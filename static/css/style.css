@@ -1,0 +1,617 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary-color: #1E4D92;
+    --color-primary-color-opacity: #1E4D9226;
+    --color-light-sea-green: #3AAFA9;
+    --color-light-sea-green1: #E5FFFE;
+    --color-light-sea-green-opacity: #3AAFA926;
+    --color-light-sea-green-opacity-1: #3AAFA980;
+    --color-mist-teal: #3AAFA90A;
+    --color-teal-veil: #3AAFA91A;
+    --color-teal-shadow:#3AAFA94D;
+    --color-teal-tropical:#3AAFA9E5;
+    --color-soft-teal: #DCEFEF;
+    --color-frosted-cloud: #F8FAFC;
+    --color-powder-cyan: #F7FFFF;
+    --color-strong-red: #B00020;
+    --color-mint-cream: #EBF9F1;
+    --color-green: #28A745;
+    --color-peach: #FEF2E5;
+    --color-burnt-orange: #CD6200;
+    --color-soft-pink: #FBE7E8;
+    --color-charcoal-black: #1C1B1F;
+    --color-dark-gray: #484848;
+    --color-golden-yellow: #DAC568;
+    --color-transparent-light-sea-green: #3AAFA926;
+    --color-light-gray: #D4D4D4;
+    --color-light-gray1: #626262;
+    --color-light-gray2: #E9E9E9;
+    --color-vibrant-red: #FE5353;
+    --color-cyan: #51F5EC;
+    --color-light-white: #F1F1F1;
+    --color-white: #FFFFFF;
+    --color-translucent-white:#FFFFFFB2;
+    --color-vivid-orange: #F79E1B;
+    --color-transparent-vivid-orange: #F79E1B26;
+    --color-transparent-vivid-orange-2:#F79E1BA6;
+    --color-transparent-black: #0000008C;
+    --color-semi-transparent-black: #0000004D;
+    --color-dark-blue: #123456;
+    --color-transparent-dark-blue: #12345633;
+    --color-vibrant-blue: #4361EE;
+    --color-royal-purple: #3A0CA3;
+    --color-sky-blue: #4CC9F0;
+    --color-magenta-pink: #F72585;
+    --color-gray-color: #E7E7E7;
+    --color-deep-purple: #7209B7;
+    --color-light-sky-blue: #D2E8FF;
+    --color-shadow-color-1: #1E4D9226;
+    --color-lightest-gray: #F6F6F6;
+    --color-medium-gray: #929292;
+    --color-slate-gray: #79747E;
+    --color-jet-black: #1F1F1F;
+    --color-mist-black: #0000001A;
+    --color-smoky-black: #00000066;
+    --color-snow-gray: #F9F9F9;
+    --color-pagination: #E0E0E0;
+    --color-dropdown: #F5F5F5;
+    --color-white-card: #FCFCFC;
+    --color-pearl-light-gray: #9C9C9C;
+    --color-dim-gray: #6B6B6B;
+    --color-sunglow: #F2AE144D;
+    --color-peach-yellow: #FDEAA054;
+    --color-golden-yellow: #FFCC00;
+    --color-deep-muted-grey: #49454F;
+    --color-Dark-Cornflower-Blue: #1E4D924D;
+    --color-light-mint-green: #DCFCE6;
+    --color-steel-blue: #123456CC;
+    --color-golden-orange:#F9B149;
+    --color-white-opacity:#F9F9F999;
+    --color-blue-teal: #1E4D9299;
+    --color-blue-teal-1: #1E4D9214;
+    --color-skywave-blue: #5182E3;
+    --color-dark-red: #A30D11;
+    --color-semi-transparent-red: #A30D1199;
+    --color-bright-green: #22C55F;
+    --color-slate-blue:#5182E3;
+    --color-slate-white:#F8F9FA;
+    --color-star-yellow:#FFDB1E;
+    --color-sunset-orange:#F79E1B4D;
+    --color-sea-green:#3AAFA90D;
+    --color-light-apricot:#FDE2BB;
+    --color-very-light-gray:#ECECEC;
+    --color-pale-blue:#E9EEF6;
+    --color-vivid-blue:#5182E34D;
+    --color-living-coral:#FF6F61;
+    --color-living-coral-border:#FF6F614D;
+    --color-transparent-living-coral:#FF6F6126;
+    --color-light-living-coral:#FF6F6159;
+    --color-saffron:#F79E1B59;
+    --color-seashell:#FFF8EE;
+    --color-cream: #FFF7EC;
+    --color-violet-sky:#6B79F5;
+    --color-translucent-sky-blue:#5182E326;
+    --color-input-tag:#6B79F526;
+    --color-silver-gray:#D6D6D6;
+    --color-pale-cream:#FEF1DD;
+    --color-transparent-cornflower:#5182E359;
+    --color-lavender: #F1EEFF;
+    --color-pale-lavender: #F1F1F9D9;
+    --color-cream-blush:#FFF9F0; 
+    --color-bright-orange:#F69601; 
+    --color-pinkish-peach:#FFEFEDD9;
+    --color-frosted-sky:#DAE7FAD9;
+    --color-soft-gray:#DADADA;
+    --color-orange-yellow:#F79E1B0A;
+    --color-soft-light-gray:#D9D9D9;
+    --color-bright-orange:#F79E1B99;
+    --color-soft-peach:#FFF5E7;
+    --color-light-cloud:#F6F5F5;
+    --color-transparent-dark-gray:#4848484D;
+    --color-soft-coral:#F3CBCC;
+    --color-transparent-violet-sky:#6B79F533;
+    --color-very-transparent-violet-sky:#6B79F50D;
+    --color-pastel-violet-sky:#E5ECFB;
+    --color-light-violet-sky:#6B79F54D;
+    --color-indigo-blue:#1E4D9205;
+    --color-light-primary-color:#1234561A;
+    --color-transparent-light-sea-green1:#3AAFA959;
+    --color-dark-blue-opacity:#12345659;
+    --color-transparent-dark-blue1:#12345626;
+    --color-dark-desaturated-blue:#1234560D;
+    --color-alice-blue:#F7FBFF;
+    --color-emerald-green:#22C55F;
+    --color-azure-blue:#3586FC;
+    --color-direction:#F5EAE8;
+    --color-cloud-gray:#DBE1E6;
+    --color-light-cream:#FFF8E9;
+    --color-living-coral-opacity:#FFE4E1;
+    --color-light-gray3:#9E9E9E;
+    --color-amber-transparent:#FF98001A;
+    --color-soft-light-gray1:#A1A1A1;
+    --color-jet-black-opacity:#1F1F1F99;
+    --color-smoke-gray:#3C3C434D;
+    --color-soft-light-teal:#E1F3F2;
+    --box-shadow-1: 4px 4px 10px 4px #3AAFA926;
+    --box-shadow-2: 0px 4px 4px 0px #00000040;
+    --box-shadow-3: 4px 4px 10px 4px #00000033;
+    --box-shadow-4: 4px 4px 10px 4px #3AAFA933;
+    --box-shadow-5: 2px 4px 8px 0px #0000000D;
+    --box-shadow-6: 4px 4px 10px 0px #00000026;
+    --box-shadow-7: 0px 4px 4px 0px #6060600D;
+    --radio-border-color: teal;
+    --radio-fill-color: teal;
+
+    /* Font Size */
+    /* Font Semibold */
+    --text-24-fs: 1.3rem;
+    --text-24-fs--font-weight: 600;
+    --text-24-fs--line-height: 120%;
+    --text-20-fs: 1.1rem;
+    --text-20-fs--font-weight: 600;
+    --text-20-fs--line-height: 120%;
+    --text-18-fs: 1rem;
+    --text-18-fs--font-weight: 600;
+    --text-18-fs--line-height: 120%;
+    --text-16-fs: 0.89rem;
+    --text-16-fs--font-weight: 600;
+    --text-16-fs--line-height: 120%;
+    --text-14-fs: 0.85rem;
+    --text-14-fs--font-weight: 600;
+    --text-14-fs--line-height: 120%;
+    /* Font Normal */
+    --text-20-nr: 1.1rem;
+    --text-20-nr--font-weight: 400;
+    --text-20-nr--line-height: 120%;
+    --text-16-nr: 0.89rem;
+    --text-16-nr--font-weight: 400;
+    --text-16-nr--line-height: 120%;
+    --text-14-nr: 0.85rem;
+    --text-14-nr--font-weight: 400;
+    --text-14-nr--line-height: 120%;
+    --text-18-nr: 1rem;
+    --text-18-nr--font-weight: 400;
+    --text-18-nr--line-height: 120%;
+    /* Font Bold */
+    --text-18-b: 1rem;
+    --text-18-b--font-weight: 700;
+    --text-18-b--line-height: 120%;
+}
+
+@font-face {
+    font-family: 'MyFont';
+    src: url('/public/font/OpenSans-Regular.ttf') format('truetype');
+}
+
+body {
+    font-family: 'MyFont';
+}
+
+/* scroll */
+.scroll::-webkit-scrollbar {
+    margin-right: 10px;
+    width: 4px;
+    height: 4px;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+    background-color: var(--scroll-thumb-color);
+    border-radius: 4px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+    /* Hides scrollbar in Chrome, Safari, and Edge */
+}
+
+
+.material-symbols-outlined {
+    font-size: 16px;
+}
+
+.primary-btn {
+    @apply flex items-center justify-center cursor-pointer gap-2 w-[133px] px-2 h-[48px] rounded-[10px] bg-light-sea-green text-white text-18-nr
+}
+
+.redeem-btn {
+    @apply w-[95px] sm:w-[110px] rounded-[10px] h-[48px] bg-light-sea-green text-white font-normal text-sm sm:text-18-nr cursor-pointer;
+}
+
+.secondary-btn {
+    @apply bg-primary-color text-white flex items-center justify-center gap-2 cursor-pointer rounded-[10px] w-[164px] h-[48px] font-normal text-base
+}
+
+.primary-btn-endcustomers {
+    @apply flex items-center justify-center cursor-pointer gap-2 w-[133px] px-2 h-[48px] rounded-[10px] bg-vivid-orange text-white text-18-nr
+}
+
+.primary-btn-client {
+    @apply flex items-center justify-center cursor-pointer gap-2 w-[133px] px-2 h-[48px] rounded-[10px] bg-dark-blue text-white text-18-nr
+}
+
+.primary-btn-advertiser {
+    @apply flex items-center justify-center cursor-pointer gap-2 w-[133px] px-2 h-[48px] rounded-[10px] bg-living-coral text-white text-18-nr
+}
+
+.profile-btn {
+    @apply w-10 h-10 flex items-center space-x-2 cursor-pointer
+}
+
+.profile-dropdown {
+    @apply hidden absolute right-0 -top-1 w-[180px] bg-white rounded-3xl z-50 overflow-hidden;
+    box-shadow: var(--box-shadow-1);
+}
+
+.active-tab{
+    @apply text-vivid-orange border-b-3 border-vivid-orange;
+}
+
+.active-tab-adv {
+    @apply text-living-coral border-b-3 border-living-coral;
+}
+
+.active-tab-ngo {
+    @apply text-violet-sky border-b-3 border-violet-sky;
+}
+
+.active-tab-advertiser{
+    @apply text-living-coral border-b-3 border-living-coral;
+}
+
+.active-tab1-ngo{
+    @apply text-violet-sky border-b-3 border-violet-sky;
+}
+
+.active-tab1{
+    @apply text-living-coral border-b-3 border-living-coral;
+}
+
+
+.active-tab-pharmacy{
+     @apply text-light-sea-green border-b-3 border-light-sea-green;
+
+}
+
+.active-tab-client{
+     @apply text-dark-blue border-b-3 border-dark-blue;
+
+}
+/* Upload File CSS */
+
+.upload-container {
+    @apply min-h-[595px] w-full rounded-[10px];
+    box-shadow: var(--box-shadow-2);
+}
+
+.upload-tabs-button {
+    @apply w-[145px] h-[36px] rounded-[6px] border border-light-sea-green text-[10px] sm:text-[14px] font-medium cursor-pointer;
+}
+
+.share-tabs-button-pharmacy {
+    @apply w-[145px] h-[36px] rounded-[6px] border border-light-sea-green text-[10px] sm:text-16-fs font-medium cursor-pointer;
+}
+
+.share-tabs-button-end-customer {
+    @apply w-[145px] h-[36px] rounded-[6px] border border-vivid-orange text-[10px] sm:text-16-fs font-medium cursor-pointer;
+}
+
+.input-fieldset {
+    @apply w-1/2 rounded-[4px] border border-light-sea-green px-2;
+
+}
+
+.input-fieldset-end-customer{
+    @apply w-1/2 rounded-[4px] border border-vivid-orange px-2;
+}
+
+.support-btn {
+    @apply w-full max-w-[360px] h-[48px] rounded-[6px] text-sm text-white bg-light-sea-green font-semibold cursor-pointer;
+}
+
+.support-btn-help {
+    @apply w-full max-w-[360px] h-[48px] rounded-[6px] text-sm text-white bg-vivid-orange font-semibold cursor-pointer;
+}
+
+.support-btn-help1 {
+    @apply w-full max-w-[360px] h-[48px] rounded-[6px] text-sm text-white bg-living-coral font-semibold cursor-pointer;
+}
+
+.support-btn-help2 {
+    @apply w-full max-w-[360px] h-[48px] rounded-[6px] text-sm text-white bg-violet-sky font-semibold cursor-pointer;
+}
+
+.support-btn-help3 {
+    @apply w-full max-w-[360px] h-[48px] rounded-[6px] text-sm text-white bg-dark-blue font-semibold cursor-pointer;
+}
+
+
+
+.green-checkbox {
+    @apply w-4 h-4 rounded-[2px] appearance-none cursor-pointer transition duration-200 ease-in-out;
+    border: 2px solid var(--color-slate-gray);
+    background-color: transparent;
+}
+
+.green-checkbox:checked {
+    @apply bg-light-sea-green;
+    border-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20.285 6.708l-11.057 11.07-5.513-5.513 1.41-1.41 4.102 4.1L18.875 5.3z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
+
+.goodies-card {
+    @apply w-full max-w-xs h-[480px] bg-white-card rounded-[10px] flex flex-col;
+    box-shadow: var(--box-shadow-3);
+}
+
+.coupon-div {
+    @apply flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-3 w-full rounded-[10px] h-auto lg:h-[115px] bg-white-card px-5 py-4;
+    box-shadow: var(--box-shadow-4);
+}
+
+.children-banner {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Checkbox Image */
+.check-img {
+    @apply w-[20px] h-[20px] bg-strong-red text-center font-semibold text-white rounded-[3px] outline-none relative cursor-pointer;
+    -webkit-appearance: none;
+    transition: 0.1s;
+    line-height: 1.2;
+}
+
+.check-img:checked {
+    @apply bg-green;
+}
+
+.check-img:before {
+    content: "✖";
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    line-height: 1;
+}
+
+.check-img:checked:before {
+    content: "✔";
+}
+
+/* Checkbox for Scan */
+.check-scan {
+    @apply w-[17px] h-[17px] bg-white border-2 border-dark-gray rounded-[2px] inline-block relative cursor-pointer; 
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.check-scan::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    line-height: 1;
+    color: white;
+}
+
+.check-scan:checked {
+    @apply bg-green border-green;
+}
+
+.check-scan:checked::before {
+    content: "✔";
+}
+
+.check-scan:indeterminate {
+    @apply bg-strong-red border-strong-red ;
+}
+
+.check-scan:indeterminate::before {
+    content: "✖";
+}
+
+.places-card{
+    @apply w-full max-w-[400px] max-h-[460px] rounded-[10px] bg-white shadow-(--box-shadow-6) flex flex-col ;
+}
+
+.medicines-card{
+    @apply w-full max-w-[400px] max-h-[355px] rounded-[10px] bg-white-card shadow-(--box-shadow-3) pt-3 relative;
+}
+
+.material-filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+}
+
+.tab-btn-customer {
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s, color 0.3s;
+}
+
+.tab-btn-customer.active-tab {
+    border-color: #F79E1B;
+    color: #F79E1B;
+}
+
+.referral-btn{
+    @apply flex items-center gap-2 px-3 max-w-[280px] w-full h-[48px] rounded-[6px] border border-vivid-orange text-vivid-orange text-18-nr;
+}
+
+.referral-btn-advertiser{
+    @apply flex items-center gap-2 px-3 max-w-[280px] w-full h-[48px] rounded-[6px] border border-living-coral text-living-coral text-18-nr;
+}
+
+.referral-btn-ngo{
+    @apply flex items-center gap-2 px-3 max-w-[280px] w-full h-[48px] rounded-[6px] border border-violet-sky text-violet-sky text-18-nr;
+}
+
+.referral-btn-pharmacy{
+    @apply flex items-center gap-2 px-3 max-w-[280px] w-full h-[48px] rounded-[6px] border border-light-sea-green text-light-sea-green text-18-nr;
+}
+#image-preview {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* or cover depending on your layout */
+    border-radius: 0.5rem;
+  }
+  
+.map-search-btn{
+    @apply p-2 px-4 xl:px-6 2xl:px-10 cursor-pointer hover:text-white;
+}
+
+.list-search-btn{
+    @apply p-2 px-4 xl:px-6 2xl:px-8 cursor-pointer hover:text-white;
+}
+
+.material-symbols-outlined.filled {
+    font-variation-settings: 'FILL' 1;
+    color: #F79E1B;
+  }
+
+  #requestSentModal {
+    display: flex;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+ .custom-radio {
+  position: relative;
+  width: 21px;
+  height: 21px;
+  margin: 10px;
+  display: inline-block;
+}
+
+.custom-radio input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.custom-radio .checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 21px;
+  height: 21px;
+  border: 2px solid var(--radio-border-color);
+  border-radius: 50%;
+  background: transparent;
+  transition: border-color 0.3s;
+  cursor: pointer;
+}
+
+.checkmark::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--radio-fill-color);
+  display: none;
+}
+
+.custom-radio input:checked ~ .checkmark::after {
+  display: block;
+}
+
+.product-input{
+    @apply text-center border border-light-sea-green-opacity-1 bg-slate-white px-4 py-1 rounded-lg focus:outline-none;
+}
+
+@layer utilities {
+  .no-spinner::-webkit-outer-spin-button,
+  .no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .no-spinner {
+    -moz-appearance: textfield; /* For Firefox */
+  }
+}
+
+
+/* Hide the native checkbox */
+.custom-checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+/* Custom checkbox style */
+.custom-checkbox-donate {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  margin-right: 8px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+/* Checked state */
+.custom-checkbox-label input[type="checkbox"]:checked + .custom-checkbox-donate {
+  background-color: #6af06a; /* Light green */
+  border-color: #6af06a;
+}
+
+/* Checkmark */
+.custom-checkbox-label input[type="checkbox"]:checked + .custom-checkbox-donate::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+
+/* Hide native radio */
+.custom-radio-label input[type="radio"] {
+  display: none;
+}
+
+/* Custom radio outer circle */
+.custom-radio {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #20B2AA; /* light-sea-green */
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+}
+
+/* Inner filled circle when checked */
+.custom-radio-label input[type="radio"]:checked + .custom-radio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background-color: #20B2AA; /* light-sea-green */
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+
+
+
+ 

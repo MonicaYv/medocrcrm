@@ -1,0 +1,137 @@
+{% extends 'registration/layout_registration.html' %}
+{% load static %}
+{% block title %}Welcome to Registration{% endblock %}
+{% block content %}
+<!-- Logo Screen -->
+<div class="flex items-center justify-center h-screen md:h-[60vh]" id="logo-screen">
+  <img
+    src="{% static 'images/supportAdmin-logo.svg' %}"
+    alt="logo"
+    class="w-48 h-60 md:w-64 md:h-72 lg:w-72 lg:h-80"
+  />
+</div>
+
+<!-- Roles Container -->
+<div class="roles hidden w-full sm:px-4 lg:px-0 absolute top-0 left-0" id="roles-container">
+
+  <!-- Background Design Top Left -->
+  <div class="hidden absolute sm:flex gap-2 items-center top-0 left-0 z-0">
+    <img src="{% static 'images/left curve.svg' %}" alt="" />
+    <div class="bg-steel-blue w-10 h-10 md:w-14 md:h-14 rounded-full"></div>
+    <div class="bg-golden-orange w-7 h-7 md:w-9 md:h-9 rounded-full mb-16 md:mb-24"></div>
+  </div>
+
+  <!-- Background Design Bottom Right -->
+  <div class="hidden absolute right-0 -bottom-20 -rotate-180 sm:flex gap-2 items-center z-0">
+    <img src="{% static 'images/left curve.svg' %}" alt="" />
+    <div class="bg-steel-blue w-10 h-10 md:w-14 md:h-14 rounded-full"></div>
+    <div class="bg-golden-orange w-7 h-7 md:w-9 md:h-9 rounded-full mb-16 md:mb-24"></div>
+  </div>
+
+  <!-- Mobile Background Design Bottom Right -->
+  <div class="absolute right-0 -bottom-50 flex gap-2 items-center z-0 sm:hidden">
+    <img src="{% static 'images/mobile-curve-bottom.svg' %}" class="mt-30" />
+    <div class="bg-light-primary-color w-15 h-15 rounded-full mt-10 mr-3"></div>
+    <img src="{% static 'images/mobile-curve.svg' %}" alt="" class="mt-4" />
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-2xl mx-auto pt-4 text-primary-color relative z-10">
+    <div class="hidden sm:flex flex-col gap-2">
+      <p class="text-3xl md:text-5xl font-bold text-center">Welcome to Avatar</p>
+      <p></p>
+      <p class="text-lg md:text-2xl pt-2 md:pt-3 text-center">Please select your role</p>
+    </div>
+    <!-- Image : Displayed only on Mobile -->
+    <div class="flex justify-center items-center sm:hidden">
+      <img src="{% static 'images/mobile-register.svg' %}" class="w-72 h-52" />
+    </div>
+    <!-- Mobile Heading -->
+    <p class="font-bold text-3xl text-primary-color text-center sm:hidden pt-6 pb-6">Choose Your Role</p>
+    <div class="pt-2 flex flex-col gap-6 md:gap-4 items-center">
+      <!-- Role Options -->
+      <div
+        data-role="customer"
+        class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-2 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition"
+      >
+        <p class="font-semibold text-base md:text-lg">I'm a Customer</p>
+        <span class="text-nowrap font-normal text-sm md:text-lg text-blue-teal group-hover:text-white/80 group-active:text-white/80">
+          I want to buy medicine or use health services
+        </span>
+      </div>
+      <div
+        data-role="medicalProvider"
+        class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-2 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition"
+      >
+        <p class="font-semibold text-sm sm:text-base md:text-lg text-nowrap">
+          I’m a Medical Provider (Doctor,Pharmacy & Labs)
+        </p>
+        <span class="text-nowrap font-normal text-sm md:text-lg text-blue-teal group-hover:text-white/80 group-active:text-white/80">
+          I want to provide medical services
+        </span>
+      </div>
+      <div
+        data-role="client"
+        class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-2 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition"
+      >
+        <p class="font-semibold text-base md:text-lg">I'm a Client</p>
+        <span class="font-normal text-sm md:text-lg text-blue-teal group-hover:text-white/80 group-active:text-white/80">
+          I want to register my business on the platform
+        </span>
+      </div>
+      <div
+        data-role="advertiser"
+        class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-2 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition"
+      >
+        <p class="font-semibold text-base md:text-lg">I'm an Advertiser</p>
+        <span class="font-normal text-sm md:text-lg text-blue-teal group-hover:text-white/80 group-active:text-white/80">
+          I want to promote my products or services to healthcare users
+        </span>
+      </div>
+      <div
+        data-role="ngoOwner"
+        class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-1 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition"
+      >
+        <p class="font-semibold text-base md:text-lg">I'm a NGO Owner</p>
+        <span class="text-sm md:text-lg text-blue-teal group-hover:text-white/80 group-active:text-white/80">
+          I want to offer healthcare support and services through my organization
+        </span>
+      </div>
+    </div>
+
+    <!--Login Button Mobile-->
+    <div class="flex items-center gap-2 pt-4 sm:hidden">
+      <hr class="flex-1 border-t-2 border-primary-color ml-10" />
+      <p class="font-semibold text-base text-primary-color">Or</p>
+      <hr class="flex-1 border-t-2 border-primary-color mr-10" />
+    </div>
+    <div class="flex justify-center items-center mx-6 bg-indigo-blue border border-primary-color rounded-md p-2 mt-4 shadow-lg sm:hidden">
+      <a href="/src/auth/Login.html">Log In</a>
+    </div>
+
+    <!-- Login Redirect Desktop -->
+    <a href="/src/auth/Login.html">
+      <span class="hidden sm:flex justify-end font-normal text-xs pr-2 pt-2">Already have an account?</span>
+    </a>
+    
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Hide logo after 2s, show roles
+    setTimeout(function() {
+      $("#logo-screen").hide();
+      $("#roles-container").removeClass("hidden");
+    }, 2000);
+
+    // Dynamic routing for role selection
+    $(".role-option").on("click", function() {
+        var role = $(this).data("role");
+        window.location.href = "/register/" + role + "/";
+    });
+});
+</script>
+{% endblock %}
