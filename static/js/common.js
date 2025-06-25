@@ -211,9 +211,10 @@ $('#register-form').on('submit', function(e) {
     }
 
     var formType = $(this).data('type');
+    var formUrl = $(this).attr('action');
     var formData = new FormData(this);
     $.ajax({
-        url: 'user/save' + formType + '/',
+        url: formUrl,
         type: 'POST',
         headers: { 'X-CSRFToken': csrftoken },
         data: formData,
@@ -223,7 +224,7 @@ $('#register-form').on('submit', function(e) {
             if (resp.success) {
                 toastr.success(resp.message || 'Registration successful!');
                 setTimeout(function() {
-                    window.location.href = "/register/";
+                    window.location.href = "login";
                 }, 1200);
             } else if (resp.errors) {
                 // Loop through errors, apply classes/styles just like jQuery Validate
@@ -278,8 +279,10 @@ $('#login-form').on('submit', function(e) {
         toastr.error('Password is required.');
         return;
     }
+    var formUrl = $(this).attr('action');
+
     $.ajax({
-        url: "user/auth/login",
+        url: formUrl,
         type: 'POST',
         headers: { 'X-CSRFToken': csrftoken },
         data: { email: email, password: password },
