@@ -1,4 +1,4 @@
-{% extends 'registration/layout_registration.html' %}
+{% extends 'layout.html' %}
 {% load static %}
 {% block title %}Register as NGO{% endblock %}
 
@@ -11,12 +11,12 @@
     </div>
 </div>
 <div class="absolute right-0 top-3">
-    <a href="" class="text-primary-color text-xs pr-10">Already have an account?</a>
+    <a href="{%url 'login' %}" class="text-primary-color text-xs pr-10">Already have an account?</a>
 </div>
 <div class="flex-1 z-10">
     <div class="max-w-3xl xl:max-w-4xl 2xl:max-w-7xl mx-auto p-10 pt-40 sm:py-20 text-primary-color">
         <h1 class="text-4xl font-bold text-center">Register as NGO</h1>
-        <form id="register-form" data-type="ngo" class="mt-10 flex flex-col gap-4" action="/" method="post" enctype="multipart/form-data">
+        <form id="register-form" data-type="ngo" class="mt-10 flex flex-col gap-4" action="{%url 'save_ngo' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
             <!-- Email -->

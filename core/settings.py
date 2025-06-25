@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'medocrcrm',
         'USER': 'postgres',
-        'PASSWORD': 'system32',
+        'PASSWORD': '12345',
         'HOST': 'localhost',  # or your server
         'PORT': '5432',
     }
