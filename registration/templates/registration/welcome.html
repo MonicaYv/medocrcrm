@@ -1,4 +1,4 @@
-{% extends 'registration/layout_registration.html' %}
+{% extends 'layout.html' %}
 {% load static %}
 {% block title %}Welcome to Registration{% endblock %}
 {% block content %}
@@ -130,7 +130,7 @@ $(document).ready(function() {
     // Dynamic routing for role selection
     $(".role-option").on("click", function() {
         var role = $(this).data("role");
-        window.location.href = "/register/" + role + "/";
+        window.location.href = "/register/" + role;
     });
 });
 </script>

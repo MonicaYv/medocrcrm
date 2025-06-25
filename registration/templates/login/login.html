@@ -1,10 +1,9 @@
-{% extends 'registration/layout_registration.html' %}
+{% extends 'layout.html' %}
 {% load static %}
 {% block title %}Login{% endblock %}
 
 {% block content %}
 <div class="flex flex-col justify-center items-center min-h-screen bg-white px-4 sm:px-8 md:px-12 lg:overflow-hidden relative">
-    <!-- Background and design elements (same as your HTML, edit paths to use {% static %} if files in STATIC) -->
     <div class="hidden absolute top-0 left-0 sm:flex gap-2 items-center z-0">
         <img src="{% static 'images/left curve.svg' %}" alt="" />
         <div class="bg-steel-blue w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full"></div>
@@ -26,7 +25,7 @@
     <!-- Login Container -->
     <div class="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl sm:pt-12 md:pt-20 text-primary-color z-10">
         <p class="text-3xl sm:text-4xl md:text-5xl font-bold text-center pt-4 md:pt-0 lg:pt-0">Log In</p>
-        <form id="login-form" class="mt-8 flex flex-col sm:gap-6" method="post" action="{% url 'ajax_login' %}">
+        <form id="login-form" class="mt-8 flex flex-col sm:gap-6" method="post" action="{% url 'login_auth' %}">
             {% csrf_token %}
             <!-- Username -->
             <div class="relative w-full">
