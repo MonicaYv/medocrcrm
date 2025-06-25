@@ -14,6 +14,7 @@ from .models import User, UserProfile
 
 
 ROLE_TO_TEMPLATE = {
+    "login": "login/login.html",
     "customer": "registration/register_user.html",
     "ngoOwner": "registration/ngo_register.html",
     "medicalProvider": "registration/medical_provider_register.html",
@@ -22,12 +23,14 @@ ROLE_TO_TEMPLATE = {
 }
 
 def welcome(request):
+    print("Rendering welcome page")
     return render(request, 'registration/welcome.html')
 
 def register_by_role(request, role):
     tpl = ROLE_TO_TEMPLATE.get(role)
     if not tpl:
         tpl = "registration/welcome.html"
+    print(f"Rendering registration page for role: {role}")
     return render(request, tpl)
 
 ALLOWED_EXTENSIONS = {'.pdf', '.jpg', '.jpeg', '.png'}
@@ -310,6 +313,7 @@ def save_user(request):
     return JsonResponse({"success": True, "message": "User registered successfully."})
 
 def login_page(request):
+    print("Rendering login page")
     return render(request, 'login/login.html')
 
 @csrf_protect
