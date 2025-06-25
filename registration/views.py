@@ -6,7 +6,7 @@ from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .models import User, NGOProfile
