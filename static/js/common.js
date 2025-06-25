@@ -213,7 +213,7 @@ $('#register-form').on('submit', function(e) {
     var formType = $(this).data('type');
     var formData = new FormData(this);
     $.ajax({
-        url: '/register/save' + formType + '/',
+        url: 'user/save' + formType + '/',
         type: 'POST',
         headers: { 'X-CSRFToken': csrftoken },
         data: formData,
@@ -279,7 +279,7 @@ $('#login-form').on('submit', function(e) {
         return;
     }
     $.ajax({
-        url: "auth/login",
+        url: "user/auth/login",
         type: 'POST',
         headers: { 'X-CSRFToken': csrftoken },
         data: { email: email, password: password },
