@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.urls import reverse
+
 
 # Create your views here.
 from .utils import dashboard_login_required
@@ -19,5 +21,5 @@ def dashboard_home(request):
 
 def logout_view(request):
     request.session.flush()  # clears all session data
-    return redirect('/login/')
+    return reverse('user/login')
 
