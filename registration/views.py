@@ -14,7 +14,6 @@ from .models import User, NGOProfile
 from .models import User, UserProfile
 
 
-
 ROLE_TO_TEMPLATE = {
     "login": "login/login.html",
     "customer": "registration/register_user.html",
