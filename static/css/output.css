@@ -5150,7 +5150,7 @@
 }
 @font-face {
   font-family: 'MyFont';
-  src: url('/public/font/OpenSans-Regular.ttf') format('truetype');
+  src: url('../font/OpenSans-Regular.ttf') format('truetype');
 }
 body {
   font-family: 'MyFont';
