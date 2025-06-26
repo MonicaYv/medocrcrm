@@ -1,6 +1,95 @@
+{% load static %}
+<!-- Header -->
 <div class="h-[72px] w-full flex items-center justify-between p-2 md:p-6 md:shadow-lg">
-    <!-- LOGO and Navigation etc. -->
-    <!-- You can use user info with: {{ request.user }} or custom context -->
-    <div>{{ user.name }}</div>
-    <!-- ...rest of your header, notifications, dropdown etc. ... -->
+  <!-- Logo div -->
+  <div class="w-16">
+    <img src="{% static 'images/ngo.svg' %}" alt="Logo" loading="lazy" class="w-10"/>
+  </div>
+
+  <!-- Desktop Navbar -->
+  <div class="hidden sm:block">
+    <div class="flex items-center gap-2 md:gap-8">
+      <!-- Buttons -->
+      <button class="flex gap-2 border border-violet-sky rounded-md text-violet-sky p-[0.3rem] open-share-modal cursor-pointer text-base">
+        <p>HEALTH2025</p>
+        <span class="material-symbols-outlined !text-base">
+          share
+        </span>
+      </button>
+      <!-- Share Popup -->
+      <div id="shareModal" class="fixed inset-0 bg-semi-transparent-black hidden items-center justify-center z-50">
+        <!-- ... popup code stays unchanged ... -->
+      </div>
+      <!-- Icons -->
+      <a href=""><img src="{% static 'images/map.svg' %}" alt="map" title="Map" class="cursor-pointer" /></a>
+      <a href=""><img src="{% static 'images/star.svg' %}" alt="star" title="Saved" class="cursor-pointer" /></a>
+      <a href=""><img src="{% static 'images/cart.svg' %}" alt="cart" title="Cart" class="cursor-pointer" /></a>
+      <img src="{% static 'images/bell.svg' %}" alt="bell" title="Notifications" class="cursor-pointer" id="bell-icon" />
+      <!-- Notification Dropdown -->
+      <div id="notificationDropdown" class="hidden absolute right-20 top-15 mt-2 bg-white shadow-lg rounded-md z-50 w-130 border border-violet-sky">
+        <!-- ... notification items unchanged ... -->
+      </div>
+      <!-- User Dropdown -->
+      <div class="relative inline-block">
+        <button class="profile-btn">
+          <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8"/>
+        </button>
+        <!-- Dropdown -->
+        <div class="profile-dropdown">
+          <div class="px-4 py-3 flex items-center space-x-3 cursor-pointer">
+            <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8 rounded-full" />
+            <div>
+              <p class="text-sm font-normal">
+                {{ user.name|default:"User Name" }}
+              </p>
+            </div>
+          </div>
+          <div>
+            <a href="{% url 'logout' %}" class="px-4 py-3 text-sm hover:bg-violet-sky-opacity flex items-center space-x-2">
+              <span class="material-symbols-outlined"> logout </span>
+              <span>Sign out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Navbar -->
+  <div class="block sm:hidden">
+    <div class="flex items-center gap-4">
+      <input type="search" placeholder="Search"
+        class="w-full max-w-[249px] h-[36px] rounded-[6px] bg-light-white border-none px-3 focus:!outline-none focus:ring-0" />
+      <span class="material-symbols-outlined cursor-pointer text-golden-yellow">
+        kid_star
+      </span>
+      <span class="material-symbols-outlined cursor-pointer">
+        notifications
+      </span>
+      <!-- User Dropdown -->
+      <div class="relative inline-block">
+        <button class="profile-btn">
+          <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" />
+        </button>
+        <!-- Dropdown -->
+        <div class="profile-dropdown">
+          <div class="px-4 py-3 flex items-center space-x-3 cursor-pointer">
+            <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8 rounded-full" />
+            <div>
+              <p class="text-sm font-normal">
+                {{ user.name|default:"User Name" }}
+
+              </p>
+            </div>
+          </div>
+          <div>
+            <a href="{% url 'logout' %}" class="px-4 py-3 text-sm hover:bg-violet-sky-opacity flex items-center space-x-2">
+              <span class="material-symbols-outlined"> logout </span>
+              <span>Sign out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

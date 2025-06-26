@@ -31,7 +31,6 @@ def register_by_role(request, role):
     tpl = ROLE_TO_TEMPLATE.get(role)
     if not tpl:
         tpl = "registration/welcome.html"
-    print(f"Rendering registration page for role: {role}")
     return render(request, tpl)
 
 ALLOWED_EXTENSIONS = {'.pdf', '.jpg', '.jpeg', '.png'}
