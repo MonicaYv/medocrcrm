@@ -169,3 +169,16 @@ class ContactPerson(models.Model):
     otp = models.CharField(max_length=16, blank=True, null=True)
     referral_code = models.CharField(max_length=64, blank=True, null=True)
     email_otp = models.CharField(max_length=16, blank=True, null=True)
+
+class AccountSubscriptionFAQ(models.Model):
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+    category = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'account_subscription_faq' 
+
+    def __str__(self):
+        return self.question
