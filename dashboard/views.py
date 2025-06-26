@@ -1,6 +1,4 @@
-from django.shortcuts import render
-
-# Create your views here.
+from django.shortcuts import render, redirect
 from .utils import dashboard_login_required
 from .models import SettingMenu
 
@@ -11,6 +9,7 @@ def dashboard_home(request):
     menu_items = SettingMenu.objects.filter(
         is_active=True, user_types__contains=[user.user_type]
     ).order_by('order')
+    print("User type:", user.user_type)
     # You can add more user-specific logic here
     return render(request, "dashboard/home.html", {
         "user": user,

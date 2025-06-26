@@ -178,9 +178,11 @@ def save_ngo(request):
     contact_person_name = data.get("contact_person_name", "")
     contact_person_phone = data.get("contact_person_phone", "")
     contact_person_role = data.get("contact_person_role", "")
+    contact_person_designation = data.get("contact_person_designation", "")
     contact_person_otp = data.get("otp2", "")
 
     if errors:
+        print("Validation errors:", errors)
         return JsonResponse({"success": False, "errors": errors}, status=400)
 
     # --- Save User & NGOProfile ---
