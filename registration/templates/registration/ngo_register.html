@@ -3,247 +3,358 @@
 {% block title %}Register as NGO{% endblock %}
 
 {% block content %}
-<div class="relative z-0">
+  <!-- Left curve -->
+  <div class="relative z-0">
     <div class="absolute flex gap-2 items-center">
-        <img src="{% static 'images/left curve.svg' %}" alt="">
-        <div class="bg-steel-blue w-14 h-14 rounded-full ml-4"></div>
-        <div class="bg-golden-orange w-9 h-9 rounded-full mb-24"></div>
+      <img src="{% static 'images/left curve.svg' %}" alt="">
+      <div class="bg-steel-blue w-14 h-14 rounded-full ml-4"></div>
+      <div class="bg-golden-orange w-9 h-9 rounded-full mb-24"></div>
     </div>
-</div>
-<div class="absolute right-0 top-3">
-    <a href="{%url 'login' %}" class="text-primary-color text-xs pr-10">Already have an account?</a>
-</div>
-<div class="flex-1 z-10">
+  </div>
+  <!-- Already Account link -->
+  <div class="absolute right-0 top-3">
+    <a href="{% url 'login' %}" class="text-primary-color text-xs pr-10">Already have an account?</a>
+  </div>
+  <!-- Main content -->
+  <div class="flex-1 z-10">
     <div class="max-w-3xl xl:max-w-4xl 2xl:max-w-7xl mx-auto p-10 pt-40 sm:py-20 text-primary-color">
-        <h1 class="text-4xl font-bold text-center">Register as NGO</h1>
-        <form id="register-form" data-type="ngo" class="mt-10 flex flex-col gap-4" action="{%url 'save_ngo' %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            <!-- Email -->
+      <h1 class="text-4xl font-bold text-center">Register as NGO</h1>
+      <form id="register-form" class="mt-10 flex flex-col gap-4" action="{% url 'save_ngo' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Email & Phone -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex flex-col gap-4 w-full sm:w-1/2">
             <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Email</label>
-                <input type="text" name="email" placeholder="contact@sunrisepharma.com"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="email"></div>
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Email</label>
+              <input type="text" name="email" placeholder="contact@sunrisepharma.com"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
             </div>
-
-            <!-- Phone Number -->
-            <div class="relative w-full">
+          </div>
+          <div class="flex flex-col gap-4 w-full sm:w-1/2">
+            <div class="flex items-center gap-2">
+              <div class="code-dropdown relative inline-block">
+                <div class="code-btn flex items-center border border-primary-color rounded-md p-3 mt-2 pt-4 cursor-pointer">
+                  <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                  <span class="selected-code mr-2">+91</span>
+                </div>
+                <div class="code-option absolute left-0 mt-0.5 border border-primary-color bg-white text-blue-teal shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-20 max-h-44 overflow-y-auto scroll"></div>
+              </div>
+              <div class="relative w-full">
                 <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Phone Number</label>
                 <input type="text" name="phone_number1" placeholder="9876543210"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="phone_number1"></div>
+                  class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+              </div>
             </div>
-
-            <!-- NGO Name -->
+          </div>
+        </div>
+        <!-- NGO Name -->
+        <div class="relative w-full">
+          <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">NGO Name</label>
+          <input type="text" name="company_name" placeholder="Helping Hands Foundation"
+            class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+        </div>
+        <!-- Website/Services -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex flex-col gap-4 w-full sm:w-1/2">
             <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">NGO Name</label>
-                <input type="text" name="company-name" placeholder="Helping Hands Foundation"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="company-name"></div>
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Website URL</label>
+              <input type="text" name="website_url" placeholder="(optional)"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
             </div>
-
-            <!-- Website URL (Optional) -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Website URL</label>
-                <input type="text" name="website_url" placeholder="(optional)"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="website_url"></div>
-            </div>
-
-            <!-- NGO Services (Checkboxes) -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">NGO Services</label>
-                <div class="flex gap-4 mt-6">
-                    <label><input type="checkbox" name="ngo_services[]" value="BINGO"> BINGO</label>
-                    <label><input type="checkbox" name="ngo_services[]" value="INGO"> INGO</label>
-                    <label><input type="checkbox" name="ngo_services[]" value="ENGO"> ENGO</label>
-                    <label><input type="checkbox" name="ngo_services[]" value="Etc."> Etc.</label>
+          </div>
+          <div class="flex flex-col gap-4 w-full sm:w-1/2">
+            <div class="dropdown relative inline-block">
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">NGO Services</label>
+              <div class="dropdown-btn flex items-center justify-between border border-primary-color rounded-md p-3 mt-2 pt-4 cursor-pointer">
+                <span class="mr-2 selected-value">select</span>
+                <span class="material-symbols-outlined dropdown-arrow">keyboard_arrow_down</span>
+              </div>
+              <div class="dropdown-option absolute left-0 border border-primary-color bg-white text-blue-teal shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-full mt-0.5 z-20 max-h-44 overflow-y-auto scroll">
+                <div class="px-4 py-2 flex items-center hover:bg-gray-100 cursor-pointer">
+                  <label for="bingo" class="flex-1">BINGO</label>
+                  <input type="checkbox" id="bingo" name="ngo_services[]" value="BINGO" class="mr-2">
                 </div>
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="ngo_services"></div>
+                <div class="px-4 py-2 flex items-center hover:bg-gray-100 cursor-pointer">
+                  <label for="ingo" class="flex-1">INGO</label>
+                  <input type="checkbox" id="ingo" name="ngo_services[]" value="INGO" class="mr-2">
+                </div>
+                <div class="px-4 py-2 flex items-center hover:bg-gray-100 cursor-pointer">
+                  <label for="engo" class="flex-1">ENGO</label>
+                  <input type="checkbox" id="engo" name="ngo_services[]" value="ENGO" class="mr-2">
+                </div>
+                <div class="px-4 py-2 flex items-center hover:bg-gray-100 cursor-pointer">
+                  <label for="etc" class="flex-1">Etc.</label>
+                  <input type="checkbox" id="etc" name="ngo_services[]" value="Etc." class="mr-2">
+                </div>
+              </div>
             </div>
-
-            <!-- Address -->
+          </div>
+        </div>
+               <!-- Address -->
+        <div class="relative w-full">
+          <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Address</label>
+          <textarea name="address" placeholder="12 MG Road, Near City Hospital"
+            class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal"></textarea>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4 otp-div">
+          <div class="flex flex-col gap-4 w-full sm:w-1/2">
+            <!-- City,Town,District -->
             <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Address</label>
-                <textarea name="address" placeholder="12 MG Road, Near City Hospital"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal"></textarea>
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="address"></div>
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">City,Town,District</label>
+              <input type="text" name="dist" placeholder="Pune"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
             </div>
-
-            <!-- City -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">City/District</label>
-                <input type="text" name="dist" placeholder="Pune"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="dist"></div>
-            </div>
-
             <!-- State -->
             <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">State</label>
-                <input type="text" name="state" placeholder="Maharashtra"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="state"></div>
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">State</label>
+              <input type="text" name="state" placeholder="New York"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
             </div>
-
+            <!-- NGO Registration Number & Document -->
+            <div class="upload-section relative w-full">
+              <label class="absolute left-3 top-0.5 bg-white px-1 text-xs z-10">
+                NGO Registration Number & Document
+              </label>
+              <div class="flex items-center w-full mt-2">
+                <input type="text" name="ngo_registration_number" placeholder="U85110MH2022PTC123456"
+                  class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" />
+                <div class="uploadTrigger flex items-center justify-center cursor-pointer ml-2 border-dashed border-2 border-primary-color rounded-md p-4">
+                  <span class="material-symbols-outlined text-primary-color text-2xl">upload</span>
+                </div>
+                <input type="file" name="ngo_registration_doc" accept=".pdf,.jpg,.jpeg,.png" class="uploadInput hidden" />
+              </div>
+            </div>
+            <!-- PAN Number & Document -->
+            <div class="upload-section relative w-full">
+              <label class="absolute left-3 top-0.5 bg-white px-1 text-xs z-10">
+                PAN Number & Document
+              </label>
+              <div class="flex items-center w-full mt-2">
+                <input type="text" name="pan_number" placeholder="AABCM1234F"
+                  class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" />
+                <div class="uploadTrigger flex items-center justify-center cursor-pointer ml-2 border-dashed border-2 border-primary-color rounded-md p-4">
+                  <span class="material-symbols-outlined text-primary-color text-2xl">upload</span>
+                </div>
+                <input type="file" name="pan_doc" accept=".pdf,.jpg,.jpeg,.png" class="uploadInput hidden" />
+              </div>
+            </div>
+            <!-- 12A Document Number & Document -->
+            <div class="upload-section relative w-full">
+              <label class="absolute left-3 top-0.5 bg-white px-1 text-xs z-10">
+                12A Document Number & Document
+              </label>
+              <div class="flex items-center w-full mt-2">
+                <input type="text" name="doc_12a_number" placeholder="MH/C/2022/123456"
+                  class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" />
+                <div class="uploadTrigger flex items-center justify-center cursor-pointer ml-2 border-dashed border-2 border-primary-color rounded-md p-4">
+                  <span class="material-symbols-outlined text-primary-color text-2xl">upload</span>
+                </div>
+                <input type="file" name="doc_12a" accept=".pdf,.jpg,.jpeg,.png" class="uploadInput hidden" />
+              </div>
+            </div>
+            <!-- Brand Image -->
+            <div class="upload-section relative w-full">
+              <label class="absolute left-3 top-0.5 bg-white px-1 text-xs z-10">
+                Brand Name & Image
+              </label>
+              <div class="flex items-center w-full mt-2">
+                <input type="text" placeholder="brand.png"
+                  class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" readonly />
+                <div class="uploadTrigger flex items-center justify-center cursor-pointer ml-2 border-dashed border-2 border-primary-color rounded-md p-4">
+                  <span class="material-symbols-outlined text-primary-color text-2xl">upload</span>
+                </div>
+                <input type="file" name="brand_image" accept=".jpg,.jpeg,.png" class="uploadInput hidden" />
+              </div>
+            </div>
+            <!-- Password -->
+            <div class="w-full relative">
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Password</label>
+              <div class="relative">
+                <input id="Password" type="password" name="password" placeholder="***************"
+                  class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+                <span
+                  class="togglePassword material-symbols-outlined absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-primary-color"
+                  data-target="Password">
+                  visibility
+                </span>
+              </div>
+              <p class="text-xs mt-1">Password must be 8+ characters with uppercase, lowercase, number, and symbol</p>
+            </div>
+            <!-- Send OTP -->
+            <div>
+              <div
+                class="bg-primary-color cursor-pointer rounded-md p-[0.95rem] w-full text-white text-center mt-[2.0 rem] send-otp">
+                Send OTP
+              </div>
+              <p class="text-xs mt-1 flex justify-start otp">Didn’t get the code ?&nbsp;<span
+                  class="text-charcoal-black resend cursor-pointer">Resend</span></p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-4 w-full sm:w-1/2">
             <!-- Pincode -->
             <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Pincode</label>
-                <input type="text" name="pincode" placeholder="411001"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="pincode"></div>
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Pincode</label>
+              <input type="text" name="pincode" placeholder="411001"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
             </div>
-
             <!-- Country -->
             <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Country</label>
-                <input type="text" name="country" placeholder="India"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="country"></div>
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Country</label>
+              <input type="text" name="country" placeholder="India"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
             </div>
-
-            <!-- NGO Registration Number -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Registration Number</label>
-                <input type="text" name="ngo_registration_number" placeholder="U85110MH2022PTC123456"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="ngo_registration_number"></div>
-            </div>
-            <!-- NGO Registration Document -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Registration Document</label>
-                <input type="file" name="ngo_registration_doc" accept=".pdf,.jpg,.jpeg,.png"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-2 text-sm focus:outline-none" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="ngo_registration_doc"></div>
-            </div>
-
-            <!-- PAN Number & Document -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">PAN Number</label>
-                <input type="text" name="pan_number" placeholder="AABCM1234F"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="pan_number"></div>
-            </div>
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">PAN Document</label>
-                <input type="file" name="pan_doc" accept=".pdf,.jpg,.jpeg,.png"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-2 text-sm focus:outline-none" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="pan_doc"></div>
-            </div>
-
             <!-- GST Number & Document -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">GST Number</label>
+            <div class="upload-section relative w-full">
+              <label class="absolute left-3 top-0.5 bg-white px-1 text-xs z-10">
+                GST Number & Document
+              </label>
+              <div class="flex items-center w-full mt-2">
                 <input type="text" name="gst_number" placeholder="27AABCM1234F1Z5"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="gst_number"></div>
+                  class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" />
+                <div class="uploadTrigger flex items-center justify-center cursor-pointer ml-2 border-dashed border-2 border-primary-color rounded-md p-4">
+                  <span class="material-symbols-outlined text-primary-color text-2xl">upload</span>
+                </div>
+                <input type="file" name="gst_doc" accept=".pdf,.jpg,.jpeg,.png" class="uploadInput hidden" />
+              </div>
             </div>
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">GST Document</label>
-                <input type="file" name="gst_doc" accept=".pdf,.jpg,.jpeg,.png"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-2 text-sm focus:outline-none" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="gst_doc"></div>
-            </div>
-
-            <!-- TAN Number & Document -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">TAN Number</label>
+            <!-- TAN Number & Document-->
+            <div class="upload-section relative w-full">
+              <label class="absolute left-3 top-0.5 bg-white px-1 text-xs z-10">
+                TAN Number & Document
+              </label>
+              <div class="flex items-center w-full mt-2">
                 <input type="text" name="tan_number" placeholder="MUMA12345B"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="tan_number"></div>
+                  class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" />
+                <div class="uploadTrigger flex items-center justify-center cursor-pointer ml-2 border-dashed border-2 border-primary-color rounded-md p-4">
+                  <span class="material-symbols-outlined text-primary-color text-2xl">upload</span>
+                </div>
+                <input type="file" name="tan_doc" accept=".pdf,.jpg,.jpeg,.png" class="uploadInput hidden" />
+              </div>
             </div>
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">TAN Document</label>
-                <input type="file" name="tan_doc" accept=".pdf,.jpg,.jpeg,.png"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-2 text-sm focus:outline-none" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="tan_doc"></div>
-            </div>
-
-            <!-- Section 8 Number & Document -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Section 8 Number</label>
+                      <!-- Section 8 Number & Document -->
+            <div class="upload-section relative w-full">
+              <label class="absolute left-3 top-0.5 bg-white px-1 text-xs z-10">
+                Section 8 Number & Document
+              </label>
+              <div class="flex items-center w-full mt-2">
                 <input type="text" name="section8_number" placeholder="Section 8 Number"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="section8_number"></div>
+                  class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" />
+                <div class="uploadTrigger flex items-center justify-center cursor-pointer ml-2 border-dashed border-2 border-primary-color rounded-md p-4">
+                  <span class="material-symbols-outlined text-primary-color text-2xl">upload</span>
+                </div>
+                <input type="file" name="section8_doc" accept=".pdf,.jpg,.jpeg,.png" class="uploadInput hidden" />
+              </div>
             </div>
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Section 8 Document</label>
-                <input type="file" name="section8_doc" accept=".pdf,.jpg,.jpeg,.png"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-2 text-sm focus:outline-none" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="section8_doc"></div>
-            </div>
-
-            <!-- 12A Number & Document -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">12A Number</label>
-                <input type="text" name="doc_12a_number" placeholder="12A Number"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="doc_12a_number"></div>
-            </div>
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">12A Document</label>
-                <input type="file" name="doc_12a" accept=".pdf,.jpg,.jpeg,.png"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-2 text-sm focus:outline-none" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="doc_12a"></div>
-            </div>
-
-            <!-- Brand Image -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Brand Image</label>
-                <input type="file" name="brand_image" accept=".jpg,.jpeg,.png"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-2 text-sm focus:outline-none" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="brand_image"></div>
-            </div>
-
             <!-- Brand Description -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Brand Description</label>
+            <div class="upload-section relative w-full">
+              <label class="absolute left-3 top-0.5 bg-white px-1 text-xs z-10">
+                Brand Description
+              </label>
+              <div class="flex items-center w-full mt-2">
                 <input type="text" name="brand_description" placeholder="(optional)"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="brand_description"></div>
-            </div>
-
-            <!-- Password -->
-            <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Password</label>
-                <input type="password" name="password" placeholder="***************"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="password"></div>
+                  class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" />
+                
+              </div>
             </div>
             <!-- Confirm Password -->
             <div class="relative w-full">
-                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Confirm Password</label>
-                <input type="password" name="confirm_password" placeholder="***************"
-                    class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
-                <div class="error-message text-red-500 text-xs mt-1" data-error-for="confirm_password"></div>
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Confirm Password</label>
+              <input id="ConfPassword" type="password" name="confirm_password" placeholder="***************"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+              <span data-target="ConfPassword"
+                class="togglePassword material-symbols-outlined absolute right-4 top-9 transform -translate-y-1/2 cursor-pointer text-primary-color">
+                visibility
+              </span>
             </div>
-            <!-- Terms -->
-            <div class="flex gap-4 items-center">
-                <input type="checkbox" name="terms" class="w-5 h-5 border-2 border-deep-muted-grey" />
-                <p>I agree to the Terms of Service, Privacy Policy & Disclaimer.</p>
+            <!-- Enter email OTP -->
+            <div class="relative w-full mt-4">
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Enter email OTP</label>
+              <input type="text" name="otp1" placeholder="123456"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+              <p class="text-xs mt-1 flex justify-end mt-1 otp-message "></p>
             </div>
-            <div class="error-message text-red-500 text-xs mt-1" data-error-for="terms"></div>
+          </div>
+        </div>
 
-            <div class="flex justify-center items-center gap-4 mt-5">
-                <div class="border border-primary-color rounded-md py-2 px-10 cursor-pointer">
-                    <a href="{% url 'welcome' %}">Back</a>
+        <h1 class="text-3xl font-semibold">Contact person</h1>
+        <div class="flex flex-col sm:flex-row gap-4 otp-div">
+          <div class="flex flex-col gap-4 w-full sm:w-1/2">
+            <!-- Name -->
+            <div class="relative w-full">
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Name</label>
+              <input type="text" name="contact_person_name" placeholder="Rahul Mehta"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+            </div>
+            <!-- Designation -->
+            <div class="flex items-center gap-2">
+              <div class="dropdown code-dropdown relative inline-block">
+                <div class="dropdown-btn flex items-center border border-primary-color rounded-md p-3 mt-2 pt-4 cursor-pointer">
+                  <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                  <span class="selected-code mr-2">+91</span>
                 </div>
-                <button type="submit"
-                        class="bg-primary-color text-white rounded-md py-2 px-10 cursor-pointer">Continue</button>
+                <div class="dropdown-option code-option absolute left-0 mt-0.5 border border-primary-color bg-white text-blue-teal shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-20 max-h-44 overflow-y-auto scroll"></div>
+              </div>
+              <div class="relative w-full">
+                <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Phone Number</label>
+                <input type="text" name="contact_person_phone" placeholder="9876543210"
+                  class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+              </div>
             </div>
-        </form>
+            <!-- Send OTP -->
+            <div>
+              <div class="bg-primary-color rounded-md p-[0.95rem] w-full text-white text-center mt-6 send-otp">
+                Send OTP
+              </div>
+              <p class="text-xs mt-1 flex justify-start otp">Didn’t get the code ?&nbsp;<span
+                  class="text-charcoal-black resend cursor-pointer">Resend</span></p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-4 w-full sm:w-1/2">
+            <!-- Role-->
+            <div class="relative w-full">
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Role</label>
+              <input type="text" name="contact_person_role"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+            </div>
+            <!-- Referral Code -->
+            <div class="relative w-full ">
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">Referral Code</label>
+              <input type="text" name="referral_code" placeholder="(optional)"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+              <p class="text-xs mt-1 ">Have a referral code? Enter it here to unlock benefits</p>
+            </div>
+            <!-- OTP Verifications -->
+            <div class="relative w-full">
+              <label class="absolute left-3 -top-0.5 bg-white px-1 text-xs z-10">OTP Verifications</label>
+              <input type="text" name="otp2"
+                class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
+              <p class="text-xs mt-1 otp-message">Enter the 6 digit code send to registered Email/WhatsApp</p>
+            </div>
+          </div>
+        </div>
+        <!-- Terms of Service -->
+        <div class="flex gap-4 items-center">
+          <input type="checkbox" name="terms" class="w-5 h-5 border-2 border-deep-muted-grey" />
+          <p>I agree to the Terms of Service, Privacy Policy & Disclaimer.</p>
+        </div>
+        <div class="flex justify-center items-center gap-4 mt-5">
+          <div class="border border-primary-color rounded-md py-2 px-10 cursor-pointer">
+            <a href="{% url 'welcome' %}">Back</a>
+          </div>
+          <button type="submit"
+            class="bg-primary-color text-white rounded-md py-2 px-10 cursor-pointer">Continue</button>
+        </div>
+      </form>
     </div>
-</div>
-<div class="flex justify-end absolute right-0 -bottom-[100%] z-0">
+  </div>
+  <!-- Right curve -->
+  <div class="flex justify-end absolute right-0 -bottom-[100%] z-0">
     <div class="flex gap-2 items-center -rotate-180">
-        <img src="{% static 'images/right curve.svg' %}" alt="" class="rotate-180">
-        <div class="bg-steel-blue w-14 h-14 rounded-full ml-4"></div>
-        <div class="bg-golden-orange w-9 h-9 rounded-full mb-24"></div>
+      <img src="{% static 'images/right curve.svg' %}" alt="" class="rotate-180">
+      <div class="bg-steel-blue w-14 h-14 rounded-full ml-4"></div>
+      <div class="bg-golden-orange w-9 h-9 rounded-full mb-24"></div>
     </div>
-</div>
+  </div>
+  {% endblock %}
 
-{% endblock %}
 
-{% block extra_js %}
-{% endblock %}

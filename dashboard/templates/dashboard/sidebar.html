@@ -1,0 +1,16 @@
+<aside class="sidebar w-[200px] md:w-[280px] h-full shadow-lg">
+    <nav class="h-full py-4 overflow-y-auto scroll">
+        <ul class="flex flex-col gap-1">
+        {% for menu in sidebar_menu %}
+            <li>
+                <a href="{{ menu.url }}" class="flex items-center gap-3 px-6 py-3 w-full">
+                    {% if menu.icon %}
+                    <span class="material-symbols-outlined">{{ menu.icon }}</span>
+                    {% endif %}
+                    <p>{{ menu.name }}</p>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    </nav>
+</aside>

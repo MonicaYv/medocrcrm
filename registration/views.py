@@ -2,6 +2,7 @@ from django.shortcuts import render
 import os
 import re
 from django.conf import settings
+from django.urls import reverse
 from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
@@ -11,6 +12,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .models import User, NGOProfile
 from .models import User, UserProfile
+
 
 
 ROLE_TO_TEMPLATE = {
@@ -23,7 +25,6 @@ ROLE_TO_TEMPLATE = {
 }
 
 def welcome(request):
-    print("Rendering welcome page")
     return render(request, 'registration/welcome.html')
 
 def register_by_role(request, role):
@@ -40,12 +41,9 @@ def is_file_clean(file_obj):
     return True
 
 def validate_and_save_file(file_obj, subdir, field_label):
-    """
-    Validate extension, size, simulate virus scan, and save.
-    Returns: (relative_path, error_message)
-    """
+   
     if not file_obj:
-        return '', None
+      return '', f"{field_label} is required."
 
     ext = os.path.splitext(file_obj.name)[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
@@ -82,16 +80,21 @@ def save_ngo(request):
             errors["email"] = "This email is already registered."
 
     password = data.get("password")
+    confirm_password = data.get("confirm_password")
     if not password or len(password) < 8:
         errors["password"] = "Password is required (min 8 chars)."
+    elif password != confirm_password:
+        errors["confirm_password"] = "Passwords do not match."
 
+    # Phone and country code
+    phone_country_code = "+91"  # default; 
     phone_number = data.get("phone_number1")
     if not phone_number or not re.match(r"^\d{8,15}$", phone_number):
         errors["phone_number1"] = "Enter a valid phone number (8-15 digits)."
 
-    ngo_name = data.get("company-name")
+    ngo_name = data.get("company_name")
     if not ngo_name:
-        errors["company-name"] = "NGO Name is required."
+        errors["company_name"] = "NGO Name is required."
 
     website_url = data.get("website_url")
     ngo_services = request.POST.getlist("ngo_services[]")
@@ -170,13 +173,17 @@ def save_ngo(request):
         errors["brand_image"] = err
 
     brand_description = data.get("brand_description", "")
-    email_otp = data.get("email_otp", "")
+    email_otp = data.get("otp1", "")  # from HTML field "otp1"
     referral_code = data.get("referral_code", "")
-    phone_country_code = data.get("phone_country_code", "+91")
+    contact_person_name = data.get("contact_person_name", "")
+    contact_person_phone = data.get("contact_person_phone", "")
+    contact_person_role = data.get("contact_person_role", "")
+    contact_person_otp = data.get("otp2", "")
 
     if errors:
         return JsonResponse({"success": False, "errors": errors}, status=400)
 
+    # --- Save User & NGOProfile ---
     user = User.objects.create(
         email=email,
         phone_country_code=phone_country_code,
@@ -185,7 +192,7 @@ def save_ngo(request):
         user_type="ngo"
     )
 
-    NGOProfile.objects.create(
+    ngo_profile = NGOProfile.objects.create(
         user=user,
         ngo_name=ngo_name,
         ngo_services=ngo_services,
@@ -219,6 +226,23 @@ def save_ngo(request):
         email_otp=email_otp,
         referral_code=referral_code,
     )
+
+    # Save Contact Person
+    if contact_person_name and contact_person_phone:
+        from .models import ContactPerson
+        ContactPerson.objects.create(
+            profile_type='ngo',
+            profile_id=ngo_profile.id,
+            name=contact_person_name,
+            phone_country_code=phone_country_code,
+            phone_number=contact_person_phone,
+            role=contact_person_role,
+            designation=contact_person_designation,
+            otp=contact_person_otp,
+            referral_code=referral_code,
+            email_otp=email_otp
+        )
+
     return JsonResponse({"success": True, "message": "NGO registered successfully."})
 
 @csrf_protect
@@ -313,8 +337,8 @@ def save_user(request):
     return JsonResponse({"success": True, "message": "User registered successfully."})
 
 def login_page(request):
-    print("Rendering login page")
     return render(request, 'login/login.html')
+
 
 @csrf_protect
 @require_POST
@@ -337,15 +361,7 @@ def login_auth(request):
             errors["password"] = "Invalid email or password."
             return JsonResponse({"success": False, "errors": errors})
         request.session['user_id'] = user.id
-        dashboard_url = "/dashboard/"
-        if user.user_type == 'ngo':
-            dashboard_url = "/ngo/dashboard/"
-        elif user.user_type == 'client':
-            dashboard_url = "/client/dashboard/"
-        elif user.user_type == 'advertiser':
-            dashboard_url = "/advertiser/dashboard/"
-        elif user.user_type == 'provider':
-            dashboard_url = "/provider/dashboard/"
+        dashboard_url = reverse("dashboard")
         return JsonResponse({"success": True, "redirect": dashboard_url})
     except User.DoesNotExist:
         errors["password"] = "Invalid email or password."

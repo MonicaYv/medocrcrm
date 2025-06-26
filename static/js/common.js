@@ -183,7 +183,6 @@ const csrftoken = getCookie('csrftoken');
 $('#register-form').on('submit', function(e) {
     e.preventDefault();
     // Clear all previous errors and error classes
-    $('.error-message').text('').removeClass('text-xs text-dark-red');
     $('.border-dark-red').removeClass('border-dark-red');
     $('.placeholder\\:text-semi-transparent-red').removeClass('placeholder:text-semi-transparent-red');
     $('label.text-dark-red').removeClass('text-dark-red');
@@ -192,23 +191,31 @@ $('#register-form').on('submit', function(e) {
     var cpwd = $('[name="confirm_password"]').val();
     if (pwd !== cpwd) {
         var $field = $('[name="confirm_password"]');
-        $('[data-error-for="confirm_password"]')
+        $field.next('.field-error').remove();
+        $('<span class="field-error text-xs text-dark-red"></span>')
             .text('Passwords do not match.')
-            .addClass('text-xs text-dark-red');
+            .insertAfter($field);
         $field
             .addClass('border-dark-red placeholder:text-semi-transparent-red')
             .removeClass('border-primary-color placeholder:text-blue-teal');
         $field.prev('label').addClass('text-dark-red');
+
         toastr.error('Passwords do not match.');
         return;
     }
-    if (!$('[name="terms"]').is(':checked')) {
-        $('[data-error-for="terms"]')
+
+    var $terms = $('[name="terms"]');
+    $terms.next('.field-error').remove();
+
+    if (!$terms.is(':checked')) {
+        $('<span class="field-error text-xs text-dark-red"></span>')
             .text('You must agree to the terms.')
-            .addClass('text-xs text-dark-red');
+            .insertAfter($terms);
+
         toastr.error('You must agree to the terms.');
         return;
     }
+
 
     var formType = $(this).data('type');
     var formUrl = $(this).attr('action');
@@ -245,16 +252,17 @@ $('#register-form').on('submit', function(e) {
         },
         error: function(xhr) {
             if (xhr.responseJSON && xhr.responseJSON.errors) {
-                $.each(xhr.responseJSON.errors, function(field, message) {
-                    var $input = $('[name="' + field + '"]');
-                    $('[data-error-for="' + field + '"]')
-                        .text(message)
-                        .addClass('text-xs text-dark-red');
-                    $input
-                        .addClass('border-dark-red placeholder:text-semi-transparent-red')
-                        .removeClass('border-primary-color placeholder:text-blue-teal');
-                    $input.prev('label').addClass('text-dark-red');
-                });
+                $.each(xhr.responseJSON.errors, function(field, message) { 
+                var $input = $('[name="' + field + '"]');
+                $input.next('.field-error').remove();
+                $('<span class="field-error text-xs text-dark-red"></span>')
+                    .text(message)
+                    .insertAfter($input);
+                $input
+                    .addClass('border-dark-red placeholder:text-semi-transparent-red')
+                    .removeClass('border-primary-color placeholder:text-blue-teal');
+                $input.prev('label').addClass('text-dark-red');
+            });
                 toastr.error("Please correct the highlighted errors.");
             } else {
                 toastr.error("Server error. Try again.");
@@ -290,7 +298,7 @@ $('#login-form').on('submit', function(e) {
             if (resp.success) {
                 toastr.success('Login successful!');
                 setTimeout(function() {
-                    window.location.href = resp.redirect || '/dashboard/';
+                    window.location.href = resp.redirect;
                 }, 1000);
             } else {
                 if (resp.errors) {
