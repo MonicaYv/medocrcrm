@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'registration',
     'dashboard',
     'settings',
+    'faq',
 ]
 
 MIDDLEWARE = [
