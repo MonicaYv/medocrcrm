@@ -449,7 +449,7 @@ checkbox.on('change', function () {
                 </span>
                 <div class="w-full flex items-center justify-center">
                   <img
-                    src="/public/images/medicine-img.svg"
+                    src="/static/images/medicine-img.svg"
                     alt="Medicine"
                     loading="lazy"
                   />

@@ -340,7 +340,7 @@ $(".tab-btn").on("click", function () {
   })
 
 
-   const $bellIcon = $("#bell-icon");
+  const $bellIcon = $("#bell-icon");
   const $popup = $("#popup");
   const $closePopup = $("#close-popup");
   // const $viewDetailsDropdown = $("#viewDetailsDropdown");

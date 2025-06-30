@@ -316,6 +316,41 @@ $('#login-form').on('submit', function(e) {
     });
 });
 
+$('.submit-form').on('submit', function(e) {
+    e.preventDefault();
+    var formUrl = $(this).attr('action');
+    var formType = $(this).attr('method');
+    var formData = new FormData(this);
+    console.log('Form Data:', formData);
+    console.log('Form URL:', formUrl);
+    console.log('Form Type:', formType);
+    $.ajax({
+        url: formUrl,
+        type: formType,
+        headers: { 'X-CSRFToken': csrftoken },
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(resp) {
+            if (resp.success) {
+                toastr.success(resp.message);
+
+                setTimeout(function() {
+                    window.location.href = resp.redirect;
+                }, 1000);
+            } else {
+                if (resp.errors) {
+                    toastr.error(resp.message);
+                } else {
+                    toastr.error(resp.message);
+                }
+            }
+        },
+        error: function(xhr) {
+            toastr.error("Server error. Try again.");
+        }
+    });
+});
 
 
     

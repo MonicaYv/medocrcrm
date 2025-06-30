@@ -12,7 +12,7 @@ urlpatterns = [
     path('user/', include('registration.urls')),
     path('dashboard', dashboard_views.dashboard_home, name='dashboard'),
     path('logout', dashboard_views.logout_view, name='logout'),
-    path('settings/', settings_views.settings_page, name='settings_page'),
+    path('settings/', include('settings.urls')),
 
     # ... other apps
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
