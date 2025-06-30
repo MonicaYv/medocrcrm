@@ -15,8 +15,8 @@ from registration.models import AccountSubscriptionFAQ
 
 faq_data=[
     {
-        "question":"How do I upgrade premium subscription ?",
-        "answer":"Go to Subscription section under Settings and choose a plan.",
+        "question":"TEST?",
+        "answer":"TEST.",
         "category":"Subscription"
     }
 ]
