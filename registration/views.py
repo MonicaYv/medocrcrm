@@ -13,7 +13,6 @@ from django.core.exceptions import ValidationError
 from .models import User, NGOProfile
 from .models import User, UserProfile
 
-
 ROLE_TO_TEMPLATE = {
     "login": "login/login.html",
     "customer": "registration/register_user.html",
@@ -38,22 +37,19 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 def is_file_clean(file_obj):
     return True
 
-def validate_and_save_file(file_obj, subdir, field_label):
-   
-    if not file_obj:
-      return '', f"{field_label} is required."
+def validate_and_save_file(file_obj, subdir, field_label, user_type='common'):
 
+    if not file_obj:
+        return '', f"{field_label} is required."
     ext = os.path.splitext(file_obj.name)[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
         return '', f"{field_label} must be a PDF or image file."
-
     if file_obj.size > MAX_FILE_SIZE:
         return '', f"{field_label} must be under 5MB."
-
     if not is_file_clean(file_obj):
         return '', f"{field_label} failed virus scan."
 
-    upload_dir = os.path.join('ngo_docs', subdir)
+    upload_dir = os.path.join(f"{user_type}_docs", subdir)
     os.makedirs(os.path.join(settings.MEDIA_ROOT, upload_dir), exist_ok=True)
     filename = default_storage.save(os.path.join(upload_dir, file_obj.name), file_obj)
     return filename, None 
@@ -121,13 +117,13 @@ def save_ngo(request):
 
     # --- File validations and saves ---
     ngo_registration_doc_path, err = validate_and_save_file(
-        files.get("ngo_registration_doc"), "registration", "Registration Document")
+        files.get("ngo_registration_doc"), "registration", "Registration Document", user_type="ngo")
     if err:
         errors["ngo_registration_doc"] = err
 
     pan_number = data.get("pan_number")
     pan_doc_path, err = validate_and_save_file(
-        files.get("pan_doc"), "pan", "PAN Document")
+        files.get("pan_doc"), "pan", "PAN Document",user_type="ngo")
     if pan_number and not pan_doc_path:
         errors["pan_doc"] = "PAN document is required if PAN number is provided."
     if err:
@@ -135,7 +131,7 @@ def save_ngo(request):
 
     gst_number = data.get("gst_number")
     gst_doc_path, err = validate_and_save_file(
-        files.get("gst_doc"), "gst", "GST Document")
+        files.get("gst_doc"), "gst", "GST Document", user_type="ngo")
     if gst_number and not gst_doc_path:
         errors["gst_doc"] = "GST document is required if GST number is provided."
     if err:
@@ -143,7 +139,7 @@ def save_ngo(request):
 
     tan_number = data.get("tan_number")
     tan_doc_path, err = validate_and_save_file(
-        files.get("tan_doc"), "tan", "TAN Document")
+        files.get("tan_doc"), "tan", "TAN Document", user_type="ngo")
     if tan_number and not tan_doc_path:
         errors["tan_doc"] = "TAN document is required if TAN number is provided."
     if err:
@@ -151,7 +147,7 @@ def save_ngo(request):
 
     section8_number = data.get("section8_number")
     section8_doc_path, err = validate_and_save_file(
-        files.get("section8_doc"), "section8", "Section 8 Document")
+        files.get("section8_doc"), "section8", "Section 8 Document", user_type="ngo")
     if section8_number and not section8_doc_path:
         errors["section8_doc"] = "Section 8 document is required if number is provided."
     if err:
@@ -159,14 +155,14 @@ def save_ngo(request):
 
     doc_12a_number = data.get("doc_12a_number")
     doc_12a_path, err = validate_and_save_file(
-        files.get("doc_12a"), "doc_12a", "12A Document")
+        files.get("doc_12a"), "doc_12a", "12A Document", user_type="ngo")
     if doc_12a_number and not doc_12a_path:
         errors["doc_12a"] = "12A document is required if number is provided."
     if err:
         errors["doc_12a"] = err
 
     brand_image_path, err = validate_and_save_file(
-        files.get("brand_image"), "brand_image", "Brand Image")
+        files.get("brand_image"), "brand_image", "Brand Image", user_type="ngo")
     if brand_image_path and err:
         errors["brand_image"] = err
 
@@ -338,7 +334,6 @@ def save_user(request):
 
 def login_page(request):
     return render(request, 'login/login.html')
-
 
 @csrf_protect
 @require_POST

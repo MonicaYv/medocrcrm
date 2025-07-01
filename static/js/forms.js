@@ -388,20 +388,96 @@ function closePopup(id) {
   document.body.style.overflow = "auto";
 }
 
+function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+function deleteAccount() {
+    const selectedReason = document.querySelector('input[name="address"]:checked');
+    const otherReasonInput = document.querySelector('input[placeholder^="Specify Your Reason"]');
+    let reason = "";
+
+    if (selectedReason) {
+        reason = selectedReason.parentElement.previousElementSibling.innerText.trim();
+    }
+    if (otherReasonInput && otherReasonInput.value.trim()) {
+        reason = otherReasonInput.value.trim();
+    }
+
+    const csrftoken = getCookie('csrftoken');  // make sure getCookie is defined
+
+    fetch('delete-account/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ reason })
+    })
+    .then(res => {
+        if (res.ok) {
+            window.location.href = '/';
+        } else {
+            alert("Failed to delete account");
+        }
+    });
+    window.showToaster('success', 'Account deleted!');
+    closePopup("deleteAccountPopup");
+}
+
 function clearSearchHistory() {
   // Perform action here
+  const csrftoken = getCookie('csrftoken');  // make sure getCookie is defined
+
+    fetch('clear-search-history/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ reason })
+    })
+    .then(res => {
+        if (res.ok) {
+            console.log("Search history cleared successfully");
+        } else {
+            alert("Failed to delete history.");
+        }
+    });
   window.showToaster('success', 'Search history cleared!');
   closePopup("searchHistoryPopup");
 }
 
 function clearSavedData() {
   // Perform action here
+  const csrftoken = getCookie('csrftoken');  // make sure getCookie is defined
+
+    fetch('clear-saved-data/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ reason })
+    })
+    .then(res => {
+        if (res.ok) {
+            console.log("Saved data cleared successfully");
+        } else {
+            alert("Failed to delete saved data.");
+        }
+    });
   window.showToaster('success', 'Saved data cleared!');
   closePopup("savedDataPopup");
-}
-
-function deleteAccount() {
-  // Perform action here
-  window.showToaster('success', 'Account deleted!');
-  closePopup("deleteAccountPopup");
 }

@@ -1,6 +1,6 @@
 {% extends 'dashboard/layout.html' %}
 {% load static %}
-{% block title %}Register as User{% endblock %}
+{% block title %}NGO Settings{% endblock %}
 {% block content %}
 
 <div class="h-full flex-1 flex flex-col gap-8 p-6 overflow-y-auto scroll relative transition-all duration-300 main-content">
@@ -61,7 +61,6 @@
       </div>
 
     <!--Account Details Section -->
-
     <div id="account-details"
       class="grid grid-cols-1 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6 px-4 sm:px-6 pt-6 account-detail tab-content">
       <p class="font-semibold text-lg text-jet-black pt-4">
@@ -86,7 +85,7 @@
               Country Code
             </p>
             <p class="font-normal text-sm md:text-md text-medium-gray">
-              +91
+              {{country_code}}
             </p>
           </div>
           <div class="flex flex-col">
@@ -283,59 +282,59 @@
         </div>
       </div>
 
-        <!-- Delete Account Popup -->
-        <div id="deleteAccountPopup"
-        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
-          <h2 class="text-lg font-semibold mb-3"></h2>
-          <p class="text-sm font-semibold mb-4">Do you want to delete your profile ?</p>
-          <div class="flex justify-end gap-3">
-            <button class="px-8 py-1 border-1 rounded-xl text-gray-600"
-              onclick="closePopup('deleteAccountPopup')">No</button>
-            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white"
-              onclick="deleteAccount()">Yes</button>
-          </div>
-          <p class="font-semibold text-lg text-jet-black pt-6"> We are sorry you are going, Please select your reason</p>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">I found a better alternative</p>
-              <label class="custom-radio">
-                <input type="radio" name="address">
-                <span class="checkmark"></span>
-              </label>
-          </div>
-            <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">This App is Hard To Use</p>
-              <label class="custom-radio">
-                <input type="radio" name="address">
-                <span class="checkmark"></span>
-              </label>
-          </div>
-            <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">Not Getting Enough Value</p>
-              <label class="custom-radio">
-                <input type="radio" name="address">
-                <span class="checkmark"></span>
-              </label>
-          </div>
-            <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">Just Taking A Break</p>
-              <label class="custom-radio">
-                <input type="radio" name="address">
-                <span class="checkmark"></span>
-              </label>
-          </div>
-            <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">Other (Please Specify)</p>
-              <label class="custom-radio">
-                <input type="radio" name="address">
-                <span class="checkmark"></span>
-              </label>
-          </div>
-          <input type="text" class="mt-2 rounded-sm p-2 focus:ring-0 w-full focus:!outline-none focus:ring-offset-0" placeholder="Specify Your Reason (10 Words)">
-          <div class="flex justify-end pt-2">
-            <button class="bg-violet-sky text-white rounded-md p-2 cursor-pointer submitBtn">Submit</button>
-          </div>
+      <!-- Delete Account Popup -->
+      <div id="deleteAccountPopup"
+      class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
+        <h2 class="text-lg font-semibold mb-3"></h2>
+        <p class="text-sm font-semibold mb-4">Do you want to delete your profile ?</p>
+        <div class="flex justify-end gap-3">
+          <button class="px-8 py-1 border-1 rounded-xl text-gray-600"
+            onclick="closePopup('deleteAccountPopup')">No</button>
+          <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white"
+            onclick="deleteAccount()">Yes</button>
         </div>
+        <p class="font-semibold text-lg text-jet-black pt-6"> We are sorry you are going, Please select your reason</p>
+        <div class="flex justify-between items-center pt-2">
+          <p class="font-normal text-base text-jet-black">I found a better alternative</p>
+            <label class="custom-radio">
+              <input type="radio" name="address">
+              <span class="checkmark"></span>
+            </label>
+        </div>
+          <div class="flex justify-between items-center pt-2">
+          <p class="font-normal text-base text-jet-black">This App is Hard To Use</p>
+            <label class="custom-radio">
+              <input type="radio" name="address">
+              <span class="checkmark"></span>
+            </label>
+        </div>
+          <div class="flex justify-between items-center pt-2">
+          <p class="font-normal text-base text-jet-black">Not Getting Enough Value</p>
+            <label class="custom-radio">
+              <input type="radio" name="address">
+              <span class="checkmark"></span>
+            </label>
+        </div>
+          <div class="flex justify-between items-center pt-2">
+          <p class="font-normal text-base text-jet-black">Just Taking A Break</p>
+            <label class="custom-radio">
+              <input type="radio" name="address">
+              <span class="checkmark"></span>
+            </label>
+        </div>
+          <div class="flex justify-between items-center pt-2">
+          <p class="font-normal text-base text-jet-black">Other (Please Specify)</p>
+            <label class="custom-radio">
+              <input type="radio" name="address">
+              <span class="checkmark"></span>
+            </label>
+        </div>
+        <input type="text" class="mt-2 rounded-sm p-2 focus:ring-0 w-full focus:!outline-none focus:ring-offset-0" placeholder="Specify Your Reason (10 Words)">
+        <div class="flex justify-end pt-2">
+          <button class="bg-violet-sky text-white rounded-md p-2 cursor-pointer submitBtn">Submit</button>
+        </div>
+      </div>
       </div>
       <!--Success Popup-->
       <div id="successPopup" class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
@@ -394,20 +393,22 @@
                 <input
               type="text"
               class="border border-dashed border-violet-sky p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="image.png"
+              value="{{ ngo_registration_doc_path }}"
               readonly
-            /> 
+            />
             <div class="flex items-center gap-2   text-nowrap">
             
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
             <span title="View"
-
+              data-doc-type="ngo_registration_doc"
+              data-doc-path="{{ ngo_registration_doc_path }}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
               >visibility</span
             >
             <span title="Upload  Document"
+              data-doc-type="ngo_registration_doc"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
               >upload</span
             >
@@ -433,7 +434,7 @@
                 <input
               type="text"
               class="border border-dashed border-violet-sky p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="image.png"
+              value="{{gst_doc_path}}"
               readonly
             />
               <div class="flex items-center gap-2   text-nowrap">
@@ -442,10 +443,13 @@
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
             <span  title="View"
+              data-doc-type="gst_doc"
+              data-doc-path="{{ gst_doc_path }}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
               >visibility</span
             >
             <span title="Upload  Document"
+              data-doc-type="gst_doc"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
               >upload</span
             >
@@ -471,7 +475,7 @@
               <input
               type="text"
               class="border border-dashed border-violet-sky p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="image.png"
+              value="{{pan_doc_path}}"
               readonly
             />
               <div class="flex items-center gap-2   text-nowrap">
@@ -480,10 +484,13 @@
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
             <span  title="View"
+              data-doc-type="pan_doc"
+              data-doc-path="{{ pan_doc_path }}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
               >visibility</span
             >
             <span title="Upload  Document"
+              data-doc-type="pan_doc"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
               >upload</span
             >
@@ -509,7 +516,7 @@
               <input
               type="text"
               class="border border-dashed border-violet-sky p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="image.png"
+              value="{{tan_doc_path}}"
               readonly
             />
               <div class="flex items-center gap-2   text-nowrap">
@@ -518,10 +525,13 @@
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
             <span  title="View"
+              data-doc-type="tan_doc"
+              data-doc-path="{{ tan_doc_path }}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
               >visibility</span
             >
             <span title="Upload  Document"
+              data-doc-type="tan_doc"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
               >upload</span
             >
@@ -547,7 +557,7 @@
               <input
               type="text"
               class="border border-dashed border-violet-sky p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="image.png"
+              value="{{doc_12a_path}}"
               readonly
             />
               <div class="flex items-center gap-2   text-nowrap">
@@ -556,10 +566,13 @@
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
             <span  title="View"
+              data-doc-type="doc_12a"
+              data-doc-path="{{ doc_12a_path }}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
               >visibility</span
             >
             <span title="Upload  Document"
+              data-doc-type="doc_12a"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
               >upload</span
             >
@@ -585,7 +598,7 @@
               <input
               type="text"
               class="border border-dashed border-violet-sky p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="image.png"
+              value="{{section8_doc_path}}"
               readonly
             />
               <div class="flex items-center gap-2   text-nowrap">
@@ -594,10 +607,13 @@
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
             <span  title="View"
+              data-doc-type="section8_doc"
+              data-doc-path="{{ section8_doc_path }}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
               >visibility</span
             >
             <span title="Upload  Document"
+              data-doc-type="section8_doc"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
               >upload</span
             >
@@ -621,7 +637,7 @@
               <input
               type="text"
               class="border border-dashed border-violet-sky p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="image.png"
+              value="{{brand_image_path}}"
               readonly
             />
               <div class="flex items-center gap-2   text-nowrap">
@@ -630,10 +646,13 @@
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
             <span  title="View"
+              data-doc-type="brand_image"
+              data-doc-path="{{ brand_image_path }}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
               >visibility</span
             >
             <span title="Upload  Document"
+              data-doc-type="brand_image"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
               >upload</span
             >
@@ -768,168 +787,6 @@
           </div>
         </div>
     </div>
-    <!--Edit Section-->
-    <div class="hidden edit-details">
-      <p class="text-violet-sky pl-4 sm:pl-6">Account Details</p>
-
-      <form id="editForm" method="POST" action="{% url 'update_ngo_profile' %}" class="submit-form grid grid-cols-1 gap-x-6 md:gap-x-12 gap-y-6 px-4 sm:px-6 pt-6 text-sm">
-        {% csrf_token %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
-          <!-- Email + Phone -->
-          <div class="md:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- Email -->
-            <div class="flex flex-col">
-              <input name="email" type="email" class="border rounded px-3 py-2 w-full"
-                placeholder="Email Address" value="{{email}}" />
-              <span class="error emailError text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-
-            <!-- Country code + Phone -->
-            <div class="flex flex-col lg:flex-row gap-4">
-              <!-- Country Code -->
-              <div class="pl-4 lg:w-1/4">
-                <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
-              </div>
-
-              <!-- Phone -->
-              <div class="flex-1">
-                <input name="phone" type="text" class="border rounded px-3 py-2 w-full"
-                  placeholder="Phone Number" value="{{phone_no}}"/>
-                <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-              </div>
-            </div>
-            <!-- OTP -->
-
-            <div class="flex-1">
-              <button type="button"
-                class="bg-violet-sky opacity-50 text-white px-2 py-2.5 rounded mb-1.5 w-full cursor-pointer">
-                Send Phone OTP
-              </button>
-              <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
-                <span class="text-black">Resend</span></span>
-            </div>
-            <div class="flex-1">
-              <input name="otp1" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
-              <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-              <div class="flex items-center gap-2 justify-end">
-
-                <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
-                <p class="font-normal text-xs text-bright-green">Verified</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--NGO Name-->
-        <input name="ngo_name" type="text" class="w-full rounded" placeholder="NGO Name" value="{{ngo_name}}"/>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
-          <!--Advertiser Type-->
-          <div class="relative dropdown-container">
-            <input name="website_url" type="text" class="rounded w-full dropdown-input" placeholder="Website URL (Optional)" value="{{website_url}}"/>
-
-          </div>
-          <!--NGO Services -->
-          <div class="relative dropdown-container">
-            <input name="ngo_services" type="text" class="rounded w-full dropdown-input cursor-pointer" placeholder="NGO Services"
-                  value="{{ ngo_services|join:', ' }}" readonly />
-            <span class="material-symbols-outlined absolute right-2 top-2 toggleDropdown cursor-pointer">
-              keyboard_arrow_down
-            </span>
-
-            <div class="dropdown-menu p-4 hidden bg-white rounded shadow-md z-10 absolute w-full">
-              {% for service in all_services %}
-              <div class="flex items-center justify-between">
-                <p class="px-2 py-2 font-normal text-base text-violet-sky">
-                  {{ service }}
-                </p>
-                <input type="checkbox" name="services" value="{{ service }}"
-                      class="w-5 h-5 text-violet-sky rounded-sm focus:ring-2 focus:ring-violet-sky"
-                      {% if service in ngo_services %}checked{% endif %} />
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-
-
-
-        <!--Address-->
-        <input name="address" type="text" class="w-full rounded" placeholder="Address" value="{{address}}"/>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
-          <!-- City,Town,District -->
-          <div class="flex flex-col">
-            <input name="city" type="text" class="border rounded px-3 py-2" placeholder="City,Town,District" value="{{city}}"/>
-            <span class="error adminNameError text-red-500 text-sm mt-1 hidden"></span>
-          </div>
-          <!-- State -->
-          <div class="flex flex-col">
-            <input name="state" type="text" class="border rounded px-3 py-2" placeholder="State" value="{{state}}"/>
-            <span class="error genderError text-red-500 text-sm mt-1 hidden"></span>
-          </div>
-          <!-- Country -->
-          <div class="flex flex-col">
-            <input name="country" type="text" class="border rounded px-3 py-2" placeholder="Country" value="{{country}}"/>
-            <span class="error addressError text-red-500 text-sm mt-1 hidden"></span>
-          </div>
-          <!-- Pincode -->
-          <div class="flex flex-col">
-            <input name="pincode" type="text" class="border rounded px-3 py-2" placeholder="Pincode" value="{{pincode}}"/>
-            <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
-          </div>
-          <!-- contact -->
-          <div class="flex flex-col">
-            <input name="contact_name" type="text" class="border rounded px-3 py-2" placeholder="Contact Person Name" value="{{contact_name}}"/>
-            <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
-          </div>
-          <!-- ROle -->
-          <div class="flex flex-col">
-            <input name="contact_role" type="text" class="border rounded px-3 py-2" placeholder="Role" value="{{contact_role}}"/>
-            <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
-          </div>
-          <!-- Country code + Phone -->
-          <div class="flex flex-col lg:flex-row gap-4">
-            <!-- Country Code -->
-            <div class="lg:w-1/4">
-              <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}" placeholder="India (+91)"></select>
-            </div>
-
-            <!-- Phone -->
-            <div class="flex-1">
-              <input name="contact_phone_number" type="text" class="border rounded px-3 py-2 w-full" placeholder="Phone Number" value="{{contact_phone_number}}"/>
-              <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-            </div>
-          </div>
-          <!--Send OTP-->
-          <div class="flex items-center gap-2">
-            <div class="flex-1">
-              <button type="button" class="bg-violet-sky text-white px-2 py-2.5 rounded w-full cursor-pointer">
-                Send Phone OTP
-              </button>
-              <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
-                <span class="text-black">Resend</span></span>
-            </div>
-            <div class="flex-1">
-              <input name="otp2" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
-              <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-              <div class="flex items-center gap-2 justify-end">
-                <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
-                <p class="font-normal text-xs text-bright-green">Verified</p>
-              </div>
-            </div>
-          </div>
-          <!-- Buttons -->
-          <div class="md:col-span-2 flex justify-end pt-4 gap-2 flex-wrap">
-            <button type="button"
-              class="px-4 py-2 rounded-md border text-violet-sky font-normal text-lg border-violet-sky cancel-btn">
-              Cancel
-            </button>
-            <button type="submit"
-              class="bg-violet-sky text-white px-6 py-2 rounded-lg font-normal text-lg cursor-pointer save-btn">
-              Save Changes
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
     <!--Change Password -->
     <div class="hidden toggle-section" data-section="password">
       <p class="text-gray-950 text-2xl pl-4 sm:pl-6">
@@ -938,10 +795,11 @@
       </p>
       <p class="text-violet-sky pl-4 sm:pl-6">Change Password</p>
 
-      <form id="editChangePassword" class="px-4 sm:px-6 pt-6 text-sm">
+      <form id="editChangePassword" method="POST" action="{% url 'change_password' %}" class="submit-form px-4 sm:px-6 pt-6 text-sm">
+        {% csrf_token %}
         <!-- Pharmacy Name -->
         <div class="flex flex-col">
-          <input id="pharmacyName" type="text" class="border rounded mb-5 px-3 py-2"
+          <input name="current_password" type="text" class="border rounded mb-5 px-3 py-2"
             placeholder="Type your current password *" required />
           <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
         </div>
@@ -951,12 +809,12 @@
           </p>
         </div>
         <div class="flex flex-col">
-          <input id="pharmacyName" type="text" class="border rounded mb-5 px-3 py-2"
+          <input name="new_password" type="text" class="border rounded mb-5 px-3 py-2"
             placeholder="Type your new password *" required />
           <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
         </div>
         <div class="flex flex-col">
-          <input id="pharmacyName" type="text" class="border rounded mb-5 px-3 py-2"
+          <input name="confirm_password" type="text" class="border rounded mb-5 px-3 py-2"
             placeholder="Retype your new password *" required />
           <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
         </div>
@@ -970,7 +828,7 @@
               <span class="text-black">Resend</span></span>
           </div>
           <div>
-            <input id="phone" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
+            <input name="otp" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
             <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
             <div class="flex items-center gap-2 justify-end">
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1121,8 +979,215 @@
         or by emailing at info@sizaf.com.
       </p>
     </div>
+    <!--Edit Section-->
+    <div class="hidden edit-details">
+        <p class="text-violet-sky pl-4 sm:pl-6">Account Details</p>
+        <form id="editForm" method="POST" action="{% url 'update_ngo_profile' %}" class="submit-form grid grid-cols-1 gap-x-6 md:gap-x-12 gap-y-6 px-4 sm:px-6 pt-6 text-sm">
+          {% csrf_token %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
+            <!-- Email + Phone -->
+            <div class="md:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- Email -->
+              <div class="flex flex-col">
+                <input name="email" type="email" class="border rounded px-3 py-2 w-full"
+                  placeholder="Email Address" value="{{email}}" />
+                <span class="error emailError text-red-500 text-sm mt-1 hidden"></span>
+              </div>
+
+              <!-- Country code + Phone -->
+              <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Country Code -->
+                <div class="pl-4 lg:w-1/4">
+                  <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
+                </div>
+
+                <!-- Phone -->
+                <div class="flex-1">
+                  <input name="phone" type="text" class="border rounded px-3 py-2 w-full"
+                    placeholder="Phone Number" value="{{phone_no}}"/>
+                  <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                </div>
+              </div>
+              <!-- OTP -->
+
+              <div class="flex-1">
+                <button type="button"
+                  class="bg-violet-sky opacity-50 text-white px-2 py-2.5 rounded mb-1.5 w-full cursor-pointer">
+                  Send Phone OTP
+                </button>
+                <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
+                  <span class="text-black">Resend</span></span>
+              </div>
+              <div class="flex-1">
+                <input name="otp1" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
+                <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                <div class="flex items-center gap-2 justify-end">
+
+                  <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+                  <p class="font-normal text-xs text-bright-green">Verified</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--NGO Name-->
+          <input name="ngo_name" type="text" class="w-full rounded" placeholder="NGO Name" value="{{ngo_name}}"/>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
+            <!--NGO Type-->
+            <div class="relative dropdown-container">
+              <input name="website_url" type="text" class="rounded w-full dropdown-input" placeholder="Website URL (Optional)" value="{{website_url}}"/>
+
+            </div>
+            <!--NGO Services -->
+            <div class="relative dropdown-container">
+              <input name="ngo_services" type="text" class="rounded w-full dropdown-input cursor-pointer" placeholder="NGO Services"
+                    value="{{ ngo_services|join:', ' }}" readonly />
+              <span class="material-symbols-outlined absolute right-2 top-2 toggleDropdown cursor-pointer">
+                keyboard_arrow_down
+              </span>
+
+              <div class="dropdown-menu p-4 hidden bg-white rounded shadow-md z-10 absolute w-full">
+                {% for service in all_services %}
+                <div class="flex items-center justify-between">
+                  <p class="px-2 py-2 font-normal text-base text-violet-sky">
+                    {{ service }}
+                  </p>
+                  <input type="checkbox" name="services" value="{{ service }}"
+                        class="w-5 h-5 text-violet-sky rounded-sm focus:ring-2 focus:ring-violet-sky"
+                        {% if service in ngo_services %}checked{% endif %} />
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+
+
+          <!--Address-->
+          <input name="address" type="text" class="w-full rounded" placeholder="Address" value="{{address}}"/>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
+            <!-- City,Town,District -->
+            <div class="flex flex-col">
+              <input name="city" type="text" class="border rounded px-3 py-2" placeholder="City,Town,District" value="{{city}}"/>
+              <span class="error adminNameError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- State -->
+            <div class="flex flex-col">
+              <input name="state" type="text" class="border rounded px-3 py-2" placeholder="State" value="{{state}}"/>
+              <span class="error genderError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- Country -->
+            <div class="flex flex-col">
+              <input name="country" type="text" class="border rounded px-3 py-2" placeholder="Country" value="{{country}}"/>
+              <span class="error addressError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- Pincode -->
+            <div class="flex flex-col">
+              <input name="pincode" type="text" class="border rounded px-3 py-2" placeholder="Pincode" value="{{pincode}}"/>
+              <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- contact -->
+            <div class="flex flex-col">
+              <input name="contact_name" type="text" class="border rounded px-3 py-2" placeholder="Contact Person Name" value="{{contact_name}}"/>
+              <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- ROle -->
+            <div class="flex flex-col">
+              <input name="contact_role" type="text" class="border rounded px-3 py-2" placeholder="Role" value="{{contact_role}}"/>
+              <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- Country code + Phone -->
+            <div class="flex flex-col lg:flex-row gap-4">
+              <!-- Country Code -->
+              <div class="lg:w-1/4">
+                <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}" placeholder="India (+91)"></select>
+              </div>
+
+              <!-- Phone -->
+              <div class="flex-1">
+                <input name="contact_phone_number" type="text" class="border rounded px-3 py-2 w-full" placeholder="Phone Number" value="{{contact_phone_number}}"/>
+                <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+              </div>
+            </div>
+            <!--Send OTP-->
+            <div class="flex items-center gap-2">
+              <div class="flex-1">
+                <button type="button" class="bg-violet-sky text-white px-2 py-2.5 rounded w-full cursor-pointer">
+                  Send Phone OTP
+                </button>
+                <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
+                  <span class="text-black">Resend</span></span>
+              </div>
+              <div class="flex-1">
+                <input name="otp2" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
+                <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                <div class="flex items-center gap-2 justify-end">
+                  <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+                  <p class="font-normal text-xs text-bright-green">Verified</p>
+                </div>
+              </div>
+            </div>
+            <!-- Buttons -->
+            <div class="md:col-span-2 flex justify-end pt-4 gap-2 flex-wrap">
+              <button type="button"
+                class="px-4 py-2 rounded-md border text-violet-sky font-normal text-lg border-violet-sky cancel-btn">
+                Cancel
+              </button>
+              <button type="submit"
+                class="bg-violet-sky text-white px-6 py-2 rounded-lg font-normal text-lg cursor-pointer save-btn">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </form>
+    </div>
     </div>
 </div>
+
+  <!--Document Popup-->
+  <div id="viewModal"
+    class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="bg-soft-gray p-6 rounded-xl shadow-lg max-w-md w-full">
+      <div id="userTypeHolder" data-user-type="{{ request.user_obj.user_type }}" hidden></div>
+      <div class="flex justify-between items-center">               
+        <p class="font-semibold text-xl mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined">document_scanner</span>
+          Document Title
+        </p>
+        <button id="closeModal" class="cursor-pointer text-2xl">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="modalContent" class="text-center bg-white rounded-md h-96">
+
+        <!-- <img src="/static/images/incorp-certificate.svg" alt="" class="object-cover h-96 w-full"> -->
+        <img   id="modalImg"    class="object-cover h-96 w-full hidden" alt="Document preview">
+        <embed id="modalEmbed" class="w-full h-96 hidden" type="application/pdf" />
+        <a     id="modalLink"   class="block py-8 text-violet-sky" hidden target="_blank">Download Document</a>
+      </div>
+      <div class="flex items-center justify-between pt-1">
+        <p class="font-normal text-xs text-dark-gray">Image (JPG, PNG). Maximum file size: 1MB.</p>
+        <div class="flex items-center gap-2 text-nowrap">
+          <p class="font-normal text-sm text-emerald-green">Virus Scan</p>
+          <input type="checkbox"
+            class="text-emerald-green w-4 h-4 text-lg cursor-pointer rounded-xs focus:ring-0 focus:ring-offset-0"
+            checked>
+        </div>
+      </div>
+
+      <!--Buttons-->
+      <div class="flex justify-between items-center pt-4 w-full">
+        <input type="file" id="replaceInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+        <button id="replaceBtn" type="button">
+          <p
+            class="flex items-center gap-2 border border-violet-sky bg-white text-violet-sky px-4 py-2 rounded-md cursor-pointer">
+            <span class="material-symbols-outlined">upload</span>Replace</p>
+        </button>
+        <button id="saveBtn" type="button" disabled>
+          <p class="px-4 py-2 rounded-md cursor-pointer bg-violet-sky text-white">Save</p>
+        </button>
+      </div>
+    </div>
+  </div>  -->
 
 {% endblock %}
 
@@ -1131,5 +1196,6 @@
   <script src="{% static 'js/countryCodes.js' %}"></script>
   <script src="{% static 'js/toaster.js' %}"></script>
   <script src="{% static 'js/Purchase.js' %}"></script>
+  <script src="{% static 'js/tabs.js' %}"></script>
   <script src="{% static 'js/settings.js' %}"></script>
 {% endblock %}
