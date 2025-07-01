@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'registration',
     'dashboard',
     'settings',
+    'ngopost',
     'faq',
 ]
 
@@ -99,6 +100,22 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'document')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGIN_URL = '/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
 MONGO_DATABASE_NAME = 'database_1'
 MONGO_DATABASE_HOST = "mongodb://192.168.1.100:47016/"
 
@@ -107,5 +124,5 @@ connect(
     host=MONGO_DATABASE_HOST,
 )
 
-
+# AUTH_USER_MODEL = 'registration.User'
 

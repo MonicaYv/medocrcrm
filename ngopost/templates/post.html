@@ -1,0 +1,1380 @@
+{% extends "dashboard/layout.html" %}
+{% load static %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <!-- Page specific content here -->
+    <div
+        class="h-full flex-1 flex flex-col gap-8 p-6 overflow-y-auto scroll bg-slate-white relative transition-all duration-300 main-content">
+        <div
+          class="show-sidebar-toggle hidden absolute top-10 left-0 z-50 h-10 w-10 bg-light-gray items-center justify-center rounded-r-md cursor-pointer">
+          <span class="material-symbols-outlined text-violet-sky font-bold text-2xl">
+            arrow_forward_ios
+          </span>
+        </div>
+
+        <div class="bg-white shadow-(--box-shadow-5) rounded-[10px] px-2 sm:px-4 py-4">
+          <div class="flex items-center justify-between">
+            <div class="space-y-2">
+              <p class="flex items-center gap-3 text-20-fs">
+                <span class="tab-icon material-symbols-outlined"> upload </span>
+                <span class="tab-title font-medium">New Post</span>
+              </p>
+              <p class="tab-description text-18-nr">
+                Post Your Cause—Reach Generous Donors Today!
+              </p>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="flex gap-6 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar">
+            <button
+              class="tab-btn-ngo active-tab-ngo text-sm sm:text-18-nr px-4 font-medium cursor-pointer text-violet-sky"
+              data-tab="new-post">
+              New Post
+            </button>
+            <button class="tab-btn-ngo text-sm sm:text-18-nr px-4 font-medium cursor-pointer text-violet-sky"
+              data-tab="post-history">
+              Post History
+            </button>
+            <button class="tab-btn-ngo text-sm sm:text-18-nr px-4 font-medium cursor-pointer text-violet-sky"
+              data-tab="saved-post">
+              Saved Post
+            </button>
+          </div>
+
+          <!-- Saved Post Content -->
+          <div class="saved-post tab-content hidden py-6 space-y-6">
+            <!-- Header -->
+            <div class="px-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+              <p class="text-sm font-semibold whitespace-nowrap">Saved Post</p>
+              <div class="flex items-center justify-end gap-5 w-full sm:w-5/6">
+                <div class="w-full max-w-[350px] rounded-[6px] bg-light-white flex items-center gap-2 px-2">
+                  <span class="material-symbols-outlined text-dark-gray">
+                    search
+                  </span>
+                  <input type="text" placeholder="Search by medicine name or categories"
+                    class="w-full py-2.5 border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-medium-gray" />
+                </div>
+                <button
+                  class="w-full max-w-[90px] h-[40px] border border-violet-sky rounded-[10px] text-violet-sky flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-violet-sky">
+                    keyboard_arrow_down
+                  </span>
+                  Filter
+                </button>
+                <button
+                  class="w-full max-w-[100px] h-[40px] border border-violet-sky rounded-[10px] text-violet-sky flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-violet-sky">
+                    file_export
+                  </span>
+                  <span class="hidden sm:block">View</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-auto whitespace-nowrap docTable">
+                <thead class="bg-violet-sky text-white text-sm sm:text-18-b">
+                  <tr>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      <div class="flex items-center justify-center gap-2">
+                        Date & Time
+                        <img src="/static/images/sort-alt.svg" alt="sort" loading="lazy" />
+                      </div>
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      Post Type
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      Views
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      <div class="flex flex-col items-center justify-center">
+                        <p>Target</p>
+                        <p>Donation</p>
+                      </div>
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      <div class="flex flex-col items-center justify-center">
+                        <p>Donation</p>
+                        <p>Received</p>
+                      </div>
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">Status</th>
+                    <th class="text-center px-4 py-6">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-snow-gray text-dark-gray text-16-fs">
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">234</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div
+                        class="max-w-[120px] w-full bg-mint-cream text-green py-2 rounded-md border-none px-3 flex items-center justify-center gap-2">
+                        Ongoing
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined material-filled text-violet-sky bookmark-fill cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">5465</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div class="statusDropdown relative inline-block w-[120px]">
+                          <div class="selectedStatus bg-mint-cream text-green py-2 px-3 rounded-md flex items-center justify-between cursor-pointer">
+                            <span class="status-label">Ongoing</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                          </div>
+                        
+                          <!-- Dropdown options -->
+                          <div class="statusOptions absolute top-full left-0 w-full mt-1 bg-white shadow-md rounded-md hidden z-10" style="display: none;">
+                            <div class="bg-mint-cream text-green py-2 px-3 cursor-pointer hover:opacity-80">Ongoing</div>
+                            <div class="bg-soft-pink text-strong-red py-2 px-3 cursor-pointer hover:opacity-80">Closed</div>
+                            <div class="bg-peach text-burnt-orange py-2 px-3 cursor-pointer hover:opacity-80">Paused</div>
+                          </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">213</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div
+                        class="w-full max-w-[120px] bg-peach text-burnt-orange py-2 rounded-md border-none px-3 flex items-center justify-center gap-2">
+                        Paused
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">234</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div class="statusDropdown relative inline-block w-[120px]">
+                          <div class="selectedStatus bg-mint-cream text-green py-2 px-3 rounded-md flex items-center justify-between cursor-pointer">
+                            <span class="status-label">Ongoing</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                          </div>
+                        
+                          <!-- Dropdown options -->
+                          <div class="statusOptions absolute top-full left-0 w-full mt-1 bg-white shadow-md rounded-md hidden z-10" style="display: none;">
+                            <div class="bg-mint-cream text-green py-2 px-3 cursor-pointer hover:opacity-80">Ongoing</div>
+                            <div class="bg-soft-pink text-strong-red py-2 px-3 cursor-pointer hover:opacity-80">Closed</div>
+                            <div class="bg-peach text-burnt-orange py-2 px-3 cursor-pointer hover:opacity-80">Paused</div>
+                          </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">5465</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div
+                        class="w-full max-w-[120px] bg-soft-pink text-strong-red py-2 rounded-md border-none px-3 flex items-center justify-center gap-2">
+                        Closed
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">213</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div
+                        class="w-full max-w-[120px] bg-peach text-burnt-orange py-2 rounded-md border-none px-3 flex items-center justify-center gap-2">
+                        Paused
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">234</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div
+                        class="w-full max-w-[120px] bg-mint-cream text-green py-2 rounded-md border-none px-3 flex items-center justify-center gap-2">
+                        Ongoing
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">5465</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div
+                        class="w-full max-w-[120px] bg-soft-pink text-strong-red py-2 rounded-md border-none px-3 flex items-center justify-center gap-2">
+                        Closed
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">213</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div
+                        class="w-full max-w-[120px] bg-peach text-burnt-orange py-2 rounded-md border-none px-3 flex items-center justify-center gap-2">
+                        Paused
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-4.5 text-center flex flex-col items-center">20/03/25,14:30
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      Bills
+                    </td>
+                    <td class="px-4 py-4.5 text-center">234</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-4 py-4.5 text-center">₹500000</td>
+                    <td class="px-6 py-4.5 flex items-center justify-center">
+                      <div
+                        class="w-full max-w-[120px] bg-mint-cream text-green py-2 rounded-md border-none px-3 flex items-center justify-center gap-2">
+                        Ongoing
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4.5 text-center">
+                      <span title="Saved"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2">
+                        bookmark
+                      </span>
+                      <span title="View Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                        data-popup="preview">
+                        visibility
+                      </span>
+                      <span title="Download Post History"
+                        class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                        data-popup="download">
+                        download
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Post History Content -->
+          <div class="post-history tab-content hidden py-6 space-y-6">
+            <!-- Header -->
+            <div class="px-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+              <p class="text-sm font-semibold whitespace-nowrap">Post history</p>
+              <div class="flex items-center justify-end gap-5 w-full sm:w-5/6">
+                <div class="w-full max-w-[350px] rounded-[6px] bg-light-white flex items-center gap-2 px-2">
+                  <span class="material-symbols-outlined text-dark-gray">
+                    search
+                  </span>
+                  <input type="text" placeholder="Search by medicine name or categories"
+                    class="w-full py-2.5 border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-medium-gray" />
+                </div>
+                <button
+                  class="w-full max-w-[90px] h-[40px] border border-violet-sky rounded-[10px] text-violet-sky flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-violet-sky">
+                    keyboard_arrow_down
+                  </span>
+                  Filter
+                </button>
+                <button
+                  class="w-full max-w-[100px] h-[40px] border border-violet-sky rounded-[10px] text-violet-sky flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-violet-sky">
+                    file_export
+                  </span>
+                  <span class="hidden sm:block">View</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-auto whitespace-nowrap docTable">
+                <thead class="bg-violet-sky text-white text-sm sm:text-18-b">
+                  <tr>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      <div class="flex items-center justify-center gap-2">
+                        Date & Time
+                        <img src="/static/images/sort-alt.svg" alt="sort" loading="lazy" />
+                      </div>
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      Post Type
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      Views
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      <div class="flex flex-col items-center justify-center">
+                        <p>Target</p>
+                        <p>Donation</p>
+                      </div>
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      <div class="flex flex-col items-center justify-center">
+                        <p>Donation</p>
+                        <p>Received</p>
+                      </div>
+                    </th>
+                    <th class="text-center px-4 py-6 border-r border-white">
+                      <div class="flex flex-col items-center justify-center">
+                        <p>Status</p>
+                        <p>(Edit if required)</p>
+                      </div>
+                    </th>
+                    <th class="text-center px-4 py-6">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if post_history %}
+                    {% for post in post_history %}
+                    <tr class="border-b border-light-gray">
+                      <td class="px-4 py-4.5 text-center">{{ post.created_at|date:"d/m/y, H:i" }}</td>
+                      <td class="px-4 py-4.5 text-center">{{ post.post_type }}</td>
+                      <td class="px-4 py-4.5 text-center">{{ post.views }}</td>
+                      <td class="px-4 py-4.5 text-center">₹{{ post.target_donation|floatformat:0 }}</td>
+                      <td class="px-4 py-4.5 text-center">₹{{ post.donation_received|floatformat:0 }}</td>
+                      <td class="px-6 py-4.5 flex items-center justify-center">
+                        <div class="statusDropdown relative inline-block w-[120px]">
+                          <div class="selectedStatus bg-mint-cream text-green py-2 px-3 rounded-md flex items-center justify-between cursor-pointer">
+                            <span class="status-label">Ongoing</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                          </div>
+                        
+                          <!-- Dropdown options -->
+                          <div class="statusOptions absolute top-full left-0 w-full mt-1 bg-white shadow-md rounded-md hidden z-10" style="display: none;">
+                            <div class="bg-mint-cream text-green py-2 px-3 cursor-pointer hover:opacity-80">Ongoing</div>
+                            <div class="bg-soft-pink text-strong-red py-2 px-3 cursor-pointer hover:opacity-80">Closed</div>
+                            <div class="bg-peach text-burnt-orange py-2 px-3 cursor-pointer hover:opacity-80">Paused</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-4 py-4.5">
+                        <div class="flex items-center justify-center gap-6">
+                          <span class="material-symbols-outlined bookmark-fill cursor-pointer">bookmark</span>
+                          <span class="material-symbols-outlined cursor-pointer preview-btn"
+                                data-post-id="{{ post.id }}">visibility</span>
+                          <span class="material-symbols-outlined cursor-pointer">download</span>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="7" class="text-center py-10">You have no post history.</td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- New Post content -->
+          <form id="new-post-form" method="POST" action="{% url 'posts' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="new-post tab-content py-3 space-y-2">
+              <div class="mt-5 space-y-3">
+                <h1 class=" text-18-fs font-semibold">Post Details</h1>
+                <!-- Header -->
+                <div class="space-y-2">
+                  <h1 class="text-dark-gray text-14-fs">Header</h1>
+                  <input name="header" type="text" placeholder="Support Underprivileged Kids in Pune"
+                    class="w-full h-10 p-3 rounded-[6px] border border-dark-gray focus:outline-none focus:ring-0 placeholder:text-dark-gray placeholder:text-14-nr">
+                  <p class="text-xs font-normal text-dark-gray text-end">*Title exists limit of 80 character's</p>
+                </div>
+
+                <!-- Description -->
+                <div class="space-y-2">
+                  <h1 class="text-dark-gray text-14-fs">Description</h1>
+                  <textarea name="description" rows="4"
+                    class="w-full py-3 px-3 rounded-[6px] border border-dark-gray focus:outline-none focus:ring-0 placeholder:text-dark-gray placeholder:text-14-nr resize-none"
+                    placeholder="We are helping 50+ kids with basic education and meals. Support us to make a change"></textarea>
+                  <p class="text-xs font-normal text-dark-gray text-end">*Description exists limit of 80 character's</p>
+                </div>
+
+
+                <div class="flex items-start justify-between gap-5">
+                  <!-- Tags Section -->
+                  <div class="space-y-2 w-full">
+                    <h1 class="text-dark-gray text-14-fs">Tags</h1>
+                    <div class="w-full h-10 border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                      <input name="tags" type="text" class="w-full h-full border-none p-2 focus:outline-none focus:ring-0" />
+                    </div>
+                    <!-- Description line aligned properly -->
+                    <div class="flex justify-end">
+                      <p class="text-xs font-normal text-dark-gray">*Description exists limit of 80 characters</p>
+                    </div>
+                  </div>
+
+                  <!-- Post Type Section -->
+                  <div class="space-y-2 w-full">
+                    <h1 class="text-dark-gray text-14-fs">Post Type</h1>
+                    <div class="relative dropdown-wrapper">
+                      <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                        <input name="post_type" type="text" readonly value="Education"
+                          class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-dark-gray text-14-nr text-left" />
+                        <span class="material-symbols-outlined dropdown-button">keyboard_arrow_down</span>
+                      </div>
+                      <div
+                        class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                        <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="education">Education</div>
+                        <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="one-time">Health</div>
+                        <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="weekly">Food</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between gap-5">
+
+                  <div class="space-y-2 w-full">
+                    <h1 class="text-dark-gray text-14-fs">Donation Frequency</h1>
+                    <div class="relative dropdown-wrapper">
+                      <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                        <input name="donation_frequency" type="text" readonly value="One-time"
+                          class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-dark-gray text-14-nr text-left" />
+                        <span class="material-symbols-outlined dropdown-button dropdown-button" >keyboard_arrow_down</span>
+                      </div>
+                      <div
+                        class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                        <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="One-time">One-time</div>
+                        <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="Two-time">Two-time</div>
+                        <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="Three-time">Three-time</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2 w-full">
+                    <h1 class="text-dark-gray text-14-fs">Target Donation</h1>
+                    <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                      <input name="target_donation" type="text" placeholder="Rs 50000"
+                        class="w-full h-8 border-none p-2 focus:outline-none focus:ring-0 placeholder:text-dark-gray placeholder:text-14-nr" />
+                    </div>
+                  </div>
+
+                </div>
+                <div class="mt-4 space-y-4">
+                  <h1 class="text-18-fs text-black">Target Audience</h1>
+                  <div class="space-y-2">
+                    <h1 class="text-dark-gray text-14-fs">Country</h1>
+                    <div class="relative dropdown-wrapper">
+                      <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                        <input name="country" type="text" readonly value="Select"
+                          class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                        <span class="material-symbols-outlined dropdown-button">
+                          keyboard_arrow_down
+                        </span>
+                      </div>
+                      <div
+                        class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                        <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="india">India</div>
+                        <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="usa">USA</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between gap-5">
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">State</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input name="state" type="text" readonly value="Select"
+                            class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined dropdown-button">
+                            keyboard_arrow_down
+                          </span>
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="MH">Maharashtra</div>
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="MP">Madhya Pradesh</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">City</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input name="city" type="text" readonly value="Select"
+                            class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined dropdown-button">
+                            keyboard_arrow_down
+                          </span>
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="pune">Pune</div>
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="nagpur">Nagpur</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Pincode</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input name="pincode" type="text" readonly value="Select"
+                            class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined dropdown-button">
+                            keyboard_arrow_down
+                          </span>
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="483501">483501</div>
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="486201">486201</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-5">
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Age</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input name="age" type="text" readonly value="Select"
+                            class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined dropdown-button">
+                            keyboard_arrow_down
+                          </span>
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="1">18-30 years</div>
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="2">31-50 years</div>
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="3">51+ years</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Gender</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input name="gender" type="text" readonly value="Select"
+                            class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined dropdown-button">
+                            keyboard_arrow_down
+                          </span>
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="male">Male</div>
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="female">Female</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-5">
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Spending power</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input name="spending_power" type="text" readonly value="Select"
+                            class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined dropdown-button">
+                            keyboard_arrow_down
+                          </span>
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="1">0-200 Per Month</div>
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="2">200-500 Per Month</div>
+                          <div class="px-4 py-2 hover:bg-translucent-sky-blue cursor-pointer" data-value="3">500 and Above Per Month</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Period *</h1>
+                      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
+
+                       <!-- Start Date -->
+                        <div class="relative calendar-wrapper w-full">
+                          <div
+                            class="w-full h-10 border border-dark-gray rounded-[6px] py-2.5 px-4 cursor-pointer flex items-center justify-between custom-date-trigger">
+                            <span class="selected-date text-16-nr text-dark-gray">YYYY-MM-DD</span>
+                            <span class="material-symbols-outlined text-dark-gray">calendar_month</span>
+                          </div>
+                          <input type="text" name="start-date" class="start-date-range custom-date-range"
+                            style="position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none;" />
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="relative calendar-wrapper w-full">
+                          <div
+                            class="w-full h-10 border border-dark-gray rounded-[6px] py-2.5 px-4 cursor-pointer flex items-center justify-between custom-date-trigger">
+                            <span class="selected-date text-16-nr text-dark-gray">YYYY-MM-DD</span>
+                            <span class="material-symbols-outlined text-dark-gray">calendar_month</span>
+                          </div>
+                          <input type="text" name="end-date" class="end-date-range custom-date-range"
+                            style="position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none;" />
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Upload Section -->
+              <div class="mt-4 space-y-3">
+                <p class="text-16-nr">Upload creative (Only 2 creatives)<span class="text-dark-red">*</span></p>
+                <div
+                  class="upload-area relative border-2 border-dashed border-violet-sky rounded-md h-[312px] flex items-center justify-center px-6">
+                  <input name="creatives" type="file" class="hidden upload-input" />
+                  <div class="upload-placeholder flex flex-col items-center space-y-2 cursor-pointer">
+                    <img src="/static/images/cloud-upload-ngo.svg" alt="Cloud" loading="lazy" />
+                    <p class="text-xs sm:text-base text-center">Click or Upload</p>
+                  </div>
+                  <div class="upload-preview hidden relative w-full h-60">
+                    <button type="button" class="cancel-upload absolute -top-8 sm:-top-2 right-2">
+                      <span class="material-symbols-outlined cursor-pointer">
+                        close
+                      </span>
+                    </button>
+                    <img src="" alt="Preview" class="uploaded-img mx-auto max-h-60 object-contain" />
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <p class="text-[9px] sm:text-xs py-2 text-dark-gray">
+                    Upload a JPG, PNG, or MP4 up to 10 MB
+                  </p>
+                  <div class="flex items-center gap-1">
+                    <p class="text-xs sm:text-16-nr text-dark-red">Virus Scan</p>
+                    <img src="/static/images/virus-scan.svg" alt="Scan" loading="lazy">
+                  </div>
+                </div>
+                <div class="flex justify-end  sm:gap-8">
+
+                  <button class="w-full max-w-[140px] py-3 rounded-[10px] border border-violet-sky text-violet-sky">
+                    Cancel
+                  </button>
+
+                  <button type="submit" class="w-full max-w-[140px] py-3 rounded-[10px] bg-violet-sky text-white">
+                    Post
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          
+        </div>
+
+        <!-- Download popup -->
+        <div class="download-popup popup hidden fixed inset-0 items-center justify-center bg-black/40 px-3 z-50">
+          <div
+            class="bg-white pb-3 rounded-[10px] shadow-lg max-w-[560px] h-[640px] w-full space-y-4 overflow-y-auto no-scrollbar">
+            <div class="bg-violet-sky text-white p-4 rounded-t-lg relative">
+              <div class="relative mb-4 h-6">
+                <!-- Left Icons -->
+                <div class="absolute left-0 top-0 flex items-center gap-3">
+
+                  <span
+                    class="material-symbols-outlined openSharePopup cursor-pointer text-white p-2 rounded-md text-lg">share</span>
+
+
+                  <span
+                    class="material-symbols-outlined cursor-pointer text-white  p-2 rounded-md text-lg">download</span>
+                </div>
+                <!-- Centered Title -->
+                <h2 class="absolute inset-0 flex justify-center items-center text-xl font-semibold text-white">
+                  Post History</h2>
+              </div>
+              <span
+                class="material-symbols-outlined absolute top-3 right-3 text-white text-2xl font-semibold cursor-pointer close-popup">
+                close
+              </span>
+            </div>
+            <div class="px-4">
+              <div class="w-full rounded-[4px] overflow-hidden">
+                <img src="/static/images/post.svg" alt="post-img" loading="lazy" class="w-full h-40 object-cover">
+              </div>
+              <!-- Audience Profile -->
+              <div class="my-3 pb-2">
+                <div class="text-18-fs text-violet-sky mb-3">Audience Profile</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-jet-black">
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Age</span>
+                      <span>:</span>
+                    </div>
+                    25
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Gender</span>
+                      <span>:</span>
+                    </div>
+                    Female
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">City</span>
+                      <span>:</span>
+                    </div>
+                    Pune
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Spending Power</span>
+                      <span>:</span>
+                    </div>
+                    ₹500 Per month
+                  </div>
+                </div>
+              </div>
+              <!-- Coupon Details -->
+              <div class="border-t-2 border-dashed py-3 border-semi-transparent-black">
+                <div class="text-18-fs text-violet-sky mb-3">Post Details</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 text-jet-black">
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Header</span>
+                      <span>:</span>
+                    </div>
+                    <p class="ml-2 whitespace-nowrap">Bharat seva mandal</p>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Date & Time</span>
+                      <span>:</span>
+                    </div>
+                    <p class="ml-2">20/03/25,14:30 </p>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Views</span>
+                      <span>:</span>
+                    </div>
+                    <p class="">234</p>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Post Type</span>
+                      <span>:</span>
+                    </div>
+                    <p class="text-right">Education</p>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Target Donation</span>
+                      <span>:</span>
+                    </div>
+                    <p class="text-right">50,000</p>
+                  </div>
+
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Donation Received</span>
+                      <span>:</span>
+                    </div>
+                    <p class="text-right">40,000</p>
+                  </div>
+
+                  <div class="text-14-nr flex items-center justify-between">
+                    <div class="flex items-center justify-between w-1/2">
+                      <span class="text-14-fs">Status</span>
+                      <span>:</span>
+                    </div>
+                    <span class="text-14-fs text-strong-red px-5 py-1 rounded-[10px] bg-soft-pink">Closed</span>
+                  </div>
+
+                </div>
+                <div class="overflow-x-auto w-full no-scrollbar mt-4">
+                  <table class="table-auto min-w-full text-sm text-dark-gray whitespace-nowrap">
+                    <thead class="bg-violet-sky  text-white">
+                      <tr>
+                        <th class="text-center px-4 py-4 border-r border-white">Date &
+                          Time
+                          <img src="/static/images/sort-alt.svg" alt="sort" class="inline ml-2" />
+                        </th>
+                        <th class="px-4 py-4 text-center border-r border-white">
+                          Name
+
+                        </th>
+                        <th class="text-center px-4 py-4 border-r border-white">City
+                        </th>
+
+                        <th class="text-center px-4 py-6 border-r border-white">
+                          <div class="flex flex-col items-center justify-center">
+                            <p>Donation</p>
+                            <p>Received</p>
+                          </div>
+                        </th>
+
+                        <th class="text-center px-4 py-4 border-r border-white">
+                          Action
+                        </th>
+
+                      </tr>
+                    </thead>
+                    <tbody class="bg-snow-gray text-dark-gray text-[16px]">
+                      <tr>
+                        <td class="px-4 py-2.5 text-center">
+                          20/03/25,14:30
+                        </td>
+                        <td class="px-4 py-2.5 text-center">Sahil</td>
+
+                        <td class="px-4 py-2.5 text-center">Pune</td>
+
+                        <td class="px-4 py-2.5 text-center">₹500000</td>
+
+                        <td class="px-4 py-2.5 text-center">
+
+                          <span
+                            class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                            data-popup="preview">
+                            visibility
+                          </span>
+                          <span
+                            class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                            data-popup="download">
+                            download
+                          </span>
+                        </td>
+
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-2.5 text-center">
+                          20/03/25,14:30
+                        </td>
+                        <td class="px-4 py-2.5 text-center">Neha</td>
+
+                        <td class="px-4 py-2.5 text-center">Delhi</td>
+
+                        <td class="px-4 py-2.5 text-center">₹500000</td>
+
+                        <td class="px-4 py-2.5 text-center">
+
+                          <span
+                            class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                            data-popup="preview">
+                            visibility
+                          </span>
+                          <span
+                            class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                            data-popup="download">
+                            download
+                          </span>
+                        </td>
+
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-2.5 text-center">
+                          20/03/25,14:30
+                        </td>
+                        <td class="px-4 py-2.5 text-center">Ravi</td>
+
+                        <td class="px-4 py-2.5 text-center">Pune</td>
+
+                        <td class="px-4 py-2.5 text-center">₹10000</td>
+
+                        <td class="px-4 py-2.5 text-center">
+
+                          <span
+                            class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                            data-popup="preview">
+                            visibility
+                          </span>
+                          <span
+                            class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                            data-popup="download">
+                            download
+                          </span>
+                        </td>
+
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-2.5 text-center">
+                          20/03/25,14:30
+                        </td>
+                        <td class="px-4 py-2.5 text-center">John</td>
+
+                        <td class="px-4 py-2.5 text-center">Mumbai</td>
+
+                        <td class="px-4 py-2.5 text-center">₹500000</td>
+
+                        <td class="px-4 py-2.5 text-center">
+
+                          <span
+                            class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 visibility"
+                            data-popup="preview">
+                            visibility
+                          </span>
+                          <span
+                            class="material-symbols-outlined cursor-pointer hover:bg-translucent-sky-blue rounded-full p-1 transition-all mr-2 download"
+                            data-popup="download">
+                            download
+                          </span>
+                        </td>
+
+                      </tr>
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+
+              <!-- Note -->
+              <div
+                class="mt-3 text-center text-xs text-jet-black border-t-2 border-dashed py-3 border-semi-transparent-black">
+
+              </div>
+              <div class="flex items-center justify-between text-14-nr space-x-8">
+
+                <div class="flex items-center space-x-2">
+                  <span class="text-14-fs">Post Reference ID</span>
+                  <span>:</span>
+                  <p class="ml-2">AVTR203245</p>
+                </div>
+
+
+                <div class="flex items-center space-x-2">
+                  <span class="text-14-fs whitespace-nowrap">Header</span>
+                  <span>:</span>
+                  <p class=" ml-2">@username123</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2 mt-4">
+                <span class="text-14-fs whitespace-nowrap">Downloaded On</span>
+                <span>:</span>
+                <p class=" ml-2">20/03/25,14:30 </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- preview popup -->
+        <div class="preview-popup popup hidden fixed inset-0 items-center justify-center bg-black/40 px-3 z-50 h-full">
+          <div
+            class="bg-white pb-3 rounded-[10px] shadow-lg max-w-[560px] h-[640px] w-full space-y-4 overflow-hidden">
+            <div class="flex items-center justify-between text-white h-10 bg-violet-sky px-3">
+              <div class="flex items-center gap-4">
+                <span class="material-symbols-outlined cursor-pointer">share</span>
+                <span class="material-symbols-outlined cursor-pointer">download</span>
+              </div>
+              <span class="font-medium">Post History</span>
+              <span class="material-symbols-outlined cursor-pointer close-popup">close</span>
+            </div>
+            <div class="px-4 h-[calc(100%-40px)] overflow-y-auto scroll space-y-2 pb-6">
+              <div class="w-full rounded-[4px] overflow-hidden">
+                <img id="preview-creative1" src="/static/images/post.svg" alt="post" loading="lazy" class="w-full h-40 object-cover">
+              </div>
+              <!-- Audience Profile -->
+              <div class="my-4 pt-4 border-t-2 border-dashed border-semi-transparent-black">
+                <div class="text-18-fs text-violet-sky mb-3">Audience Profile</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-jet-black">
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5">
+                      <span class="text-14-fs">Age</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-age-group"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5 sm:w-1/2">
+                      <span class="text-14-fs">Gender</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-gender"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5">
+                      <span class="text-14-fs">City</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-city"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5 sm:w-1/2">
+                      <span class="text-14-fs">Spending Power</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-spending-power"></span>
+                  </div>
+                </div>
+              </div>
+              <!-- Post Details -->
+              <div class="py-3">
+                <div class="text-18-fs text-violet-sky mb-3">Post Details</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 text-jet-black">
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5">
+                      <span class="text-14-fs">Header</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-header"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5 sm:w-1/2">
+                      <span class="text-14-fs">Date & Time</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-date-time"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5">
+                      <span class="text-14-fs">Views</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-views"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5 sm:w-1/2">
+                      <span class="text-14-fs">Post Type</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-post-type"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5">
+                      <span class="text-14-fs">Target Donation</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-target-donation"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5 sm:w-1/2">
+                      <span class="text-14-fs">Donation Received</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-donation-received"></span>
+                  </div>
+                  <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                    <div class="flex items-center justify-between w-2/5">
+                      <span class="text-14-fs">Status</span>
+                      <span>:</span>
+                    </div>
+                    <span id="preview-status"></span>
+                  </div>
+                </div>
+                <!-- Do not alter the static donation history table below -->
+                <div class="border-t-2 border-dashed py-3 border-semi-transparent-black overflow-x-auto w-full no-scrollbar mt-4">
+                  <table class="table-auto min-w-full text-sm text-dark-gray whitespace-nowrap">
+                    <thead class="bg-violet-sky  text-white">
+                      <tr>
+                        <th class="text-center px-4 py-2 border-r border-white">Date &
+                          Time
+                          <img src="/static/images/sort-alt.svg" alt="sort" class="inline ml-2" />
+                        </th>
+                        <th class="px-4 py-2 text-center border-r border-white">
+                          Name
+
+                        </th>
+                        <th class="text-center px-4 py-2 border-r border-white">City
+                        </th>
+
+                        <th class="text-center px-4 py-2 border-r border-white">
+                          <div class="flex items-center justify-center">
+                            <p>Donation</p>
+                            <p>Received</p>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-snow-gray text-dark-gray text-[14px]">
+                      <tr>
+                        <td class="px-4 py-2.5 text-center">
+                          20/03/25,14:30
+                        </td>
+                        <td class="px-4 py-2.5 text-center">Sahil</td>
+
+                        <td class="px-4 py-2.5 text-center">Pune</td>
+
+                        <td class="px-4 py-2.5 text-center">₹500000</td>
+
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-2.5 text-center">
+                          20/03/25,14:30
+                        </td>
+                        <td class="px-4 py-2.5 text-center">Neha</td>
+
+                        <td class="px-4 py-2.5 text-center">Delhi</td>
+
+                        <td class="px-4 py-2.5 text-center">₹500000</td>
+
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-2.5 text-center">
+                          20/03/25,14:30
+                        </td>
+                        <td class="px-4 py-2.5 text-center">Ravi</td>
+
+                        <td class="px-4 py-2.5 text-center">Pune</td>
+
+                        <td class="px-4 py-2.5 text-center">₹10000</td>
+                      </tr>
+                      <tr>
+                        <td class="px-4 py-2.5 text-center">
+                          20/03/25,14:30
+                        </td>
+                        <td class="px-4 py-2.5 text-center">John</td>
+
+                        <td class="px-4 py-2.5 text-center">Mumbai</td>
+
+                        <td class="px-4 py-2.5 text-center">₹500000</td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="border-t-2 border-dashed py-3 border-semi-transparent-black grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-jet-black">
+                <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                  <div class="flex items-center justify-between w-1/2">
+                    <span class="text-14-fs">Post Reference ID</span>
+                    <span>:</span>
+                  </div>
+                  <span id="preview-post-reference-id"></span>
+                </div>
+                <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                  <div class="flex items-center justify-between w-1/2">
+                    <span class="text-14-fs">Uploaded By</span>
+                    <span>:</span>
+                  </div>
+                  <span id="preview-uploaded-by"></span>
+                </div>
+                <div class="text-14-nr flex items-center justify-between sm:justify-start gap-3">
+                  <div class="flex items-center justify-between w-1/2">
+                    <span class="text-14-fs">Downloaded On</span>
+                    <span>:</span>
+                  </div>
+                  <p>20/03/25,14:30</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    <!-- rest of your dashboard -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="{% static 'js/NGO/ngo-new-post.js' %}"></script>
+<script src="{% static 'js/NGO/ngo-tabs.js' %}"></script>
+<script src="{% static 'js/NGO/table-pagination.js' %}"></script>
+<script src="{% static 'js/toaster.js' %}"></script>
+<script>
+
+</script>
+{% endblock %}

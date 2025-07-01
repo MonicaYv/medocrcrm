@@ -8,4 +8,5 @@ urlpatterns = [
     path('save/ngo', views.save_ngo, name='save_ngo'),
     path('login', views.login_page, name='login'),
     path('auth/login', views.login_auth, name='login_auth'),
+    path('save/client', views.save_client, name='save_client'),
 ]

@@ -21,8 +21,9 @@ $(document).ready(function () {
         $('.dropdown-list').hide();
     });
 
-
     // Calendar
+    let selectedDate = null;
+
     $('.custom-date-trigger').on('click', function () {
         var $wrapper = $(this).closest('.calendar-wrapper');
         var $input = $wrapper.find('.custom-date-range');
@@ -37,11 +38,11 @@ $(document).ready(function () {
             singleDatePicker: true,
             showDropdowns: true,
             autoUpdateInput: false,
-            parentEl: $wrapper,  // Will now position inside this wrapper
+            parentEl: $wrapper,  
             drops: 'up',
             opens: 'center',
             locale: {
-                format: 'DD/MM/YYYY',
+                format: 'YYYY-MM-DD',
                 cancelLabel: 'Clear'
             }
         });
@@ -53,11 +54,16 @@ $(document).ready(function () {
         $input.off('apply.daterangepicker cancel.daterangepicker');
 
         $input.on('apply.daterangepicker', function (e, picker) {
-            $wrapper.find('.selected-date').text(picker.startDate.format('DD/MM/YYYY'));
+            const formattedDate = picker.startDate.format('YYYY-MM-DD');
+            selectedDate = formattedDate;
+            $input.val(formattedDate);
+            $wrapper.find('.selected-date').text(formattedDate);
+            console.log("Selected Date:", selectedDate); 
         });
 
         $input.on('cancel.daterangepicker', function (e, picker) {
-            $wrapper.find('.selected-date').text('DD/MM/YY');
+            selectedDate = null;
+            $wrapper.find('.selected-date').text('YYYY-MM-DD');
         });
     });
 
@@ -230,5 +236,205 @@ $(document).ready(function () {
         let index = $(this).data('index');
         tags.splice(index, 1);
         renderTags();
+    });
+
+    // AJAX validation for missing fields on NGO post form
+    $('#new-post-form').on('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var formData = new FormData(form);
+        // Add a flag to indicate AJAX validation
+        formData.append('ajax_validate', '1');
+
+        // Remove previous field errors
+        $('.field-error').remove();
+
+        var fieldNameMap = {
+            "Header": "header",
+            "Description": "description",
+            "Tags": "tags",
+            "Post Type": "post_type",
+            "Donation Frequency": "donation_frequency",
+            "Target Donation": "target_donation",
+            "Country": "country",
+            "State": "state",
+            "City": "city",
+            "Pincode": "pincode",
+            "Age": "age",
+            "Gender": "gender",
+            "Spending power": "spending_power",
+            "Start Date": "start-date",
+            "End Date": "end-date",
+            "Creative Upload": "creatives"
+        };
+
+        $.ajax({
+            url: $(form).attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            },
+            success: function (response) {
+                $('.field-error').remove();
+                if (response.missing_fields && response.missing_fields.length) {
+                    window.showToaster('error', 'Please fill all required fields');
+                    response.missing_fields.forEach(function(field) {
+                        var inputName = fieldNameMap[field] || field.toLowerCase().replace(/ /g, '_');
+                        var $input = $('[name="' + inputName + '"]');
+                        var $errorTarget = $input;
+
+                        // Debug logging
+                        console.log('Missing field:', field, 'Mapped input name:', inputName, 'Input found:', $input.length);
+
+                        if ($input.length) {
+                            if ($input.closest('.dropdown-wrapper').length) {
+                                // For dropdowns, always append after the closest .space-y-2 container
+                                var $container = $input.closest('.space-y-2');
+                                if ($container.length) {
+                                    $errorTarget = $container;
+                                } else {
+                                    $errorTarget = $input.closest('.dropdown-wrapper');
+                                }
+                            } else if ($input.closest('.calendar-wrapper').length) {
+                                $errorTarget = $input.closest('.calendar-wrapper');
+                            } else if (inputName === 'creatives') {
+                                $errorTarget = $('.upload-area');
+                            }
+                        } else {
+                            // Fallback: try to find the .space-y-2 by label text
+                            var $label = $("h1:contains('" + field + "')");
+                            if ($label.length) {
+                                $errorTarget = $label.closest('.space-y-2');
+                            }
+                        }
+                        if ($errorTarget && $errorTarget.length) {
+                            $errorTarget.after('<div class="field-error text-red-600 text-sm mt-1">' + field + ' is required.</div>');
+                        }
+                    });
+                    // Optionally scroll to first error
+                    var $firstError = $('.field-error').first();
+                    if ($firstError.length) {
+                        $('html, body').animate({ scrollTop: $firstError.offset().top - 100 }, 300);
+                    }
+                } else if (response.success) {
+                    window.showToaster('success', 'Post Submitted');
+                    // Reset the form
+                    $('#new-post-form')[0].reset();
+                    // Clear image previews
+                    $('.upload-preview').addClass('hidden');
+                    $('.upload-placeholder').removeClass('hidden');
+                    // Clear tags UI
+                    $('#tag-container').empty();
+                    // Reset date pickers (set value and UI to default)
+                    $('.custom-date-range').val('');
+                    $('.calendar-wrapper .selected-date').each(function(i, el) {
+                        if (i === 0) {
+                            $(el).text('YYYY-MM-DD');
+                        } else {
+                            $(el).text('DD/MM/YY');
+                        }
+                    });
+                }
+            },
+            error: function (xhr) {
+                // Fallback error
+                var errorHtml = '<div id="form-errors" class="mb-4 p-3 bg-red-100 text-red-700 rounded">An error occurred. Please try again.</div>';
+                $(form).prepend(errorHtml);
+            }
+        });
+    });
+
+    $(document).on("click", ".bookmark-fill", function () {
+        $(this).toggleClass(`material-filled text-violet-sky`);
+    })
+
+    // Status Dropdown
+    $('.statusDropdown').each(function () {
+        const $dropdown = $(this);
+        const $selected = $dropdown.find('.selectedStatus');
+        const $options = $dropdown.find('.statusOptions');
+        const $label = $dropdown.find('.status-label');
+
+        // Toggle dropdown on click
+        $selected.on('click', function () {
+            // Hide all others first
+            $('.statusOptions').not($options).hide();
+            $options.toggle();
+        });
+
+        // Handle option selection
+        $options.find('div').on('click', function () {
+            const selectedText = $(this).text();
+            const bgClass = $(this).attr('class').match(/bg-[^\s]+/)[0];
+            const textClass = $(this).attr('class').match(/text-[^\s]+/)[0];
+
+            // Update text and classes for this dropdown only
+            $label.text(selectedText);
+            $selected
+                .removeClass(function (i, className) {
+                    return (className.match(/(bg|text)-[^\s]+/g) || []).join(' ');
+                })
+                .addClass(`${bgClass} ${textClass}`);
+
+            $options.hide();
+        });
+    });
+
+    // Hide any open dropdowns if clicking outside
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.statusDropdown').length) {
+            $('.statusOptions').hide();
+        }
+    });
+
+    // Preview popup logic
+    $(document).on('click', '.preview-btn', function() {
+        var postId = $(this).data('post-id');
+        $.ajax({
+            url: '/posts/' + postId + '/detail/',
+            type: 'GET',
+            success: function(data) {
+                // Fill popup fields
+                $('#preview-header').text(data.header);
+                $('#preview-description').text(data.description);
+                $('#preview-tags').text(data.tags);
+                $('#preview-post-type').text(data.post_type);
+                $('#preview-donation-frequency').text(data.donation_frequency);
+                $('#preview-target-donation').text(data.target_donation);
+                $('#preview-country').text(data.country);
+                $('#preview-state').text(data.state);
+                $('#preview-city').text(data.city);
+                $('#preview-pincode').text(data.pincode);
+                $('#preview-age-group').text(data.age_group);
+                $('#preview-gender').text(data.gender);
+                $('#preview-date-time').text(data.date_time || '-');
+                $('#preview-views').text(data.views || '-');
+                $('#preview-donation-received').text(data.donation_received || '-');
+                $('#preview-status').text(data.status || '-');
+                $('#preview-spending-power').text(data.spending_power);
+                $('#preview-start-date').text(data.start_date);
+                $('#preview-end-date').text(data.end_date);
+                $('#preview-post-reference-id').text(data.post_reference_id || '-');
+                $('#preview-uploaded-by').text(data.uploaded_by || '-');
+                if (data.creative1) {
+                    $('#preview-creative1').attr('src', data.creative1).show();
+                } else {
+                    $('#preview-creative1').hide();
+                }
+                if (data.creative2) {
+                    $('#preview-creative2').attr('src', data.creative2).show();
+                } else {
+                    $('#preview-creative2').hide();
+                }
+                // Show the popup
+                $('.preview-popup').removeClass('hidden').addClass('flex');
+            },
+            error: function() {
+                window.showToaster('error', 'Could not load post details.');
+            }
+        });
     });
 });
