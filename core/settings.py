@@ -20,7 +20,8 @@ INSTALLED_APPS = [
     'registration',
     'dashboard',
     'settings',
-    'faq',
+    'support',
+    "django_extensions"
 ]
 
 MIDDLEWARE = [
