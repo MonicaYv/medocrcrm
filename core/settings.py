@@ -125,4 +125,12 @@ connect(
 )
 
 # AUTH_USER_MODEL = 'registration.User'
+#mail setting 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yourprovider.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'your@email.com'
+EMAIL_HOST_PASSWORD = 'your_password'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'Your App <your@email.com>'
 

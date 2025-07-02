@@ -4,6 +4,277 @@
 
 {% block content %}
     <!-- Page specific content here -->
-    <h1>Welcome back, {{ user.name }}!</h1>
+   <div class="bg-slate-white relative transition-all duration-300 main-content h-full flex-1 flex flex-col gap-8 p-6 overflow-y-auto scroll">
+    <div class="show-sidebar-toggle hidden absolute top-10 left-0 z-50 h-10 w-10 bg-light-gray items-center justify-center rounded-r-md cursor-pointer">
+     <span class="material-symbols-outlined text-violet-sky font-bold text-2xl" >
+        arrow_forward_ios
+        </span>
+    </div>
+    <div class="shadow-lg p-3 sm:p-5 max-w-full rounded-md bg-white">
+        <div class="flex lg:items-center justify-between flex-col lg:flex-row">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined">home</span>
+            <h1 class="text-xl sm:text-2xl font-semibold">Home</h1>
+        </div>
+        <div class="flex flex-col gap-2 lg:items-center lg:pt-0 sm:pt-4" id="infoSection">
+            <div id="date" class="font-normal text-base sm:text-xs">
+            {% now "d M Y, l" %}
+            </div>
+            <div id="location" class="font-normal text-base flex items-center gap-2 sm:text-xs">
+            <span class="material-symbols-outlined"> location_on </span>
+            <span id="location-text">
+                {{ ngo_profile.city|default:"Your City" }}, {{ ngo_profile.state|default:"Your State" }}
+            </span>
+            </div>
+        </div>
+        </div>
+
+        <div class="mt-4">
+        <h2 class="text-lg font-semibold">{{ ngo_profile.ngo_name }}</h2>
+        </div>
+        <div class="mt-6">
+        <img src="{% if ngo_profile.brand_image_path %}{{ ngo_profile.brand_image_path }}{% else %}/static/images/smile-foundation.svg{% endif %}"
+            alt="{{ ngo_profile.ngo_name }}"
+            class="w-full rounded-md shadow-md"
+            loading="lazy" />
+        </div>
+        <div class="mt-4">
+        <span class="text-lg font-normal">
+            {{ ngo_profile.brand_description|default:"Smile Foundation is a national-level organization in India, working to empower underprivileged children, youth, and women through education, healthcare, and livelihood programs. Established in 2002, it aims to bring positive change by creating awareness and enabling access to rights. The foundation follows a lifecycle approach to development, ensuring long-term impact." }}
+        </span>
+        </div>
+        <div class="mt-6">
+        <p class="text-xl font-bold text-dark-gray underline text-center">
+            Reach supporters who care—share your cause with targeted outreach for just a 2% platform fee.
+        </p>
+        </div>
+        <div class="flex items-center gap-5 mt-4">
+        <h1 class="font-semibold text-lg ">Post Performance Overview</h1>
+        <div class="search-filter-section flex items-center justify-end gap-5 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-auto">
+
+            <div class="dropdown filter-dropdown relative z-10">
+            <button
+                class="filter-dropdown-btn dropdown-btn flex items-center border border-slate-gray rounded-md p-2 cursor-pointer">
+                <span class="material-symbols-outlined">tune</span>
+            </button>
+            <div
+                class="filter-dropdown-option dropdown-option absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44">
+                <div class="p-2 pl-4 flex justify-between items-center hover:bg-violet-sky hover:text-white rounded">
+                Custom date
+                <span class="material-symbols-outlined">calendar_today</span>
+                </div>
+                <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded">1 Week</div>
+                <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded">1 Month</div>
+                <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded">1 Year</div>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 pt-6 gap-6">
+        <div class="border border-light-gray2 rounded-lg px-4 py-4 w-full">
+            <div class="flex justify-between items-center">
+            <p class="font-semibold text-lg">Total Post</p>
+            <span
+                class="material-symbols-outlined cursor-pointer rounded-full bg-translucent-sky-blue p-1 text-violet-sky">
+                content_copy
+            </span>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+            <p class="text-2xl font-semibold">{{ total_posts }}</p>
+            <p class="text-sm font-normal">Last 30 days</p>
+            </div>
+        </div>
+
+        <div class="border border-light-gray2 rounded-lg px-4 py-4 w-full">
+            <div class="flex justify-between items-center">
+            <p class="font-semibold text-lg">Total views</p>
+            <span
+                class="material-symbols-outlined cursor-pointer rounded-full bg-translucent-sky-blue p-1 text-violet-sky">
+                visibility
+            </span>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+            <p class="text-2xl font-semibold">{{ total_views }}</p>
+            <p class="text-sm font-normal">Last 30 days</p>
+            </div>
+        </div>
+        <div class="border border-light-gray2 rounded-lg px-4 py-4 w-full">
+            <div class="flex justify-between items-center">
+            <p class="font-semibold text-lg">Target Donation</p>
+            <span
+                class="material-symbols-outlined cursor-pointer rounded-full bg-translucent-sky-blue p-1 text-violet-sky">
+                currency_rupee
+            </span>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+            <p class="text-2xl font-semibold">&#8377;{{ total_target|floatformat:0 }}</p>
+            <p class="text-sm font-normal">Last 30 Days</p>
+            </div>
+        </div>
+        <div class="border border-light-gray2 rounded-lg px-4 py-4 w-full">
+            <div class="flex justify-between items-center">
+            <p class="font-semibold text-lg">Received Donation</p>
+            <span
+                class="material-symbols-outlined cursor-pointer rounded-full bg-translucent-sky-blue p-1 text-violet-sky">
+                currency_rupee
+            </span>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+            <p class="text-2xl font-semibold">&#8377;{{ total_received|floatformat:0 }}</p>
+            <p class="text-sm font-normal">Last 30 Days</p>
+            </div>
+        </div>
+        </div>
+
+        <div class="flex flex-col gap-4 pt-4 mt-6">
+
+        <!-- Chart Controls -->
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <!-- Custom Legend -->
+            <div class="flex flex-wrap items-center gap-10" id="ngoCustomLegend">
+            <label class="flex items-center gap-4 cursor-pointer ">
+                <input type="checkbox" class="legend-checkbox focus:outline-none focus:ring-0 focus:ring-offset-0" data-index="0" checked />
+                <span class="flex items-center gap-1">
+                <div class="bg-violet-sky w-2 h-2 rounded-full"></div>
+                Total Post
+                </span>
+            </label>
+
+            <label class="flex items-center gap-4 cursor-pointer">
+                <input type="checkbox" class="legend-checkbox focus:outline-none focus:ring-0 focus:ring-offset-0" data-index="1" checked />
+                <span class="flex items-center gap-1">
+                <div class="bg-violet-sky w-2 h-2 rounded-full"></div>
+                Total views
+                </span>
+            </label>
+
+            <label class="flex items-center gap-4 cursor-pointer">
+                <input type="checkbox" class="legend-checkbox focus:outline-none focus:ring-0 focus:ring-offset-0" data-index="2" checked />
+                <span class="flex items-center gap-1">
+                <div class="bg-violet-sky w-2 h-2 rounded-full"></div>
+                Target Donation
+                </span>
+            </label>
+            <label class="flex items-center gap-4 cursor-pointer">
+                <input type="checkbox" class="legend-checkbox focus:outline-none focus:ring-0 focus:ring-offset-0" data-index="3" checked />
+                <span class="flex items-center gap-1">
+                <div class="bg-light-sea-green w-2 h-2 rounded-full"></div>
+                Donation Received
+                </span>
+            </label>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex flex-wrap gap-4 items-center">
+
+            <!-- Filter Dropdown -->
+            <div class="dropdown filter-dropdown relative z-10">
+                <button
+                class="filter-dropdown-btn dropdown-btn flex items-center border border-slate-gray rounded-md p-2  cursor-pointer">
+                <span class="material-symbols-outlined">tune</span>
+                </button>
+                <div
+                class="filter-dropdown-option dropdown-option absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44">
+                <div class="p-2 pl-4 flex justify-between items-center hover:bg-violet-sky hover:text-white rounded">
+                    Custom date
+                    <span class="material-symbols-outlined">calendar_today</span>
+                </div>
+                <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded">1 Week</div>
+                <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded">1 Month</div>
+                <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded">1 Year</div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <canvas id="ngoChart" class="max-h-70 "></canvas>
+
+        <!-- Time Range Tabs -->
+        <div class="flex flex-wrap items-center gap-3 justify-center text-light-gray1" id="ngotimeRangeTabs">
+            <p class="cursor-pointer active-tab-ngo px-2 py-1 rounded">1D</p>
+            |
+            <p class="cursor-pointer px-2 py-1 rounded">5D</p>
+            |
+            <p class="cursor-pointer px-2 py-1 rounded">1M</p>
+            |
+            <p class="cursor-pointer px-2 py-1 rounded">6M</p>
+            |
+            <p class="cursor-pointer px-2 py-1 rounded">YTD</p>
+            |
+            <p class="cursor-pointer px-2 py-1 rounded">1Y</p>
+            |
+            <p class="cursor-pointer px-2 py-1 rounded">5Y</p>
+        </div>
+        </div>
+        <div class="flex flex-col lg:flex-row gap-10 pt-6">
+        <div
+            class="calendar-container rounded-xl lg:w-1/2 h-[26rem] border border-violet-sky overflow-y-auto no-scrollbar"
+            data-color="violet-sky">
+            <div class="flex justify-between items-center p-3 rounded-t-xl bg-violet-sky">
+            <div id="monthYearDropdown" class="relative cursor-pointer">
+                <div class="px-2 py-1 flex items-center gap-2 text-white text-3xl">
+                <span id="monthYearLabel">Loading...</span>
+                <span class="material-symbols-outlined">
+                    keyboard_arrow_down
+                </span>
+                </div>
+                <div id="dropdownContent"
+                class="absolute left-0 mt-1 bg-white border rounded shadow-lg hidden max-h-60 overflow-y-auto">
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="prevMonth" class="  text-white h-8 w-8 flex items-center justify-center cursor-pointer">
+                <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button id="nextMonth" class=" text-white h-8 w-8 flex items-center justify-center cursor-pointer">
+                <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+                <button class="bg-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer"><span class="material-symbols-outlined  text-dark-gray">add</span></button>
+            </div>
+            </div>
+            <div id="calendarDays" class="grid grid-cols-7  gap-2  text-center text-jet-black m-2 "></div>
+
+            <div class="m-4 flex flex-col gap-3">
+
+            </div>
+            <div class="mt-4 flex flex-wrap gap-8 text-sm px-4 pb-4">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-slate-blue rounded-full"></span> PF Deposit
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-strong-red rounded-full"></span> GST
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-green rounded-full"></span> ESI
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-bright-orange rounded-full"></span> INCOME TAX
+            </div>
+            </div>
+        </div>
+
+        <div class="rounded-xl lg:w-1/2 h-[26rem] overflow-y-auto no-scrollbar bg-lightest-gray px-4 py-4">
+            <h2 class="text-xl font-bold mb-4 mt-2 ml-4">Trending Posts</h2>
+            <div class="flex flex-col items-center gap-6">
+            {% for post in trending_posts %}
+                <div class="w-full max-w-lg p-4 bg-white shadow-md rounded-md">
+                <p class="font-semibold text-sm text-violet-sky ">{{ ngo_profile.ngo_name|upper }}</p>
+                <div class="flex justify-between items-center">
+                    <p class="font-bold text-lg text-dark-gray">{{ post.header }}</p>
+                    <p class="font-semibold text-base text-dark-gray">{{ post.donation_received|floatformat:0 }}</p>
+                </div>
+                <p class="text-base text-dark-gray">{{ post.created_at|date:'d M Y, H:i A' }}</p>
+                </div>
+            {% empty %}
+                <div>No trending posts found.</div>
+            {% endfor %}
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
     <!-- rest of your dashboard -->
 {% endblock %}

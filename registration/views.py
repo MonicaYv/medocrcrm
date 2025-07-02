@@ -12,6 +12,8 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .models import User, NGOProfile, ClientProfile
 from .models import User, UserProfile
+from registration.utils import send_custom_email  
+from django.utils import timezone
 
 ROLE_TO_TEMPLATE = {
     "login": "login/login.html",
@@ -238,6 +240,17 @@ def save_ngo(request):
             referral_code=referral_code,
             email_otp=email_otp
         )
+        send_custom_email(
+        to_email=email,
+        subject="Welcome to Our Platform!",
+        template_name="email/registration_email.html",
+        context={
+            "user_name": "Monika",
+            "login_url": "",
+            "year": timezone.now().year,
+        }
+    )
+
 
     return JsonResponse({"success": True, "message": "NGO registered successfully."})
 
