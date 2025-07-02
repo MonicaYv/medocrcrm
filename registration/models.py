@@ -1,3 +1,4 @@
+from datetime import time
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
@@ -16,6 +17,14 @@ class User(models.Model):
     user_type = models.CharField(max_length=32, choices=USER_TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    inapp_notifications = models.BooleanField(default=True)
+    email_notifications = models.BooleanField(default=True)
+    push_notifications = models.BooleanField(default=True)
+    regulatory_alerts = models.BooleanField(default=True)
+    promotions_and_offers = models.BooleanField(default=True)
+    quite_mode = models.BooleanField(default=False)
+    quite_mode_start_time = models.TimeField(blank=True, null=True, default=time(22, 0))
+    quite_mode_end_time = models.TimeField(blank=True, null=True, default=time(6, 0))
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

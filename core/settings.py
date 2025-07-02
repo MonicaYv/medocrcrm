@@ -21,8 +21,8 @@ INSTALLED_APPS = [
     'dashboard',
     'settings',
     'support',
-    "django_extensions"
-]
+    'ngopost'
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -100,6 +100,22 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'document')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGIN_URL = '/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
 MONGO_DATABASE_NAME = 'database_1'
 MONGO_DATABASE_HOST = "mongodb://192.168.1.100:47016/"
 
@@ -108,5 +124,13 @@ connect(
     host=MONGO_DATABASE_HOST,
 )
 
-
+# AUTH_USER_MODEL = 'registration.User'
+#mail setting 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yourprovider.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'your@email.com'
+EMAIL_HOST_PASSWORD = 'your_password'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'Your App <your@email.com>'
 

@@ -10,9 +10,10 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from .models import User, NGOProfile
+from .models import User, NGOProfile, ClientProfile
 from .models import User, UserProfile
-
+from registration.utils import send_custom_email  
+from django.utils import timezone
 
 ROLE_TO_TEMPLATE = {
     "login": "login/login.html",
@@ -38,22 +39,19 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 def is_file_clean(file_obj):
     return True
 
-def validate_and_save_file(file_obj, subdir, field_label):
-   
-    if not file_obj:
-      return '', f"{field_label} is required."
+def validate_and_save_file(file_obj, subdir, field_label, user_type='common'):
 
+    if not file_obj:
+        return '', f"{field_label} is required."
     ext = os.path.splitext(file_obj.name)[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
         return '', f"{field_label} must be a PDF or image file."
-
     if file_obj.size > MAX_FILE_SIZE:
         return '', f"{field_label} must be under 5MB."
-
     if not is_file_clean(file_obj):
         return '', f"{field_label} failed virus scan."
 
-    upload_dir = os.path.join('ngo_docs', subdir)
+    upload_dir = os.path.join(f"{user_type}_docs", subdir)
     os.makedirs(os.path.join(settings.MEDIA_ROOT, upload_dir), exist_ok=True)
     filename = default_storage.save(os.path.join(upload_dir, file_obj.name), file_obj)
     return filename, None 
@@ -121,13 +119,13 @@ def save_ngo(request):
 
     # --- File validations and saves ---
     ngo_registration_doc_path, err = validate_and_save_file(
-        files.get("ngo_registration_doc"), "registration", "Registration Document")
+        files.get("ngo_registration_doc"), "registration", "Registration Document", user_type="ngo")
     if err:
         errors["ngo_registration_doc"] = err
 
     pan_number = data.get("pan_number")
     pan_doc_path, err = validate_and_save_file(
-        files.get("pan_doc"), "pan", "PAN Document")
+        files.get("pan_doc"), "pan", "PAN Document",user_type="ngo")
     if pan_number and not pan_doc_path:
         errors["pan_doc"] = "PAN document is required if PAN number is provided."
     if err:
@@ -135,7 +133,7 @@ def save_ngo(request):
 
     gst_number = data.get("gst_number")
     gst_doc_path, err = validate_and_save_file(
-        files.get("gst_doc"), "gst", "GST Document")
+        files.get("gst_doc"), "gst", "GST Document", user_type="ngo")
     if gst_number and not gst_doc_path:
         errors["gst_doc"] = "GST document is required if GST number is provided."
     if err:
@@ -143,7 +141,7 @@ def save_ngo(request):
 
     tan_number = data.get("tan_number")
     tan_doc_path, err = validate_and_save_file(
-        files.get("tan_doc"), "tan", "TAN Document")
+        files.get("tan_doc"), "tan", "TAN Document", user_type="ngo")
     if tan_number and not tan_doc_path:
         errors["tan_doc"] = "TAN document is required if TAN number is provided."
     if err:
@@ -151,7 +149,7 @@ def save_ngo(request):
 
     section8_number = data.get("section8_number")
     section8_doc_path, err = validate_and_save_file(
-        files.get("section8_doc"), "section8", "Section 8 Document")
+        files.get("section8_doc"), "section8", "Section 8 Document", user_type="ngo")
     if section8_number and not section8_doc_path:
         errors["section8_doc"] = "Section 8 document is required if number is provided."
     if err:
@@ -159,14 +157,14 @@ def save_ngo(request):
 
     doc_12a_number = data.get("doc_12a_number")
     doc_12a_path, err = validate_and_save_file(
-        files.get("doc_12a"), "doc_12a", "12A Document")
+        files.get("doc_12a"), "doc_12a", "12A Document", user_type="ngo")
     if doc_12a_number and not doc_12a_path:
         errors["doc_12a"] = "12A document is required if number is provided."
     if err:
         errors["doc_12a"] = err
 
     brand_image_path, err = validate_and_save_file(
-        files.get("brand_image"), "brand_image", "Brand Image")
+        files.get("brand_image"), "brand_image", "Brand Image", user_type="ngo")
     if brand_image_path and err:
         errors["brand_image"] = err
 
@@ -242,6 +240,17 @@ def save_ngo(request):
             referral_code=referral_code,
             email_otp=email_otp
         )
+        send_custom_email(
+        to_email=email,
+        subject="Welcome to Our Platform!",
+        template_name="email/registration_email.html",
+        context={
+            "user_name": "Monika",
+            "login_url": "",
+            "year": timezone.now().year,
+        }
+    )
+
 
     return JsonResponse({"success": True, "message": "NGO registered successfully."})
 
@@ -339,7 +348,6 @@ def save_user(request):
 def login_page(request):
     return render(request, 'login/login.html')
 
-
 @csrf_protect
 @require_POST
 def login_auth(request):
@@ -366,3 +374,172 @@ def login_auth(request):
     except User.DoesNotExist:
         errors["password"] = "Invalid email or password."
         return JsonResponse({"success": False, "errors": errors})
+
+
+
+@csrf_protect
+@require_POST
+def save_client(request):
+    data = request.POST
+    files = request.FILES
+    errors = {}
+
+    # --- Validation ---
+    email = data.get("email")
+    if not email:
+        errors["email"] = "Email is required."
+    else:
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["email"] = "Enter a valid email address."
+        if User.objects.filter(email=email).exists():
+            errors["email"] = "This email is already registered."
+
+    password = data.get("password")
+    confirm_password = data.get("confirm-password")
+    if not password or len(password) < 8:
+        errors["password"] = "Password is required (min 8 chars)."
+    elif password != confirm_password:
+        errors["confirm-password"] = "Passwords do not match."
+
+    # Phone and country code
+    phone_country_code = "+91"  # default; 
+    phone_number = data.get("phone-number1")
+    if not phone_number or not re.match(r"^\d{8,15}$", phone_number):
+        errors["phone-number1"] = "Enter a valid phone number (8-15 digits)."
+
+    client_name = data.get("company-name")
+    if not client_name:
+        errors["company-name"] = "Client Name is required."
+
+    website_url = data.get("website-url")
+    client_services = request.POST.getlist("services_interested_in")
+    if not client_services:
+        errors["services_interested_in"] = "Select at least one Client service."
+
+    address = data.get("address")
+    if not address:
+        errors["address"] = "Address is required."
+    city = data.get("dist")
+    if not city:
+        errors["dist"] = "City/District is required."
+    state = data.get("state")
+    if not state:
+        errors["state"] = "State is required."
+    pincode = data.get("pincode")
+    if not pincode or not re.match(r"^\d{4,10}$", pincode):
+        errors["pincode"] = "Enter a valid pincode."
+    country = data.get("country")
+    if not country:
+        errors["country"] = "Country is required."
+
+    incorporation_number = data.get("incorporation-doc")
+    if not incorporation_number:
+        errors["incorporation-doc"] = "Incorporation Document is required."
+
+    # --- File validations and saves ---
+    incorporation_doc_path, err = validate_and_save_file(
+        files.get("incorporation_doc"), "registration", "Incorporation Document")
+    if err:
+        errors["incorporation_doc"] = err
+
+    pan_number = data.get("pan_number")
+    pan_doc_path, err = validate_and_save_file(
+        files.get("pan_doc"), "pan", "PAN Document")
+    if pan_number and not pan_doc_path:
+        errors["pan_doc"] = "PAN document is required if PAN number is provided."
+    if err:
+        errors["pan_doc"] = err
+
+    gst_number = data.get("gst_number")
+    gst_doc_path, err = validate_and_save_file(
+        files.get("gst_doc"), "gst", "GST Document")
+    if gst_number and not gst_doc_path:
+        errors["gst_doc"] = "GST document is required if GST number is provided."
+    if err:
+        errors["gst_doc"] = err
+
+    tan_number = data.get("tan_number")
+    tan_doc_path, err = validate_and_save_file(
+        files.get("tan_doc"), "tan", "TAN Document")
+    if tan_number and not tan_doc_path:
+        errors["tan_doc"] = "TAN document is required if TAN number is provided."
+    if err:
+        errors["tan_doc"] = err
+
+
+    brand_image_path, err = validate_and_save_file(
+        files.get("brand_image"), "brand_image", "Brand Image")
+    if brand_image_path and err:
+        errors["brand_image"] = err
+
+    brand_description = data.get("brand_description", "")
+    email_otp = data.get("otp1", "")  # from HTML field "otp1"
+    referral_code = data.get("referral_code", "")
+    contact_person_name = data.get("contact_person_name", "")
+    contact_person_phone = data.get("contact_person_phone", "")
+    contact_person_role = data.get("contact_person_role", "")
+    contact_person_designation = data.get("contact_person_designation", "")
+    contact_person_otp = data.get("otp2", "")
+
+    if errors:
+        print("Validation errors:", errors)
+        return JsonResponse({"success": False, "errors": errors}, status=400)
+
+    # --- Save User & NGOProfile ---
+    user = User.objects.create(
+        email=email,
+        phone_country_code=phone_country_code,
+        phone_number=phone_number,
+        password=make_password(password),
+        user_type="client"
+    )
+
+    client_profile = ClientProfile.objects.create(
+        user=user,
+        client_name=client_name,
+        company_type=data.get("company-type", ""),
+        services_interested_in=client_services,
+        website_url=website_url,
+        address=address,
+        city=city,
+        state=state,
+        pincode=pincode,
+        country=country,
+        incorporation_number=incorporation_number,
+        incorporation_doc_path=incorporation_doc_path,
+        incorporation_doc_virus_scanned=True if incorporation_doc_path else False,
+        pan_number=pan_number,
+        pan_doc_path=pan_doc_path,
+        pan_doc_virus_scanned=True if pan_doc_path else False,
+        gst_number=gst_number,
+        gst_doc_path=gst_doc_path,
+        gst_doc_virus_scanned=True if gst_doc_path else False,
+        tan_number=tan_number,
+        tan_doc_path=tan_doc_path,
+        tan_doc_virus_scanned=True if tan_doc_path else False,
+        brand_image_path=brand_image_path,
+        brand_image_virus_scanned=True if brand_image_path else False,
+        brand_description=brand_description,
+        email_otp=email_otp,
+        referral_code=referral_code,
+    )
+
+    # Save Contact Person
+    if contact_person_name and contact_person_phone:
+        from .models import ContactPerson
+        ContactPerson.objects.create(
+            profile_type='client',
+            profile_id=client_profile.id,
+            name=contact_person_name,
+            phone_country_code=phone_country_code,
+            phone_number=contact_person_phone,
+            role=contact_person_role,
+            designation=contact_person_designation,
+            otp=contact_person_otp,
+            referral_code=referral_code,
+            email_otp=email_otp
+        )
+
+    return JsonResponse({"success": True, "message": "Client registered successfully."})

@@ -2391,11 +2391,11 @@
   .bg-\[linear-gradient\(90deg\,_\#3AAFA9_0\%\,_\#3F9E99_59\.5\%\,_\#36918D_95\%\)\] {
     background-image: linear-gradient(90deg, #3AAFA9 0%, #3F9E99 59.5%, #36918D 95%);
   }
-  .bg-\[url\(\'\/public\/images\/success-share-img\.png\'\)\] {
-    background-image: url('/public/images/success-share-img.png');
+  .bg-\[url\(\'\/static\/images\/success-share-img\.png\'\)\] {
+    background-image: url('/static/images/success-share-img.png');
   }
-  .bg-\[url\(\/public\/images\/colorfulbackground\.png\)\] {
-    background-image: url(/public/images/colorfulbackground.png);
+  .bg-\[url\(\/static\/images\/colorfulbackground\.png\)\] {
+    background-image: url(/static/images/colorfulbackground.png);
   }
   .from-cyan-400 {
     --tw-gradient-from: var(--color-cyan-400);

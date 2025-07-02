@@ -48,25 +48,25 @@ const amenityTags = {
 // Define custom Leaflet icons for different amenity types
 const icons = {
   hospital: L.icon({
-    iconUrl: '/public/images/hospital-marker.svg',
+    iconUrl: '/static/images/hospital-marker.svg',
     iconSize: [30, 30],
     iconAnchor: [15, 30],
     popupAnchor: [0, -30]
   }),
   doctor: L.icon({
-    iconUrl: '/public/images/doctor-marker.svg',
+    iconUrl: '/static/images/doctor-marker.svg',
     iconSize: [30, 30],
     iconAnchor: [15, 30],
     popupAnchor: [0, -30]
   }),
   pharmacy: L.icon({
-    iconUrl: '/public/images/pharmacy-marker.svg',
+    iconUrl: '/static/images/pharmacy-marker.svg',
     iconSize: [30, 30],
     iconAnchor: [15, 30],
     popupAnchor: [0, -30]
   }),
   lab: L.icon({
-    iconUrl: '/public/images/lab-marker.svg',
+    iconUrl: '/static/images/lab-marker.svg',
     iconSize: [30, 30],
     iconAnchor: [15, 30],
     popupAnchor: [0, -30]
@@ -315,7 +315,7 @@ $(document).ready(function () {
             const directionsHtml = `
               <div class="px-4 py-3 suggestion-detail">
                 <div class="h-32 w-full bg-cover bg-center" 
-                    style="background-image: url('${place.imageUrl || "/public/images/hospital.svg"}')">
+                    style="background-image: url('${place.imageUrl || "/static/images/hospital.svg"}')">
                 </div>
                 <div class="flex flex-col gap-2 mt-2">
                   <div class="flex justify-between">
@@ -420,7 +420,7 @@ $(document).ready(function () {
           const overviewHtml = `
             <div class="px-4 py-3 suggestion-detail">
               <div class="h-32 w-full bg-cover bg-center" 
-                  style="background-image: url('${place.imageUrl || "/public/images/hospital.svg"}')">
+                  style="background-image: url('${place.imageUrl || "/static/images/hospital.svg"}')">
               </div>
               <div class="flex flex-col gap-2 mt-2">
                 <div class="flex justify-between">

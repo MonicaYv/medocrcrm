@@ -109,7 +109,7 @@ $(document).ready(function(){
 
 
     const sunIcon = `<img 
-        src="/public/images/sun.svg" 
+        src="/static/images/sun.svg" 
         alt="Sun Decoration" 
         class="md:ml-10" 
         loading="lazy" 

@@ -1,0 +1,1162 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+{% block title %}Advertiser Settings{% endblock %}
+{% block content %}
+
+<div class="h-full flex-1 flex flex-col gap-8 p-6 overflow-y-auto scroll bg-slate-white relative transition-all duration-300 main-content">
+    <div class="show-sidebar-toggle hidden absolute top-10 left-0 z-50 h-10 w-10 bg-light-gray items-center justify-center rounded-r-md cursor-pointer" >
+    <span class="material-symbols-outlined text-living-coral font-bold text-2xl">
+        arrow_forward_ios
+    </span>
+    </div>
+    <div class="bg-white shadow-(--box-shadow-5) rounded-[10px] px-2 sm:px-4 py-4 max-w-full">
+    <div class="setting-header space-y-2">
+    <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined">
+            settings
+        </span>
+        <p class="font-medium text-xl">Settings</p>                
+    </div>
+    
+    <p class="text-18-nr">
+    Make It Perfect—Update Your Settings!
+    </p>
+    </div>
+        <div class="flex items-center">
+        <!--Tabs-->
+        <div
+        class="flex gap-4 sm:gap-5 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar tabs"
+        >
+        <button
+            class="tab-btn-advertiser active-tab-advertiser text-sm sm:text-16-nr px-4 py-1.5 cursor-pointer text-light-gray1 font-light"
+            data-tab="account-details"
+        >
+            Account Details
+        </button>
+        <button
+            class="tab-btn-advertiser text-sm sm:text-16-nr px-4 py-1.5 cursor-pointer text-light-gray1 font-light"
+            data-tab="documents"
+        >
+            Documents
+        </button>
+        <button
+            class="tab-btn-advertiser text-sm sm:text-16-nr px-4 py-1.5 cursor-pointer text-light-gray1 font-light"
+            data-tab="notification-control"
+        >
+            Notification Control Center
+        </button>
+        </div>
+        <div class="ml-auto shrink-0 relative edit-toggle flex items-center gap-4">
+        <div class="flex flex-col items-end gap-2">
+            <p class="font-normal text-base text-dark-gray lastEditMsg">Last Edit on 20/03/25,14:30</p>
+            <p class="font-normal text-xs text-medium-gray docInfo hidden">All the image of documents should not exceed the file size limit of 3MB</p>
+        </div> 
+        
+            
+        <span title="Edit"
+            class="material-symbols-outlined cursor-pointer border p-0.5 rounded-sm editIcon"
+        >
+            edit
+        </span>
+        </div>
+    </div>
+
+    <!--Account Details Section -->
+    <div
+    class="grid grid-cols-1 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6 px-4 sm:px-6 pt-5 account-detail account-details tab-content">
+    <p class="font-semibold text-lg text-jet-black pt-4">
+        Account Details
+        <span class="font-normal text-base text-dark-gray">(Account created on {{created_at}} )</span>
+    </p>
+    <div class="grid sm:grid-cols-2 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6">
+        <!-- Email -->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">
+            Email Address
+        </p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{email}}
+        </p>
+        </div>
+
+        <!-- Country Code + Phone -->
+        <div class="flex flex-col sm:flex-row sm:items-start gap-20">
+        <div class="flex flex-col">
+            <p class="font-semibold text-base text-jet-black md:text-lg">
+            Country Code
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{country_code}}
+            </p>
+        </div>
+        <div class="flex flex-col">
+            <p class="font-semibold text-base text-jet-black md:text-lg">
+            Phone No.
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{phone_no}}
+            </p>
+        </div>
+        </div>
+        <!-- Company Name -->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base text-jet-black md:text-lg">
+            Advertiser Company Name
+        </p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{advertiser_name}}
+        </p>
+        </div>
+        <div></div>
+
+        <!-- Advertiser Type -->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base text-jet-black md:text-lg">
+            Advertiser Type
+        </p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{advertiser_type}}
+        </p>
+        </div>
+
+        <!--Ad Service-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base text-jet-black md:text-lg">
+            Ad Service Required
+        </p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{services_interested}}
+        </p>
+        </div>
+        <!--Website URL -->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base text-jet-black md:text-lg">
+            Website URL
+        </p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{website_url}}
+        </p>
+        </div>
+        <div></div>
+        <!--Address-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">Address</p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{address}}
+        </p>
+        </div>
+        <div></div>
+        <!--City, Town, District-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">
+            City, Town, District
+        </p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{city}}
+        </p>
+        </div>
+        <!--State-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">State</p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{state}}
+        </p>
+        </div>
+        <!--Country-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">Country</p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{country}}
+        </p>
+        </div>
+        <!--Pincode-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">Pincode</p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{pincode}}
+        </p>
+        </div>
+        <!--Brand Description-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">Brand Description</p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{description}}
+        </p>
+        </div>
+        <div></div>
+        <!--Contact persons name-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">
+            Contact Person's Name
+        </p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{contact_name}}
+        </p>
+        </div>
+        <!--Role-->
+        <div class="flex flex-col">
+        <p class="font-semibold text-base md:text-lg">Role</p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{contact_role}}
+        </p>
+        </div>
+        <!-- Country Code + Phone -->
+        <div class="flex flex-col sm:flex-row sm:items-start gap-20">
+        <div class="flex flex-col">
+            <p class="font-semibold text-base text-jet-black md:text-lg">
+            Country Code
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{country_code}}
+            </p>
+        </div>
+        <div class="flex flex-col">
+            <p class="font-semibold text-base text-jet-black md:text-lg">
+            Phone Number
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{contact_phone_number}}
+            </p>
+        </div>
+        </div>
+        <!--Referral Code-->
+        <div class="flex items-center gap-4">
+        <p class="font-semibold text-base md:text-lg">
+            Referral Code
+        </p>
+        <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{referral_code}}
+        </p>
+        </div>
+    </div>
+    <!-- Account Settings -->
+    <div class="flex flex-col gap-y-3 mt-8">
+        <p class="font-semibold text-base md:text-lg">
+        Account Settings
+        </p>
+        <div class="flex justify-between flex-wrap gap-4">
+        <p class="font-normal text-sm md:text-md text-living-coral cursor-pointer"
+            onclick="openPopup('searchHistoryPopup')">
+            Clear Search History
+        </p>
+        <p class="font-normal text-sm md:text-md text-living-coral cursor-pointer"
+            onclick="openPopup('savedDataPopup')">
+            Clear Saved Data
+        </p>
+        <p class="font-normal text-sm md:text-md text-living-coral cursor-pointer toggle-trigger"
+            data-target="password">
+            Change Password
+        </p>
+        <p class="font-normal text-sm md:text-md text-living-coral cursor-pointer"
+            onclick="openPopup('deleteAccountPopup')">
+            Account Delete
+        </p>
+        </div>
+    </div>
+
+    <!-- Popup Modal Template -->
+    <!-- Search History Popup -->
+    <div id="searchHistoryPopup"
+        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+        <p class="text-sm font-semibold mb-4">
+            Do you want clear your recent history ?
+        </p>
+        <div class="flex justify-end gap-3">
+            <button class="px-8 py-1 border-1 rounded-xl text-gray-600"
+            onclick="closePopup('searchHistoryPopup')">
+            No
+            </button>
+            <button class="px-8 py-1 rounded-xl bg-red-500 text-white" onclick="clearSearchHistory()">
+            Yes
+            </button>
+        </div>
+        </div>
+    </div>
+
+    <!-- Saved Data Popup -->
+    <div id="savedDataPopup"
+        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+        <p class="text-sm font-semibold mb-4">
+            Do you want clear your saved data ?
+        </p>
+        <div class="flex justify-end gap-3">
+            <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('savedDataPopup')">
+            No
+            </button>
+            <button class="px-8 py-1 border-1 rounded-xl bg-red-500 text-white" onclick="clearSavedData()">
+            Yes
+            </button>
+        </div>
+        </div>
+    </div>
+
+        <!-- Delete Account Popup -->
+        <div id="deleteAccountPopup"
+        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
+        <h2 class="text-lg font-semibold mb-3"></h2>
+        <p class="text-sm font-semibold mb-4">Do you want to delete your profile ?</p>
+        <div class="flex justify-end gap-3">
+            <button class="px-8 py-1 border-1 rounded-xl text-gray-600"
+            onclick="closePopup('deleteAccountPopup')">No</button>
+            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white"
+            onclick="deleteAccount()">Yes</button>
+        </div>
+        <p class="font-semibold text-lg text-jet-black pt-6"> We are sorry you are going, Please select your reason</p>
+        <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">I found a better alternative</p>
+            <label class="custom-radio">
+                <input type="radio" name="address">
+                <span class="checkmark"></span>
+            </label>
+        </div>
+            <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">This App is Hard To Use</p>
+            <label class="custom-radio">
+                <input type="radio" name="address">
+                <span class="checkmark"></span>
+            </label>
+        </div>
+            <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">Not Getting Enough Value</p>
+            <label class="custom-radio">
+                <input type="radio" name="address">
+                <span class="checkmark"></span>
+            </label>
+        </div>
+            <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">Just Taking A Break</p>
+            <label class="custom-radio">
+                <input type="radio" name="address">
+                <span class="checkmark"></span>
+            </label>
+        </div>
+            <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">Other (Please Specify)</p>
+            <label class="custom-radio">
+                <input type="radio" name="address">
+                <span class="checkmark"></span>
+            </label>
+        </div>
+        <input type="text" class="mt-2 rounded-sm p-2 focus:ring-0 w-full focus:!outline-none focus:ring-offset-0" placeholder="Specify Your Reason (10 Words)">
+        <div class="flex justify-end pt-2">
+            <button class="bg-living-coral text-white rounded-md p-2 cursor-pointer submitBtn">Submit</button>
+        </div>
+        </div>
+    </div>
+    <!--Success Popup-->
+    <div id="successPopup" class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
+        <div class="flex justify-end">
+            <span class="material-symbols-outlined cursor-pointer" onclick="closePopup('successPopup')"> close</span>
+        </div>
+        <div class="flex items-center justify-center flex-col">
+            <img src="/static/images/successfull.svg" alt="">
+            <p class="font-normal text-base text-jet-black">Your request has been sent to the administrator. We will update you shortly </p>
+        </div>
+        
+        </div>
+        
+    </div>
+
+    <!-- Terms and Conditions-->
+    <div class="flex flex-col bg-[#FFC9D3] p-4 rounded mt-4 border-1">
+        <p class="font-semibold text-base md:text-lg">
+        Terms and Conditions
+        </p>
+        <div class="flex justify-between mt-3">
+        <p class="font-normal text-sm md:text-md text-living-coral cursor-pointer toggle-trigger"
+            data-target="terms-conditons">
+            Terms of Usage
+        </p>
+        <p class="font-normal text-sm md:text-md text-living-coral cursor-pointer toggle-trigger"
+            data-target="privacy-policy">
+            Privacy Policy
+        </p>
+        <p class="font-normal text-sm md:text-md text-living-coral cursor-pointer toggle-trigger"
+            data-target="disclaimer">
+            Disclaimer
+        </p>
+        </div>
+    </div>
+    
+    </div>
+    <!--Documents Section-->
+    <div class="hidden tab-content documents">
+    <div class="flex lg:items-center justify-between pt-8 flex-col lg:flex-row">
+    <div class="flex flex-col gap-1">
+        <p class="font-semibold text-lg text-jet-black">
+        Incorporation Number & Document
+        </p>
+        <p class="font-normal text-base text-medium-gray">
+        {{incorporation_number}}
+        </p>
+    </div>
+    <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
+        <div class="flex items-center gap-2 lg:pr-32 text-nowrap">
+        
+        <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+        <p class="font-normal text-xs text-bright-green">Approved</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <input
+        type="text"
+        class="border border-dashed border-living-coral p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
+        value="{{incorporation_doc_path}}"
+        readonly
+        /> 
+        <div class="flex items-center gap-2   text-nowrap">
+        
+        <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+        <p class="font-normal text-xs text-bright-green">Virus Scan</p>
+        </div>
+        <span title="View"
+        data-doc-type="incorporation_doc"
+        data-doc-path="{{incorporation_doc_path}}"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
+        >visibility</span
+        >
+        <span title="Upload  Document"
+        data-doc-type="incorporation_doc"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
+        >upload</span
+        >
+        </div>
+        
+    </div>
+    </div>
+    <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
+    <div class="flex flex-col gap-1">
+        <p class="font-semibold text-lg text-jet-black">
+        GST Number & Document
+        </p>
+        <p class="font-normal text-base text-medium-gray">
+        {{gst_number}}
+        </p>
+    </div>
+    <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
+        <div class="flex items-center gap-2  lg:pr-25  text-nowrap">          
+            <span class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
+        <p class="font-normal text-xs text-strong-red">Blurry,Unclear</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <input
+        type="text"
+        class="border border-dashed border-living-coral p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
+        value="{{gst_doc_path}}"
+        readonly
+        />
+        <div class="flex items-center gap-2   text-nowrap">
+        
+        <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+        <p class="font-normal text-xs text-bright-green">Virus Scan</p>
+        </div>
+        <span  title="View"
+        data-doc-type="gst_doc"
+        data-doc-path="{{gst_doc_path}}"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
+        >visibility</span
+        >
+        <span title="Upload  Document"
+        data-doc-type="gst_doc"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
+        >upload</span
+        >
+        </div>
+        
+    </div>
+    </div>
+    <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
+    <div class="flex flex-col gap-1">
+        <p class="font-semibold text-lg text-jet-black">
+        PAN Number & Document
+        </p>
+        <p class="font-normal text-base text-medium-gray">
+        {{pan_number}}
+        </p>
+    </div>
+    <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
+        <div class="flex items-center gap-2  lg:pr-14  text-nowrap">          
+        <span class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
+        <p class="font-normal text-xs text-strong-red">Mismatch/Wrong Data</p>
+        </div>
+        <div class="flex items-center gap-2">
+        <input
+        type="text"
+        class="border border-dashed border-living-coral p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
+        value="{{pan_doc_path}}"
+        readonly
+        />
+        <div class="flex items-center gap-2   text-nowrap">
+        
+        <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+        <p class="font-normal text-xs text-bright-green">Virus Scan</p>
+        </div>
+        <span  title="View"
+        data-doc-type="pan_doc"
+        data-doc-path="{{pan_doc_path}}"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
+        >visibility</span
+        >
+        <span title="Upload  Document"
+        data-doc-type="pan_doc"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
+        >upload</span
+        >
+        </div>
+        
+    </div>
+    </div>
+    <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
+    <div class="flex flex-col gap-1">
+        <p class="font-semibold text-lg text-jet-black">
+        TAN Number & Document
+        </p>
+        <p class="font-normal text-base text-medium-gray">
+        {{tan_number}}
+        </p>
+    </div>
+    <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
+        <div class="flex items-center gap-2  lg:pr-35  text-nowrap">          
+            <span class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
+        <p class="font-normal text-xs text-strong-red">Expired</p>
+        </div>
+        <div class="flex items-center gap-2">
+        <input
+        type="text"
+        class="border border-dashed border-living-coral p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
+        value="{{tan_doc_path}}"
+        readonly
+        />
+        <div class="flex items-center gap-2   text-nowrap">
+        
+        <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+        <p class="font-normal text-xs text-bright-green">Virus Scan</p>
+        </div>
+        <span  title="View"
+        data-doc-type="tan_doc"
+        data-doc-path="{{tan_doc_path}}"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
+        >visibility</span
+        >
+        <span title="Upload  Document"
+        data-doc-type="tan_doc"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
+        >upload</span
+        >
+        </div>
+        
+    </div>
+    </div>
+    
+    <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
+    <div class="flex flex-col gap-1">
+        <p class="font-semibold text-lg text-jet-black">
+        Brand Image
+        </p>
+    
+    </div>
+    <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
+        <div class="flex items-center gap-2  lg:pr-35  text-nowrap">          
+            <span class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
+        <p class="font-normal text-xs text-strong-red">Expired</p>
+        </div>
+        <div class="flex items-center gap-2">
+        <input
+        type="text"
+        class="border border-dashed border-living-coral p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
+        value="{{brand_image_path}}"
+        readonly
+        />
+        <div class="flex items-center gap-2   text-nowrap">
+        
+        <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+        <p class="font-normal text-xs text-bright-green">Virus Scan</p>
+        </div>
+        <span  title="View"
+        data-doc-type="brand_image"
+        data-doc-path="{{brand_image_path}}"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon"
+        >visibility</span
+        >
+        <span title="Upload  Document"
+        data-doc-type="brand_image"
+        class="material-symbols-outlined border p-1 rounded-md cursor-pointer"
+        >upload</span
+        >
+        </div>
+        
+    </div>
+    </div>
+    <p class="font-semibold text-lg text-living-coral pt-4">Rejection explanation:</p>
+    <div class="flex flex-col gap-2 pt-2">
+    <p class="font-bold text-base">Blurry or Unreadable Document - <span class="font-normal">The uploaded file is not clear. Please ensure the text and details are fully visible.</span> </p>
+    <p class="font-bold text-base">Expired or Outdated Document - <span class="font-normal">The document has passed its validity date. Please upload a current version.</span> </p>
+    <p class="font-bold text-base">Wrong File Format or Incomplete Upload - <span class="font-normal">Only PDF, JPG, or PNG files are accepted. Ensure the full document is uploaded.</span> </p>
+    <p class="font-bold text-base">Incorrect or Mismatched Information - <span>The document does not match your profile details (e.g., name, ID, registration info).</span> </p>
+    </div>
+    </div>
+    <!--Notification Control Section-->
+    <div class="hidden tab-content" id="notification-control">
+    <p class="font-semibold pt-4 px-4 text-lg">
+        Notification Channel Management
+    </p>
+
+    <div class="px-4 pt-4 space-y-6">
+        <!-- Notification Toggles -->
+        <div class="space-y-6">
+        <!-- Reusable Switch Block -->
+        <div class="flex flex-col md:flex-row justify-between gap-2">
+            <p class="text-base font-normal">In-app Notifications</p>
+            <label class="inline-flex items-center gap-3 cursor-pointer">
+            <p class="font-normal text-sm text-medium-gray">
+                Manage In-app updates.
+            </p>
+            <input type="checkbox" name="inapp_notifications" data-field="inapp_notifications" class="sr-only peer" {% if inapp_notifications %}checked{% endif %} />
+            <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-violet-sky">
+            </div>
+            </label>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between gap-2">
+            <p class="text-base font-normal">Email Notifications</p>
+            <label class="inline-flex items-center gap-3 cursor-pointer">
+            <p class="font-normal text-sm text-medium-gray">
+                Manage Email updates.
+            </p>
+            <input type="checkbox" name="email_notifications" data-field="email_notifications" class="sr-only peer" {% if email_notifications %}checked{% endif %} />
+            <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-violet-sky">
+            </div>
+            </label>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between gap-2">
+            <p class="text-base font-normal">Push Notifications</p>
+            <label class="inline-flex items-center gap-3 cursor-pointer">
+            <p class="font-normal text-sm text-medium-gray">
+                Enable/Disable App alerts.
+            </p>
+            <input type="checkbox" name="push_notifications" data-field="push_notifications" class="sr-only peer" {% if push_notifications %}checked{% endif %} />
+            <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-violet-sky">
+            </div>
+            </label>
+        </div>
+        </div>
+    </div>
+
+    <!-- Priority Level Management -->
+        <div class="px-4 pt-6 space-y-4">
+        <p class="font-semibold text-lg">Priority Level Management</p>
+        <div class="space-y-3">
+        <div class="flex justify-between items-center">
+            <p class="text-base font-normal">Regulatory Alerts <span class="font-normal text-sm">(Will Be Sent on Updates)</span></p>
+            <input type="checkbox" name="regulatory_alerts" data-field="regulatory_alerts" {% if regulatory_alerts %}checked{% endif %}
+            class="w-5 h-5 text-violet-sky text-xl rounded-sm focus:ring-0 focus:outline-none focus:ring-offset-0" />
+        </div>
+        <div class="flex justify-between items-center">
+            <p class="text-base font-normal">Promotions & Offers <span class="font-normal text-sm">(Will Be Sent on Updates)</span></p>
+            <input type="checkbox" name="promotions_and_offers" data-field="promotions_and_offers" {% if promotions_and_offers %}checked{% endif %}
+            class="w-5 h-5 text-violet-sky text-xl rounded-sm focus:ring-0  focus:ring-offset-0" />
+        </div>
+        </div>
+    </div>
+
+    <!-- Quiet Hours Setting -->
+    <div class="px-4 pt-6">
+        <p class="font-semibold text-lg">Quiet Hours Setting</p>
+        <div class="flex flex-col lg:flex-row lg:justify-between gap-4 pt-4">
+        <div class="flex flex-col md:flex-row justify-between gap-2">
+            <p class="text-base font-normal">Set Quite Mode</p>
+            <label class="inline-flex items-center gap-3 cursor-pointer">
+            <p class="font-normal text-sm text-medium-gray">
+                Enable/Disable
+            </p>
+            <input type="checkbox" name="quite_mode" data-field="quite_mode" class="sr-only peer" {% if quite_mode %}checked{% endif %} />
+            <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-violet-sky">
+            </div>
+            </label>
+        </div>
+        <p class="text-base font-normal">
+            Pick Time to start Quiet Mode
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Start Time -->
+            <div class="relative w-full sm:w-40">
+            <label for="start-time" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+            <input type="time" name="quite_mode_start_time" id="start-time" data-field="quite_mode_start_time"
+                class="border rounded px-3 py-2 w-full pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-sky"
+                value="{{ quite_mode_start_time|time:'H:i' }}" required />
+            <span
+                class="material-symbols-outlined absolute right-2 top-11 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+                timer
+            </span>
+            </div>
+
+            <!-- End Time -->
+            <div class="relative w-full sm:w-40">
+                <label
+                for="end-time"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >End Time</label
+                >
+                <input
+                type="time"
+                id="end-time"
+                name="quite_mode_end_time"
+                data-field="quite_mode_end_time"
+                class="border rounded px-3 py-2 w-full pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-sky"
+                value="{{ quite_mode_end_time|time:'H:i' }}"
+                required
+                />
+                <span
+                class="material-symbols-outlined absolute right-2 top-11 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                >
+                timer
+                </span>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    <!--Change Password -->
+    <div class="hidden toggle-section" data-section="password">
+    <p class="text-gray-950 text-2xl pl-4 sm:pl-6">
+        Setting <span>></span> Account-Details <span>></span>Change
+        Password
+    </p>
+    <p class="text-violet-sky pl-4 sm:pl-6">Change Password</p>
+
+    <form id="editChangePassword" method="POST" action="{% url 'change_password' %}" class="submit-form px-4 sm:px-6 pt-6 text-sm">
+        {% csrf_token %}
+        <!-- Pharmacy Name -->
+        <div class="flex flex-col">
+        <input name="current_password" type="text" class="border rounded mb-5 px-3 py-2"
+            placeholder="Type your current password *" required />
+        <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
+        </div>
+        <div class="flex justify-end mb-4">
+        <p class="text-violet-sky pl-4 font-bold cursor-pointer sm:pl-6">
+            Forgot Password?
+        </p>
+        </div>
+        <div class="flex flex-col">
+        <input name="new_password" type="text" class="border rounded mb-5 px-3 py-2"
+            placeholder="Type your new password *" required />
+        <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
+        </div>
+        <div class="flex flex-col">
+        <input name="confirm_password" type="text" class="border rounded mb-5 px-3 py-2"
+            placeholder="Retype your new password *" required />
+        <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
+        </div>
+        <!--Send OTP-->
+        <div class="flex items-center justify-end gap-2">
+        <div>
+            <button type="button" class="bg-violet-sky text-white px-2 py-2.5 rounded w-full cursor-pointer">
+            Send Phone OTP
+            </button>
+            <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
+            <span class="text-black">Resend</span></span>
+        </div>
+        <div>
+            <input name="otp" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
+            <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+            <div class="flex items-center gap-2 justify-end">
+            <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+                <p class="font-normal text-xs text-bright-green">Verified</p>
+            </div>
+        </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="md:col-span-2 flex justify-end pt-4 gap-2 flex-wrap">
+        <button type="button"
+            class="px-4 py-2 rounded-md border text-violet-sky font-normal text-lg border-violet-sky cancel-btn">
+            Cancel
+        </button>
+        <button type="submit"
+            class="bg-violet-sky text-white px-6 py-2 rounded-lg font-normal text-lg cursor-pointer save-btn">
+            Save Changes
+        </button>
+        </div>
+    </form>
+    </div>
+    <!--Terms and Conditions -->
+    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="terms-conditons">
+    <div class="text-white mb-2 items-center p-4 rounded bg-living-coral flex justify-between">
+        <h1 class="text-3xl">Terms of Usage</h1>
+        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
+        close
+        </span>
+    </div>
+    <h2 class="text-black text-xl mb-2 font-semibold">
+        1. Introduction
+    </h2>
+    <p class="">
+        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
+    </p>
+    <p>
+        Terms of Service (“Terms”, “Terms of Service”) govern your use
+        of our website located at sizaf.com (together or individually
+        “Service”) operated by Sizaf.com. Our Privacy Policy also
+        governs your use of our Service and explains how we collect,
+        safeguard and disclose information that results from your use of
+        our web pages. Your agreement with us includes these Terms and
+        our Privacy Policy (“Agreements”). By visiting our website you
+        acknowledge that you have read and understood Agreements, and
+        agree to be bound by them.
+    </p>
+    <p>
+        you do not agree with (or cannot comply with) these Terms, you
+        may not use the Service. However, please let us know by emailing
+        info@sizaf.com, so we can try to find a solution. These Terms
+        apply to all visitors, users, and others who wish to access or
+        use the Service.
+    </p>
+    <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+        2. Communications
+    </h2>
+    <p>
+        By using our Service, you agree to subscribe to newsletters,
+        marketing or promotional materials and other information we may
+        send. However, you may opt out of receiving any, or all, of
+        these communications from us by following the unsubscribe link
+        or by emailing at info@sizaf.com.
+    </p>
+    </div>
+    <!--Privacy Policy -->
+    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="privacy-policy">
+    <div class="text-white mb-2 items-center p-4 rounded bg-living-coral flex justify-between">
+        <h1 class="text-3xl">Privacy Policy</h1>
+        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
+        close
+        </span>
+    </div>
+    <h2 class="text-living-coral text-xl mb-2 font-semibold">
+        1. Introduction
+    </h2>
+    <p class="">
+        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
+    </p>
+    <p>
+        Terms of Service (“Terms”, “Terms of Service”) govern your use
+        of our website located at sizaf.com (together or individually
+        “Service”) operated by Sizaf.com. Our Privacy Policy also
+        governs your use of our Service and explains how we collect,
+        safeguard and disclose information that results from your use of
+        our web pages. Your agreement with us includes these Terms and
+        our Privacy Policy (“Agreements”). By visiting our website you
+        acknowledge that you have read and understood Agreements, and
+        agree to be bound by them.
+    </p>
+    <p>
+        you do not agree with (or cannot comply with) these Terms, you
+        may not use the Service. However, please let us know by emailing
+        info@sizaf.com, so we can try to find a solution. These Terms
+        apply to all visitors, users, and others who wish to access or
+        use the Service.
+    </p>
+    <h2 class="text-living-coral text-xl mb-2 mt-2 font-semibold">
+        2. Communications
+    </h2>
+    <p>
+        By using our Service, you agree to subscribe to newsletters,
+        marketing or promotional materials and other information we may
+        send. However, you may opt out of receiving any, or all, of
+        these communications from us by following the unsubscribe link
+        or by emailing at info@sizaf.com.
+    </p>
+    </div>
+    <!--Disclaimer -->
+    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="disclaimer">
+    <div class="text-white mb-2 items-center p-4 rounded bg-living-coral flex justify-between">
+        <h1 class="text-3xl">Disclaimer</h1>
+        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
+        close
+        </span>
+    </div>
+    <h2 class="text-living-coral text-xl mb-2 font-semibold">
+        1. Introduction
+    </h2>
+    <p class="">
+        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
+    </p>
+    <p>
+        Terms of Service (“Terms”, “Terms of Service”) govern your use
+        of our website located at sizaf.com (together or individually
+        “Service”) operated by Sizaf.com. Our Privacy Policy also
+        governs your use of our Service and explains how we collect,
+        safeguard and disclose information that results from your use of
+        our web pages. Your agreement with us includes these Terms and
+        our Privacy Policy (“Agreements”). By visiting our website you
+        acknowledge that you have read and understood Agreements, and
+        agree to be bound by them.
+    </p>
+    <p>
+        you do not agree with (or cannot comply with) these Terms, you
+        may not use the Service. However, please let us know by emailing
+        info@sizaf.com, so we can try to find a solution. These Terms
+        apply to all visitors, users, and others who wish to access or
+        use the Service.
+    </p>
+    <h2 class="text-living-coral text-xl mb-2 mt-2 font-semibold">
+        2. Communications
+    </h2>
+    <p>
+        By using our Service, you agree to subscribe to newsletters,
+        marketing or promotional materials and other information we may
+        send. However, you may opt out of receiving any, or all, of
+        these communications from us by following the unsubscribe link
+        or by emailing at info@sizaf.com.
+    </p>
+    </div>
+    <!--Edit Section-->
+    <div class="hidden edit-details">
+        <p class="text-living-coral pl-4 sm:pl-6">Account Details</p>
+        <form id="editForm" method="POST" action="{% url 'update_advertiser_profile' %}" class="submit-formgrid grid-cols-1 gap-x-6 md:gap-x-12 gap-y-6 px-4 sm:px-6 pt-6 text-sm">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
+            <!-- Email + Phone -->
+            <div class="md:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Email -->
+                <div class="flex flex-col">
+                <input name="email" type="email" class="border rounded px-3 py-2 w-full"
+                    placeholder="Email Address" value="{email}"/>
+                <span class="error emailError text-red-500 text-sm mt-1 hidden"></span>
+                </div>
+
+                <!-- Country code + Phone -->
+                <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Country Code -->
+                <div class="pl-4 lg:w-1/4">
+                    <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
+                </div>
+
+                <!-- Phone -->
+                <div class="flex-1">
+                    <input name="phone" type="text" class="border rounded px-3 py-2 w-full"
+                    placeholder="Phone Number" value="{{phone_no}}"/>
+                    <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                </div>
+                </div>
+                <!-- OTP -->
+
+                <div class="flex-1">
+                <button type="button"
+                    class="bg-living-coral opacity-50 text-white px-2 py-2.5 rounded mb-1.5 w-full cursor-pointer">
+                    Send Phone OTP
+                </button>
+                <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
+                    <span class="text-black">Resend</span></span>
+                </div>
+                <div class="flex-1">
+                <input name="otp1" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
+                <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                <div class="flex items-center gap-2 justify-end">
+                    <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+                    <p class="font-normal text-xs text-bright-green">Verified</p>
+                </div>
+                </div>
+            </div>
+            </div>
+            <!--Company Name-->
+            <input name="company_name" type="text" class="w-full rounded" placeholder="Company Name" value="{{company_name}}"/>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
+            <!--Advertiser Type-->
+            <div
+                class="issue-type-wrapper w-full  rounded-[6px] text-dark-gray border border-slate-gray pl-0.5 text-sm flex items-center justify-between relative">
+
+                <input name="advertiser_type" type="text" placeholder="Advertiser Type"
+                    class="issue-type-input w-full focus:outline-none focus:ring-0 border-0 cursor-pointer" value="{{ advertiser_type|join:', ' }}" readonly>
+                <span class="material-symbols-outlined cursor-pointer">keyboard_arrow_down</span>
+
+                <!-- Dropdown options -->
+                
+                <ul class="issue-type-dropdown absolute top-full left-0 w-full bg-white  rounded-md shadow-md z-50 hidden  border border-dark-gray mt-2  ">
+                    {% for type in all_types %}
+                    <li class="dropdown-option px-2 py-2 flex mb-2 justify-between items-center hover:bg-transparent-living-coral  ">
+                    <span class="text-base font-normal">{{type}}</span>
+                    <input type="checkbox" value="{{type}}"
+                        class="issue-checkbox form-checkbox cursor-pointer w-5 h-5 text-black rounded-sm mr-2 "
+                        data-type="{{type}}" name="advertiser_type"/>
+                    </li>    
+                    {% endfor %}            
+                    <li class="dropdown-option px-2 py-2 mb-2 flex justify-between items-center hover:bg-transparent-living-coral">
+                    <span class="text-base font-normal">Others</span>
+                    <input type="checkbox" value="Others"
+                        class="issue-checkbox form-checkbox cursor-pointer w-5 h-5 text-black  rounded-sm mr-2 "
+                        data-type="other" name="advertiser_type"/>
+                    </li>
+                </ul>
+                </div>
+            <!--Ad Services Required-->
+            <div class="issue-type-wrapper w-full  rounded-[6px] text-dark-gray border border-slate-gray pl-0.5 text-sm flex items-center justify-between relative">
+                <input name="company_services" type="text" placeholder="Ad Services Required"
+                    class="issue-type-input w-full focus:outline-none focus:ring-0 border-0 cursor-pointer" value="{{ services_interested|join:', ' }}" readonly>
+                <span class="material-symbols-outlined cursor-pointer">keyboard_arrow_down</span>
+                <!-- Dropdown options -->
+                <ul class="issue-type-dropdown absolute top-full left-0 w-full bg-white  rounded-md shadow-md z-50 hidden  border border-dark-gray mt-2  ">
+                    {% for service in all_services %}
+                    <li class="dropdown-option px-2 py-2 flex mb-2 justify-between items-center hover:bg-transparent-living-coral  ">
+                    <span class="text-base font-normal">{{service}}</span>
+                    <input type="checkbox" name="company_services" value="{{service}}"
+                        class="issue-checkbox form-checkbox cursor-pointer w-5 h-5 text-black rounded-sm mr-2 "
+                        data-type="{{service}}" />
+                    </li>
+                    {% endfor %}
+                    <li class="dropdown-option px-2 py-2 mb-2 flex justify-between items-center hover:bg-transparent-living-coral">
+                    <span class="text-base font-normal">Others</span>
+                    <input type="checkbox" name="company_services" value="{{service}}"
+                        class="issue-checkbox form-checkbox cursor-pointer w-5 h-5 text-black  rounded-sm mr-2 "
+                        data-type="Others" />
+                    </li>
+                </ul>
+                
+            </div>
+            </div>
+            <!--Website URL-->
+            <input name="website_url" type="text" class="w-full rounded" placeholder="Website URL" value="{{website_url}}"/>
+
+            <!--Address-->
+            <input type="text" class="w-full rounded" placeholder="Address" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
+            <!-- City,Town,District -->
+            <div class="flex flex-col">
+                <input name="city" type="text" class="border rounded px-3 py-2" placeholder="City,Town,District" value="{{city}}"/>
+                <span class="error adminNameError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- State -->
+            <div class="flex flex-col">
+                <input name="state" type="text" class="border rounded px-3 py-2" placeholder="State" value="{{state}}"/>
+                <span class="error genderError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- Country -->
+            <div class="flex flex-col">
+                <input name="country" type="text" class="border rounded px-3 py-2" placeholder="Country" value="{{country}}"/>
+                <span class="error addressError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- Pincode -->
+            <div class="flex flex-col">
+                <input name="pincode" type="text" class="border rounded px-3 py-2" placeholder="Pincode" value="{{pincode}}"/>
+                <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- contact -->
+            <div class="flex flex-col">
+                <input name="contact_name" type="text" class="border rounded px-3 py-2" placeholder="Contact Person Name" value="{{contact_name}}"/>
+                <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- ROle -->
+            <div class="flex flex-col">
+                <input name="contact_role" type="text" class="border rounded px-3 py-2" placeholder="Role" value="{{contact_role}}"/>
+                <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
+            </div>
+            <!-- Country code + Phone -->
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Country Code -->
+                <div class="lg:w-1/4">
+                <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
+                </div>
+
+                <!-- Phone -->
+                <div class="flex-1">
+                <input name="contact_phone_number" type="text" class="border rounded px-3 py-2 w-full" placeholder="Phone Number" value="{{contact_phone_number}}"/>
+                <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                </div>
+            </div>
+            <!--Send OTP-->
+            <div class="flex items-center gap-2">
+                <div class="flex-1">
+                <button type="button" class="bg-living-coral opacity-50 text-white px-2 py-2.5 rounded w-full cursor-pointer">
+                    Send Phone OTP
+                </button>
+                <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
+                    <span class="text-black">Resend</span></span>
+                </div>
+                <div class="flex-1">
+                <input id="otp2" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" />
+                <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                <div class="flex items-center gap-2 justify-end">
+                    <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
+                    <p class="font-normal text-xs text-bright-green">Verified</p>
+                </div>
+                </div>
+            </div>
+            <!-- Buttons -->
+            <div class="md:col-span-2 flex justify-end pt-4 gap-2 flex-wrap">
+                <button type="button"
+                class="px-4 py-2 rounded-md border text-living-coral font-normal text-lg border-living-coral cancel-btn">
+                Cancel
+                </button>
+                <button type="submit"
+                class="bg-living-coral text-white px-6 py-2 rounded-lg font-normal text-lg cursor-pointer save-btn">
+                Save Changes
+                </button>
+            </div>
+            </div>
+        </form>
+    </div>
+    </div>
+</div>
+    <!--Document Popup-->
+    <div id="viewModal"
+        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-soft-gray p-6 rounded-xl shadow-lg max-w-md w-full">
+        <div id="userTypeHolder" data-user-type="{{ request.user_obj.user_type }}" hidden></div>
+        <div class="flex justify-between items-center">               
+            <p class="font-semibold text-xl mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined">document_scanner</span>
+            Document Title
+            </p>
+            <button id="closeModal" class="cursor-pointer text-2xl">
+            <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div id="modalContent" class="text-center bg-white rounded-md h-96">
+
+            <!-- <img src="/static/images/incorp-certificate.svg" alt="" class="object-cover h-96 w-full"> -->
+            <img   id="modalImg"    class="object-cover h-96 w-full hidden" alt="Document preview">
+            <embed id="modalEmbed" class="w-full h-96 hidden" type="application/pdf" />
+            <a     id="modalLink"   class="block py-8 text-violet-sky" hidden target="_blank">Download Document</a>
+        </div>
+        <div class="flex items-center justify-between pt-1">
+            <p class="font-normal text-xs text-dark-gray">Image (JPG, PNG). Maximum file size: 1MB.</p>
+            <div class="flex items-center gap-2 text-nowrap">
+            <p class="font-normal text-sm text-emerald-green">Virus Scan</p>
+            <input type="checkbox"
+                class="text-emerald-green w-4 h-4 text-lg cursor-pointer rounded-xs focus:ring-0 focus:ring-offset-0"
+                checked>
+            </div>
+        </div>
+
+        <!--Buttons-->
+        <div class="flex justify-between items-center pt-4 w-full">
+            <input type="file" id="replaceInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+            <button id="replaceBtn" type="button">
+            <p
+                class="flex items-center gap-2 border border-violet-sky bg-white text-violet-sky px-4 py-2 rounded-md cursor-pointer">
+                <span class="material-symbols-outlined">upload</span>Replace</p>
+            </button>
+            <button id="saveBtn" type="button" disabled>
+            <p class="px-4 py-2 rounded-md cursor-pointer bg-violet-sky text-white">Save</p>
+            </button>
+        </div>
+        </div>
+    </div>  
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/forms.js' %}"></script>
+    <script src="{% static 'js/countryCodes.js' %}"></script>
+    <script src="{% static 'js/toaster.js' %}"></script>
+    <script src="{% static 'js/Purchase.js' %}"></script>
+    <script src="{% static 'js/tabs.js' %}"></script>
+    <script src="{% static 'js/settings.js' %}"></script>
+{% endblock %}
