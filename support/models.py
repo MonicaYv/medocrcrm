@@ -1,6 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
-
+from registration.models import User
 class IssueType(models.Model):
     name = models.CharField(max_length=100, unique=True)
 

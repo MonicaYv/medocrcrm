@@ -1,0 +1,609 @@
+{% extends "dashboard/layout.html" %}
+{% load static %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- Main Content -->
+      <div class="h-full flex-1 flex flex-col gap-8 p-6 overflow-y-auto scroll">
+        <div class="shadow-lg p-3 sm:p-5 max-w-full rounded-md">
+          <div class="space-y-1">
+            <h1 class="font-semibold text-base sm:text-xl">Help & Support</h1>
+            <p class="font-normal text-xs sm:text-base">Get assistance with issues, find answers to common questions, or
+              report a problem.</p>
+          </div>
+          <!-- Tabs -->
+          <div class="flex gap-6 sm:gap-8 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar">
+
+            <button class="tab-btn-ngo active-tab1-ngo text-violet-sky px-4 text-18-fs cursor-pointer" data-tab="report-issue">
+              Report Issue
+            </button>
+            <button class="tab-btn-ngo cursor-pointer text-violet-sky" data-tab="contact-support">
+              FAQ or Contact Support
+            </button>
+
+
+
+
+          </div>
+  
+
+          <!-- Report issue Div -->
+<div class="report-issue tab-content pt-8">
+  <!-- Track or Report Issue -->
+  <div class="space-y-2">
+    <h1 class="font-semibold text-base">Report or Track an Issue</h1>
+
+    <!-- ✅ Clean, Single Form -->
+    <form id="support-form" method="POST" enctype="multipart/form-data" class="issue-form space-y-4">
+      {% csrf_token %}
+      <div class="w-full flex flex-col sm:flex-row items-center gap-5">
+
+        <!-- Issue Type Dropdown -->
+        <div
+          class="issue-type-wrapper w-full sm:w-1/2 h-[50px] rounded-[6px] text-dark-gray border border-slate-gray px-3 text-sm flex items-center justify-between relative">
+          <input type="text" placeholder="Issue Type"
+            class="issue-type-input w-full focus:outline-none border-0 cursor-pointer" readonly>
+          <input type="hidden" name="issue_type" id="issue_type_hidden">
+          <span class="material-symbols-outlined cursor-pointer">keyboard_arrow_down</span>
+          <ul
+            class="issue-type-dropdown absolute top-full left-0 w-full bg-white border border-violet-sky rounded-md shadow-md z-10 hidden">
+            {% for issue in issue_types %}
+            <li class="dropdown-option px-3 py-2 cursor-pointer" data-id="{{ issue.id }}">{{ issue.name }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Select Issue Dropdown -->
+        <div
+          class="select-issue-wrapper w-full sm:w-1/2 h-[50px] rounded-[6px] text-dark-gray border border-slate-gray px-3 text-sm flex items-center justify-between relative">
+          <input type="text" placeholder="Select Issue"
+            class="select-issue-input w-full focus:outline-none border-0 cursor-pointer" readonly>
+          <input type="hidden" name="select_issue" id="select_issue_hidden">
+          <span class="material-symbols-outlined cursor-pointer">keyboard_arrow_down</span>
+          <ul
+            class="select-issue-dropdown absolute top-full left-0 w-full bg-white border border-violet-sky rounded-md shadow-md z-10 hidden">
+            <!-- dynamically loaded via AJAX -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <textarea rows="6" name="description"
+        class="issue-description block p-2.5 w-full text-sm rounded-[6px] border text-dark-gray border-slate-gray focus:!outline-none focus:ring-0"
+        placeholder="Please enter description for issue"></textarea>
+
+      <div class="flex items-center justify-between w-full gap-4">
+        <!-- Upload image field -->
+        <div
+          class="w-full sm:w-1/2 h-[50px] rounded-[6px] border-2 border-dashed border-violet-sky flex items-center justify-center">
+          <input id="issue-image" type="file" name="image" accept="image/*" class="issue-image hidden">
+          <label for="issue-image"
+            class="w-full flex items-center justify-start gap-3 sm:gap-1 md:gap-3 cursor-pointer">
+            <span class="material-symbols-outlined">image</span>
+            <span class="font-normal text-sm mr-4">Upload image of the issue</span>
+          </label>
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit"
+          class="issue-submit-btn px-8 text-medium-gray bg-light-gray rounded-[10px] py-2 cursor-not-allowed"
+          disabled>
+          Submit
+        </button>
+      </div>
+    </form>
+
+    <div class="w-full h-0.5 rounded bg-violet-sky mt-7"></div>
+  </div>
+</div>
+            <!-- Ticket History -->
+            <div class="space-y-2 mt-6">
+
+              <div class="flex items-center gap-5">
+                <h1 class="font-semibold text-base text-dark-gray">Points History</h1>
+                <div
+                  class="search-filter-section flex items-center justify-end gap-5 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-auto">
+                  <div class="w-full max-w-[800px] rounded-[6px] bg-light-white flex items-center pl-6 pr-4">
+                    <span class="material-symbols-outlined text-dark-gray mr-2">search</span>
+                    <input type="text" placeholder="Search by medicine name or categories"
+                      class="w-full py-2.5 bg-light-white text-black placeholder:text-medium-gray border-none focus:outline-none focus:ring-0" />
+                  </div>
+
+                  <div class="custom-dropdown relative z-10">
+                    <button
+                      class="custom-dropdown-btn flex items-center border border-slate-gray rounded-md p-2 cursor-pointer">
+                      <span class="material-symbols-outlined">tune</span>
+                    </button>
+                    <div
+                      class="custom-dropdown-option absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44">
+                      <div class="p-2 pl-4 flex justify-between items-center hover:bg-violet-sky hover:text-white rounded">Custom date
+                        <span class="material-symbols-outlined">calendar_today</span>
+                      </div>
+                      <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded ">1 Week</div>
+                      <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded">1 Month</div>
+                      <div class="p-2 pl-4 hover:bg-violet-sky hover:text-white rounded">1 Year</div>
+                    </div>
+                  </div>
+
+
+                </div>
+              </div>
+              <!-- Table -->
+              <div class="relative max-h-[calc(9*2rem)] overflow-y-auto overflow-x-auto no-scrollbar">
+                <table class="table-auto min-w-full text-sm text-dark-gray whitespace-nowrap">
+                  <thead class="bg-violet-sky  text-white">
+                    <tr>
+                      <th class="text-center px-4 py-4 border-r border-white">Date & Time</th>
+                      <th class="px-4 py-4 text-center border-r border-white">
+                        Ticket ID
+                        <img src="/static/images/sort-alt.svg" alt="sort" class="inline ml-2" />
+                      </th>
+                      <th class="text-center px-4 py-4 border-r border-white">Issue Type</th>
+                      <th class="text-center px-4 py-4 border-r border-white">
+                        Status
+                        <img src="/static/images/sort-alt.svg" alt="sort" class="inline ml-2" />
+                      </th>
+                      <th class="text-center px-4 py-4 border-r border-white">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-snow-gray text-dark-gray text-[16px]">
+                    <tr>
+                      <td class="px-4 py-2.5 text-center">
+                        20 Mar 2025<br />10:30 AM,
+                      </td>
+                      <td class="px-4 py-2.5 text-center">#34234212</td>
+
+                      <td class="px-4 py-2.5 text-center">Payment Issue</td>
+                      <td class="px-4 py-2.5 text-center">Open</td>
+                      <td class="px-4 py-2.5 text-center">
+
+                        <span class="material-symbols-outlined text-dark-gray cursor-pointer"
+                          onclick="openModal()">visibility</span>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class="px-4 py-2.5 text-center">
+                        20 Mar 2025<br />10:30 AM,
+                      </td>
+                      <td class="px-4 py-2.5 text-center">#34234212</td>
+
+                      <td class="px-4 py-2.5 text-center">Payment Issue</td>
+                      <td class="px-4 py-2.5 text-center">In-progress</td>
+                      <td class="px-4 py-2.5 text-center">
+
+                        <span class="material-symbols-outlined text-dark-gray cursor-pointer"
+                          onclick="openModal()">visibility</span>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class="px-4 py-2.5 text-center">
+                        20 Mar 2025<br />10:30 AM,
+                      </td>
+                      <td class="px-4 py-2.5 text-center">#34234212</td>
+
+                      <td class="px-4 py-2.5 text-center">Payment Issue</td>
+                      <td class="px-4 py-2.5 text-center">Resolved</td>
+                      <td class="px-4 py-2.5 text-center">
+
+                        <span class="material-symbols-outlined text-dark-gray cursor-pointer"
+                          onclick="openModal()">visibility</span>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class="px-4 py-2.5 text-center">
+                        20 Mar 2025<br />10:30 AM,
+                      </td>
+                      <td class="px-4 py-2.5 text-center">#34234212</td>
+
+                      <td class="px-4 py-2.5 text-center">Payment Issue</td>
+                      <td class="px-4 py-2.5 text-center">Closed</td>
+                      <td class="px-4 py-2.5 text-center">
+
+                        <span class="material-symbols-outlined text-dark-gray cursor-pointer"
+                          onclick="openModal()">visibility</span>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class="px-4 py-2.5 text-center">
+                        20 Mar 2025<br />10:30 AM,
+                      </td>
+                      <td class="px-4 py-2.5 text-center">#34234212</td>
+
+                      <td class="px-4 py-2.5 text-center">Payment Issue</td>
+                      <td class="px-4 py-2.5 text-center">Open</td>
+                      <td class="px-4 py-2.5 text-center">
+
+                        <span class="material-symbols-outlined text-dark-gray cursor-pointer"
+                          onclick="openModal()">visibility</span>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class="px-4 py-2.5 text-center">
+                        20 Mar 2025<br />10:30 AM,
+                      </td>
+                      <td class="px-4 py-2.5 text-center">#34234212</td>
+
+                      <td class="px-4 py-2.5 text-center">Payment Issue</td>
+                      <td class="px-4 py-2.5 text-center">In-progress</td>
+                      <td class="px-4 py-2.5 text-center">
+
+                        <span class="material-symbols-outlined text-dark-gray cursor-pointer"
+                          onclick="openModal()">visibility</span>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class="px-4 py-2.5 text-center">
+                        20 Mar 2025<br />10:30 AM,
+                      </td>
+                      <td class="px-4 py-2.5 text-center">#34234212</td>
+
+                      <td class="px-4 py-2.5 text-center">Payment Issue</td>
+                      <td class="px-4 py-2.5 text-center">Resolved</td>
+                      <td class="px-4 py-2.5 text-center">
+
+                        <span class="material-symbols-outlined text-dark-gray cursor-pointer"
+                          onclick="openModal()">visibility</span>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class="px-4 py-2.5 text-center">
+                        20 Mar 2025<br />10:30 AM,
+                      </td>
+                      <td class="px-4 py-2.5 text-center">#34234212</td>
+
+                      <td class="px-4 py-2.5 text-center">Payment Issue</td>
+                      <td class="px-4 py-2.5 text-center">Closed</td>
+                      <td class="px-4 py-2.5 text-center">
+
+                        <span class="material-symbols-outlined text-dark-gray cursor-pointer"
+                          onclick="openModal()">visibility</span>
+                      </td>
+
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div
+                  class="view-modal fixed inset-0 bg-opacity-70 bg-black/30 flex items-center justify-center z-50 hidden">
+                  <div class="bg-white w-[90%] max-w-md rounded-lg shadow-lg view-modal-content">
+
+                    <!-- Header -->
+                    <div class="bg-violet-sky text-white p-4 rounded-t-lg relative">
+                      <h2 class="text-lg font-semibold text-center">Ticket Details</h2>
+
+                    </div>
+
+                    <hr class="border-dashed border-gray-400 my-10">
+                    <div class="mt-4 text-sm pl-6">
+
+                      <div class="flex mb-1">
+                        <div class="w-32 font-bold text-dark-gray text-base">Ticket ID:</div>
+                        <div class="w-4 flex justify-center items-center font-bold text-dark-gray">:</div>
+                        <div class="flex-1 text-sm font-normal text-jet-black ml-3">#34234212</div>
+                      </div>
+
+                      <div class="flex mb-1">
+                        <div class="w-32 font-bold text-dark-gray text-base">Issue Type</div>
+                        <div class="w-4 flex justify-center items-center font-bold text-dark-gray">:</div>
+                        <div class="flex-1 text-sm font-normal text-jet-black ml-3">Payment Issue</div>
+                      </div>
+
+                      <div class="flex mb-1">
+                        <div class="w-32 font-bold text-dark-gray text-base">Status</div>
+                        <div class="w-4 flex justify-center items-center font-bold text-dark-gray">:</div>
+                        <div class="flex-1 text-sm font-normal text-jet-black ml-3">In-progress</div>
+                      </div>
+
+                      <div class="flex mb-1">
+                        <div class="w-32 font-bold text-dark-gray text-base">Date & Time</div>
+                        <div class="w-4 flex justify-center items-center font-bold text-dark-gray">:</div>
+                        <div class="flex-1 text-sm font-normal text-jet-black ml-3">20 Mar 2025, 10:38 AM</div>
+                      </div>
+                    </div>
+                    <hr class="border-dashed border-gray-400 my-10">
+
+                    <div class="mt-4 text-sm pl-6">
+
+                      <div class="flex mb-1">
+                        <div class="w-32 font-bold text-dark-gray text-base">Description</div>
+                        <div class="w-4 flex justify-center items-center font-bold text-dark-gray">:</div>
+                        <div class="flex-1 text-sm font-normal text-jet-black ml-3">Your payment is under process</div>
+                      </div>
+
+                      <div class="flex mb-1 items-center">
+                        <div class="w-32 font-bold text-dark-gray text-base">Uploaded Image</div>
+                        <div class="w-4 flex justify-center items-center font-bold text-dark-gray">:</div>
+                        <div class="flex-1 text-sm font-normal text-jet-black ml-3">
+                          <div
+                            class="w-16 h-16 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden border border-dashed border-violet-sky ">
+                            <img src="/static/images/Nimin-tablet.png" alt="Uploaded Issue"
+                              class="object-cover w-full h-full" />
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                    <hr class="border-dashed border-gray-400 my-10">
+                    <p class="text-center text-sm my-4">*This is a system-generated document.*</p>
+
+
+
+                  </div>
+
+                </div>
+              </div>
+              <div class="flex justify-center items-center gap-2 mt-6">
+                <button
+                  class="text-gray-500 px-4 py-2 text-xs font-normal rounded-md cursor-not-allowed">Previous</button>
+                <button class="bg-violet-sky  text-white px-4 py-2 rounded-md">1</button>
+                <button class="bg-pagination text-white px-4 py-2 rounded-md">2</button>
+                <button class="bg-pagination text-white px-4 py-2 rounded-md">3</button>
+                <button class="text-gray-500 px-4 py-2 text-xs font-normal rounded-md">Next</button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Contact Support Div -->
+          <div class="contact-support tab-content pt-8 space-y-6 hidden">
+            <!-- Email Support -->
+            <div class="flex items-center gap-2 justify-between w-full">
+              <div class="w-1/2 flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-violet-sky ">
+                    mail
+                  </span>
+                  <p class="text-sm font-semibold">Email Support</p>
+                </div>
+                <p class="font-normal text-sm text-medium-gray">Send us a detailed email, and we’ll get back to you
+                  within 24 hours.</p>
+              </div>
+              <!-- Button to Open Email Support Popup -->
+              <div class="w-1/2 flex items-center justify-end">
+                <button onclick="document.querySelector('.emailPopup').classList.remove('hidden')"
+                  class="support-btn-help2">
+                  Contact by Email
+                </button>
+              </div>
+
+              <!-- Email Support Popup -->
+              <div
+                class="emailPopup fixed inset-0 bg-opacity-70 bg-black/30 flex items-center justify-center z-50 hidden">
+                <div class="bg-white w-[90%] max-w-md rounded-lg shadow-lg">
+
+                  <!-- Header -->
+                  <div class="bg-violet-sky text-white p-4 rounded-t-lg relative">
+                    <h2 class="text-lg font-semibold text-center">Email Support</h2>
+
+                    <!-- Close Button (Top Right) -->
+                    <button onclick="document.querySelector('.emailPopup').classList.add('hidden')"
+                      class="absolute top-3 right-3 text-white text-2xl font-semibold">
+                      &times;
+                    </button>
+                  </div>
+
+                  <!-- Form Fields -->
+                  <div class="p-4 space-y-6">
+
+                    <!-- Email Address Field -->
+                    <div>
+                      <label for="email" class="block text-base font-semibold text-dark-gray">Email Address</label>
+                      <input type="email" id="email" placeholder="Contactsupport@gmail.com"
+                        class="w-full border border-dark-gray p-2 rounded mt-1 placeholder:text-sm placeholder:font-semibold placeholder:text-light-gray1" />
+                    </div>
+
+
+                    <!-- Description Field -->
+                    <div>
+                      <label for="description" class="block text-base font-semibold text-dark-gray">Description</label>
+                      <textarea id="description" rows="4"
+                        class="w-full border border-dark-gray p-2 rounded mt-1"></textarea>
+                    </div>
+
+                    <!-- Send Button -->
+                    <div class="flex justify-end cursor-pointer">
+                      <button class="bg-violet-sky text-white font-semibold px-8 py-2 rounded-md"
+                        onclick="sendEmailSupport()">
+                        Send
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+            <!-- Chat Support   -->
+            <div class="flex items-center gap-2 justify-between w-full">
+              <div class="w-1/2 flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-violet-sky ">
+                    forum
+                  </span>
+                  <p class="text-sm font-semibold">Chat Support</p>
+                </div>
+                <p class="font-normal text-sm text-medium-gray">Connect with our support team in real-time.</p>
+              </div>
+              <div class="w-1/2 flex items-center justify-end">
+                <button class="support-btn-help2">
+                  Start Chat
+                </button>
+              </div>
+            </div>
+            <!-- Call Support   -->
+
+            <!-- FAQ Section  -->
+            <div class="flex items-center gap-2 justify-between w-full">
+              <div class="w-1/2 flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-violet-sky ">
+                    quiz
+                  </span>
+                  <p class="text-sm font-semibold">FAQ Section</p>
+                </div>
+                <p class="font-normal text-sm text-medium-gray">Quick Answers.</p>
+              </div>
+              <div class="w-1/2 flex items-center justify-end">
+                <div class="w-full max-w-[360px] h-[48px] rounded-[6px] text-sm flex items-center justify-center">
+                  <a href="#" class="underline text-violet-sky  font-normal">
+                    Click to read More/Hide
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative mt-6 flex items-center rounded-md w-full">
+              <input type="text" class="flex-grow px-4 py-2 bg-gray-100 border border-slate-400 rounded-md pr-10"
+                placeholder="Search by Ticket ID or Issue Type" />
+              <span class="absolute right-3 top-2 text-slate-400">
+                <span class="material-symbols-outlined">
+                  search
+                </span>
+              </span>
+            </div>
+
+
+
+            <div class="mt-4 rounded-md w-full account-subscription border border-violet-sky ">
+              <div class="flex items-center justify-between p-4 cursor-pointer toggle-subscription">
+                <h2 class="text-xl font-bold whitespace-nowrap">Account & Subscription</h2>
+                <span class="material-symbols-outlined chevron-icon transition-transform">expand_more</span>
+              </div>
+              <div class="subscription-content p-4 hidden">
+                <div class="mb-4">
+                  <h3 class="font-semibold">Q: How do I create an account?</h3>
+                  <p class="text-base">
+                    A: Click on "Sign Up" and follow the registration process by entering your details.
+                  </p>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Q: How do I upgrade to a premium subscription?</h3>
+                  <p class="text-base">
+                    A: Go to the Subscription section under Settings and choose a plan.
+                  </p>
+                </div>
+                <div>
+                  <h3 class="font-semibold mt-4">Q: What is the Avatar system?</h3>
+                  <p class="text-base">
+                    A: The Avatar system is a platform where users can create personalized avatars using video, photos,
+                    and voice.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class=" mt-4 rounded-md w-full avatar-creation border border-violet-sky ">
+              <div class="flex items-center justify-between p-4 cursor-pointer toggle-avatar">
+                <h2 class="text-xl font-bold whitespace-nowrap">Avatar & Creation</h2>
+                <span class="material-symbols-outlined chevron-icon transition-transform">expand_more</span>
+              </div>
+              <div class="avatar-content p-4 hidden">
+                <div class="mb-4">
+                  <h3 class="font-semibold">Q: What inputs are required to create an avatar?</h3>
+                  <p class="text-base">
+                    A: You need to upload a photo or take a live picture, provide a voice sample, and optionally a short
+                    video.
+                  </p>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Q: How can I edit my avatar?</h3>
+                  <p class="text-base">
+                    A: Go to the My Avatar section and "Edit Avatar".
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 rounded-md w-full troubleshooting-section border border-violet-sky ">
+              <div class="flex items-center justify-between p-4 cursor-pointer toggle-troubleshooting">
+                <h2 class="text-xl font-bold whitespace-nowrap">Troubleshooting</h2>
+                <span class="material-symbols-outlined chevron-icon transition-transform">expand_more</span>
+              </div>
+              <div class="troubleshooting-content p-4 hidden">
+                <div class="mb-4">
+                  <h3 class="font-semibold">
+                    Q: My avatar isn't syncing with my profile. What should I do?
+                  </h3>
+                  <p class="text-base">
+                    A: Ensure your account is verified. If the problem persists, contact support.
+                  </p>
+                </div>
+                <div>
+                  <h3 class="font-semibold">
+                    Q: Why is my avatar voice not accurate?
+                  </h3>
+                  <p class="text-base">
+                    A: Try re-uploading the voice sample or check the microphone settings during recording.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 rounded-md w-full billing-payments-section border border-violet-sky ">
+              <div class="flex items-center justify-between p-4 cursor-pointer toggle-billing-payments">
+                <h2 class="text-xl font-bold whitespace-nowrap">Billing & Payments</h2>
+                <span class="material-symbols-outlined chevron-icon transition-transform">expand_more</span>
+              </div>
+              <div class="billing-payments-content p-4 hidden">
+                <div class="mb-4">
+                  <h3 class="font-semibold">
+                    Q: What payment methods are accepted?
+                  </h3>
+                  <p class="text-base">
+                    A: We accept credit/debit cards, PayPal, and other major payment gateways.
+                  </p>
+                </div>
+                <div>
+                  <h3 class="font-semibold">
+                    Q: I was charged twice. How can I get a refund?
+                  </h3>
+                  <p class="text-base">
+                    A: Contact Billing Support through the Support page and provide your payment receipt.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 rounded-md w-full mb-10 support-contact-section border border-violet-sky ">
+              <div class="flex items-center justify-between p-4 cursor-pointer toggle-support-contact">
+                <h2 class="text-xl font-bold whitespace-nowrap">Support & Contact</h2>
+                <span class="material-symbols-outlined chevron-icon transition-transform">expand_more</span>
+              </div>
+              <div class="support-contact-content p-4 hidden">
+                <div class="mb-4">
+                  <h3 class="font-semibold">Q: How do I contact support?</h3>
+                  <p class="text-base">
+                    A: Use the Email Support, Chat Support, or Phone Support options on the Support page.
+                  </p>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Q: Where can I track my issue tickets?</h3>
+                  <p class="text-base">
+                    A: Go to the Ticket History section on the Support page.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!-- Chat Bubble Button -->
+          {% include 'chat.html' %}
+        </div>
+
+      </div>
+    </div>
+  </main>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/tabs.js' %}"></script>
+  <script src="{% static 'js/help.js' %}"></script>
+{% endblock %}

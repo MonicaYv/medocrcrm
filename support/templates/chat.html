@@ -1,0 +1,43 @@
+            <button
+            class=" z-10 chat-toggle cursor-pointer bg-violet-sky  text-white rounded-full w-10 h-10 flex items-center justify-center fixed bottom-4 right-10 cursor-pointer shadow-lg"
+            onclick="toggleChat()">
+            <span class="material-symbols-outlined">
+              chat_bubble
+            </span>
+          </button>
+
+          <div
+            class="bg-black/30 chat-popup hidden  fixed inset-0 flex items-end justify-end  right-4 bg-opacity-70 z-50">
+            <div
+              class="bg-white w-[70%] max-w-xs shadow-lg p-4 rounded-lg text-black backdrop-blur-sm flex flex-col items-start justify-start h-[550px]">
+
+
+              <div class="chat-header bg-violet-sky  text-white p-4 w-full rounded-t-md relative">
+                <!-- Close button -->
+                <button onclick="document.querySelector('.chat-popup').classList.add('hidden')"
+                  class="absolute top-2 right-2 text-white text-xl font-bold focus:outline-none">
+                  ×
+                </button>
+
+                <p class="font-semibold text-xl">Hi there!</p>
+                <p class="font-semibold text-xl">I am PharmaBot</p>
+                <p class="text-base font-normal text-white mt-3 mb-5">How can I assist you?</p>
+              </div>
+
+
+              <div
+                class="chat-body p-4 border-t-0 border border-violet-sky  rounded-md bg-white text-black w-[90%] mx-auto rounded-b-md shadow -mt-4 relative z-10">
+                <p>Is Cash on Delivery (COD) available?</p>
+                <p class="mt-4">How do I apply a coupon or discount code?</p>
+                <p class="mt-4">How do I get a refund if my order is cancelled?</p>
+              </div>
+              <div class="chat-footer p-4 flex flex-col gap-4 w-full mt-auto">
+                <input type="text" placeholder="Please enter your query"
+                  class="flex-grow p-2 border border-gray-300 rounded" />
+                <div class="flex justify-end">
+                  <button disabled class="bg-light-gray text-medium-gray px-5 py-2 rounded-md">Submit</button>
+                </div>
+              </div>
+
+            </div>
+          </div>

@@ -4,9 +4,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from registration import views
 from dashboard import views as dashboard_views
-from settings import views as settings_views
-from ngopost import views as ngopost_views
-from ngopost.views import post_view, post_detail_ajax
 
 urlpatterns = [
     path('', views.login_page, name='login'),
@@ -14,6 +11,7 @@ urlpatterns = [
     path('user/', include('registration.urls')),
     path('dashboard', dashboard_views.dashboard_home, name='dashboard'),
     path('logout', dashboard_views.logout_view, name='logout'),
+    path('help/', include('support.urls')),
     path('settings/', include('settings.urls')),
     path('posts/', include('ngopost.urls')),
 
