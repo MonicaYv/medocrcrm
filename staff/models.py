@@ -88,21 +88,21 @@ class DoctorsProfile(models.Model):
     email = models.EmailField(max_length=255, null=True, blank=True)
 
     education = models.ForeignKey(
-        "DoctorEducation",
+        "registration.DoctorEducation",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
 
     experience = models.ForeignKey(
-        "DoctorExperience",
+        "registration.DoctorExperience",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
 
     specialization = models.ForeignKey(
-        "DoctorSpeciality",
+        "registration.DoctorSpeciality",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
