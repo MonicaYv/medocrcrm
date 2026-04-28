@@ -139,7 +139,42 @@ class HospitalTiming(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+class PharmacyTypeAssociation(models.Model):
+    pharmacy = models.ForeignKey(
+        'PharmacyProfile',
+        db_column='pharmacy_id',
+        on_delete=models.CASCADE
+    )
+
+    pharmacy_type = models.ForeignKey(
+        'PharmacyType',
+        db_column='type_id',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        db_table = 'pharmacy_profile_types'
+        managed = False
+
+class PharmacyServiceAssociation(models.Model):
+    pharmacy = models.ForeignKey(
+        'PharmacyProfile',
+        db_column='pharmacy_id',
+        on_delete=models.CASCADE
+    )
+
+    pharmacy_service = models.ForeignKey(
+        'PharmacyServices',
+        db_column='service_id',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        db_table = 'pharmacy_profile_services'
+        managed = False
+
+
 class User(models.Model):
     USER_TYPE_CHOICES = [
         ('advertiser', 'Advertiser'),
@@ -191,21 +226,40 @@ class UserAddress(models.Model):
         db_column="user_profile_id"
     )
 
-    address_type = models.CharField(max_length=64, blank=True, null=True)
+    address_type = models.CharField(max_length=64)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255, blank=True, null=True)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
-    country = models.CharField(max_length=128, blank=True, null=True)
-    state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True)
-    city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
-    pincode = models.CharField(max_length=20, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
+
+    phone_number = models.CharField(max_length=20)
+
+    country = models.CharField(max_length=128)
+
+    state = models.ForeignKey(
+        State,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    city = models.ForeignKey(
+        City,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    pincode = models.CharField(max_length=20)
+
+    address = models.TextField()
+
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
 
     class Meta:
         db_table = "registration_useraddress"
+        managed = False
 
     def __str__(self):
-        return f"{self.address_type} - {self.city}"
+        city_name = self.city.name if self.city else ""
+        return f"{self.address_type} - {city_name}"
 
     
 class UserReferral(models.Model):
@@ -313,8 +367,19 @@ class PharmacyProfile(models.Model):
     personal_pan_number = models.CharField(max_length=50, blank=True, null=True)
     website = models.CharField(max_length=255, blank=True, null=True)
     company_name = models.CharField(max_length=255)
-    pharmacy_type = models.ForeignKey(PharmacyType, on_delete=models.CASCADE, blank=True, null=True)
-    services_offered = models.ForeignKey(PharmacyServices, on_delete=models.CASCADE, blank=True, null=True)
+    pharmacy_types = models.ManyToManyField(
+        PharmacyType,
+        through='PharmacyTypeAssociation',
+        related_name='pharmacies',
+        blank=True
+    )
+
+    services = models.ManyToManyField(
+        PharmacyServices,
+        through='PharmacyServiceAssociation',
+        related_name='pharmacies',
+        blank=True
+    )
     pharmacy_timing = models.ForeignKey(PharmacyTiming, on_delete=models.CASCADE, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True)
@@ -348,7 +413,7 @@ class PharmacyProfile(models.Model):
     otp = models.CharField(max_length=64, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.company_name} ({self.user.username})"
+        return f"{self.company_name} ({self.user.email})"
 
 class LabProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, db_column="user_id", related_name="lab_profile",)

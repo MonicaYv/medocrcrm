@@ -25,6 +25,9 @@ def orders(request):
         .select_related(
             "user",
             "assigned_pharmacy",
+            "address",
+            "address__city",
+            "address__state",
         )
         .prefetch_related(
             "medicines",
