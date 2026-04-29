@@ -22,7 +22,9 @@
   data-budget="{{ appointment.budget|default:'' }}"
   data-order-id="R{{ appointment.id }}"
   data-status="{{ appointment.status }}"
->
+  data-distance="{{ appointment.distance|default:'6 km' }}"
+  data-time="{{ appointment.eta|default:'20 mins away' }}"
+  >
 
 
   <div class="flex lg:justify-between items-center flex-col lg:flex-row gap-4">

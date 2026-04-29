@@ -1,5 +1,9 @@
 from django.shortcuts import render
 from dashboard.utils import dashboard_login_required, get_common_context
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.core.paginator import Paginator
+from appointments.models import LabAppointments
 
 # Create your views here.
 
@@ -60,4 +64,51 @@ def ajax_doctor_history(request):
         "html": html,
         "current_page": page_obj.number,
         "total_pages": paginator.num_pages
+    })
+
+@dashboard_login_required
+def ajax_lab_history(request):
+    user = request.user_obj
+
+    status = request.GET.get("status", "accepted").strip().lower()
+    page_number = request.GET.get("page", 1)
+
+    if status == "canceled":
+        status = "cancelled"
+
+    qs = LabAppointments.objects.select_related(
+        "user__userprofile",
+        "test_package",
+        "test_type",
+        "test_description",
+        "address",
+        "user",
+    )
+
+    if status != "all":
+        if status == "missed":
+            qs = qs.none()
+        else:
+            qs = qs.filter(status__iexact=status)
+
+    qs = qs.order_by("-created_at")
+
+    paginator = Paginator(qs, 5)
+    page_obj = paginator.get_page(page_number)
+
+    html = render_to_string(
+        "lab/lab_history_cards.html",
+        {
+            "appointments": page_obj,
+            "page_obj": page_obj,
+        },
+        request=request,
+    )
+
+    return JsonResponse({
+        "html": html,
+        "current_page": page_obj.number,
+        "total_pages": paginator.num_pages,
+        "has_next": page_obj.has_next(),
+        "has_prev": page_obj.has_previous(),
     })
