@@ -1,0 +1,217 @@
+{% load static %}
+{% with address=order.address profile=order.user.userprofile %}
+<div id="history-order-popup-{{ history_status }}-{{ order.id }}"
+     class="history-order-popup-{{ history_status }}-{{ order.id }} popup-overlay fixed inset-0 bg-black/40 hidden items-center justify-center z-50 px-3">
+    <div class="popup-content rounded-[8px] w-[680px] max-h-[90vh] overflow-y-auto relative shadow-xl bg-white p-4 scroll">
+        <div class="flex justify-between items-center px-6 py-3 border-blue-haze z-10">
+            <h2 class="text-base font-bold">User Information</h2>
+            <div class="flex items-center gap-4">
+                <button type="button" class="cursor-pointer pharmacy-open-share">
+                    <span class="material-symbols-outlined !text-xl">share</span>
+                </button>
+
+                <div class="pharmacy-share-modal hidden fixed inset-0 bg-black/40 z-50 items-center justify-center">
+                    <div class="bg-white w-[520px] rounded-lg shadow-lg p-6 relative">
+                        <div class="flex justify-between items-center">
+                            <p class="font-semibold text-xl">Share</p>
+                            <span class="material-symbols-outlined pharmacy-close-share cursor-pointer">close</span>
+                        </div>
+                        <hr class="mt-4" />
+                        <div class="flex justify-between pt-4">
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/whatsappicon.svg' %}" alt="whatsapp" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">Whatsapp</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/telegramicon.svg' %}" alt="telegram" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">Telegram</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/facebookicon.svg' %}" alt="facebook" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">Facebook</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/smsicon.svg' %}" alt="message" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">Message</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/gmailicon.svg' %}" alt="email" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">E-mail</p>
+                            </div>
+                        </div>
+                        <div class="pt-4 relative mt-6">
+                            <input type="text"
+                                   class="pharmacy-share-link w-full rounded-md p-4 text-sm border"
+                                   value="Order #{{ order.id }} - {{ order.get_order_status_display }} - Total ₹{{ order.final_amount|default:order.total_amount|default:'0.00' }}"
+                                   disabled />
+                            <button type="button" class="pharmacy-copy-btn absolute right-3 top-6 bg-dodger-blue text-white rounded-md p-2">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <span class="close-popup material-symbols-outlined close-icon cursor-pointer text-black text-[13.15px]"
+                      data-popup="history-order-popup-{{ history_status }}-{{ order.id }}">close</span>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="rounded-[12px] p-4 space-y-6">
+                <div class="bg-blue-50 p-4 rounded-md flex flex-wrap gap-4">
+                    <div class="flex flex-col w-[96px]">
+                        {% if profile.profile_photo_path %}
+                            <img src="{{ profile.profile_photo_path }}" alt="customer" class="w-[92px] h-[92px] rounded-md object-cover">
+                        {% else %}
+                            <img src="{% static 'images/user.svg' %}" alt="customer" class="w-[92px] h-[92px] rounded-md object-contain bg-white">
+                        {% endif %}
+                        <p class="font-normal text-sm text-center pt-4">
+                            {% if address %}{{ address.first_name }} {{ address.last_name|default:"" }}{% else %}Customer{% endif %}
+                        </p>
+                        <p class="font-normal text-sm text-center pt-2">#{{ order.id }}</p>
+                    </div>
+
+                    <div class="flex flex-col gap-4 w-[180px]">
+                        <div class="flex gap-2">
+                            <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-dodger-blue !text-lg">person</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-spanish-gray">Gender</p>
+                                <p class="font-normal text-sm">{{ profile.gender|default:"Not added" }}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-dodger-blue !text-lg">hourglass</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-spanish-gray">Age</p>
+                                <p class="font-normal text-sm">{{ profile.age|default:"Not added" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-4 flex-1 min-w-[220px]">
+                        <div class="flex gap-2">
+                            <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-dodger-blue !text-lg">call</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
+                                <p class="font-normal text-sm">
+                                    {% if address.phone_number %}
+                                        {{ address.phone_number }}
+                                    {% elif order.user.phone_number %}
+                                        {{ order.user.phone_country_code|default:"" }} {{ order.user.phone_number }}
+                                    {% else %}
+                                        Not added
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
+                                <img src="{% static 'images/address-icon.svg' %}" alt="address">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-spanish-gray">Address</p>
+                                <p class="font-normal text-sm">
+                                    {% if address %}
+                                        {{ address.address }}, {{ address.city.name|default:"" }} {{ address.state.name|default:"" }} {{ address.pincode }}
+                                    {% else %}
+                                        Not added
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="mt-4 text-blue-haze">
+
+                <div class="enquiredDetail">
+                    <div class="flex flex-col mt-4 py-4 gap-4">
+                        <div class="flex justify-center items-center gap-1">
+                            <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                            <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+                            <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                            <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+                            <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between mx-20">
+                            <p class="text-ebony font-normal text-sm">Enquiry</p>
+                            <p class="text-ebony font-normal text-sm">Ongoing</p>
+                            {% if history_status == "cancelled" %}
+                                <p class="text-ebony font-normal text-sm">No-Show</p>
+                            {% else %}
+                                <p class="text-ebony font-normal text-sm">Completed</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    {% for med in order.medicines.all %}
+                        <div class="flex items-start gap-3 border-b border-grayish-gray pb-3">
+                            <div class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
+                                <img src="{% static 'images/medicine.svg' %}" alt="medicine" class="h-[92px] w-[92px]" />
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-ebony font-semibold text-sm mb-1">{{ med.product_name|default:med.medicine_id }}</p>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-sm font-regular text-blue-gray">{{ med.quantity }} unit</span>
+                                    {% if med.requires_prescription %}
+                                        <span class="px-2 py-0.5 rounded-md bg-dark-crimson-red text-white text-[8px]">Prescription Needed</span>
+                                    {% else %}
+                                        <span class="px-2 py-0.5 rounded-md bg-ocean-green text-white text-[8px]">No Prescription</span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-ebony font-regular text-sm">₹{{ med.price }}</span>
+                                    {% if med.mrp and med.mrp != med.price %}
+                                        <span class="text-arctic-gray font-regular text-sm line-through">₹{{ med.mrp }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-center text-gray-400">No medicines added in this order.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="flex items-center justify-center gap-2">
+                    {% if history_status == "cancelled" %}
+                        <p class="text-center text-base text-piano-black font-bold">You missed the Order</p>
+                        <img src="{% static 'images/missed.svg' %}" alt="missed icon" class="w-[18px] h-[18px]" />
+                    {% else %}
+                        <p class="text-center text-base text-piano-black font-bold">You have completed Order</p>
+                        <img src="{% static 'images/ok.svg' %}" alt="ok icon" class="w-[18px] h-[18px]" />
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <span class="text-ebony font-regular text-sm">
+                        Total <span class="text-dodger-blue font-semibold text-sm">₹{{ order.final_amount|default:order.total_amount|default:"0.00" }}</span>
+                    </span>
+                    <button type="button" class="flex items-center gap-2 h-[30px] p-2 rounded-[8px] border border-dodger-blue bg-pale-azure text-vivid-blue">
+                        <span class="text-sm font-regular text-ebony">View Invoice</span>
+                        <img src="{% static 'images/view.svg' %}" alt="visibility icon" class="w-[16px] h-[16px]" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="border border-light-grayish-blue rounded-[12px] p-4">
+                <div class="flex items-center gap-3 rounded-[12px]">
+                    <div class="w-[48px] h-[48px] flex items-center justify-center rounded-full border border-dodger-blue bg-pale-azure">
+                        <span class="material-symbols-outlined text-dodger-blue text-[24px]">phone</span>
+                    </div>
+                    <div>
+                        <p class="text-blue-gray font-regular text-base mb-1">Need help with anything?</p>
+                        <p class="text-ebony font-semibold text-base">Call: (239) 555-0108</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endwith %}
