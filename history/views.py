@@ -1,9 +1,13 @@
-from django.shortcuts import render
-from dashboard.utils import dashboard_login_required, get_common_context
-from django.http import JsonResponse
-from django.template.loader import render_to_string
 from django.core.paginator import Paginator
-from appointments.models import LabAppointments
+from django.db.models import Prefetch, Q
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.template.loader import render_to_string
+
+from appointments.models import DoctorAppointment, LabAppointments
+from dashboard.utils import dashboard_login_required, get_common_context, get_theme_colors
+from orders.models import OrderStatusChoices, PurchaseMedicine, UserPurchase
+from registration.models import PharmacyProfile
 
 # Create your views here.
 
@@ -12,6 +16,38 @@ def history(request):
     user = request.user_obj
     context = get_common_context(request,user)
     if user.user_type == 'pharmacy':
+        pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+        order_scope = Q(assigned_pharmacy=pharmacy_profile)
+
+        base_orders = (
+            UserPurchase.objects
+            .filter(order_scope)
+            .defer(
+                "prescriptions",
+                "doctor_name",
+                "patient_name",
+            )
+            .select_related(
+                "user",
+                "user__userprofile",
+                "assigned_pharmacy",
+                "address",
+                "address__city",
+                "address__state",
+            )
+            .prefetch_related(
+                Prefetch(
+                    "medicines",
+                    queryset=PurchaseMedicine.objects.defer("mongo_snapshot"),
+                )
+            )
+            .order_by("-updated_at", "-created_at")
+        )
+
+        context.update({
+            "completed_orders": base_orders.filter(order_status=OrderStatusChoices.DELIVERED),
+            "cancelled_orders": base_orders.filter(order_status=OrderStatusChoices.CANCELLED),
+        })
         return render(request, 'pharmacy/history.html', context)
     elif user.user_type == 'lab':
         return render(request, 'lab/history.html', context)

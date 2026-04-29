@@ -1,404 +1,289 @@
 {% load static %}
-                        <div
-                            id="order-details-popup"
-                            class="order-details-popup popup-overlay fixed inset-0 bg-black/40 hidden items-center justify-center z-50 px-3">
-                            <div
-                                class="popup-content rounded-[8px] w-[680px] max-h-[90vh] overflow-y-auto relative shadow-xl bg-white p-4 scroll">
-                                <!-- Header -->
+{% with address=order.address profile=order.user.userprofile %}
+<div id="order-details-popup-{{ order.id }}"
+     class="order-details-popup-{{ order.id }} popup-overlay fixed inset-0 bg-black/40 hidden items-center justify-center z-50 px-3">
+    <div class="popup-content rounded-[8px] w-[680px] max-h-[90vh] overflow-y-auto relative shadow-xl bg-white p-4 scroll">
+        <div class="flex justify-between items-center px-6 py-3 border-blue-haze z-10">
+            <h2 class="text-base font-bold">User Information</h2>
+            <div class="flex items-center gap-4">
+                <button type="button" class="cursor-pointer pharmacy-open-share">
+                    <span class="material-symbols-outlined !text-xl">share</span>
+                </button>
 
+                <div class="pharmacy-share-modal hidden fixed inset-0 bg-black/40 z-50 items-center justify-center">
+                    <div class="bg-white w-[520px] rounded-lg shadow-lg p-6 relative">
+                        <div class="flex justify-between items-center">
+                            <p class="font-semibold text-xl">Share</p>
+                            <span class="material-symbols-outlined pharmacy-close-share cursor-pointer">close</span>
+                        </div>
+                        <hr class="mt-4" />
+                        <div class="flex justify-between pt-4">
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/whatsappicon.svg' %}" alt="whatsapp" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">Whatsapp</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/telegramicon.svg' %}" alt="telegram" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">Telegram</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/facebookicon.svg' %}" alt="facebook" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">Facebook</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/smsicon.svg' %}" alt="message" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">Message</p>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 w-20 text-center">
+                                <img src="{% static 'images/gmailicon.svg' %}" alt="email" class="w-10 h-10 cursor-pointer" />
+                                <p class="text-base text-dark-gray">E-mail</p>
+                            </div>
+                        </div>
+                        <div class="pt-4 relative mt-6">
+                            <input type="text"
+                                   class="pharmacy-share-link w-full rounded-md p-4 text-sm border"
+                                   value="Order #{{ order.id }} - {{ order.get_order_status_display }} - Total ₹{{ order.final_amount|default:order.total_amount|default:'0.00' }}"
+                                   disabled />
+                            <button type="button" class="pharmacy-copy-btn absolute right-3 top-6 bg-dodger-blue text-white rounded-md p-2">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                                <div class="flex justify-between items-center px-6 py-3  border-blue-haze z-10">
-                                    <h2 class="text-base font-bold">User Information</h2>
-                                    <div class="flex items-center gap-4">
-                                        <button class="cursor-pointer pharmacy-open-share">
-                                            <span class="material-symbols-outlined !text-xl">share</span>
-                                        </button>
+                <span class="close-popup material-symbols-outlined close-icon cursor-pointer text-black text-[13.15px]"
+                      data-popup="order-details-popup-{{ order.id }}">close</span>
+            </div>
+        </div>
 
-                                        <!-- Pharmacy Share Popup -->
-                                        <div
-                                            class="pharmacy-share-modal hidden fixed inset-0 bg-black/40 z-50 items-center justify-center">
+        <div class="space-y-4">
+            <div class="rounded-[12px] p-4 space-y-6">
+                <div class="bg-blue-50 p-4 rounded-md flex flex-wrap gap-4">
+                    <div class="flex flex-col w-[96px]">
+                        {% if profile.profile_photo_path %}
+                            <img src="{{ profile.profile_photo_path }}" alt="customer" class="w-[92px] h-[92px] rounded-md object-cover">
+                        {% else %}
+                            <img src="{% static 'images/user.svg' %}" alt="customer" class="w-[92px] h-[92px] rounded-md object-contain bg-white">
+                        {% endif %}
+                        <p class="font-normal text-sm text-center pt-4">
+                            {% if address %}{{ address.first_name }} {{ address.last_name|default:"" }}{% else %}Customer{% endif %}
+                        </p>
+                        <p class="font-normal text-sm text-center pt-2">#{{ order.id }}</p>
+                    </div>
 
-                                            <div class="bg-white w-[520px] rounded-lg shadow-lg p-6 relative">
+                    <div class="flex flex-col gap-4 w-[180px]">
+                        <div class="flex gap-2">
+                            <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-dodger-blue !text-lg">person</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-spanish-gray">Gender</p>
+                                <p class="font-normal text-sm">{{ profile.gender|default:"Not added" }}</p>
+                            </div>
+                        </div>
 
-                                                <!-- Header -->
-                                                <div class="flex justify-between items-center">
-                                                    <p class="font-semibold text-xl">Share</p>
-                                                    <span
-                                                        class="material-symbols-outlined pharmacy-close-share cursor-pointer">
-                                                        close
-                                                    </span>
-                                                </div>
+                        <div class="flex gap-2">
+                            <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-dodger-blue !text-lg">hourglass</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-spanish-gray">Age</p>
+                                <p class="font-normal text-sm">{{ profile.age|default:"Not added" }}</p>
+                            </div>
+                        </div>
+                    </div>
 
-                                                <hr class="mt-4" />
+                    <div class="flex flex-col gap-4 flex-1 min-w-[220px]">
+                        <div class="flex gap-2">
+                            <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-dodger-blue !text-lg">call</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
+                                <p class="font-normal text-sm">
+                                    {% if address.phone_number %}
+                                        {{ address.phone_number }}
+                                    {% elif order.user.phone_number %}
+                                        {{ order.user.phone_country_code|default:"" }} {{ order.user.phone_number }}
+                                    {% else %}
+                                        Not added
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
 
-                                                <!-- Share Icons -->
-                                                <div class="flex justify-between pt-4">
-                                                    <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                                        <img src="/static/images/whatsappicon.svg"
-                                                            class="w-10 h-10 cursor-pointer" />
-                                                        <p class="text-base text-dark-gray">Whatsapp</p>
-                                                    </div>
+                        <div class="flex gap-2">
+                            <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
+                                <img src="{% static 'images/address-icon.svg' %}" alt="address">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-spanish-gray">Address</p>
+                                <p class="font-normal text-sm">
+                                    {% if address %}
+                                        {{ address.address }}, {{ address.city.name|default:"" }} {{ address.state.name|default:"" }} {{ address.pincode }}
+                                    {% else %}
+                                        Not added
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                                    <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                                        <img src="/static/images/telegramicon.svg"
-                                                            class="w-10 h-10 cursor-pointer" />
-                                                        <p class="text-base text-dark-gray">Telegram</p>
-                                                    </div>
+                <hr class="mt-4 text-blue-haze">
 
-                                                    <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                                        <img src="/static/images/facebookicon.svg"
-                                                            class="w-10 h-10 cursor-pointer" />
-                                                        <p class="text-base text-dark-gray">Facebook</p>
-                                                    </div>
+                <div class="open-order-map flex items-center justify-between p-[12px] border border-light-gray2 rounded-[8px] cursor-pointer"
+                     data-address="{% if address %}{{ address.address }}, {{ address.city.name|default:'' }}, {{ address.state.name|default:'' }}, {{ address.pincode }}{% endif %}">
+                    <div class="flex items-center gap-3">
+                        <img src="{% static 'images/map_button.svg' %}" alt="map icon" class="w-[33px] h-[30px]" />
+                        <div>
+                            <p class="text-raisin-black text-sm">
+                                Delivering to <span class="font-semibold">{{ address.address_type|default:"Customer address" }}</span>
+                            </p>
+                            <p class="text-jet-black text-xs">
+                                {% if address %}{{ address.city.name|default:"" }}, {{ address.state.name|default:"" }}{% else %}Address not added{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-dark-gray text-[18px]">chevron_right</span>
+                </div>
 
-                                                    <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                                        <img src="/static/images/smsicon.svg"
-                                                            class="w-10 h-10 cursor-pointer" />
-                                                        <p class="text-base text-dark-gray">Message</p>
-                                                    </div>
+                <div class="p-[12px] border border-light-gray2 rounded-[8px] qr-section">
+                    <div class="flex items-center justify-between cursor-pointer qr-toggle">
+                        <div>
+                            <p class="text-ebony font-bold text-sm">QR Code for Payment</p>
+                            <p class="text-ebony font-medium text-xs">
+                                Date: {{ order.created_at|date:"D, d M Y - g:i A" }}
+                            </p>
+                        </div>
+                        <span class="material-symbols-outlined pl-[6.43px] text-dark-gray qr-icon">expand_more</span>
+                    </div>
+                    <div class="qr-content hidden mt-4 w-full flex justify-center items-center">
+                        <img src="{% static 'images/sample-qr.png' %}" alt="Payment QR" class="w-[160px] h-[160px] object-contain mx-auto" />
+                    </div>
+                </div>
 
-                                                    <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                                        <img src="/static/images/gmailicon.svg"
-                                                            class="w-10 h-10 cursor-pointer" />
-                                                        <p class="text-base text-dark-gray">E-mail</p>
-                                                    </div>
-                                                </div>
+                <div class="enquiredDetail">
+                    <div class="flex flex-col mt-4 py-4 gap-4">
+                        <div class="flex justify-center items-center gap-1">
+                            <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+                            <div class="w-2 h-2 {% if order.order_status == 'pending' %}bg-blue-haze{% else %}bg-dodger-blue{% endif %} rounded-full"></div>
+                            <div class="w-[138px] h-0.5 {% if order.order_status == 'pending' %}bg-blue-haze{% else %}bg-dodger-blue{% endif %}"></div>
+                            <div class="w-2 h-2 {% if order.order_status == 'delivered' %}bg-dodger-blue{% else %}bg-blue-haze{% endif %} rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-blue-haze"></div>
+                            <div class="w-2 h-2 {% if order.order_status == 'cancelled' %}bg-dodger-blue{% else %}bg-blue-haze{% endif %} rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between mx-10">
+                            <p class="pl-6 text-ebony font-normal text-sm">Enquiry</p>
+                            <p class="pl-2 text-ebony font-normal text-sm">Ongoing</p>
+                            <p class="text-arctic-gray font-normal text-sm">Completed</p>
+                            <p class="text-arctic-gray font-normal text-sm">Cancel/Expired</p>
+                        </div>
+                    </div>
+                </div>
 
-                                                <!-- Copy Link -->
-                                                <div class="pt-4 relative mt-6">
-                                                    <input type="text"
-                                                        class="pharmacy-share-link w-full rounded-md p-4 text-sm border"
-                                                        value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci"
-                                                        disabled />
-
-                                                    <button
-                                                        class="pharmacy-copy-btn absolute right-3 top-6 bg-dodger-blue text-white rounded-md p-2">
-                                                        Copy
-                                                    </button>
-                                                </div>
-
-                                            </div>
-                                        </div>
-
-
-                                        <span
-                                            class="close-popup material-symbols-outlined close-icon cursor-pointer text-black text-[13.15px]"
-                                            data-popup="order-details-popup">close</span>
-                                    </div>
+                <div class="space-y-3">
+                    {% for med in order.medicines.all %}
+                        <div class="flex items-start gap-3 border-b border-grayish-gray pb-3">
+                            <div class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
+                                <img src="{% static 'images/medicine.svg' %}" alt="medicine" class="h-[92px] w-[92px]" />
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-ebony font-semibold text-sm mb-1">{{ med.product_name|default:med.medicine_id }}</p>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-sm font-regular text-blue-gray">{{ med.quantity }} unit</span>
+                                    {% if med.requires_prescription %}
+                                        <span class="px-2 py-0.5 rounded-md bg-dark-crimson-red text-white text-[8px]">Prescription Needed</span>
+                                    {% else %}
+                                        <span class="px-2 py-0.5 rounded-md bg-ocean-green text-white text-[8px]">No Prescription</span>
+                                    {% endif %}
                                 </div>
-                                <!-- Content -->
-                                <div class="space-y-4">
-                                    <div class="rounded-[12px] p-4 space-y-6">
-                                        <!-- Customer Info -->
-                                        <div class="bg-blue-50 p-4 rounded-md flex gap-4">
-                                            <div class="flex flex-col ">
-                                                <img src="/static/images/dolly-paris1.svg" alt="">
-                                                <p class="font-normal text-sm text-center pt-4">Dolly Paris</p>
-                                                <p class="font-normal text-sm text-center pt-2">#8942</p>
-
-                                            </div>
-
-                                            <div class="flex flex-col gap-4 w-[180px]">
-                                                <div class="flex  gap-2">
-                                                    <div
-                                                        class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
-                                                        <span
-                                                            class="material-symbols-outlined text-dodger-blue !text-lg">
-                                                            female
-                                                        </span>
-                                                    </div>
-                                                    <div class="flex flex-col gap-2">
-                                                        <p class="font-normal text-xs text-spanish-gray">Gender</p>
-                                                        <p class="font-normal text-sm">Female</p>
-                                                    </div>
-                                                </div>
-
-                                                <div class="flex  gap-2">
-                                                    <div
-                                                        class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
-                                                        <span
-                                                            class="material-symbols-outlined text-dodger-blue !text-lg">
-                                                            hourglass
-                                                        </span>
-                                                    </div>
-                                                    <div class="flex flex-col gap-2">
-                                                        <p class="font-normal text-xs text-spanish-gray">Age</p>
-                                                        <p class="font-normal text-sm">25</p>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-
-                                            <div class="flex flex-col gap-4">
-                                                <div class="flex  gap-2">
-                                                    <div
-                                                        class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
-                                                        <span
-                                                            class="material-symbols-outlined text-dodger-blue !text-lg">
-                                                            call
-                                                        </span>
-                                                    </div>
-                                                    <div class="flex flex-col gap-2">
-                                                        <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
-                                                        <p class="font-normal text-sm">+91 7737533456</p>
-                                                    </div>
-                                                </div>
-
-                                                <div class="flex  gap-2">
-                                                    <div
-                                                        class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
-                                                        <img src="/static/images/address-icon.svg" alt="">
-                                                    </div>
-                                                    <div class="flex flex-col gap-2">
-                                                        <p class="font-normal text-xs text-spanish-gray">Address</p>
-                                                        <p class="font-normal text-sm">123 maple los Angeles, CA 90001
-                                                            usa
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-
-                                        <hr class="mt-4 text-blue-haze">
-
-
-                                        <!-- Delivery Location -->
-                                        <div id="openMap"
-                                            class="flex items-center justify-between p-[12px] border border-light-gray2 rounded-[8px] cursor-pointer">
-
-                                            <div class="flex items-center gap-3">
-                                                <img src="/static/images/map_button.svg" alt="map icon"
-                                                    class="w-[33px] h-[30px]" />
-                                                <div>
-                                                    <p class="text-raisin-black text-sm">Delivering to <span
-                                                            class="font-semibold">Saket Enclave</span> </p>
-                                                    <p class="text-jet-black text-xs">Chhijarpur, New Delhi</p>
-                                                </div>
-                                            </div>
-
-                                            <span class="material-symbols-outlined text-dark-gray text-[18px]">
-                                                chevron_right
-                                            </span>
-                                        </div>
-
-                                        <!-- QR Code Section -->
-                                        <div class="p-[12px] border border-light-gray2 rounded-[8px] qr-section">
-
-                                            <!-- Header -->
-                                            <div class="flex items-center justify-between cursor-pointer qr-toggle">
-                                                <div>
-                                                    <p class="text-ebony font-bold text-sm">QR Code for Payment</p>
-                                                    <p class="text-ebony font-medium text-xs">
-                                                        Date: Tue, 25 June 2025 - 11:32 AM
-                                                    </p>
-                                                </div>
-                                                <span
-                                                    class="material-symbols-outlined pl-[6.43px] text-dark-gray qr-icon">
-                                                    expand_more
-                                                </span>
-                                            </div>
-
-                                            <!-- QR CONTENT -->
-                                            <div class="qr-content hidden mt-4 w-full flex justify-center items-center">
-                                                <img src="/static/images/sample-qr.png" alt="Payment QR"
-                                                    class="w-[160px] h-[160px] object-contain mx-auto" />
-                                            </div>
-
-                                        </div>
-
-                                        <!-- Progress Bar -->
-                                        <div class="enquiredDetail">
-                                            <div class="flex flex-col mt-4 py-4 gap-4">
-                                                <!-- Progress Bar -->
-                                                <div class="flex justify-center items-center gap-1">
-                                                    <!-- Enquiry -->
-                                                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                                                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-
-                                                    <!-- Appointment -->
-                                                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                                                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-
-                                                    <!-- Completed -->
-                                                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                                                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-
-                                                    <!-- Cancel/Expired -->
-                                                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                                                </div>
-
-                                                <!-- Labels (text colors unchanged) -->
-                                                <div class="flex items-center justify-between mx-10">
-                                                    <p class="pl-6 text-ebony font-normal text-sm">Enquiry</p>
-                                                    <p class="pl-2 text-ebony font-normal text-sm">Ongoing
-                                                    </p>
-                                                    <p class="text-arctic-gray font-normal text-sm">Completed</p>
-                                                    <p class="text-arctic-gray font-normal text-sm">Cancel/Expired</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- Medicine Items -->
-                                        <div class="space-y-3">
-                                            <!-- Item 1 -->
-                                            <div class="flex items-start gap-3 border-b border-grayish-gray pb-3">
-                                                <div
-                                                    class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
-                                                    <img src="/static/images/medicine.svg" alt="medicine"
-                                                        class="h-[92px] w-[92px]" />
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p class="text-ebony font-semibold text-sm mb-1">Shelcal 500mg Strip
-                                                        of
-                                                        15 Ta...</p>
-                                                    <div class="flex items-center gap-2 mb-2">
-                                                        <span class="text-sm font-regular text-blue-gray">1x1
-                                                            unit</span>
-                                                        <span
-                                                            class="px-2 py-0.5 rounded-md bg-dark-crimson-red text-white text-[8px]">Prescription
-                                                            Needed</span>
-                                                        <img src="/static/images/view.svg" alt="visibility icon"
-                                                            class="w-[16px] h-[16px]" />
-                                                    </div>
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="text-ebony font-regular text-sm">$20.00</span>
-                                                        <span
-                                                            class="text-arctic-gray font-regular text-sm line-through">$30.00</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- Item 2 -->
-                                            <div class="flex items-start gap-3 border-b border-grayish-gray pb-3">
-                                                <div
-                                                    class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
-                                                    <img src="/static/images/medicine.svg" alt="medicine"
-                                                        class="h-[92px] w-[92px]" />
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p class="text-ebony font-semibold text-sm mb-1">Shelcal 500mg Strip
-                                                        of
-                                                        15 Ta...</p>
-                                                    <div class="flex items-center gap-2 mb-2">
-                                                        <span class="text-sm font-regular text-blue-gray">1x1
-                                                            unit</span>
-                                                        <span
-                                                            class="px-2 py-0.5 rounded-md bg-ocean-green text-white text-[8px]">
-                                                            Prescription Received</span>
-                                                        <img src="/static/images/view.svg" alt="visibility icon"
-                                                            class="w-[16px] h-[16px]" />
-
-                                                    </div>
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="text-ebony font-regular text-sm">$15.00</span>
-                                                        <span
-                                                            class="text-arctic-gray font-regular text-sm line-through">$25.00</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- Item 3 -->
-                                            <div class="flex items-start gap-3 border-b border-grayish-gray pb-3">
-                                                <div
-                                                    class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
-                                                    <img src="/static/images/medicine.svg" alt="medicine"
-                                                        class="h-[92px] w-[92px]" />
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p class="text-ebony font-semibold text-sm mb-1">Shelcal 500mg Strip
-                                                        of
-                                                        15 Ta...</p>
-                                                    <div class="flex items-center gap-2 mb-2">
-                                                        <span class="text-sm font-regular text-blue-gray">1x1
-                                                            unit</span>
-                                                        <span
-                                                            class="px-2 py-0.5 rounded-md bg-ocean-green text-white text-[8px]">
-                                                            Prescription Received</span>
-                                                        <img src="/static/images/view.svg" alt="visibility icon"
-                                                            class="w-[16px] h-[16px]" />
-                                                    </div>
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="text-ebony font-regular text-sm">$10.00</span>
-                                                        <span
-                                                            class="text-arctic-gray font-regular text-sm line-through">$18.00</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="pt-4 flex flex-col gap-2">
-                                            <div class="flex justify-between items-center">
-                                                <p class="font-normal text-sm">Order ID</p>
-                                                <p class="font-normal text-sm">6 km</p>
-                                            </div>
-                                            <div class="flex justify-between items-center">
-                                                <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                                                <p class="font-normal text-sm">20 mins away</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="flex justify-between items-center mt-4">
-                                            <label class="flex items-center gap-2 cursor-pointer">
-
-                                                <span class="font-normal text-sm">No Show</span>
-                                                <input type="checkbox"
-                                                    class="w-4 h-4 accent-dodger-blue rounded cursor-pointer">
-                                            </label>
-                                            <p class="font-normal text-sm text-spanish-gray">Customer didn’t show up</p>
-                                        </div>
-
-                                        <div class="mt-2 flex justify-between items-center">
-                                            <div class="flex gap-2 items-center">
-                                                <p class="font-normal text-sm">Total</p>
-                                                <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
-                                            </div>
-                                            <div
-                                                class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
-                                                <p class="font-normal text-sm">View Invoice</p>
-                                                <span class="material-symbols-outlined !text-lg">visibility</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Action Buttons -->
-                                    <div class="flex justify-center gap-3">
-                                        <button
-                                            class="close-popup w-[160px] px-6 py-3 rounded-[8px] bg-dodger-blue text-white text-[15px] popup-btn"
-                                            data-popup="order-details-popup">
-                                            Complete
-                                        </button>
-
-                                        <button
-                                            class="close-popup w-[160px] close-popup px-6 py-3 rounded-[8px] border border-strong-red text-strong-red text-[15px] popup-btn"
-                                            data-popup="cancel-order-popup">
-                                            Cancel Order
-                                        </button>
-                                    </div>
-                                    <!--cancel order Popup-->
-                                    <div
-                                        class="cancel-order-popup popup-overlay fixed inset-0 bg-black/40 hidden items-center justify-center z-50 px-3">
-                                        <div
-                                            class="popup-content rounded-[8px] w-[616px] overflow-y-auto relative shadow-xl bg-white p-4 scroll">
-                                            <div class="absolute right-4 close-popup" data-popup="cancel-order-popup">
-                                                <span class="material-symbols-outlined cursor-pointer">close</span>
-                                            </div>
-                                            <!-- Icon -->
-                                            <div class="flex items-center justify-center mb-4">
-                                                <div
-                                                    class="w-[60px] h-[60px] rounded-full bg-rosewater flex items-center justify-center">
-                                                    <img src="/static/images/cancelorder-icon.svg"
-                                                        alt="cancelorder icon" class="w-[32px] h-[32px] " />
-                                                </div>
-                                            </div>
-                                            <!-- Message -->
-                                            <p class="text-center text-dark-gray font-regular text-base mb-6">
-                                                Are you sure you want to cancel this order ?
-                                            </p>
-                                            <!-- Cancel Button -->
-                                            <button
-                                                class="block mx-auto w-[198px] px-6 py-3 rounded-[6px] bg-rosewater text-error font-semibold text-base"
-                                                id="confirmCancelOrder">
-                                                Cancel Order
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-ebony font-regular text-sm">₹{{ med.price }}</span>
+                                    {% if med.mrp and med.mrp != med.price %}
+                                        <span class="text-arctic-gray font-regular text-sm line-through">₹{{ med.mrp }}</span>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
+                    {% empty %}
+                        <p class="text-center text-gray-400">No medicines added in this order.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="pt-4 flex flex-col gap-2">
+                    <div class="flex justify-between items-center">
+                        <p class="font-normal text-sm">Order ID</p>
+                        <p class="font-normal text-sm">{{ order.delivery_type|default:"regular"|title }}</p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <p class="font-normal text-sm text-blue-gray">Order #{{ order.id }}</p>
+                        <p class="font-normal text-sm">{{ order.get_order_status_display }}</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <span class="font-normal text-sm">No Show</span>
+                        <input type="checkbox" class="w-4 h-4 accent-dodger-blue rounded cursor-pointer">
+                    </label>
+                    <p class="font-normal text-sm text-spanish-gray">Customer did not show up</p>
+                </div>
+
+                <div class="mt-2 flex justify-between items-center">
+                    <div class="flex gap-2 items-center">
+                        <p class="font-normal text-sm">Total</p>
+                        <p class="font-normal text-sm text-dodger-blue">₹{{ order.final_amount|default:order.total_amount|default:"0.00" }}</p>
+                    </div>
+                    <div class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
+                        <p class="font-normal text-sm">View Invoice</p>
+                        <span class="material-symbols-outlined !text-lg">visibility</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-3">
+                {% if order.order_status != "delivered" %}
+                    <form method="post" action="{% url 'update_order_status' order.id 'complete' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="w-[160px] px-6 py-3 rounded-[8px] bg-dodger-blue text-white text-[15px]">
+                            Complete
+                        </button>
+                    </form>
+                {% endif %}
+
+                {% if order.order_status != "cancelled" %}
+                    <button type="button"
+                            class="w-[160px] px-6 py-3 rounded-[8px] border border-strong-red text-strong-red text-[15px] popup-btn"
+                            data-popup="cancel-order-popup-{{ order.id }}">
+                        Cancel Order
+                    </button>
+                {% endif %}
+            </div>
+
+            <div class="cancel-order-popup-{{ order.id }} popup-overlay fixed inset-0 bg-black/40 hidden items-center justify-center z-50 px-3">
+                <div class="popup-content rounded-[8px] w-[616px] overflow-y-auto relative shadow-xl bg-white p-4 scroll">
+                    <div class="absolute right-4 close-popup" data-popup="cancel-order-popup-{{ order.id }}">
+                        <span class="material-symbols-outlined cursor-pointer">close</span>
+                    </div>
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="w-[60px] h-[60px] rounded-full bg-rosewater flex items-center justify-center">
+                            <img src="{% static 'images/cancelorder-icon.svg' %}" alt="cancel order icon" class="w-[32px] h-[32px]" />
+                        </div>
+                    </div>
+                    <p class="text-center text-dark-gray font-regular text-base mb-6">
+                        Are you sure you want to cancel order #{{ order.id }}?
+                    </p>
+                    <form method="post" action="{% url 'update_order_status' order.id 'cancel' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="block mx-auto w-[198px] px-6 py-3 rounded-[6px] bg-rosewater text-error font-semibold text-base">
+                            Cancel Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endwith %}
