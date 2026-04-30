@@ -1,0 +1,42 @@
+{% if appointments %}
+  {% for appointment in appointments %}
+    {% include "partials/appointment-cards.html" %}
+  {% endfor %}
+
+  <div class="flex justify-center items-center gap-6 mt-8">
+
+    {% if page_obj.has_previous %}
+      <button
+        class="page-btn text-sm font-medium text-jet-black hover:underline"
+        data-page="{{ page_obj.previous_page_number }}">
+        Previous
+      </button>
+    {% else %}
+      <span class="text-sm text-spanish-gray opacity-40 cursor-not-allowed">
+        Previous
+      </span>
+    {% endif %}
+
+    <span class="w-9 h-9 flex items-center justify-center rounded-lg bg-dodger-blue text-white text-sm font-semibold">
+      {{ page_obj.number }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <button
+        class="page-btn text-sm font-medium text-jet-black hover:underline"
+        data-page="{{ page_obj.next_page_number }}">
+        Next
+      </button>
+    {% else %}
+      <span class="text-sm text-spanish-gray opacity-40 cursor-not-allowed">
+        Next
+      </span>
+    {% endif %}
+
+  </div>
+
+{% else %}
+  <p class="text-center text-spanish-gray mt-10">
+    No appointments found
+  </p>
+{% endif %}

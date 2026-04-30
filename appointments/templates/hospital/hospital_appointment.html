@@ -12,38 +12,17 @@
                     </span>
                 </div>
                 <div class="bg-white shadow-(--box-shadow-5) rounded-[10px] p-5 max-w-full">
-                    <div class="setting-header">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined"> clarify </span>
-                            <p class="font-medium text-xl">Appointments</p>
-                        </div>
-
-
-                    </div>
 
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between w-full gap-4 mt-8">
 
-                        <!-- Tabs -->
-                        <div class="flex flex-wrap gap-2 lg:gap-4">
-                            <button
-                                class="tab-btn-hospital active-tab-hospital text-sm sm:text-18-nr px-4 py-1.5 font-semibold cursor-pointer text-dark-gray"
-                                data-tab="all">All</button>
-                            <button
-                                class="tab-btn-hospital text-sm sm:text-18-nr px-4 py-1.5 font-medium cursor-pointer text-dark-gray"
-                                data-tab="missed">Missed</button>
-                            <button
-                                class="tab-btn-hospital text-sm sm:text-18-nr px-4 py-1.5 font-medium cursor-pointer text-dark-gray"
-                                data-tab="canceled">Cancelled</button>
-                            <button
-                                class="tab-btn-hospital text-sm sm:text-18-nr px-4 py-1.5 font-medium cursor-pointer text-dark-gray"
-                                data-tab="pending">Pending</button>
-                            <button
-                                class="tab-btn-hospital text-sm sm:text-18-nr px-4 py-1.5 font-medium cursor-pointer text-dark-gray"
-                                data-tab="equipment">Bed Inventory</button>
+                        <!-- Title -->
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-dark-gray">assignment</span>
+                            <p class="font-semibold text-xl text-jet-black">Appointments</p>
                         </div>
 
                         <!-- Search + Filter Section -->
-                        <div class="flex items-center gap-3 sm:gap-4 w-full lg:w-auto">
+                        <div class="flex items-center gap-3 sm:gap-4 w-full lg:w-auto justify-end">
                             <!-- Search Input -->
                             <div class="flex items-center w-full lg:w-[300px] h-10 rounded-[6px] bg-light-white px-2">
                                 <span class="material-symbols-outlined text-dark-gray">search</span>
@@ -61,8 +40,7 @@
                                     class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
                                     <div
                                         class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-dodger-blue hover:text-white rounded">
-                                        Custom date<span
-                                            class="material-symbols-outlined calendar-icon">calendar_today</span>
+                                        Custom date<span class="material-symbols-outlined calendar-icon">calendar_today</span>
                                     </div>
                                     <div class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                                         1 Week
