@@ -1,6 +1,6 @@
 import json
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 from dashboard.utils import dashboard_login_required, get_common_context
@@ -29,6 +29,7 @@ def services(request):
     context = get_common_context(request, user)
 
     if user.user_type == 'pharmacy':
+        pharmacy_profile = user.pharmacyprofile
         master_medicine = MONGO_COLLECTIONS["master_medicine"]
         pipeline = [
             {
@@ -56,10 +57,30 @@ def services(request):
                 medicine_map[row["category"]] = sorted(row["medicines"])
 
         context["medicine_categories"] = sorted(categories)
-        context["medicine_map"] = medicine_map
+        context["medicine_map"] = json.dumps(medicine_map)
 
         types = MedicineType.objects.filter(is_active=True).values_list("name", flat=True)
         context["medicine_types"] = list(types)
+
+        medicines = PharmacyMedicine.objects.filter(
+            pharmacy=pharmacy_profile,
+            is_active=True
+        ).order_by("-updated_at", "-created_at")
+
+        sub = SellerSubscription.objects.filter(
+            seller_type="pharmacy",
+            seller_profile_id=pharmacy_profile.id,
+            is_active=True,
+            is_enabled=True
+        ).first()
+
+        context.update({
+            "pharmacy_profile": pharmacy_profile,
+            "pharmacy_medicines": medicines,
+            "has_pharmacy_medicines": medicines.exists(),
+            "has_premium": bool(sub and not sub.is_expired),
+            "subscription": sub,
+        })
         return render(request, 'pharmacy/services.html', context)
     
     elif user.user_type == 'lab':
@@ -312,7 +333,7 @@ def save_doctor_services(request):
 
 @dashboard_login_required
 def get_pharmacy_medicines(request):
-    pharmacy = request.user_obj.pharmacy_profile
+    pharmacy = request.user_obj.pharmacyprofile
 
     medicines = PharmacyMedicine.objects.filter(
         pharmacy=pharmacy,
@@ -343,28 +364,60 @@ def save_pharmacy_medicines(request):
     except json.JSONDecodeError:
         return JsonResponse({"success": False}, status=400)
 
-    pharmacy = request.user_obj.pharmacy_profile
+    pharmacy = request.user_obj.pharmacyprofile
     services = data.get("services", [])
 
-    PharmacyMedicine.objects.filter(
-        pharmacy=pharmacy
-    ).update(is_active=False)
+    if not isinstance(services, list):
+        return JsonResponse({"success": False, "error": "Invalid services"}, status=400)
 
+    saved = []
     for s in services:
-        PharmacyMedicine.objects.create(
-            pharmacy=pharmacy,
-            category=s["category"],
-            name=s["name"],
-            type=s["type"],
-            quantity=s["quantity"],
-            price=s["price"]
-        )
+        category = str(s.get("category", "")).strip()
+        name = str(s.get("name", "")).strip()
+        med_type = str(s.get("type", "")).strip()
+        quantity = str(s.get("quantity", "")).strip()
+        price = s.get("price") or 0
 
+        if not all([category, name, med_type, quantity]):
+            continue
+
+        obj = PharmacyMedicine.objects.create(
+            pharmacy=pharmacy,
+            category=category,
+            name=name,
+            type=med_type,
+            quantity=quantity,
+            price=price
+        )
+        saved.append({
+            "id": obj.id,
+            "category": obj.category,
+            "name": obj.name,
+            "type": obj.type,
+            "quantity": obj.quantity,
+            "price": str(obj.price),
+        })
+
+    return JsonResponse({"success": True, "medicines": saved})
+
+
+@dashboard_login_required
+@require_POST
+def delete_pharmacy_medicine(request, medicine_id):
+    pharmacy = request.user_obj.pharmacyprofile
+    medicine = get_object_or_404(
+        PharmacyMedicine,
+        id=medicine_id,
+        pharmacy=pharmacy,
+        is_active=True
+    )
+    medicine.is_active = False
+    medicine.save(update_fields=["is_active", "updated_at"])
     return JsonResponse({"success": True})
 
 @dashboard_login_required
 def pharmacy_dropdowns(request):
-    pharmacy = request.user_obj.pharmacy_profile
+    pharmacy = request.user_obj.pharmacyprofile
 
     medicines = PharmacyMedicine.objects.filter(
         pharmacy=pharmacy,

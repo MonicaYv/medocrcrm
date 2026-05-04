@@ -24,7 +24,9 @@
                             <div class="flex flex-col gap-2">
                                 <div id="location" class="font-normal text-base flex items-center gap-2">
                                     <span class="material-symbols-outlined !text-base"> location_on </span>
-                                    <span id="location-text">Fetching location...</span>
+                                    <span id="location-text">
+                                        {% if pharmacy_profile.city %}{{ pharmacy_profile.city.name }}, {% endif %}{{ pharmacy_profile.country|default:"India" }}
+                                    </span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <p>Auto Bid </p>
@@ -50,16 +52,21 @@
                         <!--Hospital Image and Admin Details-->
                         <div class="flex flex-col lg:flex-row gap-3 w-full lg:h-[494px]">
                             <div class="relative flex-1">
-                                <img src="/static/images/lab-bg.png" alt="Lab" class="w-full h-full object-cover rounded-lg">
+                                {% if pharmacy_profile.storefront_image_path %}
+                                    <img src="{{ pharmacy_profile.storefront_image_path }}" alt="{{ pharmacy_profile.company_name }}" class="w-full h-full object-cover rounded-lg">
+                                {% else %}
+                                    <img src="/static/images/lab-bg.png" alt="{{ pharmacy_profile.company_name }}" class="w-full h-full object-cover rounded-lg">
+                                {% endif %}
                                 <div class="absolute inset-0 flex items-end">
                                     <div class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
                                         <div class="flex flex-col gap-2">
                                             <div class="flex items-center gap-2">
                                                 <span class="material-symbols-outlined">home</span>
-                                                <p class="text-base font-semibold">Lifecare Multispeciality Hospital</p>
+                                                <p class="text-base font-semibold">{{ pharmacy_profile.company_name }}</p>
                                             </div>
                                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                                <p class="font-semibold text-sm">221/A, 2nd Floor, Shanti Nagar Road, Sector 10, Andheri East, <br> Mumbai, Maharashtra – 400093
+                                                <p class="font-semibold text-sm">
+                                                    {{ pharmacy_profile.address|default:"Address not added" }}{% if pharmacy_profile.city %}, {{ pharmacy_profile.city.name }}{% endif %}{% if pharmacy_profile.state %}, {{ pharmacy_profile.state.name }}{% endif %}{% if pharmacy_profile.pincode %} - {{ pharmacy_profile.pincode }}{% endif %}
                                                 </p>
                                             </div>
                                         </div>
@@ -70,7 +77,7 @@
                                 <div class="h-[120px] sm:h-[136px] bg-dodger-blue relative flex flex-col gap-3 px-7 py-6">
                                     <span class="text-sm sm:text-base font-bold text-white">Subscription Details</span>
                                     <span class="text-[30px] sm:text-[35px] font-bold text-white">
-                                        ₹999 <span class="text-sm sm:text-base font-bold text-white">/month</span>
+                                        ₹{{ subscription.price|default:"999" }} <span class="text-sm sm:text-base font-bold text-white">/month</span>
                                     </span>
                                     <div class="absolute right-5 top-4 bg-premium-yellow px-5 py-0.5 text-xs sm:text-sm font-bold text-black rounded-full">
                                         PREMIUM
@@ -137,16 +144,55 @@
                         </div>
 
                         <div class="w-full h-[415px] shadow-17 rounded-lg px-5 py-5">
-                            <h2 class="text-[20px] font-bold text-blue-charcoal">Medicines</h2>
+                            <div class="flex items-center justify-between gap-3">
+                                <h2 class="text-[20px] font-bold text-blue-charcoal">Medicines</h2>
+                                {% if has_pharmacy_medicines %}
+                                    <button class="home-add-service w-12 h-12 bg-dodger-blue rounded-full text-white flex items-center justify-center cursor-pointer shadow-lg">
+                                        <span class="material-symbols-outlined">add</span>
+                                    </button>
+                                {% endif %}
+                            </div>
+                            {% if has_pharmacy_medicines %}
+                                <div class="mt-5 bg-[#F9FAFB] rounded-[10px] w-full p-3">
+                                    <div class="pharmacy-medicine-grid grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        {% for med in pharmacy_medicines %}
+                                            <div class="pharmacy-medicine-card service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2"
+                                                 data-id="{{ med.id }}">
+                                                <div class="flex items-start justify-between w-full">
+                                                    <div class="flex items-center gap-3 min-w-0">
+                                                        <img src="/static/images/medicines-icon.svg" alt="medicines" class="shrink-0">
+                                                        <div class="min-w-0">
+                                                            <h3 class="text-sm sm:text-base font-semibold text-black truncate">{{ med.name }}</h3>
+                                                            <p class="text-xs text-foggy-silver">{{ med.quantity }} | {{ med.type }} | {{ med.category }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
+                                                    <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
+                                                        <button class="delete-pharmacy-medicine w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
+                                                                data-id="{{ med.id }}">
+                                                            <img src="/static/images/delete-icon.svg" alt="delete">
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center w-full">
+                                                    <span class="text-base sm:text-lg text-dodger-blue font-bold">₹{{ med.price }}</span>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% else %}
                             <div class="w-full flex items-center justify-center mt-5">
                                 <div class="flex flex-col items-center gap-6 w-3/4 sm:w-3/5">
                                     <img src="/static/images/services-bg.svg" alt="services">
                                     <span class="text-sm sm:text-base text-center font-normal text-black">At the moment, there are no Services in queue. We'll keep you updated!</span>
                                     <button class="home-add-service w-full max-w-[352px] h-[40px] rounded-lg border border-dodger-blue text-dodger-blue text-xs sm:text-sm font-semibold cursor-pointer">
-                                        Add Services
+                                        Add Medicine
                                     </button>
                                 </div>
                             </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -169,6 +215,18 @@
 {% block extra_js %}
 <script>
     window.MEDICINE_MAP = {{ medicine_map|safe }};
+    window.PHARMACY_MEDICINES = [
+        {% for med in pharmacy_medicines %}
+            {
+                id: {{ med.id }},
+                category: "{{ med.category|escapejs }}",
+                name: "{{ med.name|escapejs }}",
+                type: "{{ med.type|escapejs }}",
+                quantity: "{{ med.quantity|escapejs }}",
+                price: "{{ med.price|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
 </script>
 
   <script src="/static/js/tabs.js"></script>

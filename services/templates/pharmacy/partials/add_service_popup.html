@@ -1,93 +1,16 @@
 {% load static %}
-            <div class="add-service popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden">
-                <div class="popup-content bg-white rounded-[10px] max-w-[533px] h-[590px] p-5 w-full relative flex flex-col gap-3 shadow-17">
-                    <div class="flex items-center justify-between border-b border-dodger-blue pb-4">
-                        <h2 class="text-lg sm:text-[23.4px] font-bold text-desaturated-blue">Add Services</h2>
-                        <span class="material-symbols-outlined text-jet-black close-icon cursor-pointer">close</span>
-                    </div>
-                    <!-- Category Dropdown -->
-                    <div class="mb-4 custom-dropdown">
-                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Category</label>
 
-                        <div class="dropdown-trigger mt-2">
-                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Surgery</span>
-                                <span class="material-symbols-outlined">
-                                    keyboard_arrow_down
-                                </span>
-                            </button>
-
-                            <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Surgery</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Diagnostics</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Consultation</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Donation</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Medicine Name Dropdown -->
-                    <div class="mb-4 custom-dropdown">
-                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Medicine Name</label>
-
-                        <div class="dropdown-trigger mt-2">
-                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Surgery</span>
-                                <span class="material-symbols-outlined">
-                                    keyboard_arrow_down
-                                </span>
-                            </button>
-
-                            <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Surgery</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Diagnostics</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Consultation</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Donation</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Medicine Type Dropdown -->
-                    <div class="mb-4 custom-dropdown">
-                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Medicine Type</label>
-
-                        <div class="dropdown-trigger mt-2">
-                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Surgery</span>
-                                <span class="material-symbols-outlined">
-                                    keyboard_arrow_down
-                                </span>
-                            </button>
-
-                            <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Surgery</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Diagnostics</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Consultation</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Donation</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <!-- Price -->
-                        <div>
-                            <label class="text-base sm:text-lg text-jet-black font-semibold">Quantity</label>
-                            <input type="text"
-                                class="w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
-                                value="10 tablets">
-                        </div>
-                        
-                        <!-- Price -->
-                        <div>
-                            <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
-                            <input type="text"
-                                class="w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
-                                value="₹ 0.00">
-                        </div>
-                    </div>
-
-                    <button class="w-full rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-xs sm:text-sm text-white font-semibold cursor-pointer">
-                        Save
-                    </button>
-                </div>
-            </div>
+<div class="add-service popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden">
+    <div class="popup-content bg-white rounded-[10px] max-w-[533px] h-auto p-5 w-full relative flex flex-col gap-3 shadow-17">
+        <div class="flex items-center justify-between border-b border-dodger-blue pb-4">
+            <h2 class="text-lg sm:text-[23.4px] font-bold text-desaturated-blue">Add Medicine</h2>
+            <span class="material-symbols-outlined text-jet-black close-icon cursor-pointer">close</span>
+        </div>
+        <p class="text-sm text-foggy-silver">
+            Use the Add Medicine flow on this page to create or update your active medicine list.
+        </p>
+        <button type="button" class="home-add-service close-icon w-full rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-xs sm:text-sm text-white font-semibold cursor-pointer">
+            Add Medicine
+        </button>
+    </div>
+</div>
