@@ -22,6 +22,7 @@
   data-budget="{{ appointment.budget|default:'' }}"
   data-order-id="R{{ appointment.id }}"
   data-status="{{ appointment.status }}"
+  data-cancelled-by="{{ appointment.cancelled_by|default:'Doctor' }}"
   data-distance="{{ appointment.distance|default:'6 km' }}"
   data-time="{{ appointment.eta|default:'20 mins away' }}"
   >
