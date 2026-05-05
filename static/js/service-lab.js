@@ -850,5 +850,10 @@ $(document).on('click', '.close-icon', function () {
 });
 
 $(document).on('click', '.add-service-btn', function () {
-  $('.add-service').removeClass('hidden').addClass('flex');
+  const activeTab = $(this).closest('.tabs-inner-content').data('type');
+
+  $('.add-service')
+    .attr('data-active-tab', activeTab)
+    .removeClass('hidden')
+    .addClass('flex');
 });

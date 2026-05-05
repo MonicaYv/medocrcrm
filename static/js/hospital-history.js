@@ -2,26 +2,36 @@ $(document).ready(function () {
   let currentStatus = "accepted";
 
   function loadHospitalHistory(status = "accepted", page = 1) {
-    currentStatus = status;
+  const isDoctorPage = $("#doctor-cards-container").length > 0;
 
-    $("#hospital-cards-container").html(
-      `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
-    );
+  const container = isDoctorPage
+    ? "#doctor-cards-container"
+    : "#hospital-cards-container";
 
-    $.ajax({
-      url: "/history/hospital/history/ajax/",
-      type: "GET",
-      data: { status: status, page: page },
-      success: function (res) {
-        $("#hospital-cards-container").html(res.html);
-      },
-      error: function () {
-        $("#hospital-cards-container").html(
-          `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
-        );
-      }
-    });
-  }
+  const ajaxUrl = isDoctorPage
+    ? "/history/doctor/history/ajax/"
+    : "/history/hospital/history/ajax/";
+
+  currentStatus = status;
+
+  $(container).html(
+    `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
+  );
+
+  $.ajax({
+    url: ajaxUrl,
+    type: "GET",
+    data: { status: status, page: page },
+    success: function (res) {
+      $(container).html(res.html);
+    },
+    error: function () {
+      $(container).html(
+        `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
+      );
+    }
+  });
+}
 
   $(document).on("click", ".page-btn, .prev-btn, .next-btn", function () {
     let page = $(this).data("page");
@@ -477,11 +487,12 @@ $(document).ready(function () {
     }
   });
   /* Open modal on hospital history card click */
-$("#hospital-cards-container").on(
+$("#hospital-cards-container, #doctor-cards-container").on(
   "click",
   ".card-all-pending, .card-all-accepted, .card-all-completed, .card-all-cancelled, .card-all-canceled, .card-all-missed",
   function () {
     const card = $(this);
+    const isDoctorPage = $("#doctor-cards-container").length > 0;
 
     $("#modal-name").text(card.data("name") || "-");
     $("#modal-gender").text(card.data("gender") || "-");
@@ -513,15 +524,14 @@ $("#hospital-cards-container").on(
       address = "-";
     }
     $("#modal-address").text(address);
-
+    if (isDoctorPage) {
+      $("#modal-requirement-label").text("Medical Requirement");
+    } else {
+      $("#modal-requirement-label").text("Test Requirement");
+    }
     $("#modal-service-type").text(card.data("service-type") || "-");
     $("#modal-details").text(card.data("details") || "-");
     const status = (card.data("status") || "").toLowerCase();
-    if (status === "pending") {
-      $("#modal-attachment-row").addClass("hidden");
-    } else {
-      $("#modal-attachment-row").removeClass("hidden");
-    }
     const isCancelled = status === "cancelled" || status === "canceled";
 
     let step1 = "bg-blue-haze";

@@ -9,6 +9,7 @@ from appointments.models import DoctorAppointment, LabAppointments
 from dashboard.utils import dashboard_login_required, get_common_context, get_theme_colors
 from orders.models import OrderStatusChoices, PurchaseMedicine, UserPurchase
 from registration.models import PharmacyProfile
+from registration.models import DoctorProfile
 
 # Create your views here.
 
@@ -73,34 +74,44 @@ def doctor_history_view(request):
 
 @dashboard_login_required
 def ajax_doctor_history(request):
-    user = request.user_obj
-    status = request.GET.get("status", "Accepted")
-    page = request.GET.get("page", 1)
+    status = request.GET.get("status", "accepted").strip().lower()
+    page_number = request.GET.get("page", 1)
 
-    qs = DoctorAppointment.objects.filter(
-        doctor=user,
-        status__iexact=status
-    ).select_related(
+    if status == "canceled":
+        status = "cancelled"
+
+    qs = DoctorAppointment.objects.select_related(
         "user__userprofile",
-        "address"
-    ).order_by("-created_at")
+        "address",
+        "user",
+    )
+
+    if status != "all":
+        if status == "missed":
+            qs = qs.none()
+        else:
+            qs = qs.filter(status__iexact=status)
+
+    qs = qs.order_by("-created_at")
 
     paginator = Paginator(qs, 5)
-    page_obj = paginator.get_page(page)
+    page_obj = paginator.get_page(page_number)
 
     html = render_to_string(
-        "partials/doctor_history_cards.html",
+        "doctor/doctor-history-cards.html",
         {
             "appointments": page_obj,
             "page_obj": page_obj,
         },
-        request=request
+        request=request,
     )
 
     return JsonResponse({
         "html": html,
         "current_page": page_obj.number,
-        "total_pages": paginator.num_pages
+        "total_pages": paginator.num_pages,
+        "has_next": page_obj.has_next(),
+        "has_prev": page_obj.has_previous(),
     })
 
 @dashboard_login_required
