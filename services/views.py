@@ -159,6 +159,15 @@ def save_lab_services(request):
             except LabDays.DoesNotExist:
                 pass
 
+        if not day_obj:
+            day_obj = LabDays.objects.first()
+
+        if not day_obj:
+            return JsonResponse({
+                "success": False,
+                "error": "No LabDays found. Please add at least one day."
+            }, status=400)
+
         obj = LabRatePackage.objects.create(
             lab=lab,
             category=category,
@@ -231,6 +240,11 @@ def get_lab_services(request):
     test_packages = []
     for p in packages:
         test_packages.append({
+            "id": p.id,
+            "type": "test-package",
+            "category_id": p.category.id,
+            "package_id": p.package.id,
+            "days_id": p.days.id if p.days else None,
             "category": p.category.name,
             "package": p.package.name,
             "days": p.days.name if p.days else "",
@@ -244,6 +258,10 @@ def get_lab_services(request):
     collection_modes = []
     for m in modes:
         collection_modes.append({
+            "id": m.id,
+            "type": "collection-mode",
+            "mode_id": m.mode_type.id,
+            "region_id": m.region.id if m.region else None,
             "mode": m.mode_type.name,
             "region": m.region.name if m.region else "",
             "price": str(m.price)
@@ -256,7 +274,77 @@ def get_lab_services(request):
         "collection_modes": collection_modes
     })
 
+@dashboard_login_required
+@require_POST
+def delete_lab_service(request, service_type, service_id):
+    lab = request.user_obj.lab_profile
 
+    if service_type == "test-package":
+        obj = get_object_or_404(
+            LabRatePackage,
+            id=service_id,
+            lab=lab
+        )
+        obj.delete()
+        return JsonResponse({"success": True})
+
+    if service_type == "collection-mode":
+        obj = get_object_or_404(
+            LabRateMode,
+            id=service_id,
+            lab=lab
+        )
+        obj.delete()
+        return JsonResponse({"success": True})
+
+    return JsonResponse({
+        "success": False,
+        "error": "Invalid service type"
+    }, status=400)
+
+@dashboard_login_required
+@require_POST
+def update_lab_service(request, service_type, service_id):
+    lab = request.user_obj.lab_profile
+    data = json.loads(request.body)
+
+    price = data.get("price") or 0
+
+    if service_type == "test-package":
+        obj = get_object_or_404(
+            LabRatePackage,
+            id=service_id,
+            lab=lab
+        )
+
+        category = LabTestCategory.objects.get(id=data.get("category_id"))
+        package = LabTestPackageMaster.objects.get(id=data.get("package_id"))
+
+        obj.category = category
+        obj.package = package
+        obj.price = price
+        obj.save()
+
+        return JsonResponse({"success": True})
+
+    if service_type == "collection-mode":
+        obj = get_object_or_404(
+            LabRateMode,
+            id=service_id,
+            lab=lab
+        )
+
+        mode = LabModeType.objects.get(id=data.get("mode_id"))
+        region = LabRegion.objects.get(id=data.get("region_id"))
+
+        obj.mode_type = mode
+        obj.region = region
+        obj.price = price
+        obj.save()
+
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"success": False}, status=400)
 
 @dashboard_login_required
 @require_POST
@@ -330,6 +418,40 @@ def save_doctor_services(request):
         "visits": saved_visits
     })
 
+@dashboard_login_required
+def get_doctor_services(request):
+    doctor = request.user_obj.doctor_profile
+
+    services = DoctorServiceRate.objects.filter(
+        doctor=doctor
+    ).select_related("category", "service")
+
+    visits = DoctorVisitCharge.objects.filter(
+        doctor=doctor
+    ).select_related("visit_type")
+
+    service_data = []
+    for s in services:
+        service_data.append({
+            "id": s.id,
+            "category": s.category.name,
+            "service": s.service.name,
+            "price": str(s.price),
+        })
+
+    visit_data = []
+    for v in visits:
+        visit_data.append({
+            "id": v.id,
+            "visit_type": v.visit_type.name,
+            "price": str(v.price),
+        })
+
+    return JsonResponse({
+        "success": True,
+        "services": service_data,
+        "visits": visit_data,
+    })
 
 @dashboard_login_required
 def get_pharmacy_medicines(request):

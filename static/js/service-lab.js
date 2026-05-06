@@ -555,8 +555,13 @@ function renderPremiumServices(res) {
   res.test_packages.forEach(i => {
     tpContainer.append(`
       <div class="service-card bg-white border border-frost-white rounded-md shadow-12
-           h-[120px] w-full flex flex-col items-start px-4 py-3 relative"
-           data-id="${i.id || ''}">
+        h-[120px] w-full flex flex-col items-start px-4 py-3 relative"
+        data-id="${i.id || ''}"
+        data-category-id="${i.category_id || ''}"
+        data-package-id="${i.package_id || ''}"
+        data-category-name="${i.category || ''}"
+        data-package-name="${i.package || ''}"
+        data-price="${i.price || ''}">
 
         <div class="flex items-start justify-between w-full border-b border-[#E8E8E8] pb-3">
 
@@ -573,15 +578,16 @@ function renderPremiumServices(res) {
                         w-40 z-20 px-4 shadow-12">
               <button
                 class="open-popup w-full text-left py-2.5 text-ebony text-sm font-semibold
-                       flex items-center gap-3 border-b border-light-grayish-blue cursor-pointer"
+                      flex items-center gap-3 border-b border-[#E8E8E8] cursor-pointer"
                 data-target="add-service">
-                <img src="/static/images/edit-icon.svg" alt="edit">
+                <img src="/static/images/edit-icon.svg" alt="edit" class="w-5 h-5">
                 Edit
               </button>
+
               <button
                 class="delete-btn w-full text-left py-2.5 text-sm text-ebony font-semibold
-                       flex items-center gap-3 cursor-pointer">
-                <img src="/static/images/delete-icon.svg" alt="delete">
+                      flex items-center gap-3 cursor-pointer">
+                <img src="/static/images/delete-icon.svg" alt="delete" class="w-5 h-5">
                 Delete
               </button>
             </div>
@@ -595,15 +601,15 @@ function renderPremiumServices(res) {
       </div>
     `);
   });
-  tpContainer.append(`
-    <div class="flex items-center justify-end col-span-full">
-      <button
-        class="add-service-btn w-14 h-14 bg-dodger-blue rounded-full
-              flex items-center justify-center shadow-lg">
-        <span class="material-symbols-outlined text-white text-3xl">add</span>
-      </button>
-    </div>
-  `);
+  // tpContainer.append(`
+  //   <div class="flex items-center justify-end col-span-full">
+  //     <button
+  //       class="add-service-btn w-14 h-14 bg-dodger-blue rounded-full
+  //             flex items-center justify-center shadow-lg">
+  //       <span class="material-symbols-outlined text-white text-3xl">add</span>
+  //     </button>
+  //   </div>
+  // `);
 
   /* ---------------- Collection Modes ---------------- */
   const cmContainer = $('.premium-section [data-type="collection-mode"] .grid');
@@ -612,8 +618,13 @@ function renderPremiumServices(res) {
   res.collection_modes.forEach(i => {
     cmContainer.append(`
       <div class="service-card bg-white border border-frost-white rounded-md shadow-12
-           h-[120px] w-full flex flex-col items-start px-4 py-3 relative"
-           data-id="${i.id || ''}">
+        h-[120px] w-full flex flex-col items-start px-4 py-3 relative"
+        data-id="${i.id || ''}"
+        data-mode-id="${i.mode_id || ''}"
+        data-region-id="${i.region_id || ''}"
+        data-mode-name="${i.mode || ''}"
+        data-region-name="${i.region || ''}"
+        data-price="${i.price || ''}">
 
         <div class="flex items-start justify-between w-full border-b border-[#E8E8E8] pb-3">
 
@@ -630,15 +641,16 @@ function renderPremiumServices(res) {
                         w-40 z-20 px-4 shadow-12">
               <button
                 class="open-popup w-full text-left py-2.5 text-ebony text-sm font-semibold
-                       flex items-center gap-3 border-b border-light-grayish-blue cursor-pointer"
+                      flex items-center gap-3 border-b border-[#E8E8E8] cursor-pointer"
                 data-target="add-service">
-                <img src="/static/images/edit-icon.svg" alt="edit">
+                <img src="/static/images/edit-icon.svg" alt="edit" class="w-5 h-5">
                 Edit
               </button>
+
               <button
                 class="delete-btn w-full text-left py-2.5 text-sm text-ebony font-semibold
-                       flex items-center gap-3 cursor-pointer">
-                <img src="/static/images/delete-icon.svg" alt="delete">
+                      flex items-center gap-3 cursor-pointer">
+                <img src="/static/images/delete-icon.svg" alt="delete" class="w-5 h-5">
                 Delete
               </button>
             </div>
@@ -652,15 +664,15 @@ function renderPremiumServices(res) {
     `);
 
   });
-  cmContainer.append(`
-    <div class="flex items-center justify-end col-span-full">
-      <button
-        class="add-service-btn w-14 h-14 bg-dodger-blue rounded-full
-              flex items-center justify-center shadow-lg">
-        <span class="material-symbols-outlined text-white text-3xl">add</span>
-      </button>
-    </div>
-  `);
+  // cmContainer.append(`
+  //   <div class="flex items-center justify-end col-span-full">
+  //     <button
+  //       class="add-service-btn w-14 h-14 bg-dodger-blue rounded-full
+  //             flex items-center justify-center shadow-lg">
+  //       <span class="material-symbols-outlined text-white text-3xl">add</span>
+  //     </button>
+  //   </div>
+  // `);
 }
 
 
@@ -673,8 +685,13 @@ function renderNonPremiumServices(res) {
   res.test_packages.forEach(i => {
     tpContainer.append(`
       <div class="service-card bg-white border border-frost-white rounded-md shadow-12
-           h-[120px] w-full flex flex-col items-start px-4 py-3 relative"
-           data-id="${i.id || ''}">
+        h-[120px] w-full flex flex-col items-start px-4 py-3 relative"
+        data-id="${i.id || ''}"
+        data-category-id="${i.category_id || ''}"
+        data-package-id="${i.package_id || ''}"
+        data-category-name="${i.category || ''}"
+        data-package-name="${i.package || ''}"
+        data-price="${i.price || ''}">
 
         <div class="flex items-start justify-between w-full border-b border-[#E8E8E8] pb-3">
 
@@ -691,15 +708,16 @@ function renderNonPremiumServices(res) {
                         w-40 z-20 px-4 shadow-12">
               <button
                 class="open-popup w-full text-left py-2.5 text-ebony text-sm font-semibold
-                       flex items-center gap-3 border-b border-light-grayish-blue cursor-pointer"
+                      flex items-center gap-3 border-b border-[#E8E8E8] cursor-pointer"
                 data-target="add-service">
-                <img src="/static/images/edit-icon.svg" alt="edit">
+                <img src="/static/images/edit-icon.svg" alt="edit" class="w-5 h-5">
                 Edit
               </button>
+
               <button
                 class="delete-btn w-full text-left py-2.5 text-sm text-ebony font-semibold
-                       flex items-center gap-3 cursor-pointer">
-                <img src="/static/images/delete-icon.svg" alt="delete">
+                      flex items-center gap-3 cursor-pointer">
+                <img src="/static/images/delete-icon.svg" alt="delete" class="w-5 h-5">
                 Delete
               </button>
             </div>
@@ -713,15 +731,15 @@ function renderNonPremiumServices(res) {
       </div>
     `);
   });
-  tpContainer.append(`
-    <div class="flex items-center justify-end col-span-full">
-      <button
-        class="add-service-btn w-14 h-14 bg-dodger-blue rounded-full
-              flex items-center justify-center shadow-lg">
-        <span class="material-symbols-outlined text-white text-3xl">add</span>
-      </button>
-    </div>
-  `);
+  // tpContainer.append(`
+  //   <div class="flex items-center justify-end col-span-full">
+  //     <button
+  //       class="add-service-btn w-14 h-14 bg-dodger-blue rounded-full
+  //             flex items-center justify-center shadow-lg">
+  //       <span class="material-symbols-outlined text-white text-3xl">add</span>
+  //     </button>
+  //   </div>
+  // `);
 
   /* ---------------- Collection Modes ---------------- */
   const cmContainer = $('.services-without-subscription [data-type="collection-mode"] .grid');
@@ -730,8 +748,13 @@ function renderNonPremiumServices(res) {
   res.collection_modes.forEach(i => {
     cmContainer.append(`
       <div class="service-card bg-white border border-frost-white rounded-md shadow-12
-           h-[120px] w-full flex flex-col items-start px-4 py-3 relative"
-           data-id="${i.id || ''}">
+        h-[120px] w-full flex flex-col items-start px-4 py-3 relative"
+        data-id="${i.id || ''}"
+        data-mode-id="${i.mode_id || ''}"
+        data-region-id="${i.region_id || ''}"
+        data-mode-name="${i.mode || ''}"
+        data-region-name="${i.region || ''}"
+        data-price="${i.price || ''}">
 
         <div class="flex items-start justify-between w-full border-b border-[#E8E8E8] pb-3">
 
@@ -748,15 +771,16 @@ function renderNonPremiumServices(res) {
                         w-40 z-20 px-4 shadow-12">
               <button
                 class="open-popup w-full text-left py-2.5 text-ebony text-sm font-semibold
-                       flex items-center gap-3 border-b border-light-grayish-blue cursor-pointer"
+                      flex items-center gap-3 border-b border-[#E8E8E8] cursor-pointer"
                 data-target="add-service">
-                <img src="/static/images/edit-icon.svg" alt="edit">
+                <img src="/static/images/edit-icon.svg" alt="edit" class="w-5 h-5">
                 Edit
               </button>
+
               <button
                 class="delete-btn w-full text-left py-2.5 text-sm text-ebony font-semibold
-                       flex items-center gap-3 cursor-pointer">
-                <img src="/static/images/delete-icon.svg" alt="delete">
+                      flex items-center gap-3 cursor-pointer">
+                <img src="/static/images/delete-icon.svg" alt="delete" class="w-5 h-5">
                 Delete
               </button>
             </div>
@@ -770,15 +794,15 @@ function renderNonPremiumServices(res) {
     `);
 
   });
-  cmContainer.append(`
-    <div class="flex items-center justify-end col-span-full">
-      <button
-        class="add-service-btn w-14 h-14 bg-dodger-blue rounded-full
-              flex items-center justify-center shadow-lg">
-        <span class="material-symbols-outlined text-white text-3xl">add</span>
-      </button>
-    </div>
-  `);
+  // cmContainer.append(`
+  //   <div class="flex items-center justify-end col-span-full">
+  //     <button
+  //       class="add-service-btn w-14 h-14 bg-dodger-blue rounded-full
+  //             flex items-center justify-center shadow-lg">
+  //       <span class="material-symbols-outlined text-white text-3xl">add</span>
+  //     </button>
+  //   </div>
+  // `);
 }
 
 
@@ -823,26 +847,79 @@ $(document).on('click', '.more-btn', function (e) {
   e.preventDefault();
   e.stopPropagation();
 
-  // close all open menus first
-  $('.more-dropdown').addClass('hidden');
-
-  // open the menu that belongs to THIS button
   const menu = $(this).next('.more-dropdown');
-  menu.toggleClass('hidden');
+  const isOpen = !menu.hasClass('hidden');
+
+  $('.more-dropdown').addClass('hidden').removeAttr('style');
+
+  if (!isOpen) {
+    menu.removeClass('hidden').css({
+      display: 'block',
+      zIndex: 9999
+    });
+  }
 });
 
 // close menu when clicking outside
-$(document).on('click', function () {
-  $('.more-dropdown').addClass('hidden');
+$(document).on('click', function (e) {
+  if (!$(e.target).closest('.more-btn, .more-dropdown').length) {
+    $('.more-dropdown').addClass('hidden').removeAttr('style');
+  }
 });
 
-
-
 $(document).on('click', '.open-popup', function (e) {
+  e.preventDefault();
   e.stopPropagation();
 
-  const target = $(this).data('target'); // "add-service"
-  $('.' + target).removeClass('hidden').addClass('flex');
+  $('.more-dropdown').addClass('hidden').removeAttr('style');
+
+  const card = $(this).closest('.service-card');
+  const activeTab = $(this).closest('.tabs-inner-content').data('type') || 'test-packages';
+  const popup = $('.add-service');
+
+  popup
+    .attr('data-active-tab', activeTab)
+    .attr('data-edit-id', card.data('id'))
+    .attr('data-edit-type', activeTab === 'collection-mode' ? 'collection-mode' : 'test-package');
+
+  popup.find('.selected-text').removeAttr('data-id');
+  popup.find('input[type="text"]').val(card.data('price') || '₹ 0.00');
+
+  const dropdowns = popup.find('.custom-dropdown');
+
+  if (activeTab === 'test-packages') {
+    dropdowns.eq(0).show().find('label').text('Select Category');
+    dropdowns.eq(1).show().find('label').text('Select Service');
+
+    populateDropdown(dropdowns.eq(0), window.LAB_DATA.categories);
+    populateDropdown(dropdowns.eq(1), window.LAB_DATA.packages);
+
+    dropdowns.eq(0).find('.selected-text')
+      .text(card.data('category-name') || 'Select Category')
+      .attr('data-id', card.data('category-id'));
+
+    dropdowns.eq(1).find('.selected-text')
+      .text(card.data('package-name') || 'Select Service')
+      .attr('data-id', card.data('package-id'));
+  }
+
+  if (activeTab === 'collection-mode') {
+    dropdowns.eq(0).show().find('label').text('Select Collection Mode');
+    dropdowns.eq(1).show().find('label').text('Select Region');
+
+    populateDropdown(dropdowns.eq(0), window.LAB_DATA.modes);
+    populateDropdown(dropdowns.eq(1), window.LAB_DATA.regions);
+
+    dropdowns.eq(0).find('.selected-text')
+      .text(card.data('mode-name') || 'Select Collection Mode')
+      .attr('data-id', card.data('mode-id'));
+
+    dropdowns.eq(1).find('.selected-text')
+      .text(card.data('region-name') || 'Select Region')
+      .attr('data-id', card.data('region-id'));
+  }
+
+  popup.removeClass('hidden').addClass('flex');
 });
 
 $(document).on('click', '.close-icon', function () {
@@ -850,10 +927,182 @@ $(document).on('click', '.close-icon', function () {
 });
 
 $(document).on('click', '.add-service-btn', function () {
+  const activeTab = $(this).closest('.tabs-inner-content').data('type') || 'test-packages';
+  const popup = $('.add-service');
+  popup.removeAttr('data-edit-id').removeAttr('data-edit-type');
+  popup.attr('data-active-tab', activeTab);
+
+  popup.find('.selected-text').removeAttr('data-id');
+  popup.find('input[type="text"]').val('₹ 0.00');
+
+  const dropdowns = popup.find('.custom-dropdown');
+
+  if (activeTab === 'test-packages') {
+    dropdowns.eq(0).show().find('label').text('Select Category');
+    dropdowns.eq(1).show().find('label').text('Select Service');
+
+    dropdowns.eq(0).find('.selected-text').text('Select Category');
+    dropdowns.eq(1).find('.selected-text').text('Select Service');
+
+    populateDropdown(dropdowns.eq(0), window.LAB_DATA.categories);
+    populateDropdown(dropdowns.eq(1), window.LAB_DATA.packages);
+  }
+
+  if (activeTab === 'collection-mode') {
+    dropdowns.eq(0).show().find('label').text('Select Collection Mode');
+    dropdowns.eq(1).show().find('label').text('Select Region');
+
+    dropdowns.eq(0).find('.selected-text').text('Select Collection Mode');
+    dropdowns.eq(1).find('.selected-text').text('Select Region');
+
+    populateDropdown(dropdowns.eq(0), window.LAB_DATA.modes);
+    populateDropdown(dropdowns.eq(1), window.LAB_DATA.regions);
+  }
+
+  popup.removeClass('hidden').addClass('flex');
+});
+
+$(document).on('click', '#popup-save-service', function () {
+  const popup = $('.add-service');
+  const activeTab = popup.attr('data-active-tab') || 'test-packages';
+
+  const editId = popup.attr('data-edit-id');
+  const editType = popup.attr('data-edit-type');
+
+  let price = popup.find('input[type="text"]').val() || "0";
+  price = price.replace(/[₹,]/g, '').trim() || "0";
+
+  let payload = {};
+
+  if (activeTab === 'test-packages') {
+    const categoryId = popup.find('.custom-dropdown').eq(0).find('.selected-text').data('id');
+    const packageId = popup.find('.custom-dropdown').eq(1).find('.selected-text').data('id');
+
+    if (!categoryId || !packageId) {
+      toastr.error("Please select category and service");
+      return;
+    }
+
+    payload = {
+      category_id: categoryId,
+      package_id: packageId,
+      price: price
+    };
+  }
+
+  if (activeTab === 'collection-mode') {
+    const modeId = popup.find('.custom-dropdown').eq(0).find('.selected-text').data('id');
+    const regionId = popup.find('.custom-dropdown').eq(1).find('.selected-text').data('id');
+
+    if (!modeId || !regionId) {
+      toastr.error("Please select mode and region");
+      return;
+    }
+
+    payload = {
+      mode_id: modeId,
+      region_id: regionId,
+      price: price
+    };
+  }
+
+  let ajaxUrl = "";
+  let ajaxData = {};
+
+  // 🔥 MAIN LOGIC
+  if (editId) {
+    // 👉 EDIT MODE
+    ajaxUrl = `/services/update-service/${editType}/${editId}/`;
+    ajaxData = payload;
+  } else {
+    // 👉 ADD MODE
+    ajaxUrl = "/services/add-services";
+
+    ajaxData = activeTab === 'collection-mode'
+      ? { services: [], collections: [payload] }
+      : { services: [{ ...payload, days: null }], collections: [] };
+  }
+
+  $.ajax({
+    url: ajaxUrl,
+    method: "POST",
+    headers: {
+      "X-CSRFToken": getCookie("csrftoken")
+    },
+    contentType: "application/json",
+    data: JSON.stringify(ajaxData),
+    success: function (res) {
+      if (res.success) {
+        toastr.success(editId ? "Updated successfully" : "Added successfully");
+
+        popup
+          .addClass('hidden')
+          .removeClass('flex')
+          .removeAttr('data-edit-id')
+          .removeAttr('data-edit-type');
+
+        fetchLabServices();
+      } else {
+        toastr.error("Failed");
+      }
+    },
+    error: function () {
+      toastr.error("Error saving data");
+    }
+  });
+});
+
+$(document).on('click', '.delete-btn', function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const card = $(this).closest('.service-card');
+  const serviceId = card.data('id');
+
   const activeTab = $(this).closest('.tabs-inner-content').data('type');
 
-  $('.add-service')
-    .attr('data-active-tab', activeTab)
-    .removeClass('hidden')
-    .addClass('flex');
+  const serviceType = activeTab === 'collection-mode'
+    ? 'collection-mode'
+    : 'test-package';
+
+  if (!serviceId) {
+    toastr.error("Service ID not found");
+    return;
+  }
+
+  if (!confirm("Are you sure you want to delete this service?")) {
+    return;
+  }
+
+  $.ajax({
+    url: `/services/delete-service/${serviceType}/${serviceId}/`,
+    method: "POST",
+    headers: {
+      "X-CSRFToken": getCookie("csrftoken")
+    },
+    success: function (res) {
+      if (res.success) {
+        toastr.success("Service deleted successfully");
+        fetchLabServices();
+      } else {
+        toastr.error("Failed to delete service");
+      }
+    },
+    error: function () {
+      toastr.error("Something went wrong while deleting");
+    }
+  });
+});
+
+$(document).on("click", ".more-options", function (e) {
+  e.stopPropagation(); 
+  $(".more-dropdown").addClass("hidden"); // sab close
+  $(this).siblings(".more-dropdown").toggleClass("hidden"); // current open/close
+});
+
+// 👉 click outside = close dropdown
+$(document).on("click", function (e) {
+  if (!$(e.target).closest(".more-options, .more-dropdown").length) {
+    $(".more-dropdown").addClass("hidden");
+  }
 });
