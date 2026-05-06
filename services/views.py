@@ -110,20 +110,45 @@ def services(request):
             HospitalServiceDescription,
             HospitalBedRoom
         )
+        from .models import HospitalServiceRateCard, HospitalRoomRateCard
 
-        context["hospital_categories"] = list(
-            HospitalCategory.objects.values("id", "name")
+        hospital_profile = user.hospital_profile
+
+        categories = HospitalCategory.objects.values("id", "name")
+        services = HospitalServiceDescription.objects.values("id", "description")
+        bed_rooms = HospitalBedRoom.objects.values("id", "name")
+
+        service_cards = list(
+            HospitalServiceRateCard.objects.filter(
+                hospital=hospital_profile,
+                is_active=True
+            ).select_related("category", "description").order_by("-updated_at", "-created_at")
+        )
+        room_cards = list(
+            HospitalRoomRateCard.objects.filter(
+                hospital=hospital_profile,
+                is_active=True
+            ).select_related("bed_room").order_by("-updated_at", "-created_at")
         )
 
-        context["hospital_services"] = list(
-            HospitalServiceDescription.objects.values(
-                "id", "description"
-            )
-        )
+        sub = SellerSubscription.objects.filter(
+            seller_type="hospital",
+            seller_profile_id=hospital_profile.id,
+            is_active=True,
+            is_enabled=True
+        ).first()
 
-        context["hospital_bed_rooms"] = list(
-            HospitalBedRoom.objects.values("id", "name")
-        )
+        context.update({
+            "hospital_profile": hospital_profile,
+            "hospital_categories": list(categories),
+            "hospital_services": list(services),
+            "hospital_bed_rooms": list(bed_rooms),
+            "hospital_service_cards": service_cards,
+            "hospital_room_cards": room_cards,
+            "has_hospital_cards": bool(service_cards or room_cards),
+            "has_premium": bool(sub and not sub.is_expired),
+            "subscription": sub,
+        })
 
         return render(request, 'hospital/services.html', context)
 
@@ -588,3 +613,193 @@ def pharmacy_dropdowns(request):
         "types": list(types),
         "medicines": list(medicines)
     })
+
+
+# Hospital Services APIs
+@dashboard_login_required
+def get_hospital_services(request):
+    hospital = request.user_obj.hospital_profile
+
+    from .models import HospitalServiceRateCard, HospitalRoomRateCard
+
+    services = [
+        {
+            "id": row.id,
+            "category_id": row.category_id,
+            "category": row.category.name,
+            "service_id": row.description_id,
+            "service": row.description.description,
+            "price": str(row.price),
+        }
+        for row in HospitalServiceRateCard.objects.filter(
+            hospital=hospital,
+            is_active=True
+        ).select_related("category", "description")
+    ]
+
+    rooms = [
+        {
+            "id": row.id,
+            "bed_room_id": row.bed_room_id,
+            "room": row.bed_room.name,
+            "ac": row.ac,
+            "days": row.days,
+            "price": str(row.price),
+        }
+        for row in HospitalRoomRateCard.objects.filter(
+            hospital=hospital,
+            is_active=True
+        ).select_related("bed_room")
+    ]
+
+    return JsonResponse({
+        "success": True,
+        "services": services,
+        "rooms": rooms,
+    })
+
+
+@dashboard_login_required
+@require_POST
+def save_hospital_services(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"success": False, "error": "Invalid JSON"},
+            status=400
+        )
+    
+    hospital = request.user_obj.hospital_profile
+    services = data.get("services", [])
+    rooms = data.get("rooms", [])
+    
+    from appointments.models import (
+        HospitalCategory,
+        HospitalServiceDescription,
+        HospitalBedRoom
+    )
+    from .models import HospitalServiceRateCard, HospitalRoomRateCard
+    
+    saved_services = []
+    saved_rooms = []
+    
+    # Save services
+    for s in services:
+        try:
+            category = HospitalCategory.objects.get(id=s["category_id"])
+            service = HospitalServiceDescription.objects.get(id=s["service_id"])
+        except (HospitalCategory.DoesNotExist, HospitalServiceDescription.DoesNotExist):
+            continue
+        
+        obj, created = HospitalServiceRateCard.objects.update_or_create(
+            hospital=hospital,
+            category=category,
+            description=service,
+            defaults={
+                "price": s.get("price") or 0,
+                "is_active": True
+            }
+        )
+        
+        saved_services.append({
+            "id": obj.id,
+            "category": category.name,
+            "service": service.description[:50],
+            "price": str(obj.price)
+        })
+    
+    # Save rooms
+    for r in rooms:
+        try:
+            bed_room = HospitalBedRoom.objects.get(id=r["bed_room_id"])
+        except HospitalBedRoom.DoesNotExist:
+            continue
+        
+        obj, created = HospitalRoomRateCard.objects.update_or_create(
+            hospital=hospital,
+            bed_room=bed_room,
+            ac=r.get("ac", False),
+            days=r.get("days") or 1,
+            defaults={
+                "price": r.get("price") or 0,
+                "is_active": True
+            }
+        )
+        
+        saved_rooms.append({
+            "id": obj.id,
+            "room": bed_room.name,
+            "ac": obj.ac,
+            "days": obj.days,
+            "price": str(obj.price)
+        })
+    
+    return JsonResponse({
+        "success": True,
+        "services": saved_services,
+        "rooms": saved_rooms
+    })
+
+
+@dashboard_login_required
+def get_hospital_category_services(request):
+    category_id = request.GET.get("category_id")
+    
+    if not category_id:
+        return JsonResponse({"error": "Category ID required"}, status=400)
+    
+    from appointments.models import (
+        HospitalCategory,
+        HospitalServiceDescription
+    )
+    
+    try:
+        category = HospitalCategory.objects.get(id=category_id)
+    except HospitalCategory.DoesNotExist:
+        return JsonResponse({"error": "Category not found"}, status=404)
+    
+    services = HospitalServiceDescription.objects.all().values("id", "description")
+    
+    return JsonResponse({
+        "success": True,
+        "category": {
+            "id": category.id,
+            "name": category.name
+        },
+        "services": list(services)
+    })
+
+
+@dashboard_login_required
+@require_POST
+def delete_hospital_service(request, rate_id):
+    hospital = request.user_obj.hospital_profile
+    from .models import HospitalServiceRateCard
+
+    rate_card = get_object_or_404(
+        HospitalServiceRateCard,
+        id=rate_id,
+        hospital=hospital,
+        is_active=True,
+    )
+    rate_card.is_active = False
+    rate_card.save(update_fields=["is_active", "updated_at"])
+    return JsonResponse({"success": True})
+
+
+@dashboard_login_required
+@require_POST
+def delete_hospital_room(request, rate_id):
+    hospital = request.user_obj.hospital_profile
+    from .models import HospitalRoomRateCard
+
+    rate_card = get_object_or_404(
+        HospitalRoomRateCard,
+        id=rate_id,
+        hospital=hospital,
+        is_active=True,
+    )
+    rate_card.is_active = False
+    rate_card.save(update_fields=["is_active", "updated_at"])
+    return JsonResponse({"success": True})

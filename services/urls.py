@@ -21,4 +21,11 @@ urlpatterns = [
     path('pharmacy/medicines/save/', views.save_pharmacy_medicines, name='save_pharmacy_medicines'),
     path('pharmacy/medicines/<int:medicine_id>/delete/', views.delete_pharmacy_medicine, name='delete_pharmacy_medicine'),
     path('pharmacy/dropdowns/', views.pharmacy_dropdowns, name='pharmacy_dropdowns'),
+
+    # HOSPITAL
+    path('hospital/services/', views.get_hospital_services, name='get_hospital_services'),
+    path('hospital/services/save/', views.save_hospital_services, name='save_hospital_services'),
+    path('hospital/category-services/', views.get_hospital_category_services, name='get_hospital_category_services'),
+    path('hospital/services/<int:rate_id>/delete/', views.delete_hospital_service, name='delete_hospital_service'),
+    path('hospital/rooms/<int:rate_id>/delete/', views.delete_hospital_room, name='delete_hospital_room'),
 ]
