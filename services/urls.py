@@ -13,6 +13,8 @@ urlpatterns = [
     # DOCTOR
     path('services/add-doctor-services/', views.save_doctor_services, name='save_doctor_services'),
     path('doctor-services/', views.get_doctor_services, name='get_doctor_services'),
+    path('doctor-service/<str:service_type>/<int:service_id>/delete/',views.delete_doctor_service,name='delete_doctor_service'
+),
 
     # PHARMACY
     path('pharmacy/medicines/', views.get_pharmacy_medicines, name='get_pharmacy_medicines'),

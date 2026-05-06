@@ -437,6 +437,8 @@ def get_doctor_services(request):
             "category": s.category.name,
             "service": s.service.name,
             "price": str(s.price),
+            "category_id": s.category.id,
+            "service_id": s.service.id,
         })
 
     visit_data = []
@@ -445,13 +447,32 @@ def get_doctor_services(request):
             "id": v.id,
             "visit_type": v.visit_type.name,
             "price": str(v.price),
+            "visit_type_id": v.visit_type.id,
         })
+        
 
     return JsonResponse({
         "success": True,
         "services": service_data,
         "visits": visit_data,
     })
+
+@dashboard_login_required
+@require_POST
+def delete_doctor_service(request, service_type, service_id):
+    doctor = request.user_obj.doctor_profile
+
+    if service_type == "service":
+        obj = get_object_or_404(DoctorServiceRate, id=service_id, doctor=doctor)
+        obj.delete()
+        return JsonResponse({"success": True})
+
+    if service_type == "visit":
+        obj = get_object_or_404(DoctorVisitCharge, id=service_id, doctor=doctor)
+        obj.delete()
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"success": False}, status=400)
 
 @dashboard_login_required
 def get_pharmacy_medicines(request):

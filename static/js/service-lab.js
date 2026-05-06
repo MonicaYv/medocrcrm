@@ -843,20 +843,16 @@ $(document).on('click', '.open-add-service', function () {
 });
 
 // toggle 3-dot menu
-$(document).on('click', '.more-btn', function (e) {
-  e.preventDefault();
+$(document).on("click", ".more-options", function (e) {
   e.stopPropagation();
 
-  const menu = $(this).next('.more-dropdown');
-  const isOpen = !menu.hasClass('hidden');
+  $(".more-dropdown").addClass("hidden");
+  $(this).siblings(".more-dropdown").toggleClass("hidden");
+});
 
-  $('.more-dropdown').addClass('hidden').removeAttr('style');
-
-  if (!isOpen) {
-    menu.removeClass('hidden').css({
-      display: 'block',
-      zIndex: 9999
-    });
+$(document).on("click", function (e) {
+  if (!$(e.target).closest(".more-options, .more-dropdown").length) {
+    $(".more-dropdown").addClass("hidden");
   }
 });
 
