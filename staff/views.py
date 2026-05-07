@@ -13,6 +13,11 @@ from staff.models import DoctorsProfile, DoctorAvailability
 import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.http import JsonResponse
+from registration.models import LabProfile
+from staff.models import LabTechnician
+from .models import LabSpecialization 
+
 # Create your views here.
 
 @dashboard_login_required
@@ -156,3 +161,126 @@ def get_hospital_doctors(request):
         "success": True,
         "doctors": data
     })  
+
+
+
+# ✅ ADD TECHNICIAN
+@dashboard_login_required
+def add_technician(request):
+
+    if request.method == "POST":
+
+        try:
+            user = request.user
+
+            lab = LabProfile.objects.filter(user_id=user.id).first()
+
+            if not lab:
+                lab = LabProfile.objects.create(user_id=user.id)
+
+            full_name = request.POST.get("full_name")
+            phone = request.POST.get("phone_number")
+            gender = request.POST.get("gender")
+            age = request.POST.get("age")
+            education = request.POST.get("education")
+            experience = request.POST.get("experience")
+
+            specialization_id = request.POST.get("specialization")
+
+            specialization = None
+
+            if specialization_id:
+                specialization = LabSpecialization.objects.filter(
+                    id=specialization_id
+                ).first()
+
+            # ✅ IMAGE SAVE FIX
+            profile_image = request.FILES.get("profile_image")
+
+            image_path = ""
+
+            if profile_image:
+
+                fs = FileSystemStorage()
+
+                filename = fs.save(
+                    f"technicians/{profile_image.name}",
+                    profile_image
+                )
+
+                image_path = filename
+
+            technician = LabTechnician.objects.create(
+                lab=lab,
+                full_name=full_name,
+                phone_number=phone,
+                gender=gender,
+                age=age,
+                education=education,
+                experience_years=experience,
+                specialization=specialization,
+                profile_photo_path=image_path
+            )
+
+            print("✅ SAVED:", technician.id)
+
+            return JsonResponse({
+                "success": True
+            })
+
+        except Exception as e:
+
+            print("❌ ERROR:", str(e))
+
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            })
+
+
+@dashboard_login_required
+def get_technicians(request):
+
+    try:
+        user = request.user
+
+        lab = LabProfile.objects.filter(user_id=user.id).first()
+
+        if not lab:
+            return JsonResponse({
+                "success": False,
+                "message": "Lab not found"
+            })
+
+        technicians = LabTechnician.objects.filter(lab=lab)
+
+        data = []
+
+        for t in technicians:
+
+            # ✅ IMAGE URL FIX
+            if t.profile_photo_path:
+                image_url = settings.MEDIA_URL + str(t.profile_photo_path)
+            else:
+                image_url = "/static/images/dummy.jpg"
+
+            data.append({
+                "id": t.id,
+                "full_name": t.full_name,
+                "phone_number": t.phone_number,
+                "specialization": t.specialization.name if t.specialization else "Technician",
+                "experience_years": t.experience_years or 0,
+                "image": image_url
+            })
+
+        return JsonResponse(data, safe=False)
+
+    except Exception as e:
+
+        print("❌ ERROR:", str(e))
+
+        return JsonResponse({
+            "success": False,
+            "message": str(e)
+        })
+    
