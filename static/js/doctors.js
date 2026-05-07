@@ -1,177 +1,25 @@
+function getCookie(name) {
+  let cookieValue = null;
+
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+
+  return cookieValue;
+}
+
 $(document).ready(function () {
   // Define all doctors data
-  const allDoctors = [
-    {
-      name: "Dr. Coolen Smith",
-      phone: "+91 7568412234",
-      specialty: "Neurologist",
-      rating: "4.2",
-      image: "/static/images/coolen-Smith.jpg",
-    },
-    {
-      name: "Dr. Sarah Johnson",
-      phone: "+91 7568412235",
-      specialty: "Cardiologist",
-      rating: "4.5",
-      image: "/static/images/doctor-2.jpg",
-    },
-    {
-      name: "Dr. Michael Chen",
-      phone: "+91 7568412236",
-      specialty: "Pediatrician",
-      rating: "4.3",
-      image: "/static/images/doctor-3.jpg",
-    },
-    {
-      name: "Dr. Emily Brown",
-      phone: "+91 7568412237",
-      specialty: "Dermatologist",
-      rating: "4.4",
-      image: "/static/images/doctor-4.jpg",
-    },
-    {
-      name: "Dr. James Wilson",
-      phone: "+91 7568412238",
-      specialty: "Orthopedic",
-      rating: "4.1",
-      image: "/static/images/doctor-5.jpg",
-    },
-    {
-      name: "Dr. Lisa Anderson",
-      phone: "+91 7568412239",
-      specialty: "ENT Specialist",
-      rating: "4.6",
-      image: "/static/images/doctor-6.jpg",
-    },
-    {
-      name: "Dr. Robert Taylor",
-      phone: "+91 7568412240",
-      specialty: "Gastroenterologist",
-      rating: "4.2",
-      image: "/static/images/doctor-2.jpg",
-    },
-    {
-      name: "Dr. Maria Garcia",
-      phone: "+91 7568412241",
-      specialty: "Psychiatrist",
-      rating: "4.7",
-      image: "/static/images/doctor-7.jpg",
-    },
-    // Page 2
-    {
-      name: "Dr. David Martinez",
-      phone: "+91 7568412242",
-      specialty: "Ophthalmologist",
-      rating: "4.3",
-      image: "/static/images/doctor-8.jpg",
-    },
-    {
-      name: "Dr. Jennifer Lee",
-      phone: "+91 7568412243",
-      specialty: "Neurologist",
-      rating: "4.4",
-      image: "/static/images/coolen-Smith.jpg",
-    },
-    {
-      name: "Dr. William Harris",
-      phone: "+91 7568412244",
-      specialty: "Cardiologist",
-      rating: "4.5",
-      image: "/static/images/doctor-2.jpg",
-    },
-    {
-      name: "Dr. Amanda White",
-      phone: "+91 7568412245",
-      specialty: "Pediatrician",
-      rating: "4.2",
-      image: "/static/images/doctor-3.jpg",
-    },
-    {
-      name: "Dr. Christopher Moore",
-      phone: "+91 7568412246",
-      specialty: "Dermatologist",
-      rating: "4.6",
-      image: "/static/images/doctor-4.jpg",
-    },
-    {
-      name: "Dr. Patricia Clark",
-      phone: "+91 7568412247",
-      specialty: "Orthopedic",
-      rating: "4.3",
-      image: "/static/images/doctor-5.jpg",
-    },
-    {
-      name: "Dr. Daniel Lewis",
-      phone: "+91 7568412248",
-      specialty: "ENT Specialist",
-      rating: "4.4",
-      image: "/static/images/doctor-6.jpg",
-    },
-    {
-      name: "Dr. Nancy Walker",
-      phone: "+91 7568412249",
-      specialty: "Gastroenterologist",
-      rating: "4.5",
-      image: "/static/images/doctor-2.jpg",
-    },
-    // Page 3
-    {
-      name: "Dr. Kevin Hall",
-      phone: "+91 7568412250",
-      specialty: "Psychiatrist",
-      rating: "4.2",
-      image: "/static/images/doctor-7.jpg",
-    },
-    {
-      name: "Dr. Betty Allen",
-      phone: "+91 7568412251",
-      specialty: "Ophthalmologist",
-      rating: "4.7",
-      image: "/static/images/doctor-8.jpg",
-    },
-    {
-      name: "Dr. George Young",
-      phone: "+91 7568412252",
-      specialty: "Neurologist",
-      rating: "4.3",
-      image: "/static/images/coolen-Smith.jpg",
-    },
-    {
-      name: "Dr. Helen King",
-      phone: "+91 7568412253",
-      specialty: "Cardiologist",
-      rating: "4.4",
-      image: "/static/images/doctor-2.jpg",
-    },
-    {
-      name: "Dr. Steven Wright",
-      phone: "+91 7568412254",
-      specialty: "Pediatrician",
-      rating: "4.5",
-      image: "/static/images/doctor-3.jpg",
-    },
-    {
-      name: "Dr. Sandra Scott",
-      phone: "+91 7568412255",
-      specialty: "Dermatologist",
-      rating: "4.6",
-      image: "/static/images/doctor-4.jpg",
-    },
-    {
-      name: "Dr. Brian Green",
-      phone: "+91 7568412256",
-      specialty: "Orthopedic",
-      rating: "4.2",
-      image: "/static/images/doctor-5.jpg",
-    },
-    {
-      name: "Dr. Carol Adams",
-      phone: "+91 7568412257",
-      specialty: "ENT Specialist",
-      rating: "4.3",
-      image: "/static/images/doctor-6.jpg",
-    },
-  ];
+  let allDoctors = [];
 
   // 1. Toggle Main Dropdown
   $(".filterToggle").on("click", function (e) {
@@ -289,7 +137,7 @@ $(document).ready(function () {
 
   // Pagination functionality
   let currentPage = 1;
-  const totalPages = 3;
+  let totalPages = 1;
   const itemsPerPage = 8;
 
   function renderDoctors(page) {
@@ -301,10 +149,14 @@ $(document).ready(function () {
       .map(
         (doctor) => `
           <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments relative flex flex-col items-center gap-4 cursor-pointer doctorCard">
-            <img src="${doctor.image}" alt="Doctor Image" class="w-[104px] h-[104px] rounded-full object-cover shadow-doctor">
+            <img 
+              src="${doctor.image || '/static/images/coolen-Smith.jpg'}"
+              onerror="this.onerror=null; this.src='/static/images/coolen-Smith.jpg';"
+              alt="Doctor Image"
+              class="w-[104px] h-[104px] rounded-full object-cover shadow-doctor">
             <div class="flex flex-col">
               <span class="font-semibold text-sm">${doctor.name}</span>
-              <span class="font-normal text-sm text-spanish-gray">${doctor.phone}</span>
+              <span class="font-normal text-sm text-spanish-gray">${doctor.phone || 'No phone number'}</span>
             </div>
             <span class="font-semibold text-sm text-primary-blue">${doctor.specialty}</span>
             
@@ -321,6 +173,7 @@ $(document).ready(function () {
   }
 
   function renderPagination() {
+    totalPages = Math.ceil(allDoctors.length / itemsPerPage) || 1;
     let pageButtons = "";
     for (let i = 1; i <= totalPages; i++) {
       const activeClass =
@@ -357,16 +210,33 @@ $(document).ready(function () {
     goToPage(page);
   });
 
-  // Initial render
-  renderDoctors(currentPage);
-  renderPagination();
+  function loadHospitalDoctors() {
+  $.getJSON("/staff/hospital/doctors/list/", function (res) {
+    if (res.success) {
+      allDoctors = res.doctors;
+      currentPage = 1;
 
-  $(".popup-btn").on("click", function () {
-    let popupId = $(this).data("popup");
-    $("." + popupId)
-      .removeClass("hidden")
-      .addClass("flex");
+      renderDoctors(currentPage);
+      renderPagination();
+    }
   });
+}
+
+  // Initial render
+  loadHospitalDoctors();
+
+
+ $(".popup-btn").on("click", function () {
+  let popupId = $(this).data("popup");
+
+  // if (popupId === "addDoctorPopup") {
+  //   clearAddDoctorForm();
+  // }
+
+  $("." + popupId)
+    .removeClass("hidden")
+    .addClass("flex");
+});
 
   // Close popup
   $(".close-popup").on("click", function () {
@@ -731,228 +601,79 @@ $(document).ready(function () {
   });
 
   // Handle Register button click with validation
-  $(".registerDocBtn").on("click", function (e) {
-    e.preventDefault();
+// Handle Register button click with validation
+$(".registerDocBtn").on("click", function (e) {
+  e.preventDefault();
+  // if (!validateAddDoctorForm()) return;
 
-    // Validate the form
-    if (validateAddDoctorForm()) {
-      // Show success toaster
-      toastr.success("Doctor registered successfully!");
+  const $popup = $(".addDoctorPopup");
 
-      // Close the popup
-      $(".addDoctorPopup").addClass("hidden").removeClass("flex");
+  const name = $popup.find('input[type="text"]').eq(0).val().trim();
+  const phone = $popup.find('input[type="number"]').eq(0).val().trim();
+  const gender = $popup.find('input[type="text"]').eq(1).val().trim();
+  const age = $popup.find('input[type="number"]').eq(1).val().trim();
+  const specialty = $popup.find(".dropdown-text").eq(0).text().trim();
+  const education = $popup.find(".dropdown-text").eq(1).text().trim();
+  const experience = parseInt($popup.find(".increaseBtn").siblings("span").text()) || 0;
 
-      // Clear all form fields after a short delay
-      setTimeout(function () {
-        clearAddDoctorForm();
-      }, 300);
-    }
-  });
+  const availability = [];
 
-  // Handle Cancel button click
-  $(".cancelBtn").on("click", function (e) {
-    e.preventDefault();
+  $popup.find(".bg-white.border.border-blue-haze.p-4 > .flex.items-center.justify-between").each(function () {
+    const $row = $(this);
+    const day = $row.find("span.font-normal.text-sm").eq(0).text().trim();
+    const statusText = $row.find(".flex.items-center.gap-10 span.font-normal.text-sm").text().trim();
 
-    // Clear the form
-    clearAddDoctorForm();
-
-    // Close the popup
-    $(".addDoctorPopup").addClass("hidden").removeClass("flex");
-  });
-
-  // Validation function
-  // Validation function
-  function validateAddDoctorForm() {
-    const $popup = $(".addDoctorPopup");
-
-    // Check if image is uploaded
-    const hasImage = $popup.find(".upload-image img").length > 0;
-    if (!hasImage) {
-      toastr.error("Please upload a doctor photo");
-      return false;
-    }
-
-    // Get all input values
-    const name = $popup.find('input[type="text"]').eq(0).val().trim();
-    const phone = $popup.find('input[type="number"]').eq(0).val().trim();
-    const gender = $popup.find('input[type="text"]').eq(1).val().trim();
-    const age = $popup.find('input[type="number"]').eq(1).val().trim();
-
-    // Validate Name
-    if (!name) {
-      toastr.error("Please enter doctor name");
-      $popup.find('input[type="text"]').eq(0).focus();
-      return false;
-    }
-
-    // Validate Phone Number
-    if (!phone) {
-      toastr.error("Please enter phone number");
-      $popup.find('input[type="number"]').eq(0).focus();
-      return false;
-    }
-
-    // Validate phone number format (10 digits)
-    if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-      toastr.error("Please enter a valid 10-digit phone number");
-      $popup.find('input[type="number"]').eq(0).focus();
-      return false;
-    }
-
-    // Validate Gender
-    if (!gender) {
-      toastr.error("Please enter gender");
-      $popup.find('input[type="text"]').eq(1).focus();
-      return false;
-    }
-
-    // Validate Age
-    if (!age) {
-      toastr.error("Please enter age");
-      $popup.find('input[type="number"]').eq(1).focus();
-      return false;
-    }
-
-    // Validate age range
-    const ageNum = parseInt(age);
-    if (ageNum < 18 || ageNum > 100) {
-      toastr.error("Please enter a valid age between 18 and 100");
-      $popup.find('input[type="number"]').eq(1).focus();
-      return false;
-    }
-
-    // Validate Specialty dropdown
-    const specialty = $popup.find(".dropdown-text").eq(0).text().trim();
-    if (specialty === "Select") {
-      toastr.error("Please select a specialty");
-      return false;
-    }
-
-    // Validate Education dropdown
-    const education = $popup.find(".dropdown-text").eq(1).text().trim();
-    if (education === "Select") {
-      toastr.error("Please select education qualification");
-      return false;
-    }
-
-    // Validate Experience
-    const experience = parseInt(
-      $popup.find(".increaseBtn").siblings("span").text()
-    );
-    if (experience === 0) {
-      toastr.error("Please add years of experience");
-      return false;
-    }
-
-    // Validate Fees
-    const homeVisitFee = $popup.find('input[type="number"]').eq(2).val().trim();
-    const hospitalVisitFee = $popup
-      .find('input[type="number"]')
-      .eq(3)
-      .val()
-      .trim();
-
-    if (!homeVisitFee || parseFloat(homeVisitFee) <= 0) {
-      toastr.error("Please enter home visit fee");
-      $popup.find('input[type="number"]').eq(2).focus();
-      return false;
-    }
-
-    if (!hospitalVisitFee || parseFloat(hospitalVisitFee) <= 0) {
-      toastr.error("Please enter hospital visit fee");
-      $popup.find('input[type="number"]').eq(3).focus();
-      return false;
-    }
-
-    // Validate Availability - at least one day must be selected with time
-    let hasAvailability = false;
-    let selectedDaysWithoutTime = [];
-
-    $popup
-      .find(
-        ".bg-white.border.border-blue-haze.p-4 > .flex.items-center.justify-between"
-      )
-      .each(function () {
-        const $row = $(this);
-        const dayName = $row
-          .find("span.font-normal.text-sm")
-          .eq(0)
-          .text()
-          .trim();
-        const $checkIcon = $row.find(
-          '.material-symbols-outlined:contains("check")'
-        );
-        const $timerIcon = $row.find(
-          '.material-symbols-oriented:contains("timer")'
-        );
-        const $statusText = $row
-          .find(".flex.items-center.gap-10 span.font-normal.text-sm")
-          .text()
-          .trim();
-
-        // Check if day is selected (check icon is blue)
-        if ($checkIcon.hasClass("text-primary-blue")) {
-          // Check if time is also set (status text is not "Not Available")
-          if ($statusText !== "Not Available") {
-            hasAvailability = true;
-          } else {
-            selectedDaysWithoutTime.push(dayName);
-          }
-        }
+    if (statusText && statusText !== "Not Available") {
+      const parts = statusText.split(" - ");
+      availability.push({
+        day: day,
+        start_time: parts[0] || "",
+        end_time: parts[1] || ""
       });
-
-    // Check if any day is selected but time not set
-    if (selectedDaysWithoutTime.length > 0) {
-      toastr.warning(
-        `Please set time for: ${selectedDaysWithoutTime.join(", ")}`
-      );
-      return false;
     }
+  });
 
-    // Check if at least one day with time is set
-    if (!hasAvailability) {
-      toastr.error("Please select at least one day and set availability time");
-      return false;
-    }
+  const formData = new FormData();
 
-    // All validations passed
-    return true;
+  formData.append("name", name);
+  formData.append("phone", phone);
+  formData.append("gender", gender);
+  formData.append("age", age);
+  formData.append("specialty", specialty);
+  formData.append("education", education);
+  formData.append("experience", experience);
+  formData.append("availability", JSON.stringify(availability));
+
+  const photoFile = fileInput[0].files[0];
+  if (photoFile) {
+    formData.append("photo", photoFile);
   }
 
-  // Function to clear all form fields in Add Doctor popup
-  function clearAddDoctorForm() {
-    // Reset image upload
-    resetUploadDiv();
+  $.ajax({
+    url: "/staff/hospital/doctors/save/",
+    method: "POST",
+    headers: {
+      "X-CSRFToken": getCookie("csrftoken")
+    },
+    data: formData,
+    processData: false,
+    contentType: false,
 
-    // Clear all text inputs
-    $('.addDoctorPopup input[type="text"]').val("");
-    $('.addDoctorPopup input[type="number"]').val("");
+    success: function (res) {
+      if (res.success) {
+        toastr.success("Doctor registered successfully!");
+        loadHospitalDoctors();
 
-    // Reset dropdowns
-    $(".addDoctorPopup .dropdown-text").text("Select");
-    $(".addDoctorPopup .dropdown").addClass("hidden");
-    $(".addDoctorPopup .dropdown-btn").css("transform", "rotate(0deg)");
+        $(".addDoctorPopup").addClass("hidden").removeClass("flex");
+        clearAddDoctorForm();
+      } else {
+        toastr.error(res.error || "Failed to register doctor");
+      }
+    },
 
-    // Reset experience counter
-    $(".addDoctorPopup .increaseBtn").siblings("span").text("0");
-
-    // Reset all check icons to gray
-    $('.addDoctorPopup .material-symbols-outlined:contains("check")')
-      .removeClass("text-primary-blue")
-      .addClass("text-light-gray");
-
-    // Reset all timer icons to gray
-    $('.addDoctorPopup .material-symbols-outlined:contains("timer")')
-      .removeClass("text-primary-blue")
-      .addClass("text-light-gray");
-
-    // Reset all availability text to "Not Available"
-    $(".addDoctorPopup .flex.items-center.gap-10 span.font-normal.text-sm")
-      .text("Not Available")
-      .removeClass("text-primary-blue")
-      .addClass("text-light-gray");
-
-    // Remove any open time selectors
-    $(".addDoctorPopup .time-selector").remove();
-  }
+    error: function (xhr) {
+      toastr.error(xhr.responseJSON?.error || "Something went wrong");
+    }
+  });
+});
 });
