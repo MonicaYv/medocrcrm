@@ -600,7 +600,6 @@ $(document).ready(function () {
     }
   });
 
-  // Handle Register button click with validation
 // Handle Register button click with validation
 $(".registerDocBtn").on("click", function (e) {
   e.preventDefault();
