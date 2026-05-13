@@ -1,4 +1,53 @@
 $(document).ready(function () {
+  let currentStatus = "accepted";
+
+  function loadHospitalHistory(status = "accepted", page = 1) {
+  const isDoctorPage = $("#doctor-cards-container").length > 0;
+
+  const container = isDoctorPage
+    ? "#doctor-cards-container"
+    : "#hospital-cards-container";
+
+  const ajaxUrl = isDoctorPage
+    ? "/history/doctor/history/ajax/"
+    : "/history/hospital/history/ajax/";
+
+  currentStatus = status;
+
+  $(container).html(
+    `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
+  );
+
+  $.ajax({
+    url: ajaxUrl,
+    type: "GET",
+    data: { status: status, page: page },
+    success: function (res) {
+      $(container).html(res.html);
+    },
+    error: function () {
+      $(container).html(
+        `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
+      );
+    }
+  });
+}
+
+  $(document).on("click", ".page-btn, .prev-btn, .next-btn", function () {
+    let page = $(this).data("page");
+
+    if ($(this).hasClass("prev-btn")) {
+      page = $(this).data("prev");
+    }
+
+    if ($(this).hasClass("next-btn")) {
+      page = $(this).data("next");
+    }
+
+    loadHospitalHistory(currentStatus, page);
+  });
+
+  loadHospitalHistory("accepted", 1);
   const itemsPerPage = 5;
 
   // Toggle disease dropdown
@@ -107,34 +156,34 @@ $(document).ready(function () {
   }
 
   // Handle pagination clicks
-  $(document).on("click", ".prev-btn, .next-btn, .page-btn", function () {
-    const button = $(this);
-    const paginationContainer = button.closest('[class*="pagination-"]');
-    const tab = paginationContainer.attr("class").match(/pagination-(\w+)/)[1];
-    const container = $(`.${tab} #cards-container`);
-    const cards = container.children();
-    const totalPages = paginationContainer.data("total-pages");
-    let currentPage = paginationContainer.data("current-page");
+  // $(document).on("click", ".prev-btn, .next-btn, .page-btn", function () {
+  //   const button = $(this);
+  //   const paginationContainer = button.closest('[class*="pagination-"]');
+  //   const tab = paginationContainer.attr("class").match(/pagination-(\w+)/)[1];
+  //   const container = $(`.${tab} #cards-container`);
+  //   const cards = container.children();
+  //   const totalPages = paginationContainer.data("total-pages");
+  //   let currentPage = paginationContainer.data("current-page");
 
-    if (button.hasClass("prev-btn")) {
-      currentPage = Math.max(1, currentPage - 1);
-    } else if (button.hasClass("next-btn")) {
-      currentPage = Math.min(totalPages, currentPage + 1);
-    } else if (button.hasClass("page-btn")) {
-      currentPage = parseInt(button.data("page"));
-    }
+  //   if (button.hasClass("prev-btn")) {
+  //     currentPage = Math.max(1, currentPage - 1);
+  //   } else if (button.hasClass("next-btn")) {
+  //     currentPage = Math.min(totalPages, currentPage + 1);
+  //   } else if (button.hasClass("page-btn")) {
+  //     currentPage = parseInt(button.data("page"));
+  //   }
 
-    showPage(tab, currentPage, cards, totalPages);
-  });
+  //   showPage(tab, currentPage, cards, totalPages);
+  // });
 
   // Initialize on page load
-  initializePagination();
+  // initializePagination();
 
   // Open modal when any card is clicked
   // All Accepted
-  $(document).on("click", ".card-all-accepted", function () {
-    $(".modal-all-accepted").removeClass("hidden");
-  });
+  // $(document).on("click", ".card-all-accepted", function () {
+  //   $(".modal-all-accepted").removeClass("hidden");
+  // });
 
   // Close modal when close button is clicked
   $(".modal-close-all-accepted").on("click", function () {
@@ -142,9 +191,9 @@ $(document).ready(function () {
   });
 
   // All Completed
-  $(document).on("click", ".card-all-completed", function () {
-    $(".modal-all-completed").removeClass("hidden");
-  });
+  // $(document).on("click", ".card-all-completed", function () {
+  //   $(".modal-all-completed").removeClass("hidden");
+  // });
 
   // Close modal when close button is clicked
   $(".modal-close-all-completed").on("click", function () {
@@ -152,9 +201,9 @@ $(document).ready(function () {
   });
 
   // For "missed" modal
-  $(document).on("click", ".card-missed", function () {
-    $(".modal-missed").removeClass("hidden");
-  });
+  // $(document).on("click", ".card-missed", function () {
+  //   $(".modal-missed").removeClass("hidden");
+  // });
 
   // Close "missed" modal
   $(".modal-close-missed").on("click", function () {
@@ -162,9 +211,9 @@ $(document).ready(function () {
   });
 
   // For "canceled" modal
-  $(document).on("click", ".card-canceled", function () {
-    $(".modal-canceled").removeClass("hidden");
-  });
+  // $(document).on("click", ".card-canceled", function () {
+  //   $(".modal-canceled").removeClass("hidden");
+  // });
 
   // Close "canceled" modal
   $(".modal-close-canceled").on("click", function () {
@@ -172,9 +221,9 @@ $(document).ready(function () {
   });
 
   // For "pending" modal
-  $(document).on("click", ".card-pending", function () {
-    $(".modal-pending").removeClass("hidden");
-  });
+  // $(document).on("click", ".card-pending", function () {
+  //   $(".modal-pending").removeClass("hidden");
+  // });
 
   // Close "pending" modal
   $(".modal-close-pending").on("click", function () {
@@ -226,24 +275,26 @@ $(document).ready(function () {
     $allDropdowns.addClass("hidden");
   });
 
-  // Tab switching functionality
-  $(".tab-btn-hospital").on("click", function () {
-    const targetTab = $(this).data("tab");
+ $(".tab-btn-hospital").on("click", function () {
+  const targetTab = $(this).data("tab");
 
-    // Update active tab button
-    $(".tab-btn-hospital")
-      .removeClass("active-tab-hospital font-semibold")
-      .addClass("font-medium");
-    $(this)
-      .addClass("active-tab-hospital font-semibold")
-      .removeClass("font-medium");
-
-    // Hide all tab contents
+  if (targetTab === "equipment") {
     $(".tab-content").addClass("hidden");
+    $(".equipment").removeClass("hidden");
+  } else {
+    $(".tab-content").addClass("hidden");
+    $(".accepted").removeClass("hidden");
+    loadHospitalHistory(targetTab, 1);
+  }
 
-    // Show selected tab content
-    $(`.${targetTab}`).removeClass("hidden");
-  });
+  $(".tab-btn-hospital")
+    .removeClass("active-tab-hospital font-semibold")
+    .addClass("font-medium");
+
+  $(this)
+    .addClass("active-tab-hospital font-semibold")
+    .removeClass("font-medium");
+});
 
   // 1. Toggle Main Dropdown
   $(".filterToggle").on("click", function (e) {
@@ -434,5 +485,250 @@ $(document).ready(function () {
       currentAssignBtn = null;
       $('.assignPopup input[type="text"]').val("");
     }
+  });
+  /* Open modal on hospital history card click */
+$("#hospital-cards-container, #doctor-cards-container").on(
+  "click",
+  ".card-all-pending, .card-all-accepted, .card-all-completed, .card-all-cancelled, .card-all-canceled, .card-all-missed",
+  function () {
+    const card = $(this);
+    const isDoctorPage = $("#doctor-cards-container").length > 0;
+
+    $("#modal-name").text(card.data("name") || "-");
+    $("#modal-gender").text(card.data("gender") || "-");
+    $("#modal-age").text(card.data("age") || "-");
+
+    let phone = String(card.data("phone") || "-");
+    if (phone !== "-" && !phone.startsWith("+91")) {
+      phone = "+91 " + phone;
+    }
+    $("#modal-phone").text(phone);
+
+    const visitType = card.data("visit-type") || "Visit";
+
+    const formattedVisitType =
+      visitType.replaceAll("_", " ").toLowerCase() === "hospital"
+        ? "Hospital Visit"
+        : visitType.replaceAll("_", " ").toLowerCase() === "home collection"
+          ? "Home Visit"
+          : visitType
+              .replaceAll("_", " ")
+              .replace(/\b\w/g, c => c.toUpperCase());
+
+    $("#modal-visit-type").text(formattedVisitType);
+
+    $("#modal-date").text(card.data("date") || "-");
+
+    let address = String(card.data("address") || "-");
+    if (address === "string -" || address === "string" || address.trim() === "") {
+      address = "-";
+    }
+    $("#modal-address").text(address);
+    if (isDoctorPage) {
+      $("#modal-requirement-label").text("Medical Requirement");
+    } else {
+      $("#modal-requirement-label").text("Test Requirement");
+    }
+    $("#modal-service-type").text(card.data("service-type") || "-");
+    $("#modal-details").text(card.data("details") || "-");
+    const status = (card.data("status") || "").toLowerCase();
+    const isCancelled = status === "cancelled" || status === "canceled";
+
+    let step1 = "bg-blue-haze";
+    let step2 = "bg-blue-haze";
+    let step3 = "bg-blue-haze";
+    let step4 = "bg-blue-haze";
+
+    if (status === "pending") {
+      step1 = "bg-dodger-blue";
+    }
+
+    if (status === "accepted") {
+      step1 = "bg-dodger-blue";
+      step2 = "bg-dodger-blue";
+    }
+
+    if (status === "completed") {
+      step1 = "bg-dodger-blue";
+      step2 = "bg-dodger-blue";
+      step3 = "bg-dodger-blue";
+    }
+
+    if (status === "cancelled" || status === "canceled") {
+      step1 = "bg-dodger-blue";
+      step4 = "bg-dodger-blue";
+    }
+
+    const orderId = card.data("order-id") || "-";
+    const budget = card.data("budget")
+    ? "₹" + String(card.data("budget")).replace(".00", "")
+    : "-";
+
+    let rightTitle = "Budget";
+    let rightValue = budget;
+    let buttons = "";
+
+    if (status === "pending") {
+      rightTitle = "Budget";
+      rightValue = budget;
+
+      buttons = `
+        <div class="pt-4 flex justify-center items-center gap-3">
+          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
+          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Reject</button>
+        </div>
+      `;
+    }
+
+    if (status === "accepted") {
+      rightTitle = card.data("distance") || "6 km";
+      rightValue = card.data("time") || "20 mins away";
+
+      buttons = `
+        <div class="pt-4 flex justify-center items-center gap-3">
+          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
+          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
+        </div>
+      `;
+    }
+
+    if (status === "cancelled" || status === "canceled") {
+      rightTitle = "Canceled by";
+      const cancelledBy = card.data("cancelled-by") || "Doctor";
+
+      rightTitle = "";
+      rightValue = `Canceled by ${cancelledBy}`;
+
+      buttons = "";
+    }
+
+    if (status === "missed") {
+      rightTitle = "Missing Reason";
+      rightValue = "Doctor didn’t show up";
+
+      buttons = "";
+    }
+
+    if (status === "accepted") {
+      rightTitle = card.data("distance") || "6 km";
+      rightValue = card.data("time") || "20 mins away";
+
+      buttons = `
+        <div class="pt-4 flex justify-center items-center gap-3">
+          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
+          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
+        </div>
+      `;
+    }
+
+    if (status === "pending") {
+      buttons = `
+        <div class="pt-4 flex justify-center items-center gap-3">
+          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
+          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Reject</button>
+        </div>
+      `;
+    }
+
+    if (status === "cancelled" || status === "canceled") {
+      rightTitle = "";
+      rightValue = "Canceled by Doctor";
+    }
+
+    if (status === "missed") {
+      rightTitle = "Reason";
+      rightValue = "Doctor didn’t show up";
+    }
+    const timelineHtml = isCancelled
+    ? `
+      <div class="flex flex-col py-4 gap-4">
+        <div class="flex justify-center items-center gap-1">
+          <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+          <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+          <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+          <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+          <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+        </div>
+
+        <div class="flex items-center justify-between mx-20 text-sm">
+          <p>Enquiry</p>
+          <p>Appointment</p>
+          <p>Canceled</p>
+        </div>
+      </div>
+    `
+    : `
+      <div class="flex flex-col py-4 gap-4">
+        <div class="flex justify-center items-center gap-1">
+          <div class="w-2 h-2 ${step1} rounded-full"></div>
+          <div class="w-[138px] h-0.5 ${step2}"></div>
+
+          <div class="w-2 h-2 ${step2} rounded-full"></div>
+          <div class="w-[138px] h-0.5 ${step3}"></div>
+
+          <div class="w-2 h-2 ${step3} rounded-full"></div>
+          <div class="w-[138px] h-0.5 ${step4}"></div>
+
+          <div class="w-2 h-2 ${step4} rounded-full"></div>
+        </div>
+
+        <div class="flex items-center justify-between px-10 text-sm">
+          <p>Enquiry</p>
+          <p>Appointment</p>
+          <p>Completed</p>
+          <p>Cancel/Expired</p>
+        </div>
+      </div>
+    `;
+    $("#modal-enquiry-detail").html(`
+      ${timelineHtml}
+
+  <div class="mt-6">
+    <div class="flex justify-between">
+      <p class="font-normal text-sm">Order ID</p>
+      ${rightTitle ? `<p class="font-normal text-sm">${rightTitle}</p>` : `<p></p>`}
+    </div>
+
+    <div class="flex justify-between mt-1">
+      <p class="font-normal text-sm text-blue-gray">Order #${orderId}</p>
+      <p class="font-normal text-sm ${
+        status === "cancelled" || status === "canceled"
+          ? "text-strong-red"
+          : rightTitle === "Budget"
+            ? "text-dodger-blue"
+            : ""
+      }">
+        ${rightValue}
+      </p>
+    </div>
+
+    ${status === "accepted" ? `
+      <div class="flex justify-between items-center mt-3">
+        <label class="flex items-center gap-2">
+          <span class="font-normal text-sm">No Show</span>
+          <input type="checkbox" class="w-4 h-4 accent-dodger-blue">
+        </label>
+        <p class="font-normal text-sm text-blue-gray">Patient didn’t show up</p>
+      </div>
+    ` : ""}
+    ${status === "accepted" ? `
+    <div class="flex justify-between items-center mt-4">
+      <div class="flex items-center gap-2">
+        <span class="font-normal text-sm">${formattedVisitType}</span>
+        <span class="text-dodger-blue font-medium text-sm">${budget}</span>
+      </div>
+
+      <div class="border border-dodger-blue text-jet-black rounded-lg px-3 py-1 flex items-center gap-2 cursor-pointer">
+        <p class="font-normal text-sm">Proforma Bill</p>
+        <span class="material-symbols-outlined !text-lg">visibility</span>
+      </div>
+    </div>
+  ` : ""}
+
+    ${buttons}
+  </div>
+`);
+
+    $(".modal-pending").removeClass("hidden");
   });
 });

@@ -1,135 +1,185 @@
-$(document).ready(function () {
-  // Define all doctors data
-  const allDoctors = [
-    {
-      name: "Mr. Rakesh Verma",
-      phone: "+91 7568412234",
-      specialty: "Lab Technician",
-      rating: "4.2",
-      image: "/static/images/coolen-Smith.jpg",
-    },
-    {
-      name: "Mr. Coolen Smith",
-      phone: "+91 7568412235",
-      specialty: "Biochemistry Technician",
-      rating: "4.5",
-      image: "/static/images/doctor-2.jpg",
-    },
-    {
-      name: "Mr. Coolen Smith",
-      phone: "+91 7568412236",
-      specialty: "Cytology Technician",
-      rating: "4.3",
-      image: "/static/images/doctor-3.jpg",
-    },
-    {
-      name: "Mr. Emily Brown",
-      phone: "+91 7568412237",
-      specialty: "Pathology Technician",
-      rating: "4.4",
-      image: "/static/images/doctor-4.jpg",
-    },
-    {
-      name: "Mr. James Wilson",
-      phone: "+91 7568412238",
-      specialty: "Lab Technician",
-      rating: "4.1",
-      image: "/static/images/doctor-5.jpg",
-    },
-    {
-      name: "Mr. Lisa Anderson",
-      phone: "+91 7568412239",
-      specialty: "Lab Technician",
-      rating: "4.6",
-      image: "/static/images/doctor-6.jpg",
-    },
-    {
-      name: "Mr. Robert Taylor",
-      phone: "+91 7568412240",
-      specialty: "Lab Technician",
-      rating: "4.2",
-      image: "/static/images/doctor-2.jpg",
-    },
-    {
-      name: "Mr. Maria Garcia",
-      phone: "+91 7568412241",
-      specialty: "Lab Technician",
-      rating: "4.7",
-      image: "/static/images/doctor-7.jpg",
-    },
-    // Page 2
-    {
-      name: "Mr. David Martinez",
-      phone: "+91 7568412242",
-      specialty: "Lab Technician",
-      rating: "4.3",
-      image: "/static/images/doctor-8.jpg",
-    },
-    {
-      name: "Mr. Jennifer Lee",
-      phone: "+91 7568412243",
-      specialty: "Lab Technician",
-      rating: "4.4",
-      image: "/static/images/coolen-Smith.jpg",
-    },
-    {
-      name: "Mr. William Harris",
-      phone: "+91 7568412244",
-      specialty: "Lab Technician",
-      rating: "4.5",
-      image: "/static/images/doctor-2.jpg",
-    },
-    {
-      name: "Mr. Amanda White",
-      phone: "+91 7568412245",
-      specialty: "Lab Technician",
-      rating: "4.2",
-      image: "/static/images/doctor-3.jpg",
-    },
-    {
-      name: "Mr. Christopher Moore",
-      phone: "+91 7568412246",
-      specialty: "Lab Technician",
-      rating: "4.6",
-      image: "/static/images/doctor-4.jpg",
-    },
-    {
-      name: "Mr. Patricia Clark",
-      phone: "+91 7568412247",
-      specialty: "Lab Technician",
-      rating: "4.3",
-      image: "/static/images/doctor-5.jpg",
-    },
-    {
-      name: "Mr. Daniel Lewis",
-      phone: "+91 7568412248",
-      specialty: "Lab Technician",
-      rating: "4.4",
-      image: "/static/images/doctor-6.jpg",
-    },
-    {
-      name: "Mr. Nancy Walker",
-      phone: "+91 7568412249",
-      specialty: "Lab Technician",
-      rating: "4.5",
-      image: "/static/images/doctor-2.jpg",
-    },
+console.log("🚀 JS LOADED");
 
-    {
-      name: "Mr. Daniel Lewis",
-      phone: "+91 7568412248",
-      specialty: "Lab Technician",
-      rating: "4.4",
-      image: "/static/images/doctor-6.jpg",
-    },
-    {
-      name: "Mr. Nancy Walker",
-      phone: "+91 7568412249",
-      specialty: "Lab Technician",
-      rating: "4.5",
-      image: "/static/images/doctor-2.jpg",
-    },
-  ];
+function getCSRFToken() {
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+
+            if (cookie.startsWith("csrftoken=")) {
+                cookieValue = cookie.substring("csrftoken=".length);
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+// 👇 ADD HERE (TOP LEVEL)
+function getCSRFToken() {
+  let match = document.cookie.match(/csrftoken=([^;]+)/);
+  return match ? match[1] : "";
+}
+
+
+function resetUploadDiv() {
+  $(".upload-image").html(`
+    <span class="material-symbols-outlined text-primary-blue text-6xl">
+      upload
+    </span>
+  `);
+
+  $("#fileInput").val("");
+}
+
+
+$(document).ready(function () {
+  loadTechnicians();
+
+function resetUploadDiv() {
+    $("#uploadDiv").html("");   // adjust ID if different
+    $("#uploadPreview").attr("src", "");
+    $("#fileInput").val("");
+}
+
+
+
+
+// Define all doctors data
+  // const allDoctors = [
+  //   {
+  //     name: "Mr. Rakesh Verma",
+  //     phone: "+91 7568412234",
+  //     specialty: "Lab Technician",
+  //     rating: "4.2",
+  //     image: "/static/images/coolen-Smith.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Coolen Smith",
+  //     phone: "+91 7568412235",
+  //     specialty: "Biochemistry Technician",
+  //     rating: "4.5",
+  //     image: "/static/images/doctor-2.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Coolen Smith",
+  //     phone: "+91 7568412236",
+  //     specialty: "Cytology Technician",
+  //     rating: "4.3",
+  //     image: "/static/images/doctor-3.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Emily Brown",
+  //     phone: "+91 7568412237",
+  //     specialty: "Pathology Technician",
+  //     rating: "4.4",
+  //     image: "/static/images/doctor-4.jpg",
+  //   },
+  //   {
+  //     name: "Mr. James Wilson",
+  //     phone: "+91 7568412238",
+  //     specialty: "Lab Technician",
+  //     rating: "4.1",
+  //     image: "/static/images/doctor-5.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Lisa Anderson",
+  //     phone: "+91 7568412239",
+  //     specialty: "Lab Technician",
+  //     rating: "4.6",
+  //     image: "/static/images/doctor-6.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Robert Taylor",
+  //     phone: "+91 7568412240",
+  //     specialty: "Lab Technician",
+  //     rating: "4.2",
+  //     image: "/static/images/doctor-2.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Maria Garcia",
+  //     phone: "+91 7568412241",
+  //     specialty: "Lab Technician",
+  //     rating: "4.7",
+  //     image: "/static/images/doctor-7.jpg",
+  //   },
+  //   // Page 2
+  //   {
+  //     name: "Mr. David Martinez",
+  //     phone: "+91 7568412242",
+  //     specialty: "Lab Technician",
+  //     rating: "4.3",
+  //     image: "/static/images/doctor-8.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Jennifer Lee",
+  //     phone: "+91 7568412243",
+  //     specialty: "Lab Technician",
+  //     rating: "4.4",
+  //     image: "/static/images/coolen-Smith.jpg",
+  //   },
+  //   {
+  //     name: "Mr. William Harris",
+  //     phone: "+91 7568412244",
+  //     specialty: "Lab Technician",
+  //     rating: "4.5",
+  //     image: "/static/images/doctor-2.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Amanda White",
+  //     phone: "+91 7568412245",
+  //     specialty: "Lab Technician",
+  //     rating: "4.2",
+  //     image: "/static/images/doctor-3.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Christopher Moore",
+  //     phone: "+91 7568412246",
+  //     specialty: "Lab Technician",
+  //     rating: "4.6",
+  //     image: "/static/images/doctor-4.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Patricia Clark",
+  //     phone: "+91 7568412247",
+  //     specialty: "Lab Technician",
+  //     rating: "4.3",
+  //     image: "/static/images/doctor-5.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Daniel Lewis",
+  //     phone: "+91 7568412248",
+  //     specialty: "Lab Technician",
+  //     rating: "4.4",
+  //     image: "/static/images/doctor-6.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Nancy Walker",
+  //     phone: "+91 7568412249",
+  //     specialty: "Lab Technician",
+  //     rating: "4.5",
+  //     image: "/static/images/doctor-2.jpg",
+  //   },
+
+  //   {
+  //     name: "Mr. Daniel Lewis",
+  //     phone: "+91 7568412248",
+  //     specialty: "Lab Technician",
+  //     rating: "4.4",
+  //     image: "/static/images/doctor-6.jpg",
+  //   },
+  //   {
+  //     name: "Mr. Nancy Walker",
+  //     phone: "+91 7568412249",
+  //     specialty: "Lab Technician",
+  //     rating: "4.5",
+  //     image: "/static/images/doctor-2.jpg",
+  //   },
+  // ];
 
   // 1. Toggle Main Dropdown
   $(".filterToggle").on("click", function (e) {
@@ -295,8 +345,8 @@ $(document).ready(function () {
   function goToPage(page) {
     if (page >= 1 && page <= totalPages) {
       currentPage = page;
-      renderDoctors(currentPage);
-      renderPagination();
+      // renderDoctors(currentPage);
+      // renderPagination();
       $("html, body").animate({ scrollTop: 0 }, 300);
     }
   }
@@ -316,8 +366,8 @@ $(document).ready(function () {
   });
 
   // Initial render
-  renderDoctors(currentPage);
-  renderPagination();
+  // renderDoctors(currentPage);
+  // renderPagination();
 
   $(".popup-btn").on("click", function () {
     let popupId = $(this).data("popup");
@@ -459,10 +509,10 @@ $(document).ready(function () {
           e.stopPropagation();
         });
 
-        // Handle remove button
-        $(".btn-remove").on("click", function () {
-          resetUploadDiv();
-        });
+        // // Handle remove button
+        // $(".btn-remove").on("click", function () {
+        //   // resetUploadDiv();
+        // });
 
         // Handle reupload button
         $(".btn-reupload").on("click", function () {
@@ -474,13 +524,16 @@ $(document).ready(function () {
     }
   });
 
-  // Function to reset upload div to original state
-  function resetUploadDiv() {
-    $(".upload-image").html(`
-            <span class="material-symbols-outlined text-primary-blue text-!6xl">upload</span>
-        `);
-    fileInput.val(""); // Clear the file input
-  }
+ 
+ 
+  
+  // // Function to reset upload div to original state
+  // function resetUploadDiv() {
+  //   $(".upload-image").html(`
+  //           <span class="material-symbols-outlined text-primary-blue text-!6xl">upload</span>
+  //       `);
+  //   fileInput.val(""); // Clear the file input
+  // }
 
   $(document).ready(function () {
     // Toggle dropdown on button click
@@ -539,26 +592,19 @@ $(document).ready(function () {
   // Initialize value
   let value = 0;
 
-  // Handle increase button click
-  $(".increaseBtn").on("click", function () {
-    const $counter = $(this).siblings("span");
-    value = parseInt($counter.text()) || 0;
-    value++;
-    $counter.text(value);
-  });
+ $(".increaseBtn").on("click", function () {
+  let val = parseInt($("#expValue").text()) || 0;
+  val++;
+  $("#expValue").text(val);
+  $("#experience").val(val); // ✅ sync hidden input
+});
 
-  // Handle decrease button click
-  $(".decreaseBtn").on("click", function () {
-    const $counter = $(this).siblings("span");
-    value = parseInt($counter.text()) || 0;
-
-    // Prevent negative values
-    if (value > 0) {
-      value--;
-      $counter.text(value);
-    }
-  });
-
+$(".decreaseBtn").on("click", function () {
+  let val = parseInt($("#expValue").text()) || 0;
+  if (val > 0) val--;
+  $("#expValue").text(val);
+  $("#experience").val(val); // ✅ sync hidden input
+});
   // Configure Toastr options
   toastr.options = {
     closeButton: true,
@@ -689,23 +735,172 @@ $(document).ready(function () {
   });
 
   // Handle Register button click with validation
-  $(".registerDocBtn").on("click", function (e) {
+  // $(".registerDocBtn").on("click", function (e) {
+  //   e.preventDefault();
+
+  //   // Validate the form
+  //   if (validateAddDoctorForm()) {
+  //     // Show success toaster
+  //     toastr.success("Doctor registered successfully!");
+
+  //     // Close the popup
+  //     $(".addDoctorPopup").addClass("hidden").removeClass("flex");
+
+  //     // Clear all form fields after a short delay
+  //     setTimeout(function () {
+  //       clearAddDoctorForm();
+  //     }, 300);
+  //   }
+  // });
+// $(document).on("click", ".registerDocBtn", function () {
+//   alert("CLICK WORKING");
+// });
+function loadTechnicians() {
+
+  $.ajax({
+    url: "/staff/get-technicians/",
+    type: "GET",
+
+    success: function (data) {
+
+      console.log("REAL DATA:", data);
+
+      if (!Array.isArray(data)) {
+        return;
+      }
+
+      let html = "";
+
+      data.forEach(function (t) {
+
+        let imgSrc = "/static/images/dummy.jpg";
+
+        if (
+          t.image &&
+          t.image !== "/media/dummy.jpg"
+        ) {
+          imgSrc = t.image;
+        }
+
+        html += `
+        <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments flex flex-col items-center gap-3">
+
+          <img src="${imgSrc}"
+               class="w-[90px] h-[90px] rounded-full object-cover">
+
+          <div class="text-center">
+
+            <div class="font-semibold">
+              ${t.full_name}
+            </div>
+
+            <div class="text-sm text-gray-500">
+              ${t.phone_number}
+            </div>
+
+          </div>
+
+          <div class="text-blue-600 text-sm font-medium">
+            ${t.specialization}
+          </div>
+
+          <div class="text-orange-500 text-sm">
+            ${t.experience_years} yrs exp
+          </div>
+
+        </div>
+        `;
+      });
+
+      $("#doctorGrid").html(html);
+    },
+
+    error: function (err) {
+      console.log("ERROR:", err);
+    }
+
+  });
+
+}
+// $(document).ready(function () {
+//   // loadTechnicians();
+// });
+
+  $(document).on("click", ".registerDocBtn", function (e) {
     e.preventDefault();
 
-    // Validate the form
-    if (validateAddDoctorForm()) {
-      // Show success toaster
-      toastr.success("Doctor registered successfully!");
+    console.log("✅ BUTTON CLICKED");
 
-      // Close the popup
-      $(".addDoctorPopup").addClass("hidden").removeClass("flex");
+    if (!validateAddDoctorForm()) return;
 
-      // Clear all form fields after a short delay
-      setTimeout(function () {
-        clearAddDoctorForm();
-      }, 300);
+    // let formData = new FormData($("#technicianForm")[0]);
+    let form = document.getElementById("technicianForm");
+    if (!form) {
+      toastr.error("Form not found");
+      return;
     }
+    let formData = new FormData(form);
+
+    // ✅ ADD HERE
+    let file = fileInput[0].files[0];
+    if (file) {
+       formData.append("profile_image", file);
+    }
+
+    formData.set("experience", $("#experience").val() || 0);
+    let specialization = $("#specialization").val();
+    let education = $("#education").val();
+
+    console.log("specialization:", specialization);
+    console.log("education:", education);
+
+    if (!specialization) {
+      toastr.error("Select specialization");
+    return;
+  }
+
+   if (!education) {
+    toastr.error("Select education");
+    return;
+  }
+
+  
+  formData.set("specialization", specialization);
+  formData.set("education", education);
+
+    $.ajax({
+      url: ADD_TECHNICIAN_URL,
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: {
+        "X-CSRFToken": getCSRFToken()
+      },
+
+      success: function (resp) {
+        console.log("✅ SUCCESS:", resp);
+
+        if (resp.success) {
+          toastr.success("Technician Registered Successfully");
+
+          $(".addDoctorPopup").addClass("hidden").removeClass("flex");
+
+           loadTechnicians();
+        } else {
+          toastr.error(resp.message || "Save failed");
+        }
+      },
+
+      error: function (xhr) {
+        console.log("❌ ERROR:", xhr.responseText);
+        toastr.error("Server error");
+      }
+    });
+
   });
+
+});
 
   // Handle Cancel button click
   $(".cancelBtn").on("click", function (e) {
@@ -719,168 +914,214 @@ $(document).ready(function () {
   });
 
   // Validation function
-  // Validation function
   function validateAddDoctorForm() {
-    const $popup = $(".addDoctorPopup");
+  const name = $('input[name="full_name"]').val().trim();
+  const phone = $('input[name="phone_number"]').val().trim();
+  const gender = $('input[name="gender"]').val().trim();
+  const age = $('input[name="age"]').val().trim();
+  const specialty = $('select[name="specialization"]').val();
+  const education = $('input[name="education"]').val();
+  const experience = parseInt($("#experience").val());
 
-    // Check if image is uploaded
-    const hasImage = $popup.find(".upload-image img").length > 0;
-    if (!hasImage) {
-      toastr.error("Please upload a doctor photo");
-      return false;
-    }
-
-    // Get all input values
-    const name = $popup.find('input[type="text"]').eq(0).val().trim();
-    const phone = $popup.find('input[type="number"]').eq(0).val().trim();
-    const gender = $popup.find('input[type="text"]').eq(1).val().trim();
-    const age = $popup.find('input[type="number"]').eq(1).val().trim();
-
-    // Validate Name
-    if (!name) {
-      toastr.error("Please enter doctor name");
-      $popup.find('input[type="text"]').eq(0).focus();
-      return false;
-    }
-
-    // Validate Phone Number
-    if (!phone) {
-      toastr.error("Please enter phone number");
-      $popup.find('input[type="number"]').eq(0).focus();
-      return false;
-    }
-
-    // Validate phone number format (10 digits)
-    if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-      toastr.error("Please enter a valid 10-digit phone number");
-      $popup.find('input[type="number"]').eq(0).focus();
-      return false;
-    }
-
-    // Validate Gender
-    if (!gender) {
-      toastr.error("Please enter gender");
-      $popup.find('input[type="text"]').eq(1).focus();
-      return false;
-    }
-
-    // Validate Age
-    if (!age) {
-      toastr.error("Please enter age");
-      $popup.find('input[type="number"]').eq(1).focus();
-      return false;
-    }
-
-    // Validate age range
-    const ageNum = parseInt(age);
-    if (ageNum < 18 || ageNum > 100) {
-      toastr.error("Please enter a valid age between 18 and 100");
-      $popup.find('input[type="number"]').eq(1).focus();
-      return false;
-    }
-
-    // Validate Specialty dropdown
-    const specialty = $popup.find(".dropdown-text").eq(0).text().trim();
-    if (specialty === "Select") {
-      toastr.error("Please select a specialty");
-      return false;
-    }
-
-    // Validate Education dropdown
-    const education = $popup.find(".dropdown-text").eq(1).text().trim();
-    if (education === "Select") {
-      toastr.error("Please select education qualification");
-      return false;
-    }
-
-    // Validate Experience
-    const experience = parseInt(
-      $popup.find(".increaseBtn").siblings("span").text()
-    );
-    if (experience === 0) {
-      toastr.error("Please add years of experience");
-      return false;
-    }
-
-    // Validate Fees
-    const homeVisitFee = $popup.find('input[type="number"]').eq(2).val().trim();
-    const hospitalVisitFee = $popup
-      .find('input[type="number"]')
-      .eq(3)
-      .val()
-      .trim();
-
-    if (!homeVisitFee || parseFloat(homeVisitFee) <= 0) {
-      toastr.error("Please enter home visit fee");
-      $popup.find('input[type="number"]').eq(2).focus();
-      return false;
-    }
-
-    if (!hospitalVisitFee || parseFloat(hospitalVisitFee) <= 0) {
-      toastr.error("Please enter hospital visit fee");
-      $popup.find('input[type="number"]').eq(3).focus();
-      return false;
-    }
-
-    // Validate Availability - at least one day must be selected with time
-    let hasAvailability = false;
-    let selectedDaysWithoutTime = [];
-
-    $popup
-      .find(
-        ".bg-white.border.border-blue-haze.p-4 > .flex.items-center.justify-between"
-      )
-      .each(function () {
-        const $row = $(this);
-        const dayName = $row
-          .find("span.font-normal.text-sm")
-          .eq(0)
-          .text()
-          .trim();
-        const $checkIcon = $row.find(
-          '.material-symbols-outlined:contains("check")'
-        );
-        const $timerIcon = $row.find(
-          '.material-symbols-oriented:contains("timer")'
-        );
-        const $statusText = $row
-          .find(".flex.items-center.gap-10 span.font-normal.text-sm")
-          .text()
-          .trim();
-
-        // Check if day is selected (check icon is blue)
-        if ($checkIcon.hasClass("text-primary-blue")) {
-          // Check if time is also set (status text is not "Not Available")
-          if ($statusText !== "Not Available") {
-            hasAvailability = true;
-          } else {
-            selectedDaysWithoutTime.push(dayName);
-          }
-        }
-      });
-
-    // Check if any day is selected but time not set
-    if (selectedDaysWithoutTime.length > 0) {
-      toastr.warning(
-        `Please set time for: ${selectedDaysWithoutTime.join(", ")}`
-      );
-      return false;
-    }
-
-    // Check if at least one day with time is set
-    if (!hasAvailability) {
-      toastr.error("Please select at least one day and set availability time");
-      return false;
-    }
-
-    // All validations passed
-    return true;
+  if (!name) {
+    toastr.error("Enter name");
+    return false;
   }
+
+  if (!phone || phone.length !== 10) {
+    toastr.error("Enter valid 10-digit phone");
+    return false;
+  }
+
+  if (!gender) {
+    toastr.error("Enter gender");
+    return false;
+  }
+
+  if (!age || age < 18 || age > 100) {
+    toastr.error("Enter valid age (18–100)");
+    return false;
+  }
+
+  if (!specialty) {
+    toastr.error("Select specialty");
+    return false;
+  }
+
+  if (!education) {
+    toastr.error("Enter education");
+    return false;
+  }
+
+  if (experience < 0){
+    toastr.error("Add experience");
+    return false;
+  }
+
+  return true;
+}
+  // // Validation function
+  // function validateAddDoctorForm() {
+  //   const $popup = $(".addDoctorPopup");
+
+  //   // Check if image is uploaded
+  //   const hasImage = $popup.find(".upload-image img").length > 0;
+  //   if (!hasImage) {
+  //     toastr.error("Please upload a doctor photo");
+  //     return false;
+  //   }
+
+  //   // Get all input values
+  //   const name = $popup.find('input[type="text"]').eq(0).val().trim();
+  //   const phone = $popup.find('input[type="number"]').eq(0).val().trim();
+  //   const gender = $popup.find('input[type="text"]').eq(1).val().trim();
+  //   const age = $popup.find('input[type="number"]').eq(1).val().trim();
+
+  //   // Validate Name
+  //   if (!name) {
+  //     toastr.error("Please enter doctor name");
+  //     $popup.find('input[type="text"]').eq(0).focus();
+  //     return false;
+  //   }
+
+  //   // Validate Phone Number
+  //   if (!phone) {
+  //     toastr.error("Please enter phone number");
+  //     $popup.find('input[type="number"]').eq(0).focus();
+  //     return false;
+  //   }
+
+  //   // Validate phone number format (10 digits)
+  //   if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+  //     toastr.error("Please enter a valid 10-digit phone number");
+  //     $popup.find('input[type="number"]').eq(0).focus();
+  //     return false;
+  //   }
+
+  //   // Validate Gender
+  //   if (!gender) {
+  //     toastr.error("Please enter gender");
+  //     $popup.find('input[type="text"]').eq(1).focus();
+  //     return false;
+  //   }
+
+  //   // Validate Age
+  //   if (!age) {
+  //     toastr.error("Please enter age");
+  //     $popup.find('input[type="number"]').eq(1).focus();
+  //     return false;
+  //   }
+
+  //   // Validate age range
+  //   const ageNum = parseInt(age);
+  //   if (ageNum < 18 || ageNum > 100) {
+  //     toastr.error("Please enter a valid age between 18 and 100");
+  //     $popup.find('input[type="number"]').eq(1).focus();
+  //     return false;
+  //   }
+
+  //   // Validate Specialty dropdown
+  //   const specialty = $popup.find(".dropdown-text").eq(0).text().trim();
+  //   if (specialty === "Select") {
+  //     toastr.error("Please select a specialty");
+  //     return false;
+  //   }
+
+  //   // Validate Education dropdown
+  //   const education = $popup.find(".dropdown-text").eq(1).text().trim();
+  //   if (education === "Select") {
+  //     toastr.error("Please select education qualification");
+  //     return false;
+  //   }
+
+  //   // Validate Experience
+  //   const experience = parseInt(
+  //     $popup.find(".increaseBtn").siblings("span").text()
+  //   );
+  //   if (experience === 0) {
+  //     toastr.error("Please add years of experience");
+  //     return false;
+  //   }
+
+  //   // Validate Fees
+  //   const homeVisitFee = $popup.find('input[type="number"]').eq(2).val().trim();
+  //   const hospitalVisitFee = $popup
+  //     .find('input[type="number"]')
+  //     .eq(3)
+  //     .val()
+  //     .trim();
+
+  //   if (!homeVisitFee || parseFloat(homeVisitFee) <= 0) {
+  //     toastr.error("Please enter home visit fee");
+  //     $popup.find('input[type="number"]').eq(2).focus();
+  //     return false;
+  //   }
+
+  //   if (!hospitalVisitFee || parseFloat(hospitalVisitFee) <= 0) {
+  //     toastr.error("Please enter hospital visit fee");
+  //     $popup.find('input[type="number"]').eq(3).focus();
+  //     return false;
+  //   }
+
+  //   // Validate Availability - at least one day must be selected with time
+  //   let hasAvailability = false;
+  //   let selectedDaysWithoutTime = [];
+
+  //   $popup
+  //     .find(
+  //       ".bg-white.border.border-blue-haze.p-4 > .flex.items-center.justify-between"
+  //     )
+  //     .each(function () {
+  //       const $row = $(this);
+  //       const dayName = $row
+  //         .find("span.font-normal.text-sm")
+  //         .eq(0)
+  //         .text()
+  //         .trim();
+  //       const $checkIcon = $row.find(
+  //         '.material-symbols-outlined:contains("check")'
+  //       );
+  //       const $timerIcon = $row.find(
+  //         '.material-symbols-oriented:contains("timer")'
+  //       );
+  //       const $statusText = $row
+  //         .find(".flex.items-center.gap-10 span.font-normal.text-sm")
+  //         .text()
+  //         .trim();
+
+  //       // Check if day is selected (check icon is blue)
+  //       if ($checkIcon.hasClass("text-primary-blue")) {
+  //         // Check if time is also set (status text is not "Not Available")
+  //         if ($statusText !== "Not Available") {
+  //           hasAvailability = true;
+  //         } else {
+  //           selectedDaysWithoutTime.push(dayName);
+  //         }
+  //       }
+  //     });
+
+  //   // Check if any day is selected but time not set
+  //   if (selectedDaysWithoutTime.length > 0) {
+  //     toastr.warning(
+  //       `Please set time for: ${selectedDaysWithoutTime.join(", ")}`
+  //     );
+  //     return false;
+  //   }
+
+  //   // Check if at least one day with time is set
+  //   if (!hasAvailability) {
+  //     toastr.error("Please select at least one day and set availability time");
+  //     return false;
+  //   }
+
+  //   // All validations passed
+  //   return true;
+  // }
 
   // Function to clear all form fields in Add Doctor popup
   function clearAddDoctorForm() {
     // Reset image upload
-    resetUploadDiv();
+    // resetUploadDiv();
 
     // Clear all text inputs
     $('.addDoctorPopup input[type="text"]').val("");
@@ -913,4 +1154,39 @@ $(document).ready(function () {
     // Remove any open time selectors
     $(".addDoctorPopup .time-selector").remove();
   }
+$("#technicianForm").submit(function (e) {
+    e.preventDefault(); // stop page reload
+
+    let formData = new FormData(this);
+
+    formData.append("full_name", full_name);
+    formData.append("phone_number", phone_number);
+    formData.append("gender", gender);
+    formData.append("age", age);
+    formData.append("education", education);
+    formData.append("experience", experience);
+    formData.append("specialization", specialization);
+
+    formData.append(
+       "profile_image",
+      $("#profile_image")[0].files[0]
+    );
+
+
+    $.ajax({
+    url: "/staff/add-technician/",
+    type: "POST",
+    data: formData,
+    processData: false,
+    contentType: false,
+
+    headers: {
+       "X-CSRFToken": getCSRFToken()
+    },
+
+    success: function(res){
+        console.log(res);
+    }
+});
+
 });

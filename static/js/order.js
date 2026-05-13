@@ -392,10 +392,25 @@ $(".review-summary-toggle").on("click", function () {
 });
 
 //open the map
-$("#openMap").on("click", function () {
-    const address = "Saket Enclave, Chhijarpur, New Delhi";
+$(document).on("click", ".open-order-map, #openMap", function () {
+    const address = $(this).data("address") || "Saket Enclave, Chhijarpur, New Delhi";
+    if (!address) return;
     const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(address)}`;
     window.open(mapUrl, "_blank");
+});
+
+$(document).on("click", ".pharmacy-open-share", function (e) {
+    e.stopPropagation();
+    $(this).siblings(".pharmacy-share-modal").removeClass("hidden").addClass("flex");
+});
+
+$(document).on("click", ".pharmacy-close-share", function () {
+    $(this).closest(".pharmacy-share-modal").addClass("hidden").removeClass("flex");
+});
+
+$(document).on("click", ".pharmacy-copy-btn", function () {
+    const $input = $(this).siblings(".pharmacy-share-link");
+    navigator.clipboard.writeText($input.val());
 });
 
 document.addEventListener("DOMContentLoaded", () => {

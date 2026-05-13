@@ -1,400 +1,130 @@
 {% load static %}
-                    <div class="services-section px-4 hidden">
-                        <!-- Step Indicator -->
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center w-full px-1 lg:px-2 gap-2 lg:gap-10">
-                                <div class="flex flex-col items-center gap-2">
-                                     <div class="step-circle active-step" data-step="1">
-                                        1
-                                    </div>
-                                    <span class="step-label active-heading font-normal text-xs lg:text-base text-foggy-silver whitespace-nowrap"  data-step="1">Add Services</span>
-                                </div>
-                                <div class="step-line" data-step="1"></div>
-                                <div class="flex flex-col items-center gap-2">
-                                     <div class="step-circle" data-step="2">
-                                        2
-                                    </div>
-                                    <span class="step-label font-normal text-xs lg:text-base text-foggy-silver whitespace-nowrap"  data-step="2">Summary</span>
-                                </div>
-                            </div>
-                        </div>
 
-                         <!-- STEP 1 : Add Medicine -->
-                        <div id="step-1" class="step-content space-y-5">
-                            <h2 class="text-lg md:text-[23.4px] font-bold text-desaturated-blue">Add Medicine</h2>
+<div class="services-section px-4 hidden">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center w-full px-1 lg:px-2 gap-2 lg:gap-10">
+            <div class="flex flex-col items-center gap-2">
+                <div class="step-circle active-step" data-step="1">1</div>
+                <span class="step-label active-heading font-normal text-xs lg:text-base text-foggy-silver whitespace-nowrap" data-step="1">Add Medicine</span>
+            </div>
+            <div class="step-line" data-step="1"></div>
+            <div class="flex flex-col items-center gap-2">
+                <div class="step-circle" data-step="2">2</div>
+                <span class="step-label font-normal text-xs lg:text-base text-foggy-silver whitespace-nowrap" data-step="2">Summary</span>
+            </div>
+        </div>
+    </div>
 
-                            <div class="services-list space-y-5">
-                                <!-- Service Card -->
-                                <div class="service-card rounded-lg px-4 py-6 relative bg-[#F9FAFB]">
-                                    <button class="remove-service absolute top-3 right-3 text-ebony hover:text-red-500">✕</button>
+    <div id="step-1" class="step-content space-y-5">
+        <h2 class="text-lg md:text-[23.4px] font-bold text-desaturated-blue">Add Medicine</h2>
 
-                                    <!-- Category Dropdown -->
-                                    <div class="mb-4 custom-dropdown">
-                                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Category</label>
+        <div class="services-list space-y-5">
+            <div class="service-card rounded-lg px-4 py-6 relative bg-[#F9FAFB]">
+                <button type="button" class="remove-service absolute top-3 right-3 text-ebony hover:text-red-500">x</button>
 
-                                        <div class="dropdown-trigger mt-2">
-                                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Options</span>
-                                                <span class="material-symbols-outlined">
-                                                    keyboard_arrow_down
-                                                </span>
-                                            </button>
-
-                                            <ul class="dropdown-menu category-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                                {% for cat in medicine_categories %}
-                                                    <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer"
-                                                        data-category="{{ cat }}">
-                                                        {{ cat }}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <!-- Medicine name Dropdown -->
-                                    <div class="mb-4 custom-dropdown">
-                                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Medicine Name</label>
-
-                                        <div class="dropdown-trigger mt-2">
-                                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Options</span>
-                                                <span class="material-symbols-outlined">
-                                                    keyboard_arrow_down
-                                                </span>
-                                            </button>
-
-                                            <ul class="dropdown-menu medicine-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <!-- Medicine type Dropdown -->
-                                    <div class="mb-4 custom-dropdown">
-                                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Medicine Type</label>
-
-                                        <div class="dropdown-trigger mt-2">
-                                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Options</span>
-                                                <span class="material-symbols-outlined">
-                                                    keyboard_arrow_down
-                                                </span>
-                                            </button>
-
-                                            <ul class="dropdown-menu medicine-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                                {% for t in medicine_types %}
-                                                    <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
-                                                        {{ t }}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-col-1 sm:grid-cols-2 gap-4">
-                                       
-                                        <!-- Quantity -->
-                                        <div>
-                                            <label class="text-base sm:text-lg text-jet-black font-semibold">Quantity</label>
-                                            <input type="text"
-                                                class="w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
-                                                value="">
-                                        </div>
-
-                                        <!-- Price -->
-                                        <div>
-                                            <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
-                                            <input type="text"
-                                                class="w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
-                                                value="">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="service-card rounded-lg px-4 py-6 relative bg-[#F9FAFB]">
-                                    <button class="remove-service absolute top-3 right-3 text-ebony hover:text-red-500">✕</button>
-
-                                    <!-- Category Dropdown -->
-                                    <div class="mb-4 custom-dropdown">
-                                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Category</label>
-
-                                        <div class="dropdown-trigger mt-2">
-                                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Options</span>
-                                                <span class="material-symbols-outlined">
-                                                    keyboard_arrow_down
-                                                </span>
-                                            </button>
-
-                                            <ul class="dropdown-menu category-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                                {% for cat in medicine_categories %}
-                                                    <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer"
-                                                        data-category="{{ cat }}">
-                                                        {{ cat }}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <!-- Medicine name Dropdown -->
-                                    <div class="mb-4 custom-dropdown">
-                                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Medicine Name</label>
-
-                                        <div class="dropdown-trigger mt-2">
-                                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Options</span>
-                                                <span class="material-symbols-outlined">
-                                                    keyboard_arrow_down
-                                                </span>
-                                            </button>
-
-                                            <ul class="dropdown-menu medicine-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <!-- Medicine type Dropdown -->
-                                    <div class="mb-4 custom-dropdown">
-                                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Medicine Type</label>
-
-                                        <div class="dropdown-trigger mt-2">
-                                            <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                                <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Options</span>
-                                                <span class="material-symbols-outlined">
-                                                    keyboard_arrow_down
-                                                </span>
-                                            </button>
-
-                                            <ul class="dropdown-menu type-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                                {% for t in medicine_types %}
-                                                    <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
-                                                        {{ t }}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-col-1 sm:grid-cols-2 gap-4">
-                                       
-                                        <!-- Quantity -->
-                                        <div>
-                                            <label class="text-base sm:text-lg text-jet-black font-semibold">Quantity</label>
-                                            <input type="text"
-                                                class="w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
-                                                value="">
-                                        </div>
-
-                                        <!-- Price -->
-                                        <div>
-                                            <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
-                                            <input type="text"
-                                                class="w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
-                                                value="">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>    
-
-                            <button class="add-service border border-dodger-blue text-dodger-blue text-xs sm:text-sm font-semibold rounded-lg w-full max-w-[182px] h-[40px] cursro-pointer">+ Add More Services</button>
-
-                            <div class="file-upload-wrapper flex flex-col sm:flex-row sm:items-center gap-3">
-                                <!-- Hidden File Input -->
-                                <input type="file" class="file-input hidden" accept=".csv,image/*">
-
-                                <!-- Upload Box -->
-                                <div class="upload-box flex-1 border border-dashed border-dodger-blue rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer">
-                                    <div class="flex items-center gap-2 file-info">
-                                        <span class="material-symbols-outlined">image</span>
-                                        <span class="file-name text-sm font-normal text-jet-black">
-                                            Upload CSV File
-                                        </span>
-                                    </div>
-
-                                    <div class="flex items-center gap-2">
-                                        <button type="button" class="remove-file hidden text-red-500 text-lg">✕</button>
-                                        <button type="button" class="upload-btn bg-dodger-blue text-white px-3 py-1 rounded text-lg">+</button>
-                                    </div>
-                                </div>
-
-                                <!-- Submit -->
-                                <button
-                                    class="submit-btn w-full max-w-[120px] py-2 rounded-[10px] bg-light-gray text-sm sm:text-base cursor-not-allowed"
-                                    disabled>
-                                    Submit
-                                </button>
-                            </div>
-
-                            <div class="flex items-center justify-end gap-5">
-                                <button id="cancel-steps" class="step-btn w-full max-w-[270px] border border-strong-red text-strong-red py-3 rounded-lg text-sm font-normal cursor-pointer">
-                                    Cancel
-                                </button>
-                                <button class="step-btn w-full max-w-[270px] bg-dodger-blue text-white py-3 rounded-lg text-sm font-normal cursor-pointer" data-target="2">
-                                    Next
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- STEP 2 : SUMMARY -->  
-                        <div id="step-2" class="step-content space-y-5 hidden">
-                            <div class="flex flex-col gap-4">
-                                <h2 class="text-lg md:text-[23.4px] font-bold text-desaturated-blue">Medicine</h2>
-                                <div class="w-full p-3 bg-[#F9FAFB] rounded-[10px] grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <div class="flex items-center gap-3">
-                                                <img src="/static/images/medicines-icon.svg" alt="medicines">
-                                                <h3 class="text-sm sm:text-base font-semibold text-black">Paracetamol 650mg  1xStrip </h3>
-                                            </div>
-                                            <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer" data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                    <div class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <div class="flex items-center gap-3">
-                                                <img src="/static/images/medicines-icon.svg" alt="medicines">
-                                                <h3 class="text-sm sm:text-base font-semibold text-black">Paracetamol 650mg  1xStrip </h3>
-                                            </div>
-                                            <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer" data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                    <div class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <div class="flex items-center gap-3">
-                                                <img src="/static/images/medicines-icon.svg" alt="medicines">
-                                                <h3 class="text-sm sm:text-base font-semibold text-black">Paracetamol 650mg  1xStrip </h3>
-                                            </div>
-                                            <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer" data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                    <div class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <div class="flex items-center gap-3">
-                                                <img src="/static/images/medicines-icon.svg" alt="medicines">
-                                                <h3 class="text-sm sm:text-base font-semibold text-black">Paracetamol 650mg  1xStrip </h3>
-                                            </div>
-                                            <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer" data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                    <div class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <div class="flex items-center gap-3">
-                                                <img src="/static/images/medicines-icon.svg" alt="medicines">
-                                                <h3 class="text-sm sm:text-base font-semibold text-black">Paracetamol 650mg  1xStrip </h3>
-                                            </div>
-                                            <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer" data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                    <div class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <div class="flex items-center gap-3">
-                                                <img src="/static/images/medicines-icon.svg" alt="medicines">
-                                                <h3 class="text-sm sm:text-base font-semibold text-black">Paracetamol 650mg  1xStrip </h3>
-                                            </div>
-                                            <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer" data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center justify-end gap-5">
-                                <button class="step-btn w-full max-w-[270px] border border-strong-red text-strong-red py-3 rounded-lg text-sm font-normal cursor-pointer" data-target="1">
-                                    Cancel
-                                </button>
-                                <button class="step-btn w-full max-w-[270px] bg-dodger-blue text-white py-3 rounded-lg text-sm font-normal cursor-pointer" data-target="2">
-                                    Next
-                                </button>
-                            </div>
-
-                            <div class="w-full h-[80px] rounded-[10px] border border-[#007BFF80] flex items-center gap-5 justify-between px-4">
-                                <span class="text-sm sm:text-base font-semibold text-blue-charcoal whitespace-nowrap">₹999 / Month</span>
-                                <button class="w-full max-w-[329px] rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-sm font-semibold text-white cursor-pointer">
-                                    Pay Now
-                                </button>
-                            </div>
-                        </div>
+                <div class="mb-4 custom-dropdown">
+                    <label class="text-base sm:text-lg text-jet-black font-semibold">Select Category</label>
+                    <div class="dropdown-trigger mt-2">
+                        <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                            <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Category</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                        </button>
+                        <ul class="dropdown-menu category-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
+                            {% for cat in medicine_categories %}
+                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer" data-category="{{ cat }}" data-value="{{ cat }}">{{ cat }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
+                </div>
+
+                <div class="mb-4 custom-dropdown">
+                    <label class="text-base sm:text-lg text-jet-black font-semibold">Select Medicine Name</label>
+                    <div class="dropdown-trigger mt-2">
+                        <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                            <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Medicine Name</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                        </button>
+                        <ul class="dropdown-menu medicine-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
+                    </div>
+                </div>
+
+                <div class="mb-4 custom-dropdown">
+                    <label class="text-base sm:text-lg text-jet-black font-semibold">Select Medicine Type</label>
+                    <div class="dropdown-trigger mt-2">
+                        <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                            <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Medicine Type</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                        </button>
+                        <ul class="dropdown-menu type-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
+                            {% for t in medicine_types %}
+                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer" data-value="{{ t }}">{{ t }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid grid-col-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-base sm:text-lg text-jet-black font-semibold">Quantity</label>
+                        <input type="text" class="medicine-quantity w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none" placeholder="10 Tablets">
+                    </div>
+                    <div>
+                        <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
+                        <input type="number" min="0" step="0.01" class="medicine-price w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none" placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="add-service border border-dodger-blue text-dodger-blue text-xs sm:text-sm font-semibold rounded-lg w-full max-w-[182px] h-[40px] cursor-pointer">+ Add More Medicine</button>
+
+        <div class="file-upload-wrapper flex flex-col sm:flex-row sm:items-center gap-3">
+            <input type="file" class="file-input hidden" accept=".csv">
+            <div class="upload-box flex-1 border border-dashed border-dodger-blue rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer">
+                <div class="flex items-center gap-2 file-info">
+                    <span class="material-symbols-outlined">image</span>
+                    <span class="file-name text-sm font-normal text-jet-black">Upload CSV File</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="remove-file hidden text-red-500 text-lg">x</button>
+                    <button type="button" class="upload-btn bg-dodger-blue text-white px-3 py-1 rounded text-lg">+</button>
+                </div>
+            </div>
+            <button type="button" class="submit-btn w-full max-w-[120px] py-2 rounded-[10px] bg-light-gray text-sm sm:text-base cursor-not-allowed" disabled>
+                Submit
+            </button>
+        </div>
+
+        <div class="flex items-center justify-end gap-5">
+            <button id="cancel-steps" type="button" class="step-btn w-full max-w-[270px] border border-strong-red text-strong-red py-3 rounded-lg text-sm font-normal cursor-pointer">
+                Cancel
+            </button>
+            <button type="button" class="pharmacy-summary-next step-btn w-full max-w-[270px] bg-dodger-blue text-white py-3 rounded-lg text-sm font-normal cursor-pointer" data-target="2">
+                Next
+            </button>
+        </div>
+    </div>
+
+    <div id="step-2" class="step-content space-y-5 hidden">
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg md:text-[23.4px] font-bold text-desaturated-blue">Medicine</h2>
+            <div class="w-full p-3 bg-[#F9FAFB] rounded-[10px] grid grid-cols-1 lg:grid-cols-2 gap-4 pharmacy-summary-grid"></div>
+        </div>
+
+        <div class="flex items-center justify-end gap-5">
+            <button type="button" class="step-btn w-full max-w-[270px] border border-strong-red text-strong-red py-3 rounded-lg text-sm font-normal cursor-pointer" data-target="1">
+                Cancel
+            </button>
+            <button type="button" class="save-pharmacy-medicines w-full max-w-[270px] bg-dodger-blue text-white py-3 rounded-lg text-sm font-normal cursor-pointer">
+                Save
+            </button>
+        </div>
+
+        <div class="w-full h-[80px] rounded-[10px] border border-[#007BFF80] flex items-center gap-5 justify-between px-4">
+            <span class="text-sm sm:text-base font-semibold text-blue-charcoal whitespace-nowrap">₹{{ subscription.price|default:"999" }} / Month</span>
+            <button type="button" class="w-full max-w-[329px] rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-sm font-semibold text-white cursor-pointer">
+                Pay Now
+            </button>
+        </div>
+    </div>
+</div>

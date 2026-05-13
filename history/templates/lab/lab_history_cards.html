@@ -1,0 +1,11 @@
+{% if appointments %}
+  {% for appointment in appointments %}
+
+    {% include "partials/appointment-cards.html" %}
+
+  {% endfor %}
+{% else %}
+  <p class="text-center text-spanish-gray mt-10">
+    No appointments found
+  </p>
+{% endif %}

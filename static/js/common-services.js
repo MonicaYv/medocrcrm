@@ -66,7 +66,7 @@ $(document).on('click', '.dropdown-item', function () {
     const value = $(this).text();
     const dropdown = $(this).closest('.custom-dropdown');
 
-    dropdown.find('.selected-text').text(value);
+    dropdown.find('.selected-text').text(value.trim()).attr('data-value', value.trim());
     dropdown.find('.dropdown-menu').addClass('hidden');
 });
 
@@ -121,6 +121,9 @@ function goToStep(stepNumber) {
 }
 
 $(document).on('click', '.step-btn', function () {
+    if ($(this).hasClass('pharmacy-summary-next')) {
+        return;
+    }
     const targetStep = $(this).data('target');
     goToStep(targetStep);
 });
@@ -176,4 +179,157 @@ document.addEventListener("click", function (e) {
             `;
         });
     }
+});
+
+/* -------- PHARMACY MEDICINE SERVICES -------- */
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+}
+
+function resetMedicineCard($card) {
+    $card.find('.selected-text').each(function () {
+        const label = $(this).closest('.custom-dropdown').find('label').text().trim();
+        $(this).text(label).removeAttr('data-value');
+    });
+    $card.find('.medicine-menu').empty();
+    $card.find('input').val('');
+}
+
+$(document).on('click', '.add-service', function () {
+    const $list = $(this).closest('.step-content').find('.services-list');
+    if (!$list.length) return;
+
+    const $card = $list.find('.service-card').first().clone();
+    resetMedicineCard($card);
+    $list.append($card);
+});
+
+$(document).on('click', '.remove-service', function () {
+    const $list = $(this).closest('.services-list');
+    if ($list.find('.service-card').length === 1) {
+        resetMedicineCard($(this).closest('.service-card'));
+        return;
+    }
+    $(this).closest('.service-card').remove();
+});
+
+function collectPharmacyMedicineRows() {
+    const rows = [];
+
+    $('.services-section #step-1 .service-card').each(function () {
+        const $card = $(this);
+        const dropdowns = $card.find('.custom-dropdown');
+        const category = dropdowns.eq(0).find('.selected-text').attr('data-value') || dropdowns.eq(0).find('.selected-text').text().trim();
+        const name = dropdowns.eq(1).find('.selected-text').attr('data-value') || dropdowns.eq(1).find('.selected-text').text().trim();
+        const type = dropdowns.eq(2).find('.selected-text').attr('data-value') || dropdowns.eq(2).find('.selected-text').text().trim();
+        const quantity = $card.find('.medicine-quantity').val().trim();
+        const price = $card.find('.medicine-price').val().trim();
+
+        const placeholderValues = ['Select Category', 'Select Medicine Name', 'Select Medicine Type', 'Select Options'];
+        if (!placeholderValues.includes(category) && !placeholderValues.includes(name) && !placeholderValues.includes(type) && quantity && price) {
+            rows.push({ category, name, type, quantity, price });
+        }
+    });
+
+    return rows;
+}
+
+function renderPharmacySummary(rows) {
+    const $grid = $('.pharmacy-summary-grid');
+    $grid.empty();
+
+    if (!rows.length) {
+        $grid.append('<p class="text-center text-gray-400 lg:col-span-2 py-6">No medicines selected.</p>');
+        return;
+    }
+
+    rows.forEach((row) => {
+        $grid.append(`
+            <div class="service-card bg-white border border-frost-white rounded-md shadow-12 min-h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
+                <div class="flex items-start justify-between w-full gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <img src="/static/images/medicines-icon.svg" alt="medicines">
+                        <div class="min-w-0">
+                            <h3 class="text-sm sm:text-base font-semibold text-black truncate">${row.name}</h3>
+                            <p class="text-xs text-foggy-silver">${row.quantity} | ${row.type} | ${row.category}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center w-full">
+                    <span class="text-base sm:text-lg text-dodger-blue font-bold">₹${row.price}</span>
+                </div>
+            </div>
+        `);
+    });
+}
+
+$(document).on('click', '.pharmacy-summary-next', function () {
+    const rows = collectPharmacyMedicineRows();
+    if (!rows.length) {
+        alert('Please add at least one complete medicine row.');
+        return;
+    }
+
+    renderPharmacySummary(rows);
+    goToStep(2);
+});
+
+$(document).on('click', '.save-pharmacy-medicines', function () {
+    const rows = collectPharmacyMedicineRows();
+    if (!rows.length) {
+        alert('Please add at least one complete medicine row.');
+        goToStep(1);
+        return;
+    }
+
+    const $btn = $(this);
+    $btn.prop('disabled', true).addClass('opacity-60');
+
+    fetch('/services/pharmacy/medicines/save/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ services: rows })
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (!data.success) {
+                throw new Error(data.error || 'Unable to save medicines');
+            }
+            window.location.reload();
+        })
+        .catch((error) => {
+            alert(error.message);
+            $btn.prop('disabled', false).removeClass('opacity-60');
+        });
+});
+
+$(document).on('click', '.delete-pharmacy-medicine', function (e) {
+    e.stopPropagation();
+    const id = $(this).data('id');
+    if (!id) return;
+
+    fetch(`/services/pharmacy/medicines/${id}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (!data.success) {
+                throw new Error(data.error || 'Unable to delete medicine');
+            }
+            $(`.pharmacy-medicine-card[data-id="${id}"]`).remove();
+            if (!$('.pharmacy-medicine-card').length) {
+                window.location.reload();
+            }
+        })
+        .catch((error) => alert(error.message));
 });

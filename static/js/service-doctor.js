@@ -73,6 +73,19 @@ $(document).ready(function () {
   });
 });
 
+$(document).on("click", ".more-btn", function (e) {
+  e.stopPropagation();
+
+  $(".more-dropdown").addClass("hidden");
+
+  $(this)
+    .siblings(".more-dropdown")
+    .toggleClass("hidden");
+});
+
+$(document).on("click", function () {
+  $(".more-dropdown").addClass("hidden");
+});
 /* =========================================================
    ADD / REMOVE CARDS
 ========================================================= */
@@ -266,7 +279,7 @@ function renderDoctorSummary(services, visits) {
 /* =========================================================
    SAVE (SINGLE SUBMIT)
 ========================================================= */
-$(document).on('click', '#step-3 .step-btn[data-target="3"]', function () {
+$(document).on('click', '#save-doctor-services', function () {
   const services = collectDoctorServices();
   const visits   = collectVisitCharges();
 
@@ -276,7 +289,7 @@ $(document).on('click', '#step-3 .step-btn[data-target="3"]', function () {
   }
 
   $.ajax({
-    url: "/services/add-doctor-services/",
+    url: "/services/services/add-doctor-services/",
     method: "POST",
     headers: { "X-CSRFToken": getCookie("csrftoken") },
     contentType: "application/json",
@@ -295,3 +308,211 @@ $(document).on('click', '#step-3 .step-btn[data-target="3"]', function () {
   });
 });
 
+$(document).ready(function () {
+  fetchDoctorSavedServices();
+});
+
+function fetchDoctorSavedServices() {
+  $.getJSON("/services/doctor-services/", function (res) {
+    if (!res.success) return;
+
+    const hasData =
+      (res.services && res.services.length) ||
+      (res.visits && res.visits.length);
+
+    if (!hasData) return;
+
+    $('.home-section').addClass('hidden');
+    $('.services-section').addClass('hidden');
+
+    $('.premium-section').removeClass('hidden');
+    $('.services-without-subscription').addClass('hidden');
+
+    renderDoctorServiceCards(res.services || []);
+    renderDoctorVisitCards(res.visits || []);
+    // default services tab open
+    const activeBtn = $('.tabs-inner .tab-btn[data-type="services"]');
+
+    $('.tabs-inner .tab-btn').removeClass('active');
+    activeBtn.addClass('active');
+
+    $('.tabs-inner-content').addClass('hidden');
+    $('.tabs-inner-content[data-type="services"]').removeClass('hidden');
+
+    // move indicator
+    const indicator = $('.tabs-inner .tab-indicator');
+
+    indicator.css({
+      width: activeBtn.outerWidth(),
+      height: activeBtn.outerHeight(),
+      left: activeBtn.position().left,
+      top: activeBtn.position().top,
+      borderRadius: '6px',
+      backgroundColor: '#ffffff',
+      boxShadow: '0 4px 10px rgba(0,0,0,0.18)',
+      border: '1px solid #BFDBFE'
+    });
+  });
+}
+
+function doctorMenuHtml() {
+  return `
+    <div class="absolute right-4 top-3 z-[9999]">
+      <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
+
+      <div class="more-dropdown hidden absolute right-0 top-7 bg-white rounded-[12px] w-[150px] z-[99999] px-3 py-2 shadow-lg">
+        <button type="button"
+          class="doctor-edit-btn w-full text-left py-2.5 text-[#1F2937] text-sm font-normal flex items-center gap-3 border-b border-[#E5E7EB] cursor-pointer">
+          <img src="/static/images/edit-icon.svg" alt="edit" class="w-5 h-5">
+          Edit
+        </button>
+
+        <button type="button"
+          class="delete-btn w-full text-left py-2.5 text-[#1F2937] text-sm font-normal flex items-center gap-3 cursor-pointer">
+          <img src="/static/images/delete-icon.svg" alt="delete" class="w-5 h-5">
+          Delete
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function doctorCardHtml(title, price, id, type) {
+  return `
+    <div class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative overflow-visible gap-2"
+         data-id="${id}"
+         data-type="${type}">
+      <div class="flex items-start justify-between w-full">
+        <h3 class="text-sm sm:text-base font-semibold text-black">${title}</h3>
+        ${doctorMenuHtml()}
+      </div>
+      <div class="flex items-center w-full">
+        <span class="text-base sm:text-lg text-dodger-blue font-bold">₹${price}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderDoctorServiceCards(services) {
+  const premiumGrid = $('.premium-section [data-type="services"] .grid');
+  const nonPremiumGrid = $('.services-without-subscription [data-type="services"] .grid');
+
+  premiumGrid.empty();
+  nonPremiumGrid.empty();
+
+  services.forEach(s => {
+    const card = doctorCardHtml(
+  s.service,
+  s.price,
+  s.id,
+  "service"
+);
+    premiumGrid.append(card);
+    nonPremiumGrid.append(card);
+  });
+}
+
+function renderDoctorVisitCards(visits) {
+  const premiumGrid = $('.premium-section [data-type="visit-charges"] .grid');
+  const nonPremiumGrid = $('.services-without-subscription [data-type="visit-charges"] .grid');
+
+  premiumGrid.empty();
+  nonPremiumGrid.empty();
+
+  visits.forEach(v => {
+    const card = doctorCardHtml(
+  v.visit_type,
+  v.price,
+  v.id,
+  "visit"
+);
+    premiumGrid.append(card);
+    nonPremiumGrid.append(card);
+  });
+}
+
+$(document).on('click', '.home-add-service', function () {
+  $('.home-section').addClass('hidden');
+  $('.premium-section').addClass('hidden');
+  $('.services-without-subscription').addClass('hidden');
+
+  $('.services-section').removeClass('hidden');
+
+  $('#step-1').removeClass('hidden');
+  $('#step-2, #step-3').addClass('hidden');
+});
+
+$(document).on("click", ".more-btn", function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const dropdown = $(this).siblings(".more-dropdown");
+
+  $(".more-dropdown").not(dropdown).addClass("hidden");
+  dropdown.toggleClass("hidden");
+});
+
+$(document).on("click", function (e) {
+  if (!$(e.target).closest(".more-btn, .more-dropdown").length) {
+    $(".more-dropdown").addClass("hidden");
+  }
+});
+
+$(document).on("click", ".doctor-edit-btn", function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  $(".more-dropdown").addClass("hidden");
+
+  const card = $(this).closest(".service-card");
+  const id = card.data("id");
+  const type = card.data("type");
+
+  console.log("EDIT DOCTOR CARD:", id, type);
+
+  $(".premium-section").addClass("hidden");
+  $(".services-without-subscription").addClass("hidden");
+  $(".home-section").addClass("hidden");
+
+  $(".services-section").removeClass("hidden");
+
+  $("#step-1").removeClass("hidden");
+  $("#step-2, #step-3").addClass("hidden");
+
+  $(".services-section")
+    .attr("data-edit-id", id)
+    .attr("data-edit-type", type);
+});
+
+$(document).on('click', '.delete-btn', function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const card = $(this).closest('.service-card');
+  const serviceId = card.data('id');
+  const serviceType = card.data('type');
+
+  if (!serviceId || !serviceType) {
+    toastr.error("Service ID not found");
+    return;
+  }
+
+  if (!confirm("Are you sure you want to delete this?")) return;
+
+  $.ajax({
+    url: `/services/doctor-service/${serviceType}/${serviceId}/delete/`,
+    method: "POST",
+    headers: { "X-CSRFToken": getCookie("csrftoken") },
+    success(res) {
+      if (res.success) {
+        toastr.success("Deleted successfully");
+        fetchDoctorSavedServices();
+      } else {
+        toastr.error("Delete failed");
+      }
+    },
+    error() {
+      toastr.error("Something went wrong");
+    }
+  });
+});

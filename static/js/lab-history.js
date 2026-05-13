@@ -1,4 +1,29 @@
 $(document).ready(function () {
+  let currentHistoryStatus = "accepted";
+
+  function loadLabHistory(status = "accepted", page = 1) {
+    currentHistoryStatus = status;
+
+    $("#lab-history-cards-container").html(
+      `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
+    );
+
+    $.ajax({
+      url: "/history/lab/history/ajax/",
+      type: "GET",
+      data: { status: status, page: page },
+      success: function (res) {
+        $("#lab-history-cards-container").html(res.html);
+      },
+      error: function () {
+        $("#lab-history-cards-container").html(
+          `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
+        );
+      }
+    });
+  }
+
+loadLabHistory("accepted", 1);
   const itemsPerPage = 5;
 
   // Toggle disease dropdown
@@ -132,19 +157,19 @@ $(document).ready(function () {
 
   // Open modal when any card is clicked
   // All Accepted
-  $(document).on("click", ".card-all-accepted", function () {
-    $(".modal-all-accepted").removeClass("hidden");
-  });
+  // $(document).on("click", ".card-all-accepted", function () {
+  //   $(".modal-all-accepted").removeClass("hidden");
+  // });
 
   // Close modal when close button is clicked
   $(".modal-close-all-accepted").on("click", function () {
     $(".modal-all-accepted").addClass("hidden");
   });
 
-  // All Completed
-  $(document).on("click", ".card-all-completed", function () {
-    $(".modal-all-completed").removeClass("hidden");
-  });
+  // // All Completed
+  // $(document).on("click", ".card-all-completed", function () {
+  //   $(".modal-all-completed").removeClass("hidden");
+  // });
 
   // Close modal when close button is clicked
   $(".modal-close-all-completed").on("click", function () {
@@ -152,9 +177,9 @@ $(document).ready(function () {
   });
 
   // For "missed" modal
-  $(document).on("click", ".card-missed", function () {
-    $(".modal-missed").removeClass("hidden");
-  });
+  // $(document).on("click", ".card-missed", function () {
+  //   $(".modal-missed").removeClass("hidden");
+  // });
 
   // Close "missed" modal
   $(".modal-close-missed").on("click", function () {
@@ -230,6 +255,15 @@ $(document).ready(function () {
   $(".tab-btn-hospital").on("click", function () {
     const targetTab = $(this).data("tab");
 
+    if (targetTab === "equipment") {
+      $(".tab-content").addClass("hidden");
+      $(".equipment").removeClass("hidden");
+    } else {
+      $(".tab-content").addClass("hidden");
+      $(".accepted").removeClass("hidden");
+      loadLabHistory(targetTab, 1);
+    }
+
     // Update active tab button
     $(".tab-btn-hospital")
       .removeClass("active-tab-hospital font-semibold")
@@ -238,11 +272,14 @@ $(document).ready(function () {
       .addClass("active-tab-hospital font-semibold")
       .removeClass("font-medium");
 
-    // Hide all tab contents
     $(".tab-content").addClass("hidden");
 
-    // Show selected tab content
-    $(`.${targetTab}`).removeClass("hidden");
+    if (targetTab === "equipment") {
+      $(".equipment").removeClass("hidden");
+    } else {
+      $(".accepted").removeClass("hidden");
+      loadLabHistory(targetTab, 1);
+    }
   });
 
   // 1. Toggle Main Dropdown
@@ -435,4 +472,191 @@ $(document).ready(function () {
       $('.assignPopup input[type="text"]').val("");
     }
   });
+
+  /* Open modal on history card click */
+  $("#lab-history-cards-container").on(
+  "click",
+  ".card-all-pending, .card-all-accepted, .card-all-completed, .card-all-cancelled, .card-all-missed",
+  function () {
+    const card = $(this);
+
+    $("#modal-name").text(card.data("name") || "-");
+    $("#modal-gender").text(card.data("gender") || "-");
+    $("#modal-age").text(card.data("age") || "-");
+    let phone = String(card.data("phone") || "-");
+
+    if (phone !== "-" && !phone.startsWith("+91")) {
+      phone = "+91 " + phone;
+    }
+
+    $("#modal-phone").text(phone);
+    $("#modal-visit-type").text(
+    (card.data("visit-type") || "Visit")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, c => c.toUpperCase())
+    );
+    $("#modal-date").text(card.data("date") || "-");
+    let address = String(card.data("address") || "-");
+
+    if (
+      address === "string -" ||
+      address === "string" ||
+      address.trim() === ""
+    ) {
+      address = "-";
+    }
+
+    $("#modal-address").text(address);
+    $("#modal-service-type").text(card.data("service-type") || "-");
+    $("#modal-details").text(card.data("details") || "-");
+    const status = (card.data("status") || "").toLowerCase();
+    let step1 = "bg-blue-haze";
+    let step2 = "bg-blue-haze";
+    let step3 = "bg-blue-haze";
+    let step4 = "bg-blue-haze";
+
+    if (status === "pending") {
+      step1 = "bg-dodger-blue";
+    }
+
+    if (status === "accepted") {
+      step1 = "bg-dodger-blue";
+      step2 = "bg-dodger-blue";
+    }
+
+    if (status === "completed") {
+      step1 = "bg-dodger-blue";
+      step2 = "bg-dodger-blue";
+      step3 = "bg-dodger-blue";
+    }
+
+  if (status === "cancelled" || status === "canceled") {
+    step1 = "bg-dodger-blue";
+    step4 = "bg-dodger-blue";
+  }
+    const orderId = card.data("order-id") || "-";
+    const budget = card.data("budget") ? "₹" + card.data("budget") : "-";
+    const visitType = card.data("visit-type") || "Home Visit";
+
+    let rightTitle = "Budget";
+    let rightValue = budget;
+    let buttons = "";
+
+    // 🔵 Status logic
+    if (status === "accepted") {
+      rightTitle = card.data("distance") || "6 km";
+      rightValue = card.data("time") || "20 mins away";
+
+      buttons = `
+        <div class="pt-4 flex justify-center items-center gap-3">
+          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
+          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
+        </div>
+      `;
+    }
+
+    if (status === "pending") {
+      buttons = `
+        <div class="pt-4 flex justify-center items-center gap-3">
+          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
+          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Reject</button>
+        </div>
+      `;
+    }
+
+    if (status === "cancelled" || status === "canceled") {
+      rightTitle = "Canceled by";
+      rightValue = "Technician";
+    }
+
+    if (status === "missed") {
+      rightTitle = "Reason";
+      rightValue = "Patient didn’t show up";
+    }
+
+    // 🧠 Bottom UI inject
+    $("#modal-enquiry-detail").html(`
+      <div class="flex flex-col py-4 gap-4">
+        <div class="flex justify-center items-center gap-1">
+          <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+          <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+
+          <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+          <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+
+          <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+          <div class="w-[138px] h-0.5 bg-blue-haze"></div>
+
+          <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+        </div>
+
+        <div class="flex items-center justify-between px-10 text-sm">
+          <p>Enquiry</p>
+          <p>Appointment</p>
+          <p class="text-spanish-gray">Completed</p>
+          <p class="text-spanish-gray">Cancel/Expired</p>
+        </div>
+      </div>
+      <div class="mt-6">
+        
+        <div class="flex justify-between">
+          <p>Order ID</p>
+          <p>${rightTitle}</p>
+        </div>
+
+        <div class="flex justify-between mt-1">
+          <p class="text-gray-500">Order #${orderId}</p>
+          <p>${rightValue}</p>
+        </div>
+
+        <div class="flex justify-between items-center mt-3">
+          <label class="flex items-center gap-2">
+            <span>No Show</span>
+            <input type="checkbox" class="w-4 h-4 accent-dodger-blue">
+          </label>
+
+          <p class="text-gray-400">Patient didn’t show up</p>
+        </div>
+
+        <div class="flex justify-between items-center mt-4">
+        <div class="flex items-center gap-2">
+          <span>
+            ${
+              (visitType || "Visit")
+                .replaceAll("_", " ")
+                .toLowerCase() === "home collection"
+                ? "Home Visit"
+                : (visitType || "Visit")
+                    .replaceAll("_", " ")
+                    .replace(/\b\w/g, c => c.toUpperCase())
+            }
+          </span>
+
+          <span class="text-dodger-blue font-medium">
+            ${budget.replace(".00", "")}
+          </span>
+        </div>
+
+          <div class="border border-dodger-blue text-jet-black rounded-lg px-3 py-1 flex items-center gap-2 cursor-pointer">
+            <p>Proforma Bill</p>
+            <span class="material-symbols-outlined !text-lg">visibility</span>
+          </div>
+        </div>
+
+        ${buttons}
+
+      </div>
+    `);
+
+    $("#modal-order-id").text("Order #" + (card.data("order-id") || "-"));
+    $("#modal-budget").text(card.data("budget") ? "₹" + card.data("budget") : "-");
+
+    $(".modal-pending").removeClass("hidden");
+  }
+);
+
+/* Close modal */
+$(document).on("click", ".modal-close-pending", function () {
+  $(".modal-pending").addClass("hidden");
+});
 });

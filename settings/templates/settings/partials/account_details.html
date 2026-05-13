@@ -529,7 +529,9 @@
          Type Of Pharmacy
         </p>
         <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{pharmacy_type}}
+        {% for type in pharmacy_types %}
+            {{ type.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
         </p>
     </div>
 
@@ -539,7 +541,9 @@
         Services You Offer
         </p>
         <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{services_offered}}
+        {% for service in services %}
+            {{ service.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
         </p>
     </div>
     <!--Website URL -->

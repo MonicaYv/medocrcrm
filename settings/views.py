@@ -261,9 +261,9 @@ def handle_pharmacy_profile(user):
     all_workingdays = PharmacyTiming.objects.filter(is_active=True)
     data = {
         'company_name': profile.company_name,
-        'pharmacy_type': profile.pharmacy_type,
+        'pharmacy_types': profile.pharmacy_types.all(),
         'all_types': all_types,
-        'services_offered': profile.services_offered,
+        'services_offered': profile.services.all(),
         'all_services': all_services,
         'all_workingdays': all_workingdays,
         'address': profile.address,
@@ -672,18 +672,35 @@ def update_pharmacy_profile(request):
             # --- Update Pharmacy Profile ---
             pharmacy_profile = get_object_or_404(PharmacyProfile, user=user)
             pharmacy_profile.company_name = post_data.get("company_name")
-            pharmacy_profile.website_url = post_data.get("website_url")
+            pharmacy_profile.website = post_data.get("website_url")
             pharmacy_profile.address = post_data.get("address")
             pharmacy_profile.city = post_data.get("city")
             pharmacy_profile.state = post_data.get("state")
             pharmacy_profile.pincode = post_data.get("pincode")
 
-            pharmacy_type_value = post_data.get("pharmacy_type")
-            if pharmacy_type_value:
-                pharmacy_profile.pharmacy_type = get_object_or_404(PharmacyType, name=pharmacy_type_value)
-            services_offered_value = post_data.get("services_offered")
-            if services_offered_value:
-                pharmacy_profile.services_offered = get_object_or_404(PharmacyServices, name=services_offered_value)
+            # Many-to-many pharmacy types
+            pharmacy_type_values = post_data.getlist("pharmacy_type")
+
+            if pharmacy_type_values:
+                pharmacy_types = PharmacyType.objects.filter(
+                    name__in=pharmacy_type_values
+                )
+                pharmacy_profile.pharmacy_types.set(pharmacy_types)
+
+            # Many-to-many pharmacy services
+            services_offered_values = post_data.getlist("services_offered")
+
+            if services_offered_values:
+                pharmacy_services = PharmacyServices.objects.filter(
+                    name__in=services_offered_values
+                )
+                pharmacy_profile.services.set(pharmacy_services)
+            # pharmacy_type_value = post_data.get("pharmacy_type")
+            # if pharmacy_type_value:
+            #     pharmacy_profile.pharmacy_type = get_object_or_404(PharmacyType, name=pharmacy_type_value)
+            # services_offered_value = post_data.get("services_offered")
+            # if services_offered_value:
+            #     pharmacy_profile.services_offered = get_object_or_404(PharmacyServices, name=services_offered_value)
 
             pharmacy_profile.save()
 

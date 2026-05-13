@@ -161,29 +161,44 @@ def login_auth(request):
 
     try:
         user = User.objects.get(email=email)
+
         if not check_password(password, user.password):
             errors["password"] = "Invalid email or password."
             return JsonResponse({"success": False, "errors": errors})
-        
+
+        allowed_user_types = ["user", "pharmacy", "lab", "doctor", "hospital"]
+
+        if user.user_type not in allowed_user_types:
+            return JsonResponse({
+                "success": False,
+                "error": "This account type is not allowed to login here."
+            })
+
         if not user.is_active:
             errors["account"] = "Your account is deleted. Please contact support."
             return JsonResponse({"success": False, "errors": errors})
-        
-        # Update last_login here
+
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
-        
+
         request.session['user_id'] = user.id
+
         if remember_me:
             request.session.set_expiry(60 * 60 * 24 * 30)
         else:
             request.session.set_expiry(0)
+
         dashboard_url = reverse("dashboard")
-        return JsonResponse({"success": True, "redirect": dashboard_url})
+
+        return JsonResponse({
+            "success": True,
+            "redirect": dashboard_url
+        })
+
     except User.DoesNotExist:
         errors["password"] = "Invalid email or password."
         return JsonResponse({"success": False, "errors": errors})
-
+    
 @csrf_protect
 @require_POST
 def save_user(request):

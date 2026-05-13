@@ -1,0 +1,65 @@
+{% load static %}
+{% with address=order.address %}
+<div class="history-order-card order-card popup-btn mb-4 mt-4 sm:mt-6 rounded-lg shadow-(--box-shadow-5) overflow-hidden cursor-pointer"
+     data-popup="history-order-popup-{{ history_status }}-{{ order.id }}"
+     data-search="order {{ order.id }} #{{ order.id }} {% if address %}{{ address.first_name|lower }} {{ address.last_name|default:''|lower }}{% endif %} {% for med in order.medicines.all %}{{ med.product_name|default:med.medicine_id|lower }} {% endfor %}">
+    <div class="bg-lightest-blue1 p-3 sm:p-4 min-h-[63px]">
+        <div class="flex items-center justify-between mb-1 gap-3">
+            <p class="rounded-[6px] text-[10px] sm:text-xs px-2 py-1 font-medium text-electric-purple bg-lavendar-dream">
+                Order ID #{{ order.id }}
+            </p>
+            <span class="flex items-center gap-1 text-[10px] sm:text-xs font-regular text-desaturated-blue">
+                <img src="{% static 'images/time.svg' %}" alt="time icon" class="w-[10px] h-[10px] sm:w-[12px] sm:h-[12px]" />
+                ETA :
+                {% if order.delivery_type == "quick" %}20 min{% else %}45 min{% endif %}
+            </span>
+        </div>
+
+        <div class="flex items-center justify-between text-[10px] sm:text-sm text-desaturated-blue mt-1 gap-3">
+            {% if history_status == "cancelled" %}
+                <span class="font-semibold text-crimson-red1">Cancelled</span>
+            {% else %}
+                <span class="font-semibold text-dodger-blue">Completed</span>
+            {% endif %}
+            <span class="flex items-center gap-1">
+                <img src="{% static 'images/alarm.svg' %}" alt="alarm icon" class="w-[10px] h-[10px] sm:w-[12px] sm:h-[12px]" />
+                {{ order.updated_at|date:"d/m/y, H:i" }}
+            </span>
+        </div>
+    </div>
+
+    <div class="bg-white">
+        <div class="flex items-start gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-gainsboro">
+            <img src="{% static 'images/Medicinebg1.svg' %}" alt="medicines" class="w-[32px] h-[32px] sm:w-[37px] sm:h-[37px]" />
+            <div>
+                <p class="font-regular text-foggy-silver mb-2 text-[10px] sm:text-xs">Medicines List</p>
+                <ul class="text-xs sm:text-sm text-dark-grayish-blue font-semibold space-y-1">
+                    {% for med in order.medicines.all %}
+                        <li>{{ med.product_name|default:med.medicine_id }} &times; {{ med.quantity }}</li>
+                    {% empty %}
+                        <li class="text-gray-400">No medicines</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-gainsboro">
+            <div class="flex items-start gap-3">
+                <img src="{% static 'images/customer.svg' %}" alt="customer icon" class="w-[32px] h-[32px] sm:w-[37px] sm:h-[37px]" />
+                <div>
+                    <p class="font-regular text-foggy-silver mb-2 text-[10px] sm:text-xs">Customer Details</p>
+                    <p class="text-xs sm:text-sm text-dark-grayish-blue font-semibold">
+                        {% if address %}{{ address.first_name }} {{ address.last_name|default:"" }}{% else %}Customer #{{ order.user_id }}{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <button type="button"
+                    class="w-[155px] h-[36px] px-4 rounded-[8px] text-dodger-blue border border-dodger-blue text-xs sm:text-sm font-medium flex items-center justify-center gap-2 open-popup"
+                    data-popup="history-order-popup-{{ history_status }}-{{ order.id }}">
+                View Invoice
+            </button>
+        </div>
+    </div>
+</div>
+{% endwith %}

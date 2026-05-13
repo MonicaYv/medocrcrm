@@ -116,12 +116,12 @@ class UserPurchase(models.Model):
         blank=True
     )
 
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    address_text = models.TextField(null=True, blank=True)
-    city = models.CharField(max_length=128, null=True, blank=True)
-    pincode = models.CharField(max_length=16, null=True, blank=True)
-    state = models.CharField(max_length=128, null=True, blank=True)
+    # latitude = models.FloatField(null=True, blank=True)
+    # longitude = models.FloatField(null=True, blank=True)
+    # address_text = models.TextField(null=True, blank=True)
+    # city = models.CharField(max_length=128, null=True, blank=True)
+    # pincode = models.CharField(max_length=16, null=True, blank=True)
+    # state = models.CharField(max_length=128, null=True, blank=True)
 
     notes = models.TextField(null=True, blank=True)
     coupon_code = models.CharField(max_length=50, null=True, blank=True)
