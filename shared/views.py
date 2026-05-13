@@ -4,9 +4,11 @@ import os
 import tempfile
 from django.http import JsonResponse
 # from .utils import process_document
+import os
+import requests
+import traceback
 
-def process_document():
-    pass
+OCR_SERVICE_URL = os.getenv("OCR_SERVICE_URL")
 
 @dashboard_login_required
 def shared(request):
@@ -29,12 +31,20 @@ def ocr_upload(request):
                 tmp_file.write(chunk)
             tmp_path = tmp_file.name
 
-        result = process_document(tmp_path)
+        with open(tmp_path, "rb") as f:
+            response = requests.post(
+                OCR_SERVICE_URL,
+                files={"file": f},
+                timeout=60
+            )
+
+        result = response.json()
         os.remove(tmp_path)
 
         return JsonResponse(result, safe=False)
 
     except Exception as e:
+        traceback.print_exc()
         return JsonResponse({"error": str(e)}, status=500)
 
 @dashboard_login_required
