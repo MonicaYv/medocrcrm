@@ -40,6 +40,24 @@ function resetUploadDiv() {
 $(document).ready(function () {
   loadTechnicians();
 
+
+$("#searchTechnician").on("keyup", function () {
+
+  let searchValue = $(this).val().toLowerCase();
+
+  let filteredData = allTechnicians.filter(function (t) {
+
+    return (
+      t.full_name.toLowerCase().includes(searchValue) ||
+      t.specialization.toLowerCase().includes(searchValue)
+    );
+
+  });
+
+  renderTechnicians(filteredData);
+
+});
+
 function resetUploadDiv() {
     $("#uploadDiv").html("");   // adjust ID if different
     $("#uploadPreview").attr("src", "");
@@ -754,7 +772,58 @@ $(".decreaseBtn").on("click", function () {
   // });
 // $(document).on("click", ".registerDocBtn", function () {
 //   alert("CLICK WORKING");
+
 // });
+let allTechnicians = [];
+
+
+// ✅ ADD THIS HERE
+function renderTechnicians(data) {
+
+  let html = "";
+
+  data.forEach(function (t) {
+
+    let imgSrc = "/static/images/dummy.jpg";
+
+    if (t.image && t.image !== "/media/dummy.jpg") {
+      imgSrc = t.image;
+    }
+
+    html += `
+      <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments flex flex-col items-center gap-3">
+
+        <img src="${imgSrc}"
+             class="w-[90px] h-[90px] rounded-full object-cover">
+
+        <div class="text-center">
+
+          <div class="font-semibold">
+            ${t.full_name}
+          </div>
+
+          <div class="text-sm text-gray-500">
+            ${t.phone_number}
+          </div>
+
+        </div>
+
+        <div class="text-blue-600 text-sm font-medium">
+          ${t.specialization}
+        </div>
+
+        <div class="text-orange-500 text-sm">
+          ${t.experience_years} yrs exp
+        </div>
+
+      </div>
+    `;
+  });
+
+  $("#doctorGrid").html(html);
+}
+
+// ✅ YOUR OLD FUNCTION
 function loadTechnicians() {
 
   $.ajax({
@@ -763,56 +832,16 @@ function loadTechnicians() {
 
     success: function (data) {
 
+      allTechnicians = data;
+
       console.log("REAL DATA:", data);
 
       if (!Array.isArray(data)) {
         return;
       }
 
-      let html = "";
-
-      data.forEach(function (t) {
-
-        let imgSrc = "/static/images/dummy.jpg";
-
-        if (
-          t.image &&
-          t.image !== "/media/dummy.jpg"
-        ) {
-          imgSrc = t.image;
-        }
-
-        html += `
-        <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments flex flex-col items-center gap-3">
-
-          <img src="${imgSrc}"
-               class="w-[90px] h-[90px] rounded-full object-cover">
-
-          <div class="text-center">
-
-            <div class="font-semibold">
-              ${t.full_name}
-            </div>
-
-            <div class="text-sm text-gray-500">
-              ${t.phone_number}
-            </div>
-
-          </div>
-
-          <div class="text-blue-600 text-sm font-medium">
-            ${t.specialization}
-          </div>
-
-          <div class="text-orange-500 text-sm">
-            ${t.experience_years} yrs exp
-          </div>
-
-        </div>
-        `;
-      });
-
-      $("#doctorGrid").html(html);
+      // ✅ SHOW TECHNICIANS
+      renderTechnicians(data);
     },
 
     error: function (err) {
@@ -822,6 +851,8 @@ function loadTechnicians() {
   });
 
 }
+
+
 // $(document).ready(function () {
 //   // loadTechnicians();
 // });
