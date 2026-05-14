@@ -1026,17 +1026,29 @@ def save_medical_pharmacy(request):
         user_type="pharmacy"
     )
 
+    state_name = data.get("state")
+    city_name = data.get("city")
+
+    state_obj = State.objects.filter(name=state_name).first()
+
+    city_obj = City.objects.filter(
+        name=city_name,
+        state=state_obj
+    ).first()
+
     profile = PharmacyProfile.objects.create(
         user=user,
         company_name=company_name,
-        pharmacy_type=pharmacy_type,
-        services_offered=services_offered,
+        # pharmacy_type=pharmacy_type,
+        # services_offered=services_offered,
         pharmacy_timing=pharmacy_timing,
         personal_email=email,
         website=website,
         address=address,
-        city=city,
-        state=state,
+        # city=city,
+        # state=state,
+        state=state_obj,
+        city=city_obj,
         pincode=pincode,
         incorporation_number=incorporation_number,
         incorporation_doc_path=incorporation_doc_path,
@@ -1148,6 +1160,16 @@ def save_lab(request):
         user_type="lab"
     )
 
+    state_name = data.get("state")
+    city_name = data.get("city")
+
+    state_obj = State.objects.filter(name=state_name).first()
+
+    city_obj = City.objects.filter(
+       name=city_name,
+       state=state_obj
+    ).first()
+
     # Create Lab Profile
     lab = LabProfile.objects.create(
         user=user,
@@ -1161,8 +1183,10 @@ def save_lab(request):
         identity_proof_pan_number=data.get("pan_number"),
         gov_license_number=data.get("gov_license_number"),
         address=data.get("address"),
-        city=data.get("city"),
-        state=data.get("state"),
+        city=city_obj,
+        state=state_obj,
+        # city=data.get("city"),
+        # state=data.get("state"),
         pincode=data.get("pincode"),
         country=data.get("country"),
         lab_timing_id=data.get("lab_timing"),
@@ -1299,6 +1323,17 @@ def save_hospital(request):
     home_visit_value = data.get("home_visit", "").strip()
     home_visit_bool = home_visit_value == "Available"
 
+
+    state_name = data.get("state")
+    city_name = data.get("city")
+
+    state_obj = State.objects.filter(name=state_name).first()
+
+    city_obj = City.objects.filter(
+       name=city_name,
+       state=state_obj
+    ).first()
+
     hospital = HospitalProfile.objects.create(
         user=user,
         hospital_name=data.get("hospital_name"),
@@ -1306,8 +1341,10 @@ def save_hospital(request):
         contact_no=data.get("phone"),
         alternate_contact_no=data.get("alt_phone"),
         address=data.get("address"),
-        city=data.get("city"),
-        state=data.get("state"),
+        # city=data.get("city"),
+        # state=data.get("state"),
+        state=state_obj,
+        city=city_obj,
         pincode=data.get("pincode"),
         country=data.get("country"),
         hospital_timing_id=data.get("hospital_timing"),
@@ -1463,6 +1500,16 @@ def save_doctor(request):
         user_type="doctor",
     )
 
+    state_name = data.get("state")
+    city_name = data.get("city")
+
+    state_obj = State.objects.filter(name=state_name).first()
+
+    city_obj = City.objects.filter(
+        name=city_name,
+        state=state_obj
+    ).first()
+
     DoctorProfile.objects.create(
         user=user,
         full_name=full_name,
@@ -1476,8 +1523,10 @@ def save_doctor(request):
         education=education,
         experience=experience,
         full_address=address,
-        city=city,
-        state=state,
+        # city=city,
+        # state=state,
+        state=state_obj,
+        city=city_obj,
         pincode=pincode,
         country=country,
         clinic_timing_from=timing_from,
