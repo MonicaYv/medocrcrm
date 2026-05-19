@@ -1599,7 +1599,13 @@ def forgot_password(request):
         elif user.user_type == "doctor" and hasattr(user, "doctor_profile"):
             company_name = user.doctor_profile.clinic_name
 
-        result = async_to_sync(send_forgot_password_email)(user, company_name, "http://localhost:5000")
+        base_url = "https://medcrm.aibuzz.net"
+
+        result = async_to_sync(send_forgot_password_email)(
+            user,
+            company_name,
+            base_url
+        )
         return JsonResponse(result)
 
     return render(request, "login/forgot_password.html")

@@ -152,10 +152,16 @@ class HospitalServiceRateCard(models.Model):
         on_delete=models.CASCADE,
         related_name="service_rate_cards"
     )
-    category = models.ForeignKey("appointments.HospitalCategory", on_delete=models.CASCADE)
+
+    category = models.ForeignKey(
+        "appointments.HospitalCategory",
+        on_delete=models.CASCADE
+    )
+
     description = models.ForeignKey(
         "appointments.HospitalServiceDescription",
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        db_column="service_description_id"   # IMPORTANT FIX
     )
 
     price = models.DecimalField(max_digits=10, decimal_places=2)
