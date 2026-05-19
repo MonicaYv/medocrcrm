@@ -4,26 +4,27 @@ import aiosmtplib
 from asgiref.sync import sync_to_async
 from email.message import EmailMessage
 from .models import PasswordResetToken
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
+from django.conf import settings
 
-SMTP_HOST = "mail.sizaf.com"
-SMTP_PORT = 465
-SMTP_USERNAME = "dotsdesktop@sizaf.com"
-SMTP_PASSWORD = "eri$45;e]H0K"
-SMTP_FROM = "dotsdesktop@sizaf.com"
-RESET_TOKEN_EXPIRY = 1800 
+# SMTP_HOST = "mail.sizaf.com"
+# SMTP_PORT = 465
+# SMTP_USERNAME = "dotsdesktop@sizaf.com"
+# SMTP_PASSWORD = "eri$45;e]H0K"
+# SMTP_FROM = "dotsdesktop@sizaf.com"
+# RESET_TOKEN_EXPIRY = 1800 
 
-executor = ThreadPoolExecutor(max_workers=5)
+# executor = ThreadPoolExecutor(max_workers=5)
 
-def send_email_background(msg):
-    asyncio.run(aiosmtplib.send(
-        msg,
-        hostname=SMTP_HOST,
-        port=SMTP_PORT,
-        username=SMTP_USERNAME,
-        password=SMTP_PASSWORD,
-        use_tls=True,
-    ))
+# def send_email_background(msg):
+#     asyncio.run(aiosmtplib.send(
+#         msg,
+#         hostname=SMTP_HOST,
+#         port=SMTP_PORT,
+#         username=SMTP_USERNAME,
+#         password=SMTP_PASSWORD,
+#         use_tls=True,
+#     ))
 
 def generate_otp_secret() -> str:
     return pyotp.random_base32()
@@ -34,19 +35,28 @@ def generate_otp(secret: str, interval: int = 300) -> str:
 def verify_otp(secret: str, otp: str, interval: int = 300) -> bool:
     return pyotp.TOTP(secret, interval=interval).verify(otp, valid_window=5)
 
-def send_email(recipient: str, subject: str, body: str):
+async def send_email(recipient: str, subject: str, body: str):
     msg = EmailMessage()
-    msg["From"] = SMTP_FROM
+    msg["From"] = settings.DEFAULT_FROM_EMAIL
     msg["To"] = recipient
     msg["Subject"] = subject
     msg.set_content(body)
-    executor.submit(send_email_background, msg)
+
+    await aiosmtplib.send(
+    msg,
+    hostname=settings.EMAIL_HOST,
+    port=settings.EMAIL_PORT,
+    username=settings.EMAIL_HOST_USER,
+    password=settings.EMAIL_HOST_PASSWORD,
+    start_tls=True,
+)
+
     return True
     
 async def async_send_otp_email(user):
     otp_secret = generate_otp_secret()
     otp = generate_otp(otp_secret)
-    email_sent = send_email(user.email, "Your OTP Code", f"Your OTP is: {otp}")
+    email_sent = await send_email(user.email, "Your OTP Code", f"Your OTP is: {otp}")
     print(otp)
     if not email_sent:
         return {"success": False, "message": "Failed to send email."}
@@ -71,7 +81,7 @@ async def send_forgot_password_email(user, company_name: str, base_url: str):
 
     Security Tip: Never share your password with anyone. This link will expire in 30 minutes for your protection."""
 
-    email_sent = send_email(user.email, subject, body_text)
+    email_sent = await send_email(user.email, subject, body_text)
     
     if not email_sent:
         return {"success": False, "message": "Failed to send email."}
