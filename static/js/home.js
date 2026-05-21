@@ -1359,9 +1359,21 @@ $(document).ready(function () {
           refreshAllCalendars();
         }
       },
+      // error: function(xhr, status, error) {
+      //   console.error('Error loading events:', error);
+      // }
       error: function(xhr, status, error) {
-        console.error('Error loading events:', error);
-      }
+
+    console.log(xhr.responseText);
+
+    const container = $('#upcoming-events-container');
+
+    if (!container.length) {
+        return;
+    }
+
+    console.error('Error loading events:', error);
+}
     });
   }
 
@@ -1404,6 +1416,9 @@ $(document).ready(function () {
           return;
         }
         const title = container.find('h4').first(); // Keep the title
+        if (!container.length) {
+          return;
+        }
         
         // Clear existing content except title
         container.find('*').not('h4').remove();
@@ -1431,6 +1446,9 @@ $(document).ready(function () {
       },
       error: function(xhr, status, error) {
         const container = $('#upcoming-events-container');
+        if (!container.length) {
+          return;
+}
         const title = container.find('h4').first();
         container.find('*').not('h4').remove();
         

@@ -39,6 +39,7 @@ from appointments.models import HospitalAppointments
 from appointments.models import DoctorAppointment
 from orders.models import UserPurchase, OrderStatusChoices
 from appointments.models import WalletTransaction
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
 @dashboard_login_required

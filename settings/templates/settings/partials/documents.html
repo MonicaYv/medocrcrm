@@ -770,11 +770,20 @@
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="incorporation_doc" data-doc-path="{{incorporation_doc_path}}"
+            <span title="View" data-doc-type="incorporation_doc" data-doc-path="/document/pharmacy_docs/incorporation/{{incorporation_doc_path}}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
-            <span title="Upload Document" data-doc-type="incorporation_doc"
-              class="material-symbols-outlined border p-1 rounded-md cursor-pointer">upload</span>
-          </div>
+            <div class="relative inline-block">
+            <span title="Upload Document"
+            class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
+            upload
+            </span>
+
+            <input
+            type="file"
+            class="hidden file-input"
+            data-doc="incorporation_doc"
+            accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
+         </div>
         </div>
       </div>
 
@@ -796,10 +805,22 @@
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="gst_doc" data-doc-path="{{gst_doc_path}}"
+            <span title="View" data-doc-type="gst_doc" data-doc-path="/document/pharmacy_docs/gst/{{gst_doc_path}}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
-            <span title="Upload Document" data-doc-type="gst_doc"
-              class="material-symbols-outlined border p-1 rounded-md cursor-pointer">upload</span>
+           <div class="relative inline-block">
+
+           <span title="Upload Document"
+           class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
+           upload
+           </span>
+
+           <input
+           type="file"
+           class="hidden file-input"
+           data-doc="gst_doc"
+           accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
+
+        </div>
           </div>
         </div>
       </div>
@@ -822,10 +843,20 @@
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="pan_doc" data-doc-path="{{pan_doc_path}}"
+            <span title="View" data-doc-type="pan_doc"  data-doc-path="/document/pharmacy_docs/pan/{{pan_doc_path}}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
-            <span title="Upload Document" data-doc-type="pan_doc"
-              class="material-symbols-outlined border p-1 rounded-md cursor-pointer">upload</span>
+          <div class="relative inline-block">
+          <span title="Upload Document"
+           class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
+           upload
+           </span>
+
+           <input
+           type="file"
+           class="hidden file-input"
+           data-doc="pan_doc"
+           accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
+
           </div>
         </div>
       </div>
@@ -848,10 +879,20 @@
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="tan_doc" data-doc-path="{{tan_doc_path}}"
+            <span title="View" data-doc-type="tan_doc" data-doc-path="/document/pharmacy_docs/tan/{{tan_doc_path}}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
-            <span title="Upload Document" data-doc-type="tan_doc"
-              class="material-symbols-outlined border p-1 rounded-md cursor-pointer">upload</span>
+           <div class="relative inline-block">
+           <span title="Upload Document"
+           class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
+           upload
+          </span>
+
+          <input
+          type="file"
+          class="hidden file-input"
+          data-doc="tan_doc"
+          accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
+          </div>
           </div>
         </div>
       </div>
@@ -874,10 +915,22 @@
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="medical_license_doc" data-doc-path="{{medical_license_doc_path}}"
+            <span title="View" data-doc-type="medical_license_doc" data-doc-path="/document/pharmacy_docs/medical_license/{{medical_license_doc_path}}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
-            <span title="Upload Document" data-doc-type="medical_license_doc"
-              class="material-symbols-outlined border p-1 rounded-md cursor-pointer">upload</span>
+           <div class="relative inline-block">
+           <span title="Upload Document"
+           class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
+           upload
+           </span>
+
+          <input
+          type="file"
+          class="hidden file-input"
+         data-doc="medical_license_doc"
+         accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
+
+         </div>
+            </div>
           </div>
         </div>
       </div>
@@ -897,10 +950,21 @@
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="storefront_image" data-doc-path="{{storefront_image_path}}"
+            <span title="View" data-doc-type="storefront_image"  data-doc-path="/document/pharmacy_docs/store_front/{{storefront_image_path}}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
-            <span title="Upload Document" data-doc-type="storefront_image"
-              class="material-symbols-outlined border p-1 rounded-md cursor-pointer">upload</span>
+             <div class="relative inline-block">
+             <span title="Upload Document"
+             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
+             upload
+             </span>
+
+            <input
+            type="file"
+            class="hidden file-input"
+            data-doc="storefront_image"
+            accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
+
+           </div>
           </div>
         </div>
       </div>
@@ -929,7 +993,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
                     </div>
                 </div>
 
@@ -944,7 +1009,7 @@
                 <div class="flex items-center gap-2">
                     <input type="text"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="image.png" readonly />
+                        value="{{lab_registration_doc_path.name}}"readonly />
                     <div class="flex items-center gap-2   text-nowrap">
 
                         <span
@@ -952,14 +1017,19 @@
                         <p class="font-normal text-xs text-bright-green">Virus Scan</p>
                     </div>
                     <span title="View"
+                        data-doc-type="lab_certificate"
+                        data-doc-path="/document/{{lab_certificate_path}}"
                         class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
-                            accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
+                        <input 
+                           type="file" 
+                           class="hidden file-input" 
+                           data-doc="lab_certificate">
+                           accept=".pdf,.doc,.docx,.jpg,.png,.jpeg"/>
                     </div>
                 </div>
 
@@ -978,7 +1048,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                             class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
                     </div>
                 </div>
 
@@ -994,7 +1065,7 @@
                 <div class="flex items-center gap-2">
                     <input type="text"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="image.png" readonly />
+                        value="{{identity_proof_aadhar_path.name}}" readonly />
                     <div class="flex items-center gap-2 text-nowrap">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1003,13 +1074,15 @@
                         </p>
                     </div>
                     <span title="View"
+                        data-doc-type="identity_proof_aadhar"
+                        data-doc-path="/document/{{identity_proof_aadhar_path}}"
                         class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file" class="hidden file-input" data-doc="identity_proof_aadhar"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1029,7 +1102,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc" data-doc-save="true">Save</button>
                     </div>
                 </div>
 
@@ -1045,7 +1119,7 @@
                 <div class="flex items-center gap-2">
                     <input type="text"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="image.png" readonly />
+                        value="{{identity_proof_pan_path.name}}" readonly />
                     <div class="flex items-center gap-2 text-nowrap">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1054,13 +1128,15 @@
                         </p>
                     </div>
                     <span title="View"
+                        data-doc-type="identity_proof_pan"
+                        data-doc-path="/document/{{identity_proof_pan_path}}"
                         class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file" class="hidden file-input" data-doc="identity_proof_pan"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1080,7 +1156,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc" data-doc-save="true">Save</button>
                     </div>
                 </div>
 
@@ -1094,7 +1171,7 @@
                 <div class="flex items-center gap-2">
                     <input type="text"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="image.png" readonly />
+                        value="{{lab_photo_path.name}}" readonly />
                     <div class="flex items-center gap-2 text-nowrap">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1103,13 +1180,16 @@
                         </p>
                     </div>
                     <span title="View"
+                        data-doc-type="gov_license"
+                        data-doc-path="/document/{{gov_license_path}}"
                         class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <!-- <input type="file" id="replaceInput"class="hidden file-input" -->
+                        <input type="file" class="hidden file-input" data-doc="gov_license"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1129,7 +1209,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc" data-doc-save="true">Save</button>
                     </div>
                 </div>
 
@@ -1143,7 +1224,7 @@
                 <div class="flex items-center gap-2">
                     <input type="text"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="image.png" readonly />
+                        value="{{lab_photo_path}}" readonly />
                     <div class="flex items-center gap-2 text-nowrap">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1152,13 +1233,16 @@
                         </p>
                     </div>
                     <span title="View"
+                        data-doc-type="lab_photo"
+                        data-doc-path="/document/{{lab_photo_path}}"
                         class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
+                            data-doc-type="lab_photo"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file" class="hidden file-input" data-doc="lab_photo"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1181,7 +1265,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
                     </div>
                 </div>
 
@@ -1203,14 +1288,19 @@
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">Virus Scan</p>
                     </div>
-                    <span title="View"
-                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
+                    <span 
+                        title="View"
+                        data-doc-type="hospital_license"
+                        data-doc-path="/document/{{registration_certificate_path}}"
+                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">
+                        visibility
+                    </span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file" class="hidden file-input"  data-doc="hospital_license"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1230,7 +1320,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
                     </div>
                 </div>
 
@@ -1254,14 +1345,19 @@
                             Virus Scan
                         </p>
                     </div>
-                    <span title="View"
-                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
+                    <span 
+                        title="View"
+                        data-doc-type="admin_identity_proof"
+                        data-doc-path="/document/{{aadhar_doc_path}}"
+                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">
+                        visibility
+                    </span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file" class="hidden file-input"  data-doc="admin_identity_proof"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1281,7 +1377,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
                     </div>
                 </div>
 
@@ -1303,14 +1400,21 @@
                             Virus Scan
                         </p>
                     </div>
-                    <span title="View"
-                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
+                    <span 
+                        title="View"
+                        data-doc-type="pan_doc"
+                        data-doc-path="/document/{{pan_doc_path}}"
+                        class="view-icon material-symbols-outlined border p-1 rounded-md cursor-pointer">
+                        visibility
+                    </span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                       <input type="file" 
+                            class="file-input hidden" 
+                            data-doc="pan_doc"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1341,14 +1445,21 @@
                             Virus Scan
                         </p>
                     </div>
-                    <span title="View"
-                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
+                    <span 
+                        title="View"
+                        data-doc-type="hospital_image"
+                        data-doc-path="/document/{{hospital_photo_path}}"
+                        class="view-icon material-symbols-outlined border p-1 rounded-md cursor-pointer">
+                        visibility
+                    </span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file"  
+                            class="file-input hidden" 
+                            data-doc="hospital_image"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1394,13 +1505,19 @@
                         <p class="font-normal text-xs text-bright-green">Virus Scan</p>
                     </div>
                     <span title="View"
-                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
+                    data-doc-type="clinic_registration"
+                    data-doc-path="/document/doctor_docs/registration/{{registration_certificate_path}}"
+                    class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">
+                    visibility
+                   </span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file" 
+                            class="hidden file-input" 
+                            data-doc="clinic_registration"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>
@@ -1444,16 +1561,23 @@
                             Virus Scan
                         </p>
                     </div>
-                    <span title="View"
-                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
+                    <span 
+                        title="View"
+                        data-doc-type="aadhar_doc"
+                        data-doc-path="/document/doctor_docs/aadhar/{{aadhar_doc_path}}"
+                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">
+                        visibility
+                    </span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file" 
+                            class="hidden file-input"
+                            data-doc="aadhar_doc"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
-                    </div>
+                        </div>
                 </div>
 
             </div>
@@ -1495,16 +1619,23 @@
                             Virus Scan
                         </p>
                     </div>
-                    <span title="View"
-                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
+                    <span 
+                        title="View"
+                        data-doc-type="pan_doc"
+                        data-doc-path="/document/doctor_docs/pan/{{pan_doc_path}}"
+                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">
+                        visibility
+                    </span>
                     <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file" 
+                            class="hidden file-input"
+                            data-doc="pan_doc"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
-                    </div>
+                        </div>
                 </div>
 
             </div>
@@ -1522,7 +1653,8 @@
                         <button
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
                         <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                            type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc" data-doc-save="true"></button>>Save</button>
                     </div>
                 </div>
 
@@ -1545,13 +1677,19 @@
                         </p>
                     </div>
                     <span title="View"
-                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
-                    <div class="relative inline-block">
+                        data-doc-type="clinic_photo"
+                        data-doc-path="/document/doctor_docs/clinic_photo/{{clinic_photo_path}}"
+                        class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">
+                        visibility
+                    </span>
+                        <div class="relative inline-block">
                         <span title="Upload Document"
                             class="upload-trigger material-symbols-outlined border p-1 rounded-md cursor-pointer">
                             upload
                         </span>
-                        <input type="file" class="hidden file-input"
+                        <input type="file"
+                            class="hidden file-input"
+                            data-doc="clinic_photo"
                             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
                     </div>
                 </div>

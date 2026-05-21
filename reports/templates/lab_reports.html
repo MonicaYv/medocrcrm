@@ -170,7 +170,8 @@
                 <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">9-10 PM</li>
               </ul>
             </div>
-            <div id="heatmap" class="!h-[60%]"></div>
+            <!-- <div id="heatmap" class="!h-[60%]"></div> -->
+            <div id="heatmap" class="h-[320px] mt-4"></div>
             <button class=" bg-dodger-blue text-white w-full text-center mt-4 py-2 rounded-lg download-btn" data-target="heatmap">Download Report</button>
           </div>
 
@@ -220,26 +221,59 @@
                   </div>
                 </div>
               </div>
-              <div class="flex items-center justify-between gap-4">
+              <!-- <div class="flex items-center justify-between gap-4">
                 <div class="flex-1 h-5 rounded-full overflow-hidden">
                   <div class="flex h-full">
-                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" style="width: 81%;">
+                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" id="winBar1"style="width: 81%;">
                       88
                     </div>
-                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" style="width: 19%;">
+                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center"id="lossBar1" style="width: 19%;">
                       20
                     </div>
                   </div>
                 </div>
                 <span class="text-xs">Jul 8–14</span>
-              </div>
+              </div> -->
+              <div class="flex items-center justify-between gap-4">
+
+  <div class="flex-1 h-5 rounded-full overflow-hidden">
+
+    <div class="flex h-full">
+
+      <div
+        class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center"
+        id="winBar1"
+        style="width:81%;">
+
+        <span id="winText1">81%</span>
+
+      </div>
+
+      <div
+        class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center"
+        id="lossBar1"
+        style="width:19%;">
+
+        <span id="lossText1">19%</span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <span class="text-xs" id="date1">
+    Jul 8-14
+  </span>
+
+</div>
               <div class="flex items-center justify-between gap-4">
                 <div class="flex-1 h-5 rounded-full overflow-hidden">
                   <div class="flex h-full">
-                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" style="width: 85%;">
+                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center"id="winBar2" style="width: 85%;">
                       100
                     </div>
-                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" style="width: 15%;">
+                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" id="lossBar2" style="width: 15%;">
                       15
                     </div>
                   </div>
@@ -249,10 +283,10 @@
               <div class="flex items-center justify-between gap-4">
                 <div class="flex-1 h-5 rounded-full overflow-hidden">
                   <div class="flex h-full">
-                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" style="width: 60%;">
+                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" id="winBar3"style="width: 60%;">
                       60
                     </div>
-                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" style="width: 40%;">
+                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" id="lossBar3" style="width: 40%;">
                       25
                     </div>
                   </div>
@@ -282,6 +316,13 @@
 
 {% block extra_js %}
   <script src="/static/js/tabs.js"></script>
-<script src="/static/js/lab-reports.js"></script>
+<!-- <script src="/static/js/lab-reports.js"></script> -->
   <script src="/static/js/table-pagination.js"></script>
+<!-- HTML2CANVAS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- JSPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="/static/js/lab-reports.js"></script>
 {% endblock %}

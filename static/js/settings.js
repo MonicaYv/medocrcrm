@@ -18,12 +18,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // Grab modal elements
     const viewModal   = document.getElementById("viewModal");
     const modalTitle  = viewModal.querySelector("p.font-semibold");
-    const modalImg    = viewModal.querySelector("#modalContent img");
-    const modalEmbed  = viewModal.querySelector("#modalContent embed");
+    // const modalImg    = viewModal.querySelector("#modalContent img");
+    // const modalEmbed  = viewModal.querySelector("#modalContent embed");
+    const modalImg = document.getElementById("modalImg");
+    const modalEmbed = document.getElementById("modalEmbed");
     const virusCheck  = viewModal.querySelector("input[type=checkbox]");
     const replaceBtn  = document.getElementById("replaceBtn");
-    const saveBtn     = document.getElementById("saveBtn");
-    const fileInput   = document.getElementById("replaceInput");
+    // const saveBtn     = document.getElementById("saveBtn");
+    const saveBtns = document.querySelectorAll(".save-btn-doc");
+    // const fileInput   = document.getElementById("replaceInput");
+    // console.log(fileInput.files)
+    let fileInput = null;
     const userType    = document.getElementById("userTypeHolder")?.dataset.userType;
 
     let currentDocType = null;
@@ -34,6 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
         advertiser: "advertiser_docs",
         client: "client_docs",
         pharmacy: "pharmacy_docs",
+        lab: "lab_docs",
+        hospital: "hospital_docs",
     };
     // Mapping doc_type → human title
     const titleMap = {
@@ -46,13 +53,23 @@ document.addEventListener("DOMContentLoaded", () => {
         doc_12a:               "12A Certificate",
         brand_image:           "Brand Image",
         medical_license_doc:   "Medical License",
-        storefront_image:      "Storefront Image"
+        storefront_image: "Storefront Image",
+        hospital_license: "Hospital License",
+        admin_identity_proof: "Admin Identity Proof",
+        pan_doc: "Hospital PAN",
+        hospital_photo: "Hospital Image",
+        lab_certificate: "Lab Registration Certificate",
+        identity_proof_aadhar: "Aadhar Card",
+        identity_proof_pan: "PAN Card",
+        gov_license: "Government License",
+        lab_photo: "Lab Photo",
     };
 
     // 1) View icons open the modal
     document.querySelectorAll(".view-icon").forEach(icon => {
         icon.addEventListener("click", () => {
         currentDocType = icon.dataset.docType;
+        console.log("DOC TYPE:", currentDocType);
         const path     = icon.dataset.docPath || "";
         const ext      = path.split(".").pop().toLowerCase();
 
@@ -67,14 +84,38 @@ document.addEventListener("DOMContentLoaded", () => {
             brand_image:           'brand_image',
             medical_license_doc:   'medical_license',
             storefront_image:      'store_front',
+
+
+            hospital_license: "registration",
+            admin_identity_proof: "aadhar",
+            pan_doc: "pan",
+            hospital_photo: "hospital_photo",
+
+            lab_certificate: 'lab_certificate',
+            identity_proof_aadhar: 'aadhar',
+            identity_proof_pan: 'pan',
+            gov_license: 'gov_license',
+            lab_photo: 'lab_photo',
         };
 
         const baseFolder = docFolder[userType];   
         console.log("Basefolder:", baseFolder)           // e.g. "ngo_docs"
         const subfolder  = subdirMap[currentDocType];  
         console.log("docType =", currentDocType, "subfolder =", subfolder);      // e.g. "pan"
-        const fullPath   = `${baseFolder}/${subfolder}/${path}`;  // e.g. "ngo_docs/pan/abc.pdf"
-        const previewURL = `/document/${fullPath}`; 
+        // const fullPath   = `${baseFolder}/${subfolder}/${path}`;  // e.g. "ngo_docs/pan/abc.pdf"
+        // // const previewURL = `/document/${fullPath}`; 
+        // const fullPath = path.replace("/media/", "");
+        // const previewURL = `/document/${fullPath}`;
+        const previewURL = path;
+        // if (!path || path === "/media/" || path.trim() === "") {
+
+        //     toastr.error("Document not found");
+
+        //     return;
+        // }
+        console.log("PREVIEW URL:", previewURL);
+        console.log("PATH:", path);
+        // console.log("FULLPATH:", fullPath);
 
         // Set title
         modalTitle.innerHTML = `<span class="material-symbols-outlined">document_scanner</span> ${titleMap[currentDocType] || "Document Preview"}`;
@@ -84,8 +125,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Show correct preview
         if (["jpg","jpeg","png","webp"].includes(ext)) {
-            modalImg.src    = previewURL;
+            // modalImg.src    = previewURL;
+        if (previewURL && previewURL !== "/media/") {
+
+            modalImg.src = previewURL;
+
             modalImg.classList.remove("hidden");
+        }
+     
+       
         }
         else if (ext === "pdf") {
             modalEmbed.src    = previewURL;
@@ -97,11 +145,20 @@ document.addEventListener("DOMContentLoaded", () => {
         virusCheck.checked = approved;
 
         // Reset replace/save
-        newFile = null;
-        replaceBtn && (replaceBtn.disabled = false);
-        saveBtn    && (saveBtn.disabled    = true);
+        // newFile = null;
+        // replaceBtn && (replaceBtn.disabled = false);
+        // saveBtn    && (saveBtn.disabled    = true);
+        // Reset replace/save
+          replaceBtn && (replaceBtn.disabled = false);
+        //   saveBtn && (saveBtn.disabled = false);
 
         viewModal.classList.remove("hidden");
+        // modalImg.src = path;
+        // if (path && path !== "/media/") {
+        //     modalImg.src = path;
+        // }
+
+        // modalImg.classList.remove("hidden");
         });
     });
 
@@ -110,55 +167,316 @@ document.addEventListener("DOMContentLoaded", () => {
         .addEventListener("click", () => viewModal.classList.add("hidden"));
 
     // 3) Replace → file picker
-    replaceBtn && replaceBtn.addEventListener("click", () => {
-        fileInput.click();
-    });
-    fileInput && fileInput.addEventListener("change", () => {
-        newFile = fileInput.files[0];
-        saveBtn.disabled = !newFile;
-        previewImage(newFile);
-    });
-    const previewImage = (file) => {
-    $("#modalImg").empty();
+
+replaceBtn && replaceBtn.addEventListener("click", () => {
+
+    const currentInput = document.querySelector(
+        `.file-input[data-doc="${currentDocType}"]`
+    );
+
+    if(currentInput){
+
+        currentInput.click();
+
+        currentInput.onchange = (e) => {
+
+            newFile = e.target.files[0];
+
+            console.log("SELECTED FILE:", newFile);
+
+            if(newFile){
+
+                toastr.success("File selected");
+
+                saveBtns.forEach(btn => {
+                   btn.disabled = false;
+               });
+
+                // saveBtn.disabled = false;
+
+                previewImage(newFile);
+            }
+        };
+    }
+});
+// replaceBtn && replaceBtn.addEventListener("click", () => {
+
+//     const currentInput = document.querySelector(
+//         `.file-input[data-doc="${currentDocType}"]`
+//     );
+
+//     if(currentInput){
+//         currentInput.click();
+//     }
+// });
+
+// document.querySelectorAll(".upload-trigger").forEach(trigger => {
+
+//     trigger.addEventListener("click", function () {
+
+//         const wrapper = this.closest(".relative.inline-block");
+
+//         const input = wrapper.querySelector(".file-input");
+
+//         if (input) {
+
+//             input.click();
+
+//             input.onchange = function (e) {
+
+//                 newFile = e.target.files[0];
+
+//                 console.log("SELECTED FILE:", newFile);
+
+//                 if (newFile) {
+
+//                     toastr.success("File selected");
+
+//                     saveBtn.disabled = false;
+
+//                     previewImage(newFile);
+//                 }
+//             };
+//         }
+//     });
+
+// });
+
+// replaceBtn && replaceBtn.addEventListener("click", () => {
+
+//     const activeInput = document.querySelector(
+//         `.file-input[data-doc="${currentDocType}"]`
+//     );
+
+//     if(activeInput){
+
+//         activeInput.click();
+
+//         activeInput.onchange = (e) => {
+
+//             newFile = e.target.files[0];
+
+//             console.log("SELECTED FILE:", newFile);
+
+//             if(newFile){
+
+//                 saveBtn.disabled = false;
+
+//                 previewImage(newFile);
+//             }
+//         };
+//     }
+// });
+
+// document.querySelectorAll(".file-input").forEach(input => {
+
+//     input.addEventListener("change", (e) => {
+
+//         newFile = e.target.files[0];
+
+//         console.log("SELECTED FILE:", newFile);
+
+//         if(newFile){
+
+//             saveBtn.disabled = false;
+
+//             previewImage(newFile);
+//         }
+//     });
+
+// });
+//     replaceBtn && replaceBtn.addEventListener("click", () => {
+//         fileInput.click();
+//     });
+//     fileInput && fileInput.addEventListener("change", (e) => {
+
+//         newFile = e.target.files[0];
+
+//         console.log("SELECTED FILE:", newFile);
+
+//         if(newFile){
+//            saveBtn.disabled = false;
+//            previewImage(newFile);
+//        }
+//    });
+    // fileInput && fileInput.addEventListener("change", () => {
+    //     newFile = fileInput.files[0];
+    //     saveBtn.disabled = !newFile;
+    //     previewImage(newFile);
+    // });
+const previewImage = (file) => {
+
     const reader = new FileReader();
+
     reader.onload = (e) => {
-      $("#modalImg").attr('src', e.target.result);
+
+        modalImg.src = e.target.result;
+
+        modalImg.classList.remove("hidden");
+
+        if(modalEmbed){
+            modalEmbed.classList.add("hidden");
+        }
     };
+
     reader.readAsDataURL(file);
-    };
-    // 4) Save → upload via AJAX
-    saveBtn && saveBtn.addEventListener("click", () => {
-        if (!newFile || !currentDocType) return;
+};
+
+saveBtns.forEach(saveBtn => {
+
+    saveBtn.addEventListener("click", async () => {
+
+        console.log("SAVE BUTTON CLICKED");
+
+        console.log("newFile =", newFile);
+
+        console.log("currentDocType =", currentDocType);
+
+        if (!newFile || !currentDocType) {
+
+            toastr.error("Please select a file");
+
+            return;
+        }
 
         const fd = new FormData();
+
         fd.append("doc_type", currentDocType);
+
         fd.append("document", newFile);
 
         const csrftoken = getCookie("csrftoken");
-        fetch("update-document/", {
-        method: "POST",
-        headers: { "X-CSRFToken": csrftoken },
-        body: fd
-        })
-        .then(r => r.json())
-        .then(json => {
-        if (json.success) {
-            location.reload();
-            toastr.success("Document updated successfully");
-        } else {
-            alert(json.error || JSON.stringify(json.errors));
+
+        try {
+
+            const response = await fetch("/settings/update-document/", {
+
+                method: "POST",
+
+                headers: {
+                    "X-CSRFToken": csrftoken
+                },
+
+                body: fd
+            });
+
+            const data = await response.json();
+
+            console.log("UPLOAD RESPONSE:", data);
+
+            if (data.success) {
+
+                toastr.success("Document updated successfully");
+
+                setTimeout(() => {
+
+                    location.reload();
+
+                }, 1500);
+
+            } else {
+
+                toastr.error(data.error || data.message || "Upload failed");
+            }
+
+        } catch (error) {
+
+            console.error("UPLOAD ERROR:", error);
+
+            toastr.error("Upload failed");
         }
-        })
-        .catch(e => {
-        console.error(e);
-        alert("Upload failed.");
-        });
     });
 });
+    // const previewImage = (file) => {
+    // $("#modalImg").empty();
+    // const reader = new FileReader();
+    // reader.onload = (e) => {
+    //   $("#modalImg").attr('src', e.target.result);
+    // };
+    // reader.readAsDataURL(file);
+    // };
+    // 4) Save → upload via AJAX
+//     saveBtn && saveBtn.addEventListener("click", async () => {
+//     console.log("SAVE BUTTON CLICKED");
+
+//     console.log("newFile =", newFile);
+//     console.log("currentDocType =", currentDocType);
+//     // console.log(fileInput.files)
+//     console.log("newFile =", newFile)
+//     console.log("currentDocType =", currentDocType)
+//     console.log("CURRENT FILE:", newFile);
+//     console.log("CURRENT DOC:", currentDocType);
+
+//     if (!newFile || !currentDocType) {
+//         toastr.error("Please select a file");
+//         return;
+//     }
+
+//     const fd = new FormData();
+
+//     fd.append("doc_type", currentDocType);
+//     // console.log("SENDING:", backendDocType);
+//     console.log("SENDING:", currentDocType);
+    
+//     fd.append("document", newFile);
+
+//     const csrftoken = getCookie("csrftoken");
+
+//     try {
+
+//         const response = await fetch("/settings/update-document/", {
+//             method: "POST",
+//             headers: {
+//                 "X-CSRFToken": csrftoken
+//             },
+//             body: fd
+//         });
+
+//         const data = await response.json();
+
+//         console.log("UPLOAD RESPONSE:", data);
+
+//         if (data.success) {
+
+//             toastr.success("Document updated successfully");
+
+//             setTimeout(() => {
+//                 location.reload();
+//             }, 1500);
+
+//         } else {
+
+//             toastr.error(data.error || data.message || "Upload failed");
+
+//             console.log(data);
+//         }
+
+//     } catch (error) {
+
+//         console.error("UPLOAD ERROR:", error);
+
+//         toastr.error("Upload failed");
+//     }
+// });
+});
+        // .then(r => r.json())
+        // .then(json => {
+        // if (json.success) {
+        //     location.reload();
+        //     toastr.success("Document updated successfully");
+        // } else {
+        //     alert(json.error || JSON.stringify(json.errors));
+        // }
+        // })
+        // .catch(e => {
+        // console.error(e);
+        // alert("Upload failed.");
+        // });
 document.querySelectorAll('[data-field]').forEach(input => {
     const csrftoken = getCookie("csrftoken");
 
-    input.addEventListener('change', () => {
+    // input.addEventListener('change', () => {
+    input.addEventListener('input', () => {
         const field = input.dataset.field;
         let value;
 

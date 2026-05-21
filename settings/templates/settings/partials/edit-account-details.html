@@ -16,7 +16,7 @@
                 <div class="flex flex-col lg:flex-row gap-4">
                     <!-- Country Code -->
                     <div class="pl-4 lg:w-1/4">
-                        <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                        <select name="countryCodes "size="1"  class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
                             {% for code in country_codes %}
                                 <option value="{{ code.dial_code }}"
                                     {% if code.dial_code == country_code %}selected{% endif %}>
@@ -29,8 +29,14 @@
 
                     <!-- Phone -->
                     <div class="flex-1">
-                        <input name="phone" type="text" class="border rounded px-3 py-2 w-full"
-                        placeholder="Phone Number" value="{{phone_no}}"/>
+                        <!-- <input name="phone" type="text" value="{{phone_no}}" class="border rounded px-3 py-2 w-full"/> -->
+                        <!-- placeholder="Phone Number" value="{{phone_no}}"/> -->
+                         <input
+                            name="phone"
+                            type="text"
+                            value="{{phone_no}}"
+                            class="border rounded px-3 py-2 w-full"
+                         />
                         <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
                     </div>
                 </div>
@@ -182,7 +188,7 @@
                 <div class="flex flex-col lg:flex-row gap-4">
                     <!-- Country Code -->
                     <div class="pl-4 lg:w-1/4">
-                        <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                        <select name="countryCodes"  size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
                             {% for code in country_codes %}
                                 <option value="{{ code.dial_code }}"
                                     {% if code.dial_code == country_code %}selected{% endif %}>
@@ -365,7 +371,7 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class="pl-4 lg:w-1/4">
-                    <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
                         {% for code in country_codes %}
                             <option value="{{ code.dial_code }}"
                                 {% if code.dial_code == country_code %}selected{% endif %}>
@@ -654,7 +660,7 @@
                 <div class="flex flex-col lg:flex-row gap-4">
                     <!-- Country Code -->
                     <div class="pl-4 lg:w-1/4">
-                        <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                        <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
                             {% for code in country_codes %}
                                 <option value="{{ code.dial_code }}"
                                     {% if code.dial_code == country_code %}selected{% endif %}>
@@ -858,7 +864,7 @@
 
                 <!-- Phone -->
                 <div class="flex-1">
-                    <input name="phone_number" type="text" class="border rounded px-3 py-2 w-full"
+                    <input name="phone" type="text" class="border rounded px-3 py-2 w-full"
                         placeholder="Phone No." value="{{contact_number}}"/>
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
                 </div>
@@ -987,7 +993,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
             <!-- City,Town,District -->
             <div class="flex flex-col">
-                <input name=""city type="text" class="border rounded px-3 py-2"
+                <input name="city" type="text" class="border rounded px-3 py-2"
                     placeholder="City,Town,District" value="{{city}}"/>
                 <span class="error adminNameError text-red-500 text-sm mt-1 hidden"></span>
             </div>
@@ -1019,7 +1025,7 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class="pl-4 lg:w-1/4">
-                    <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
                         {% for code in country_codes %}
                             <option value="{{ code.dial_code }}"
                                 {% if code.dial_code == country_code %}selected{% endif %}>
@@ -1102,8 +1108,14 @@
 
                 <!-- Phone -->
                 <div class="flex-1">
-                    <input name="phone_number" type="text" class="border rounded px-3 py-2 w-full"
-                        placeholder="Phone No." value="{{contact_no}}"/>
+                    <input 
+                        id="phone"
+                        name="phone"
+                        type="text"
+                        value="{{contact_no}}"
+                        class="border rounded px-3 py-2 w-full"
+                        placeholder="Phone No."
+                    />
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
                 </div>
             </div>
@@ -1177,7 +1189,7 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class="pl-4 lg:w-1/4">
-                    <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
                         {% for code in country_codes %}
                             <option value="{{ code.dial_code }}"
                                 {% if code.dial_code == country_code %}selected{% endif %}>
@@ -1250,18 +1262,19 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class=" lg:w-1/4">
-                    <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
+                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
                     {% for code in country_codes %}
                         <option value="{{ code.dial_code }}"
                             {% if code.dial_code == country_code %}selected{% endif %}>
                             {{ code.name }} ({{ code.dial_code }})
                         </option>
                     {%endfor%}
+                    </select>
                 </div>
 
                 <!-- Phone -->
                 <div class="flex-1">
-                    <input name="contact_number" type="text" class="border rounded px-3 py-2 w-full"
+                    <input name="phone" type="text" class="border rounded px-3 py-2 w-full"
                         placeholder="Phone No." value="{{contact_number}}" />
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
                 </div>
@@ -1487,7 +1500,7 @@
         </div>
 
         <!--Address-->
-        <input type="text" name=""address class="w-full border rounded px-3 py-2" placeholder="Address" value="{{address}}"/>
+        <input type="text" name="address" class="w-full border rounded px-3 py-2" placeholder="Address" value="{{address}}"/>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
             <!-- City,Town,District -->
             <div class="flex flex-col">
@@ -1523,13 +1536,14 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class=" lg:w-1/4">
-                    <select name="countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
+                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
                     {% for code in country_codes %}
                         <option value="{{ code.dial_code }}"
                             {% if code.dial_code == country_code %}selected{% endif %}>
                             {{ code.name }} ({{ code.dial_code }})
                         </option>
                     {%endfor%}
+                     </select>
                 </div>
 
                 <!-- Phone -->

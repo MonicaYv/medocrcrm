@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import traceback
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
@@ -132,7 +133,9 @@ def settings_page(request):
 
 
 def get_base_context(user):
+
     context = {
+        
         'email': user.email,
         'country_code': user.phone_country_code,
         'phone_no': user.phone_number,
@@ -149,6 +152,8 @@ def get_base_context(user):
         'quite_mode': user.quite_mode,
         'quite_mode_start_time': user.quite_mode_start_time,
         'quite_mode_end_time': user.quite_mode_end_time,
+        
+        
     }
     return context
 
@@ -308,13 +313,20 @@ def handle_lab_profile(user):
         'facilities_selected': profile.facilities.all(),
         'all_facilities': all_facilities,
         'lab_certificate_number': profile.lab_certificate_number,
-        'lab_certificate_path': os.path.basename(profile.lab_certificate_path) if profile.lab_certificate_path else "",
+        # 'lab_certificate_path': os.path.basename(profile.lab_certificate_path) if profile.lab_certificate_path else "",
+        'lab_certificate_path': profile.lab_certificate_path if profile.lab_certificate_path else "",
         'identity_proof_aadhar_number': profile.identity_proof_aadhar_number,
-        'identity_proof_aadhar_path': os.path.basename(profile.identity_proof_aadhar_path) if profile.identity_proof_aadhar_path else "",
+        # 'identity_proof_aadhar_path': os.path.basename(profile.identity_proof_aadhar_path) if profile.identity_proof_aadhar_path else "",
+        'identity_proof_aadhar_path': profile.identity_proof_aadhar_path if profile.identity_proof_aadhar_path else "",
         'identity_proof_pan_number': profile.identity_proof_pan_number,
-        'identity_proof_pan_path': os.path.basename(profile.identity_proof_pan_path) if profile.identity_proof_pan_path else "",
+        # 'identity_proof_pan_path': os.path.basename(profile.identity_proof_pan_path) if profile.identity_proof_pan_path else "",
+        'identity_proof_pan_path': profile.identity_proof_pan_path if profile.identity_proof_pan_path else "",
         'gov_license_number': profile.gov_license_number,
-        'gov_license_path': os.path.basename(profile.gov_license_path) if profile.gov_license_path else "",
+        # 'gov_license_path': os.path.basename(profile.gov_license_path) if profile.gov_license_path else "",
+        'gov_license_path': profile.gov_license_path if profile.gov_license_path else "",
+        # 'lab_photo_path': os.path.basename(profile.lab_photo_path) if profile.lab_photo_path else "",
+        # 'is_verified': profile.is_verified,
+    
         'lab_photo_path': os.path.basename(profile.lab_photo_path) if profile.lab_photo_path else "",
         'is_verified': profile.is_verified,
         'verification_status': profile.verification_status,
@@ -327,24 +339,37 @@ def handle_lab_profile(user):
 def handle_hospital_profile(user):
     profile = HospitalProfile.objects.filter(user=user).first()
     data = {
+        'registration_certificate_path': profile.registration_certificate_path if profile.registration_certificate_path else "",
+
+        'aadhar_doc_path': profile.aadhar_doc_path if profile.aadhar_doc_path else "",
+
+        'pan_doc_path': profile.pan_doc_path if profile.pan_doc_path else "",
+
+        'hospital_photo_path': profile.hospital_photo_path if profile.hospital_photo_path else "",
         'hospital_name' : profile.hospital_name,
         'owner_name': profile.owner_name,
         'contact_no': profile.contact_no,
         'alternate_contact_no': profile.alternate_contact_no,
         'address': profile.address,
+        'country': profile.country,
         'city': profile.city,
         'state': profile.state,
         'pincode': profile.pincode,
         'hospital_timing': profile.hospital_timing,
         'home_visit': profile.home_visit,
         'registration_no': profile.registration_no,
-        'registration_certificate_path': os.path.basename(profile.registration_certificate_path) if profile.registration_certificate_path else "",
+        # 'registration_certificate_path': os.path.basename(profile.registration_certificate_path) if profile.registration_certificate_path else "",
+       'registration_certificate_path': profile.registration_certificate_path if profile.registration_certificate_path else "",
         'aadhar_card_no': profile.aadhar_card_no,
-        'aadhar_doc_path': os.path.basename(profile.aadhar_doc_path) if profile.aadhar_doc_path else "",
+        # 'aadhar_doc_path': os.path.basename(profile.aadhar_doc_path) if profile.aadhar_doc_path else "",
+        'aadhar_doc_path': profile.aadhar_doc_path if profile.aadhar_doc_path else "",
         'pan_card_no': profile.pan_card_no,
-        'pan_doc_path': os.path.basename(profile.pan_doc_path) if profile.pan_doc_path else "",
-        'hospital_logo_path': os.path.basename(profile.hospital_logo_path) if profile.hospital_logo_path else "",
-        'hospital_photo_path': os.path.basename(profile.hospital_photo_path) if profile.hospital_photo_path else "",
+        # 'pan_doc_path': os.path.basename(profile.pan_doc_path) if profile.pan_doc_path else "",
+        'pan_doc_path': profile.pan_doc_path if profile.pan_doc_path else "",
+        # 'hospital_logo_path': os.path.basename(profile.hospital_logo_path) if profile.hospital_logo_path else "",
+        'hospital_logo_path': profile.hospital_logo_path if profile.hospital_logo_path else "",
+        # 'hospital_photo_path': os.path.basename(profile.hospital_photo_path) if profile.hospital_photo_path else "",
+        'hospital_photo_path': profile.hospital_photo_path if profile.hospital_photo_path else "",
         'phone_for_otp': profile.phone_for_otp,
         'is_verified': profile.is_verified,
         'verification_status': profile.verification_status,
@@ -423,11 +448,22 @@ def update_user_document(request):
     doc_type = request.POST.get('doc_type')
     file = request.FILES.get('document')
 
+    print(file)
+
     if not doc_type or not file:
         return JsonResponse({'success': False, 'error': 'Missing document or type.'}, status=400)
 
     subdir_map = {
+        'hospital_license': 'registration',
+        'admin_identity_proof': 'aadhar',      
+        'pan_doc': 'pan',
+        'hospital_image': 'hospital_image',
         'ngo_registration_doc': 'registration',
+        'lab_certificate': 'lab_certificate',
+        'identity_proof_aadhar': 'aadhar',
+        'identity_proof_pan': 'pan',
+        'gov_license': 'gov_license',
+        'lab_photo': 'lab_photo',
         'incorporation_doc': 'incorporation',
         'gst_doc': 'gst',
         'pan_doc': 'pan',
@@ -437,6 +473,11 @@ def update_user_document(request):
         'brand_image': 'brand_image',
         'medical_license_doc': 'medical_license',
         'storefront_image': 'store_front',
+        'clinic_registration': 'registration',
+        'aadhar_doc': 'aadhar',
+        'doctor_pan': 'pan',
+        'clinic_logo': 'clinic_logo',
+        'clinic_photo': 'clinic_photo',
     }
         
     upload_subdir = subdir_map.get(doc_type)
@@ -447,22 +488,44 @@ def update_user_document(request):
     if error:
         return JsonResponse({'success': False, 'error': error}, status=400)
 
+    # profile_model = {
+    #     'ngo': NGOProfile,
+    #     'advertiser': AdvertiserProfile,
+    #     'client': ClientProfile,
+    #     'pharmacy': PharmacyProfile,
+    # }.get(user_type)
+    
+
     profile_model = {
         'ngo': NGOProfile,
         'advertiser': AdvertiserProfile,
         'client': ClientProfile,
         'pharmacy': PharmacyProfile,
+        'lab': LabProfile,
+        'hospital': HospitalProfile,
+        'doctor': DoctorProfile,
     }.get(user_type)
-
     if not profile_model:
         return JsonResponse({'success': False, 'error': 'Invalid user type for document upload.'}, status=400)
 
     profile = profile_model.objects.filter(user=user).first()
+    print("PROFILE =", profile)
+    print("DOC TYPE =", doc_type)
+    print("FILE =", file)
     if not profile:
         return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
 
     doc_field_map = {
+        'hospital_license': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
+        'admin_identity_proof': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
+        'hospital_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
+        'hospital_image': ('hospital_photo_path', 'hospital_photo_virus_scanned'),
         'ngo_registration_doc': ('ngo_registration_doc_path', 'ngo_registration_doc_virus_scanned'),
+        'lab_certificate': ('lab_certificate_path', 'lab_certificate_virus_scanned'),
+        'identity_proof_aadhar': ('identity_proof_aadhar_path', 'identity_proof_aadhar_virus_scanned'),
+        'identity_proof_pan': ('identity_proof_pan_path', 'identity_proof_pan_virus_scanned'),
+        'gov_license': ('gov_license_path', 'gov_license_virus_scanned'),
+        'lab_photo': ('lab_photo_path', 'lab_photo_virus_scanned'),
         'incorporation_doc': ('incorporation_doc_path', 'incorporation_doc_virus_scanned'),
         'gst_doc': ('gst_doc_path', 'gst_doc_virus_scanned'),
         'pan_doc': ('pan_doc_path', 'pan_doc_virus_scanned'),
@@ -472,6 +535,11 @@ def update_user_document(request):
         'brand_image': ('brand_image_path', 'brand_image_virus_scanned'),
         'medical_license_doc': ('medical_license_doc_path', 'medical_license_doc_virus_scanned'),
         'storefront_image': ('storefront_image_path', 'storefront_image_virus_scanned'),
+        'clinic_registration': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
+        'aadhar_doc': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
+        'doctor_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
+        'clinic_logo': ('clinic_logo_path', 'clinic_logo_virus_scanned'),
+        'clinic_photo': ('clinic_photo_path', 'clinic_photo_virus_scanned'),
     }
 
     doc_fields = doc_field_map.get(doc_type)
@@ -479,7 +547,10 @@ def update_user_document(request):
         return JsonResponse({'success': False, 'error': 'Unknown document type.'}, status=400)
 
     setattr(profile, doc_fields[0], file_path)
+    print("SETTING:", doc_fields[0], "=", file_path)
     setattr(profile, doc_fields[1], True)
+    print("FILE PATH =", file_path)
+    print("DOC FIELD =", doc_fields[0])
     profile.save()
 
     return JsonResponse({'success': True, 'message': 'Document updated successfully.'})
@@ -653,7 +724,8 @@ def update_pharmacy_profile(request):
     user = request.user_obj  
 
     validate_email_phone(post_data, errors)
-    required_fields = ["company_name", "city", "state", "pincode"]
+    # required_fields = ["company_name", "city", "state", "pincode"]
+    required_fields = ["company_name", "pincode"]
     for field in required_fields:
         if not post_data.get(field):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
@@ -674,27 +746,32 @@ def update_pharmacy_profile(request):
             pharmacy_profile.company_name = post_data.get("company_name")
             pharmacy_profile.website = post_data.get("website_url")
             pharmacy_profile.address = post_data.get("address")
-            pharmacy_profile.city = post_data.get("city")
-            pharmacy_profile.state = post_data.get("state")
+            pharmacy_profile.city_id = None
+            pharmacy_profile.state_id = None
+
+            pharmacy_profile.owner_name = post_data.get("owner_name")
+            pharmacy_profile.country = post_data.get("country")
+            # pharmacy_profile.city = post_data.get("city")
+            # pharmacy_profile.state = post_data.get("state")
             pharmacy_profile.pincode = post_data.get("pincode")
 
             # Many-to-many pharmacy types
-            pharmacy_type_values = post_data.getlist("pharmacy_type")
+            # pharmacy_type_values = post_data.getlist("pharmacy_type")
 
-            if pharmacy_type_values:
-                pharmacy_types = PharmacyType.objects.filter(
-                    name__in=pharmacy_type_values
-                )
-                pharmacy_profile.pharmacy_types.set(pharmacy_types)
+            # if pharmacy_type_values:
+            #     pharmacy_types = PharmacyType.objects.filter(
+            #         name__in=pharmacy_type_values
+            #     )
+            #     pharmacy_profile.pharmacy_types.set(pharmacy_types)
 
-            # Many-to-many pharmacy services
-            services_offered_values = post_data.getlist("services_offered")
+            # # Many-to-many pharmacy services
+            # services_offered_values = post_data.getlist("services_offered")
 
-            if services_offered_values:
-                pharmacy_services = PharmacyServices.objects.filter(
-                    name__in=services_offered_values
-                )
-                pharmacy_profile.services.set(pharmacy_services)
+            # if services_offered_values:
+            #     pharmacy_services = PharmacyServices.objects.filter(
+            #         name__in=services_offered_values
+            #     )
+            #     pharmacy_profile.services.set(pharmacy_services)
             # pharmacy_type_value = post_data.get("pharmacy_type")
             # if pharmacy_type_value:
             #     pharmacy_profile.pharmacy_type = get_object_or_404(PharmacyType, name=pharmacy_type_value)
@@ -720,8 +797,15 @@ def update_pharmacy_profile(request):
 
         return JsonResponse({'success': True, 'message': 'Pharmacy profile updated successfully'})
     
+    # except Exception as e:
+    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
     except Exception as e:
-        return JsonResponse({"success": False, "message": str(e)}, status=500)
+         print("PHARMACY SAVE ERROR:", e)
+
+         return JsonResponse({
+            "success": False,
+            "message": str(e)
+        }, status=500)
 
 @require_POST
 @dashboard_login_required
@@ -740,77 +824,358 @@ def update_lab_profile(request):
         return JsonResponse({"success": False, "errors": errors}, status=400)
     
     try:
+    
         with transaction.atomic():
-            user.email = post_data.get('email')
-            user.phone_country_code = post_data.get("countryCodes")
-            user.save()
-            
-            lab_profile = get_object_or_404(LabProfile, user=user)
-            lab_profile.save()
-            
-            return JsonResponse({'success': True, 'message': 'Lab profile updated successfully'})
 
+             user.email = post_data.get('email')
+             user.phone_country_code = post_data.get("countryCodes")
+             user.save()
+
+             lab_profile = get_object_or_404(LabProfile, user=user)
+
+             # Update fields
+             lab_profile.lab_name = post_data.get("lab_name")
+             lab_profile.owner_name = post_data.get("owner_name")
+
+             lab_profile.contact_number = post_data.get("phone")
+
+             lab_profile.lab_registration_number = post_data.get("lab_registration_number")
+
+             lab_profile.address = post_data.get("address")
+             lab_profile.country = post_data.get("country")
+
+             lab_profile.pincode = post_data.get("pincode")
+
+    # DO NOT TOUCH city/state for now
+    # because they are ForeignKeys
+
+             lab_profile.save()
+
+             return JsonResponse({
+                 'success': True,
+                 'message': 'Lab profile updated successfully'
+              })
     except Exception as e:
-        return JsonResponse({"success": False, "message": str(e)}, status=500)
+        import traceback
+        print(traceback.format_exc())
+
+        return JsonResponse({
+            "success": False,
+            "message": str(e)
+        }, status=500)
+
+    
+    
+    #         return JsonResponse({'success': True, 'message': 'Lab profile updated successfully'})
+
+    # except Exception as e:
+    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 @require_POST
 @dashboard_login_required
 def update_hospital_profile(request):
-    post_data = request.POST
-    errors = {}
-    user = request.user_obj  
-    validate_email_phone(post_data, errors)
-    required_fields = ["hospital_name", "city", "state", "pincode"]
-    for field in required_fields:
-        if not post_data.get(field):
-            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
-    if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+    if request.method == "POST":
+
+        print(request.POST)
+
+        post_data = request.POST
+        errors = {}
+
+        user = request.user_obj
+
+        validate_email_phone(post_data, errors)
+
+        required_fields = ["hospital_name", "city", "state", "pincode"]
+
+        for field in required_fields:
+            if not post_data.get(field):
+                errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+        if errors:
+            return JsonResponse({
+                "success": False,
+                "errors": errors
+            }, status=400)
+
+        try:
+
+            with transaction.atomic():
+
+                user.email = post_data.get('email')
+                # user.phone_country_code = post_data.get("countryCodes")
+                # user.phone_number = post_data.get("contact_number")
+                user.phone_country_code = post_data.get("phone_country_code")
+                user.phone_number = post_data.get("phone")
+                user.save()
+
+                hospital_profile = get_object_or_404(
+                    HospitalProfile,
+                    user=user
+                )
+
+                hospital_profile.hospital_name = post_data.get("hospital_name")
+                hospital_profile.address = post_data.get("address")
+                # hospital_profile.city = post_data.get("city")
+                # hospital_profile.state = post_data.get("state")
+                hospital_profile.city_name = post_data.get("city")
+                hospital_profile.state_id = None
+                hospital_profile.owner_name = post_data.get("owner_name")
+                user.phone_country_code = post_data.get("phone_country_code")
+                user.phone_number = post_data.get("phone")
+                # hospital_profile.country = post_data.get("country")
+                # hospital_profile.pincode = post_data.get("pincode")
+
+                hospital_profile.save()
+
+                print("DATA SAVED SUCCESSFULLY")
+
+                return JsonResponse({
+                    "success": True,
+                    "message": "Hospital profile updated successfully"
+                })
+
+        except Exception as e:
+
+            print("SAVE ERROR:", e)
+
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            }, status=500)
+# def update_hospital_profile(request):
+#     if request.method == "POST":
+#         print(request.POST)
+#     post_data = request.POST
+#     errors = {}
+#     user = request.user_obj  
+#     validate_email_phone(post_data, errors)
+#     required_fields = ["hospital_name", "city", "state", "pincode"]
+#     for field in required_fields:
+#         if not post_data.get(field):
+#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+#     if errors:
+#         return JsonResponse({"success": False, "errors": errors}, status=400)
     
-    try:
-        with transaction.atomic():
-            user.email = post_data.get('email')
-            user.phone_country_code = post_data.get("countryCodes")
-            user.save()
+#     try:
+#         with transaction.atomic():
+#             user.email = post_data.get('email')
+#             user.phone_country_code = post_data.get("countryCodes")
+#             user.phone_number = post_data.get("contact_number")
+#             user.save()
             
-            hospital_profile = get_object_or_404(HospitalProfile, user=user)
-            hospital_profile.save()
-            
-            return JsonResponse({'success': True, 'message': 'Hospital profile updated successfully'})
+#             hospital_profile = get_object_or_404(HospitalProfile, user=user)
+#             hospital_profile.hospital_name = post_data.get("hospital_name")
+#             hospital_profile.address = post_data.get("address")
+#             hospital_profile.city = post_data.get("city")
+#             hospital_profile.state = post_data.get("state")
+#             hospital_profile.country = post_data.get("country")
+#             hospital_profile.pincode = post_data.get("pincode")
+#             try:
+#                hospital.save()
+#                print("DATA SAVED SUCCESSFULLY")
 
-    except Exception as e:
-        return JsonResponse({"success": False, "message": str(e)}, status=500)
+#                return JsonResponse({
+#                "status": "success"
+#             })
+
+#             except Exception as e:
+#                 print("SAVE ERROR:", e)
+
+#                 return JsonResponse({
+#                 "status": "error",
+#                 "message": str(e)
+#             })
+#             # hospital_profile.save()
+        
+            
+    #         return JsonResponse({'success': True, 'message': 'Hospital profile updated successfully'})
+
+    # except Exception as e:
+    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
+
 
 @require_POST
 @dashboard_login_required
 def update_doctor_profile(request):
+
     post_data = request.POST
     errors = {}
-    user = request.user_obj  
+    user = request.user_obj
+
     validate_email_phone(post_data, errors)
+
     required_fields = ["clinic_name", "city", "state", "pincode"]
+
     for field in required_fields:
         if not post_data.get(field):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
     if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
-    
+        return JsonResponse({
+            "success": False,
+            "errors": errors
+        }, status=400)
+
     try:
+
         with transaction.atomic():
+
+            # USER UPDATE
             user.email = post_data.get('email')
             user.phone_country_code = post_data.get("countryCodes")
+            user.phone_number = post_data.get("phone")
             user.save()
-            
-            doctor_profile = get_object_or_404(DoctorProfile, user=user)
+
+            # DOCTOR PROFILE
+            doctor_profile = get_object_or_404(
+                DoctorProfile,
+                user=user
+            )
+
+            doctor_profile.clinic_name = post_data.get("clinic_name")
+
+            doctor_profile.registration_number = post_data.get(
+                "registration_number"
+            )
+
+            doctor_profile.full_address = post_data.get("address")
+
+            # doctor_profile.city = post_data.get("city")
+
+            # doctor_profile.state = post_data.get("state")
+
+            doctor_profile.country = post_data.get("country")
+
+            doctor_profile.pincode = post_data.get("pincode")
+
+            doctor_profile.owner_name = post_data.get("owner_name")
+
             doctor_profile.save()
-            
-            return JsonResponse({'success': True, 'message': 'Doctor profile updated successfully'})
+
+            return JsonResponse({
+                "success": True,
+                "message": "Doctor profile updated successfully"
+            })
 
     except Exception as e:
-        return JsonResponse({"success": False, "message": str(e)}, status=500)
 
+        import traceback
+
+        print(traceback.format_exc())
+
+        print("DOCTOR SAVE ERROR:", str(e))
+
+        return JsonResponse({
+            "success": False,
+            "message": str(e)
+        }, status=500)
+# def update_doctor_profile(request):
+#     post_data = request.POST
+#     errors = {}
+#     user = request.user_obj
+
+#     validate_email_phone(post_data, errors)
+
+#     required_fields = ["clinic_name", "city", "state", "pincode"]
+
+#     for field in required_fields:
+#         if not post_data.get(field):
+#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+#     if errors:
+#         return JsonResponse({"success": False, "errors": errors}, status=400)
+
+#     try:
+#         with transaction.atomic():
+
+#             user.email = post_data.get('email')
+#             user.phone_country_code = post_data.get("countryCodes")
+#             user.phone_number = post_data.get("phone")
+#             user.save()
+
+#             doctor_profile = get_object_or_404(DoctorProfile, user=user)
+            
+
+            # doctor_profile.clinic_name = post_data.get("clinic_name")
+            # doctor_profile.registration_number = post_data.get("registration_number")
+
+        #    doctor_profile.full_address = post_data.get("address")
+        #    doctor_profile.city = post_data.get("city")
+        #    doctor_profile.state = post_data.get("state")
+        #    doctor_profile.pincode = post_data.get("pincode")
+        
+# def update_doctor_profile(request):
+#     post_data = request.POST
+#     errors = {}
+#     user = request.user_obj  
+#     validate_email_phone(post_data, errors)
+#     required_fields = ["clinic_name", "city", "state", "pincode"]
+#     for field in required_fields:
+#         if not post_data.get(field):
+#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+#     if errors:
+#         return JsonResponse({"success": False, "errors": errors}, status=400)
+#     try:
+#     with transaction.atomic():
+
+#         user.email = post_data.get('email')
+#         user.phone_country_code = post_data.get("countryCodes")
+#         user.phone_number = post_data.get("phone")
+#         user.save()
+
+#         doctor_profile = get_object_or_404(DoctorProfile, user=user)
+
+#         doctor_profile.clinic_name = post_data.get("clinic_name")
+#         doctor_profile.registration_number = post_data.get("registration_number")
+
+#         doctor_profile.address = post_data.get("address")
+
+#         doctor_profile.city = post_data.get("city")
+#         doctor_profile.state = post_data.get("state")
+#         doctor_profile.pincode = post_data.get("pincode")
+
+#         doctor_profile.owner_name = post_data.get("owner_name")
+
+#         doctor_profile.contact_number = post_data.get("phone")
+#         doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
+
+#         doctor_profile.save()
+
+#         return JsonResponse({
+#             'success': True,
+#             'message': 'Doctor profile updated successfully'
+#         })
+  
+    # try:
+    #     with transaction.atomic():
+    #         user.email = post_data.get('email')
+    #         user.phone_country_code = post_data.get("countryCodes")
+    #         user.save()
+            
+    #         # doctor_profile = get_object_or_404(DoctorProfile, user=user)
+    #         # doctor_profile.save()
+    #         doctor_profile = get_object_or_404(DoctorProfile, user=user)
+    #         doctor_profile.clinic_name = post_data.get("clinic_name")
+    #         doctor_profile.registration_number = post_data.get("registration_number")
+    #         # doctor_profile.full_address = post_data.get("address")
+    #         doctor_profile.address = post_data.get("address")
+    #         doctor_profile.city = post_data.get("city")
+    #         doctor_profile.state = post_data.get("state")
+    #         doctor_profile.pincode = post_data.get("pincode")
+    #         doctor_profile.owner_name = post_data.get("owner_name")
+    #         doctor_profile.contact_number = post_data.get("phone")
+    #         doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
+
+    #         doctor_profile.save()
+            
+    #         return JsonResponse({'success': True, 'message': 'Doctor profile updated successfully'})
+
+    # except Exception as e:
+    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
+# 
 @require_POST
 @dashboard_login_required
 def delete_account(request):

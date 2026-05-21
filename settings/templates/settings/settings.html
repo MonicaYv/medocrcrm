@@ -523,8 +523,10 @@
         <div id="modalContent" class="text-center bg-white rounded-md h-96">
 
           <!-- <img src="/static/images/incorp-certificate.svg" alt="" class="object-cover h-96 w-full"> -->
-          <img id="modalImg" class="object-cover h-96 w-full hidden" alt="Document preview">
-          <embed id="modalEmbed" class="w-full h-96 hidden" type="application/pdf" />
+          <!-- <img id="modalImg" class="object-cover h-96 w-full hidden" alt="Document preview"> -->
+          <img id="modalImg" class="hidden w-full h-full object-contain" alt="Document preview">
+          <!-- <embed id="modalEmbed" class="w-full h-96 hidden" type="application/pdf" /> -->
+          <embed id="modalEmbed" class="hidden w-full h-full" type="application/pdf" />
           <a id="modalLink" class="block py-8 text-{{ text }}" hidden target="_blank">Download Document</a>
         </div>
         <div class="flex items-center justify-between pt-1">
@@ -539,15 +541,20 @@
 
         <!--Buttons-->
         <div class="flex justify-between items-center pt-4 w-full">
-          <input type="file" id="replaceInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+          <input type="file" id="replaceInput"   name="document" class="hidden" accept=".pdf,.jpg,.jpeg,.png" />
           <button id="replaceBtn" type="button">
             <p
               class="flex items-center gap-2 border border-{{ text }} bg-white text-{{ text }} px-4 py-2 rounded-md cursor-pointer">
               <span class="material-symbols-outlined">upload</span>Replace
             </p>
           </button>
-          <button id="saveBtn" type="button" disabled>
-            <p class="px-4 py-2 rounded-md cursor-pointer bg-{{ text }} text-white">Save</p>
+          <button 
+             id="saveBtn" 
+             type="button"  
+             class="save-btn-doc px-4 py-2 rounded-md cursor-pointer bg-{{ text }} text-white">
+             
+            <!-- <p class="px-4 py-2 rounded-md cursor-pointer bg-{{ text }} text-white">Save</p> -->
+             Save
           </button>
         </div>
       </div>
