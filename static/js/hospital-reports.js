@@ -1,6 +1,7 @@
 let barChart;
 let pieChart;
 let lineChart;
+let patientJourneyChart;
 $(document).ready(function () {
   // --------- BAR CHART (Most Requested Test) ----------
   const barCtx = document.getElementById("barChart").getContext("2d");
@@ -95,31 +96,59 @@ $(document).ready(function () {
   const horizontalCtx = document
     .getElementById("horizontalBarChart")
     .getContext("2d");
-  new Chart(horizontalCtx, {
+  patientJourneyChart = new Chart(horizontalCtx, {
+
     type: "bar",
+
     data: {
-      labels: ["Leads", "Connect", "Booked", "Visited", "Feedback"],
-      datasets: [
-        {
-          axis: "y",
-          data: [6000, 5200, 3800, 3300, 1750],
-          fill: false,
-          backgroundColor: [
-            "#3B82F6",
-            "#EF4444",
-            "#FABA23",
-            "#84CC16",
-            "#EC4899",
-          ],
-        },
-      ],
+
+        labels: ["Loading"],
+
+        datasets: [
+
+            {
+
+                axis: "y",
+
+                data: [0],
+
+                fill: false,
+
+                backgroundColor: [
+
+                    "#3B82F6",
+
+                    "#EF4444",
+
+                    "#FABA23",
+
+                    "#84CC16",
+
+                    "#EC4899",
+
+                ],
+
+            },
+
+        ],
+
     },
+
     options: {
-      responsive: true,
-      plugins: { legend: false },
-      indexAxis: "y",
+
+        responsive: true,
+
+        plugins: {
+
+            legend: false
+
+        },
+
+        indexAxis: "y",
+
     },
-  });
+
+});
 
   // --------- USER RATINGS ----------
   const ratingData = [
@@ -278,68 +307,62 @@ $(".download-btn").on("click", function () {
   am4core.useTheme(am4themes_animated);
 
   // Create map instance
-  var chart = am4core.create("heatmap", am4maps.MapChart);
+ 
+  
+  
+  window.heatmapChart = am4core.create("heatmap", am4maps.MapChart);
 
   // Set map definition
-  chart.geodata = am4geodata_india2019High;
+  
+  heatmapChart.geodata =
+    am4geodata_india2019High;
+
+  heatmapChart.homeZoomLevel = 1;
+
+  heatmapChart.homeGeoPoint = {
+      longitude: 78.9629,
+      latitude: 22.5937
+  };
 
   // Create map polygon series
-  var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+
+  window.polygonSeries = heatmapChart.series.push(new am4maps.MapPolygonSeries());
 
   // Set min/max fill color for each area
   polygonSeries.heatRules.push({
     property: "fill",
     target: polygonSeries.mapPolygons.template,
-    min: chart.colors.getIndex(1).brighten(1),
-    max: chart.colors.getIndex(1).brighten(-0.3),
+    min: heatmapChart.colors.getIndex(1).brighten(1),
+    max: heatmapChart.colors.getIndex(1).brighten(-0.3),
   });
 
   // Make map load polygon data (state shapes and names) from GeoJSON
   polygonSeries.useGeodata = true;
+  polygonSeries.geodata = am4geodata_india2019High;
+  polygonSeries.calculateVisualCenter = true;
+  
+   polygonSeries.exclude = ["AQ"];
+   
+
+  
+
+  polygonSeries.dataFields.value = "value";
+
+  polygonSeries.dataFields.id = "id";
+  polygonSeries.mapPolygons.template.propertyFields.fill =
+    "fill";
+  polygonSeries.mapPolygons.template.applyOnClones = true;
 
   // Set heatmap values for each state
-  polygonSeries.data = [
-    { id: "IN-JK", value: 0 },
-    { id: "IN-MH", value: 6269321325 },
-    { id: "IN-UP", value: 0 },
-    { id: "US-AR", value: 0 },
-    { id: "IN-RJ", value: 0 },
-    { id: "IN-AP", value: 0 },
-    { id: "IN-MP", value: 0 },
-    { id: "IN-TN", value: 0 },
-    { id: "IN-JH", value: 0 },
-    { id: "IN-WB", value: 0 },
-    { id: "IN-GJ", value: 0 },
-    { id: "IN-BR", value: 0 },
-    { id: "IN-TG", value: 0 },
-    { id: "IN-GA", value: 0 },
-    { id: "IN-DN", value: 0 },
-    { id: "IN-DL", value: 0 },
-    { id: "IN-DD", value: 0 },
-    { id: "IN-CH", value: 0 },
-    { id: "IN-CT", value: 0 },
-    { id: "IN-AS", value: 0 },
-    { id: "IN-AR", value: 0 },
-    { id: "IN-AN", value: 0 },
-    { id: "IN-KA", value: 0 },
-    { id: "IN-KL", value: 0 },
-    { id: "IN-OR", value: 0 },
-    { id: "IN-SK", value: 0 },
-    { id: "IN-HP", value: 0 },
-    { id: "IN-PB", value: 0 },
-    { id: "IN-HR", value: 0 },
-    { id: "IN-UT", value: 0 },
-    { id: "IN-LK", value: 0 },
-    { id: "IN-MN", value: 0 },
-    { id: "IN-TR", value: 0 },
-    { id: "IN-MZ", value: 0 },
-    { id: "IN-NL", value: 0 },
-    { id: "IN-ML", value: 0 },
-  ];
+  polygonSeries.data = [];
+  heatmapChart.zoomControl =
+    new am4maps.ZoomControl();
 
 
   // Configure series tooltip
   var polygonTemplate = polygonSeries.mapPolygons.template;
+  polygonTemplate.fill =
+    am4core.color("#DCEBFF");
   polygonTemplate.tooltipText = "{name}: {value}";
   polygonTemplate.nonScalingStroke = true;
   polygonTemplate.strokeWidth = 0.5;
@@ -439,7 +462,21 @@ function loadDashboardData(filterType) {
         success: function(response) {
 
             // CARDS
-            $("#totalRevenue").text(response.stats.revenue);
+            $("#totalRevenue").text(
+              response.stats.revenue
+            );
+
+            $("#highestRevenue").text(
+               response.stats.highest_revenue
+            );
+
+            $("#quarterGrowth").text(
+               response.stats.growth
+           );
+
+            $("#avgRevenue").text(
+               response.stats.avg_revenue
+            );
             // $("#ratingsValue").text(response.stats.ratings);
             // $("#bookingsValue").text(response.stats.bookings);
             // $("#avgBidValue").text(response.stats.avg_bid);
@@ -472,6 +509,90 @@ function loadDashboardData(filterType) {
 
             lineChart.update();
 
+
+              // ==========================
+               // // PATIENT JOURNEY UPDATE
+              // ==========================
+
+             patientJourneyChart.data.labels =
+               response.patient_journey.labels;
+
+             patientJourneyChart.data.datasets[0].data =
+                response.patient_journey.data;
+
+             patientJourneyChart.update();
+
+
+             // ==========================
+             // HEATMAP UPDATE
+             // ==========================
+
+             const stateMap = {
+
+                "Maharashtra": "IN-MH",
+                "Delhi": "IN-DL",
+                "Karnataka": "IN-KA",
+                "Tamil Nadu": "IN-TN",
+                "Gujarat": "IN-GJ",
+                "Rajasthan": "IN-RJ",
+                "Uttar Pradesh": "IN-UP",
+                "Madhya Pradesh": "IN-MP",
+                "West Bengal": "IN-WB",
+                "Bihar": "IN-BR",
+                "Punjab": "IN-PB",
+                "Haryana": "IN-HR",
+                "Kerala": "IN-KL",
+                "Telangana": "IN-TG",
+                "Andhra Pradesh": "IN-AP"
+
+              };
+
+let heatmapData = [];
+
+response.heatmap.labels.forEach((state, index) => {
+
+    const cleanedState = state.trim();
+
+    const mapId = stateMap[cleanedState];
+
+    if (mapId) {
+
+        heatmapData.push({
+
+            id: mapId,
+
+            value: response.heatmap.data[index]
+
+        });
+
+    }
+
+});
+
+if (heatmapData.length === 0) {
+
+    heatmapData = [
+        {
+            id: "IN-MH",
+            value: 0
+        }
+    ];
+
+}
+
+
+polygonSeries.data = heatmapData;
+polygonSeries.invalidateRawData();
+
+heatmapChart.invalidateRawData();
+
+heatmapChart.reinit();
+
+heatmapChart.invalidateSize();
+
+heatmapChart.validateData();
+
+
         },
 
         error: function(error) {
@@ -483,6 +604,7 @@ function loadDashboardData(filterType) {
     });
 
 }
+        
 
 // ================================
 // REPORT FILTER
@@ -517,40 +639,7 @@ $(".report-filter").click(function () {
     let growth = "";
     let avg = "";
 
-    if (type === "today") {
-
-        revenue = "₹15,000";
-        highest = "₹8,000";
-        growth = "+2%";
-        avg = "₹500";
-
-    }
-
-    else if (type === "week") {
-
-        revenue = "₹1.2 L";
-        highest = "₹68K";
-        growth = "+8%";
-        avg = "₹1,500";
-
-    }
-
-    else if (type === "month") {
-
-        revenue = "₹4.5 L";
-        highest = "₹1.5 L";
-        growth = "+15%";
-        avg = "₹3,150";
-
-    }
-
-    $("#totalRevenue").text(revenue);
-
-    $("#highestRevenue").text(highest);
-
-    $("#quarterGrowth").text(growth);
-
-    $("#avgRevenue").text(avg);
+    
 
 });
 
