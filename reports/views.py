@@ -152,7 +152,21 @@ def _pharmacy_reports_context(request, user):
         created_at__date__gte=start_date,
         created_at__date__lte=end_date,
     )
-    orders = UserPurchase.objects.filter(order_filter)
+
+    bids = PharmacyBidding.objects.filter(
+        pharmacy=pharmacy_profile,
+        created_at__date__gte=start_date,
+        created_at__date__lte=end_date,
+    )
+    accepted_bid_order_ids = set(
+        bids.filter(bid_status=PharmacyBidStatus.ACCEPTED).values_list("order_id", flat=True)
+    )
+
+    orders = UserPurchase.objects.filter(
+        Q(assigned_pharmacy=pharmacy_profile) | Q(bids__pharmacy=pharmacy_profile),
+        created_at__date__gte=start_date,
+        created_at__date__lte=end_date,
+    )
     total_order_scope = (
         Q(assigned_pharmacy=pharmacy_profile)
         | Q(
@@ -178,12 +192,6 @@ def _pharmacy_reports_context(request, user):
         output_field=DecimalField(max_digits=12, decimal_places=2),
     )
     revenue = completed_orders.aggregate(total=Sum(amount_expr))["total"] or Decimal("0")
-
-    bids = PharmacyBidding.objects.filter(
-        pharmacy=pharmacy_profile,
-        created_at__date__gte=start_date,
-        created_at__date__lte=end_date,
-    )
     won_order_statuses = [
         OrderStatusChoices.CONFIRMED,
         OrderStatusChoices.SHIPPED,
@@ -191,9 +199,6 @@ def _pharmacy_reports_context(request, user):
     ]
     won_order_ids = set(
         orders.filter(order_status__in=won_order_statuses).values_list("id", flat=True)
-    )
-    accepted_bid_order_ids = set(
-        bids.filter(bid_status=PharmacyBidStatus.ACCEPTED).values_list("order_id", flat=True)
     )
     won_bids = len(won_order_ids | accepted_bid_order_ids)
     lost_bids = bids.filter(
