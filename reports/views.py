@@ -153,6 +153,23 @@ def _pharmacy_reports_context(request, user):
         created_at__date__lte=end_date,
     )
     orders = UserPurchase.objects.filter(order_filter)
+    total_order_scope = (
+        Q(assigned_pharmacy=pharmacy_profile)
+        | Q(
+            assigned_pharmacy__isnull=True,
+            order_status=OrderStatusChoices.PENDING,
+        )
+        | Q(bids__pharmacy=pharmacy_profile)
+    )
+    total_orders_count = (
+        UserPurchase.objects.filter(
+            total_order_scope,
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date,
+        )
+        .aggregate(total=Count("id", distinct=True))["total"]
+        or 0
+    )
     completed_orders = orders.exclude(order_status=OrderStatusChoices.CANCELLED)
     amount_expr = Coalesce(
         "final_amount",
@@ -167,7 +184,18 @@ def _pharmacy_reports_context(request, user):
         created_at__date__gte=start_date,
         created_at__date__lte=end_date,
     )
-    won_bids = bids.filter(bid_status=PharmacyBidStatus.ACCEPTED).count()
+    won_order_statuses = [
+        OrderStatusChoices.CONFIRMED,
+        OrderStatusChoices.SHIPPED,
+        OrderStatusChoices.DELIVERED,
+    ]
+    won_order_ids = set(
+        orders.filter(order_status__in=won_order_statuses).values_list("id", flat=True)
+    )
+    accepted_bid_order_ids = set(
+        bids.filter(bid_status=PharmacyBidStatus.ACCEPTED).values_list("order_id", flat=True)
+    )
+    won_bids = len(won_order_ids | accepted_bid_order_ids)
     lost_bids = bids.filter(
         bid_status__in=[PharmacyBidStatus.REJECTED, PharmacyBidStatus.CANCELLED]
     ).count()
@@ -242,12 +270,35 @@ def _pharmacy_reports_context(request, user):
         "lost": [weekday_map.get(day, {}).get("lost", 0) for day, _ in day_order],
     }
 
+    won_order_weekday_rows = (
+        orders.filter(order_status__in=won_order_statuses)
+        .exclude(id__in=accepted_bid_order_ids)
+        .annotate(weekday=ExtractWeekDay("updated_at"))
+        .values("weekday")
+        .annotate(total=Count("id"))
+    )
+    for row in won_order_weekday_rows:
+        index = next((i for i, item in enumerate(day_order) if item[0] == row["weekday"]), None)
+        if index is not None:
+            win_loss_chart["won"][index] += row["total"]
+
     win_loss_rows = []
     for week_index in range(3):
         week_end = end_date - timedelta(days=week_index * 7)
         week_start = week_end - timedelta(days=6)
         week_bids = bids.filter(created_at__date__gte=week_start, created_at__date__lte=week_end)
-        week_won = week_bids.filter(bid_status=PharmacyBidStatus.ACCEPTED).count()
+        week_won_order_ids = set(
+            orders.filter(
+                order_status__in=won_order_statuses,
+                updated_at__date__gte=week_start,
+                updated_at__date__lte=week_end,
+            ).values_list("id", flat=True)
+        )
+        week_accepted_bid_order_ids = set(
+            week_bids.filter(bid_status=PharmacyBidStatus.ACCEPTED)
+            .values_list("order_id", flat=True)
+        )
+        week_won = len(week_won_order_ids | week_accepted_bid_order_ids)
         week_lost = week_bids.filter(
             bid_status__in=[PharmacyBidStatus.REJECTED, PharmacyBidStatus.CANCELLED]
         ).count()
@@ -305,7 +356,7 @@ def _pharmacy_reports_context(request, user):
     context.update({
         "report_search": search,
         "total_revenue": _money(revenue),
-        "total_orders": _number(orders.count()),
+        "total_orders": _number(total_orders_count),
         "total_bids": _number(bids.count()),
         "won_bids": _number(won_bids),
         "lost_bids": _number(lost_bids),
