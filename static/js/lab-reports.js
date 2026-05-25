@@ -222,9 +222,17 @@ function loadDashboardData(filterType = "today") {
         },
 
         success: function (response) {
-        updateHeatmap(filterType);
+           console.log(response);
+           updateHeatmap(
+              response.heatmap_data
+           );
 
-        updateBidWinLoss(filterType);
+        updateBidWinLoss(
+           response.bid_win_loss
+        );
+        // updateHeatmap(filterType);
+
+        // updateBidWinLoss(filterType);
 
             // =========================
             // CARDS
@@ -285,8 +293,30 @@ function loadDashboardData(filterType = "today") {
 
             lineChart.update();
             // UPDATE BID WIN LOSS
-            $(".bg-mint-leaf").eq(0).css("width", "81%");
-            $(".bg-bright-red").eq(0).css("width", "19%");
+            // $(".bg-mint-leaf").eq(0).css("width", "81%");
+            // $(".bg-bright-red").eq(0).css("width", "19%");
+
+            // =========================
+            // BID WIN LOSS DYNAMIC
+            // =========================
+
+            $("#winBar1")
+               .css(
+                "width",
+                response.bid_win_loss.win + "%"
+           )
+            .text(
+                response.bid_win_loss.completed
+            );
+
+            $("#lossBar1")
+               .css(
+                  "width",
+                response.bid_win_loss.loss + "%"
+               )
+               .text(
+                   response.bid_win_loss.cancelled
+                );
 
             // =========================
             // RATINGS
@@ -397,35 +427,33 @@ $("input[type='text']").on("keyup", function () {
 
 // =====================================
 // FILTER FUNCTIONALITY
+
 // =====================================
 
-$(".filterDropdown div").click(function () {
+// =====================================
+// FILTER FUNCTIONALITY
+// =====================================
+$(document).off("click", ".filterDropdown div");
+$(".filterDropdown div").on("click", function () {
 
-    // let filterText = $(this)
-    //     .text()
-    //     .trim()
-    //     .toLowerCase();
     let filterText = $(this)
-        .clone()
-        .children()
-        .remove()
-        .end()
-        .text()
-        .trim()
-        .toLowerCase();
+        .attr("data-filter")
+        .trim();
 
-    // REMOVE CHECK ICONS
+    console.log("FILTER:", filterText);
+
+    // RESET CHECK ICONS
     $(".filterDropdown span:first-child")
         .removeClass("text-dodger-blue")
         .addClass("text-light-gray");
 
-    // ACTIVE ICON
+    // ACTIVE CHECK
     $(this)
         .find("span:first")
         .removeClass("text-light-gray")
         .addClass("text-dodger-blue");
 
-    // LOAD DATA
+    // LOAD API
     loadDashboardData(filterText);
 
     // CLOSE DROPDOWN
@@ -465,7 +493,11 @@ $(".dropdown-btn").click(function (e) {
 
 $(".dropdown-menu li").click(function () {
 
-    let value = $(this).text();
+    // let value = $(this).text();
+    let value = $(this)
+       .text()
+       .trim()
+       .toLowerCase();
 
     $(this)
         .closest(".dropdown")
@@ -491,10 +523,10 @@ $(".dropdown-menu li").click(function () {
     // BID TREND DYNAMIC
 
     if (
-        value === "Day" ||
-        value === "Week" ||
-        value === "Month" ||
-        value === "Year"
+        value === "day" ||
+        value === "week" ||
+        value === "month" ||
+        value === "year"
     ) {
 
         updateBidTrend(value);
@@ -513,175 +545,158 @@ $(document).click(function () {
 // =====================================
 // HEATMAP DYNAMIC
 // =====================================
+function updateHeatmap(data) {
+    $("#heatmap").empty();
 
+    am4core.ready(function () {
 
-function updateHeatmap(timeRange) {
+        am4core.useTheme(am4themes_animated);
 
-    const heatmap = $("#heatmap");
+        $("#heatmap").html("");
 
-    heatmap.empty();
+        var chart = am4core.create(
+            "heatmap",
+            am4maps.MapChart
+        );
 
-    let colors = [];
+        chart.geodata =
+            am4geodata_india2019High;
 
-    if (timeRange === "8-9 AM") {
+        chart.projection =
+            new am4maps.projections.Miller();
 
-        colors = [20,30,40,50,60];
+        var polygonSeries =
+            chart.series.push(
+                new am4maps.MapPolygonSeries()
+            );
 
-    } 
-    
-    else if (timeRange === "10-12 AM") {
+        polygonSeries.useGeodata = true;
 
-        colors = [40,50,60,70,80];
+        polygonSeries.heatRules.push({
 
-    } 
-    
-    else if (timeRange === "5-6 PM") {
+            property: "fill",
 
-        colors = [70,80,90,60,50];
+            target:
+            polygonSeries.mapPolygons.template,
 
-    } 
-    
-    else {
+            min:
+            am4core.color("#DCEAFE"),
 
-        colors = [90,80,70,60,50];
+            max:
+            am4core.color("#2563EB")
 
-    }
+        });
 
-    for (let i = 0; i < 25; i++) {
+        let mapData = [];
 
-        const value = colors[i % colors.length];
+        data.forEach((item) => {
 
-        heatmap.append(`
-            <div 
-                style="
-                    width:60px;
-                    height:40px;
-                    background:rgba(59,130,246,${value / 100});
-                    border-radius:6px;
-                    margin:4px;
-                    display:inline-block;
-                ">
-            </div>
-        `);
+            let stateId = "";
 
-    }
+            if (item.hour.includes("12")) {
+                stateId = "IN-MH";
+            }
+
+            else if (item.hour.includes("11")) {
+                stateId = "IN-DL";
+            }
+
+            else {
+                stateId = "IN-KA";
+            }
+
+            mapData.push({
+
+                id: stateId,
+
+                value: item.count
+
+            });
+
+        });
+
+        polygonSeries.data = mapData;
+
+        let polygonTemplate =
+            polygonSeries.mapPolygons.template;
+
+        polygonTemplate.tooltipText =
+            "{name}: {value}";
+
+    });
 
 }
 // =====================================
 // BID WIN LOSS
 // =====================================
 
-function updateBidWinLoss(filterType) {
+function updateBidWinLoss(data) {
+    $("#bidWinChart").empty();
 
-    let data = {
+    const container =
+        $("#bidWinLossContainer");
 
-        today: {
-            values: [81, 19, 85, 15, 60, 40],
-            dates: ["Today", "Morning", "Evening"]
+    container.empty();
+
+    const rows = [
+
+        {
+            label: "Current",
+            win: data.win,
+            loss: data.loss
         },
 
-        week: {
-            values: [70, 30, 75, 25, 55, 45],
-            dates: ["Mon-Tue", "Wed-Thu", "Fri-Sat"]
+        {
+            label: "Jul 1-7",
+            win: Math.max(data.win - 10, 0),
+            loss: Math.min(data.loss + 10, 100)
         },
 
-        month: {
-            values: [90, 10, 88, 12, 78, 22],
-            dates: ["Week 1", "Week 2", "Week 3"]
-        },
-
-        custom: {
-            values: [95, 5, 92, 8, 85, 15],
-            dates: ["Custom 1", "Custom 2", "Custom 3"]
+        {
+            label: "Jun 24-30",
+            win: Math.max(data.win - 20, 0),
+            loss: Math.min(data.loss + 20, 100)
         }
 
-    };
+    ];
 
-    let values = data[filterType].values;
-    let dates = data[filterType].dates;
+    rows.forEach((row) => {
 
-    // ROW 1
-    $("#winBar1").css("width", values[0] + "%");
-    $("#lossBar1").css("width", values[1] + "%");
+        container.append(`
 
-    $("#winText1").text(values[0] + "%");
-    $("#lossText1").text(values[1] + "%");
+            <div class="flex items-center gap-3">
 
-    $("#date1").text(dates[0]);
+                <div class="flex-1">
 
-    // ROW 2
-    $("#winBar2").css("width", values[2] + "%");
-    $("#lossBar2").css("width", values[3] + "%");
+                    <div class="flex h-4 rounded-full overflow-hidden">
 
-    $("#winText2").text(values[2] + "%");
-    $("#lossText2").text(values[3] + "%");
+                        <div
+                            class="bg-green-500 text-white text-[10px] flex items-center justify-center"
+                            style="width:${row.win}%"
+                        >
+                            ${row.win}
+                        </div>
 
-    $("#date2").text(dates[1]);
+                        <div
+                            class="bg-red-500 text-white text-[10px] flex items-center justify-center"
+                            style="width:${row.loss}%"
+                        >
+                            ${row.loss}
+                        </div>
 
-    // ROW 3
-    $("#winBar3").css("width", values[4] + "%");
-    $("#lossBar3").css("width", values[5] + "%");
+                    </div>
 
-    $("#winText3").text(values[4] + "%");
-    $("#lossText3").text(values[5] + "%");
+                </div>
 
-    $("#date3").text(dates[2]);
+                <span class="text-xs text-gray-500 w-16">
+                    ${row.label}
+                </span>
 
-}
+            </div>
 
-function updateBidTrend(type) {
+        `);
 
-    let labels = [];
-    let cbc = [];
-    let rtpcr = [];
-
-    if (type === "Day") {
-
-        labels = ["9AM","12PM","3PM","6PM"];
-
-        cbc = [120,150,180,140];
-
-        rtpcr = [200,240,210,260];
-
-    }
-
-    else if (type === "Week") {
-
-        labels = ["Week1","Week2","Week3","Week4"];
-
-        cbc = [320,340,310,360];
-
-        rtpcr = [420,380,460,400];
-
-    }
-
-    else if (type === "Month") {
-
-        labels = ["Jan","Feb","Mar","Apr"];
-
-        cbc = [500,600,450,700];
-
-        rtpcr = [750,680,800,720];
-
-    }
-
-    else {
-
-        labels = ["2022","2023","2024","2025"];
-
-        cbc = [4000,5200,6100,7200];
-
-        rtpcr = [5000,6400,7600,8300];
-
-    }
-
-    lineChart.data.labels = labels;
-
-    lineChart.data.datasets[0].data = cbc;
-
-    lineChart.data.datasets[1].data = rtpcr;
-
-    lineChart.update();
+    });
 
 }
 

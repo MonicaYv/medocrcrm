@@ -523,6 +523,121 @@ function loadDashboardData(filterType) {
              patientJourneyChart.update();
 
 
+
+             // ==========================================
+            // CONVERSION INSIGHTS DYNAMIC
+             // ==========================================
+
+            // ==========================================
+          // CONVERSION INSIGHTS DYNAMIC
+           // ==========================================
+
+          let conversionRows = "";
+
+          const colors = [
+
+              "bg-azure-radiance",
+              "bg-light-green",
+              "bg-sunrise-yellow",
+              "bg-violet",
+              "bg-red"
+
+           ];
+
+          response.patient_journey.labels.forEach(
+             (label, index) => {
+
+               conversionRows += `
+
+             <div class="flex items-center justify-between px-4 border-b border-blue-haze py-2">
+
+                <div class="flex items-center gap-1">
+
+                <div class="w-1 h-1 rounded-full ${colors[index]}"></div>
+
+                <p class="font-normal text-xs">
+                    ${label}
+                </p>
+
+            </div>
+
+            <div class="flex items-center gap-[130px]">
+
+                <p class="font-normal text-xs">
+                    ${response.patient_journey.data[index]}
+                </p>
+
+                <p class="font-normal text-xs">
+                    ${response.patient_journey.conversion[index]}
+                </p>
+
+            </div>
+
+        </div>
+
+        `;
+
+    }
+);
+
+$("#conversionTableBody").html(
+    conversionRows
+);
+   // ==========================================
+   // PACKAGE TABLE DYNAMIC
+   // ==========================================
+
+    let packageRows = "";
+
+   response.package_table.forEach((item, index) => {
+
+        let colorClass = "bg-azure-radiance";
+
+        if (index === 1) {
+           colorClass = "bg-light-green";
+        }
+
+        else if (index === 2) {
+           colorClass = "bg-sunrise-yellow";
+        }
+
+       packageRows += `
+
+       <div class="flex items-center justify-between px-4 border-b border-blue-haze">
+
+           <div class="flex items-center gap-1">
+
+               <div class="w-1 h-1 rounded-full ${colorClass}"></div>
+
+               <p class="font-normal text-xs">
+                   ${item.package}
+               </p>
+
+          </div>
+
+          <div class="flex items-center gap-[130px]">
+
+            <p class="font-normal text-xs">
+                ${item.bookings}
+            </p>
+
+            <p class="font-normal text-xs">
+                ${item.conversion}
+            </p>
+
+         </div>
+
+      </div>
+
+     `;
+
+});
+
+  $("#packageTableBody").html(
+       packageRows
+  );
+
+
              // ==========================
              // HEATMAP UPDATE
              // ==========================
@@ -591,6 +706,7 @@ heatmapChart.reinit();
 heatmapChart.invalidateSize();
 
 heatmapChart.validateData();
+
 
 
         },

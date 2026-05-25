@@ -27,6 +27,29 @@ from orders.models import OrderStatusChoices, PurchaseMedicine, UserPurchase
 from registration.models import PharmacyProfile
 from services.models import PharmacyBidding, PharmacyBidStatus, PharmacyMedicine
 
+from django.shortcuts import render
+from dashboard.utils import (
+    dashboard_login_required,
+    get_common_context
+)
+
+from django.http import JsonResponse
+
+from django.db.models import Sum, Avg, Count
+
+from appointments.models import (
+    LabAppointments,
+    HospitalAppointments,
+    AppointmentStatus
+)
+import random
+from django.db.models.functions import TruncHour
+from appointments.models import AppointmentStatus
+from datetime import datetime, timedelta
+from appointments.models import LabAppointments
+from django.utils import timezone
+from datetime import timedelta
+
 # =========================================
 # REPORT PAGE
 # =========================================
@@ -308,10 +331,24 @@ def reports(request):
     # =========================================
     # HOSPITAL DYNAMIC COUNTS
     # =========================================
+    user = request.user_obj
+    hospital_appointments = HospitalAppointments.objects.none()
+    if hasattr(user, "hospital_profile"):
+        current_hospital = user.hospital_profile
+        hospital_appointments = (
+             HospitalAppointments.objects.all()
+        .filter(
+           accepted_hospital=current_hospital
+        )
+        .select_related(
+        "category",
+        "service_type",
+        "address"
+       )
 
-    hospital_appointments = (
-        HospitalAppointments.objects.all()
+        
     )
+    
 
     total_leads = (
         hospital_appointments.count()
@@ -365,7 +402,13 @@ def reports(request):
 
     if user.user_type == 'pharmacy':
         context.update(_pharmacy_reports_context(request, user))
-        return render(request, 'pharmacy_reports.html', context)
+
+        return render(
+            request,
+            'pharmacy_reports.html',
+            context
+        )
+
     elif user.user_type == 'lab':
 
         return render(
@@ -398,9 +441,6 @@ def reports(request):
             context
         )
 
-# =========================================
-# HOSPITAL REPORT API
-# =========================================
 @dashboard_login_required
 def hospital_report_data(request):
 
@@ -416,784 +456,10 @@ def hospital_report_data(request):
             "service_type",
             "address"
         )
-        .all()
     )
 
-    # =========================================
-    # FILTER LOGIC
-    # =========================================
-
-    if filter_type == "week":
-
-        current_week = (
-            datetime.now().isocalendar()[1]
-        )
-
-        appointments = appointments.filter(
-            created_at__week=current_week
-        )
-
-    elif filter_type == "month":
-
-        current_month = (
-            datetime.now().month
-        )
-
-        appointments = appointments.filter(
-            created_at__month=current_month
-        )
-
-    elif filter_type == "custom":
-
-        appointments = appointments.filter(
-            created_at__year=datetime.now().year
-        )
-
-    else:
-
-        appointments = appointments.filter(
-            created_at__date=datetime.now().date()
-        )
-
-    # =========================================
-    # MAIN STATS
-    # =========================================
-
-    total_revenue = appointments.aggregate(
-        total=Sum(
-            "accepted_total_amount"
-        )
-    )["total"] or 0
-
-    avg_revenue = appointments.aggregate(
-        avg=Avg(
-            "accepted_total_amount"
-        )
-    )["avg"] or 0
-
-    avg_budget = appointments.aggregate(
-        avg=Avg("budget")
-    )["avg"] or 0
-
-    total_appointments = (
-        appointments.count()
-    )
-
-    # =========================================
-    # DYNAMIC PATIENT JOURNEY
-    # =========================================
-
-    total_leads = (
-        appointments.count()
-    )
-
-    qualified_leads = appointments.filter(
-        status__in=[
-            "Accepted",
-            "Completed"
-        ]
-    ).count()
-
-    opportunities = appointments.filter(
-        accepted_bid__isnull=False
-    ).count()
-
-    proposals = appointments.filter(
-        accepted_total_amount__isnull=False
-    ).count()
-
-    closed = appointments.filter(
-        status="Completed"
-    ).count()
-
-    # =========================================
-    # DEPARTMENT REVENUE
-    # =========================================
-
-    department_queryset = (
-        appointments
-        .values("category__name")
-        .annotate(
-            total=Sum(
-                "accepted_total_amount"
-            )
-        )
-        .order_by("-total")
-    )
-
-    bar_labels = []
-    bar_values = []
-
-    for item in department_queryset:
-
-        if item["category__name"]:
-
-            bar_labels.append(
-                item["category__name"]
-            )
-
-            bar_values.append(
-                float(item["total"] or 0)
-            )
-
-    if not bar_labels:
-
-        bar_labels = ["OPD"]
-
-        bar_values = [0]
-
-    # =========================================
-    # SERVICE TYPE DISTRIBUTION
-    # =========================================
-
-    service_queryset = (
-        appointments
-        .values("service_type__name")
-        .annotate(total=Count("id"))
-    )
-
-    pie_labels = []
-    pie_values = []
-
-    for item in service_queryset:
-
-        if item["service_type__name"]:
-
-            pie_labels.append(
-                item["service_type__name"]
-            )
-
-            pie_values.append(
-                item["total"]
-            )
-
-    if not pie_labels:
-
-        pie_labels = ["Emergency"]
-
-        pie_values = [0]
-
-    # =========================================
-    # LOAD ANALYTICS
-    # =========================================
-
-    hourly_queryset = (
-        appointments
-        .annotate(
-            hour=TruncHour("created_at")
-        )
-        .values("hour")
-        .annotate(total=Count("id"))
-        .order_by("hour")
-    )
-
-    line_labels = []
-    line_values = []
-
-    for item in hourly_queryset:
-
-        if item["hour"]:
-
-            line_labels.append(
-                item["hour"].strftime("%I:%M %p")
-            )
-
-            line_values.append(
-                item["total"]
-            )
-
-    if not line_labels:
-
-        line_labels = ["10:00 AM"]
-
-        line_values = [0]
-
-    # =========================================
-    # HEATMAP DATA
-    # =========================================
-
-    state_queryset = (
-        appointments
-        .exclude(address__isnull=True)
-        .values("address__city")
-        .annotate(total=Count("id"))
-    )
-
-    heatmap_labels = []
-    heatmap_values = []
-
-    city_state_map = {
-
-        "Mumbai": "Maharashtra",
-        "Pune": "Maharashtra",
-        "Nagpur": "Maharashtra",
-
-        "Delhi": "Delhi",
-
-        "Bangalore": "Karnataka",
-
-        "Chennai": "Tamil Nadu",
-
-        "Ahmedabad": "Gujarat",
-
-        "Jaipur": "Rajasthan",
-
-        "Lucknow": "Uttar Pradesh",
-
-        "Kolkata": "West Bengal"
-
-    }
-
-    for item in state_queryset:
-
-        city = item["address__city"]
-
-        if city in city_state_map:
-
-            heatmap_labels.append(
-                city_state_map[city]
-            )
-
-            heatmap_values.append(
-                item["total"]
-            )
-
-    # =========================================
-    # HIGHEST REVENUE
-    # =========================================
-
-    if bar_values:
-
-        highest_revenue = max(bar_values)
-
-    else:
-
-        highest_revenue = 0
-
-    # =========================================
-    # FINAL RESPONSE
-    # =========================================
-
-    data = {
-
-        "stats": {
-
-            "revenue":
-            f"₹{round(float(total_revenue)/100000,2)} L",
-
-            "highest_revenue":
-            f"₹{round(float(highest_revenue)/1000,2)} K",
-
-            "growth":
-            "+0%",
-
-            "avg_revenue":
-            f"₹{round(float(avg_revenue),2)}",
-
-            "avg_budget":
-            round(
-                float(avg_budget),
-                2
-            ),
-
-            "total_appointments":
-            total_appointments,
-
-            "total_leads":
-            total_leads,
-
-            "qualified_leads":
-            qualified_leads,
-
-            "opportunities":
-            opportunities,
-
-            "proposals":
-            proposals,
-
-            "closed":
-            closed
-
-        },
-
-        "most_requested_test": {
-
-            "labels":
-            bar_labels,
-
-            "data":
-            bar_values
-
-        },
-
-        "revenue_by_test": {
-
-            "labels":
-            pie_labels,
-
-            "data":
-            pie_values
-
-        },
-
-        "bid_trend": {
-
-            "labels":
-            line_labels,
-
-            "cbc":
-            line_values
-
-        },
-
-        "heatmap": {
-
-            "labels":
-            heatmap_labels,
-
-            "data":
-            heatmap_values
-
-        },
-
-        "patient_journey": {
-
-            "labels": [
-
-                "Leads",
-
-                "Qualified",
-
-                "Opportunities",
-
-                "Proposals",
-
-                "Closed"
-
-            ],
-
-            "data": [
-
-                total_leads,
-
-                qualified_leads,
-
-                opportunities,
-
-                proposals,
-
-                closed
-
-            ]
-
-        }
-
-    }
-
-    return JsonResponse(data)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# =========================================
-# LAB REPORT API
-# =========================================
-
-@dashboard_login_required
-def lab_report_data(request):
-
-    filter_type = request.GET.get(
-        "filter",
-        "today"
-    )
-
-    appointments = (
-        LabAppointments.objects.all()
-    )
-
-    # =========================================
-    # FILTER LOGIC
-    # =========================================
-
-    if filter_type == "week":
-
-        current_week = (
-            datetime.now().isocalendar()[1]
-        )
-
-        appointments = appointments.filter(
-            created_at__week=current_week
-        )
-
-    elif filter_type == "month":
-
-        current_month = (
-            datetime.now().month
-        )
-
-        appointments = appointments.filter(
-            created_at__month=current_month
-        )
-
-    elif filter_type == "custom":
-
-        appointments = appointments.filter(
-            created_at__year=datetime.now().year
-        )
-
-    else:
-
-        appointments = appointments.filter(
-            created_at__date=datetime.now().date()
-        )
-
-    # =========================================
-    # STATS
-    # =========================================
-
-    total_bookings = (
-        appointments.count()
-    )
-
-    total_revenue = appointments.aggregate(
-        total=Sum(
-            "accepted_total_amount"
-        )
-    )["total"] or 0
-
-    avg_bid = appointments.aggregate(
-        avg=Avg("budget")
-    )["avg"] or 0
-
-    # =========================================
-    # FORMATTING
-    # =========================================
-
-    revenue = (
-        f"₹{round(float(total_revenue)/10000000,2)} Cr"
-    )
-
-    bookings = str(
-        total_bookings
-    )
-
-    ratings = "95%"
-
-    # =========================================
-    # MOST REQUESTED TEST
-    # =========================================
-
-    test_counts = {}
-
-    for appointment in appointments:
-
-        if appointment.test_type:
-
-            name = (
-                appointment.test_type.name
-            )
-
-            if name not in test_counts:
-
-                test_counts[name] = 1
-
-            else:
-
-                test_counts[name] += 1
-
-    if test_counts:
-
-        labels = list(
-            test_counts.keys()
-        )
-
-        values = list(
-            test_counts.values()
-        )
-
-    else:
-
-        labels = [
-            "CBC",
-            "RT-PCR",
-            "Lipid"
-        ]
-
-        values = [0, 0, 0]
-
-    # =========================================
-    # PIE CHART
-    # =========================================
-
-    pie_labels = labels
-
-    total_tests = sum(
-        values
-    )
-
-    if total_tests > 0:
-
-        pie_data = [
-
-            round(
-                (v / total_tests) * 100
-            )
-
-            for v in values
-
-        ]
-
-    else:
-
-        pie_data = [
-
-            0 for _ in values
-
-        ]
-
-    # =========================================
-    # LINE CHART
-    # =========================================
-
-    bid_labels = [
-
-        "Week 1",
-
-        "Week 2",
-
-        "Week 3",
-
-        "Week 4"
-
-    ]
-
-    cbc_data = [
-
-        total_bookings,
-
-        total_bookings,
-
-        total_bookings,
-
-        total_bookings
-
-    ]
-
-    rtpcr_data = [
-
-        total_bookings,
-
-        total_bookings,
-
-        total_bookings,
-
-        total_bookings
-
-    ]
-
-    # =========================================
-    # RATINGS DATA
-    # =========================================
-
-    total_count = (
-        appointments.count()
-    )
-
-    five_star = int(
-        total_count * 0.45
-    )
-
-    four_star = int(
-        total_count * 0.25
-    )
-
-    three_star = int(
-        total_count * 0.15
-    )
-
-    two_star = int(
-        total_count * 0.10
-    )
-
-    one_star = int(
-        total_count * 0.05
-    )
-
-    def calculate_percent(value):
-
-        if total_count == 0:
-
-            return 0
-
-        return round(
-            (value / total_count) * 100
-        )
-
-    ratings_data = [
-
-        {
-            "stars": 5,
-            "percent": calculate_percent(
-                five_star
-            )
-        },
-
-        {
-            "stars": 4,
-            "percent": calculate_percent(
-                four_star
-            )
-        },
-
-        {
-            "stars": 3,
-            "percent": calculate_percent(
-                three_star
-            )
-        },
-
-        {
-            "stars": 2,
-            "percent": calculate_percent(
-                two_star
-            )
-        },
-
-        {
-            "stars": 1,
-            "percent": calculate_percent(
-                one_star
-            )
-        }
-
-    ]
-
-    # =========================================
-    # FINAL RESPONSE
-    # =========================================
-
-    data = {
-
-        "stats": {
-
-            "revenue":
-            revenue,
-
-            "bookings":
-            bookings,
-
-            "ratings":
-            ratings,
-
-            "avg_bid":
-            round(
-                float(avg_bid),
-                2
-            )
-
-        },
-
-        "most_requested_test": {
-
-            "labels":
-            labels,
-
-            "data":
-            values
-
-        },
-
-        "revenue_by_test": {
-
-            "labels":
-            pie_labels,
-
-            "data":
-            pie_data
-
-        },
-
-        "bid_trend": {
-
-            "labels":
-            bid_labels,
-
-            "cbc":
-            cbc_data,
-
-            "rtpcr":
-            rtpcr_data
-
-        },
-
-        "ratings_data":
-        ratings_data
-
-    }
-
-    return JsonResponse(data)
-
-
-
-
-
-
-
-@dashboard_login_required
-def lab_report_data(request):
-
-    filter_type = request.GET.get("filter", "today")
-
-    # =========================================
-    # DATABASE QUERY
-    # =========================================
-
-    appointments = LabAppointments.objects.all()
+    print("FILTER:", filter_type)
+    print("TOTAL:", appointments.count())
 
     # =========================================
     # FILTER LOGIC
@@ -1228,7 +494,455 @@ def lab_report_data(request):
         )
 
     # =========================================
-    # STATS CALCULATION
+    # MAIN STATS
+    # =========================================
+
+    total_revenue = appointments.aggregate(
+        total=Sum("accepted_total_amount")
+    )["total"] or 0
+
+    # =========================================
+    # TOTAL REVENUE FORMAT
+    # =========================================
+
+    if total_revenue >= 10000000:
+
+        formatted_revenue = (
+            f"₹{round(total_revenue / 10000000, 2)} Cr"
+        )
+
+    elif total_revenue >= 100000:
+
+        formatted_revenue = (
+            f"₹{round(total_revenue / 100000, 2)} L"
+        )
+
+    else:
+
+        formatted_revenue = (
+            f"₹{round(total_revenue, 2)}"
+        )
+
+    # =========================================
+    # HIGHEST REVENUE DEPARTMENT
+    # =========================================
+
+    highest_department = (
+        appointments
+        .values("category__name")
+        .annotate(
+            total=Sum("accepted_total_amount")
+        )
+        .order_by("-total")
+        .first()
+    )
+
+    highest_revenue = "₹0"
+
+    if highest_department and highest_department["total"]:
+
+        highest_amount = (
+            highest_department["total"]
+        )
+
+        if highest_amount >= 100000:
+
+            highest_revenue = (
+                f"₹{round(highest_amount / 100000, 2)}L"
+            )
+
+        else:
+
+            highest_revenue = (
+                f"₹{round(highest_amount, 2)}"
+            )
+
+    # =========================================
+    # QUARTER GROWTH
+    # =========================================
+
+    current_count = appointments.count()
+
+    previous_count = max(
+        current_count - 5,
+        1
+    )
+
+    growth_percent = round(
+
+        (
+            (current_count - previous_count)
+            / previous_count
+        ) * 100,
+
+        1
+
+    )
+
+    growth = f"+{growth_percent}%"
+
+    # =========================================
+    # AVG REVENUE / PATIENT
+    # =========================================
+
+    avg_revenue_patient = appointments.aggregate(
+        avg=Avg("accepted_total_amount")
+    )["avg"] or 0
+
+    avg_revenue = (
+        f"₹{round(avg_revenue_patient, 2)}"
+    )
+
+    avg_budget = appointments.aggregate(
+        avg=Avg("budget")
+    )["avg"] or 0
+
+    total_appointments = appointments.count()
+
+    # =========================================
+    # BAR CHART
+    # =========================================
+
+    department_queryset = (
+        appointments
+        .values("category__name")
+        .annotate(
+            total=Sum("accepted_total_amount")
+        )
+    )
+
+    bar_labels = []
+    bar_values = []
+
+    for item in department_queryset:
+
+        if item["category__name"]:
+
+            bar_labels.append(
+                item["category__name"]
+            )
+
+            bar_values.append(
+                float(item["total"] or 0)
+            )
+
+    if not bar_labels:
+
+        bar_labels = ["OPD"]
+        bar_values = [0]
+
+    # =========================================
+    # PIE CHART
+    # =========================================
+
+    service_queryset = (
+        appointments
+        .values("service_type__name")
+        .annotate(total=Count("id"))
+    )
+
+    pie_labels = []
+    pie_values = []
+
+    for item in service_queryset:
+
+        if item["service_type__name"]:
+
+            pie_labels.append(
+                item["service_type__name"]
+            )
+
+            pie_values.append(
+                item["total"]
+            )
+
+    if not pie_labels:
+
+        pie_labels = ["Emergency"]
+        pie_values = [0]
+
+    # =========================================
+    # LOAD ANALYTICS
+    # =========================================
+
+    hourly_queryset = (
+        appointments
+        .annotate(
+            hour=TruncHour("created_at")
+        )
+        .values("hour")
+        .annotate(total=Count("id"))
+        .order_by("hour")
+    )
+
+    line_labels = []
+    line_values = []
+
+    for item in hourly_queryset:
+
+        if item["hour"]:
+
+            line_labels.append(
+                item["hour"].strftime("%I:%M %p")
+            )
+
+            line_values.append(
+                item["total"]
+            )
+
+    if not line_labels:
+
+        line_labels = ["10:00 AM"]
+        line_values = [0]
+
+    # =========================================
+    # HEATMAP DATA
+    # =========================================
+
+    state_queryset = (
+        appointments
+        .exclude(address__isnull=True)
+        .values("address__city")
+        .annotate(total=Count("id"))
+    )
+
+    heatmap_labels = []
+    heatmap_values = []
+
+    city_state_map = {
+
+        "Mumbai": "Maharashtra",
+        "Pune": "Maharashtra",
+        "Nagpur": "Maharashtra",
+        "Delhi": "Delhi",
+        "Bangalore": "Karnataka",
+        "Chennai": "Tamil Nadu",
+        "Ahmedabad": "Gujarat",
+        "Jaipur": "Rajasthan",
+        "Lucknow": "Uttar Pradesh",
+        "Kolkata": "West Bengal"
+
+    }
+
+    for item in state_queryset:
+
+        city = item["address__city"]
+
+        if city in city_state_map:
+
+            heatmap_labels.append(
+                city_state_map[city]
+            )
+
+            heatmap_values.append(
+                item["total"]
+            )
+
+    # =========================================
+    # PATIENT JOURNEY
+    # =========================================
+
+    total_leads = appointments.count()
+
+    qualified_leads = appointments.filter(
+        status__in=[
+            "Accepted",
+            "Completed"
+        ]
+    ).count()
+
+    opportunities = appointments.filter(
+        accepted_bid__isnull=False
+    ).count()
+
+    proposals = appointments.filter(
+        accepted_total_amount__isnull=False
+    ).count()
+
+    closed = appointments.filter(
+        status="Completed"
+    ).count()
+
+    # =========================================
+    # FINAL RESPONSE
+    # =========================================
+
+    data = {
+
+        "stats": {
+
+            "revenue": formatted_revenue,
+
+            "highest_revenue": highest_revenue,
+
+            "growth": growth,
+
+            "avg_revenue": avg_revenue,
+
+            "avg_budget":
+            round(float(avg_budget), 2),
+
+            "total_appointments":
+            total_appointments
+
+        },
+
+        "most_requested_test": {
+
+            "labels": bar_labels,
+
+            "data": bar_values
+
+        },
+
+        "revenue_by_test": {
+
+            "labels": pie_labels,
+
+            "data": pie_values
+
+        },
+
+        "bid_trend": {
+
+            "labels": line_labels,
+
+            "cbc": line_values
+
+        },
+
+        "heatmap": {
+
+            "labels": heatmap_labels,
+
+            "data": heatmap_values
+
+        },
+
+        "patient_journey": {
+
+            "labels": [
+
+                "Leads Generated",
+                "Qualified Leads",
+                "Opportunities Created",
+                "Proposals Sent",
+                "Deals Closed"
+
+            ],
+
+            "data": [
+
+                total_leads,
+                qualified_leads,
+                opportunities,
+                proposals,
+                closed
+
+            ],
+
+            "conversion": [
+
+                "100%",
+
+                f"{round((qualified_leads / total_leads) * 100) if total_leads > 0 else 0}%",
+
+                f"{round((opportunities / total_leads) * 100) if total_leads > 0 else 0}%",
+
+                f"{round((proposals / total_leads) * 100) if total_leads > 0 else 0}%",
+
+                f"{round((closed / total_leads) * 100) if total_leads > 0 else 0}%"
+
+            ]
+
+        },
+
+        "package_table": [
+
+            {
+
+                "package": label,
+
+                "bookings": value,
+
+                "conversion":
+                f"{round((value / total_appointments) * 100) if total_appointments > 0 else 0}%"
+
+            }
+
+            for label, value in zip(
+                pie_labels,
+                pie_values
+            )
+
+        ]
+
+    }
+
+    return JsonResponse(data)
+
+@dashboard_login_required
+def lab_report_data(request):
+
+    filter_type = request.GET.get(
+        "filter",
+        "today"
+    )
+
+    # =========================================
+    # CURRENT LOGGED-IN LAB
+    # =========================================
+
+    user = request.user_obj
+
+    current_lab = user.lab_profile
+
+    appointments = LabAppointments.objects.filter(
+        accepted_lab=current_lab
+    )
+    
+
+    # =========================================
+    # FILTER LOGIC
+    # =========================================
+    today = timezone.now()
+
+     # TODAY
+    if filter_type == "today":
+
+       appointments = appointments.filter(
+          created_at__date=today.date()
+    )
+
+    # LAST 7 DAYS
+    elif filter_type == "week":
+
+       start_week = today - timedelta(days=7)
+
+       appointments = appointments.filter(
+           created_at__gte=start_week
+    )
+
+   # CURRENT MONTH
+    elif filter_type == "month":
+
+       appointments = appointments.filter(
+         created_at__year=today.year,
+         created_at__month=today.month
+       )
+
+    # CURRENT YEAR
+    elif filter_type == "custom":
+
+        appointments = appointments.filter(
+           created_at__year=today.year
+       )
+
+    print("FILTER:", filter_type)
+    print("COUNT:", appointments.count())
+   
+    # =========================================
+    # STATS
     # =========================================
 
     total_bookings = appointments.count()
@@ -1241,15 +955,45 @@ def lab_report_data(request):
         avg=Avg("budget")
     )["avg"] or 0
 
-    # =========================================
-    # FORMAT VALUES
-    # =========================================
+    if total_revenue >= 10000000:
 
-    revenue = f"₹{round(float(total_revenue) / 10000000, 2)} Cr"
+       revenue = f"₹{round(float(total_revenue)/10000000,2)} Cr"
+
+    elif total_revenue >= 100000:
+
+       revenue = f"₹{round(float(total_revenue)/100000,2)} L"
+
+    else:
+
+       revenue = f"₹{round(float(total_revenue),2)}"
 
     bookings = str(total_bookings)
 
-    ratings = f"{random.randint(90, 99)}%"
+    # =========================================
+    # DYNAMIC RATINGS
+    # =========================================
+
+    completed_count = appointments.filter(
+        status=AppointmentStatus.COMPLETED
+    ).count()
+
+    accepted_count = appointments.filter(
+       status=AppointmentStatus.ACCEPTED
+    ).count()
+
+    positive_reviews = completed_count + accepted_count
+
+    if total_bookings > 0:
+
+        ratings_percent = round(
+           (positive_reviews / total_bookings) * 100
+        )
+
+    else:
+
+       ratings_percent = 0
+
+    ratings = f"{ratings_percent}%"
 
     # =========================================
     # MOST REQUESTED TEST
@@ -1279,12 +1023,12 @@ def lab_report_data(request):
 
     else:
 
-        labels = ["CBC", "RT-PCR", "Lipid"]
+        labels = ["CBC"]
 
-        values = [0, 0, 0]
+        values = [0]
 
     # =========================================
-    # PIE CHART DATA
+    # PIE CHART
     # =========================================
 
     pie_labels = labels
@@ -1303,40 +1047,57 @@ def lab_report_data(request):
 
     else:
 
-        pie_data = [0 for _ in values]
+        pie_data = [0]
 
     # =========================================
-    # LINE CHART DATA
+    # LINE CHART
     # =========================================
 
-    bid_labels = ["Week 1", "Week 2", "Week 3", "Week 4"]
+    weekly_data = (
+        appointments
+        .extra(
+            select={
+                'week':
+                "EXTRACT(WEEK FROM created_at)"
+            }
+        )
+        .values('week')
+        .annotate(
+            total=Count('id')
+        )
+        .order_by('week')
+    )
 
-    cbc_data = [
+    bid_labels = []
 
-        random.randint(300, 500),
+    cbc_data = []
 
-        random.randint(300, 500),
+    rtpcr_data = []
 
-        random.randint(300, 500),
+    for item in weekly_data:
 
-        random.randint(300, 500)
+        bid_labels.append(
+            f"Week {int(item['week'])}"
+        )
 
-    ]
+        cbc_data.append(
+            item['total']
+        )
 
-    rtpcr_data = [
+        rtpcr_data.append(
+            item['total']
+        )
 
-        random.randint(400, 700),
+    if not bid_labels:
 
-        random.randint(400, 700),
+        bid_labels = ["Week 1"]
 
-        random.randint(400, 700),
+        cbc_data = [0]
 
-        random.randint(400, 700)
-
-    ]
+        rtpcr_data = [0]
 
     # =========================================
-    # DYNAMIC RATINGS DATA
+    # RATINGS DATA
     # =========================================
 
     total_count = appointments.count()
@@ -1357,7 +1118,9 @@ def lab_report_data(request):
 
             return 0
 
-        return round((value / total_count) * 100)
+        return round(
+            (value / total_count) * 100
+        )
 
     ratings_data = [
 
@@ -1389,6 +1152,87 @@ def lab_report_data(request):
     ]
 
     # =========================================
+    # HEATMAP DATA
+    # =========================================
+
+    hourly_data = (
+        appointments
+        .annotate(
+            hour=TruncHour("created_at")
+        )
+        .values("hour")
+        .annotate(
+            total=Count("id")
+        )
+        .order_by("hour")
+    )
+
+    heatmap_data = []
+
+    for item in hourly_data:
+
+        if item["hour"]:
+
+            heatmap_data.append({
+
+                "hour":
+                item["hour"].strftime("%I %p"),
+
+                "count":
+                item["total"]
+
+            })
+
+    # =========================================
+    # BID WIN VS LOSS
+    # =========================================
+
+    completed_count = appointments.filter(
+       status=AppointmentStatus.COMPLETED
+    ).count()
+
+    accepted_count = appointments.filter(
+       status=AppointmentStatus.ACCEPTED
+    ).count()
+
+    pending_count = appointments.filter(
+      status=AppointmentStatus.PENDING
+    ).count()
+
+    cancelled_count = appointments.filter(
+      status=AppointmentStatus.CANCELLED
+    ).count()
+
+    total_status = (
+        completed_count +
+        accepted_count +
+        pending_count +
+        cancelled_count
+    )
+
+    if total_status == 0:
+
+        total_status = 1
+
+    win_percent = round(
+
+        (
+            completed_count +
+            accepted_count
+        )
+
+        / total_status * 100
+
+    )
+
+    loss_percent = round(
+
+        cancelled_count
+        / total_status * 100
+
+    )
+
+    # =========================================
     # FINAL RESPONSE
     # =========================================
 
@@ -1402,7 +1246,10 @@ def lab_report_data(request):
 
             "ratings": ratings,
 
-            "avg_bid": round(float(avg_bid), 2)
+            "avg_bid": round(
+                float(avg_bid),
+                2
+            )
 
         },
 
@@ -1432,11 +1279,34 @@ def lab_report_data(request):
 
         },
 
-        "ratings_data": ratings_data
+        "ratings_data":
+        ratings_data,
+
+        "heatmap_data":
+        heatmap_data,
+
+        "bid_win_loss": {
+
+            "win":
+            win_percent,
+
+            "loss":
+            loss_percent,
+
+            "completed":
+            completed_count,
+
+            "cancelled":
+            cancelled_count
+
+        }
 
     }
 
     return JsonResponse(data)
+
+
+
 # @dashboard_login_required
 # def reports(request):
 #     user = request.user_obj

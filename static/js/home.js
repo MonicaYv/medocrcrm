@@ -1815,7 +1815,19 @@ $(document).ready(function () {
       const start = new Date();
       start.setDate(end.getDate() - days + 1);
 
-      const format = date => date.toISOString().split('T')[0];
+      // const format = date => date.toISOString().split('T')[0];
+      const format = (date) => {
+
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+
+            console.log("Invalid Date:", date);
+
+            return "";
+        }
+
+       return date.toISOString().split('T')[0];
+
+   };
       initDynamicNGOChart(format(start), format(end));
     }
 
