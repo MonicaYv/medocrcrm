@@ -318,6 +318,32 @@ def _pharmacy_reports_context(request, user):
     })
     return context
 
+
+@dashboard_login_required
+def pharmacy_report_data(request):
+    user = request.user_obj
+    if user.user_type != "pharmacy":
+        return JsonResponse({"error": "Invalid user type"}, status=403)
+
+    context = _pharmacy_reports_context(request, user)
+    report_data = context.get("pharmacy_report_data", {})
+
+    return JsonResponse({
+        "range_label": context.get("report_range_label", ""),
+        "stats": {
+            "total_revenue": context.get("total_revenue", "0"),
+            "won_bids": context.get("won_bids", "0"),
+            "lost_bids": context.get("lost_bids", "0"),
+            "total_bids": context.get("total_bids", "0"),
+            "total_orders": context.get("total_orders", "0"),
+            "avg_bid": context.get("avg_bid", "0"),
+        },
+        "charts": report_data,
+        "top_products": context.get("top_products", []),
+        "stock_alerts": context.get("stock_alerts", []),
+        "win_loss_rows": context.get("win_loss_rows", []),
+    })
+
 @dashboard_login_required
 def reports(request):
 
