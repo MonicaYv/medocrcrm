@@ -1,7 +1,12 @@
+let barChart;
+let pieChart;
+let lineChart;
+let patientJourneyChart;
 $(document).ready(function () {
   // --------- BAR CHART (Most Requested Test) ----------
   const barCtx = document.getElementById("barChart").getContext("2d");
-  new Chart(barCtx, {
+  // new Chart(barCtx, {
+  barChart = new Chart(barCtx, {
     type: "bar",
     data: {
       labels: [
@@ -47,7 +52,8 @@ $(document).ready(function () {
 
   // --------- PIE CHART (Revenue by Test Type) ----------
   const pieCtx = document.getElementById("pieChart").getContext("2d");
-  new Chart(pieCtx, {
+  // new Chart(pieCtx, {
+    pieChart = new Chart(pieCtx, {
     type: "pie",
     data: {
       labels: ["Direct (15%)", "NGO Referrals (35%)", "Ads (50%)"],
@@ -66,7 +72,9 @@ $(document).ready(function () {
 
   // --------- LINE CHART (Bid Trend Price) ----------
   const lineCtx = document.getElementById("lineChart").getContext("2d");
-  new Chart(lineCtx, {
+  // new Chart(lineCtx, {
+  
+  lineChart = new Chart(lineCtx, {
     type: "line",
     data: {
       labels: ["10:00", "10:30", "11:00", "11:30"],
@@ -88,31 +96,59 @@ $(document).ready(function () {
   const horizontalCtx = document
     .getElementById("horizontalBarChart")
     .getContext("2d");
-  new Chart(horizontalCtx, {
+  patientJourneyChart = new Chart(horizontalCtx, {
+
     type: "bar",
+
     data: {
-      labels: ["Leads", "Connect", "Booked", "Visited", "Feedback"],
-      datasets: [
-        {
-          axis: "y",
-          data: [6000, 5200, 3800, 3300, 1750],
-          fill: false,
-          backgroundColor: [
-            "#3B82F6",
-            "#EF4444",
-            "#FABA23",
-            "#84CC16",
-            "#EC4899",
-          ],
-        },
-      ],
+
+        labels: ["Loading"],
+
+        datasets: [
+
+            {
+
+                axis: "y",
+
+                data: [0],
+
+                fill: false,
+
+                backgroundColor: [
+
+                    "#3B82F6",
+
+                    "#EF4444",
+
+                    "#FABA23",
+
+                    "#84CC16",
+
+                    "#EC4899",
+
+                ],
+
+            },
+
+        ],
+
     },
+
     options: {
-      responsive: true,
-      plugins: { legend: false },
-      indexAxis: "y",
+
+        responsive: true,
+
+        plugins: {
+
+            legend: false
+
+        },
+
+        indexAxis: "y",
+
     },
-  });
+
+});
 
   // --------- USER RATINGS ----------
   const ratingData = [
@@ -136,18 +172,134 @@ $(document).ready(function () {
   });
 
   // --------- DOWNLOAD AS PDF ----------
-  $(".download-btn").on("click", function () {
+  // $(".download-btn").on("click", function () {
+  //   const targetId = $(this).data("target");
+  //   const { jsPDF } = window.jspdf;
+  //   const pdf = new jsPDF();
+  //   pdf.html(document.getElementById(targetId), {
+  //     callback: function (doc) {
+  //       doc.save(`${targetId}.pdf`);
+  //     },
+  //     x: 10,
+  //     y: 10,
+  //   });
+  // });
+
+  // ================================
+// FILTER DROPDOWN
+// ================================
+
+// FILTER TOGGLE
+$(".filterToggle").on("click", function (e) {
+
+    e.stopPropagation();
+
+    $(".filterDropdown").toggleClass("hidden");
+
+});
+
+
+// CUSTOM CALENDAR OPEN
+$(".calendar-icon").on("click", function (e) {
+
+    e.stopPropagation();
+
+    $(".datepicker-container").addClass("hidden");
+
+    $(this)
+      .closest(".dropdown")
+      .find(".datepicker-container")
+      .toggleClass("hidden");
+
+});
+
+// $(".filterToggle").on("click", function (e) {
+
+// // CUSTOM CALENDAR OPEN
+// $(".calendar-icon").on("click", function (e) {
+
+//     e.stopPropagation();
+
+//     $(".datepicker-container").addClass("hidden");
+
+//     $(this)
+//       .closest(".dropdown")
+//       .find(".datepicker-container")
+//       .toggleClass("hidden");
+
+// });
+
+//     e.stopPropagation();
+
+//     $(".filterDropdown").toggleClass("hidden");
+
+// });
+
+// Close dropdown outside click
+$(document).on("click", function () {
+
+    $(".filterDropdown").addClass("hidden");
+    $(".datepicker-container").addClass("hidden");
+
+});
+
+$(".download-btn").on("click", function () {
+
     const targetId = $(this).data("target");
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.html(document.getElementById(targetId), {
-      callback: function (doc) {
-        doc.save(`${targetId}.pdf`);
-      },
-      x: 10,
-      y: 10,
+
+    const targetElement = document.getElementById(targetId);
+
+    if (!targetElement) {
+        console.error("Target element not found");
+        return;
+    }
+
+    html2canvas(targetElement, {
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        allowTaint: true,
+        scale: 2,
+        logging: false
+    }).then(canvas => {
+
+        const imgData = canvas.toDataURL("image/png");
+
+        
+
+        if (!window.jspdf) {
+            alert("jsPDF library not loaded");
+            return;  
+          }
+
+        const { jsPDF } = window.jspdf;
+
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const imgWidth = 190;
+
+        const pageHeight = 295;
+
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+
+        let position = 10;
+
+        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
+        pdf.save(`${targetId}.pdf`);
     });
-  });
+
+});
 
   // --------- HEATMAP ----------
   // Wait for DOM to be ready using jQuery
@@ -155,67 +307,62 @@ $(document).ready(function () {
   am4core.useTheme(am4themes_animated);
 
   // Create map instance
-  var chart = am4core.create("heatmap", am4maps.MapChart);
+ 
+  
+  
+  window.heatmapChart = am4core.create("heatmap", am4maps.MapChart);
 
   // Set map definition
-  chart.geodata = am4geodata_india2019High;
+  
+  heatmapChart.geodata =
+    am4geodata_india2019High;
+
+  heatmapChart.homeZoomLevel = 1;
+
+  heatmapChart.homeGeoPoint = {
+      longitude: 78.9629,
+      latitude: 22.5937
+  };
 
   // Create map polygon series
-  var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+
+  window.polygonSeries = heatmapChart.series.push(new am4maps.MapPolygonSeries());
 
   // Set min/max fill color for each area
   polygonSeries.heatRules.push({
     property: "fill",
     target: polygonSeries.mapPolygons.template,
-    min: chart.colors.getIndex(1).brighten(1),
-    max: chart.colors.getIndex(1).brighten(-0.3),
+    min: heatmapChart.colors.getIndex(1).brighten(1),
+    max: heatmapChart.colors.getIndex(1).brighten(-0.3),
   });
 
   // Make map load polygon data (state shapes and names) from GeoJSON
   polygonSeries.useGeodata = true;
+  polygonSeries.geodata = am4geodata_india2019High;
+  polygonSeries.calculateVisualCenter = true;
+  
+   polygonSeries.exclude = ["AQ"];
+   
+
+  
+
+  polygonSeries.dataFields.value = "value";
+
+  polygonSeries.dataFields.id = "id";
+  polygonSeries.mapPolygons.template.propertyFields.fill =
+    "fill";
+  polygonSeries.mapPolygons.template.applyOnClones = true;
 
   // Set heatmap values for each state
-  polygonSeries.data = [
-    { id: "IN-JK", value: 0 },
-    { id: "IN-MH", value: 6269321325 },
-    { id: "IN-UP", value: 0 },
-    { id: "US-AR", value: 0 },
-    { id: "IN-RJ", value: 0 },
-    { id: "IN-AP", value: 0 },
-    { id: "IN-MP", value: 0 },
-    { id: "IN-TN", value: 0 },
-    { id: "IN-JH", value: 0 },
-    { id: "IN-WB", value: 0 },
-    { id: "IN-GJ", value: 0 },
-    { id: "IN-BR", value: 0 },
-    { id: "IN-TG", value: 0 },
-    { id: "IN-GA", value: 0 },
-    { id: "IN-DN", value: 0 },
-    { id: "IN-DL", value: 0 },
-    { id: "IN-DD", value: 0 },
-    { id: "IN-CH", value: 0 },
-    { id: "IN-CT", value: 0 },
-    { id: "IN-AS", value: 0 },
-    { id: "IN-AR", value: 0 },
-    { id: "IN-AN", value: 0 },
-    { id: "IN-KA", value: 0 },
-    { id: "IN-KL", value: 0 },
-    { id: "IN-OR", value: 0 },
-    { id: "IN-SK", value: 0 },
-    { id: "IN-HP", value: 0 },
-    { id: "IN-PB", value: 0 },
-    { id: "IN-HR", value: 0 },
-    { id: "IN-UT", value: 0 },
-    { id: "IN-LK", value: 0 },
-    { id: "IN-MN", value: 0 },
-    { id: "IN-TR", value: 0 },
-    { id: "IN-MZ", value: 0 },
-    { id: "IN-NL", value: 0 },
-    { id: "IN-ML", value: 0 },
-  ];
+  polygonSeries.data = [];
+  heatmapChart.zoomControl =
+    new am4maps.ZoomControl();
+
 
   // Configure series tooltip
   var polygonTemplate = polygonSeries.mapPolygons.template;
+  polygonTemplate.fill =
+    am4core.color("#DCEBFF");
   polygonTemplate.tooltipText = "{name}: {value}";
   polygonTemplate.nonScalingStroke = true;
   polygonTemplate.strokeWidth = 0.5;
@@ -246,4 +393,491 @@ $(document).ready(function () {
   $(document).click(function () {
     $(".dropdown-menu").addClass("hidden");
   });
+
+
 });
+
+
+// // ================================
+// // REPORT FILTER
+// // ================================
+
+// function filterReports(type) {
+
+//     console.log("Selected Filter:", type);
+
+//     let revenue = "";
+//     let highest = "";
+//     let growth = "";
+//     let avg = "";
+
+//     if (type === "today") {
+
+//         revenue = "₹15,000";
+//         highest = "₹8,000";
+//         growth = "+2%";
+//         avg = "₹500";
+
+//     }
+
+//     else if (type === "week") {
+
+//         revenue = "₹1.2 L";
+//         highest = "₹68K";
+//         growth = "+8%";
+//         avg = "₹1,500";
+
+//     }
+
+//     else if (type === "month") {
+
+//         revenue = "₹4.5 L";
+//         highest = "₹1.5 L";
+//         growth = "+15%";
+//         avg = "₹3,150";
+
+//     }
+
+//     // Update cards
+//     document.getElementById("totalRevenue").innerText = revenue;
+
+//     document.getElementById("highestRevenue").innerText = highest;
+
+//     document.getElementById("quarterGrowth").innerText = growth;
+
+//     document.getElementById("avgRevenue").innerText = avg;
+
+// }
+
+
+function loadDashboardData(filterType) {
+
+    $.ajax({
+        url: "/reports/hospital-report-data/",
+        type: "GET",
+        data: {
+            filter: filterType
+        },
+
+        success: function(response) {
+
+            // CARDS
+            $("#totalRevenue").text(
+              response.stats.revenue
+            );
+
+            $("#highestRevenue").text(
+               response.stats.highest_revenue
+            );
+
+            $("#quarterGrowth").text(
+               response.stats.growth
+           );
+
+            $("#avgRevenue").text(
+               response.stats.avg_revenue
+            );
+            // $("#ratingsValue").text(response.stats.ratings);
+            // $("#bookingsValue").text(response.stats.bookings);
+            // $("#avgBidValue").text(response.stats.avg_bid);
+
+            // BAR CHART UPDATE
+            barChart.data.labels =
+                response.most_requested_test.labels;
+
+            barChart.data.datasets[0].data =
+                response.most_requested_test.data;
+
+            barChart.update();
+
+            // PIE CHART UPDATE
+            pieChart.data.labels =
+                response.revenue_by_test.labels;
+
+            pieChart.data.datasets[0].data =
+                response.revenue_by_test.data;
+
+            pieChart.update();
+
+            // LINE CHART UPDATE
+            lineChart.data.labels =
+                response.bid_trend.labels;
+
+            lineChart.data.datasets[0].data =
+                response.bid_trend.cbc;
+                
+
+            lineChart.update();
+
+
+              // ==========================
+               // // PATIENT JOURNEY UPDATE
+              // ==========================
+
+             patientJourneyChart.data.labels =
+               response.patient_journey.labels;
+
+             patientJourneyChart.data.datasets[0].data =
+                response.patient_journey.data;
+
+             patientJourneyChart.update();
+
+
+
+             // ==========================================
+            // CONVERSION INSIGHTS DYNAMIC
+             // ==========================================
+
+            // ==========================================
+          // CONVERSION INSIGHTS DYNAMIC
+           // ==========================================
+
+          let conversionRows = "";
+
+          const colors = [
+
+              "bg-azure-radiance",
+              "bg-light-green",
+              "bg-sunrise-yellow",
+              "bg-violet",
+              "bg-red"
+
+           ];
+
+          response.patient_journey.labels.forEach(
+             (label, index) => {
+
+               conversionRows += `
+
+             <div class="flex items-center justify-between px-4 border-b border-blue-haze py-2">
+
+                <div class="flex items-center gap-1">
+
+                <div class="w-1 h-1 rounded-full ${colors[index]}"></div>
+
+                <p class="font-normal text-xs">
+                    ${label}
+                </p>
+
+            </div>
+
+            <div class="flex items-center gap-[130px]">
+
+                <p class="font-normal text-xs">
+                    ${response.patient_journey.data[index]}
+                </p>
+
+                <p class="font-normal text-xs">
+                    ${response.patient_journey.conversion[index]}
+                </p>
+
+            </div>
+
+        </div>
+
+        `;
+
+    }
+);
+
+$("#conversionTableBody").html(
+    conversionRows
+);
+   // ==========================================
+   // PACKAGE TABLE DYNAMIC
+   // ==========================================
+
+    let packageRows = "";
+
+   response.package_table.forEach((item, index) => {
+
+        let colorClass = "bg-azure-radiance";
+
+        if (index === 1) {
+           colorClass = "bg-light-green";
+        }
+
+        else if (index === 2) {
+           colorClass = "bg-sunrise-yellow";
+        }
+
+       packageRows += `
+
+       <div class="flex items-center justify-between px-4 border-b border-blue-haze">
+
+           <div class="flex items-center gap-1">
+
+               <div class="w-1 h-1 rounded-full ${colorClass}"></div>
+
+               <p class="font-normal text-xs">
+                   ${item.package}
+               </p>
+
+          </div>
+
+          <div class="flex items-center gap-[130px]">
+
+            <p class="font-normal text-xs">
+                ${item.bookings}
+            </p>
+
+            <p class="font-normal text-xs">
+                ${item.conversion}
+            </p>
+
+         </div>
+
+      </div>
+
+     `;
+
+});
+
+  $("#packageTableBody").html(
+       packageRows
+  );
+
+
+             // ==========================
+             // HEATMAP UPDATE
+             // ==========================
+
+             const stateMap = {
+
+                "Maharashtra": "IN-MH",
+                "Delhi": "IN-DL",
+                "Karnataka": "IN-KA",
+                "Tamil Nadu": "IN-TN",
+                "Gujarat": "IN-GJ",
+                "Rajasthan": "IN-RJ",
+                "Uttar Pradesh": "IN-UP",
+                "Madhya Pradesh": "IN-MP",
+                "West Bengal": "IN-WB",
+                "Bihar": "IN-BR",
+                "Punjab": "IN-PB",
+                "Haryana": "IN-HR",
+                "Kerala": "IN-KL",
+                "Telangana": "IN-TG",
+                "Andhra Pradesh": "IN-AP"
+
+              };
+
+let heatmapData = [];
+
+response.heatmap.labels.forEach((state, index) => {
+
+    const cleanedState = state.trim();
+
+    const mapId = stateMap[cleanedState];
+
+    if (mapId) {
+
+        heatmapData.push({
+
+            id: mapId,
+
+            value: response.heatmap.data[index]
+
+        });
+
+    }
+
+});
+
+if (heatmapData.length === 0) {
+
+    heatmapData = [
+        {
+            id: "IN-MH",
+            value: 0
+        }
+    ];
+
+}
+
+
+polygonSeries.data = heatmapData;
+polygonSeries.invalidateRawData();
+
+heatmapChart.invalidateRawData();
+
+heatmapChart.reinit();
+
+heatmapChart.invalidateSize();
+
+heatmapChart.validateData();
+
+
+
+        },
+
+        error: function(error) {
+
+            console.log("API Error:", error);
+
+        }
+
+    });
+
+}
+        
+
+// ================================
+// REPORT FILTER
+// ================================
+
+$(".report-filter").click(function () {
+
+    let type = $(this).data("type");
+
+    // LOAD DATA
+    loadDashboardData(type);
+
+    // ICON COLOR CHANGE
+    $(".report-filter span")
+        .removeClass("text-dodger-blue")
+        .addClass("text-light-gray");
+
+    $(this).find("span")
+        .removeClass("text-light-gray")
+        .addClass("text-dodger-blue");
+
+    // CUSTOM DATE
+    if (type === "custom") {
+
+        $(".datepicker-container")
+            .removeClass("hidden");
+
+    }
+
+    let revenue = "";
+    let highest = "";
+    let growth = "";
+    let avg = "";
+
+    
+
+});
+
+// ================================
+// SEARCH FUNCTIONALITY
+// ================================
+
+document.getElementById("searchInput")
+.addEventListener("keyup", function () {
+
+    let value = this.value.toLowerCase();
+
+    const departmentSection =
+    document.getElementById("departmentRevenueSection");
+
+    const packageSection =
+    document.getElementById("packageSection");
+
+    const conversionSection =
+    document.getElementById("conversionSection");
+    
+    const loadAnalyticsSection =
+    document.getElementById("loadAnalyticsSection");
+
+    const heatmapSection =
+    document.getElementById("heatmapSection");
+
+    const patientJourneySection =
+    document.getElementById("patientJourneySection");
+
+    // SHOW ALL IF EMPTY
+    if (value === "") {
+
+        departmentSection.style.display = "";
+        packageSection.style.display = "";
+        conversionSection.style.display = "";
+
+        loadAnalyticsSection.style.display = "";
+        heatmapSection.style.display = "";
+        patientJourneySection.style.display = "";
+
+        return;
+    }
+
+    // HIDE ALL FIRST
+    departmentSection.style.display = "none";
+    packageSection.style.display = "none";
+    conversionSection.style.display = "none";
+
+
+    loadAnalyticsSection.style.display = "none";
+    heatmapSection.style.display = "none";
+    patientJourneySection.style.display = "none";
+
+    // DEPARTMENT SEARCH
+    if (
+        value.includes("department") ||
+        value.includes("revenue") ||
+        value.includes("opd")
+    ) {
+
+        departmentSection.style.display = "";
+
+    }
+
+    // PACKAGE SEARCH
+    if (
+        value.includes("package") ||
+        value.includes("booking") ||
+        value.includes("lead")
+    ) {
+
+        packageSection.style.display = "";
+
+    }
+
+    // CONVERSION SEARCH
+    if (
+        value.includes("conversion") ||
+        value.includes("patient") ||
+        value.includes("deal")
+    ) {
+
+        conversionSection.style.display = "";
+
+    }
+
+    // LOAD ANALYTICS SEARCH
+   if (
+       value.includes("load") ||
+       value.includes("analytics") ||
+        value.includes("cbc")
+   ) {
+       loadAnalyticsSection.style.display = "";
+   }
+
+  // HEATMAP SEARCH
+  if (
+    value.includes("heatmap") ||
+    value.includes("map") ||
+    value.includes("state")
+  ) {
+    heatmapSection.style.display = "";
+  }
+
+// PATIENT JOURNEY SEARCH
+  if (
+    value.includes("journey") ||
+    value.includes("feedback") ||
+    value.includes("visited")
+ ) {
+    patientJourneySection.style.display = "";
+  }
+
+   
+
+
+});
+
+// DEFAULT LOAD
+loadDashboardData("today");
+
+
+
+    

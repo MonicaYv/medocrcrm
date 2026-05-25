@@ -1,84 +1,111 @@
 $(document).ready(function () {
- 
+  const reportEl = document.getElementById("pharmacy-report-data");
+  const reportData = reportEl ? JSON.parse(reportEl.textContent || "{}") : {};
+  const topProducts = reportData.topProducts || {};
+  const bidTrend = reportData.bidTrend || {};
+  const winLoss = reportData.winLoss || {};
+  const heatmapData = reportData.heatmap || [];
+  const ratingData = reportData.ratings || [];
+  const chartColors = ["#3b82f6", "#f97316", "#22c55e", "#ef4444", "#eab308"];
 
-  const barCtxPharmacy = document.getElementById("barChartPharmacy").getContext("2d");
-  new Chart(barCtxPharmacy, {
-    type: "bar",
-    data: {
-      labels: ["Paracetamol", "Vitamin D3", "Omega-3", "Aspirin 100", "Calcium Tablets"],
-      datasets: [
-        {
-          label: "Requests",
-          data: [120, 160, 70, 150, 100],
-          backgroundColor: ["#3b82f6", "#f97316", "#22c55e", "#8b5cf6", "#a855f7"],
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-    },
-  });
+  const barCanvas = document.getElementById("barChartPharmacy");
+  if (barCanvas) {
+    new Chart(barCanvas.getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: topProducts.labels || ["No sales yet"],
+        datasets: [
+          {
+            label: "Units sold",
+            data: topProducts.units || [0],
+            backgroundColor: chartColors,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+      },
+    });
+  }
 
-  // --------- PIE CHART (Revenue by Test Type) ----------
-  const pieCtx = document.getElementById("pieChart").getContext("2d");
-  new Chart(pieCtx, {
-    type: "pie",
-    data: {
-      labels: ["Paracetamol (30%)", "Vitamin D3 (25%)", "Omega-3 (18%)", "Aspirin  100 (12%)", "Calcium Tablets (12%)"],
-      datasets: [
-        {
-          data: [30, 25, 18, 12, 12],
-          backgroundColor: ["#3b82f6", "#f97316", "#22c55e", "#ef4444", "#eab308"],
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: "top" } },
-    },
-  });
+  const pieCanvas = document.getElementById("pieChart");
+  if (pieCanvas) {
+    new Chart(pieCanvas.getContext("2d"), {
+      type: "pie",
+      data: {
+        labels: topProducts.revenueLabels || ["No revenue yet"],
+        datasets: [
+          {
+            data: topProducts.revenue || [0],
+            backgroundColor: chartColors,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" } },
+      },
+    });
+  }
 
-  // --------- LINE CHART (Bid Trend Price) ----------
-  const lineCtx = document.getElementById("lineChart").getContext("2d");
-  new Chart(lineCtx, {
-    type: "line",
-    data: {
-      labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-      datasets: [
-        {
-          label: "Paracetamol",
-          data: [320, 340, 310, 360],
-          borderColor: "#3b82f6",
-          fill: false,
-        },
-        {
-          label: "Aspirin 100",
-          data: [420, 380, 460, 400],
-          borderColor: "#f97316",
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: "top" } },
-    },
-  });
+  const lineCanvas = document.getElementById("lineChart");
+  if (lineCanvas) {
+    new Chart(lineCanvas.getContext("2d"), {
+      type: "line",
+      data: {
+        labels: bidTrend.labels || [],
+        datasets: [
+          {
+            label: "Avg bid",
+            data: bidTrend.values || [],
+            borderColor: "#3b82f6",
+            backgroundColor: "rgba(59, 130, 246, 0.12)",
+            tension: 0.35,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" } },
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  }
 
-  // --------- USER RATINGS ----------
-  const ratingData = [
-    { stars: 5, percent: 74 },
-    { stars: 4, percent: 54 },
-    { stars: 3, percent: 38 },
-    { stars: 2, percent: 18 },
-    { stars: 1, percent: 3 },
-  ];
+  const winLossCanvas = document.getElementById("bidWinLossChart");
+  if (winLossCanvas) {
+    new Chart(winLossCanvas.getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: winLoss.labels || [],
+        datasets: [
+          {
+            label: "Bids won",
+            data: winLoss.won || [],
+            backgroundColor: "#10b981",
+          },
+          {
+            label: "Bids lost",
+            data: winLoss.lost || [],
+            backgroundColor: "#ef4444",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" } },
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+      },
+    });
+  }
 
+  $("#ratings").empty();
   ratingData.forEach((r) => {
     $("#ratings").append(`
       <div class="flex items-center justify-between">
-        <span  class="text-dodger-blue">${r.stars} star</span>
+        <span class="text-dodger-blue">${r.stars} star</span>
         <div class="w-3/4 bg-[#D3D3D3] rounded-full h-2">
           <div class="bg-[#FFCC48] h-2 rounded-full" style="width:${r.percent}%;"></div>
         </div>
@@ -87,12 +114,13 @@ $(document).ready(function () {
     `);
   });
 
-  // --------- DOWNLOAD AS PDF ----------
   $(".download-btn").on("click", function () {
     const targetId = $(this).data("target");
+    const target = document.getElementById(targetId);
+    if (!target || !window.jspdf) return;
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
-    pdf.html(document.getElementById(targetId), {
+    pdf.html(target, {
       callback: function (doc) {
         doc.save(`${targetId}.pdf`);
       },
@@ -101,99 +129,47 @@ $(document).ready(function () {
     });
   });
 
-    // --------- HEATMAP ----------
-    // Wait for DOM to be ready using jQuery
-  
+  if (document.getElementById("heatmap") && window.am4core && window.am4maps) {
     am4core.useTheme(am4themes_animated);
 
-    // Create map instance
-    var chart = am4core.create("heatmap", am4maps.MapChart);
-
-    // Set map definition
+    const chart = am4core.create("heatmap", am4maps.MapChart);
     chart.geodata = am4geodata_india2019High;
 
-    // Create map polygon series
-    var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
-
-    // Set min/max fill color for each area
+    const polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
     polygonSeries.heatRules.push({
-        property: "fill",
-        target: polygonSeries.mapPolygons.template,
-        min: chart.colors.getIndex(1).brighten(1),
-        max: chart.colors.getIndex(1).brighten(-0.3)
+      property: "fill",
+      target: polygonSeries.mapPolygons.template,
+      min: chart.colors.getIndex(1).brighten(1),
+      max: chart.colors.getIndex(1).brighten(-0.3),
     });
 
-    // Make map load polygon data (state shapes and names) from GeoJSON
     polygonSeries.useGeodata = true;
+    polygonSeries.data = heatmapData;
 
-    // Set heatmap values for each state
-    polygonSeries.data = [
-        { id: "IN-JK", value: 0 },
-        { id: "IN-MH", value: 6269321325 },
-        { id: "IN-UP", value: 0 },
-        { id: "US-AR", value: 0 },
-        { id: "IN-RJ", value: 0 },
-        { id: "IN-AP", value: 0 },
-        { id: "IN-MP", value: 0 },
-        { id: "IN-TN", value: 0 },
-        { id: "IN-JH", value: 0 },
-        { id: "IN-WB", value: 0 },
-        { id: "IN-GJ", value: 0 },
-        { id: "IN-BR", value: 0 },
-        { id: "IN-TG", value: 0 },
-        { id: "IN-GA", value: 0 },
-        { id: "IN-DN", value: 0 },
-        { id: "IN-DL", value: 0 },
-        { id: "IN-DD", value: 0 },
-        { id: "IN-CH", value: 0 },
-        { id: "IN-CT", value: 0 },
-        { id: "IN-AS", value: 0 },
-        { id: "IN-AR", value: 0 },
-        { id: "IN-AN", value: 0 },
-        { id: "IN-KA", value: 0 },
-        { id: "IN-KL", value: 0 },
-        { id: "IN-OR", value: 0 },
-        { id: "IN-SK", value: 0 },
-        { id: "IN-HP", value: 0 },
-        { id: "IN-PB", value: 0 },
-        { id: "IN-HR", value: 0 },
-        { id: "IN-UT", value: 0 },
-        { id: "IN-LK", value: 0 },
-        { id: "IN-MN", value: 0 },
-        { id: "IN-TR", value: 0 },
-        { id: "IN-MZ", value: 0 },
-        { id: "IN-NL", value: 0 },
-        { id: "IN-ML", value: 0 }
-    ];
-
-    // Configure series tooltip
-    var polygonTemplate = polygonSeries.mapPolygons.template;
+    const polygonTemplate = polygonSeries.mapPolygons.template;
     polygonTemplate.tooltipText = "{name}: {value}";
     polygonTemplate.nonScalingStroke = true;
     polygonTemplate.strokeWidth = 0.5;
 
-    // Create hover state and set alternative fill color
-    var hs = polygonTemplate.states.create("hover");
+    const hs = polygonTemplate.states.create("hover");
     hs.properties.fill = am4core.color("#3c5bdc");
+  }
 
-    // Toggle dropdown visibility
-    $(document).on('click', '.dropdown-btn', function (e) {
-      e.stopPropagation();
-      const $dropdown = $(this).closest('.dropdown');
-      $('.dropdown-menu').not($dropdown.find('.dropdown-menu')).addClass('hidden');
-      $dropdown.find('.dropdown-menu').toggleClass('hidden');
-    });
+  $(document).on("click", ".dropdown-btn", function (e) {
+    e.stopPropagation();
+    const $dropdown = $(this).closest(".dropdown");
+    $(".dropdown-menu").not($dropdown.find(".dropdown-menu")).addClass("hidden");
+    $dropdown.find(".dropdown-menu").toggleClass("hidden");
+  });
 
-    // Handle selection
-    $(document).on('click', '.dropdown-menu li', function (e) {
-      const $dropdown = $(this).closest('.dropdown');
-      const value = $(this).text();
-      $dropdown.find('.dropdown-value').text(value);
-      $dropdown.find('.dropdown-menu').addClass('hidden');
-    });
+  $(document).on("click", ".dropdown-menu li", function () {
+    const $dropdown = $(this).closest(".dropdown");
+    const value = $(this).text();
+    $dropdown.find(".dropdown-value").text(value);
+    $dropdown.find(".dropdown-menu").addClass("hidden");
+  });
 
-    // Close dropdown when clicking outside
-    $(document).click(function () {
-      $('.dropdown-menu').addClass('hidden');
-    });
+  $(document).click(function () {
+    $(".dropdown-menu").addClass("hidden");
+  });
 });

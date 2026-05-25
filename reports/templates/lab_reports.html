@@ -25,29 +25,41 @@
               <div
                 class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
                 <div
-                  class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                  class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray" 
+                  data-filter="today"
+                >
                   <span class="material-symbols-outlined !text-lg text-dodger-blue">
-                    check
-                  </span>Today
+                     check
+                  </span>
+                  Today
                 </div>
                 <div
-                  class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                  class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
+                  data-filter="week"
+                >
+                  <span class="material-symbols-outlined !text-lg text-light-gray">
+                      check
+                  </span>
+                  Week
+                </div>
+                <div
+                  class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray" 
+                  data-filter="month"
+                >
                   <span class="material-symbols-outlined !text-lg text-light-gray">
                     check
-                  </span>Week
+                  </span>
+                  Month
                 </div>
                 <div
-                  class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                  <span class="material-symbols-outlined !text-lg text-light-gray">
-                    check
-                  </span>Month
-                </div>
-                <div
-                  class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray">
+                  class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray"
+                  data-filter="custom"
+                >
                   <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined !text-lg text-light-gray">
                       check
-                    </span>Custom
+                    </span>
+                    Custom
                   </div>
                   <span class="material-symbols-outlined calendar-icon">calendar_today</span>
                 </div>
@@ -170,7 +182,12 @@
                 <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">9-10 PM</li>
               </ul>
             </div>
-            <div id="heatmap" class="!h-[60%]"></div>
+            <!-- <div id="heatmap" class="!h-[60%]"></div> -->
+            <!-- <div id="heatmap" class="h-[320px] mt-4"></div> -->
+             <div
+                id="heatmap"
+                class="h-[320px] mt-4 overflow-y-auto pr-2 space-y-3"
+              ></div>
             <button class=" bg-dodger-blue text-white w-full text-center mt-4 py-2 rounded-lg download-btn" data-target="heatmap">Download Report</button>
           </div>
 
@@ -223,23 +240,29 @@
               <div class="flex items-center justify-between gap-4">
                 <div class="flex-1 h-5 rounded-full overflow-hidden">
                   <div class="flex h-full">
-                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" style="width: 81%;">
+                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" id="winBar1"style="width: 81%;">
                       88
                     </div>
-                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" style="width: 19%;">
+                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center"id="lossBar1" style="width: 19%;">
                       20
                     </div>
                   </div>
                 </div>
-                <span class="text-xs">Jul 8–14</span>
+                <!-- <span class="text-xs">Jul 8–14</span> -->
+                  <span
+                     class="text-xs"
+                     id="date1"
+                  >
+                     Current
+                  </span>
               </div>
-              <div class="flex items-center justify-between gap-4">
+              <!-- <div class="flex items-center justify-between gap-4">
                 <div class="flex-1 h-5 rounded-full overflow-hidden">
                   <div class="flex h-full">
-                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" style="width: 85%;">
+                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center"id="winBar2" style="width: 85%;">
                       100
                     </div>
-                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" style="width: 15%;">
+                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" id="lossBar2" style="width: 15%;">
                       15
                     </div>
                   </div>
@@ -249,10 +272,10 @@
               <div class="flex items-center justify-between gap-4">
                 <div class="flex-1 h-5 rounded-full overflow-hidden">
                   <div class="flex h-full">
-                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" style="width: 60%;">
+                    <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center" id="winBar3"style="width: 60%;">
                       60
                     </div>
-                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" style="width: 40%;">
+                    <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center" id="lossBar3" style="width: 40%;">
                       25
                     </div>
                   </div>
@@ -260,7 +283,42 @@
                 <span class="text-xs">Jun 24-23</span>
               </div>
             </div>
-            <div class="bg-white p-4 rounded-xl lab-report-shadow">
+            <div class="bg-white p-4 rounded-xl lab-report-shadow"> -->
+
+            <div class="bg-white p-4 rounded-xl lab-report-shadow space-y-4">
+
+               <div class="flex items-center justify-between">
+
+                  <h2 class="font-semibold">
+                    Bid Win vs. Loss
+                  </h2>
+
+                <div class="flex items-center gap-4 text-sm">
+
+                <div class="flex items-center gap-1">
+                   <span class="w-3 h-3 rounded-full bg-mint-leaf"></span>
+                   <span>Win</span>
+                </div>
+
+               <div class="flex items-center gap-1">
+                  <span class="w-3 h-3 rounded-full bg-bright-red"></span>
+                  <span>Loss</span>
+               </div>
+
+        </div>
+
+    </div>
+
+          <!-- DYNAMIC DATA WILL COME HERE -->
+
+          <div
+             id="bidWinLossContainer"
+             class="space-y-4"
+          >
+
+        </div>
+
+ </div>
               <div class="flex justify-between items-center dropdown relative mb-2">
                 <h3 class="font-semibold">User Rating ⭐</h3>
                 <div class="flex items-center gap-2">
@@ -282,6 +340,24 @@
 
 {% block extra_js %}
   <script src="/static/js/tabs.js"></script>
-<script src="/static/js/lab-reports.js"></script>
+  
+<!-- <script src="/static/js/lab-reports.js"></script> -->
   <script src="/static/js/table-pagination.js"></script>
+
+<!-- AMCHARTS -->
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+
+<script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
+
+<script src="https://cdn.amcharts.com/lib/4/geodata/india2019High.js"></script>
+
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+
+<!-- HTML2CANVAS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- JSPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="/static/js/lab-reports.js"></script>
 {% endblock %}
