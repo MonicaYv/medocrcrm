@@ -528,7 +528,7 @@ def hospital_report_data(request):
 
     filter_type = request.GET.get(
         "filter",
-        "today"
+        "month"
     )
 
     appointments = (
@@ -987,41 +987,39 @@ def lab_report_data(request):
     # =========================================
     # FILTER LOGIC
     # =========================================
+
     today = timezone.now()
 
-     # TODAY
     if filter_type == "today":
 
-       appointments = appointments.filter(
-          created_at__date=today.date()
-    )
+        appointments = appointments.filter(
+             created_at__date=today.date()
+        )
 
-    # LAST 7 DAYS
     elif filter_type == "week":
 
-       start_week = today - timedelta(days=7)
+        appointments = appointments.filter(
+            created_at__gte=today - timedelta(days=7)
+        )
 
-       appointments = appointments.filter(
-           created_at__gte=start_week
-    )
-
-   # CURRENT MONTH
     elif filter_type == "month":
 
-       appointments = appointments.filter(
-         created_at__year=today.year,
-         created_at__month=today.month
-       )
+        appointments = appointments.filter(
+            created_at__year=today.year,
+            created_at__month=today.month
+        )
 
-    # CURRENT YEAR
     elif filter_type == "custom":
 
         appointments = appointments.filter(
-           created_at__year=today.year
-       )
+            created_at__year=today.year
+        )
 
-    print("FILTER:", filter_type)
-    print("COUNT:", appointments.count())
+    else:
+
+        appointments = appointments.all()
+
+    
    
     # =========================================
     # STATS
@@ -1105,9 +1103,9 @@ def lab_report_data(request):
 
     else:
 
-        labels = ["CBC"]
+        labels = ["No Data"]
 
-        values = [0]
+        values = [1]
 
     # =========================================
     # PIE CHART
@@ -1172,11 +1170,11 @@ def lab_report_data(request):
 
     if not bid_labels:
 
-        bid_labels = ["Week 1"]
+        bid_labels = ["No Data"]
 
-        cbc_data = [0]
+        cbc_data = [1]
 
-        rtpcr_data = [0]
+        rtpcr_data = [1]
 
     # =========================================
     # RATINGS DATA
@@ -1384,7 +1382,7 @@ def lab_report_data(request):
         }
 
     }
-
+     
     return JsonResponse(data)
 
 

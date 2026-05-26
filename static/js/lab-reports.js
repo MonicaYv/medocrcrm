@@ -17,11 +17,27 @@ $(document).ready(function () {
         },
       ],
     },
+    // options: {
+    //   responsive: true,
+    //   plugins: { legend: { display: false } },
+    // },
     options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-    },
-  });
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+             display: false
+          }
+
+    }     
+
+},
+  
+});
 
   // --------- PIE CHART (Revenue by Test Type) ----------
   const pieCtx = document.getElementById("pieChart").getContext("2d");
@@ -37,10 +53,35 @@ $(document).ready(function () {
         },
       ],
     },
+    // options: {
+    //   responsive: true,
+    //   plugins: { legend: { position: "top" } },
+    // },
     options: {
+
       responsive: true,
-      plugins: { legend: { position: "top" } },
-    },
+
+      maintainAspectRatio: false,
+
+      layout: {
+           padding: {
+               top:80,
+               bottom:30
+           }
+       },
+
+      plugins: {
+
+        legend: {
+          position: "top"
+        }
+
+    }
+
+},
+
+
+
   });
 
   // --------- LINE CHART (Bid Trend Price) ----------
@@ -65,10 +106,32 @@ $(document).ready(function () {
         },
       ],
     },
+    // options: {
+    //   responsive: true,
+    //   plugins: { legend: { position: "top" } },
+    // },
+
     options: {
+
       responsive: true,
-      plugins: { legend: { position: "top" } },
+
+      maintainAspectRatio: false,
+
+
+      scales: {
+        y: {
+          beginAtZero: true
+        }
     },
+
+      plugins: {
+
+        legend: {
+          position: "top"
+        }
+    }
+
+},
   });
 
   // --------- USER RATINGS ----------
@@ -705,40 +768,130 @@ function updateBidWinLoss(data) {
 // PDF DOWNLOAD
 // =====================================
 
-$(".download-btn").click(function () {
+// $(".download-btn").click(function () {
 
-    let targetId = $(this).data("target");
+//     let targetId = $(this).data("target");
 
-    let target = document.getElementById(targetId);
+//     let target = document.getElementById(targetId);
+
+//     html2canvas(target, {
+
+//         scale: 2,
+//         useCORS: true
+
+//     }).then(canvas => {
+
+//         const imgData =
+//             canvas.toDataURL("image/png");
+
+//         const pdf =
+//             new jspdf.jsPDF("p", "mm", "a4");
+
+//         const imgWidth = 190;
+
+//         const pageHeight = 295;
+
+//         const imgHeight =
+//             (canvas.height * imgWidth) /
+//             canvas.width;
+
+//         pdf.addImage(
+//             imgData,
+//             "PNG",
+//             10,
+//             10,
+//             imgWidth,
+//             imgHeight
+//         );
+
+//         pdf.save(targetId + ".pdf");
+
+//     });
+
+// });
+
+$(".download-btn").on("click", function () {
+
+    const targetId =
+        $(this).data("target");
+
+    // ===== CHART DOWNLOAD =====
+
+    if (
+        targetId === "barChart" ||
+        targetId === "pieChart" ||
+        targetId === "lineChart"
+    ) {
+
+        let chartCanvas =
+            document.getElementById(targetId);
+
+        const imageData =
+            chartCanvas.toDataURL("image/png");
+
+        const { jsPDF } =
+            window.jspdf;
+
+        const pdf =
+            new jsPDF("p", "mm", "a4");
+
+        pdf.text("Lab Report", 20, 20);
+
+        pdf.addImage(
+            imageData,
+            "PNG",
+            10,
+            30,
+            180,
+            100
+        );
+
+        pdf.save(targetId + ".pdf");
+
+        return;
+    }
+
+    // ===== NORMAL DIV DOWNLOAD =====
+
+    const target =
+        document.getElementById(targetId);
+
+    if (!target) {
+
+        alert("Target not found");
+        return;
+
+    }
 
     html2canvas(target, {
 
         scale: 2,
         useCORS: true
 
-    }).then(canvas => {
+    }).then((canvas) => {
 
-        const imgData =
+        const imageData =
             canvas.toDataURL("image/png");
 
+        const { jsPDF } =
+            window.jspdf;
+
         const pdf =
-            new jspdf.jsPDF("p", "mm", "a4");
+            new jsPDF("p", "mm", "a4");
 
-        const imgWidth = 190;
+        const pdfWidth = 190;
 
-        const pageHeight = 295;
-
-        const imgHeight =
-            (canvas.height * imgWidth) /
+        const pdfHeight =
+            (canvas.height * pdfWidth) /
             canvas.width;
 
         pdf.addImage(
-            imgData,
+            imageData,
             "PNG",
             10,
             10,
-            imgWidth,
-            imgHeight
+            pdfWidth,
+            pdfHeight
         );
 
         pdf.save(targetId + ".pdf");
@@ -746,4 +899,3 @@ $(".download-btn").click(function () {
     });
 
 });
-
