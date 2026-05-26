@@ -10,7 +10,7 @@
                         arrow_forward_ios
                     </span>
                 </div>
-            <div class="bg-white m-5 rounded-[10px] overflow-y-auto scroll">
+            <div class="bg-white m-5 rounded-[10px] overflow-y-auto scroll" id="pharmacy-report-root" data-report-url="{% url 'pharmacy_report_data' %}">
                 <div class=" flex flex-col gap-6 p-4 md:p-8 ">
                     <div class="flex gap-2 items-center">
                         <span class="material-symbols-outlined !font-semibold">patient_list</span>
@@ -25,7 +25,7 @@
                                 class="py-1.5 pl-8 pr-2 w-full sm:w-[17rem] text-sm rounded-md border border-blue-haze placeholder:text-medium-gray focus:outline-none" />
                         </form>
                         <div class="flex items-center md:justify-end gap-2.5">
-                            <p class="font-normal text-xs text-dodger-blue">Data shown: {{ report_range_label }}</p>
+                            <p class="font-normal text-xs text-dodger-blue">Data shown: <span id="reportRangeLabel">{{ report_range_label }}</span></p>
                             <div class="relative dropdown">
                                 <button
                                     class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
@@ -74,7 +74,7 @@
                         <div class="bg-ocean-teal p-4 rounded-lg flex justify-between items-center">
                             <div class="flex flex-col justify-between gap-1">
                                 <h2 class="text-sm">Total Revenue</h2>
-                                <p class="text-lg font-semibold">&#8377;{{ total_revenue|default:"0" }}</p>
+                                <p class="text-lg font-semibold">&#8377;<span id="totalRevenueStat">{{ total_revenue|default:"0" }}</span></p>
                             </div>
                             <div
                                 class="bg-forest-green flex justify-center items-center w-14 h-14 rounded-full text-dodger-blue">
@@ -84,7 +84,7 @@
                         <div class="bg-ocean-teal p-4 rounded-lg flex justify-between items-center">
                             <div class="flex flex-col justify-between gap-1">
                                 <h2 class="text-sm">Bid Won</h2>
-                                <p class="text-lg font-semibold">{{ won_bids|default:"0" }}</p>
+                                <p class="text-lg font-semibold" id="bidWonStat">{{ won_bids|default:"0" }}</p>
                             </div>
                             <div
                                 class="bg-forest-green flex justify-center items-center w-14 h-14 rounded-full text-dodger-blue">
@@ -94,7 +94,7 @@
                         <div class="bg-ocean-teal p-4 rounded-lg flex justify-between items-center">
                             <div class="flex flex-col justify-between gap-1">
                                 <h2 class="text-sm">Total Orders</h2>
-                                <p class="text-lg font-semibold">{{ total_orders|default:"0" }}</p>
+                                <p class="text-lg font-semibold" id="totalOrdersStat">{{ total_orders|default:"0" }}</p>
                             </div>
                             <div
                                 class="bg-forest-green flex justify-center items-center w-14 h-14 rounded-full text-dodger-blue">
@@ -104,7 +104,7 @@
                         <div class="bg-ocean-teal p-4 rounded-lg flex justify-between items-center">
                             <div class="flex flex-col justify-between gap-1">
                                 <h2 class="text-sm">Avg Bid</h2>
-                                <p class="text-lg font-semibold">&#8377;{{ avg_bid|default:"0" }}</p>
+                                <p class="text-lg font-semibold">&#8377;<span id="avgBidStat">{{ avg_bid|default:"0" }}</span></p>
                             </div>
                             <div
                                 class="bg-forest-green flex justify-center items-center w-14 h-14 rounded-full text-dodger-blue">
@@ -117,9 +117,9 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white p-4 rounded-xl lab-report-shadow">
                             <div class="flex justify-between items-center dropdown relative mb-2">
-                                <h3 class="font-semibold">Top Selling Products</h3>
+                                <h3 class="font-semibold">Top Products</h3>
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm text-medium-gray font-semibold">{{ report_range_label }}</p>
+                                    <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
                                     <span
                                         class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
                                 </div>
@@ -130,7 +130,7 @@
                             </div>
                             <div class="flex flex-col justify-center items-center gap-2 h-full">
                                 <canvas id="barChartPharmacy"></canvas>
-                                <div class="w-full space-y-2 text-sm">
+                                <div class="w-full space-y-2 text-sm" id="topProductsList">
                                     {% for product in top_products %}
                                     <div class="flex justify-between gap-3">
                                         <span class="truncate">{{ product.name }}</span>
@@ -147,9 +147,9 @@
 
                         <div class="bg-white p-4 rounded-xl lab-report-shadow">
                             <div class="flex justify-between items-center dropdown relative mb-2">
-                                <h3 class="font-semibold">Revenue by Product</h3>
+                                <h3 class="font-semibold">Revenue</h3>
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm text-medium-gray font-semibold">{{ report_range_label }}</p>
+                                    <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
                                     <span
                                         class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
                                 </div>
@@ -160,7 +160,7 @@
                             </div>
                             <div class="flex flex-col justify-center items-center gap-2">
                                 <canvas id="pieChart" class="!h-[50%] !w-[55%]"></canvas>
-                                <div class="w-full space-y-2 text-sm">
+                                <div class="w-full space-y-2 text-sm" id="revenueProductsList">
                                     {% for product in top_products %}
                                     <div class="flex justify-between gap-3">
                                         <span class="truncate">{{ product.name }}</span>
@@ -182,7 +182,7 @@
                             <div class="flex justify-between items-center dropdown relative mb-2">
                                 <h3 class="font-semibold">Heatmap</h3>
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm text-medium-gray font-semibold">{{ report_range_label }}</p>
+                                    <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
                                     <span
                                         class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
                                 </div>
@@ -214,9 +214,9 @@
 
                         <div class="bg-white p-4 rounded-xl lab-report-shadow flex flex-col justify-between">
                             <div class="flex justify-between items-center dropdown relative mb-2">
-                                <h3 class="font-semibold">Bid Trend Price</h3>
+                                <h3 class="font-semibold">Bid Trend</h3>
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm text-medium-gray font-semibold">{{ report_range_label }}</p>
+                                    <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
                                     <span
                                         class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
                                 </div>
@@ -249,7 +249,7 @@
                         <div class="space-y-4">
                             <div class="bg-white p-4 rounded-xl lab-report-shadow space-y-4">
                                 <div class="flex items-center justify-between">
-                                    <h2 class="font-semibold">Bid Win vs. Loss</h2>
+                                    <h2 class="font-semibold">Bid Win/Loss Rate</h2>
                                     <div class="flex items-center space-x-4 text-sm">
                                         <div class="flex items-center space-x-1">
                                             <span class="w-3 h-3 bg-mint-leaf rounded-full"></span>
@@ -261,6 +261,8 @@
                                         </div>
                                     </div>
                                 </div>
+                                <canvas id="bidWinLossChart" class="!h-[180px]"></canvas>
+                                <div id="winLossRows" class="space-y-4">
                                 {% for row in win_loss_rows %}
                                 <div class="flex items-center justify-between gap-4">
                                     <div class="flex-1 h-5 rounded-full overflow-hidden">
@@ -280,13 +282,14 @@
                                 {% empty %}
                                 <p class="text-sm text-medium-gray">No bid activity found.</p>
                                 {% endfor %}
+                                </div>
                             </div>
                             <div class="bg-white p-4 rounded-xl lab-report-shadow">
                                 <div class="flex justify-between items-center mb-2">
                                     <h3 class="font-semibold">Stock Alerts</h3>
-                                    <span class="text-sm text-medium-gray">{{ report_range_label }}</span>
+                                    <span class="text-sm text-medium-gray report-range-text">{{ report_range_label }}</span>
                                 </div>
-                                <div class="space-y-2 text-sm">
+                                <div class="space-y-2 text-sm" id="stockAlertsList">
                                     {% for stock in stock_alerts %}
                                     <div class="flex justify-between gap-3">
                                         <span class="truncate">{{ stock.name }}</span>
@@ -299,9 +302,9 @@
                             </div>
                             <div class="bg-white p-4 rounded-xl lab-report-shadow">
                                 <div class="flex justify-between items-center dropdown relative mb-2">
-                                    <h3 class="font-semibold">User Rating ⭐</h3>
+                                    <h3 class="font-semibold">Rating ⭐</h3>
                                     <div class="flex items-center gap-2">
-                                        <p class="text-sm text-medium-gray font-semibold">{{ report_range_label }}</p>
+                                        <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
                                         <span
                                             class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
                                     </div>
@@ -323,7 +326,11 @@
 {% endblock %}
 
 {% block extra_js %}
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- HTML2CANVAS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="/static/js/tabs.js"></script>
-<script src="/static/js/pharmacy-reports.js"></script>
+<script src="{% static 'js/pharmacy-reports.js' %}?v=20260525"></script>
   <script src="/static/js/table-pagination.js"></script>
 {% endblock %}
