@@ -113,7 +113,8 @@
         </div>
 
         <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"> -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
           <div class="bg-white p-4 rounded-xl lab-report-shadow">
             <div class="flex justify-between items-center dropdown relative mb-2">
               <h3 class="font-semibold">Most Requested Test</h3>
@@ -127,7 +128,9 @@
               </div>
             </div>
             <div class="flex flex-col justify-center items-center gap-2 h-full">
-              <canvas id="barChart"></canvas>
+            <div class="relative w-full h-[350px]">
+                <canvas id="barChart"></canvas>
+            </div>
               <p class="text-dodger-blue text-sm">14.20% High then last month</p>
               <button class=" bg-dodger-blue text-white w-72 py-2 rounded-lg download-btn" data-target="barChart">Download PDF</button>
             </div>
@@ -146,7 +149,14 @@
               </div>
             </div>
             <div class="flex flex-col justify-center items-center gap-2">
-              <canvas id="pieChart" class="!h-[50%] !w-[55%]"></canvas>
+              <!-- <canvas id="pieChart" class="!h-[50%] !w-[55%]"></canvas> -->
+              
+              
+              <div class="relative w-full h-[550px] flex justify-center items-center pt-20 overflow-visible">
+
+                  <canvas id="pieChart"></canvas>
+
+              </div>
               <p class="text-strong-red text-sm">14.20% Less then last month</p>
               <button class=" bg-dodger-blue text-white w-72 py-2 rounded-lg download-btn" data-target="pieChart">Download PDF</button>
             </div>
@@ -154,7 +164,7 @@
         </div>
 
         <!-- Heatmap & Trends -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
           <div class="bg-cloud-gray p-4 rounded-xl lab-report-shadow flex flex-col justify-between">
             <div class="flex justify-between items-center dropdown relative mb-2">
               <h3 class="font-semibold">Heatmap</h3>
@@ -218,7 +228,10 @@
                 <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">Year</li>
               </ul>
             </div>
-            <canvas id="lineChart" class="!h-[60%]"></canvas>
+            <!-- <canvas id="lineChart" class="!h-[60%]"></canvas> -->
+            <div class="relative w-full h-[320px]">
+                <canvas id="lineChart"></canvas>
+            </div>
             <button class=" bg-dodger-blue text-white w-full text-center mt-4 py-2 rounded-lg download-btn" data-target="lineChart">Download Report</button>
           </div>
 
@@ -310,15 +323,21 @@
     </div>
 
           <!-- DYNAMIC DATA WILL COME HERE -->
+          <div id="bidWinLossPdf">
 
           <div
              id="bidWinLossContainer"
              class="space-y-4"
           >
+          </div>
+          <button
+              class="bg-dodger-blue text-white w-full text-center mt-4 py-2 rounded-lg download-btn"
+              data-target="bidWinLossPdf"
+            >
+              Download PDF
+            </button>
 
-        </div>
-
- </div>
+       </div>
               <div class="flex justify-between items-center dropdown relative mb-2">
                 <h3 class="font-semibold">User Rating ⭐</h3>
                 <div class="flex items-center gap-2">
@@ -360,4 +379,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script src="/static/js/lab-reports.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 {% endblock %}

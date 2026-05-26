@@ -50,43 +50,64 @@
                     </div>
 
                     <!--Map-->
-                    <div class="  pt-5">
-                        <div class="relative">
-                            <img src="/static/images/map-bg.png" alt="Map"
-                                class="w-full! h-[330px] object-fill rounded-lg">
+                    <div class="flex flex-col lg:flex-row items-start gap-3 pt-5 ml-3">
+
+                        <!-- LEFT SECTION -->
+                        <div class="relative lg:w-[80%] w-full">
+                            <img
+                                src="/static/images/map-bg.png"
+                                alt="Map"
+                                class="w-full h-[330px] object-cover rounded-lg"
+                            >
+
                             <div class="absolute inset-0 flex items-end">
-                                <div
-                                    class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-4 rounded-br-lg rounded-bl-lg">
-                                    <!-- <div class="flex flex-col gap-2">
+                                <div class="bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-4 rounded-b-lg">
+
+                                    <div class="flex flex-col gap-2">
                                         <div class="flex items-center gap-2">
                                             <span class="material-symbols-outlined">home</span>
-                                            <p class="text-base font-semibold">Pharma Sell</p>
-                                        </div>
-                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                            <p class="font-semibold text-sm">221/A, 2nd Floor, Shanti Nagar Road, Sector
-                                                10, Andheri
-                                                East, <br> Mumbai, Maharashtra – 400093
+
+                                            <p class="text-base font-semibold">
+                                                {{ pharmacy_profile.company_name|default:"Pharmacy" }}
                                             </p>
-                                        </div> -->
-                                        <div class="flex flex-col gap-2">
-                                            <div class="flex items-center gap-2">
-                                                <span class="material-symbols-outlined">home</span>
+                                        </div>
 
-                                                <p class="text-base font-semibold">
-                                                    {{ pharmacy_profile.company_name|default:"Pharmacy" }}
-                                                </p>
-                                            </div>
-
-                                           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                                <p class="font-semibold text-sm">
-                                                    {{ pharmacy_profile.address|default:"Address not available" }}
-                                                </p>
-                                            </div>
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                            <p class="font-semibold text-sm">
+                                                {{ pharmacy_profile.address|default:"Address not available" }}
+                                            </p>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
+
+                        <!-- RIGHT PROFILE -->
+                        <div class="bg-pale-azure lg:w-[20%] w-full h-[330px] px-4 py-2 rounded-lg">
+
+                            <h1 class="text-center text-lg font-semibold">
+                                Admin Details
+                            </h1>
+
+                            <div class="flex items-center justify-center py-[22.5px]">
+                                <img src="/static/images/admin-profile.svg" alt="">
+                            </div>
+
+                            <div class="flex flex-col items-center gap-2">
+                                <p class="font-semibold text-sm">Jhon Doe</p>
+
+                                <p class="font-semibold text-sm text-dodger-blue">
+                                    +91 7763847590
+                                </p>
+
+                                <p class="font-semibold text-sm">
+                                    Designation: Receptionist
+                                </p>
+                            </div>
+
+                        </div>
+
                     </div>
                      
                     
