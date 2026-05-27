@@ -55,7 +55,8 @@ loadLabHistory("accepted", 1);
 
   // Initialize pagination for each tab
   function initializePagination() {
-    const tabs = ["accepted", "pending", "canceled", "missed", "equipment"];
+  
+    const tabs = ["accepted", "pending", "cancelled", "missed", "equipment"];
 
     tabs.forEach((tab) => {
       const container = $(`.${tab} #cards-container`);
@@ -530,13 +531,33 @@ loadLabHistory("accepted", 1);
       step3 = "bg-dodger-blue";
     }
 
-  if (status === "cancelled" || status === "canceled") {
+  if (status === "cancelled" || status === "cancelled") {
     step1 = "bg-dodger-blue";
     step4 = "bg-dodger-blue";
   }
     const orderId = card.data("order-id") || "-";
     const budget = card.data("budget") ? "₹" + card.data("budget") : "-";
     const visitType = card.data("visit-type") || "Home Visit";
+    const billImage = card.data("bill");
+
+    if (billImage) {
+
+      $("#bill-preview-container").removeClass("hidden");
+
+      $("#proformaBillImage").attr("src", billImage);
+
+      $("#proformaBillLink").attr("href", billImage);
+
+    }
+    const billImage = card.data("bill");
+
+    if (billImage) {
+
+        $("#proformaBillImage").attr("src", billImage);
+
+        $("#proformaBillLink").attr("href", billImage);
+
+    }
 
     let rightTitle = "Budget";
     let rightValue = budget;
@@ -547,12 +568,29 @@ loadLabHistory("accepted", 1);
       rightTitle = card.data("distance") || "6 km";
       rightValue = card.data("time") || "20 mins away";
 
+      // buttons = `
+      //   <div class="pt-4 flex justify-center items-center gap-3">
+      //     <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
+      //     <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
+      //   </div>
+      // `;
       buttons = `
-        <div class="pt-4 flex justify-center items-center gap-3">
-          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
-          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
-        </div>
-      `;
+          <div class="pt-4 flex justify-center items-center gap-3">
+  
+            <button 
+              class="complete-appointment-btn bg-dodger-blue text-white rounded-lg w-[180px] h-10"
+              data-id="${card.data("id")}">
+              Complete
+            </button>
+
+            <button 
+              class="cancel-appointment-btn border border-red-500 text-red-500 rounded-lg w-[180px] h-10"
+              data-id="${card.data("id")}">
+              Cancel Appointment
+            </button>
+
+          </div>
+        `;
     }
 
     if (status === "pending") {
@@ -564,7 +602,7 @@ loadLabHistory("accepted", 1);
       `;
     }
 
-    if (status === "cancelled" || status === "canceled") {
+    if (status === "cancelled" || status === "cancelled") {
       rightTitle = "Canceled by";
       rightValue = "Technician";
     }
@@ -638,8 +676,27 @@ loadLabHistory("accepted", 1);
         </div>
 
           <div class="border border-dodger-blue text-jet-black rounded-lg px-3 py-1 flex items-center gap-2 cursor-pointer">
-            <p>Proforma Bill</p>
-            <span class="material-symbols-outlined !text-lg">visibility</span>
+            <div class="mt-4">
+
+                <p class="font-semibold text-sm mb-2">
+                  Proforma Bill
+                </p>
+
+                <div id="bill-preview-container" class="hidden">
+
+                  <a id="proformaBillLink" target="_blank">
+
+                    <img
+                        id="proformaBillImage"
+                        src=""
+                         class="w-full h-64 object-contain border rounded-lg"
+                    >
+
+              </a>
+        </div>
+  </div>
+        <span class="material-symbols-outlined !text-lg">visibility</span>
+
           </div>
         </div>
 
@@ -660,3 +717,103 @@ $(document).on("click", ".modal-close-pending", function () {
   $(".modal-pending").addClass("hidden");
 });
 });
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== '') {
+
+        const cookies = document.cookie.split(';');
+
+        for (let i = 0; i < cookies.length; i++) {
+
+            const cookie = cookies[i].trim();
+
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+$(document).on("click", ".complete-appointment-btn", function (e) {
+
+    e.preventDefault();
+
+    const appointmentId = $(this).data("id");
+
+    $.ajax({
+        url: "/history/lab/complete/",
+        type: "POST",
+
+        data: {
+            id: appointmentId,
+            csrfmiddlewaretoken: getCookie("csrftoken")
+        },
+
+        success: function () {
+
+          showToast("Appointment Completed Successfully", "success");
+
+          $(".modal-pending").addClass("hidden");
+
+          setTimeout(() => {
+             location.reload();
+          }, 1000);
+        }
+        
+    });
+});
+$(document).on("click", ".cancel-appointment-btn", function (e) {
+
+    e.preventDefault();
+
+    const appointmentId = $(this).data("id");
+
+    $.ajax({
+        url: "/history/lab/cancel/",
+        type: "POST",
+
+        data: {
+            id: appointmentId,
+            csrfmiddlewaretoken: getCookie("csrftoken")
+        },
+
+        success: function () {
+
+          showToast("Appointment Cancelled Successfully", "success");
+
+          $(".modal-pending").addClass("hidden");
+
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+        }
+    });
+});
+function showToast(message, type = "success") {
+
+    const toast = $(`
+        <div class="
+            fixed top-5 right-5 z-[9999]
+            px-5 py-3 rounded-lg shadow-lg
+            text-white font-medium
+            ${type === "success" ? "bg-green-500" : "bg-red-500"}
+        ">
+            ${message}
+        </div>
+    `);
+
+    $("body").append(toast);
+
+    setTimeout(() => {
+        toast.fadeOut(400, function () {
+            $(this).remove();
+        });
+    }, 2500);
+}

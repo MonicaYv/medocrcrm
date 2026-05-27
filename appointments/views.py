@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
 from registration.models import DoctorProfile
+from django.views.decorators.http import require_POST
 from dashboard.models import SettingMenu
 from dashboard.utils import (
     dashboard_login_required,
@@ -165,3 +166,40 @@ def ajax_appointments(request):
         "total_pages": paginator.num_pages,
     })
 
+
+
+
+@require_POST
+@dashboard_login_required
+def update_appointment_status(request):
+
+    order_id = request.POST.get("order_id")
+    status = request.POST.get("status")
+
+    # REMOVE R FROM R240
+    order_id = str(order_id).replace("R", "").strip()
+
+    try:
+        order_id = int(order_id)
+    except ValueError:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid Order ID"
+        })
+
+    appointment = LabAppointments.objects.filter(
+        id=order_id
+    ).first()
+
+    if not appointment:
+        return JsonResponse({
+            "success": False,
+            "message": "Appointment not found"
+        })
+
+    appointment.status = status
+    appointment.save()
+
+    return JsonResponse({
+        "success": True
+    })

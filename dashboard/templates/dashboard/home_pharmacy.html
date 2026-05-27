@@ -1,4 +1,5 @@
 {% extends "dashboard/layout.html" %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
@@ -12,7 +13,7 @@
                         arrow_forward_ios
                     </span>
                 </div>
-                <div class="bg-white rounded-[10px] p-5">
+                 <div class="bg-white rounded-[10px] p-5">
                     <div class="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
                         <div class="flex flex-col  gap-2">
                             <div class="flex items-center gap-2">
@@ -146,6 +147,7 @@
                         <!-- </div> 
 
                     </div> -->
+                    
 
                     <!--Overview-->
                     <div class="mt-5 flex flex-col gap-4">
@@ -282,7 +284,7 @@
 
                     
                        
-                        <div class="mt-5 bg-white rounded-2xl shadow-(--box-shadow-12) p-5">
+                        <!-- <div class="mt-5 bg-white rounded-2xl shadow-(--box-shadow-12) p-5">
 
                         <div class="flex items-center justify-between mb-4">
                            <h2 class="text-lg font-semibold">Scheduled Orders</h2>
@@ -292,7 +294,7 @@
                             </span>
                         </div>
 
-                            <div class="flex flex-col gap-3"> 
+                            <div class="flex flex-col gap-3">  -->
                             <!-- {% comment %}
 
                             {% for order in scheduled_orders %}
@@ -327,93 +329,295 @@
                           {% endcomment %} -->
                           
                     
-                    {% for order in scheduled_orders %}
+                   
 
                     <!-- <div class="bg-white border border-frost-white rounded-xl p-4 flex items-center justify-between"> -->
-                    <div class="bg-white border border-frost-white rounded-2xl px-4 py-3 flex items-center justify-between min-h-[105px] shadow-sm">
+                    <!-- <div class="bg-white border border-frost-white rounded-2xl px-4 py-3 flex items-center justify-between min-h-[105px] shadow-sm"> -->
+                    <!-- Scheduled Orders -->
+                    <!-- <div class="mt-6"> -->
+                    <div class="mt-6 w-full">
 
-                       <div class="flex items-center gap-4">
+                      <!-- Heading -->
+                       <div class="flex items-center justify-between mb-4">
+                           <h2 class="text-lg font-semibold text-dark-navy">
+                               Scheduled Order
+                            </h2>
 
-                           <img
-                                src="/static/images/profile-img.png"
-                                class="w-16 h-16 rounded-xl object-cover"
-                            
-                            alt="user">
+                            <a href="/orders/" class="text-sm text-dodger-blue font-medium">
+                                View All
+                            </a>
+                        </div>
 
-                           <!-- <div class="flex flex-col gap-1"> -->
-                           <div class="flex flex-col gap-[2px]">
+                       {% if scheduled_orders %}
 
-                               <span class="bg-pale-azure text-dodger-blue px-3 py-1 rounded-lg text-xs w-fit">
+                       <!-- GRID -->
+                       <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4"> -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+
+                            {% for order in scheduled_orders|slice:":3" %}
+
+                            <!-- CARD -->
+                           <div class="scheduled-card">
+
+                            <!-- IMAGE -->
+                            <img
+                        
+                                src="/static/images/admin-profile.svg"
+                                alt="user"
+                                class="scheduled-user-img"
+                            >
+
+                            <!-- CONTENT -->
+                            <div class="scheduled-content">
+
+                                <span class="scheduled-status">
                                    {{ order.order_status }}
                                 </span>
 
-                                <p class="font-semibold text-dark-navy">
-                                     {{ order.user__email|default:"Customer Email" }}
+                                <p class="scheduled-name">
+                                    Pt. {{ order.user.first_name|default:"Karen Cooper" }}
                                 </p>
 
-                                <p class="text-sm text-charcoal-gray">
+                                <p class="scheduled-id">
                                     #{{ order.id }}
                                 </p>
 
-                                <p class="text-xs text-gray-400">
+                                <p class="scheduled-date">
                                     {{ order.created_at }}
                                 </p>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
+                   {% else %}
 
-                   {% empty %}
-
-                   <p class="text-gray-500 text-sm">
-                        No scheduled orders available.
-                    </p>
-
-                    {% endfor %}
-
-                 
+                   <div class="bg-white rounded-xl border border-frost-white p-4 text-sm text-gray-500">
+                        No Scheduled Orders Available
+                   </div>
+                   {% endif %}
+                   
                 </div>
-           </div>
+                <!-- Create Coupon Banner -->
+                {% comment %} <div class="mt-4 bg-blue-600 rounded-2xl relative overflow-hidden px-6 py-5">
 
-               <!-- Popular Coupons -->
-                <div class="mt-5 bg-white rounded-2xl shadow-(--box-shadow-12) p-5">
+                    <!-- Background Circles -->
+                    <div class="absolute -left-10 -bottom-16 w-44 h-44 bg-white/10 rounded-full"></div>
 
+                    <div class="absolute -right-10 -top-16 w-44 h-44 bg-white/10 rounded-full"></div>
+
+                    <div class="relative z-10 flex items-center justify-between gap-6">
+
+                        <!-- LEFT -->
+                        <div class="flex items-start gap-4">
+
+                            <div class="text-5xl">
+                               🎁
+                            </div>
+
+                            <div>
+
+                                <h2 class="text-2xl font-bold text-white leading-tight">
+                                    Create Coupons
+                                </h2>
+
+                                <p class="text-white/80 text-sm mt-2 max-w-[420px]">
+                                    Launch exciting offers and attract more direct customers to your pharmacy.
+                                </p>
+
+                                <ul class="text-white/80 text-sm mt-3 space-y-1 list-disc ml-5">
+
+                                    <li>Vitamin Combo @999</li>
+
+                                    <li>Book Medicines, Get Complan Free</li>
+
+                               </ul>
+
+                            </div>
+                        </div>
+                        <!-- RIGHT -->
+                        <a href="{% url 'coupons' %}"
+                           class="bg-blue-500 hover:bg-blue-600 transition-all text-white px-6 py-3 rounded-xl text-sm font-semibold whitespace-nowrap">
+
+                            Create Now
+
+                        </a>
+                    </div>
+                </div> {% endcomment %}
+                   <!-- Popular Coupons -->
+                   <div class="mt-6 w-full">
+
+                     <!-- Heading -->
                      <div class="flex items-center justify-between mb-4">
-                           <h2 class="text-lg font-semibold">Popular Coupons</h2>
+                        <h2 class="text-lg font-semibold text-dark-navy">
+                            Popular Coupons
+                        </h2>
 
-                           <span class="text-sm text-dodger-blue cursor-pointer">
-                                 View All
-                            </span>
+                        <a href="{% url 'coupons' %}"
+                            class="text-sm text-dodger-blue font-medium">
+                            View All
+                        </a>
                     </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <!-- Coupon List -->
+                     <div class="flex flex-col gap-4">
 
-                    {% for coupon in popular_coupons %}
+                        <!-- Coupon Card -->
+                        <div class="coupon-card">
 
-                <div class="border border-frost-white rounded-xl p-4 flex flex-col gap-2">
+                            <!-- LEFT -->
+                            <div class="coupon-left">
+                               <p class="coupon-category">
+                                   CATEGORY : BRAND NAME
+                                </p>
 
-                    <p class="font-semibold text-dark-navy">
-                        {{ coupon.title|default:"Coupon Offer" }}
-                    </p>
+                                <h4>
+                                    25% Off Premium Supplements
+                                </h4>
 
-                    <p class="text-sm text-charcoal-gray">
-                        Valid Till:
-                        {{ coupon.validity|default:"N/A" }}
-                    </p>
+                                <p>
+                                   Complete health assessment including blood work,
+                                   cardiac evaluation, and nutritionist consultation
+                                </p>
+                            </div>
 
-                 </div>
+                           <!-- MIDDLE -->
+                           <div class="coupon-middle">
 
-                {% empty %}
+                               <div class="flex items-center justify-between text-xs mb-1">
+                                    <span>Redeemed</span>
+                                    <small>50/100</small>
+                                </div>
 
-                <p class="text-gray-500 text-sm">
-                    No coupons available.
-                </p>
+                               <div class="progress-bar">
+                                   <div class="progress"></div>
+                                </div>
 
-                {% endfor %}
+                            </div>
+
+                           <!-- RIGHT -->
+                           <div class="coupon-right">
+                               <button>
+                                  #123GHJSAI
+                               </button>
+                        </div>
+                    </div>
+
+                  <!-- Coupon Card -->
+                  <div class="coupon-card">
+
+                      <div class="coupon-left">
+                        <p class="coupon-category">
+                            CATEGORY : BRAND NAME
+                        </p>
+
+                        <h4>
+                            25% Off Premium Supplements
+                        </h4>
+
+                        <p>
+                           Complete health assessment including blood work,
+                           cardiac evaluation, and nutritionist consultation
+                        </p>
+                    </div>
+
+            <div class="coupon-middle">
+
+                <div class="flex items-center justify-between text-xs mb-1">
+                    <span>Redeemed</span>
+                    <small>50/100</small>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
 
             </div>
-        </div>
-                    
 
+            <div class="coupon-right">
+                <button>
+                    #123GHJSAI
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Coupon Card -->
+        <div class="coupon-card">
+
+            <div class="coupon-left">
+                <p class="coupon-category">
+                    CATEGORY : BRAND NAME
+                </p>
+
+                <h4>
+                    25% Off Premium Supplements
+                </h4>
+
+                <p>
+                    Complete health assessment including blood work,
+                    cardiac evaluation, and nutritionist consultation
+                </p>
+            </div>
+
+            <div class="coupon-middle">
+
+                <div class="flex items-center justify-between text-xs mb-1">
+                    <span>Redeemed</span>
+                    <small>50/100</small>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+
+            </div>
+
+            <div class="coupon-right">
+                <button>
+                    #123GHJSAI
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+                    <!-- Subscription Details -->
+                    <div class="bg-white border border-cool-ice-gray rounded-sm p-4 flex flex-col gap-4 mt-5 ml-3">
+                        <div class="flex items-center justify-between">
+                        <p class="font-semibold text-lg text-midnight-blue-gray">Subscription Details</p>
+                        <div class="w-[120px] h-10 flex items-center justify-center bg-premium-light-blue rounded-[10px]">
+                            <span class="font-semibold text-base text-primary-blue">Active</span>
+                        </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                        <p class="font-normal text-lg text-midnight-blue-gray">Premium Subscription Plan</p>
+                        <p class="font-bold text-[32px] text-blue-charcoal">&#8377;999<span
+                            class="font-normal text-base">/month</span></p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">High-value leads</p>
+                            <p class="font-normal text-sm text-cool-gray text-left">24th May, 2026 (32 days left)</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">Fewer but richer bids</p>
+                            <p class="font-normal text-sm text-cool-gray text-left! shrink-0">Featured listing</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">Doctors gain in efficiency</p>
+                            <p class="font-normal text-sm text-cool-gray ">Analytics Dashboard</p>
+                        </div>
+                        </div>
+                        <div class="pt-3.5 flex items-center justify-center">
+                        <a href="{% url 'settings_page' %}" class="bg-primary-blue w-[322px] h-10 rounded-lg flex items-center justify-center">
+                            <span class="font-semibold text-sm text-white">View Plan Details</span>
+                        </a>
+                        </div>
+                    </div>
+        
                     <!--Trends-->
                     <div class="mt-5 flex flex-col">
                         <div class="bg-dodger-blue rounded-tl-[14px] rounded-tr-[14px] py-5 px-4 flex items-center justify-between">
