@@ -95,6 +95,12 @@
     --color-living-coral-border:#FF6F614D;
     --color-transparent-living-coral:#FF6F6126;
     --color-light-living-coral:#FF6F6159;
+    --color-midnight-blue-gray:#161C24;
+    --color-cool-gray:#454F5B;
+    --color-scarlet-red:#EF333A;
+    --color-shamrock-green:#20B038;
+    --color-premium-light-blue: #D1E7FF;
+    --color-primary-blue: #007BFF;
      --color-light-transparent-living-coral:#FF6F6108;
     --color-saffron:#F79E1B59;
     --color-seashell:#FFF8EE;
@@ -1028,3 +1034,44 @@ input[type="number"] {
 
     margin: 0;
 }
+    .create-coupon-banner{
+        padding: 22px 28px;
+        border-radius: 16px;
+    }
+
+    .scheduled-card{
+        padding: 12px 14px;
+        min-height: 90px;
+    }
+
+    .bg-premium-light-blue {
+        background-color: var(--color-premium-light-blue);
+    }
+
+    .hover\:bg-premium-light-blue {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-premium-light-blue);
+      }
+    }
+    }
+
+    .border-primary-blue {
+    border-color: var(--color-primary-blue);
+    }
+
+    .bg-primary-blue {
+    background-color: var(--color-primary-blue);
+    }
+
+    .text-primary-blue {
+    color: var(--color-primary-blue);
+    }
+    
+    .hover\:bg-primary-blue {
+        &:hover {
+        @media (hover: hover) {
+            background-color: var(--color-primary-blue);
+        }
+        }
+    }

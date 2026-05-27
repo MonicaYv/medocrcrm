@@ -584,66 +584,39 @@
 
 </div>
 
-                <!-- Subscription Details -->
-               <div class="mt-6 bg-white rounded-2xl border border-frost-white shadow-(--box-shadow-12) p-5">
-
-                   <div class="flex flex-col lg:flex-row lg:justify-between gap-6">
-
-                      <!-- LEFT -->
-                      <div class="flex flex-col gap-4">
-
-                        <h2 class="text-lg font-semibold text-dark-navy">
-                           Subscription Details
-                        </h2>
-
-                        <div class="flex flex-col gap-2 text-sm text-charcoal-gray">
-
-                         <p class="font-medium text-dark-navy">
-                            Premium Subscription Plan
-                         </p>
-
-                         <p>High-value leads</p>
-
-                         <p>Fewer but richer bids</p>
-
-                         <p>Pharmacy gain in efficiency</p>
-
+                    <!-- Subscription Details -->
+                    <div class="bg-white border border-cool-ice-gray rounded-sm p-4 flex flex-col gap-4 mt-5 ml-3">
+                        <div class="flex items-center justify-between">
+                        <p class="font-semibold text-lg text-midnight-blue-gray">Subscription Details</p>
+                        <div class="w-[120px] h-10 flex items-center justify-center bg-premium-light-blue rounded-[10px]">
+                            <span class="font-semibold text-base text-primary-blue">Active</span>
+                        </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                        <p class="font-normal text-lg text-midnight-blue-gray">Premium Subscription Plan</p>
+                        <p class="font-bold text-[32px] text-blue-charcoal">&#8377;999<span
+                            class="font-normal text-base">/month</span></p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">High-value leads</p>
+                            <p class="font-normal text-sm text-cool-gray text-left">24th May, 2026 (32 days left)</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">Fewer but richer bids</p>
+                            <p class="font-normal text-sm text-cool-gray text-left! shrink-0">Featured listing</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">Doctors gain in efficiency</p>
+                            <p class="font-normal text-sm text-cool-gray ">Analytics Dashboard</p>
+                        </div>
+                        </div>
+                        <div class="pt-3.5 flex items-center justify-center">
+                        <a href="{% url 'settings_page' %}" class="bg-primary-blue w-[322px] h-10 rounded-lg flex items-center justify-center">
+                            <span class="font-semibold text-sm text-white">View Plan Details</span>
+                        </a>
+                        </div>
                     </div>
-
-                   <a href="{% url 'coupons' %}"
-                        class="bg-dodger-blue text-white px-6 py-3 rounded-xl text-sm font-semibold w-fit">
-                        View Plan Details
-                    </a>
-                </div>
-                <!-- RIGHT -->
-                <div class="flex flex-col items-end gap-3">
-
-                    <span class="bg-light-dodger-blue text-dodger-blue px-4 py-1 rounded-lg text-xs font-semibold">
-                        Active
-                    </span>
-
-                    <div class="flex items-end gap-1">
-
-                      <h2 class="text-3xl font-bold text-dark-navy">
-                        ₹999
-                      </h2>
-
-                      <span class="text-sm text-charcoal-gray mb-1">
-                         /month
-                      </span>
-                    </div>
-                    <p class="text-xs text-charcoal-gray">
-                        24th May, 2026 (32 days left)
-                    </p>
-                    <p class="text-xs text-charcoal-gray">
-                        Featured listing
-                    </p>
-                    <p class="text-xs text-charcoal-gray">
-                        Analytics Dashboard
-                     </p>
-                </div>
-            </div>
-        </div>
         
                     <!--Trends-->
                     <div class="mt-5 flex flex-col">
