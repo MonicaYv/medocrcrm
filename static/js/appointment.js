@@ -168,8 +168,19 @@ const ENQUIRY_TEMPLATES = {
       </div>
 
       <div class="pt-4 flex justify-center gap-2 mb-2">
-        <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
-        <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10">Reject</button>
+        // <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
+        // <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10">Reject</button>
+        <button
+          class="accept-btn bg-dodger-blue text-white rounded-lg w-[180px] h-10"
+          data-order="${orderId}">
+          Accept
+        </button>
+
+        <button
+          class="reject-btn border border-strong-red text-strong-red rounded-lg w-[180px] h-10"
+          data-order="${orderId}">
+          Reject
+        </button>
       </div>
     </div>
   `,
@@ -236,3 +247,159 @@ const ENQUIRY_TEMPLATES = {
     </div>
   `
 };
+/* ------------------------------
+ * ACCEPT APPOINTMENT
+ * ------------------------------ */
+
+$(document).on("click", ".accept-btn", function () {
+
+    const orderId = $(this).data("order");
+
+    $.ajax({
+
+        url: "/appointment/update-status/",
+
+        type: "POST",
+
+        // data: {
+
+        //     order_id: orderId,
+
+        //     status: "Accepted",
+
+        //     csrfmiddlewaretoken:
+        //     $("input[name=csrfmiddlewaretoken]").val()
+
+        // },
+        data: {
+
+            order_id: orderId,
+
+            status: "Accepted"
+
+          },
+
+         headers: {
+
+            "X-CSRFToken": getCookie("csrftoken")
+
+         },
+
+        success: function () {
+
+          
+            showToast("Appointment Accepted Successfully", "success");
+
+            location.reload();
+
+        }
+
+    });
+
+});
+
+
+$(document).on("click", ".reject-btn", function () {
+
+    const orderId = $(this).data("order");
+
+    $.ajax({
+
+        url: "/appointment/update-status/",
+
+        type: "POST",
+
+        data: {
+
+            order_id: orderId,
+
+            status: "Cancelled"
+
+        },
+
+        headers: {
+
+            "X-CSRFToken": getCookie("csrftoken")
+
+        },
+
+        success: function () {
+
+            
+            showToast("Appointment Cancelled Successfully", "error");
+
+            location.reload();
+
+        },
+
+        error: function (xhr) {
+
+            console.log(xhr.responseText);
+            alert("Error");
+
+        }
+
+    });
+
+});
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+
+        const cookies = document.cookie.split(";");
+
+        for (let i = 0; i < cookies.length; i++) {
+
+            const cookie = cookies[i].trim();
+
+            if (
+                cookie.substring(0, name.length + 1) ===
+                (name + "=")
+            ) {
+
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+
+                break;
+
+            }
+
+        }
+
+    }
+
+    return cookieValue;
+
+}
+function showToast(message, type = "success") {
+
+    const toast = document.createElement("div");
+
+    toast.className = `
+        fixed top-5 right-5 z-[9999]
+        px-5 py-3 rounded-lg text-white font-medium shadow-lg
+        transition-all duration-300
+        ${type === "success" ? "bg-green-500" : "bg-red-500"}
+    `;
+
+    toast.innerText = message;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(-20px)";
+
+        setTimeout(() => {
+
+            toast.remove();
+
+        }, 300);
+
+    }, 2000);
+}
+

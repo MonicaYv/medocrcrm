@@ -10,6 +10,11 @@ from dashboard.utils import dashboard_login_required, get_common_context, get_th
 from orders.models import OrderStatusChoices, PurchaseMedicine, UserPurchase
 from registration.models import PharmacyProfile
 from registration.models import DoctorProfile
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+
+from appointments.models import LabAppointments, AppointmentStatus
+
 
 # Create your views here.
 
@@ -201,4 +206,38 @@ def ajax_hospital_history(request):
         "total_pages": paginator.num_pages,
         "has_next": page_obj.has_next(),
         "has_prev": page_obj.has_previous(),
+    })
+
+
+
+
+@require_POST
+def complete_lab_appointment(request):
+
+    appointment_id = request.POST.get("id")
+
+    appointment = LabAppointments.objects.get(id=appointment_id)
+
+    appointment.status = AppointmentStatus.COMPLETED
+
+    appointment.save()
+
+    return JsonResponse({
+        "success": True
+    })
+
+
+@require_POST
+def cancel_lab_appointment(request):
+
+    appointment_id = request.POST.get("id")
+
+    appointment = LabAppointments.objects.get(id=appointment_id)
+
+    appointment.status = AppointmentStatus.CANCELLED
+
+    appointment.save()
+
+    return JsonResponse({
+        "success": True
     })

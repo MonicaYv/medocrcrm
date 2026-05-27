@@ -2,6 +2,7 @@
 
 <div
   class="card-all-{{ appointment.status|lower }} bg-white mt-4 p-4 rounded-md shadow-lg cursor-pointer"
+  data-id="{{ appointment.id }}"
 
   data-name="Pt. {{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name|default:'' }}"
   data-profile-img="/static/images/rachel-kate.svg"
