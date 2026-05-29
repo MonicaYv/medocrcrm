@@ -13,7 +13,11 @@ urlpatterns = [
     ),
     # path('doctor/history/',views.doctor_history_view,name='doctor-history'),
     # path('doctor/history/ajax/',views.ajax_doctor_history,name='ajax-doctor-history'),
-    
+    path(
+        "update-status/",
+        views.update_appointment_status,
+        name="update-appointment-status",
+    ),
     
 ]
 
