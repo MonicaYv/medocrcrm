@@ -1958,4 +1958,19 @@ $(document).on("click", ".complete-appointment-btn", function () {
     });
 
 });
+$(".popup-btn").on("click", function () {
+  let popupId = $(this).data("popup");
+  console.log("Popup Btn Clicked");
+  $("." + popupId)
+    .removeClass("hidden")
+    .addClass("flex");
+});
 
+// Close popup
+$(".close-popup").on("click", function () {
+  let popupId = $(this).data("popup");
+  $(this)
+    .closest("." + popupId)
+    .addClass("hidden")
+    .removeClass("flex");
+});
