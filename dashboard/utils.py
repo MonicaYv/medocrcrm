@@ -9,6 +9,7 @@ from django.db.models import Sum, Q
 from settings.models import UserColorScheme
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404
+import datetime
 from registration.models import (
     User,
     HospitalProfile,
@@ -19,6 +20,50 @@ from registration.models import (
     ClientProfile,
     NGOProfile
 )
+
+POINTS_ACTION_ALIASES = {
+    "Donate": ["Donate", "Donation"],
+    "Orders": ["Orders", "Order"],
+}
+
+
+def build_points_action_query(action_type):
+    names = POINTS_ACTION_ALIASES.get(action_type, [action_type])
+    query = Q()
+    for name in names:
+        query |= Q(action_type__iexact=name)
+    return query
+
+
+def get_points_chart_data(user, chart_action_types):
+    today = datetime.date.today()
+    last_7_days = [today - datetime.timedelta(days=6 - index) for index in range(7)]
+    chart_data = {action_type: [0] * 7 for action_type in chart_action_types}
+
+    for action_type in chart_action_types:
+        action_ids = list(
+            PointsActionType.objects
+            .filter(build_points_action_query(action_type))
+            .values_list("id", flat=True)
+        )
+        if not action_ids:
+            continue
+
+        points_by_day = (
+            PointsHistory.objects
+            .filter(user=user, action_type_id__in=action_ids, timestamp__date__in=last_7_days)
+            .values("timestamp__date")
+            .annotate(total=Sum("points"))
+        )
+        totals = {row["timestamp__date"]: row["total"] or 0 for row in points_by_day}
+
+        for day_index, day in enumerate(last_7_days):
+            chart_data[action_type][day_index] = totals.get(day, 0)
+
+    return {
+        "chart_labels": [day.strftime("%d/%m") for day in last_7_days],
+        "chart_data": chart_data,
+    }
 
 def dashboard_login_required(view_func):
     @wraps(view_func)
@@ -66,13 +111,21 @@ def get_common_context(request, user):
         chart_action_types = []
         user_profile = None
 
-    all_actions = PointsActionType.objects.filter(action_type__in=chart_action_types)
+    action_ids_by_type = {
+        action_type: list(
+            PointsActionType.objects
+            .filter(build_points_action_query(action_type))
+            .values_list("id", flat=True)
+        )
+        for action_type in chart_action_types
+    }
     action_points = {
-        action.action_type: PointsHistory.objects.filter(
-            user_id=user.id, action_type=action
-        ).aggregate(total=Sum("points"))["total"]
-        or 0
-        for action in all_actions
+        action_type: (
+            PointsHistory.objects.filter(user_id=user.id, action_type_id__in=action_ids)
+            .aggregate(total=Sum("points"))["total"]
+            or 0
+        ) if action_ids else 0
+        for action_type, action_ids in action_ids_by_type.items()
     }
 
     total_points = sum(action_points.values())
@@ -164,6 +217,7 @@ def get_common_context(request, user):
         "all_badges": PointsBadge.objects.all(),
         "logo": logo_map.get(user_type),
     }
+    context.update(get_points_chart_data(user, chart_action_types))
     context["tab_class"] = tab_class_map.get(user_type)
     context["active_tab_class"] = active_tab_class_map.get(user_type)
     context["main_tab_class"] = main_tab_class_map.get(user_type)

@@ -23,6 +23,18 @@ from .models import (
 from registration.models import LabProfile
 from settings.models import SellerSubscription
 from core.settings import MONGO_COLLECTIONS
+from django.conf import settings
+
+def build_media_url(path):
+    if not path:
+        return ""
+
+    path = str(path).replace("\\", "/").strip()
+    if path.startswith(("http://", "https://", "/")):
+        return path
+
+    return f"{settings.MEDIA_URL.rstrip('/')}/{path.lstrip('/')}"
+
 
 @dashboard_login_required
 def services(request):
@@ -77,6 +89,9 @@ def services(request):
 
         context.update({
             "pharmacy_profile": pharmacy_profile,
+            "pharmacy_storefront_image_url": build_media_url(
+                pharmacy_profile.storefront_image_path
+            ),
             "pharmacy_medicines": medicines,
             "has_pharmacy_medicines": medicines.exists(),
             "has_premium": bool(sub and not sub.is_expired),
@@ -581,6 +596,11 @@ def save_pharmacy_medicines(request):
 
         if not all([category, name, med_type, quantity]):
             continue
+        if not quantity.isdigit():
+            return JsonResponse({
+                "success": False,
+                "error": "Quantity should contain numbers only."
+            }, status=400)
 
         obj = PharmacyMedicine.objects.create(
             pharmacy=pharmacy,
