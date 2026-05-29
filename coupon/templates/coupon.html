@@ -308,7 +308,7 @@
                   <p class="text-16-nr">Upload coupon image (1 rupee per coupon)<span class="text-dark-red">*</span></p>
                   <div
                     class="upload-area relative border-2 border-dashed border-living-coral rounded-md h-[312px] flex items-center justify-center px-6">
-                    <input type="file" class="required-field upload-input hidden" name="coupon_image"/>
+                    <input type="file" class="required-field upload-input hidden" name="coupon_image" accept=".jpg,.jpeg,.png,.mp4,image/jpeg,image/png,video/mp4"/>
                     <div class="upload-placeholder flex flex-col items-center space-y-2 cursor-pointer">
                       <img src="/static/images/cloud-upload-living.svg" alt="Cloud" loading="lazy" />
                       <p class="text-xs sm:text-base text-center">Click or Upload</p>
@@ -319,7 +319,9 @@
                           close
                         </span>
                       </button>
-                      <img src="" alt="Preview" class="uploaded-img mx-auto max-h-60 object-contain" />
+                      <img src="" alt="Preview" class="uploaded-img mx-auto max-h-52 object-contain" />
+                      <video class="uploaded-video hidden mx-auto max-h-52 w-full object-contain" controls></video>
+                      <p class="uploaded-file-name mt-2 text-center text-xs sm:text-sm text-dark-gray truncate"></p>
                     </div>
                   </div>
                   <div class="flex items-center justify-between">
@@ -354,6 +356,7 @@
                 <!-- Image Section -->
                 <div class="rounded-md overflow-hidden shadow mt-5">
                   <img id="pay-preview-img" src="/static/images/tablets.svg" alt="Coupon" class="w-full h-48 object-cover">
+                  <video id="pay-preview-video" class="hidden w-full h-48 object-contain bg-black" controls></video>
                   <div class="bg-white p-4">
                     <p class="text-sm uppercase text-living-coral font-semibold">Coupon</p>
                     <div class="flex justify-between items-center">

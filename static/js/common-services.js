@@ -199,10 +199,180 @@ function resetMedicineCard($card) {
     $card.find('input').val('');
 }
 
+function showPharmacyValidation(message, type = 'error') {
+    const $message = $('.pharmacy-validation-message');
+    if (!$message.length) return;
+
+    const typeClass = type === 'success'
+        ? 'border-green text-green bg-mint-cream'
+        : 'border-strong-red text-strong-red bg-soft-pink';
+
+    $message
+        .removeClass('hidden border-green text-green bg-mint-cream border-strong-red text-strong-red bg-soft-pink')
+        .addClass(typeClass)
+        .text(message);
+}
+
+function clearPharmacyValidation() {
+    $('.pharmacy-validation-message')
+        .addClass('hidden')
+        .removeClass('border-green text-green bg-mint-cream border-strong-red text-strong-red bg-soft-pink')
+        .text('');
+}
+
+function setMedicineCardValue($card, index, value) {
+    const cleanValue = String(value || '').trim();
+    $card.find('.custom-dropdown').eq(index).find('.selected-text')
+        .text(cleanValue)
+        .attr('data-value', cleanValue);
+}
+
+function parseCsvLine(line) {
+    const values = [];
+    let value = '';
+    let inQuotes = false;
+
+    for (let index = 0; index < line.length; index += 1) {
+        const char = line[index];
+        const nextChar = line[index + 1];
+
+        if (char === '"' && inQuotes && nextChar === '"') {
+            value += '"';
+            index += 1;
+        } else if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            values.push(value.trim());
+            value = '';
+        } else {
+            value += char;
+        }
+    }
+
+    values.push(value.trim());
+    return values;
+}
+
+function parseMedicineCsv(csvText) {
+    const lines = csvText
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+    if (!lines.length) return [];
+
+    let headers = parseCsvLine(lines[0]).map((header) => header.toLowerCase().replace(/\s+/g, '_'));
+    const hasHeader = ['category', 'name', 'type', 'quantity', 'price'].some((key) => headers.includes(key));
+    const dataLines = hasHeader ? lines.slice(1) : lines;
+
+    if (!hasHeader) {
+        headers = ['category', 'name', 'type', 'quantity', 'price'];
+    }
+
+    return dataLines.map((line) => {
+        const columns = parseCsvLine(line);
+        return headers.reduce((row, header, index) => {
+            row[header] = columns[index] || '';
+            return row;
+        }, {});
+    }).map((row) => ({
+        category: row.category || '',
+        name: row.name || row.medicine || row.medicine_name || '',
+        type: row.type || row.medicine_type || '',
+        quantity: String(row.quantity || '').replace(/\D/g, ''),
+        price: row.price || '',
+    })).filter((row) => row.category && row.name && row.type && row.quantity && row.price);
+}
+
+function populateMedicineRows(rows) {
+    const $list = $('.services-section #step-1 .services-list');
+    const $template = $list.find('.service-card').first();
+
+    if (!$list.length || !$template.length) return;
+
+    $list.empty();
+
+    rows.forEach((row) => {
+        const $card = $template.clone();
+        resetMedicineCard($card);
+        setMedicineCardValue($card, 0, row.category);
+        setMedicineCardValue($card, 1, row.name);
+        setMedicineCardValue($card, 2, row.type);
+        $card.find('.medicine-quantity').val(row.quantity);
+        $card.find('.medicine-price').val(row.price);
+        $list.append($card);
+    });
+}
+
+$(document).on('click', '.upload-btn, .upload-box', function (e) {
+    e.stopPropagation();
+    $(this).closest('.file-upload-wrapper').find('.file-input').trigger('click');
+});
+
+$(document).on('change', '.file-input', function () {
+    const wrapper = $(this).closest('.file-upload-wrapper');
+    const file = this.files[0];
+    clearPharmacyValidation();
+
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+        showPharmacyValidation('Please upload a CSV file.');
+        $(this).val('');
+        return;
+    }
+
+    wrapper.find('.file-name').text(file.name);
+    wrapper.find('.remove-file').removeClass('hidden');
+    wrapper.find('.submit-btn')
+        .prop('disabled', false)
+        .removeClass('bg-light-gray cursor-not-allowed')
+        .addClass('bg-dodger-blue text-white');
+});
+
+$(document).on('click', '.remove-file', function (e) {
+    e.stopPropagation();
+
+    const wrapper = $(this).closest('.file-upload-wrapper');
+    clearPharmacyValidation();
+    wrapper.find('.file-input').val('');
+    wrapper.find('.file-name').text('Upload CSV File');
+    $(this).addClass('hidden');
+    wrapper.find('.submit-btn')
+        .prop('disabled', true)
+        .removeClass('bg-dodger-blue text-white')
+        .addClass('bg-light-gray cursor-not-allowed');
+});
+
+$(document).on('click', '.submit-btn', function () {
+    const wrapper = $(this).closest('.file-upload-wrapper');
+    const file = wrapper.find('.file-input')[0]?.files?.[0];
+    clearPharmacyValidation();
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+        const rows = parseMedicineCsv(event.target.result || '');
+
+        if (!rows.length) {
+            showPharmacyValidation('No valid medicine rows found in the CSV.');
+            return;
+        }
+
+        populateMedicineRows(rows);
+        showPharmacyValidation('Medicine CSV uploaded successfully.', 'success');
+    };
+
+    reader.readAsText(file);
+});
+
 $(document).on('click', '.add-service', function () {
     const $list = $(this).closest('.step-content').find('.services-list');
     if (!$list.length) return;
 
+    clearPharmacyValidation();
     const $card = $list.find('.service-card').first().clone();
     resetMedicineCard($card);
     $list.append($card);
@@ -210,6 +380,7 @@ $(document).on('click', '.add-service', function () {
 
 $(document).on('click', '.remove-service', function () {
     const $list = $(this).closest('.services-list');
+    clearPharmacyValidation();
     if ($list.find('.service-card').length === 1) {
         resetMedicineCard($(this).closest('.service-card'));
         return;
@@ -217,8 +388,14 @@ $(document).on('click', '.remove-service', function () {
     $(this).closest('.service-card').remove();
 });
 
-function collectPharmacyMedicineRows() {
+$(document).on('input', '.medicine-quantity', function () {
+    this.value = this.value.replace(/\D/g, '');
+    clearPharmacyValidation();
+});
+
+function collectPharmacyMedicineRows(showValidation = false) {
     const rows = [];
+    let hasInvalidQuantity = false;
 
     $('.services-section #step-1 .service-card').each(function () {
         const $card = $(this);
@@ -231,9 +408,20 @@ function collectPharmacyMedicineRows() {
 
         const placeholderValues = ['Select Category', 'Select Medicine Name', 'Select Medicine Type', 'Select Options'];
         if (!placeholderValues.includes(category) && !placeholderValues.includes(name) && !placeholderValues.includes(type) && quantity && price) {
+            if (!/^\d+$/.test(quantity)) {
+                hasInvalidQuantity = true;
+                return;
+            }
             rows.push({ category, name, type, quantity, price });
         }
     });
+
+    if (hasInvalidQuantity) {
+        if (showValidation) {
+            showPharmacyValidation('Quantity should contain numbers only.');
+        }
+        return [];
+    }
 
     return rows;
 }
@@ -268,9 +456,12 @@ function renderPharmacySummary(rows) {
 }
 
 $(document).on('click', '.pharmacy-summary-next', function () {
-    const rows = collectPharmacyMedicineRows();
+    clearPharmacyValidation();
+    const rows = collectPharmacyMedicineRows(true);
     if (!rows.length) {
-        alert('Please add at least one complete medicine row.');
+        if ($('.pharmacy-validation-message').hasClass('hidden')) {
+            showPharmacyValidation('Please add at least one complete medicine row.');
+        }
         return;
     }
 
@@ -279,9 +470,12 @@ $(document).on('click', '.pharmacy-summary-next', function () {
 });
 
 $(document).on('click', '.save-pharmacy-medicines', function () {
-    const rows = collectPharmacyMedicineRows();
+    clearPharmacyValidation();
+    const rows = collectPharmacyMedicineRows(true);
     if (!rows.length) {
-        alert('Please add at least one complete medicine row.');
+        if ($('.pharmacy-validation-message').hasClass('hidden')) {
+            showPharmacyValidation('Please add at least one complete medicine row.');
+        }
         goToStep(1);
         return;
     }
@@ -305,7 +499,8 @@ $(document).on('click', '.save-pharmacy-medicines', function () {
             window.location.reload();
         })
         .catch((error) => {
-            alert(error.message);
+            showPharmacyValidation(error.message);
+            goToStep(1);
             $btn.prop('disabled', false).removeClass('opacity-60');
         });
 });
@@ -331,5 +526,5 @@ $(document).on('click', '.delete-pharmacy-medicine', function (e) {
                 window.location.reload();
             }
         })
-        .catch((error) => alert(error.message));
+        .catch((error) => showPharmacyValidation(error.message));
 });
