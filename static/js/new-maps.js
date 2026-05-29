@@ -87,7 +87,7 @@ if (navigator.geolocation) {
 }
 
 // tile_url = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-tile_url = "http://192.168.1.107:3090/styles/light-mode-nopoi/256/{z}/{x}/{y}.png"
+tile_url = "http://122.170.111.109:3090/styles/light-mode-nopoi/256/{z}/{x}/{y}.png"
 
 // Initialize map with user's location
 function showLocation(position) {
