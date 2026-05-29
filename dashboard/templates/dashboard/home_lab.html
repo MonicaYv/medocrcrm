@@ -225,9 +225,8 @@
               <p class="font-semibold text-lg">Appointment Request</p>
               <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
             </div>
-            <div
-              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg popup-btn"
-              data-popup="appointmentRequestDetail">
+            <!-- <div
+              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg">
               <div class="flex items-center gap-2">
                 <img src="/static/images/patient-4.svg" alt="Patient Profile">
                 <div class="flex flex-col gap-1">
@@ -236,8 +235,8 @@
                 </div>
               </div>
               <p class="font-normal text-sm text-nowrap">22/07/2025, 12:30 PM</p>
-              <p class="font-normal text-sm">Lab Walk-in</p>
-              <div class="flex items-center gap-4">
+              <p class="font-normal text-sm">Lab Walk-in</p> -->
+              <!-- <div class="flex items-center gap-4">
                 <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
                   check_circle
                 </span>
@@ -247,11 +246,62 @@
                 <span class="text-dodger-blue hidden accepted">Accepted</span>
                 <span class="text-strong-red hidden rejected">Rejected</span>
               </div>
+            </div> -->
+            <div
+              class="bg-white shadow-sm border border-snow rounded-xl px-4 py-3 mt-4 flex items-center justify-between hover:bg-pale-azure transition-all duration-200">
+
+              <!-- PATIENT -->
+              <div class="flex items-center gap-3 w-[250px]">
+
+                <img src="/static/images/patient-4.svg"
+                  alt="Patient Profile"
+                  class="w-10 h-10 rounded-full">
+
+                <div class="flex flex-col">
+                  <p class="font-semibold text-sm">Pt. Dolly Paris</p>
+                  <p class="text-xs text-spanish-gray">RT-PCR</p>
+                </div>
             </div>
 
-            <div
-              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg popup-btn"
-              data-popup="appointmentRequestDetail">
+          <!-- DATE -->
+    <div class="w-[220px]">
+        <p class="text-sm text-gray-700">
+            22/07/2025, 12:30 PM
+        </p>
+    </div>
+
+    <!-- TYPE -->
+    <div class="w-[180px]">
+        <p class="text-sm text-gray-700">
+            Lab Walk-in
+        </p>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="flex items-center gap-3">
+
+        <!-- VIEW -->
+        <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
+            visibility
+        </span>
+
+        <!-- ACCEPT -->
+        <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
+            check_circle
+        </span>
+
+        <!-- REJECT -->
+        <span class="material-symbols-outlined text-strong-red cursor-pointer reject-icon">
+            cancel
+        </span>
+
+    </div>
+
+</div>
+            
+
+            <!-- <div
+              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg ">
               <div class="flex items-center gap-2">
                 <img src="/static/images/patient-5.svg" alt="Patient Profile">
                 <div class="flex flex-col gap-1">
@@ -260,22 +310,67 @@
                 </div>
               </div>
               <p class="font-normal text-sm  text-nowrap">22/07/2025, 01:30 PM</p>
-              <p class="font-normal text-sm text-nowrap">Home Collection</p>
-              <div class="flex items-center gap-4">
+              <p class="font-normal text-sm text-nowrap">Home Collection</p> -->
+              <!-- <div class="flex items-center gap-4">
                 <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
                   check_circle
-                </span>
-                <span class="material-symbols-outlined text-strong-red reject-icon">
-                  cancel
-                </span>
-                <span class="text-dodger-blue hidden accepted">Accepted</span>
-                <span class="text-strong-red hidden rejected">Rejected</span>
+                </span> -->
+                <div
+                 class="bg-white shadow-sm border border-snow rounded-xl px-4 py-3 mt-4 flex items-center justify-between hover:bg-pale-azure transition-all duration-200">
+
+                  <!-- PATIENT -->
+                  <div class="flex items-center gap-3 w-[250px]">
+
+                    <img src="/static/images/patient-5.svg"
+                      alt="Patient Profile"
+                      class="w-10 h-10 rounded-full">
+
+                    <div class="flex flex-col">
+                      <p class="font-semibold text-sm">Pt. Steve Lamark</p>
+                      <p class="text-xs text-spanish-gray">Blood Test</p>
+                    </div>
+                </div>
+
+        <!-- DATE -->
+    <div class="w-[220px]">
+        <p class="text-sm text-gray-700">
+            22/07/2025, 01:30 PM
+        </p>
+    </div>
+
+    <!-- TYPE -->
+    <div class="w-[180px]">
+        <p class="text-sm text-gray-700">
+            Home Collection
+        </p>
+    </div>
+
+    
+      <div class="flex items-center gap-3">
+
+                    <!-- VIEW -->
+                    <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
+                      visibility
+                    </span>
+
+                    <!-- ACCEPT -->
+                    <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
+                      check_circle
+                    </span>
+
+                    <!-- REJECT -->
+                    <span class="material-symbols-outlined text-strong-red reject-icon">
+                      cancel
+                     </span>
+
+                  </div>
+                
+                
               </div>
             </div>
 
             <div
-              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg popup-btn"
-              data-popup="appointmentRequestDetail">
+              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg ">
               <div class="flex items-center gap-2">
                 <img src="/static/images/patient-4.svg" alt="Patient Profile">
                 <div class="flex flex-col gap-1">
@@ -285,16 +380,27 @@
               </div>
               <p class="font-normal text-sm text-nowrap">22/07/2025, 10:30 AM</p>
               <p class="font-normal text-sm text-nowrap">Home Collection</p>
-              <div class="flex items-center gap-4">
+              <!-- <div class="flex items-center gap-4">
                 <span class=" text-dodger-blue">
                   Accepted
                 </span>
+              </div> -->
+              <div class="flex items-center gap-3">
+
+                <!-- VIEW -->
+                <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
+                  visibility
+                </span>
+
+                <span class="text-dodger-blue text-sm font-medium">
+                  Accepted
+                </span>
+
               </div>
             </div>
 
             <div
-              class="bg-white shadow-md w-full mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg popup-btn"
-              data-popup="appointmentRequestDetail">
+              class="bg-white shadow-md w-full mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg ">
               <div class="flex items-center gap-2">
                 <img src="/static/images/patient-4.svg" alt="Patient Profile">
                 <div class="flex flex-col gap-1">
@@ -304,10 +410,22 @@
               </div>
               <p class="font-normal text-sm text-nowrap">22/07/2025, 10:30 AM</p>
               <p class="font-normal text-sm">Lab Walk-in</p>
-              <div class="flex items-center gap-4">
+              <!-- <div class="flex items-center gap-4">
                 <span class=" text-strong-red">
                   Rejected
                 </span>
+              </div> -->
+              <div class="flex items-center gap-3">
+
+                <!-- VIEW -->
+                <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
+                  visibility
+                </span>
+
+                <span class="text-strong-red text-sm font-medium">
+                  Rejected
+                </span>
+
               </div>
             </div>
           </div>
@@ -322,7 +440,7 @@
                   <button class="cursor-pointer">
                     <span class="material-symbols-outlined !text-xl">share</span>
                   </button>
-                  <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail">
+                  <button class="close-popup cursor-pointer">
                     <span class="material-symbols-outlined !text-2xl">close</span>
                   </button>
                 </div>
@@ -476,10 +594,13 @@
                 </div>
                 <div class="pt-4 flex justify-center items-center gap-2 mb-2">
                   <button
-                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">Accept</button>
+                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">
+                    Accept
+                  </button>
                   <button
-                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup"
-                    data-popup="appointmentRequestDetail">Reject</button>
+                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer reject-button">
+                    Reject
+                  </button>
                 </div>
               </div>
 
@@ -534,8 +655,10 @@
                   <button
                     class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer complete-btn">Complete</button>
                   <button
-                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap popup-btn"
-                    data-popup="cancelAppointmentPopup">Cancel Appointment</button>
+                     class="cancel-appointment-btn border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap"
+                     data-popup="cancelAppointmentPopup">
+                     Cancel Appointment
+                  </button>
                 </div>
                 <div
                   class="cancelAppointmentPopup fixed inset-0 flex items-center justify-center hidden bg-semi-transparent-black">
@@ -607,8 +730,7 @@
                   <button
                     class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer save-btn">Save</button>
                   <button
-                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap"
-                    data-popup="appointmentRequestDetail">Cancel</button>
+                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap">Cancel</button>
                 </div>
               </div>
 

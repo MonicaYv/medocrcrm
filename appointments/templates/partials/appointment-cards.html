@@ -26,6 +26,8 @@
   data-cancelled-by="{{ appointment.cancelled_by|default:'Doctor' }}"
   data-distance="{{ appointment.distance|default:'6 km' }}"
   data-time="{{ appointment.eta|default:'20 mins away' }}"
+  data-attachment="/static/images/attachment.png"
+  data-bill="{% if appointment.proforma_bill %}{{ appointment.proforma_bill.url }}{% endif %}"
   >
 
 

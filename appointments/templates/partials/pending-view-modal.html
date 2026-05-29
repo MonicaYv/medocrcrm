@@ -7,7 +7,8 @@
                 <div class="flex justify-between items-center border-b px-6 py-3">
                   <h2 class="text-base font-bold">Patient Information</h2>
                   <div class="flex items-center gap-4">
-                    <button class="cursor-pointer">
+                    
+                    <button class="cursor-pointer share-btn">
                       <span class="material-symbols-outlined !text-xl">share</span>
                     </button>
                     <button class="modal-close-pending text-gray-500 hover:text-gray-800 !text-3xl">&times;</button>
@@ -134,9 +135,17 @@
                   <div class="pt-4">
                     <div class="flex justify-between items-center pt-4">
                       <p class="font-normal text-sm">Attachment</p>
-                      <div class="flex items-center gap-1 cursor-pointer text-dodger-blue  view-attachment">
-                        <p class="font-semibold text-sm">Image.pdf</p>
-                        <span class="material-symbols-outlined !text-base font-semibold">visibility</span>
+                        <div 
+                         class="flex items-center gap-1 cursor-pointer text-dodger-blue  view-attachment"
+                         data-file=""
+                        >
+
+                        <p class="font-semibold text-sm  attachment-name">
+                          Image.pdf
+                        </p>
+                        <span class="material-symbols-outlined !text-base font-semibold">
+                          visibility
+                        </span>
                       </div>
                     </div>
                   </div>
