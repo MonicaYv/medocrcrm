@@ -1,5 +1,5 @@
 {% load static %}
-                <div class="premium-section space-y-4 hidden">
+                <div class="premium-section space-y-4">
                     <div class="h-[136px] bg-dodger-blue relative flex flex-col gap-3 px-7 py-6 rounded-lg">
                         <span class="text-sm sm:text-base font-bold text-white">Subscription Details</span>
                         <span class="text-[30px] sm:text-[35px] font-bold text-white">
@@ -10,262 +10,105 @@
                             PREMIUM
                         </div>
                     </div>
-                    <div class="w-full rounded-lg shadow-17 py-4 px-6 flex flex-col gap-5 ">
-                        <div class="tabs tabs-inner w-[200px] sm:w-[290px] ">
+                    <div class="w-full shadow-17 rounded-lg px-5 py-5">
+                        <div class="tabs tabs-home w-[200px] sm:w-[290px]">
                             <div class="flex flex-nowrap items-center justify-between py-0.5 text-sm px-2 relative">
                                 <div class="tab-indicator border border-blue-tint"></div>
-                                <button class="tab-btn active shrink-0" data-type="services">Services</button>
-                                <button class="tab-btn shrink-0" data-type="bed-rooms">Bed & Rooms</button>
-                            </div>
-                        </div>
-                        <!-- Services Content -->
-                        <div class="tab-content tabs-inner-content" data-type="services">
-                            <h2 class="text-lg sm:text-[23.4px] font-bold text-desaturated-blue mb-4">Services</h2>
-                            <div class="bg-[#F9FAFB] rounded-[10px] w-full p-3 space-y-3">
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div
-                                        class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <h3 class="text-sm sm:text-base font-semibold text-black">In-Clinic Visit
-                                            </h3>
-                                            <span
-                                                class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div
-                                                class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button
-                                                    class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer"
-                                                    data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span
-                                                class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <h3 class="text-sm sm:text-base font-semibold text-black">Phone Consult</h3>
-                                            <span
-                                                class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div
-                                                class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button
-                                                    class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer"
-                                                    data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span
-                                                class="text-base sm:text-lg text-dodger-blue font-bold">₹18,000</span>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <h3 class="text-sm sm:text-base font-semibold text-black">Home Visit</h3>
-                                            <span
-                                                class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div
-                                                class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button
-                                                    class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer"
-                                                    data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span
-                                                class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <h3 class="text-sm sm:text-base font-semibold text-black">Multi Visit
-                                                Treatment</h3>
-                                            <span
-                                                class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div
-                                                class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button
-                                                    class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer"
-                                                    data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span
-                                                class="text-base sm:text-lg text-dodger-blue font-bold">₹18,000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-end">
-                                    <button
-                                        class="w-14 h-14 bg-dodger-blue rounded-full flex items-center justify-center cursor-pointer">
-                                        <span class="material-symbols-outlined text-white">add_2</span>
-                                    </button>
-                                </div>
+                                <button class="tab-btn active shrink-0" data-type="services-home">Services</button>
+                                <button class="tab-btn shrink-0" data-type="bed-rooms-home">Bed & Rooms</button>
                             </div>
                         </div>
 
-                        <!-- Bed & Rooms Content -->
-                        <div class="tab-content tabs-inner-content hidden" data-type="bed-rooms">
-                            <h2 class="text-lg sm:text-[23.4px] font-bold text-desaturated-blue mb-4">Bed & Rooms</h2>
-                            <div class="bg-[#F9FAFB] rounded-[10px] w-full p-3 space-y-3">
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div
-                                        class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <h3 class="text-sm sm:text-base font-semibold text-black">In-Clinic Visit
-                                            </h3>
-                                            <span
-                                                class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div
-                                                class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button
-                                                    class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer"
-                                                    data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
+                        <div class="tabs-home-content mt-5" data-type="services-home">
+                            <h2 class="text-lg font-bold text-desaturated-blue mb-4">Services</h2>
+                            {% if hospital_service_cards %}
+                                <div class="bg-[#F9FAFB] rounded-[10px] w-full p-3 space-y-3">
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 hospital-home-services-grid">
+                                        {% for card in hospital_service_cards %}
+                                            <div class="service-card bg-white border border-frost-white rounded-md shadow-12 min-h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2 hospital-service-card"
+                                                data-rate-id="{{ card.id }}">
+                                                <div class="flex items-start justify-between w-full gap-3">
+                                                    <div class="min-w-0">
+                                                        <h3 class="text-sm sm:text-base font-semibold text-black truncate">{{ card.description.description }}</h3>
+                                                        <p class="text-xs text-foggy-silver">{{ card.category.name }}</p>
+                                                    </div>
+                                                    <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
+                                                    <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
+                                                        <button class="delete-hospital-service w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
+                                                                data-rate-id="{{ card.id }}">
+                                                            <img src="{% static 'images/delete-icon.svg' %}" alt="delete">
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center w-full">
+                                                    <span class="text-base sm:text-lg text-dodger-blue font-bold">&#8377;{{ card.price }}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span
-                                                class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
+                                        {% endfor %}
                                     </div>
-                                    <div
-                                        class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <h3 class="text-sm sm:text-base font-semibold text-black">Phone Consult</h3>
-                                            <span
-                                                class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div
-                                                class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button
-                                                    class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer"
-                                                    data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span
-                                                class="text-base sm:text-lg text-dodger-blue font-bold">₹18,000</span>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <h3 class="text-sm sm:text-base font-semibold text-black">Home Visit</h3>
-                                            <span
-                                                class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div
-                                                class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button
-                                                    class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer"
-                                                    data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span
-                                                class="text-base sm:text-lg text-dodger-blue font-bold">₹25,000</span>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="service-card bg-white border border-frost-white rounded-md shadow-12 h-[85px] w-full flex flex-col items-start px-4 py-3 relative gap-2">
-                                        <div class="flex items-start justify-between w-full">
-                                            <h3 class="text-sm sm:text-base font-semibold text-black">Multi Visit
-                                                Treatment</h3>
-                                            <span
-                                                class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
-                                            <!-- Dropdown -->
-                                            <div
-                                                class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
-                                                <button
-                                                    class="open-popup w-full text-left py-2.5 text-ebony text-sm sm:text-base font-semibold flex items-center gap-4 border-b border-light-grayish-blue cursor-pointer"
-                                                    data-target="add-service">
-                                                    <img src="/static/images/edit-icon.svg" alt="edit">
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    class="delete-btn w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer">
-                                                    <img src="/static/images/delete-icon.svg" alt="delete">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center w-full">
-                                            <span
-                                                class="text-base sm:text-lg text-dodger-blue font-bold">₹18,000</span>
-                                        </div>
+                                    <div class="flex items-center justify-end">
+                                        <button class="home-add-service w-14 h-14 bg-dodger-blue rounded-full flex items-center justify-center cursor-pointer">
+                                            <span class="material-symbols-outlined text-white">add_2</span>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="flex items-center justify-end">
-                                    <button
-                                        class="w-14 h-14 bg-dodger-blue rounded-full flex items-center justify-center cursor-pointer">
-                                        <span class="material-symbols-outlined text-white">add_2</span>
-                                    </button>
+                            {% else %}
+                                <div class="w-full flex items-center justify-center mt-5 min-h-[320px]">
+                                    <div class="flex flex-col items-center gap-6 w-3/4 sm:w-3/5">
+                                        <img src="{% static 'images/services-bg.svg' %}" alt="services">
+                                        <span class="text-sm sm:text-base text-center font-normal text-black">At the moment, there are no Services in queue. We'll keep you updated!</span>
+                                        <button class="home-add-service w-full max-w-[352px] h-[40px] rounded-lg border border-dodger-blue text-dodger-blue text-xs sm:text-sm font-semibold cursor-pointer">
+                                            Add Services
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="tabs-home-content hidden mt-5" data-type="bed-rooms-home">
+                            <h2 class="text-lg font-bold text-desaturated-blue mb-4">Bed & Rooms</h2>
+                            {% if hospital_room_cards %}
+                                <div class="bg-[#F9FAFB] rounded-[10px] w-full p-3 space-y-3">
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 hospital-home-rooms-grid">
+                                        {% for card in hospital_room_cards %}
+                                            <div class="service-card bg-white border border-frost-white rounded-md shadow-12 min-h-[81px] w-full flex flex-col items-start justify-center gap-2 px-4 py-2 relative hospital-room-card"
+                                                data-rate-id="{{ card.id }}">
+                                                <div class="flex items-center justify-between w-full gap-3">
+                                                    <h3 class="text-sm sm:text-base font-semibold text-black truncate">{{ card.bed_room.name }}</h3>
+                                                    <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
+                                                    <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
+                                                        <button class="delete-hospital-room w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
+                                                                data-rate-id="{{ card.id }}">
+                                                            <img src="{% static 'images/delete-icon.svg' %}" alt="delete">
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center justify-between w-full">
+                                                    <p class="text-sm sm:text-base font-semibold text-black">{{ card.days }} Days{% if card.ac %} | AC{% endif %}</p>
+                                                    <span class="text-base sm:text-lg font-bold text-dodger-blue">&#8377;{{ card.price }}</span>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="flex items-center justify-end">
+                                        <button class="home-add-service w-14 h-14 bg-dodger-blue rounded-full flex items-center justify-center cursor-pointer">
+                                            <span class="material-symbols-outlined text-white">add_2</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="w-full flex items-center justify-center mt-5 min-h-[320px]">
+                                    <div class="flex flex-col items-center gap-6 w-3/4 sm:w-3/5">
+                                        <img src="{% static 'images/services-bg.svg' %}" alt="services">
+                                        <span class="text-sm sm:text-base text-center font-normal text-black">No Bed & Rooms have been added yet.</span>
+                                        <button class="home-add-service w-full max-w-[352px] h-[40px] rounded-lg border border-dodger-blue text-dodger-blue text-xs sm:text-sm font-semibold cursor-pointer">
+                                            Add Services
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

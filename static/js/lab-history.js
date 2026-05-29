@@ -539,7 +539,9 @@ loadLabHistory("accepted", 1);
     const budget = card.data("budget") ? "₹" + card.data("budget") : "-";
     const visitType = card.data("visit-type") || "Home Visit";
     const billImage = card.data("bill");
-
+    console.log("Bill Image URL =", billImage);
+    alert("Bill URL = " + billImage);
+    
     if (billImage) {
 
       $("#bill-preview-container").removeClass("hidden");
@@ -548,17 +550,29 @@ loadLabHistory("accepted", 1);
 
       $("#proformaBillLink").attr("href", billImage);
 
-    }
-    const billImage = card.data("bill");
+}
+    // console.log("Bill Image =", billImage);
 
-    if (billImage) {
+    // if (billImage) {
 
-        $("#proformaBillImage").attr("src", billImage);
+    //   $("#bill-preview-container").removeClass("hidden");
 
-        $("#proformaBillLink").attr("href", billImage);
+    //   $("#proformaBillImage").attr("src", billImage);
 
-    }
+    //   $("#proformaBillLink").attr("href", billImage);
 
+    // } else {
+
+    // $("#bill-preview-container").html(`
+    //     <p class="text-red-500 text-sm">
+    //         No Proforma Bill Available
+    //     </p>
+    // `);
+
+    // $("#bill-preview-container").removeClass("hidden");
+
+    // }
+    
     let rightTitle = "Budget";
     let rightValue = budget;
     let buttons = "";
@@ -707,10 +721,29 @@ loadLabHistory("accepted", 1);
 
     $("#modal-order-id").text("Order #" + (card.data("order-id") || "-"));
     $("#modal-budget").text(card.data("budget") ? "₹" + card.data("budget") : "-");
+    if (billImage) {
+
+    $("#bill-preview-container").removeClass("hidden");
+
+    $("#proformaBillImage").attr("src", billImage);
+
+    $("#proformaBillLink").attr("href", billImage);
+
+} else {
+
+    $("#bill-preview-container").html(`
+        <p class="text-red-500 text-sm">
+            No Proforma Bill Available
+        </p>
+    `);
+
+    $("#bill-preview-container").removeClass("hidden");
+}
 
     $(".modal-pending").removeClass("hidden");
   }
 );
+
 
 /* Close modal */
 $(document).on("click", ".modal-close-pending", function () {
@@ -816,4 +849,82 @@ function showToast(message, type = "success") {
             $(this).remove();
         });
     }, 2500);
+}
+$(document).on("click", "#shareBtn", function () {
+  console.log("SHARE BUTTON CLICKED");
+  alert("Share clicked");
+
+
+    const patient = $("#modal-name").text();
+    const phone = $("#modal-phone").text();
+    const date = $("#modal-date").text();
+
+    const text =
+        `Patient: ${patient}\nPhone: ${phone}\nAppointment: ${date}`;
+
+    window.open(
+        "https://wa.me/?text=" + encodeURIComponent(text),
+        "_blank"
+    );
+});
+
+$(document).on("click", ".complete-appointment-btn", function (e) {
+
+    console.log("COMPLETE CLICKED");
+
+    e.preventDefault();
+
+    const appointmentId = $(this).data("id");
+
+    console.log("Appointment ID =", appointmentId);
+});
+$(document).on("click", ".cancel-appointment-btn", function (e) {
+
+    console.log("CANCEL CLICKED");
+
+    e.preventDefault();
+
+    const appointmentId = $(this).data("id");
+
+    console.log("Appointment ID =", appointmentId);
+});
+$(document).on("click", "#shareBtn", function (e) {
+
+    e.preventDefault();
+
+    const patient = $("#modal-name").text();
+    const phone = $("#modal-phone").text();
+    const date = $("#modal-date").text();
+
+    const text =
+      `Patient: ${patient}\nPhone: ${phone}\nAppointment: ${date}`;
+
+    if (navigator.share) {
+
+        navigator.share({
+            title: "Appointment Details",
+            text: text
+        });
+
+    } else {
+
+        window.open(
+            "https://wa.me/?text=" + encodeURIComponent(text),
+            "_blank"
+        );
+    }
+});
+function shareAppointment() {
+
+    const patient = $("#modal-name").text();
+    const phone = $("#modal-phone").text();
+    const date = $("#modal-date").text();
+
+    const text =
+        `Patient: ${patient}\nPhone: ${phone}\nAppointment: ${date}`;
+
+    window.open(
+        "https://wa.me/?text=" + encodeURIComponent(text),
+        "_blank"
+    );
 }

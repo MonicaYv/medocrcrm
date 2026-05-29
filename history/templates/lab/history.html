@@ -137,7 +137,10 @@
                         {% include "partials/pending-view-modal.html" %}
                         <div id="cards-container" class="hidden">
                             <div
-                                class="card-all-accepted bg-white mt-4 p-4 rounded-md shadow-appointments transition cursor-pointer hover:bg-blue-50 border border-cool-slate-gray">
+                                class="card-all-accepted bg-white mt-4 p-4 rounded-md shadow-appointments transition cursor-pointer hover:bg-blue-50 border border-cool-slate-gray"
+                                data-id="{{ appointment.id }}"
+                                data-bill="{{ appointment.proforma_bill.url }}"
+                            >
                                 <div class="flex lg:justify-between items-center flex-col lg:flex-row gap-4">
                                     <div class="flex items-center gap-3">
                                         <img src="/static/images/rachel-kate.svg" alt="Profile"

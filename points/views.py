@@ -4,7 +4,6 @@ from django.shortcuts import render
 from dashboard.utils import dashboard_login_required, get_common_context
 from .models import PointsHistory, PointsActionType, PointsBadge
 from coupon.models import Coupon, CouponClaimed
-from collections import defaultdict
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.utils.dateparse import parse_date
@@ -19,35 +18,6 @@ def points_dashboard(request):
     user = request.user_obj
 
     context = get_common_context(request, user)
-
-    # Extra data for chart only
-    chart_action_types = context.get("chart_action_types", [])
-    chart_data = defaultdict(lambda: [0] * 7)
-    today = datetime.date.today()
-    last_7_days = [today - datetime.timedelta(days=6 - i) for i in range(7)]
-
-    for day_index, day in enumerate(last_7_days):
-        for action_type in chart_action_types:
-            action_obj = PointsActionType.objects.filter(
-                action_type__iexact=action_type
-            ).first()
-            if action_obj:
-                points = (
-                    PointsHistory.objects.filter(
-                        user=user, action_type=action_obj, timestamp__date=day
-                    ).aggregate(total=Sum("points"))["total"]
-                    or 0
-                )
-                chart_data[action_type.title()][day_index] = points
-
-    context.update(
-        {
-            "chart_labels": [d.strftime("%d/%m") for d in last_7_days],
-            "chart_data": dict(chart_data),
-            "all_badges": PointsBadge.objects.all(),
-        }
-    )
-    print(context)
     return render(request, "ngo_points.html", context)
 
 @dashboard_login_required

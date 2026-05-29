@@ -91,6 +91,47 @@ $(document).ready(function () {
         }
     });
 
+    function showCouponUploadPreview(input, file) {
+        const area = $(input).closest('.upload-area');
+        const preview = area.find('.upload-preview');
+        const placeholder = area.find('.upload-placeholder');
+        const imagePreview = preview.find('.uploaded-img');
+        const videoPreview = preview.find('.uploaded-video');
+        const fileName = preview.find('.uploaded-file-name');
+        const fileUrl = URL.createObjectURL(file);
+
+        imagePreview.addClass('hidden').attr('src', '');
+        videoPreview.addClass('hidden').attr('src', '');
+        fileName.text(file.name);
+
+        if (file.type.startsWith('image/')) {
+            imagePreview.attr('src', fileUrl).removeClass('hidden');
+        } else if (file.type === 'video/mp4') {
+            videoPreview.attr('src', fileUrl).removeClass('hidden');
+        } else {
+            toastr.error('Please upload a JPG, PNG, or MP4 file.');
+            $(input).val('');
+            return;
+        }
+
+        placeholder.addClass('hidden');
+        preview.removeClass('hidden').addClass("flex flex-col items-center justify-center");
+    }
+
+    function setPopupMedia($popup, mediaUrl) {
+        const isVideo = mediaUrl && mediaUrl.toLowerCase().split('?')[0].endsWith('.mp4');
+        const $image = $popup.find('.popup-image');
+        const $video = $popup.find('.popup-video');
+
+        if (isVideo) {
+            $image.addClass('hidden').attr('src', '');
+            $video.removeClass('hidden').attr('src', mediaUrl);
+        } else {
+            $video.addClass('hidden').attr('src', '');
+            $image.removeClass('hidden').attr('src', mediaUrl || '');
+        }
+    }
+
     // 2. Drag and drop handling
     $('.upload-area').on('dragover', function (e) {
         e.preventDefault();
@@ -103,12 +144,14 @@ $(document).ready(function () {
     $('.upload-area').on('drop', function (e) {
         e.preventDefault();
         const file = e.originalEvent.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
+        if (file && (file.type.startsWith('image/') || file.type === 'video/mp4')) {
             const fileInput = $(this).find('input[type="file"]')[0];
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             fileInput.files = dataTransfer.files;
             $(fileInput).trigger('change');
+        } else if (file) {
+            toastr.error('Please upload a JPG, PNG, or MP4 file.');
         }
     });
 
@@ -122,19 +165,8 @@ $(document).ready(function () {
     // 4. File input change handler
     $('.upload-input').on('change', function () {
         const file = this.files[0];
-        const area = $(this).closest('.upload-area');
-        const preview = area.find('.upload-preview');
-        const placeholder = area.find('.upload-placeholder');
-
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.find('.uploaded-img').attr('src', e.target.result);
-                placeholder.addClass('hidden');
-                preview.removeClass('hidden').addClass("flex");
-            };
-            reader.readAsDataURL(file);
-        }
+        if (!file) return;
+        showCouponUploadPreview(this, file);
     });
 
     // 5. Cancel upload
@@ -147,6 +179,9 @@ $(document).ready(function () {
 
         // Reset
         input.val('');
+        preview.find('.uploaded-img').attr('src', '').removeClass('hidden');
+        preview.find('.uploaded-video').attr('src', '').addClass('hidden');
+        preview.find('.uploaded-file-name').text('');
         preview.addClass('hidden').removeClass("flex");
         placeholder.removeClass('hidden');
     });
@@ -203,7 +238,7 @@ $(document).ready(function () {
                 $('.preview-popup .popup-issued-by').text(data.uploaded_by);
                 $('.preview-popup .popup-uploaded-on').text(data.uploaded_on);
                 $('.preview-popup .popup-title').text(data.title);
-                $('.preview-popup .popup-image').attr('src', data.image_url);
+                setPopupMedia($('.preview-popup'), data.image_url);
                 $('.preview-popup .popup-age').text(data.age_group);
                 $('.preview-popup .popup-gender').text(data.gender);
                 $('.preview-popup .popup-city').text(data.city);
@@ -230,7 +265,7 @@ $(document).ready(function () {
                 $('.download-popup .popup-issued-by').text(data.uploaded_by);
                 $('.download-popup .popup-uploaded-on').text(data.uploaded_on);
                 $('.download-popup .popup-title').text(data.title);
-                $('.download-popup .popup-image').attr('src', data.image_url);
+                setPopupMedia($('.download-popup'), data.image_url);
                 $('.download-popup .popup-age').text(data.age_group);
                 $('.download-popup .popup-gender').text(data.gender);
                 $('.download-popup .popup-city').text(data.city);
@@ -554,7 +589,13 @@ $(document).ready(function () {
         if (imageFile) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                $('#pay-preview-img').attr('src', e.target.result);
+                if (imageFile.type === 'video/mp4') {
+                    $('#pay-preview-img').addClass('hidden').attr('src', '');
+                    $('#pay-preview-video').removeClass('hidden').attr('src', e.target.result);
+                } else {
+                    $('#pay-preview-video').addClass('hidden').attr('src', '');
+                    $('#pay-preview-img').removeClass('hidden').attr('src', e.target.result);
+                }
             };
             reader.readAsDataURL(imageFile);
         }

@@ -162,5 +162,13 @@
     const ticketDetailsDateWise = "{% url 'get-tickets-filters' %}";
     const faqLists = "{% url 'get-faq-lists' %}";
     const sendMail = "{% url 'send-support-email' %}";
+$(document).ready(function () {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+
+    if (tab) {
+        $(`.tabs-menu [data-tab="${tab}"]`).trigger('click');
+    }
+});
 </script>
 {% endblock %}

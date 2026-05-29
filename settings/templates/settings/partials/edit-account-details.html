@@ -707,7 +707,7 @@
             <!--P Type-->
             <div class="issue-type-wrapper w-full rounded-[6px] text-dark-gray border border-slate-gray pl-0.5 text-sm flex items-center justify-between relative">
                 <!-- Dropdown options -->
-                <select name="pharmacy_type" class="border rounded px-3 py-2 w-full" data-selected="{{pharmacy_type}}">
+                <select name="pharmacy_type" class="rounded px-3 py-2 w-full" data-selected="{{pharmacy_type}}">
                     {% for type in all_types %}
                         <option value="{{ type }}"
                             {% if type == pharmacy_type %}selected{% endif %}>
@@ -719,7 +719,7 @@
             </div>
             <!--Services Offered-->
             <div class="issue-type-wrapper w-full  rounded-[6px] text-dark-gray border border-slate-gray pl-0.5 text-sm flex items-center justify-between relative">
-                <select name="services_offered" class="border rounded px-3 py-2 w-full" data-selected="{{services_offered}}">
+                <select name="services_offered" class="rounded px-3 py-2 w-full" data-selected="{{services_offered}}">
                     {% for service in all_services %}
                         <option value="{{ service }}"
                             {% if service == services_offered %}selected{% endif %}>
@@ -733,7 +733,7 @@
 
         <!--Working Days-->
         <div class="issue-type-wrapper w-full  rounded-[6px] text-dark-gray border border-slate-gray pl-0.5 text-sm flex items-center justify-between relative mb-3">
-            <select name="working_days" class="border rounded px-3 py-2 w-full" data-selected="{{working_days}}">
+            <select name="working_days" class="rounded px-3 py-2 w-full" data-selected="{{working_days}}">
                 {% for day in all_workingdays %}
                     <option value="{{ day }}"
                         {% if day == working_days %}selected{% endif %}>
