@@ -732,3 +732,58 @@ $("#hospital-cards-container, #doctor-cards-container").on(
     $(".modal-pending").removeClass("hidden");
   });
 });
+
+$(document).on("click", ".patient-share-btn", function () {
+    $("#patientSharePopup")
+        .removeClass("hidden")
+        .addClass("flex");
+});
+
+$(document).on("click", ".close-patient-share-popup", function () {
+    $("#patientSharePopup")
+        .addClass("hidden")
+        .removeClass("flex");
+});
+
+$(document).on("click", ".patient-share-app", function () {
+
+    const app = $(this).data("app");
+    const link = $("#patient-share-link").val();
+
+    let url = "";
+
+    switch (app) {
+        case "whatsapp":
+            url = `https://wa.me/?text=${encodeURIComponent(link)}`;
+            break;
+
+        case "telegram":
+            url = `https://t.me/share/url?url=${encodeURIComponent(link)}`;
+            break;
+
+        case "facebook":
+            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+            break;
+
+        case "sms":
+            url = `sms:?body=${encodeURIComponent(link)}`;
+            break;
+
+        case "gmail":
+            url = `mailto:?subject=Patient Information&body=${encodeURIComponent(link)}`;
+            break;
+    }
+
+    if (url) {
+        window.open(url, "_blank");
+    }
+});
+
+$(document).on("click", "#copy-patient-link", function () {
+
+    const link = $("#patient-share-link").val();
+
+    navigator.clipboard.writeText(link);
+
+    alert("Link copied");
+});
