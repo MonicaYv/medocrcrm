@@ -150,135 +150,89 @@
                     
 
                     <!--Overview-->
-                    <div class="mt-5 flex flex-col gap-4">
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold text-lg">Overview</p>
-                            <div class="flex items-center gap-2.5">
-                                <p class="font-normal text-sm">Today</p>
-                                <div class="relative dropdown">
-                                    <button
-                                        class="filterToggle  flex justify-center items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
-                                        <span class="material-symbols-outlined  text-xl!">tune</span>
-                                    </button>
-                                    <div
-                                        class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                                        <div
-                                            class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                                            <span class="material-symbols-outlined !text-lg text-dodger-blue">
-                                                check
-                                            </span>Today
-                                        </div>
-                                        <div
-                                            class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                                            <span class="material-symbols-outlined !text-lg text-light-gray">
-                                                check
-                                            </span>Week
-                                        </div>
-                                        <div
-                                            class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                                            <span class="material-symbols-outlined !text-lg text-light-gray">
-                                                check
-                                            </span>Month
-                                        </div>
-                                        <div
-                                            class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray">
-                                            <div class="flex items-center gap-2">
-                                                <span class="material-symbols-outlined !text-lg text-light-gray">
-                                                    check
-                                                </span>Custom
-                                            </div>
-                                            <span class="material-symbols-outlined calendar-icon">calendar_today</span>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
-                                        <div class="datepicker-inline"></div>
-                                    </div>
+                    <div class="pt-5 flex flex-col ml-3">
+                        <div class="flex justify-between items-center">
+                        <p class="font-semibold text-lg">Overview</p>
+                        <div class="flex items-center gap-2.5">
+                            <p class="font-normal text-sm">Today</p>
+                            <div class="relative dropdown">
+                            <button
+                                class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
+                                <span class="material-symbols-outlined flex justify-center items-center">tune</span>
+                            </button>
+                            <div
+                                class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
+                                <div
+                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                                <span class="material-symbols-outlined !text-lg text-dodger-blue">
+                                    check
+                                </span>Today
                                 </div>
+                                <div
+                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                                <span class="material-symbols-outlined !text-lg text-light-gray">
+                                    check
+                                </span>Week
+                                </div>
+                                <div
+                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                                <span class="material-symbols-outlined !text-lg text-light-gray">
+                                    check
+                                </span>Month
+                                </div>
+                                <div
+                                class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined !text-lg text-light-gray">
+                                    check
+                                    </span>Custom
+                                </div>
+                                <span class="material-symbols-outlined calendar-icon">calendar_today</span>
+                                </div>
+                            </div>
+                            <div
+                                class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
+                                <div class="datepicker-inline"></div>
+                            </div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3">
-                            <!--Wallet Balance-->
-                            <div
-                                class="bg-white border border-frost-white rounded-2xl shadow-(--box-shadow-12) p-4 flex flex-col gap-2">
-                                <div class="flex items-center justify-between">
-                                    <img src="/static/images/wallet-overview.svg" alt="wallet">
-                                    <p class="font-normal text-sm text-leaf-green">+12%</p>
-                                </div>
-                                <p class="font-bold text-xl text-dark-navy">&#8377;{{ wallet_balance|default:0 }}</p>
-                                <p class="font-normal text-sm text-charcoal-gray">Wallet Balance</p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-4">
+                        <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
+                            <div class="flex flex-col gap-2">
+                            <p class="font-normal text-sm">Total Orders Today</p>
+                            <p class="font-semibold text-2xl">12</p>
+                            <p class="text-green font-normal text-xs">Confirmed: 7</p>
+                            <p class="text-golden-yellow1 font-normal text-xs">Pending: 3</p>
                             </div>
-
-                            <!--Active Bids-->
-                            <div
-                                class="bg-white border border-frost-white rounded-2xl shadow-(--box-shadow-12) p-4 flex flex-col gap-2">
-                                <div class="flex items-center justify-between">
-                                    <img src="/static/images/active-bids.svg" alt="Active Bids">
-                                    <p class="font-normal text-sm text-leaf-green">+8.2%</p>
-                                </div>
-                                <p class="font-bold text-xl text-dark-navy">{{ active_bids|default:0 }}</p>
-                                <p class="font-normal text-sm text-charcoal-gray">Active Bids</p>
-                            </div>
-
-                            <!--Alerts-->
-                            <div
-                                class="bg-white border border-frost-white rounded-2xl shadow-(--box-shadow-12) p-4 flex flex-col gap-2">
-                                <div class="flex items-center justify-between">
-                                    <img src="/static/images/alert-overview.svg" alt="Alert">
-                                    <p class="font-normal text-sm text-crimson-red">-2</p>
-                                </div>
-                                <p class="font-bold text-xl text-dark-navy">2</p>
-                                <p class="font-normal text-sm text-charcoal-gray">Alerts</p>
-                            </div>
-
-                            <!--Quotes Given-->
-                            <div
-                                class="bg-white border border-frost-white rounded-2xl shadow-(--box-shadow-12) p-4 flex flex-col gap-2">
-                                <div class="flex items-center justify-between">
-                                    <img src="/static/images/quotes-given.svg" alt="Quotes">
-                                    <p class="font-normal text-sm text-leaf-green">+12%</p>
-                                </div>
-                                <p class="font-bold text-xl text-dark-navy">{{ quotes_given|default:0 }}</p>
-                                <p class="font-normal text-sm text-charcoal-gray">Quotes Given</p>
-                            </div>
-
-                            <!--Orders won-->
-                            <div
-                                class="bg-white border border-frost-white rounded-2xl shadow-(--box-shadow-12) p-4 flex flex-col gap-2">
-                                <div class="flex items-center justify-between">
-                                    <img src="/static/images/orders-given.svg" alt="Orders">
-                                    <p class="font-normal text-sm text-leaf-green">+8.2%</p>
-                                </div>
-                                <p class="font-bold text-xl text-dark-navy">{{ orders_won|default:0 }}</p>
-                                <p class="font-normal text-sm text-charcoal-gray">Orders Won</p>
-                            </div>
-
-                            <!--Delivery Pending-->
-                            <div
-                                class="bg-white border border-frost-white rounded-2xl shadow-(--box-shadow-12) p-4 flex flex-col gap-2">
-                                <div class="flex items-center justify-between">
-                                    <img src="/static/images/delivery-bike.svg" alt="Delivery">
-                                    <p class="font-normal text-sm text-crimson-red">-2</p>
-                                </div>
-                                <p class="font-bold text-xl text-dark-navy">{{ pending_orders|default:0 }} Pending</p>
-                                <p class="font-normal text-sm text-charcoal-gray">Delivery Status</p>
+                            <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
+                            <img src="/static/images/orders-box.svg" alt="">
                             </div>
                         </div>
-                        <div class="bg-linear-to-r from-soft-ivory to-soft-ivory border border-deep-amber rounded-[14px] py-3 px-2 flex items-center justify-between">
-                            <div class="flex flex-col gap-1.5">
-                                <p class="font-normal text-sm text-copper-orange">Average Rating</p>
-                                <p class="font-bold text-xl text-warm-tangerine">4.6</p>
+
+                        <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
+                            <div class="flex flex-col gap-2">
+                            <p class="font-normal text-sm">Medicine in Stock</p>
+                            <p class="font-semibold text-2xl">1,240</p>
+                            <p class="font-normal text-xs text-green">Available: 1,110</p>
+                            <p class="font-normal text-xs text-crimson-red2">Low Stock: 34</p>
                             </div>
-                            <div class="flex flex-col items-center gap-1.5">
-                                <div class="flex items-center">
-                                    <img src="/static/images/star.svg" alt="">
-                                    <img src="/static/images/star.svg" alt="">
-                                    <img src="/static/images/star.svg" alt="">
-                                    <img src="/static/images/star.svg" alt="">
-                                    <img src="/static/images/star.svg" alt="">
-                                </div>
-                                <p class="font-normal text-xs text-cinnamon-orange">Based on customer feedback</p>
+                            <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
+                            <img src="/static/images/stock-medicine.svg" alt="">
                             </div>
+                        </div>
+
+                        <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
+                            <div class="flex flex-col gap-2">
+                            <p class="font-normal text-sm">Revenue</p>
+                            <p class="font-semibold text-2xl">₹48,630</p>
+                            <p class="text-green font-normal text-xs">Prescribe Orders: ₹36,400 </p>
+                            <p class="text-golden-yellow1 font-normal text-xs">OTC Sales: ₹12,220</p>
+                            </div>
+                            <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
+                            <img src="/static/images/revenue-wallet.svg" alt="">
+                            </div>
+                        </div>
                         </div>
                     </div>
 
@@ -397,6 +351,39 @@
                    {% endif %}
                    
                 </div>
+                    <!-- Subscription Details -->
+                    <div class="bg-white border border-cool-ice-gray rounded-sm p-4 flex flex-col gap-4 mt-5 ml-3">
+                        <div class="flex items-center justify-between">
+                        <p class="font-semibold text-lg text-midnight-blue-gray">Subscription Details</p>
+                        <div class="w-[120px] h-10 flex items-center justify-center bg-premium-light-blue rounded-[10px]">
+                            <span class="font-semibold text-base text-primary-blue">Active</span>
+                        </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                        <p class="font-normal text-lg text-midnight-blue-gray">Premium Subscription Plan</p>
+                        <p class="font-bold text-[32px] text-blue-charcoal">&#8377;999<span
+                            class="font-normal text-base">/month</span></p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">High-value leads</p>
+                            <p class="font-normal text-sm text-cool-gray text-left">24th May, 2026 (32 days left)</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">Fewer but richer bids</p>
+                            <p class="font-normal text-sm text-cool-gray text-left! shrink-0">Featured listing</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-base text-cool-gray">Doctors gain in efficiency</p>
+                            <p class="font-normal text-sm text-cool-gray ">Analytics Dashboard</p>
+                        </div>
+                        </div>
+                        <div class="pt-3.5 flex items-center justify-center">
+                        <a href="{% url 'settings_page' %}" class="bg-primary-blue w-[322px] h-10 rounded-lg flex items-center justify-center">
+                            <span class="font-semibold text-sm text-white">View Plan Details</span>
+                        </a>
+                        </div>
+                    </div>
                 <!-- Create Coupon Banner -->
                 {% comment %} <div class="mt-4 bg-blue-600 rounded-2xl relative overflow-hidden px-6 py-5">
 
@@ -584,42 +571,10 @@
 
 </div>
 
-                    <!-- Subscription Details -->
-                    <div class="bg-white border border-cool-ice-gray rounded-sm p-4 flex flex-col gap-4 mt-5 ml-3">
-                        <div class="flex items-center justify-between">
-                        <p class="font-semibold text-lg text-midnight-blue-gray">Subscription Details</p>
-                        <div class="w-[120px] h-10 flex items-center justify-center bg-premium-light-blue rounded-[10px]">
-                            <span class="font-semibold text-base text-primary-blue">Active</span>
-                        </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                        <p class="font-normal text-lg text-midnight-blue-gray">Premium Subscription Plan</p>
-                        <p class="font-bold text-[32px] text-blue-charcoal">&#8377;999<span
-                            class="font-normal text-base">/month</span></p>
-                        </div>
-                        <div class="flex flex-col gap-3">
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold text-base text-cool-gray">High-value leads</p>
-                            <p class="font-normal text-sm text-cool-gray text-left">24th May, 2026 (32 days left)</p>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold text-base text-cool-gray">Fewer but richer bids</p>
-                            <p class="font-normal text-sm text-cool-gray text-left! shrink-0">Featured listing</p>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold text-base text-cool-gray">Doctors gain in efficiency</p>
-                            <p class="font-normal text-sm text-cool-gray ">Analytics Dashboard</p>
-                        </div>
-                        </div>
-                        <div class="pt-3.5 flex items-center justify-center">
-                        <a href="{% url 'settings_page' %}" class="bg-primary-blue w-[322px] h-10 rounded-lg flex items-center justify-center">
-                            <span class="font-semibold text-sm text-white">View Plan Details</span>
-                        </a>
-                        </div>
-                    </div>
+
         
                     <!--Trends-->
-                    <div class="mt-5 flex flex-col">
+                    {% comment %} <div class="mt-5 flex flex-col">
                         <div class="bg-dodger-blue rounded-tl-[14px] rounded-tr-[14px] py-5 px-4 flex items-center justify-between">
                             <p class="font-semibold text-base text-white">📊 Nearby Trends & Market Insights</p>
                             <p class="font-semibold text-base text-white">&#8377;200</p>
@@ -650,7 +605,7 @@
                                 <span class="font-medium text-sm text-white">Pay now</span>
                             </button>
                         </div>
-                    </div>
+                    </div> {% endcomment %}
                 </div>
             </div>
 {% endblock %}

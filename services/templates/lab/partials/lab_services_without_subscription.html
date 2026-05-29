@@ -4,13 +4,120 @@
   <!-- keep your header + subscription promo as-is -->
 
   <div class="w-full rounded-lg shadow-17 py-4 px-6 flex flex-col gap-5">
+    <div class="flex flex-col lg:flex-row gap-3 w-full lg:h-[494px]">
+        <div class="relative flex-1">
+            <img
+                src="{% if lab_profile.lab_photo_path %}/document/{{ lab_profile.lab_photo_path }}{% else %}/static/images/lab-bg.png{% endif %}"
+                alt="Lab"
+                class="w-full h-full object-cover rounded-lg">
 
+            <div class="absolute inset-0 flex items-end">
+                <div class="bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
+                    <div class="flex flex-col gap-2">
+
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined">home</span>
+                            <p class="text-base font-semibold">
+                                {{ lab_profile.lab_name|default:"Your Lab Name" }}
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <p class="font-semibold text-sm">
+                                {{ lab_profile.address|default:"Address not available" }},
+                                {{ lab_profile.city|default:"" }},
+                                {{ lab_profile.state|default:"" }}
+                                {% if lab_profile.pincode %} - {{ lab_profile.pincode }}{% endif %}
+                            </p>
+
+                            {% comment %} <div class="bg-pale-azure rounded-lg p-2 flex items-center justify-center">
+                                <span class="font-semibold text-xs text-dodger-blue">
+                                    Active Bids: {{ active_bids|default:"0" }}
+                                </span>
+                            </div> {% endcomment %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-full lg:max-w-[448px] h-full rounded-lg overflow-hidden border-2 border-[#E2E8F0] shadow-16">
+            <div class="h-[120px] sm:h-[136px] bg-dodger-blue relative flex flex-col gap-3 px-7 py-6">
+                <span class="text-sm sm:text-base font-bold text-white">Subscription Details</span>
+                <span class="text-[30px] sm:text-[35px] font-bold text-white">
+                    ₹999 <span class="text-sm sm:text-base font-bold text-white">/month</span>
+                </span>
+                <div class="absolute right-5 top-4 bg-premium-yellow px-5 py-0.5 text-xs sm:text-sm font-bold text-black rounded-full">
+                    PREMIUM
+                </div>
+            </div>
+            <div>
+                <ul class="px-4 py-4 sm:py-5 space-y-6 sm:space-y-7">
+                    <li>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-[10px] bg-premium-light-blue shrink-0 flex items-center justify-center">
+                                    <img src="/static/images/subscription-1.svg" alt="subscription-1">
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-sm sm:text-base font-bold text-black">High-value leads</span>
+                                    <p class="text-xs sm:text-sm font-normal text-foggy-silver">Connect with premium prospects ready to engage</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-light-green">
+                                check
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-[10px] bg-premium-light-blue shrink-0 flex items-center justify-center">
+                                    <img src="/static/images/subscription-2.svg" alt="subscription-2">
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-sm sm:text-base font-bold text-black">Fewer but richer bids</span>
+                                    <p class="text-xs sm:text-sm font-normal text-foggy-silver">Quality over quantity with higher conversion rates</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-light-green">
+                                check
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-[10px] bg-premium-light-blue shrink-0 flex items-center justify-center">
+                                    <img src="/static/images/subscription-3.svg" alt="subscription-3">
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-sm sm:text-base font-bold text-black">Hospitals gain in efficiency</span>
+                                    <p class="text-xs sm:text-sm font-normal text-foggy-silver">Streamlined processes for healthcare institutions</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-light-green">
+                                check
+                            </span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="px-4 py-2">
+                <button class="w-full bg-dodger-blue py-3 text-white text-xs sm:text-sm font-semibold rounded-lg cursor-pointer">
+                    <a href="{% url 'settings_page' %}">
+                    Get Started Now
+                    </a>
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Tabs -->
     <div class="tabs tabs-inner w-[200px] sm:w-[350px]">
       <div class="flex justify-between px-2 relative">
         <div class="tab-indicator border border-blue-tint"></div>
-        <button class="tab-btn active" data-type="test-packages">Test & Packages</button>
-        <button class="tab-btn" data-type="collection-mode">Collection Mode</button>
+        <button class="tab-btn-lab active" data-type="test-packages">Test & Packages</button>
+        <button class="tab-btn-lab" data-type="collection-mode">Collection Mode</button>
       </div>
     </div>
 

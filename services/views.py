@@ -20,6 +20,7 @@ from .models import (
     MedicineType,
     PharmacyMedicine,
 )
+from registration.models import LabProfile
 from settings.models import SellerSubscription
 from core.settings import MONGO_COLLECTIONS
 
@@ -84,18 +85,43 @@ def services(request):
         return render(request, 'pharmacy/services.html', context)
     
     elif user.user_type == 'lab':
+        lab_profile = LabProfile.objects.get(user=user)
+
         sub = SellerSubscription.objects.filter(
             seller_type="lab",
-            seller_profile_id=user.lab_profile.id,
+            seller_profile_id=lab_profile.id,
             is_active=True,
             is_enabled=True
         ).first()
-        context["lab_categories"] = LabTestCategory.objects.all()
-        context["lab_packages"] = LabTestPackageMaster.objects.select_related("category")
-        context["lab_modes"] = LabModeType.objects.all()
-        context["lab_regions"] = LabRegion.objects.all()
-        context["lab_days"] = LabDays.objects.all()
-        context["has_premium"] = bool(sub and not sub.is_expired)
+
+        package_count = LabRatePackage.objects.filter(
+            lab=lab_profile,
+            is_active=True
+        ).count()
+
+        mode_count = LabRateMode.objects.filter(
+            lab=lab_profile,
+            is_active=True
+        ).count()
+
+        has_services = package_count > 0 or mode_count > 0
+
+        context.update({
+            "lab_profile": lab_profile,
+            "lab_categories": LabTestCategory.objects.all(),
+            "lab_packages": LabTestPackageMaster.objects.select_related("category"),
+            "lab_modes": LabModeType.objects.all(),
+            "lab_regions": LabRegion.objects.all(),
+            "lab_days": LabDays.objects.all(),
+
+            "has_services": has_services,
+            "package_count": package_count,
+            "mode_count": mode_count,
+
+            "has_premium": bool(sub and not sub.is_expired),
+            "subscription": sub,
+        })
+
         return render(request, 'lab/services.html', context)
     
     elif user.user_type == 'doctor':
