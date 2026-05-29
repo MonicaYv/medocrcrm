@@ -45,18 +45,37 @@
                         <!--Hospital Image and Admin Details-->
                         <div class="flex flex-col lg:flex-row gap-3 w-full lg:h-[494px]">
                             <div class="relative flex-1">
-                                <img src="/static/images/lab-bg.png" alt="Lab" class="w-full h-full object-cover rounded-lg">
+                                <img
+                                    src="{% if lab_profile.lab_photo_path %}/document/{{ lab_profile.lab_photo_path }}{% else %}/static/images/lab-bg.png{% endif %}"
+                                    alt="Lab"
+                                    class="w-full h-full object-cover rounded-lg">
+
                                 <div class="absolute inset-0 flex items-end">
-                                    <div class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
+                                    <div class="bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
                                         <div class="flex flex-col gap-2">
+
                                             <div class="flex items-center gap-2">
                                                 <span class="material-symbols-outlined">home</span>
-                                                <p class="text-base font-semibold">Lifecare Multispeciality Hospital</p>
-                                            </div>
-                                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                                <p class="font-semibold text-sm">221/A, 2nd Floor, Shanti Nagar Road, Sector 10, Andheri East, <br> Mumbai, Maharashtra – 400093
+                                                <p class="text-base font-semibold">
+                                                    {{ lab_profile.lab_name|default:"Your Lab Name" }}
                                                 </p>
                                             </div>
+
+                                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                                <p class="font-semibold text-sm">
+                                                    {{ lab_profile.address|default:"Address not available" }},
+                                                    {{ lab_profile.city|default:"" }},
+                                                    {{ lab_profile.state|default:"" }}
+                                                    {% if lab_profile.pincode %} - {{ lab_profile.pincode }}{% endif %}
+                                                </p>
+
+                                                {% comment %} <div class="bg-pale-azure rounded-lg p-2 flex items-center justify-center">
+                                                    <span class="font-semibold text-xs text-dodger-blue">
+                                                        Active Bids: {{ active_bids|default:"0" }}
+                                                    </span>
+                                                </div> {% endcomment %}
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -644,16 +663,19 @@
 
                             <div class="w-full h-[80px] rounded-[10px] border border-[#007BFF80] flex items-center gap-5 justify-between px-4">
                                 <span class="text-sm sm:text-base font-semibold text-blue-charcoal whitespace-nowrap">₹999 / Month</span>
-                                <button class="w-full max-w-[329px] rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-sm font-semibold text-white cursor-pointer">
+                                <a href="{% url 'settings_page' %}?tab=subscription"
+                                class="w-full max-w-[329px] rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-sm font-semibold text-white cursor-pointer">
                                     Pay Now
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
-                    {% if has_premium %}
-                    {% include 'lab/partials/lab_premium_section.html' %}
-                    {% else %}
-                    {% include 'lab/partials/lab_services_without_subscription.html' %}
+                    {% if has_services %}
+                        {% if has_premium %}
+                            {% include 'lab/partials/lab_premium_section.html' %}
+                        {% else %}
+                            {% include 'lab/partials/lab_services_without_subscription.html' %}
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

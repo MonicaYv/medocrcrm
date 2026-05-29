@@ -6,7 +6,7 @@ function getCSRFToken() {
 const chartLabels = JSON.parse(document.getElementById('chartLabelsData').textContent);
 const chartData = JSON.parse(document.getElementById('chartDataData').textContent);
 
-const colors = ["#5182E3", "#28A745", "#3AAFA9"];
+const colors = ["#5182E3", "#28A745", "#3AAFA9", "#FF6F61", "#1E4D92"];
 const datasets = Object.keys(chartData).map((actionType, i) => ({
   label: actionType,
   data: chartData[actionType],

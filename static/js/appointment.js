@@ -7,36 +7,69 @@
  * - Status-based enquiry UI
  */
 
+
 let currentStatus = "all";
 
-$(document).ready(function () {
+function loadAppointments(status = "all", page = 1) {
 
-  /* ------------------------------
-   * Load Appointments (AJAX)
-   * ------------------------------ */
-  function loadAppointments(status = "all", page = 1) {
     currentStatus = status;
 
     $("#cards-container").html(
-      `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
+      `<p class="text-center mt-10 text-spanish-gray">
+          Loading...
+       </p>`
     );
 
     $.ajax({
       url: "/appointment/ajax/appointments/",
       type: "GET",
       data: { status, page },
+
       success: function (res) {
         $("#cards-container").html(res.html);
       },
+
       error: function () {
         $("#cards-container").html(
-          `<p class="text-center text-red-500 mt-10">Failed to load appointments</p>`
+          `<p class="text-center text-red-500 mt-10">
+             Failed to load appointments
+           </p>`
         );
       }
     });
-  }
+}
 
-  loadAppointments("all", 1);
+// $(document).ready(function () {
+
+//   /* ------------------------------
+//    * Load Appointments (AJAX)
+//    * ------------------------------ */
+//   function loadAppointments(status = "all", page = 1) {
+//     currentStatus = status;
+
+//     $("#cards-container").html(
+//       `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
+//     );
+
+//     $.ajax({
+//       url: "/appointment/ajax/appointments/",
+//       type: "GET",
+//       data: { status, page },
+//       success: function (res) {
+//         $("#cards-container").html(res.html);
+//       },
+//       error: function () {
+//         $("#cards-container").html(
+//           `<p class="text-center text-red-500 mt-10">Failed to load appointments</p>`
+//         );
+//       }
+//     });
+//   }
+
+//   loadAppointments("all", 1);
+$(document).ready(function () {
+
+loadAppointments("all", 1);
 
   /* ------------------------------
    * Tabs
@@ -87,6 +120,38 @@ $(document).ready(function () {
       $("#modal-address").text(card.data("address") || "-");
       $("#modal-service-type").text(card.data("service-type") || "-");
       $("#modal-details").text(card.data("details") || "-");
+    //   const attachmentUrl = card.data("attachment") || "";
+
+    //   $(".view-attachment").attr(
+    //     "data-file",
+    //     attachmentUrl
+    //   );
+    //   const attachmentUrl = card.data("attachment") || "";
+
+    //   $(".attachment-name").text(
+    //     attachmentUrl
+    //      ? attachmentUrl.split("/").pop()
+    //      : "No Attachment"
+    //   );
+
+    //   $(".view-attachment").attr(
+    //     "data-file",
+    //     attachmentUrl
+    //  );
+    const attachmentUrl = card.data("attachment") || "";
+    console.log("Attachment URL:", attachmentUrl);
+    console.log(card);
+
+    $(".attachment-name").text(
+      attachmentUrl
+       ? attachmentUrl.split("/").pop()
+       : "No Attachment"
+      );
+
+      $(".view-attachment").attr(
+        "data-file",
+        attachmentUrl
+      );
 
       $("#modal-order-id").text("Order #" + orderId);
       $("#modal-budget").text(budget ? "₹" + budget : "-");
@@ -114,7 +179,6 @@ $(document).ready(function () {
       $(".modal-pending").removeClass("hidden");
     }
   );
-});
 
 /* ------------------------------
  * Close Modal
@@ -168,8 +232,19 @@ const ENQUIRY_TEMPLATES = {
       </div>
 
       <div class="pt-4 flex justify-center gap-2 mb-2">
-        <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
-        <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10">Reject</button>
+        // <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
+        // <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10">Reject</button>
+        <button
+          class="accept-btn bg-dodger-blue text-white rounded-lg w-[180px] h-10"
+          data-order="${orderId}">
+          Accept
+        </button>
+
+        <button
+          class="reject-btn border border-strong-red text-strong-red rounded-lg w-[180px] h-10"
+          data-order="${orderId}">
+          Reject
+        </button>
       </div>
     </div>
   `,
@@ -236,3 +311,375 @@ const ENQUIRY_TEMPLATES = {
     </div>
   `
 };
+/* ------------------------------
+ * ACCEPT APPOINTMENT
+ * ------------------------------ */
+
+// $(document).on("click", ".accept-btn", function () {
+
+//     const orderId = $(this).data("order");
+
+//     $.ajax({
+
+//         url: "/appointment/update-status/",
+
+//         type: "POST",
+
+//         // data: {
+
+//         //     order_id: orderId,
+
+//         //     status: "Accepted",
+
+//         //     csrfmiddlewaretoken:
+//         //     $("input[name=csrfmiddlewaretoken]").val()
+
+//         // },
+//         data: {
+
+//             order_id: orderId,
+
+//             status: "Accepted"
+
+//           },
+
+//          headers: {
+
+//             "X-CSRFToken": getCookie("csrftoken")
+
+//          },
+
+//         // success: function () {
+
+          
+//         //     showToast("Appointment Accepted Successfully", "success");
+
+//         //     location.reload();
+
+//         // }
+//       success: function (response) {
+
+//     if (response.success) {
+
+//         showToast("Appointment Accepted Successfully", "success");
+
+//         $(".modal-pending").addClass("hidden");
+
+//         setTimeout(() => {
+
+//             loadAppointments(currentStatus, 1);
+
+//         }, 300);
+
+//     } else {
+
+//         showToast(response.message || "Something went wrong", "error");
+
+//     }
+
+// }
+
+// });
+
+
+/* ------------------------------
+ * REJECT APPOINTMENT
+ * ------------------------------ */
+
+$(document).on("click", ".reject-btn", function () {
+
+    const orderId = $(this).data("order");
+
+    $.ajax({
+
+        url: "/appointment/update-status/",
+        type: "POST",
+
+        data: {
+            order_id: orderId,
+            status: "Cancelled"
+        },
+
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                showToast("Appointment Cancelled Successfully", "error");
+
+                $(".modal-pending").addClass("hidden");
+
+                setTimeout(() => {
+                    loadAppointments(currentStatus, 1);
+                }, 300);
+
+            } else {
+
+                showToast(response.message || "Something went wrong", "error");
+
+            }
+
+        },
+
+        error: function (xhr) {
+
+            console.log(xhr.responseText);
+
+            alert("Error");
+        }
+
+    });
+
+});
+
+
+/* ------------------------------
+ * ACCEPT APPOINTMENT
+ * ------------------------------ */
+
+$(document).on("click", ".accept-btn", function () {
+
+    const orderId = $(this).data("order");
+
+    $.ajax({
+
+        url: "/appointment/update-status/",
+        type: "POST",
+
+        data: {
+            order_id: orderId,
+            status: "Accepted"
+        },
+
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                showToast("Appointment Accepted Successfully", "success");
+
+                $(".modal-pending").addClass("hidden");
+
+                setTimeout(() => {
+                    loadAppointments(currentStatus, 1);
+                }, 300);
+
+            } else {
+
+                showToast(response.message || "Something went wrong", "error");
+
+            }
+
+        },
+
+        error: function (xhr) {
+
+            console.log(xhr.responseText);
+
+            showToast("Error updating appointment", "error");
+        }
+
+    });
+
+});
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+
+        const cookies = document.cookie.split(";");
+
+        for (let i = 0; i < cookies.length; i++) {
+
+            const cookie = cookies[i].trim();
+
+            if (
+                cookie.substring(0, name.length + 1) ===
+                (name + "=")
+            ) {
+
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+
+                break;
+
+            }
+
+        }
+
+    }
+
+    return cookieValue;
+
+}
+function showToast(message, type = "success") {
+
+    const toast = document.createElement("div");
+
+    toast.className = `
+        fixed top-5 right-5 z-[9999]
+        px-5 py-3 rounded-lg text-white font-medium shadow-lg
+        transition-all duration-300
+        ${type === "success" ? "bg-green-500" : "bg-red-500"}
+    `;
+
+    toast.innerText = message;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(-20px)";
+
+        setTimeout(() => {
+
+            toast.remove();
+
+        }, 300);
+
+    }, 2000);
+}
+/* ------------------------------
+ * VIEW ATTACHMENT
+ * ------------------------------ */
+
+// $(document).on("click", ".view-attachment", function () {
+
+//     const fileUrl = $(this).attr("data-file");
+
+//     if (!fileUrl) {
+
+//         showToast("No attachment found", "error");
+
+//         return;
+
+//     }
+
+//     window.open(fileUrl, "_blank");
+
+// });
+/* ------------------------------
+ * VIEW ATTACHMENT
+ * ------------------------------ */
+
+
+$(document).on("click", ".view-attachment", function (e) {
+
+    e.stopPropagation();
+
+    const fileUrl = $(this).attr("data-file");
+    console.log("FILE URL =>", fileUrl);
+
+    if (!fileUrl) {
+
+        showToast("No attachment found", "error");
+
+        return;
+    }
+
+    // Set uploaded image inside modal
+    $(".attachment-modal img").attr("src", fileUrl);
+    const previewContainer = $(".attachment-modal .mt-4");
+
+previewContainer.html("");
+
+if (fileUrl.toLowerCase().endsWith(".pdf")) {
+
+    previewContainer.html(`
+        <iframe
+            src="${fileUrl}"
+            class="w-full h-[500px] rounded-md"
+        ></iframe>
+    `);
+
+} else {
+
+    previewContainer.html(`
+        <img
+            src="${fileUrl}"
+            class="rounded-md w-full h-auto max-h-[420px] object-contain"
+        />
+    `);
+
+}
+
+    // Open modal
+    $(".attachment-modal").removeClass("hidden");
+
+});
+
+
+/* ------------------------------
+ * CLOSE ATTACHMENT MODAL
+ * ------------------------------ */
+
+$(document).on("click", ".close-attachment-modal", function () {
+
+    $(".attachment-modal").addClass("hidden");
+
+});
+
+
+/* ------------------------------
+ * CLOSE ON OUTSIDE CLICK
+ * ------------------------------ */
+
+$(document).on("click", ".attachment-modal", function (e) {
+
+    if ($(e.target).is(".attachment-modal")) {
+
+        $(".attachment-modal").addClass("hidden");
+
+    }
+
+});
+
+/* ------------------------------
+ * SHARE APPOINTMENT
+ * ------------------------------ */
+
+$(document).on("click", ".share-btn", function () {
+
+    const patientName = $("#modal-name").text();
+
+    const phone = $("#modal-phone").text();
+
+    const date = $("#modal-date").text();
+
+    const shareText =
+`Appointment Details
+
+Patient: ${patientName}
+Phone: ${phone}
+Date: ${date}`;
+
+    if (navigator.share) {
+
+        navigator.share({
+
+            title: "Appointment Details",
+
+            text: shareText
+
+        });
+
+    } else {
+
+        navigator.clipboard.writeText(shareText);
+
+        showToast("Appointment copied to clipboard", "success");
+
+    }
+
+});
+});

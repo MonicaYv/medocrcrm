@@ -1,9 +1,11 @@
+import os
 from pathlib import Path
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import JsonResponse
 from django.contrib import messages
 from django.conf import settings
+from django.core.files.storage import default_storage
 from datetime import datetime, timedelta, date
 from django.utils import timezone
 from django.core.paginator import Paginator
@@ -16,12 +18,41 @@ from .models import (
     State, City, PincodeOption, AgeOption, GenderOption, SpendingPowerOption, PaymentStatusEnum
 )
 from points.models import PointsActionType, PointsHistory
-from registration.views import validate_and_save_file
 from registration.models import PharmacyProfile, LabProfile, HospitalProfile, DoctorProfile
 from coupon.models import SellerCoupon
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+COUPON_ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.mp4'}
+COUPON_MAX_FILE_SIZE = 10 * 1024 * 1024
+
+
+def build_media_url(path):
+    if not path:
+        return ""
+
+    path = str(path).replace("\\", "/").strip()
+    if path.startswith(("http://", "https://", "/")):
+        return path
+
+    return f"{settings.MEDIA_URL.rstrip('/')}/{path.lstrip('/')}"
+
+
+def validate_and_save_coupon_file(file_obj):
+    if not file_obj:
+        return '', 'Coupon file is required.'
+
+    ext = os.path.splitext(file_obj.name)[1].lower()
+    if ext not in COUPON_ALLOWED_EXTENSIONS:
+        return '', 'Coupon file must be a JPG, PNG, or MP4 file.'
+
+    if file_obj.size > COUPON_MAX_FILE_SIZE:
+        return '', 'Coupon file must be under 10MB.'
+
+    upload_dir = os.path.join('advertiser_docs', 'coupon_images')
+    os.makedirs(os.path.join(settings.MEDIA_ROOT, upload_dir), exist_ok=True)
+    filename = default_storage.save(os.path.join(upload_dir, file_obj.name), file_obj)
+    return filename, None
 
 def get_seller_profile(user):
     profile_map = {
@@ -227,9 +258,7 @@ def coupon_view(request):
             # --- Validate image ---
             image_path = None
             if image_file:
-                image_path, error = validate_and_save_file(
-                    image_file, 'coupon_images', 'Coupon Image', user_type='advertiser'
-                )
+                image_path, error = validate_and_save_coupon_file(image_file)
                 if error:
                     if is_ajax:
                         return JsonResponse({'error': error, 'missing_fields': ['Image']})
@@ -377,7 +406,7 @@ def coupon_detail(request, coupon_id):
             'redeemed_count': getattr(coupon, 'redeemed_count', 0),
             'validity': coupon.validity.strftime('%d/%m/%y,%H:%M') if getattr(coupon, 'validity', None) else '',
             'status': 'Active' if getattr(coupon, 'validity', None) and coupon.validity > timezone.now().date() else 'Expired',
-            'image_url': coupon.image if coupon.image else '',
+            'image_url': build_media_url(coupon.image),
             'age_group': getattr(coupon.age_group, 'name', '') if hasattr(coupon, 'age_group') and coupon.age_group else '',
             'gender': getattr(coupon.gender, 'name', '') if hasattr(coupon, 'gender') and coupon.gender else '',
             'city': getattr(coupon.city, 'name', '') if hasattr(coupon, 'city') and coupon.city else '',

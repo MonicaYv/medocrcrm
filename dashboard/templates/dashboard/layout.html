@@ -5,6 +5,7 @@
     <title>{% block title %}Dashboard{% endblock %}</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="shortcut icon" href="{% static 'images/logo.svg' %}" >
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400..700,0..1,0" rel="stylesheet">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
@@ -22,11 +23,13 @@
 <main class="h-screen w-full">
     <!-- Header -->
     {% include 'dashboard/header.html' %}
-    <div class="h-[calc(100vh-72px)] w-full flex">
+    <!-- <div class="h-[calc(100vh-72px)] w-full flex"> -->
+    <div class="min-h-screen w-full flex overflow-hidden">
         <!-- Sidebar -->
         {% include 'dashboard/sidebar.html' %}
         <!-- Main Content Area -->
-        <div class="flex-1 overflow-y-auto scroll p-4">
+        
+        <div class="flex-1 overflow-y-auto scroll px-4 py-2">
             {% block content %}
             {% endblock %}
         </div>

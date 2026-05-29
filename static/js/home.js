@@ -1359,9 +1359,21 @@ $(document).ready(function () {
           refreshAllCalendars();
         }
       },
+      // error: function(xhr, status, error) {
+      //   console.error('Error loading events:', error);
+      // }
       error: function(xhr, status, error) {
-        console.error('Error loading events:', error);
-      }
+
+    console.log(xhr.responseText);
+
+    const container = $('#upcoming-events-container');
+
+    if (!container.length) {
+        return;
+    }
+
+    console.error('Error loading events:', error);
+}
     });
   }
 
@@ -1404,6 +1416,9 @@ $(document).ready(function () {
           return;
         }
         const title = container.find('h4').first(); // Keep the title
+        if (!container.length) {
+          return;
+        }
         
         // Clear existing content except title
         container.find('*').not('h4').remove();
@@ -1431,6 +1446,9 @@ $(document).ready(function () {
       },
       error: function(xhr, status, error) {
         const container = $('#upcoming-events-container');
+        if (!container.length) {
+          return;
+}
         const title = container.find('h4').first();
         container.find('*').not('h4').remove();
         
@@ -1797,7 +1815,19 @@ $(document).ready(function () {
       const start = new Date();
       start.setDate(end.getDate() - days + 1);
 
-      const format = date => date.toISOString().split('T')[0];
+      // const format = date => date.toISOString().split('T')[0];
+      const format = (date) => {
+
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+
+            console.log("Invalid Date:", date);
+
+            return "";
+        }
+
+       return date.toISOString().split('T')[0];
+
+   };
       initDynamicNGOChart(format(start), format(end));
     }
 
@@ -1814,4 +1844,133 @@ $(document).ready(function () {
     }
   });
 });
+$(document).ready(function () {
 
+    $(".view-appointment").click(function (e) {
+
+        e.stopPropagation();
+
+        $(".appointmentRequestDetail").removeClass("hidden");
+
+        $("body").addClass("overflow-hidden");
+    });
+    $(".accept-button").click(function () {
+
+    $(".enquiredDetail").addClass("hidden");
+
+    $(".acceptedDetail").removeClass("hidden");
+
+  });
+
+    $(".close-popup").click(function () {
+
+        $(".appointmentRequestDetail").addClass("hidden");
+
+        $("body").removeClass("overflow-hidden");
+    });
+
+});
+$(document).on("click", ".accept-button", function () {
+
+    $(".enquiredDetail").addClass("hidden");
+    $(".acceptedDetail").removeClass("hidden");
+
+    Swal.fire({
+        icon: "success",
+        title: "Appointment Accepted",
+        text: "Appointment accepted successfully",
+        showConfirmButton: false,
+        timer: 2000
+    });
+
+});
+$(document).on("click", ".cancel-appointment", function () {
+    alert("Cancel Click Working");
+});
+$(document).on("click", ".complete-button", function () {
+    alert("Complete Working");
+});
+
+$(document).on("click", ".cancel-appointment", function () {
+    alert("Cancel Working");
+});
+// Appointment Request Popup
+
+$(document).on("click", ".accept-button", function () {
+
+    $(".enquiredDetail").addClass("hidden");
+    $(".acceptedDetail").removeClass("hidden");
+
+});
+
+$(document).on("click", ".reject-button", function () {
+
+    $(".appointmentRequestDetail").addClass("hidden");
+
+});
+// Complete Appointment
+
+$(document).on("click", ".complete-btn", function () {
+
+    console.log("Complete Button Clicked");
+
+    $(".acceptedDetail").addClass("hidden");
+
+    $(".completedDetail").removeClass("hidden");
+
+});
+
+
+// Cancel Appointment
+
+$(document).on("click", "[data-popup='cancelAppointmentPopup']", function () {
+
+    console.log("Cancel Appointment Clicked");
+
+    $(".cancelAppointmentPopup").removeClass("hidden");
+
+});
+$(document).on("click", ".cancelAppointmentBtn", function () {
+
+    console.log("Final Cancel Clicked");
+
+    $(".cancelAppointmentPopup").addClass("hidden");
+
+    $(".acceptedDetail").addClass("hidden");
+
+    $(".cancelDetails").removeClass("hidden");
+
+});
+$(document).on("click", ".complete-appointment-btn", function () {
+
+    const appointmentId = $(this).data("id");
+
+    $.ajax({
+        url: "/history/lab/complete/",
+        type: "POST",
+        data: {
+            id: appointmentId,
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
+        },
+        success: function () {
+            location.reload();
+        }
+    });
+
+});
+$(".popup-btn").on("click", function () {
+  let popupId = $(this).data("popup");
+  console.log("Popup Btn Clicked");
+  $("." + popupId)
+    .removeClass("hidden")
+    .addClass("flex");
+});
+
+// Close popup
+$(".close-popup").on("click", function () {
+  let popupId = $(this).data("popup");
+  $(this)
+    .closest("." + popupId)
+    .addClass("hidden")
+    .removeClass("flex");
+});

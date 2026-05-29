@@ -536,10 +536,16 @@ function fetchLabServices() {
     // toggle sections
     if (res.has_premium) {
       $('.premium-section').removeClass('hidden');
+      setTimeout(() => {
+          $('.premium-section .tab-btn-lab.active').trigger('click');
+      }, 50);
       $('.services-without-subscription').addClass('hidden');
       renderPremiumServices(res);
     } else {
       $('.services-without-subscription').removeClass('hidden');
+      setTimeout(() => {
+          $('.services-without-subscription .tab-btn-lab.active').trigger('click');
+      }, 50);
       $('.premium-section').addClass('hidden');
       renderNonPremiumServices(res);
     }
@@ -816,7 +822,15 @@ function controlServiceSections(res) {
   const premiumSection = $('.premium-section');
   const nonPremiumSec  = $('.services-without-subscription');
   const fab            = $('.add-service-fab');
+  function refreshTabs() {
+    $('.tabs').each(function () {
+        const activeBtn = $(this).find('.tab-btn.active, .tab-btn-lab.active');
 
+        if (activeBtn.length) {
+            activeBtn.trigger('click');
+        }
+    });
+  }
   // hide all
   homeSection.addClass('hidden');
   premiumSection.addClass('hidden');
@@ -832,9 +846,11 @@ function controlServiceSections(res) {
   fab.removeClass('hidden');
 
   if (res.has_premium) {
-    premiumSection.removeClass('hidden');
+      $('.premium-section').removeClass('hidden');
+      refreshTabs();
   } else {
-    nonPremiumSec.removeClass('hidden');
+      $('.services-without-subscription').removeClass('hidden');
+      refreshTabs();
   }
 }
 

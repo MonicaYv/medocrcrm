@@ -28,8 +28,11 @@ urlpatterns = [
     path('services/', include('services.urls')),
     path('staff/', include('staff.urls')),
     path('history/', include('history.urls')),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
 
 if settings.DEBUG:
     # ... existing code ...
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

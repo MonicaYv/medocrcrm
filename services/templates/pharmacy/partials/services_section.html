@@ -2,16 +2,12 @@
 
 <div class="services-section px-4 hidden">
     <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center w-full px-1 lg:px-2 gap-2 lg:gap-10">
-            <div class="flex flex-col items-center gap-2">
-                <div class="step-circle active-step" data-step="1">1</div>
-                <span class="step-label active-heading font-normal text-xs lg:text-base text-foggy-silver whitespace-nowrap" data-step="1">Add Medicine</span>
-            </div>
-            <div class="step-line" data-step="1"></div>
-            <div class="flex flex-col items-center gap-2">
-                <div class="step-circle" data-step="2">2</div>
-                <span class="step-label font-normal text-xs lg:text-base text-foggy-silver whitespace-nowrap" data-step="2">Summary</span>
-            </div>
+        <div class="pharmacy-stepper">
+            <div class="step-circle pharmacy-step-circle pharmacy-step-start active-step" data-step="1">1</div>
+            <div class="step-line pharmacy-step-line" data-step="1"></div>
+            <div class="step-circle pharmacy-step-circle pharmacy-step-end" data-step="2">2</div>
+            <span class="step-label pharmacy-step-label pharmacy-step-start active-heading font-normal text-xs lg:text-base text-foggy-silver whitespace-nowrap" data-step="1">Add Medicine</span>
+            <span class="step-label pharmacy-step-label pharmacy-step-end font-normal text-xs lg:text-base text-foggy-silver whitespace-nowrap" data-step="2">Summary</span>
         </div>
     </div>
 
@@ -66,7 +62,7 @@
                 <div class="grid grid-col-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="text-base sm:text-lg text-jet-black font-semibold">Quantity</label>
-                        <input type="text" class="medicine-quantity w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none" placeholder="10 Tablets">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="medicine-quantity w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none" placeholder="10">
                     </div>
                     <div>
                         <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
@@ -94,6 +90,7 @@
                 Submit
             </button>
         </div>
+        <div class="pharmacy-validation-message hidden rounded-md border px-3 py-2 text-sm font-semibold"></div>
 
         <div class="flex items-center justify-end gap-5">
             <button id="cancel-steps" type="button" class="step-btn w-full max-w-[270px] border border-strong-red text-strong-red py-3 rounded-lg text-sm font-normal cursor-pointer">

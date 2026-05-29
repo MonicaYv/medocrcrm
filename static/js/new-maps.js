@@ -5,7 +5,7 @@ const colorHexMap = {
   "light-sea-green": "#3AAFA9",
   "dodger-blue": "#007BFF",
   "light-dodger-blue": "#EEF6FF",
-  "dodger-blue": "#1A7A5E",
+//   "dodger-blue": "#1A7A5E",
   "light-dodger-blue": "#DDEBE7",
 };
 
@@ -42,7 +42,8 @@ const amenityTags = {
     hospital: 'hospital',
     doctor: 'doctors',
     pharmacy: 'pharmacy',
-    lab: 'laboratory'
+    // lab: 'laboratory'
+    lab: 'laboratory|clinic|diagnostic'
 };
 
 // Define custom Leaflet icons for different amenity types
@@ -86,7 +87,7 @@ if (navigator.geolocation) {
 }
 
 // tile_url = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-tile_url = "http://192.168.1.107:3090/styles/light-mode-nopoi/256/{z}/{x}/{y}.png"
+tile_url = "http://122.170.111.109:3090/styles/light-mode-nopoi/256/{z}/{x}/{y}.png"
 
 // Initialize map with user's location
 function showLocation(position) {
@@ -254,7 +255,7 @@ function fetchPlaces(type, buttonElement, mode = "map") {
             lat: currentLat,
             lng: currentLon,
             type: type,
-            range: 1000  // you can increase to 5000 if needed
+            range: 15000  // you can increase to 5000 if needed
         }),
     })
     .then((res) => res.json())
@@ -314,7 +315,14 @@ function fetchPlaces(type, buttonElement, mode = "map") {
                     renderListView(allFetchedPlaces);
                 }
         } else {
-        toastr.error(`No ${type}s found nearby.`);
+        const typeLabels = {
+            hospital: "hospitals",
+            doctor: "doctors",
+            pharmacy: "pharmacies",
+            lab: "labs"
+        };
+        // toastr.error(`No ${type}s found nearby.`);
+        toastr.error(`No ${typeLabels[type]} found nearby.`);
         }
     })
     .catch((err) => {

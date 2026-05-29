@@ -116,5 +116,73 @@ attachmentModal.addEventListener("click", (e) => {
     // If clicked outside dropdowns, close all
     allDropdowns.forEach(d => d.classList.add('hidden'));
   });
+$(document).on("click", ".complete-appointment-btn", function () {
 
+    const appointmentId = $(this).data("id");
+
+    $.ajax({
+        url: "/history/lab/complete/",
+        type: "POST",
+        data: {
+            id: appointmentId,
+            csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+        },
+
+        success: function (response) {
+
+            Swal.fire({
+                icon: "success",
+                title: "Appointment Completed",
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            location.reload();
+        }
+    });
+});
+$(document).on("click", ".cancel-appointment-btn", function () {
+
+    const appointmentId = $(this).data("id");
+
+    $.ajax({
+        url: "/history/lab/cancel/",
+        type: "POST",
+        data: {
+            id: appointmentId,
+            csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+        },
+
+        success: function (response) {
+
+            Swal.fire({
+                icon: "success",
+                title: "Appointment Cancelled",
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            location.reload();
+        }
+    });
+});
+$(document).on("click", "#shareBtn", function () {
+
+    if (navigator.share) {
+
+        navigator.share({
+            title: "Appointment Details",
+            text: "Appointment Information",
+            url: window.location.href
+        });
+
+    } else {
+
+        window.open(
+            "https://wa.me/?text=" + encodeURIComponent(window.location.href),
+            "_blank"
+        );
+
+    }
+});
 

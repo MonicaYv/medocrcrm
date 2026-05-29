@@ -2,6 +2,7 @@
 
 <div
   class="card-all-{{ appointment.status|lower }} bg-white mt-4 p-4 rounded-md shadow-lg cursor-pointer"
+  data-id="{{ appointment.id }}"
 
   data-name="Pt. {{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name|default:'' }}"
   data-profile-img="/static/images/rachel-kate.svg"
@@ -25,6 +26,9 @@
   data-cancelled-by="{{ appointment.cancelled_by|default:'Doctor' }}"
   data-distance="{{ appointment.distance|default:'6 km' }}"
   data-time="{{ appointment.eta|default:'20 mins away' }}"
+  data-attachment="/static/images/attachment.png"
+  data-bill="{% if appointment.proforma_bill %}{{ appointment.proforma_bill.url }}{% endif %}"
+
   >
 
 

@@ -20,8 +20,21 @@ from .models import (
     MedicineType,
     PharmacyMedicine,
 )
+from registration.models import LabProfile
 from settings.models import SellerSubscription
 from core.settings import MONGO_COLLECTIONS
+from django.conf import settings
+
+def build_media_url(path):
+    if not path:
+        return ""
+
+    path = str(path).replace("\\", "/").strip()
+    if path.startswith(("http://", "https://", "/")):
+        return path
+
+    return f"{settings.MEDIA_URL.rstrip('/')}/{path.lstrip('/')}"
+
 
 @dashboard_login_required
 def services(request):
@@ -76,6 +89,9 @@ def services(request):
 
         context.update({
             "pharmacy_profile": pharmacy_profile,
+            "pharmacy_storefront_image_url": build_media_url(
+                pharmacy_profile.storefront_image_path
+            ),
             "pharmacy_medicines": medicines,
             "has_pharmacy_medicines": medicines.exists(),
             "has_premium": bool(sub and not sub.is_expired),
@@ -84,18 +100,43 @@ def services(request):
         return render(request, 'pharmacy/services.html', context)
     
     elif user.user_type == 'lab':
+        lab_profile = LabProfile.objects.get(user=user)
+
         sub = SellerSubscription.objects.filter(
             seller_type="lab",
-            seller_profile_id=user.lab_profile.id,
+            seller_profile_id=lab_profile.id,
             is_active=True,
             is_enabled=True
         ).first()
-        context["lab_categories"] = LabTestCategory.objects.all()
-        context["lab_packages"] = LabTestPackageMaster.objects.select_related("category")
-        context["lab_modes"] = LabModeType.objects.all()
-        context["lab_regions"] = LabRegion.objects.all()
-        context["lab_days"] = LabDays.objects.all()
-        context["has_premium"] = bool(sub and not sub.is_expired)
+
+        package_count = LabRatePackage.objects.filter(
+            lab=lab_profile,
+            is_active=True
+        ).count()
+
+        mode_count = LabRateMode.objects.filter(
+            lab=lab_profile,
+            is_active=True
+        ).count()
+
+        has_services = package_count > 0 or mode_count > 0
+
+        context.update({
+            "lab_profile": lab_profile,
+            "lab_categories": LabTestCategory.objects.all(),
+            "lab_packages": LabTestPackageMaster.objects.select_related("category"),
+            "lab_modes": LabModeType.objects.all(),
+            "lab_regions": LabRegion.objects.all(),
+            "lab_days": LabDays.objects.all(),
+
+            "has_services": has_services,
+            "package_count": package_count,
+            "mode_count": mode_count,
+
+            "has_premium": bool(sub and not sub.is_expired),
+            "subscription": sub,
+        })
+
         return render(request, 'lab/services.html', context)
     
     elif user.user_type == 'doctor':
@@ -137,7 +178,9 @@ def services(request):
             is_active=True,
             is_enabled=True
         ).first()
-
+        service_count = len(service_cards)
+        room_count = len(room_cards)
+        has_services = service_count > 0 or room_count > 0
         context.update({
             "hospital_profile": hospital_profile,
             "hospital_categories": list(categories),
@@ -147,8 +190,13 @@ def services(request):
             "hospital_room_cards": room_cards,
             "has_hospital_cards": bool(service_cards or room_cards),
             "has_premium": bool(sub and not sub.is_expired),
+            "has_services": has_services,
             "subscription": sub,
         })
+        print("SERVICE COUNT:", len(service_cards))
+        print("ROOM COUNT:", len(room_cards))
+        print("HAS SERVICES:", bool(service_cards or room_cards))
+        print("Context:", context)
 
         return render(request, 'hospital/services.html', context)
 
@@ -548,6 +596,11 @@ def save_pharmacy_medicines(request):
 
         if not all([category, name, med_type, quantity]):
             continue
+        if not quantity.isdigit():
+            return JsonResponse({
+                "success": False,
+                "error": "Quantity should contain numbers only."
+            }, status=400)
 
         obj = PharmacyMedicine.objects.create(
             pharmacy=pharmacy,

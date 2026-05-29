@@ -75,6 +75,8 @@ class PharmacyTiming(models.Model):
     is_active = models.BooleanField(default=True)
     class Meta:
         db_table = 'pharmacy_timing'
+    def __str__(self):
+        return self.day_of_week
 
 class LabService(models.Model):
     name = models.CharField(max_length=100, unique=True, null=True, blank=True)

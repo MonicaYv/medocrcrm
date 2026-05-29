@@ -399,9 +399,14 @@
               Manage In-app updates.
             </p>
             <input type="checkbox" name="inapp_notifications" data-field="inapp_notifications" class="sr-only peer" {% if inapp_notifications %}checked{% endif %} />
-            <div
-              class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
-            </div>
+              <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full
+                  peer-checked:bg-dodger-blue
+                  peer-checked:after:translate-x-full
+                  after:content-['']
+                  after:absolute after:top-[2px] after:start-[2px]
+                  after:bg-white after:border after:rounded-full
+                  after:w-5 after:h-5 after:transition-all">
+              </div>
           </label>
         </div>
 
@@ -414,8 +419,13 @@
             </p>
             <label class="inline-flex items-center gap-3 cursor-pointer">
               <input type="checkbox" name="email_notifications" data-field="email_notifications" class="sr-only peer" {% if email_notifications %}checked{% endif %} />
-              <div
-                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
+              <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full
+                  peer-checked:bg-dodger-blue
+                  peer-checked:after:translate-x-full
+                  after:content-['']
+                  after:absolute after:top-[2px] after:start-[2px]
+                  after:bg-white after:border after:rounded-full
+                  after:w-5 after:h-5 after:transition-all">
               </div>
             </label>
           </div>
@@ -430,8 +440,13 @@
             <label class="inline-flex items-center gap-3 cursor-pointer">
 
               <input type="checkbox" name="push_notifications" data-field="push_notifications" class="sr-only peer" {% if push_notifications %}checked{% endif %} />
-              <div
-                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
+              <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full
+                  peer-checked:bg-dodger-blue
+                  peer-checked:after:translate-x-full
+                  after:content-['']
+                  after:absolute after:top-[2px] after:start-[2px]
+                  after:bg-white after:border after:rounded-full
+                  after:w-5 after:h-5 after:transition-all">
               </div>
             </label>
           </div>
@@ -467,8 +482,13 @@
                 Enable/Disable
               </p>
               <input type="checkbox" name="quite_mode" data-field="quite_mode" class="sr-only peer" {% if quite_mode %}checked{% endif %} />
-              <div
-                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
+              <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full
+                  peer-checked:bg-dodger-blue
+                  peer-checked:after:translate-x-full
+                  after:content-['']
+                  after:absolute after:top-[2px] after:start-[2px]
+                  after:bg-white after:border after:rounded-full
+                  after:w-5 after:h-5 after:transition-all">
               </div>
             </label>
           </div>
@@ -523,8 +543,10 @@
         <div id="modalContent" class="text-center bg-white rounded-md h-96">
 
           <!-- <img src="/static/images/incorp-certificate.svg" alt="" class="object-cover h-96 w-full"> -->
-          <img id="modalImg" class="object-cover h-96 w-full hidden" alt="Document preview">
-          <embed id="modalEmbed" class="w-full h-96 hidden" type="application/pdf" />
+          <!-- <img id="modalImg" class="object-cover h-96 w-full hidden" alt="Document preview"> -->
+          <img id="modalImg" class="hidden w-full h-full object-contain" alt="Document preview">
+          <!-- <embed id="modalEmbed" class="w-full h-96 hidden" type="application/pdf" /> -->
+          <embed id="modalEmbed" class="hidden w-full h-full" type="application/pdf" />
           <a id="modalLink" class="block py-8 text-{{ text }}" hidden target="_blank">Download Document</a>
         </div>
         <div class="flex items-center justify-between pt-1">
@@ -539,15 +561,20 @@
 
         <!--Buttons-->
         <div class="flex justify-between items-center pt-4 w-full">
-          <input type="file" id="replaceInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+          <input type="file" id="replaceInput"   name="document" class="hidden" accept=".pdf,.jpg,.jpeg,.png" />
           <button id="replaceBtn" type="button">
             <p
               class="flex items-center gap-2 border border-{{ text }} bg-white text-{{ text }} px-4 py-2 rounded-md cursor-pointer">
               <span class="material-symbols-outlined">upload</span>Replace
             </p>
           </button>
-          <button id="saveBtn" type="button" disabled>
-            <p class="px-4 py-2 rounded-md cursor-pointer bg-{{ text }} text-white">Save</p>
+          <button 
+             id="saveBtn" 
+             type="button"  
+             class="save-btn-doc px-4 py-2 rounded-md cursor-pointer bg-{{ text }} text-white">
+             
+            <!-- <p class="px-4 py-2 rounded-md cursor-pointer bg-{{ text }} text-white">Save</p> -->
+             Save
           </button>
         </div>
       </div>

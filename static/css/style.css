@@ -95,6 +95,15 @@
     --color-living-coral-border:#FF6F614D;
     --color-transparent-living-coral:#FF6F6126;
     --color-light-living-coral:#FF6F6159;
+    --color-midnight-blue-gray:#161C24;
+    --color-cool-gray:#454F5B;
+    --color-scarlet-red:#EF333A;
+    --color-shamrock-green:#20B038;
+    --color-premium-light-blue: #D1E7FF;
+    --color-primary-blue: #007BFF;
+    --color-premium-yellow: #FDC700;
+    --color-pale-azure: #EEF6FF;
+    --color-ghost-white: #F7F9FC;
      --color-light-transparent-living-coral:#FF6F6108;
     --color-saffron:#F79E1B59;
     --color-seashell:#FFF8EE;
@@ -332,10 +341,87 @@ body {
 }
 
 .active-step {
-  @apply text-white text-xs lg:text-lg font-bold w-8 lg:w-12 h-8 lg:h-12;
+  @apply bg-dodger-blue text-white text-xs lg:text-lg font-bold w-8 lg:w-12 h-8 lg:h-12;
   transform: scale(1.15);
 }
+.active-line {
+  @apply bg-dodger-blue;
+}
 
+.pharmacy-stepper {
+    display: grid;
+    grid-template-columns: max-content minmax(64px, 1fr) max-content;
+    grid-template-rows: auto auto;
+    align-items: start;
+    width: 100%;
+    max-width: 520px;
+    padding-inline: 4px;
+}
+
+.pharmacy-step-circle {
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-inline: auto;
+    border: 1px solid var(--color-light-gray);
+    border-radius: 9999px;
+    background-color: var(--color-white);
+    color: var(--color-foggy-silver);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.pharmacy-step-circle.active-step {
+    border-color: var(--color-dodger-blue);
+    background-color: var(--color-dodger-blue);
+    color: var(--color-white);
+}
+
+.pharmacy-step-line {
+    grid-row: 1;
+    grid-column: 2;
+    width: 100%;
+    height: 2px;
+    margin-top: 16px;
+    background-color: var(--color-light-gray);
+}
+
+.pharmacy-step-line.active-line {
+    background-color: var(--color-dodger-blue);
+}
+
+.pharmacy-step-label {
+    grid-row: 2;
+    margin-top: 8px;
+    text-align: center;
+}
+
+.pharmacy-step-start {
+    grid-column: 1;
+}
+
+.pharmacy-step-end {
+    grid-column: 3;
+}
+
+@media (min-width: 1024px) {
+    .pharmacy-stepper {
+        padding-inline: 8px;
+    }
+
+    .pharmacy-step-circle {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+
+    .pharmacy-step-line {
+        margin-top: 24px;
+    }
+}
 .redeem-btn {
     @apply w-[95px] sm:w-[110px] rounded-[10px] h-[48px] bg-light-sea-green text-white font-normal text-sm sm:text-18-nr cursor-pointer;
 }
@@ -817,3 +903,255 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+/* =========================================
+   POPULAR COUPON FIGMA UI
+========================================= */
+
+.coupon-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+
+    background: #FFFFFF;
+    border: 1px solid #F1F5F9;
+    border-radius: 14px;
+
+    padding: 12px 16px;
+
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.04);
+}
+
+.coupon-left {
+    flex: 1;
+}
+
+.coupon-category {
+    font-size: 11px;
+    font-weight: 600;
+    color: #007BFF;
+    text-transform: uppercase;
+}
+
+.coupon-left h4 {
+    margin-top: 4px;
+    margin-bottom: 4px;
+
+    font-size: 18px;
+    font-weight: 700;
+    color: #101828;
+}
+
+.coupon-left p {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #667085;
+    max-width: 360px;
+}
+
+.coupon-middle {
+    width: 130px;
+    text-align: center;
+}
+
+.coupon-middle span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #101828;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 7px;
+    background: #EAECF0;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+
+.progress {
+    width: 50%;
+    height: 100%;
+    background: #007BFF;
+    border-radius: 999px;
+}
+
+.coupon-middle small {
+    font-size: 12px;
+    color: #667085;
+}
+
+.coupon-right button {
+    background: #007BFF;
+    color: white;
+
+    border: none;
+    border-radius: 12px;
+
+    padding: 10px 16px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+@media (max-width: 768px) {
+
+    .coupon-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .coupon-middle {
+        width: 100%;
+        text-align: left;
+    }
+
+    .coupon-right {
+        width: 100%;
+    }
+
+    .coupon-right button {
+        width: 100%;
+    }
+}
+.create-coupon-banner{
+    padding: 22px 28px;
+    border-radius: 16px;
+}
+/* ====================================
+   SCHEDULED ORDER - FIGMA MATCH
+==================================== */
+
+.scheduled-card{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #EEF2F6;
+
+    border-radius: 12px;
+
+    padding: 14px 16px;
+
+    min-height: 110px;
+
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.04);
+
+    transition: 0.2s ease;
+
+    width: 100%;
+}
+
+.scheduled-card:hover{
+    transform: translateY(-2px);
+}
+
+.scheduled-user-img{
+    width: 64px;
+    height: 64px;
+
+    border-radius: 10px;
+
+    object-fit: cover;
+
+    flex-shrink: 0;
+}
+
+.scheduled-content{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.scheduled-status{
+    width: fit-content;
+
+    background: #EEF6FF;
+
+    color: #007BFF;
+
+    padding: 3px 10px;
+
+    border-radius: 8px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    line-height: 1;
+}
+
+.scheduled-name{
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #101828;
+
+    margin: 0;
+}
+
+.scheduled-id{
+    font-size: 12px;
+
+    font-weight: 500;
+
+    color: #667085;
+
+    margin: 0;
+}
+
+.scheduled-date{
+    font-size: 11px;
+
+    font-weight: 500;
+
+    color: #22C55F;
+
+    margin: 0;
+}
+    .create-coupon-banner{
+        padding: 22px 28px;
+        border-radius: 16px;
+    }
+
+    .scheduled-card{
+        padding: 12px 14px;
+        min-height: 90px;
+    }
+
+    .bg-premium-light-blue {
+        background-color: var(--color-premium-light-blue);
+    }
+
+    .hover\:bg-premium-light-blue {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-premium-light-blue);
+      }
+    }
+    }
+
+    .border-primary-blue {
+    border-color: var(--color-primary-blue);
+    }
+
+    .bg-primary-blue {
+    background-color: var(--color-primary-blue);
+    }
+
+    .text-primary-blue {
+    color: var(--color-primary-blue);
+    }
+    
+    .hover\:bg-primary-blue {
+        &:hover {
+        @media (hover: hover) {
+            background-color: var(--color-primary-blue);
+        }
+        }
+    }

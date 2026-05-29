@@ -39,7 +39,9 @@ from appointments.models import HospitalAppointments
 from appointments.models import DoctorAppointment
 from orders.models import UserPurchase, OrderStatusChoices
 from appointments.models import WalletTransaction
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse    
 
 @dashboard_login_required
 def dashboard_home(request):
@@ -51,8 +53,10 @@ def dashboard_home(request):
         user_types__contains=[user_type]
     ).order_by('order')
 
+
     context = get_common_context(request, user)
     context["theme_colors"] = get_theme_colors(user_type)
+    
     context["sidebar_menu"] = menu_items
 
     # -------------------------------
@@ -167,13 +171,61 @@ def dashboard_home(request):
                 ]
             ).count()
 
+
+            # scheduled_orders = UserPurchase.objects.filter(
+            #     assigned_pharmacy=pharmacy_profile
+            # ).order_by('-id')[:5]
+            scheduled_orders = UserPurchase.objects.filter(
+                assigned_pharmacy=pharmacy_profile
+            ).values(
+                'id',
+                'order_status',
+                'created_at',
+                'user__email',
+            ).order_by('-id')[:5]
+
+
+            # popular_coupons = Coupon.objects.filter(
+            #     advertiser=user
+            # ).order_by('-created_at')[:5]
+            popular_coupons = Coupon.objects.all().order_by('-redeemed_count')[:5]
+
+            # context.update({
+            #     'pharmacy_profile': pharmacy_profile,
+            #     'scheduled_orders': scheduled_orders,
+            #     'popular_coupons': popular_coupons,
+            #     'user_display_name': pharmacy_profile.company_name,
+            #     'pending_orders': pending_orders,
+            #     'events': CalendarEvent.objects.all().order_by('date'),
+            #     'user': user,
+            # })
             context.update({
                 'pharmacy_profile': pharmacy_profile,
+
+                'scheduled_orders': scheduled_orders,
+                'popular_coupons': popular_coupons,
+
                 'user_display_name': pharmacy_profile.company_name,
+
                 'pending_orders': pending_orders,
+
+                'active_bids': UserPurchase.objects.filter(
+                    assigned_pharmacy=pharmacy_profile
+                ).count(),
+
+                'quotes_given': Coupon.objects.count(),
+
+                'orders_won': UserPurchase.objects.filter(
+                    assigned_pharmacy=pharmacy_profile,
+                    order_status=OrderStatusChoices.DELIVERED
+                ).count(),
+
                 'events': CalendarEvent.objects.all().order_by('date'),
+
                 'user': user,
             })
+            # return render(request, "dashboard/nearby_pharmacy.html", context)
+            context["sidebar_active"] = "home"
             return render(request, "dashboard/home_pharmacy.html", context)
 
         # ================= LAB =================
@@ -261,8 +313,11 @@ def dashboard_home(request):
             })
             return render(request, "dashboard/home_hospital.html", context)
 
-    except Exception:
-        return render(request, "dashboard/not_found.html")
+    # except Exception:
+    #     return render(request, "dashboard/not_found.html")
+    except Exception as e:
+        print("ERROR =>", e)
+        raise e
 
     
 def get_coupon_chart_data(request):
@@ -1060,3 +1115,4 @@ def get_advance_receipt(request, advance_id):
     }
 
     return JsonResponse(response_data)
+

@@ -1,0 +1,19 @@
+{% if has_services %}
+
+    <div class="home-section flex flex-col gap-5">
+        ...
+    </div>
+
+    <div class="services-section px-4 hidden">
+        ...
+    </div>
+
+{% else %}
+
+    {% if has_premium %}
+        {% include 'hospital/partials/hospital_premium_section.html' %}
+    {% else %}
+        {% include 'hospital/partials/services_without_premium.html' %}
+    {% endif %}
+
+{% endif %}

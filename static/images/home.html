@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home</title>
+  <link href="../../public/css/output.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400..700,0..1,0"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+</head>
+
+<body>
+  <main class="h-screen max-w-[1440px] w-full mx-auto bg-slate-white overflow-hidden">
+    <!-- Header -->
+    <div
+      class="h-[100px] w-full flex items-center justify-between p-2 bg-white md:p-5 md:shadow-[0_4px_10px_4px_rgba(0,0,0,0.15)]">
+      <!-- Logo div -->
+      <div class="w-[280px]">
+        <a href="/src/hospital/home.html">
+          <img src="/public/images/hospital-logo.svg" alt="Logo" loading="lazy" class="w-[50px] h-[60px]" />
+        </a>
+      </div>
+
+      <!-- Desktop Navbar -->
+      <div class="hidden sm:block flex-1">
+        <div class="flex items-center justify-end gap-2 md:gap-4 flex-[1_0_0]">
+          <!-- Buttons -->
+          <div class="relative">
+            <button
+              class="w-full max-w-[181px] h-[48px] flex items-center justify-center gap-2 border border-dodger-blue rounded-md text-dodger-blue px-5 open-share-modal cursor-pointer text-18-normal">
+              <p>HEALTH2025</p>
+              <span class="material-symbols-outlined bold-weight">
+                share
+              </span>
+            </button>
+          </div>
+          <!--Share Popup-->
+          <div id="shareModal"
+            class="hidden absolute right-72 top-20 bg-white shadow-lg rounded-md z-50 w-130 border border-dodger-blue">
+            <div class="bg-white w-130 rounded-lg shadow-lg p-6 relative">
+              <div class="flex justify-between items-center">
+                <p class="font-semibold text-xl">Share</p>
+                <span class="material-symbols-outlined close-share-modal cursor-pointer">
+                  close
+                </span>
+              </div>
+              <hr class="text-dodger-blue mt-4" />
+              <div class="flex justify-between pt-4">
+                <div class="flex flex-col items-center gap-2 w-20 text-center">
+                  <img src="/public/images/whatsappicon.svg" alt="whatsapp logo" class="w-10 h-10 cursor-pointer" />
+                  <p class="font-normal text-base text-dark-gray">Whatsapp</p>
+                </div>
+
+                <div class="flex flex-col items-center gap-2 w-20 text-center">
+                  <img src="/public/images/telegramicon.svg" alt="telegram logo" class="w-10 h-10 cursor-pointer" />
+                  <p class="font-normal text-base text-dark-gray">Telegram</p>
+                </div>
+
+                <div class="flex flex-col items-center gap-2 w-20 text-center">
+                  <img src="/public/images/facebookicon.svg" alt="facebook logo" class="w-10 h-10 cursor-pointer" />
+                  <p class="font-normal text-base text-dark-gray">Facebook</p>
+                </div>
+
+                <div class="flex flex-col items-center gap-2 w-20 text-center">
+                  <img src="/public/images/smsicon.svg" alt="sms logo" class="w-10 h-10 cursor-pointer" />
+                  <p class="font-normal text-base text-dark-gray">Message</p>
+                </div>
+
+                <div class="flex flex-col items-center gap-2 w-20 text-center">
+                  <img src="/public/images/gmailicon.svg" alt="gmail logo" class="w-10 h-10 cursor-pointer" />
+                  <p class="font-normal text-base text-dark-gray">E-mail</p>
+                </div>
+              </div>
+              <div class="pt-4 relative mt-6">
+                <input type="text" id="share-link" value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci"
+                  class="w-full rounded-md p-4 font-normal text-sm border" disabled />
+                <button type="button"
+                  class="copy-btn absolute right-3 top-6 bg-dodger-blue text-white rounded-md p-2 cursor-pointer"
+                  data-target="#share-link">
+                  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Icons -->
+          <div
+            class="relative w-9 h-9 rounded-full hover:bg-transparent-light-sea-green flex items-center justify-center">
+            <a href="/src/hospital/advance.html" class="has-tooltip"><img src="/public/images/walleticon.svg"
+                alt="wallet" class="cursor-pointer w-[26px] h-[26px]" /></a>
+            <div
+              class="absolute py-1 px-1.5 text-start text-xs tooltip -bottom-7 right-1 z-10 bg-white border rounded-md border-light-sea-green font-normal">
+              Wallet
+            </div>
+          </div>
+          <div class="relative  rounded-full hover:bg-transparent-light-sea-green flex items-center justify-center">
+            <a href="#" class="has-tooltip"><img src="/public/images/msgicon-nav.svg" alt="star"
+                class="cursor-pointer" /></a>
+            <div
+              class="absolute py-1 px-1.5 text-start text-xs tooltip -bottom-7 right-1 z-10 bg-white border rounded-md border-light-sea-green font-normal">
+              Saved
+            </div>
+          </div>
+          <div
+            class="relative w-9 h-9 rounded-full hover:bg-transparent-light-sea-green flex items-center justify-center">
+            <img src="/public/images/bell.svg" alt="bell" class="cursor-pointer has-tooltip w-[26px] h-[26px]"
+              id="bell-icon" />
+            <div class="bg-strong-red w-2 h-2 rounded-full absolute -top-0.5 right-0"></div>
+            <div
+              class="absolute py-1 px-1.5 text-start text-xs tooltip -bottom-7 right-1 z-10 bg-white border rounded-md border-dodger-blue font-normal whitespace-nowrap">
+              Notification
+            </div>
+          </div>
+          <!-- User Dropdown -->
+          <div class="relative inline-block">
+            <button class="profile-btn">
+              <img src="/public/images/user.svg" alt="User" loading="lazy" class="w-12 h-12" />
+            </button>
+            <!-- Dropdown -->
+            <div class="profile-dropdown border border-dodger-blue mt-1 w-[192px] h-[118px]">
+              <div class="p-2.5 flex items-center space-x-2.5 cursor-pointer">
+                <img src="/public/images/user.svg" alt="User" loading="lazy" class="w-12 h-12 rounded-full" />
+                <div>
+                  <p class="text-18-normal">User Name</p>
+                </div>
+              </div>
+              <div class="p-2.5 hover:bg-light-sea-green-opacity">
+                <a href="#" class="text-18-normal flex items-center space-x-2.5">
+                  <span class="material-symbols-outlined"> logout </span>
+                  <span>Sign out</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Navbar -->
+      <div class="block sm:hidden">
+        <div class="flex items-center gap-4">
+          <input type="search" placeholder="Search"
+            class="w-full max-w-[249px] h-[36px] rounded-[6px] bg-light-white border-none px-3 focus:!outline-none focus:ring-0" />
+          <span class="material-symbols-outlined cursor-pointer text-golden-yellow">
+            kid_star
+          </span>
+          <span class="material-symbols-outlined cursor-pointer">
+            notifications
+          </span>
+          <!-- User Dropdown -->
+          <div class="relative inline-block">
+            <button class="profile-btn">
+              <img src="/public/images/user.svg" alt="User" loading="lazy" />
+            </button>
+
+            <!-- Dropdown -->
+            <div class="profile-dropdown">
+              <div class="px-4 py-3 flex items-center space-x-3 cursor-pointer">
+                <img src="/public/images/user.svg" alt="User" loading="lazy" class="w-8 h-8 rounded-full" />
+                <div>
+                  <p class="text-sm font-normal">User Name</p>
+                </div>
+              </div>
+              <div>
+                <a href="#" class="px-4 py-3 text-sm hover:bg-light-sea-green-opacity flex items-center space-x-2">
+                  <span class="material-symbols-outlined"> logout </span>
+                  <span>Sign out</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="h-[calc(100vh-100px)] w-full flex relative z-10 shrink-0">
+      <!-- Sidebar -->
+      <aside class="sidebar w-[200px] md:w-[240px] h-full transition-all transform duration-300 ease-in-out bg-white ">
+        <nav class="h-full py-4 overflow-y-auto scroll no-scrollbar">
+          <div class="relative w-full flex items-center justify-between pl-[33px]">
+            <div class="flex flex-col items-start justify-center">
+              <img src="/public/images/diamond-badge.svg" alt="Diamond User" loading="lazy" />
+              <p class="text-18-normal text-dark-gray">Diamond User</p>
+            </div>
+
+            <div
+              class="menu-toggle absolute right-0 top-1/2 -translate-y-1/2 h-[48px] w-[48px] bg-light-sky-blue-tint flex items-center justify-center rounded-l-md cursor-pointer">
+              <span class="material-symbols-outlined bold-weight text-dodger-blue pl-2.5">
+                arrow_back_ios
+              </span>
+            </div>
+          </div>
+          <ul
+            class="font-normal text-dark-gray flex flex-col gap-1 sm:text-sm md:text-18-normal py-2 whitespace-nowrap">
+            <li>
+              <a href="/src/hospital/home.html" class="flex items-center gap-2.5 pl-[30px] pr-2.5 py-3.5 w-full">
+                <span class="material-symbols-outlined"> home </span>
+                <p>Home</p>
+              </a>
+            </li>
+            <li>
+              <a href="/src/hospital/nearby.html" class="flex items-center gap-2.5 pl-[30px] pr-2.5 py-3.5 w-full">
+                <span class="material-symbols-outlined"> map_search </span>
+                <p>Nearby</p>
+              </a>
+            </li>
+            <li>
+              <a href="/src/hospital/appointments.html"
+                class="flex items-center gap-2.5 pl-[30px] pr-2.5 py-3.5 w-full">
+                <img src="/public/images/appointments.svg" alt="">
+                <p>Appointments</p>
+              </a>
+            </li>
+            <li>
+              <a href="/src/hospital/reports.html" class="flex items-center gap-2.5 pl-[30px] pr-2.5 py-3.5 w-full">
+                <span class="material-symbols-outlined"> patient_list </span>
+                <p>Reports</p>
+              </a>
+            </li>
+            <li>
+              <a href="/src/hospital/settings.html" class="flex items-center gap-2.5 pl-[30px] pr-2.5 py-3.5 w-full">
+                <span class="material-symbols-outlined"> settings </span>
+                <p>Settings</p>
+              </a>
+            </li>
+
+          </ul>
+          <div class="w-full flex flex-col px-6">
+            <img src="/public/images/Sale.svg" alt="Diamond User" loading="lazy" />
+          </div>
+        </nav>
+      </aside>
+
+      <!--Main COntent-->
+      <div
+        class=" relative transition-all duration-300   main-content h-full flex-1 flex flex-col  p-6 overflow-y-auto scroll">
+        <div
+          class="show-sidebar-toggle hidden fixed top-34 left-0 z-50 h-10 w-10 bg-transparent-dodger-blue items-center justify-center rounded-r-md cursor-pointer">
+          <span class="material-symbols-outlined bold-weight text-dodger-blue">
+            arrow_forward_ios
+          </span>
+        </div>
+        <div class="bg-white px-2 sm:px-4 py-4">
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col  gap-2">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined">home</span>
+                <h1 class="text-xl font-medium">Home</h1>
+              </div>
+              <div id="date" class="font-normal text-base"></div>
+            </div>
+            <div class="flex flex-col  gap-2 lg:items-center " id="infoSection">
+              <div class="flex flex-col gap-2">
+                <div id="location" class="font-normal text-base flex items-center gap-2">
+                  <span class="material-symbols-outlined !text-base"> location_on </span>
+                  <span id="location-text">Fetching location...</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <p>Auto Bid </p>
+                  <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
+                    <input type="checkbox" class="sr-only peer">
+                    <div class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5">
+                    </div>
+                    <div
+                      class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal">
+                    </div>
+                  </label>
+                  <div
+                    class="bg-gradient-to-r from-caribbean-green to-azure-radiance w-6 h-6 rounded-[7px] text-white text-xs flex items-center justify-center">
+                    Rx</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--Hospital Image and Admin Details-->
+          <div class="flex gap-2  pt-5 ml-3">
+            <div class="relative">
+              <img src="/public/images/hospital-bg.jpg" alt="Hospital" class="w-full h-full object-cover rounded-lg">
+              <div class="absolute inset-0 flex items-end">
+                <div class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
+                  <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined">home</span>
+                      <p class="text-base font-semibold">Lifecare Multispeciality Hospital</p>
+                    </div>
+                    <p class="font-semibold text-sm">221/A, 2nd Floor, Shanti Nagar Road, Sector 10, Andheri East, <br>
+                      Mumbai, Maharashtra - 400093</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-pale-azure w-[224px] h-[330px] px-4 py-2 rounded-lg ml-3">
+              <h1 class="text-center text-lg font-semibold">Admin Details</h1>
+              <div class="flex items-center justify-center py-[22.5px]">
+                <img src="/public/images/admin-profile.svg" alt="">
+              </div>
+              <div class="flex flex-col items-center gap-2">
+                <p class="font-semibold text-sm">Jhon Doe</p>
+                <p class="font-semibold text-sm text-dodger-blue">+91 7763847590</p>
+                <p class="font-semibold text-sm">Designation: Receptionist</p>
+              </div>
+            </div>
+          </div>
+
+          <!--Overview-->
+          <div class="pt-5 flex flex-col ml-3">
+            <div class="flex justify-between items-center">
+              <p class="font-semibold text-lg">Overview</p>
+              <div class="flex items-center gap-2.5">
+                <p class="font-normal text-sm">Today</p>
+                <div class="relative dropdown">
+                  <button
+                    class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
+                    <span class="material-symbols-outlined flex justify-center items-center">tune</span>
+                  </button>
+                  <div
+                    class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
+                    <div
+                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                      <span class="material-symbols-outlined !text-lg text-dodger-blue">
+                        check
+                      </span>Today
+                    </div>
+                    <div
+                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                      <span class="material-symbols-outlined !text-lg text-light-gray">
+                        check
+                      </span>Week
+                    </div>
+                    <div
+                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                      <span class="material-symbols-outlined !text-lg text-light-gray">
+                        check
+                      </span>Month
+                    </div>
+                    <div
+                      class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray">
+                      <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined !text-lg text-light-gray">
+                          check
+                        </span>Custom
+                      </div>
+                      <span class="material-symbols-outlined calendar-icon">calendar_today</span>
+                    </div>
+                  </div>
+                  <div
+                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
+                    <div class="datepicker-inline"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-4 pt-4">
+              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center lg:w-[362px] h-[120px]">
+                <div class="flex flex-col gap-2">
+                  <p class="font-normal text-sm">Total Appointments Today</p>
+                  <p class="font-semibold text-2xl">12</p>
+                  <p class="text-green font-normal text-xs">7 Confirmed,5 Pending</p>
+                </div>
+                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
+                  <img src="/public/images/book.svg" alt="">
+                </div>
+              </div>
+
+              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center lg:w-[362px] h-[120px]">
+                <div class="flex flex-col gap-2">
+                  <p class="font-normal text-sm">Total Doctors Registered</p>
+                  <p class="font-semibold text-2xl">24</p>
+                  <p class="font-normal text-xs"><span class="text-dodger-blue">Day Shift: 16</span> | <span
+                      class="text-electric-indigo">Night Shift: 8</span> </p>
+                </div>
+                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
+                  <img src="/public/images/user-community.svg" alt="">
+                </div>
+              </div>
+
+              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center lg:w-[362px] h-[120px]">
+                <div class="flex flex-col gap-2">
+                  <p class="font-normal text-sm">Total Beds</p>
+                  <p class="font-semibold text-2xl">20</p>
+                  <p class="text-steel-blue font-normal text-xs">ICU 4 | Private Bed 4 | Gr Bed 12</p>
+                </div>
+                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
+                  <img src="/public/images/user-group.svg" alt="">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!--Scheduled Appointments-->
+          <div class="pt-5 flex flex-col ml-3">
+            <div class="flex justify-between items-center">
+              <p class="font-semibold text-lg">Scheduled Appointments</p>
+              <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
+            </div>
+            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center pt-4 gap-2">
+              <div
+                class="lg:w-[362px] h-[154px] border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
+                <div>
+                  <img src="/public/images/patient-1.svg" alt="Patient Profile">
+                </div>
+                <div class="flex flex-col gap-2">
+                  <div class="w-[79px] h-[30px] rounded-lg p-2 bg-peach text-burnt-orange font-semibold text-xs">
+                    <p>Home Visit</p>
+                  </div>
+                  <p class="font-semibold text-sm">Pt. Rachel Kate</p>
+                  <p class="font-normal text-sm text-green">22/07/2025, 10:30 AM</p>
+                  <p class="font-semibold text-sm">To be attended by Dr. Smith</p>
+                </div>
+              </div>
+
+              <div
+                class="lg:w-[362px] h-[154px] border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
+                <div>
+                  <img src="/public/images/patient-2.svg" alt="Patient Profile">
+                </div>
+                <div class="flex flex-col gap-2">
+                  <div class="w-1/2 h-[30px] rounded-lg p-2 bg-pale-azure text-dodger-blue font-semibold text-xs">
+                    <p>Hospital Visit</p>
+                  </div>
+                  <p class="font-semibold text-sm">Pt. Karen cooper</p>
+                  <p class="font-normal text-sm text-green">22/07/2025, 11:30 AM</p>
+                  <p class="font-semibold text-sm">To be attended by Dr. Smith</p>
+                </div>
+              </div>
+
+              <div
+                class="lg:w-[362px] h-[154px] border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
+                <div>
+                  <img src="/public/images/patient-3.svg" alt="Patient Profile">
+                </div>
+                <div class="flex flex-col gap-2">
+                  <div class="w-[89px] h-[30px] rounded-lg p-2 bg-pale-azure text-dodger-blue font-semibold text-xs">
+                    <p>Hospital Visit</p>
+                  </div>
+                  <p class="font-semibold text-sm">Pt. Josh Kerr</p>
+                  <p class="font-normal text-sm text-green">22/07/2025, 11:30 AM</p>
+                  <p class="font-semibold text-sm">To be attended by Dr. Kate</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!--Appointment Requests-->
+          <div class="pt-5 flex flex-col ml-3">
+            <div class="flex justify-between items-center">
+              <p class="font-semibold text-lg">Appointment Request</p>
+              <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
+            </div>
+            <div
+              class="bg-white shadow-md w-full h-[72px] mt-4 border-snow border rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-pale-azure hover:shadow-lg popup-btn"
+              data-popup="appointmentRequestDetail">
+              <div class="flex items-center gap-2">
+                <img src="/public/images/patient-4.svg" alt="Patient Profile">
+                <div class="flex flex-col gap-1">
+                  <p class="font-semibold text-sm ">Pt. Dolly Paris</p>
+                  <p class="font-normal text-xs text-spanish-gray">Kidney Stone</p>
+                </div>
+              </div>
+              <p class="font-normal text-sm pl-2">22/07/2025, 12:30 PM</p>
+              <p class="font-normal text-sm">Hospital Visit</p>
+              <div class="flex items-center gap-4">
+                <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
+                  check_circle
+                </span>
+                <span class="material-symbols-outlined text-strong-red reject-icon">
+                  cancel
+                </span>
+                <span class="text-dodger-blue hidden accepted">Accepted</span>
+                <span class="text-strong-red hidden rejected">Rejected</span>
+              </div>
+            </div>
+
+            <div
+              class="bg-white shadow-md w-full h-[72px] mt-4 border-snow border rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-pale-azure hover:shadow-lg popup-btn"
+              data-popup="appointmentRequestDetail">
+              <div class="flex items-center gap-2">
+                <img src="/public/images/patient-5.svg" alt="Patient Profile">
+                <div class="flex flex-col gap-1">
+                  <p class="font-semibold text-sm">Pt. Steve Lamark</p>
+                  <p class="font-normal text-xs text-spanish-gray">Vascular Disease</p>
+                </div>
+              </div>
+              <p class="font-normal text-sm pr-6">22/07/2025, 01:30 PM</p>
+              <p class="font-normal text-sm pr-4">Home Visit</p>
+              <div class="flex items-center gap-4">
+                <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
+                  check_circle
+                </span>
+                <span class="material-symbols-outlined text-strong-red reject-icon">
+                  cancel
+                </span>
+                <span class="text-dodger-blue hidden accepted">Accepted</span>
+                <span class="text-strong-red hidden rejected">Rejected</span>
+              </div>
+            </div>
+
+            <div
+              class="bg-white shadow-md w-full h-[72px] mt-4 border-snow border rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-pale-azure hover:shadow-lg popup-btn"
+              data-popup="appointmentRequestDetail">
+              <div class="flex items-center gap-2">
+                <img src="/public/images/patient-4.svg" alt="Patient Profile">
+                <div class="flex flex-col gap-1">
+                  <p class="font-semibold text-sm">Pt. Rachel Kate</p>
+                  <p class="font-normal text-xs text-spanish-gray">Lung Disease</p>
+                </div>
+              </div>
+              <p class="font-normal text-sm">22/07/2025, 10:30 AM</p>
+              <p class="font-normal text-sm">Home Visit</p>
+              <div class="flex items-center gap-4">
+                <span class=" text-dodger-blue">
+                  Accepted
+                </span>
+              </div>
+            </div>
+
+            <div
+              class="bg-white shadow-md w-full h-[72px] mt-4 border-snow border rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-pale-azure hover:shadow-lg popup-btn"
+              data-popup="appointmentRequestDetail">
+              <div class="flex items-center gap-2">
+                <img src="/public/images/patient-4.svg" alt="Patient Profile">
+                <div class="flex flex-col gap-1">
+                  <p class="font-semibold text-sm">Pt. Joolen Smith</p>
+                  <p class="font-normal text-xs text-spanish-gray">Heart Disease</p>
+                </div>
+              </div>
+              <p class="font-normal text-sm">22/07/2025, 10:30 AM</p>
+              <p class="font-normal text-sm">Hospital Visit</p>
+              <div class="flex items-center gap-4">
+                <span class=" text-strong-red">
+                  Rejected
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!--Appointment Request Detail Popup-->
+          <div
+            class="fixed inset-0 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden">
+            <div class="bg-white w-[680px]  p-4 rounded-lg">
+              <div class="flex items-center justify-between">
+                <p class="font-semibold text-sm">Appointment Details</p>
+                <div class="flex items-center gap-4">
+                  <button class="cursor-pointer">
+                    <span class="material-symbols-outlined !text-xl">share</span>
+                  </button>
+                  <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail">
+                    <span class="material-symbols-outlined !text-2xl">close</span>
+                  </button>
+                </div>
+              </div>
+              <hr class="mt-4 text-blue-haze">
+              <div class="mt-4 bg-pale-azure p-4 w-[648px] h-[196px] flex items-center gap-4">
+                <div class="flex flex-col ">
+                  <img src="/public/images/patient-7.svg" alt="">
+                  <p class="font-normal text-sm text-center pt-4">Dolly Paris</p>
+                </div>
+                <div class="flex flex-col gap-4 w-[180px]">
+                  <div class="flex  gap-2">
+                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
+                        female
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <p class="font-normal text-xs text-spanish-gray">Gender</p>
+                      <p class="font-normal text-sm">Female</p>
+                    </div>
+                  </div>
+
+                  <div class="flex  gap-2">
+                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
+                        hourglass
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <p class="font-normal text-xs text-spanish-gray">Age</p>
+                      <p class="font-normal text-sm">25</p>
+                    </div>
+                  </div>
+
+                  <div class="flex  gap-2">
+                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                      <img src="/public/images/visit-icon.svg" alt="">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <p class="font-normal text-xs text-spanish-gray">Visit Type</p>
+                      <p class="font-normal text-sm">Hospital Visit</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-4">
+                  <div class="flex  gap-2">
+                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
+                        call
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
+                      <p class="font-normal text-sm">+91 7737533456</p>
+                    </div>
+                  </div>
+
+                  <div class="flex  gap-2">
+                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
+                        calendar_today
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <p class="font-normal text-xs text-spanish-gray">Appointment date</p>
+                      <p class="font-normal text-sm">22/07/2025,12:30 PM</p>
+                    </div>
+                  </div>
+
+                  <div class="flex  gap-2">
+                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                      <img src="/public/images/address-icon.svg" alt="">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <p class="font-normal text-xs text-spanish-gray">Address</p>
+                      <p class="font-normal text-sm">123 maple los Angeles, CA 90001 usa</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <hr class="mt-4 text-blue-haze">
+              <div class="pt-4">
+                <p class="font-semibold text-sm">Medical Information</p>
+                <div class="pt-4 flex gap-4">
+                  <div class="flex gap-2">
+                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
+                        medical_services
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <p class="font-normal text-xs text-spanish-gray whitespace-nowrap">Medical Requirement</p>
+                      <p class="font-normal text-sm">Kidney Stone</p>
+                    </div>
+                  </div>
+
+                  <div class="flex gap-2">
+                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-dodger-blue !text-lg p-2">
+                        details
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <p class="font-normal text-xs text-spanish-gray">Details</p>
+                      <p class="font-normal text-sm">Severe lower back pain, burning while urinating, and suspected
+                        kidney stone. History of recurrence</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="enquiredDetail">
+                <div class="flex flex-col mt-4 py-4 gap-4">
+                  <div class=" flex justify-center items-center gap-1">
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[138px] h-0.5 flex">
+                      <div class="w-1/2 h-full bg-dodger-blue"></div>
+                      <div class="w-1/2 h-full bg-blue-haze"></div>
+                    </div>
+                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
+                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
+                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+                  </div>
+                  <div class="flex items-center justify-between mx-10">
+                    <p class="pl-6  font-normal text-sm">Enquiry</p>
+                    <p class="pl-2 text-spanish-gray font-normal text-sm">Appointment</p>
+                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
+                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
+                  </div>
+                </div>
+                <div class="pt-4 flex flex-col gap-2">
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm">Order ID</p>
+                    <p class="font-normal text-sm">Budget</p>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                    <p class="text-dodger-blue font-normal text-sm">&#8377;500</p>
+                  </div>
+                </div>
+                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+                  <button
+                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">Accept</button>
+                  <button
+                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup"
+                    data-popup="appointmentRequestDetail">Reject</button>
+                </div>
+              </div>
+
+              <!--When Clicked on Accept Button-->
+              <div class="acceptedDetail hidden">
+                <div class="flex flex-col mt-4 py-4 gap-4">
+                  <div class=" flex justify-center items-center gap-1">
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
+                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+                  </div>
+                  <div class="flex items-center justify-between mx-10">
+                    <p class="pl-6  font-normal text-sm">Enquiry</p>
+                    <p class="pl-2  font-normal text-sm">Appointment</p>
+                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
+                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
+                  </div>
+                </div>
+                <div class="pt-4 flex flex-col gap-2">
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm">Order ID</p>
+                    <p class="font-normal text-sm">6 km</p>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                    <p class=" font-normal text-sm">20 mins away</p>
+                  </div>
+                </div>
+                <div class="pt-4 flex justify-between items-center">
+                  <div class="flex gap-2 items-center">
+                    <p class="font-normal text-sm">No Show</p>
+                    <input type="checkbox" class="w-4 h-4 border-2">
+                  </div>
+                  <p class="font-normal text-sm text-spanish-gray">Patient didn’t show up</p>
+                </div>
+                <div class="pt-4 flex justify-between items-center">
+                  <div class="flex gap-2 items-center">
+                    <p class="font-normal text-sm">Home Visit</p>
+                    <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
+                  </div>
+                  <div
+                    class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
+                    <p class="font-normal text-sm">Proforma Bill</p>
+                    <span class="material-symbols-outlined !text-lg">visibility</span>
+                  </div>
+                </div>
+                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+                  <button
+                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer complete-btn">Complete</button>
+                  <button
+                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap popup-btn"
+                    data-popup="cancelAppointmentPopup">Cancel Appointment</button>
+                </div>
+                <div
+                  class="cancelAppointmentPopup fixed inset-0 flex items-center justify-center hidden bg-semi-transparent-black">
+                  <div
+                    class="bg-white w-[452px] h-[213px] p-5 rounded-[10px] flex flex-col gap-4 relative items-center">
+                    <button class="close-popup absolute right-4 top-8 cursor-pointer"
+                      data-popup="cancelAppointmentPopup">
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                    <div class="w-15 h-15 rounded-full bg-rosewater p-3 flex items-center justify-center">
+                      <img src="/public/images/appointment.svg" alt="">
+                    </div>
+                    <p class="font-normal text-base">Are you sure you want to cancel this appointment ?</p>
+                    <div
+                      class="bg-rosewater text-error w-[198px] h-12 rounded-md p-2.5 cursor-pointer cancelAppointmentBtn flex items-center justify-center font-semibold">
+                      Cancel Appointment</div>
+                  </div>
+                </div>
+              </div>
+
+              <!--Clicked on Complete button in accepted details popup-->
+              <div class="completeDetail hidden">
+                <div class="flex flex-col mt-4 py-4 gap-4">
+                  <div class=" flex justify-center items-center gap-1">
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
+                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+                  </div>
+                  <div class="flex items-center justify-between mx-10">
+                    <p class="pl-6  font-normal text-sm">Enquiry</p>
+                    <p class="pl-2  font-normal text-sm">Appointment</p>
+                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
+                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
+                  </div>
+                </div>
+                <div class="pt-4 flex flex-col gap-2">
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm">Order ID</p>
+                    <p class="font-normal text-sm">6 km</p>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                    <p class=" font-normal text-sm">20 mins away</p>
+                  </div>
+                </div>
+                <div class="pt-4 flex justify-between items-center">
+                  <div class="flex gap-2 items-center">
+                    <p class="font-normal text-sm">No Show</p>
+                    <input type="checkbox" class="w-4 h-4 border-2" checked>
+                  </div>
+                  <p class="font-normal text-sm  text-strong-red">Patient didn’t show up</p>
+                </div>
+                <div class="pt-4 flex justify-between items-center">
+                  <div class="flex gap-2 items-center">
+                    <p class="font-normal text-sm">Home Visit</p>
+                    <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
+                  </div>
+                  <div
+                    class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
+                    <p class="font-normal text-sm">Proforma Bill</p>
+                    <span class="material-symbols-outlined !text-lg">visibility</span>
+                  </div>
+                </div>
+                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+                  <button
+                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer save-btn">Save</button>
+                  <button
+                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap"
+                    data-popup="appointmentRequestDetail">Cancel</button>
+                </div>
+              </div>
+
+              <!--Clicked on Save btn after completing-->
+              <div class="missingDetails hidden">
+                <div class="flex flex-col mt-4 py-4 gap-4">
+                  <div class=" flex justify-center items-center gap-1">
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                  </div>
+                  <div class="flex items-center justify-between mx-20">
+                    <p class="font-normal text-sm">Enquiry</p>
+                    <p class="font-normal text-sm">Appointment</p>
+                    <p class="font-normal text-sm">No Show</p>
+                  </div>
+                </div>
+                <div class="pt-4 flex flex-col gap-2">
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm">Order ID</p>
+                    <p class="font-normal text-sm">Missing Reason</p>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                    <p class="font-normal text-sm  text-strong-red">Patient didn’t show up</p>
+                  </div>
+                </div>
+              </div>
+
+              <!--Clicked on cancel Appointment-->
+              <div class="cancelDetails hidden">
+                <div class="flex flex-col mt-4 py-4 gap-4">
+                  <div class=" flex justify-center items-center gap-1">
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                  </div>
+                  <div class="flex items-center justify-between mx-20">
+                    <p class="font-normal text-sm">Enquiry</p>
+                    <p class="font-normal text-sm">Appointment</p>
+                    <p class="font-normal text-sm">Cancelled</p>
+                  </div>
+                </div>
+                <div class="pt-4 flex flex-col gap-2">
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm">Order ID</p>
+                    <p class="font-normal text-sm">Cancelled by</p>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                    <p class="font-normal text-sm  text-strong-red">Doctor</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+  </main>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+  <script src="/public/js/sidebar.js"></script>
+  <script src="/public/js/home.js"></script>
+  <script src="/public/js/dropdown.js"></script>
+  <script src="/public/js/common.js"></script>
+</body>
+
+</html>
