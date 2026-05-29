@@ -163,7 +163,9 @@ def services(request):
             is_active=True,
             is_enabled=True
         ).first()
-
+        service_count = len(service_cards)
+        room_count = len(room_cards)
+        has_services = service_count > 0 or room_count > 0
         context.update({
             "hospital_profile": hospital_profile,
             "hospital_categories": list(categories),
@@ -173,8 +175,13 @@ def services(request):
             "hospital_room_cards": room_cards,
             "has_hospital_cards": bool(service_cards or room_cards),
             "has_premium": bool(sub and not sub.is_expired),
+            "has_services": has_services,
             "subscription": sub,
         })
+        print("SERVICE COUNT:", len(service_cards))
+        print("ROOM COUNT:", len(room_cards))
+        print("HAS SERVICES:", bool(service_cards or room_cards))
+        print("Context:", context)
 
         return render(request, 'hospital/services.html', context)
 

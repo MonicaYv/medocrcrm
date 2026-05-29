@@ -115,7 +115,7 @@ def get_common_context(request, user):
     tab_class_map = {
     "advertiser": "tab-btn-advertiser",
     "client": "tab-btn-client",
-    "pharmacy": "tab-btn-pharmacy",
+    "pharmacy": "tab-btn-hospital",
     "ngo": "tab-btn-ngo",
     "lab": "tab-btn-hospital",
     "doctor": "tab-btn-hospital",
@@ -133,20 +133,20 @@ def get_common_context(request, user):
     active_tab_class_map = {
         "advertiser": "active-tab-advertiser",
         "client": "active-tab-client",
-        "pharmacy": "active-tab-pharmacy",
+        "pharmacy": "active-tab-hospital",
         "ngo": "active-tab-ngo",
         "lab": "active-tab-hospital",
         "doctor": "active-tab-hospital",
         "hospital": "active-tab-hospital",
     }
     main_tab_class_map = {
-        "pharmacy": "main-tab-pharmacy",
+        "pharmacy": "main-tab",
         "doctor": "main-tab",
         "lab": "main-tab",
         "hospital": "main-tab",
     }
     active_main_tab_class_map = {
-        "pharmacy": "active-tab-main-pharmacy",
+        "pharmacy": "active-tab-main",
         "doctor": "active-tab-main",
         "lab": "active-tab-main",
         "hospital": "active-tab-main",
