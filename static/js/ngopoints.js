@@ -3,8 +3,10 @@ window.referralChart = null;
 function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
-const chartLabels = JSON.parse(document.getElementById('chartLabelsData').textContent);
-const chartData = JSON.parse(document.getElementById('chartDataData').textContent);
+const chartLabelsElement = document.getElementById('chartLabelsData');
+const chartDataElement = document.getElementById('chartDataData');
+const chartLabels = chartLabelsElement ? JSON.parse(chartLabelsElement.textContent) : [];
+const chartData = chartDataElement ? JSON.parse(chartDataElement.textContent) : {};
 
 const colors = ["#5182E3", "#28A745", "#3AAFA9", "#FF6F61", "#1E4D92"];
 const datasets = Object.keys(chartData).map((actionType, i) => ({
@@ -31,7 +33,7 @@ if (roundedMax < 20) {
 }
 function initReferralChart() {
   const canvas = document.getElementById("referralChart");
-  if (!canvas) return;
+  if (!canvas || !chartLabels.length) return;
 
   const ctx = canvas.getContext("2d");
 

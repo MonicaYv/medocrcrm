@@ -23,7 +23,11 @@ from registration.models import (
 
 POINTS_ACTION_ALIASES = {
     "Donate": ["Donate", "Donation"],
+    "Coupon": ["Coupon", "Coupons", "Coupon Created", "Coupon Creation"],
+    "Map": ["Map", "Maps"],
     "Orders": ["Orders", "Order"],
+    "Post": ["Post", "Posts"],
+    "Share": ["Share", "Shares"],
 }
 
 
