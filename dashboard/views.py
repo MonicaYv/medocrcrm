@@ -175,14 +175,8 @@ def dashboard_home(request):
             # scheduled_orders = UserPurchase.objects.filter(
             #     assigned_pharmacy=pharmacy_profile
             # ).order_by('-id')[:5]
-            scheduled_orders = UserPurchase.objects.filter(
-                assigned_pharmacy=pharmacy_profile
-            ).values(
-                'id',
-                'order_status',
-                'created_at',
-                'user__email',
-            ).order_by('-id')[:5]
+            # 
+            scheduled_orders = []
 
 
             # popular_coupons = Coupon.objects.filter(
