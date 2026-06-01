@@ -231,9 +231,19 @@ $(document).ready(function () {
   });
 
   // Image Attachment Preview (for all)
-  $(document).on("click", ".view-attachment", function () {
+$(document).on("click", ".view-attachment", function () {
+
+
+    console.log($("#attachment-preview-image").length);
+    console.log($(".attachment-modal").length);
+
+    $("#attachment-preview-image").attr(
+        "src",
+        window.currentAttachment || "/static/images/attachment.png"
+    );
+
     $(".attachment-modal").removeClass("hidden");
-  });
+});
 
   // Close attachment modal
   $(".close-attachment-modal").on("click", function () {
@@ -492,6 +502,14 @@ $("#hospital-cards-container, #doctor-cards-container").on(
   ".card-all-pending, .card-all-accepted, .card-all-completed, .card-all-cancelled, .card-all-canceled, .card-all-missed",
   function () {
     const card = $(this);
+    const attachment = card.data("attachment");
+    window.currentAttachment = attachment;
+
+    const bill = card.data("bill");
+    window.currentBill = bill;
+    const appointmentId = card.data("id");
+    window.currentAppointmentId = appointmentId;
+    console.log("APPOINTMENT ID =", appointmentId);
     const isDoctorPage = $("#doctor-cards-container").length > 0;
 
     $("#modal-name").text(card.data("name") || "-");
@@ -586,8 +604,8 @@ $("#hospital-cards-container, #doctor-cards-container").on(
 
       buttons = `
         <div class="pt-4 flex justify-center items-center gap-3">
-          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
-          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
+          <button class="complete-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
+          <button class="cancel-appointment border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
         </div>
       `;
     }
@@ -607,18 +625,6 @@ $("#hospital-cards-container, #doctor-cards-container").on(
       rightValue = "Doctor didn’t show up";
 
       buttons = "";
-    }
-
-    if (status === "accepted") {
-      rightTitle = card.data("distance") || "6 km";
-      rightValue = card.data("time") || "20 mins away";
-
-      buttons = `
-        <div class="pt-4 flex justify-center items-center gap-3">
-          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
-          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
-        </div>
-      `;
     }
 
     if (status === "pending") {
@@ -718,7 +724,7 @@ $("#hospital-cards-container, #doctor-cards-container").on(
         <span class="text-dodger-blue font-medium text-sm">${budget}</span>
       </div>
 
-      <div class="border border-dodger-blue text-jet-black rounded-lg px-3 py-1 flex items-center gap-2 cursor-pointer">
+      <div class="proforma-bill-btn border border-dodger-blue text-jet-black rounded-lg px-3 py-1 flex items-center gap-2 cursor-pointer">
         <p class="font-normal text-sm">Proforma Bill</p>
         <span class="material-symbols-outlined !text-lg">visibility</span>
       </div>
@@ -731,4 +737,146 @@ $("#hospital-cards-container, #doctor-cards-container").on(
 
     $(".modal-pending").removeClass("hidden");
   });
+});
+
+$(document).on("click", ".patient-share-btn", function () {
+    $("#patientSharePopup")
+        .removeClass("hidden")
+        .addClass("flex");
+});
+
+$(document).on("click", ".close-patient-share-popup", function () {
+    $("#patientSharePopup")
+        .addClass("hidden")
+        .removeClass("flex");
+});
+
+$(document).on("click", ".patient-share-app", function () {
+
+    const app = $(this).data("app");
+    const link = $("#patient-share-link").val();
+
+    let url = "";
+
+    switch (app) {
+        case "whatsapp":
+            url = `https://wa.me/?text=${encodeURIComponent(link)}`;
+            break;
+
+        case "telegram":
+            url = `https://t.me/share/url?url=${encodeURIComponent(link)}`;
+            break;
+
+        case "facebook":
+            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+            break;
+
+        case "sms":
+            url = `sms:?body=${encodeURIComponent(link)}`;
+            break;
+
+        case "gmail":
+            url = `mailto:?subject=Patient Information&body=${encodeURIComponent(link)}`;
+            break;
+    }
+
+    if (url) {
+        window.open(url, "_blank");
+    }
+});
+
+$(document).on("click", "#copy-patient-link", function () {
+
+    const link = $("#patient-share-link").val();
+
+    navigator.clipboard.writeText(link);
+
+    alert("Link copied");
+});
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+        return parts.pop().split(';').shift();
+    }
+    return '';
+}
+
+$(document).on("click", ".complete-appointment", function () {
+
+    const appointmentId = window.currentAppointmentId;
+    console.log("COMPLETE ID =", appointmentId);
+
+    $.ajax({
+        url: "/appointment/update-status/",
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+
+        data: {
+            appointment_id: appointmentId,
+            status: "Completed"
+        },
+
+        success: function (res) {
+            alert("Appointment Completed Successfully");
+        },
+
+        error: function (err) {
+            console.log(err);
+            alert("Something went wrong");
+        }
+    });
+});
+
+$(document).on("click", ".cancel-appointment", function () {
+
+    const appointmentId = window.currentAppointmentId;
+    console.log("CANCEL ID =", appointmentId);
+
+    $.ajax({
+        url: "/appointment/update-status/",
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+
+        data: {
+            appointment_id: appointmentId,
+            status: "Cancelled"
+        },
+
+        success: function (res) {
+            alert("Appointment Cancelled Successfully");
+        },
+
+        error: function (err) {
+            console.log(err);
+            alert("Something went wrong");
+        }
+    });
+});
+
+$(document).on("click", ".proforma-bill-btn", function () {
+
+    if (window.currentBill) {
+
+        $("#attachment-preview-image")
+            .attr("src", window.currentBill)
+            .removeClass("hidden");
+
+        $("#no-proforma-bill-message").addClass("hidden");
+
+    } else {
+
+        $("#attachment-preview-image").addClass("hidden");
+
+        $("#no-proforma-bill-message").removeClass("hidden");
+    }
+
+    $(".attachment-modal").removeClass("hidden");
 });

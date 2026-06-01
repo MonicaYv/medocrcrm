@@ -17,7 +17,7 @@ from .models import (
     LabAppointments,
     HospitalAppointments,
 )
-
+from django.views.decorators.http import require_POST
 
 # ======================================================
 # MAIN APPOINTMENT PAGE
@@ -167,11 +167,33 @@ def ajax_appointments(request):
     })
 
 
-
-
 @require_POST
 @dashboard_login_required
 def update_appointment_status(request):
+
+    appointment_id = request.POST.get("appointment_id")
+    status = request.POST.get("status")
+
+    try:
+        appointment = DoctorAppointment.objects.get(id=appointment_id)
+
+        appointment.status = status
+        appointment.save()
+
+        return JsonResponse({
+            "success": True,
+            "message": f"Appointment {status}"
+        })
+
+    except DoctorAppointment.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Appointment not found"
+        }, status=404)
+
+@require_POST
+@dashboard_login_required
+def update_lab_appointment_status(request):
 
     order_id = request.POST.get("order_id")
     status = request.POST.get("status")

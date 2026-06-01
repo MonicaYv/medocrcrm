@@ -107,7 +107,11 @@ loadAppointments("all", 1);
 
       const card = $(this);
       const status = (card.data("status") || "").toLowerCase();
+      window.currentStatusModal = status;
       const orderId = card.data("order-id") || "-";
+      const appointmentId = card.data("id");
+      window.currentAppointmentId = appointmentId;
+      console.log("APPOINTMENT ID =", appointmentId);
       const budget = card.data("budget");
 
       // Basic details
@@ -231,19 +235,13 @@ const ENQUIRY_TEMPLATES = {
         </div>
       </div>
 
-      <div class="pt-4 flex justify-center gap-2 mb-2">
-        // <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
-        // <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10">Reject</button>
-        <button
-          class="accept-btn bg-dodger-blue text-white rounded-lg w-[180px] h-10"
-          data-order="${orderId}">
-          Accept
+    <div class="pt-4 flex justify-center gap-2 mb-2">
+        <button class="accept-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10">
+            Accept
         </button>
 
-        <button
-          class="reject-btn border border-strong-red text-strong-red rounded-lg w-[180px] h-10"
-          data-order="${orderId}">
-          Reject
+        <button class="reject-appointment border border-strong-red text-strong-red rounded-lg w-[180px] h-10">
+            Reject
         </button>
       </div>
     </div>
@@ -386,108 +384,108 @@ const ENQUIRY_TEMPLATES = {
  * REJECT APPOINTMENT
  * ------------------------------ */
 
-$(document).on("click", ".reject-btn", function () {
+// $(document).on("click", ".reject-btn", function () {
 
-    const orderId = $(this).data("order");
+//     const orderId = $(this).data("order");
 
-    $.ajax({
+//     $.ajax({
 
-        url: "/appointment/update-status/",
-        type: "POST",
+//         url: "/appointment/update-status/",
+//         type: "POST",
 
-        data: {
-            order_id: orderId,
-            status: "Cancelled"
-        },
+//         data: {
+//             order_id: orderId,
+//             status: "Cancelled"
+//         },
 
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
+//         headers: {
+//             "X-CSRFToken": getCookie("csrftoken")
+//         },
 
-        success: function (response) {
+//         success: function (response) {
 
-            if (response.success) {
+//             if (response.success) {
 
-                showToast("Appointment Cancelled Successfully", "error");
+//                 showToast("Appointment Cancelled Successfully", "error");
 
-                $(".modal-pending").addClass("hidden");
+//                 $(".modal-pending").addClass("hidden");
 
-                setTimeout(() => {
-                    loadAppointments(currentStatus, 1);
-                }, 300);
+//                 setTimeout(() => {
+//                     loadAppointments(currentStatus, 1);
+//                 }, 300);
 
-            } else {
+//             } else {
 
-                showToast(response.message || "Something went wrong", "error");
+//                 showToast(response.message || "Something went wrong", "error");
 
-            }
+//             }
 
-        },
+//         },
 
-        error: function (xhr) {
+//         error: function (xhr) {
 
-            console.log(xhr.responseText);
+//             console.log(xhr.responseText);
 
-            alert("Error");
-        }
+//             alert("Error");
+//         }
 
-    });
+//     });
 
-});
+// });
 
 
 /* ------------------------------
  * ACCEPT APPOINTMENT
  * ------------------------------ */
 
-$(document).on("click", ".accept-btn", function () {
+// $(document).on("click", ".accept-btn", function () {
 
-    const orderId = $(this).data("order");
+//     const orderId = $(this).data("order");
 
-    $.ajax({
+//     $.ajax({
 
-        url: "/appointment/update-status/",
-        type: "POST",
+//         url: "/appointment/update-status/",
+//         type: "POST",
 
-        data: {
-            order_id: orderId,
-            status: "Accepted"
-        },
+//         data: {
+//             order_id: orderId,
+//             status: "Accepted"
+//         },
 
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
+//         headers: {
+//             "X-CSRFToken": getCookie("csrftoken")
+//         },
 
-        success: function (response) {
+//         success: function (response) {
 
-            if (response.success) {
+//             if (response.success) {
 
-                showToast("Appointment Accepted Successfully", "success");
+//                 showToast("Appointment Accepted Successfully", "success");
 
-                $(".modal-pending").addClass("hidden");
+//                 $(".modal-pending").addClass("hidden");
 
-                setTimeout(() => {
-                    loadAppointments(currentStatus, 1);
-                }, 300);
+//                 setTimeout(() => {
+//                     loadAppointments(currentStatus, 1);
+//                 }, 300);
 
-            } else {
+//             } else {
 
-                showToast(response.message || "Something went wrong", "error");
+//                 showToast(response.message || "Something went wrong", "error");
 
-            }
+//             }
 
-        },
+//         },
 
-        error: function (xhr) {
+//         error: function (xhr) {
 
-            console.log(xhr.responseText);
+//             console.log(xhr.responseText);
 
-            showToast("Error updating appointment", "error");
-        }
+//             showToast("Error updating appointment", "error");
+//         }
 
-    });
+//     });
 
-});
+// });
 
 function getCookie(name) {
 
@@ -614,7 +612,10 @@ if (fileUrl.toLowerCase().endsWith(".pdf")) {
 }
 
     // Open modal
-    $(".attachment-modal").removeClass("hidden");
+    // $(".attachment-modal").removeClass("hidden");
+    $(".attachment-modal")
+      .css("z-index", "9999")
+      .removeClass("hidden");
 
 });
 
@@ -682,4 +683,152 @@ Date: ${date}`;
     }
 
 });
+});
+
+$(document).on("click", ".patient-share-btn", function () {
+    $("#patientSharePopup")
+        .removeClass("hidden")
+        .addClass("flex");
+});
+
+$(document).on("click", ".close-patient-share-popup", function () {
+    $("#patientSharePopup")
+        .addClass("hidden")
+        .removeClass("flex");
+});
+
+$(document).on("click", "#copy-patient-link", function () {
+
+    const link = $("#patient-share-link").val();
+
+    navigator.clipboard.writeText(link);
+
+    alert("Link copied");
+});
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+        return parts.pop().split(';').shift();
+    }
+    return '';
+}
+
+$(document).on("click", ".accept-appointment", function () {
+
+    const appointmentId = window.currentAppointmentId;
+
+    $.ajax({
+        url: "/appointment/update-status/",
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+
+        data: {
+            appointment_id: appointmentId,
+            status: "Accepted"
+        },
+
+        // success: function (res) {
+        //     alert("Appointment Accepted Successfully");
+        // },
+        success: function (res) {
+
+          showToast("Appointment Accepted Successfully", "success");
+
+          $(".modal-pending").addClass("hidden");
+
+          setTimeout(() => {
+            loadAppointments(currentStatus, 1);
+          }, 500);
+        },
+        error: function (err) {
+            console.log(err);
+            showToaster("error", "Something went wrong");
+        }
+    });
+});
+
+$(document).on("click", ".reject-appointment", function () {
+
+    const appointmentId = window.currentAppointmentId;
+
+    $.ajax({
+        url: "/appointment/update-status/",
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+
+        data: {
+            appointment_id: appointmentId,
+            status: "Cancelled"
+        },
+
+        // success: function (res) {
+        //     alert("Appointment Rejected Successfully");
+        // },
+        success: function (res) {
+
+          showToast("Appointment Rejected Successfully", "success");
+
+          $(".modal-pending").addClass("hidden");
+
+          setTimeout(() => {
+            loadAppointments(currentStatus, 1);
+          }, 500);
+        },
+
+        error: function (err) {
+            console.log(err);
+            alert("Something went wrong");
+        }
+    });
+});
+
+$(document).on("click", ".patient-share-app", function () {
+
+    const app = $(this).data("app");
+    const link = $("#patient-share-link").val();
+
+    let url = "";
+
+    switch (app) {
+        case "whatsapp":
+            url = `https://wa.me/?text=${encodeURIComponent(link)}`;
+            break;
+
+        case "telegram":
+            url = `https://t.me/share/url?url=${encodeURIComponent(link)}`;
+            break;
+
+        case "facebook":
+            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+            break;
+
+        case "sms":
+            url = `sms:?body=${encodeURIComponent(link)}`;
+            break;
+
+        case "gmail":
+            url = `mailto:?subject=Patient Information&body=${encodeURIComponent(link)}`;
+            break;
+    }
+
+    if (url) {
+        window.open(url, "_blank");
+    }
+});
+
+$(document).on("click", "#copy-patient-link", function () {
+
+    const link = $("#patient-share-link").val();
+
+    navigator.clipboard.writeText(link);
+
+    alert("Link copied");
 });

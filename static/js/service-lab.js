@@ -32,6 +32,7 @@ function populateDropdown(dropdown, items) {
 }
 $(document).ready(function () {
 
+
   // STEP 1 - Test & Packages
   $('.services-list > .service-card').each(function () {
     const card = $(this);
@@ -50,6 +51,7 @@ $(document).ready(function () {
     populateDropdown(dropdowns.eq(0), window.LAB_DATA.modes);
     populateDropdown(dropdowns.eq(1), window.LAB_DATA.regions);
   });
+  updateStepper(1);
 
 });
 
@@ -96,7 +98,7 @@ const serviceCardTemplate = () => `
         <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Category</span>
         <span class="material-symbols-outlined">keyboard_arrow_down</span>
       </button>
-      <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow
+      <ul class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow
                  text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
     </div>
   </div>
@@ -110,7 +112,7 @@ const serviceCardTemplate = () => `
         <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Test / Packages</span>
         <span class="material-symbols-outlined">keyboard_arrow_down</span>
       </button>
-      <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow
+      <ul class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow
                  text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
     </div>
   </div>
@@ -125,7 +127,7 @@ const serviceCardTemplate = () => `
           <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Days</span>
           <span class="material-symbols-outlined">keyboard_arrow_down</span>
         </button>
-        <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow
+        <ul class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow
                    text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
         </ul>
       </div>
@@ -135,7 +137,8 @@ const serviceCardTemplate = () => `
     <div>
       <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
       <input type="text"
-        class="price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
+        // class="price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
+        class="price-input w-full h-[48px] border border-slate-gray rounded-md px-3 mt-2 focus:outline-none"
         value="₹ 0.00">
     </div>
   </div>
@@ -182,7 +185,7 @@ const collectionServiceCardTemplate = () => `
         <span class="material-symbols-outlined">keyboard_arrow_down</span>
       </button>
 
-      <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow
+      <ul class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow
                  text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
       </ul>
     </div>
@@ -199,7 +202,7 @@ const collectionServiceCardTemplate = () => `
           <span class="material-symbols-outlined">keyboard_arrow_down</span>
         </button>
 
-        <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow
+        <ul class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow
                    text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
         </ul>
       </div>
@@ -209,7 +212,8 @@ const collectionServiceCardTemplate = () => `
     <div>
       <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
       <input type="text"
-        class="price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
+        // class="price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
+        class="price-input w-full h-[48px] border border-slate-gray rounded-md px-3 mt-2 focus:outline-none"
         value="₹ 0.00">
     </div>
   </div>
@@ -425,6 +429,8 @@ $(document).on('click', '#step-2 .step-btn[data-target="3"]', function () {
   // move to step 3
   $('#step-1, #step-2').addClass('hidden');
   $('#step-3').removeClass('hidden');
+
+  updateStepper(3);
 });
 
 /* =========================================================
@@ -528,28 +534,63 @@ $(document).ready(function () {
   fetchLabServices();
 });
 
-function fetchLabServices() {
-  $.getJSON("/services/get-services/", function (res) {
+// function fetchLabServices() {
+//   $.getJSON("/services/get-services/", function (res) {
 
-    if (!res.success) return;
-    controlServiceSections(res);
-    // toggle sections
-    if (res.has_premium) {
-      $('.premium-section').removeClass('hidden');
-      setTimeout(() => {
-          $('.premium-section .tab-btn-lab.active').trigger('click');
-      }, 50);
-      $('.services-without-subscription').addClass('hidden');
-      renderPremiumServices(res);
-    } else {
-      $('.services-without-subscription').removeClass('hidden');
-      setTimeout(() => {
-          $('.services-without-subscription .tab-btn-lab.active').trigger('click');
-      }, 50);
-      $('.premium-section').addClass('hidden');
-      renderNonPremiumServices(res);
-    }
-  });
+//     if (!res.success) return;
+//     controlServiceSections(res);
+//     // toggle sections
+//     if (res.has_premium) {
+//       $('.premium-section').removeClass('hidden');
+//       setTimeout(() => {
+//           $('.premium-section .tab-btn-lab.active').trigger('click');
+//       }, 50);
+//       $('.services-without-subscription').addClass('hidden');
+//       renderPremiumServices(res);
+//     } else {
+//       $('.services-without-subscription').removeClass('hidden');
+//       setTimeout(() => {
+//           $('.services-without-subscription .tab-btn-lab.active').trigger('click');
+//       }, 50);
+//       $('.premium-section').addClass('hidden');
+//       renderNonPremiumServices(res);
+//     }
+//   });
+// }
+function fetchLabServices() {
+
+    $('.home-section').removeClass('hidden');
+
+    $.getJSON("/services/get-services/", function (res) {
+
+        console.log("Services Response:", res);
+        console.log("success =", res.success);
+        console.log("has_premium =", res.has_premium);
+        console.log("test_packages =", res.test_packages?.length);
+        console.log("collection_modes =", res.collection_modes?.length);
+
+        if (!res.success) {
+            $('.home-section').removeClass('hidden');
+            return;
+        }
+
+        controlServiceSections(res);
+
+        if (res.has_premium) {
+            $('.premium-section').removeClass('hidden');
+            $('.services-without-subscription').addClass('hidden');
+            renderPremiumServices(res);
+        } else {
+            $('.services-without-subscription').removeClass('hidden');
+            $('.premium-section').addClass('hidden');
+            renderNonPremiumServices(res);
+        }
+    }).fail(function () {
+
+        console.log("API FAILED");
+
+        $('.home-section').removeClass('hidden');
+    });
 }
 
 function renderPremiumServices(res) {
@@ -812,7 +853,10 @@ function renderNonPremiumServices(res) {
 }
 
 
+
 function controlServiceSections(res) {
+  console.log("CONTROL RUN");
+  console.log(res);
 
   const hasServices =
     (res.test_packages && res.test_packages.length > 0) ||
@@ -832,26 +876,46 @@ function controlServiceSections(res) {
     });
   }
   // hide all
-  homeSection.addClass('hidden');
+  // homeSection.addClass('hidden');
   premiumSection.addClass('hidden');
   nonPremiumSec.addClass('hidden');
   fab.addClass('hidden');
 
   if (!hasServices) {
     homeSection.removeClass('hidden');
+    premiumSection.addClass('hidden');
+    nonPremiumSec.addClass('hidden');
     return;
   }
 
   // services exist → show FAB always
   fab.removeClass('hidden');
 
-  if (res.has_premium) {
-      $('.premium-section').removeClass('hidden');
-      refreshTabs();
-  } else {
-      $('.services-without-subscription').removeClass('hidden');
-      refreshTabs();
-  }
+//   if (res.has_premium) {
+//       $('.premium-section').removeClass('hidden');
+//       refreshTabs();
+//   } else {
+//       $('.services-without-subscription').removeClass('hidden');
+//       refreshTabs();
+//   }
+// }
+if (res.has_premium) {
+
+    homeSection.addClass('hidden');
+
+    $('.premium-section').removeClass('hidden');
+    $('.services-without-subscription').addClass('hidden');
+
+    refreshTabs();
+
+} else {
+
+    homeSection.addClass('hidden');
+
+    $('.services-without-subscription').removeClass('hidden');
+    $('.premium-section').addClass('hidden');
+
+    refreshTabs();
 }
 
 $(document).on('click', '.open-add-service', function () {
@@ -1117,4 +1181,58 @@ $(document).on("click", function (e) {
   if (!$(e.target).closest(".more-options, .more-dropdown").length) {
     $(".more-dropdown").addClass("hidden");
   }
+});
+// function updateStepper(step){
+
+//     $('.step-circle').removeClass('active-step');
+//     $('.step-label').removeClass('active-heading');
+
+//     for(let i=1;i<=step;i++){
+//         $(`.step-circle[data-step="${i}"]`).addClass('active-step');
+//         $(`.step-label[data-step="${i}"]`).addClass('active-heading');
+//     }
+// }
+function updateStepper(step){
+
+    $('.step-circle').removeClass('active-step');
+    $('.step-label').removeClass('active-heading');
+    $('.step-line').removeClass('active-line');
+
+    for(let i=1;i<=step;i++){
+        $(`.step-circle[data-step="${i}"]`).addClass('active-step');
+        $(`.step-label[data-step="${i}"]`).addClass('active-heading');
+    }
+
+    if(step >= 2){
+        $('.step-line').eq(0).addClass('active-line');
+    }
+
+    if(step >= 3){
+        $('.step-line').eq(1).addClass('active-line');
+    }
+}
+$(document).on('click', '.home-add-service', function () {
+
+    $('.home-section').addClass('hidden');
+
+    $('.services-section').removeClass('hidden');
+
+    $('#step-1').removeClass('hidden');
+    $('#step-2').addClass('hidden');
+    $('#step-3').addClass('hidden');
+
+    updateStepper(1);
+});
+$(document).on('click', '#step-1 .step-btn[data-target="2"]', function () {
+
+    $('#step-1').addClass('hidden');
+    $('#step-2').removeClass('hidden');
+
+    updateStepper(2);
+});
+$(document).on('click', '#cancel-steps', function () {
+
+    $('.services-section').addClass('hidden');
+
+    $('.home-section').removeClass('hidden');
 });

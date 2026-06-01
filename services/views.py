@@ -1,4 +1,5 @@
 import json
+import os
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
@@ -25,7 +26,7 @@ from settings.models import SellerSubscription
 from core.settings import MONGO_COLLECTIONS
 from django.conf import settings
 
-def build_media_url(path):
+def build_media_url(path, default_subdir=""):
     if not path:
         return ""
 
@@ -33,7 +34,20 @@ def build_media_url(path):
     if path.startswith(("http://", "https://", "/")):
         return path
 
-    return f"{settings.MEDIA_URL.rstrip('/')}/{path.lstrip('/')}"
+    media_url = settings.MEDIA_URL.rstrip("/")
+    media_prefix = settings.MEDIA_URL.strip("/")
+    media_root = str(settings.MEDIA_ROOT).replace("\\", "/").rstrip("/")
+
+    if media_prefix and path.startswith(f"{media_prefix}/"):
+        path = path[len(media_prefix) + 1:]
+
+    if media_root and path.startswith(f"{media_root}/"):
+        path = path[len(media_root) + 1:]
+
+    if default_subdir and "/" not in path:
+        path = f"{default_subdir.strip('/')}/{os.path.basename(path)}"
+
+    return f"{media_url}/{path.lstrip('/')}"
 
 
 @dashboard_login_required
@@ -90,7 +104,8 @@ def services(request):
         context.update({
             "pharmacy_profile": pharmacy_profile,
             "pharmacy_storefront_image_url": build_media_url(
-                pharmacy_profile.storefront_image_path
+                pharmacy_profile.storefront_image_path,
+                "pharmacy_docs/store_front"
             ),
             "pharmacy_medicines": medicines,
             "has_pharmacy_medicines": medicines.exists(),
@@ -135,6 +150,8 @@ def services(request):
 
             "has_premium": bool(sub and not sub.is_expired),
             "subscription": sub,
+            "button_text": "Get Started Now",
+            "subscription_url": "/settings/?tab=subscription",
         })
 
         return render(request, 'lab/services.html', context)

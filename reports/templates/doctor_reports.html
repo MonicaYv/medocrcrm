@@ -93,7 +93,9 @@
           <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Total Patient</h2>
-              <p class="text-base sm:text-lg font-semibold">50</p>
+              <p class="text-base sm:text-lg font-semibold total-patient-count">
+                  50
+              </p>
             </div>
             <div
               class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
@@ -103,7 +105,9 @@
           <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Birds Received</h2>
-              <p class="text-base sm:text-lg font-semibold">84</p>
+              <p class="text-base sm:text-lg font-semibold birds-received-count">
+                  84
+              </p>
             </div>
             <div
               class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
@@ -113,7 +117,9 @@
           <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Quarter growth</h2>
-              <p class="text-base sm:text-lg font-semibold">+12.5%</p>
+              <p class="text-base sm:text-lg font-semibold quarter-growth">
+                  +12.5%
+              </p>
             </div>
             <div
               class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
@@ -123,7 +129,9 @@
           <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Average Revenue/Patient</h2>
-              <p class="text-base sm:text-lg font-semibold">₹3,150</p>
+              <p class="text-base sm:text-lg font-semibold avg-revenue">
+                ₹3,150
+            </p>
             </div>
             <div
               class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
@@ -201,7 +209,11 @@
                 <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">9-10 PM</li>
               </ul>
             </div>
-            <div id="heatmap" class="h-48 sm:h-60 md:h-72"></div>
+            <div id="heatmap" class="h-48 sm:h-60 md:h-72 relative">
+
+                <div id="heatmap" class="!h-[60%] mt-1"></div>
+
+            </div>
             <div class="flex justify-center mt-4">
               <button class="bg-dodger-blue text-white w-full sm:w-[322px] py-2 rounded-lg download-btn">
                 Download Report
@@ -302,65 +314,10 @@
               </div>
 
               <!-- Bars -->
-              <div class="flex-1 flex items-end justify-between h-40 sm:h-48 min-w-[480px]">
-                <!-- Bar -->
-                <div class="flex flex-col items-center gap-2">
-                  <div class="w-10 sm:w-[56px] h-36 sm:h-44 flex flex-col justify-end overflow-hidden">
-                    <div class="bar bg-bright-red h-[35%]" data-label="Lost" data-value="35"></div>
-                    <div class="bar bg-mint-emerald h-[65%]" data-label="Won" data-value="65"></div>
-                  </div>
-                  <span class="text-xs text-gray-500">Mon</span>
-                </div>
-
-                <div class="flex flex-col items-center gap-2">
-                  <div class="w-10 sm:w-[56px] h-36 sm:h-44 flex flex-col justify-end overflow-hidden">
-                    <div class="bar bg-bright-red h-[40%]" data-label="Lost" data-value="40"></div>
-                    <div class="bar bg-mint-emerald h-[60%]" data-label="Won" data-value="60"></div>
-                  </div>
-                  <span class="text-xs text-gray-500">Tue</span>
-                </div>
-
-                <div class="flex flex-col items-center gap-2">
-                  <div class="w-10 sm:w-[56px] h-36 sm:h-44 flex flex-col justify-end overflow-hidden">
-                    <div class="bar bg-bright-red h-[45%]" data-label="Lost" data-value="45"></div>
-                    <div class="bar bg-mint-emerald h-[55%]" data-label="Won" data-value="55"></div>
-                  </div>
-                  <span class="text-xs text-gray-500">Wed</span>
-                </div>
-
-                <div class="flex flex-col items-center gap-2">
-                  <div class="w-10 sm:w-[56px] h-36 sm:h-44 flex flex-col justify-end overflow-hidden">
-                    <div class="bar bg-bright-red h-[20%]" data-label="Lost" data-value="20"></div>
-                    <div class="bar bg-mint-emerald h-[40%]" data-label="Won" data-value="40"></div>
-                  </div>
-                  <span class="text-xs text-gray-500">Thu</span>
-                </div>
-
-                <div class="flex flex-col items-center gap-2">
-                  <div class="w-10 sm:w-[56px] h-36 sm:h-44 flex flex-col justify-end overflow-hidden">
-                    <div class="bar bg-bright-red h-[30%]" data-label="Lost" data-value="30"></div>
-                    <div class="bar bg-mint-emerald h-[60%]" data-label="Won" data-value="60"></div>
-                  </div>
-                  <span class="text-xs text-gray-500">Fri</span>
-                </div>
-
-                <div class="flex flex-col items-center gap-2">
-                  <div class="w-10 sm:w-[56px] h-36 sm:h-44 flex flex-col justify-end overflow-hidden">
-                    <div class="bar bg-bright-red h-[10%]" data-label="Lost" data-value="10"></div>
-                    <div class="bar bg-mint-emerald h-[75%]" data-label="Won" data-value="75"></div>
-                  </div>
-                  <span class="text-xs text-gray-500">Sat</span>
-                </div>
-
-                <div class="flex flex-col items-center gap-2">
-                  <div class="w-10 sm:w-[56px] h-36 sm:h-44 flex flex-col justify-end overflow-hidden">
-                    <div class="bar bg-bright-red h-[35%]" data-label="Lost" data-value="35"></div>
-                    <div class="bar bg-mint-emerald h-[65%]" data-label="Won" data-value="65"></div>
-                  </div>
-                  <span class="text-xs text-gray-500">Sun</span>
-                </div>
+              <div class="bid-chart-container flex-1 flex items-end justify-between h-40 sm:h-48 min-w-[480px]">
 
               </div>
+               
             </div>
 
             <!-- Note -->
@@ -447,77 +404,77 @@
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="consultation-table-body">
                 <!-- Row 1 -->
-                <tr>
+                <!-- <tr>
                   <td class="px-4 py-1 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-azure-radiance"></span> Monday
                   </td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr>
+                </tr> -->
                 <!-- Row 2 -->
-                <tr class="">
+                <!-- <tr class="">
                   <td class="px-4 py-1 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-light-green"></span> Tuesday
                   </td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">20</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr>
+                </tr> -->
                 <!-- Row 3 -->
-                <tr class="">
+                <!-- <tr class="">
                   <td class="px-4 py-1 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-golden-gold"></span> Wednesday
                   </td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
+                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td> -->
+                  <!-- <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr>
+                </tr> -->
                 <!-- Row 4 -->
-                <tr class="">
+                <!-- <tr class="">
                   <td class="px-4 py-1 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-safety-orange"></span> Thursday
                   </td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr>
+                </tr> -->
                 <!-- Row 5 -->
-                <tr class="">
+                <!-- <tr class="">
                   <td class="px-4 py-1 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-dark-yellow"></span> Friday
                   </td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">15</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr>
+                </tr> -->
                 <!-- Row 6 -->
-                <tr class="">
-                  <td class="px-4 py-1 flex items-center gap-2">
+                <!-- <tr class=""> -->
+                  <!-- <td class="px-4 py-1 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-dodger-blue"></span> Saturday
                   </td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">12</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr>
+                </tr> -->
                 <!-- Row 7 -->
-                <tr class="">
+                <!-- <tr class="">
                   <td class="px-4 py-1 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-crimson-red"></span> Sunday
                   </td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
                   <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr>
+                </tr> -->
 
-                <tr>
+                <!-- <tr> -->
                   <!-- Day column: empty -->
-                  <td></td>
+                  <!-- <td></td> -->
 
                   <!-- Appt + Avg Fee + Earnings -->
-                  <td colspan="3"
+                  <!-- <td colspan="3"
                     class="border-t border-gray-300 py-1 text-center font-semibold text-xs sm:text-sm whitespace-normal">
                     <span class="mr-6">Total</span>
                     <span class="mr-15">-</span>
@@ -525,7 +482,7 @@
                     <span class="mr-6">=</span>
                     <span class="font-bold">₹35,000</span>
                   </td>
-                </tr>
+                </tr> -->
 
               </tbody>
             </table>
@@ -550,6 +507,11 @@
 
 {% block extra_js %}
   <script src="/static/js/tabs.js"></script>
-<script src="/static/js/pharmacy-reports.js"></script>
+  <script src="{% static 'js/doctor-reports.js' %}"></script>
   <script src="/static/js/table-pagination.js"></script>
+<!-- heatmap -->
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/maps.js"></script>
+<script src="https://www.amcharts.com/lib/4/geodata/india2019High.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
 {% endblock %}

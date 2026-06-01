@@ -271,13 +271,25 @@ def get_technicians(request):
             else:
                 image_url = "/static/images/dummy.jpg"
 
+            # data.append({
+            #     "id": t.id,
+            #     "full_name": t.full_name,
+            #     "phone_number": t.phone_number,
+            #     "specialization": t.specialization.name if t.specialization else "Technician",
+            #     "experience_years": t.experience_years or 0,
+            #     "image": image_url
+            # })
             data.append({
                 "id": t.id,
                 "full_name": t.full_name,
                 "phone_number": t.phone_number,
                 "specialization": t.specialization.name if t.specialization else "Technician",
                 "experience_years": t.experience_years or 0,
-                "image": image_url
+                "image": image_url,
+
+                "gender": t.gender,
+                "age": t.age,
+                "education": t.education
             })
 
         return JsonResponse(data, safe=False)

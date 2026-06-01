@@ -402,10 +402,28 @@ function resetUploadDiv() {
       .addClass("hidden")
       .removeClass("flex");
   });
+//   $(document).on("click", ".doctorCard", function () {
 
-  $(".doctorCard").on("click", function () {
+//     let technicianId = $(this).data("id");
+
+//     console.log("Clicked Technician ID:", technicianId);
+
+//     $(".docInfoPopup").removeClass("hidden");
+//  });
+$(document).on("click", ".doctorCard", function () {
+
+    $("#popupName").text($(this).data("name"));
+    $("#popupPhone").text($(this).data("phone"));
+    $("#popupGender").text($(this).data("gender"));
+    $("#popupAge").text($(this).data("age"));
+    $("#popupEducation").text($(this).data("education"));
+    $("#popupSpecialization").text($(this).data("specialization"));
+    $("#popupExperience").text($(this).data("experience") + " Years");
+
+    $("#popupImage").attr("src", $(this).data("image"));
+
     $(".docInfoPopup").removeClass("hidden");
-  });
+});
 
   $(".closeInfoPopup").on("click", function () {
     $(".docInfoPopup").addClass("hidden");
@@ -790,8 +808,17 @@ function renderTechnicians(data) {
       imgSrc = t.image;
     }
 
-    html += `
-      <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments flex flex-col items-center gap-3">
+   html += `
+  <div class="doctorCard border border-cool-slate-gray rounded-lg py-4 shadow-appointments flex flex-col items-center gap-3 cursor-pointer"
+      data-id="${t.id}"
+      data-name="${t.full_name}"
+      data-phone="${t.phone_number}"
+      data-gender="${t.gender}"
+      data-age="${t.age}"
+      data-education="${t.education}"
+      data-specialization="${t.specialization}"
+      data-experience="${t.experience_years}"
+      data-image="${t.image}">
 
         <img src="${imgSrc}"
              class="w-[90px] h-[90px] rounded-full object-cover">

@@ -21,6 +21,7 @@
   data-details="{% if appointment.test_package %}{{ appointment.test_package }}{% elif appointment.test_type %}{{ appointment.test_type }}{% elif appointment.description %}{{ appointment.description }}{% elif appointment.health_issue_ids %}Health Consultation{% else %}-{% endif %}"
 
   data-budget="{{ appointment.budget|default:'' }}"
+  data-id="{{ appointment.id }}"
   data-order-id="R{{ appointment.id }}"
   data-status="{{ appointment.status }}"
   data-cancelled-by="{{ appointment.cancelled_by|default:'Doctor' }}"

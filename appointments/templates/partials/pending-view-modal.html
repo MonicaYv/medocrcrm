@@ -8,8 +8,8 @@
                   <h2 class="text-base font-bold">Patient Information</h2>
                   <div class="flex items-center gap-4">
                     
-                    <button class="cursor-pointer share-btn">
-                      <span class="material-symbols-outlined !text-xl">share</span>
+                    <button class="cursor-pointer patient-share-btn">
+                        <span class="material-symbols-outlined !text-xl">share</span>
                     </button>
                     <button class="modal-close-pending text-gray-500 hover:text-gray-800 !text-3xl">&times;</button>
                   </div>
@@ -155,3 +155,80 @@
                 <div id="modal-enquiry-detail"></div>
               </div>
             </div>
+
+            <div id="patientSharePopup"
+              class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50">
+
+              <div class="bg-white shadow-lg rounded-md w-130">
+                  <div class="bg-white rounded-lg shadow-lg p-6 relative">
+
+                      <div class="flex justify-between items-center">
+                          <p class="font-semibold text-xl">Share Patient Information</p>
+
+                          <span class="material-symbols-outlined close-patient-share-popup cursor-pointer">
+                              close
+                          </span>
+                      </div>
+
+                      <hr class="mt-4" />
+
+                      <div class="flex justify-between pt-4">
+
+                          <!-- Whatsapp -->
+                          <div class="flex flex-col items-center gap-2 w-20 text-center patient-share-app cursor-pointer"
+                              data-app="whatsapp">
+                              <img src="/static/images/whatsappicon.svg" class="w-10 h-10" />
+                              <p>Whatsapp</p>
+                          </div>
+
+                          <!-- Telegram -->
+                          <div class="flex flex-col items-center gap-2 w-20 text-center patient-share-app cursor-pointer"
+                              data-app="telegram">
+                              <img src="/static/images/telegramicon.svg" class="w-10 h-10" />
+                              <p>Telegram</p>
+                          </div>
+
+                          <!-- Facebook -->
+                          <div class="flex flex-col items-center gap-2 w-20 text-center patient-share-app cursor-pointer"
+                              data-app="facebook">
+                              <img src="/static/images/facebookicon.svg" class="w-10 h-10" />
+                              <p>Facebook</p>
+                          </div>
+
+                          <!-- SMS -->
+                          <div class="flex flex-col items-center gap-2 w-20 text-center patient-share-app cursor-pointer"
+                              data-app="sms">
+                              <img src="/static/images/smsicon.svg" class="w-10 h-10" />
+                              <p>Message</p>
+                          </div>
+
+                          <!-- Gmail -->
+                          <div class="flex flex-col items-center gap-2 w-20 text-center patient-share-app cursor-pointer"
+                              data-app="gmail">
+                              <img src="/static/images/gmailicon.svg" class="w-10 h-10" />
+                              <p>Email</p>
+                          </div>
+
+                      </div>
+
+                      <!-- ADD THIS BELOW ICONS -->
+                      <div class="pt-4 relative mt-6">
+                          <input
+                              type="text"
+                              id="patient-share-link"
+                              value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci"
+                              class="w-full rounded-md p-4 font-normal text-sm border"
+                              readonly
+                          />
+
+                          <button
+                              type="button"
+                              id="copy-patient-link"
+                              class="absolute right-3 top-6 bg-dodger-blue text-white rounded-md px-4 py-2 cursor-pointer">
+                              Copy
+                          </button>
+                      </div>
+
+                  </div>
+              </div>
+          </div>
