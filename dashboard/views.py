@@ -37,11 +37,12 @@ from services.models import DoctorBidding, DoctorBidStatus
 from appointments.models import LabAppointments
 from appointments.models import HospitalAppointments
 from appointments.models import DoctorAppointment
-from orders.models import UserPurchase, OrderStatusChoices
+from orders.models import UserPurchase, OrderStatusChoices, PurchaseMedicine
 from appointments.models import WalletTransaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-
+from django.http import HttpResponse  
+from settings.models import SellerSubscription, SellerType  
 
 def build_media_url(path):
     if not path:
@@ -189,27 +190,40 @@ def dashboard_home(request):
             ).count()
 
 
-            # scheduled_orders = UserPurchase.objects.filter(
-            #     assigned_pharmacy=pharmacy_profile
-            # ).order_by('-id')[:5]
-            # 
-            scheduled_orders = []
+            scheduled_orders = (
+                UserPurchase.objects
+                .filter(
+                    assigned_pharmacy=pharmacy_profile
+                )
+                .exclude(
+                    order_status__in=[
+                        OrderStatusChoices.DELIVERED,
+                        OrderStatusChoices.CANCELLED
+                    ]
+                )
+                .values(
+                    'id',
+                    'order_status',
+                    'created_at',
+                    'user__userprofile__first_name',
+                    'user__userprofile__last_name',
+                )
+                .order_by('-created_at')[:3]
+            )
 
 
-            # popular_coupons = Coupon.objects.filter(
-            #     advertiser=user
-            # ).order_by('-created_at')[:5]
             popular_coupons = Coupon.objects.all().order_by('-redeemed_count')[:5]
 
-            # context.update({
-            #     'pharmacy_profile': pharmacy_profile,
-            #     'scheduled_orders': scheduled_orders,
-            #     'popular_coupons': popular_coupons,
-            #     'user_display_name': pharmacy_profile.company_name,
-            #     'pending_orders': pending_orders,
-            #     'events': CalendarEvent.objects.all().order_by('date'),
-            #     'user': user,
-            # })
+            active_subscription = SellerSubscription.objects.filter(
+                seller_type=SellerType.PHARMACY,
+                seller_profile_id=pharmacy_profile.id,
+                is_active=True,
+                is_enabled=True
+            ).first()
+
+
+            popular_coupons = Coupon.objects.all().order_by('-redeemed_count')[:5]
+
             context.update({
                 'pharmacy_profile': pharmacy_profile,
 
@@ -225,6 +239,8 @@ def dashboard_home(request):
                 ).count(),
 
                 'quotes_given': Coupon.objects.count(),
+
+                'active_subscription': active_subscription,
 
                 'orders_won': UserPurchase.objects.filter(
                     assigned_pharmacy=pharmacy_profile,
@@ -1127,3 +1143,85 @@ def get_advance_receipt(request, advance_id):
 
     return JsonResponse(response_data)
 
+def pharmacy_order_details(request, order_id):
+
+    order = (
+        UserPurchase.objects
+        .filter(id=order_id)
+        .values(
+            "id",
+            "final_amount",
+            "order_status",
+            "created_at",
+
+            "user__phone_number",
+
+            "user__userprofile__first_name",
+            "user__userprofile__last_name",
+            "user__userprofile__age",
+            "user__userprofile__gender",
+            "user__userprofile__profile_photo_path",
+
+            "address__address",
+            "address__pincode",
+            "address__country",
+            "address__city__name",
+            "address__state__name",
+        )
+        .first()
+    )
+
+    if not order:
+        return JsonResponse(
+            {"error": "Order not found"},
+            status=404
+        )
+
+    medicines = list(
+        PurchaseMedicine.objects.filter(
+            purchase_id=order_id
+        ).values(
+            "product_name",
+            "quantity",
+            "price",
+            "mrp",
+            "requires_prescription"
+        )
+    )
+
+    return JsonResponse({
+        "id": order["id"],
+        "status": order["order_status"],
+        "phone": order["user__phone_number"],
+
+        "patient_name": (
+            f"{order['user__userprofile__first_name'] or ''} "
+            f"{order['user__userprofile__last_name'] or ''}"
+        ).strip(),
+
+        "age": order["user__userprofile__age"],
+        "gender": order["user__userprofile__gender"],
+
+        "profile_photo": order["user__userprofile__profile_photo_path"],
+
+        "address": {
+            "address": order["address__address"],
+            "city": order["address__city__name"],
+            "state": order["address__state__name"],
+            "country": order["address__country"],
+            "pincode": order["address__pincode"],
+        },
+
+        "total": float(order["final_amount"] or 0),
+
+        "medicines": [
+            {
+                "name": m["product_name"],
+                "qty": m["quantity"],
+                "price": float(m["price"] or 0),
+                "mrp": float(m["mrp"]) if m["mrp"] else float(m["price"] or 0) * 1.2,
+                "requires_prescription": m["requires_prescription"],
+            }
+            for m in medicines
+        ],
+    })
