@@ -107,6 +107,7 @@ loadAppointments("all", 1);
 
       const card = $(this);
       const status = (card.data("status") || "").toLowerCase();
+      window.currentStatusModal = status;
       const orderId = card.data("order-id") || "-";
       const appointmentId = card.data("id");
       window.currentAppointmentId = appointmentId;
@@ -383,108 +384,108 @@ const ENQUIRY_TEMPLATES = {
  * REJECT APPOINTMENT
  * ------------------------------ */
 
-$(document).on("click", ".reject-btn", function () {
+// $(document).on("click", ".reject-btn", function () {
 
-    const orderId = $(this).data("order");
+//     const orderId = $(this).data("order");
 
-    $.ajax({
+//     $.ajax({
 
-        url: "/appointment/update-status/",
-        type: "POST",
+//         url: "/appointment/update-status/",
+//         type: "POST",
 
-        data: {
-            order_id: orderId,
-            status: "Cancelled"
-        },
+//         data: {
+//             order_id: orderId,
+//             status: "Cancelled"
+//         },
 
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
+//         headers: {
+//             "X-CSRFToken": getCookie("csrftoken")
+//         },
 
-        success: function (response) {
+//         success: function (response) {
 
-            if (response.success) {
+//             if (response.success) {
 
-                showToast("Appointment Cancelled Successfully", "error");
+//                 showToast("Appointment Cancelled Successfully", "error");
 
-                $(".modal-pending").addClass("hidden");
+//                 $(".modal-pending").addClass("hidden");
 
-                setTimeout(() => {
-                    loadAppointments(currentStatus, 1);
-                }, 300);
+//                 setTimeout(() => {
+//                     loadAppointments(currentStatus, 1);
+//                 }, 300);
 
-            } else {
+//             } else {
 
-                showToast(response.message || "Something went wrong", "error");
+//                 showToast(response.message || "Something went wrong", "error");
 
-            }
+//             }
 
-        },
+//         },
 
-        error: function (xhr) {
+//         error: function (xhr) {
 
-            console.log(xhr.responseText);
+//             console.log(xhr.responseText);
 
-            alert("Error");
-        }
+//             alert("Error");
+//         }
 
-    });
+//     });
 
-});
+// });
 
 
 /* ------------------------------
  * ACCEPT APPOINTMENT
  * ------------------------------ */
 
-$(document).on("click", ".accept-btn", function () {
+// $(document).on("click", ".accept-btn", function () {
 
-    const orderId = $(this).data("order");
+//     const orderId = $(this).data("order");
 
-    $.ajax({
+//     $.ajax({
 
-        url: "/appointment/update-status/",
-        type: "POST",
+//         url: "/appointment/update-status/",
+//         type: "POST",
 
-        data: {
-            order_id: orderId,
-            status: "Accepted"
-        },
+//         data: {
+//             order_id: orderId,
+//             status: "Accepted"
+//         },
 
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
+//         headers: {
+//             "X-CSRFToken": getCookie("csrftoken")
+//         },
 
-        success: function (response) {
+//         success: function (response) {
 
-            if (response.success) {
+//             if (response.success) {
 
-                showToast("Appointment Accepted Successfully", "success");
+//                 showToast("Appointment Accepted Successfully", "success");
 
-                $(".modal-pending").addClass("hidden");
+//                 $(".modal-pending").addClass("hidden");
 
-                setTimeout(() => {
-                    loadAppointments(currentStatus, 1);
-                }, 300);
+//                 setTimeout(() => {
+//                     loadAppointments(currentStatus, 1);
+//                 }, 300);
 
-            } else {
+//             } else {
 
-                showToast(response.message || "Something went wrong", "error");
+//                 showToast(response.message || "Something went wrong", "error");
 
-            }
+//             }
 
-        },
+//         },
 
-        error: function (xhr) {
+//         error: function (xhr) {
 
-            console.log(xhr.responseText);
+//             console.log(xhr.responseText);
 
-            showToast("Error updating appointment", "error");
-        }
+//             showToast("Error updating appointment", "error");
+//         }
 
-    });
+//     });
 
-});
+// });
 
 function getCookie(name) {
 
@@ -611,7 +612,10 @@ if (fileUrl.toLowerCase().endsWith(".pdf")) {
 }
 
     // Open modal
-    $(".attachment-modal").removeClass("hidden");
+    // $(".attachment-modal").removeClass("hidden");
+    $(".attachment-modal")
+      .css("z-index", "9999")
+      .removeClass("hidden");
 
 });
 
@@ -728,10 +732,19 @@ $(document).on("click", ".accept-appointment", function () {
             status: "Accepted"
         },
 
+        // success: function (res) {
+        //     alert("Appointment Accepted Successfully");
+        // },
         success: function (res) {
-            alert("Appointment Accepted Successfully");
-        },
 
+          showToast("Appointment Accepted Successfully", "success");
+
+          $(".modal-pending").addClass("hidden");
+
+          setTimeout(() => {
+            loadAppointments(currentStatus, 1);
+          }, 500);
+        },
         error: function (err) {
             console.log(err);
             showToaster("error", "Something went wrong");
@@ -756,8 +769,18 @@ $(document).on("click", ".reject-appointment", function () {
             status: "Cancelled"
         },
 
+        // success: function (res) {
+        //     alert("Appointment Rejected Successfully");
+        // },
         success: function (res) {
-            alert("Appointment Rejected Successfully");
+
+          showToast("Appointment Rejected Successfully", "success");
+
+          $(".modal-pending").addClass("hidden");
+
+          setTimeout(() => {
+            loadAppointments(currentStatus, 1);
+          }, 500);
         },
 
         error: function (err) {

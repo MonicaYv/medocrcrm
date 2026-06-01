@@ -166,23 +166,79 @@ $(document).on("click", ".cancel-appointment-btn", function () {
         }
     });
 });
-$(document).on("click", "#shareBtn", function () {
+// $(document).on("click", "#shareBtn", function () {
 
-    if (navigator.share) {
+//     if (navigator.share) {
 
-        navigator.share({
-            title: "Appointment Details",
-            text: "Appointment Information",
-            url: window.location.href
-        });
+//         navigator.share({
+//             title: "Appointment Details",
+//             text: "Appointment Information",
+//             url: window.location.href
+//         });
 
-    } else {
+//     } else {
 
-        window.open(
-            "https://wa.me/?text=" + encodeURIComponent(window.location.href),
-            "_blank"
-        );
+//         window.open(
+//             "https://wa.me/?text=" + encodeURIComponent(window.location.href),
+//             "_blank"
+//         );
 
+//     }
+// });
+
+$(document).on("click", ".patient-share-btn", function () {
+
+    $("#patientSharePopup")
+        .removeClass("hidden")
+        .addClass("flex");
+
+});
+$(document).on("click", ".close-patient-share-popup", function () {
+
+    $("#patientSharePopup")
+        .addClass("hidden")
+        .removeClass("flex");
+
+});
+$(document).on("click", ".patient-share-app", function () {
+
+    const app = $(this).data("app");
+    const link = $("#patient-share-link").val();
+
+    let url = "";
+
+    switch (app) {
+
+        case "whatsapp":
+            url = `https://wa.me/?text=${encodeURIComponent(link)}`;
+            break;
+
+        case "telegram":
+            url = `https://t.me/share/url?url=${encodeURIComponent(link)}`;
+            break;
+
+        case "facebook":
+            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+            break;
+
+        case "gmail":
+            url = `mailto:?subject=Patient Information&body=${encodeURIComponent(link)}`;
+            break;
+
+        case "sms":
+            url = `sms:?body=${encodeURIComponent(link)}`;
+            break;
+    }
+
+    if (url) {
+        window.open(url, "_blank");
     }
 });
+$(document).on("click", ".patient-share-btn", function () {
 
+    console.log("SHARE CLICKED");
+
+    $("#patientSharePopup")
+        .removeClass("hidden")
+        .addClass("flex");
+});

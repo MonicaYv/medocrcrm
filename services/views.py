@@ -150,6 +150,8 @@ def services(request):
 
             "has_premium": bool(sub and not sub.is_expired),
             "subscription": sub,
+            "button_text": "Get Started Now",
+            "subscription_url": "/settings/?tab=subscription",
         })
 
         return render(request, 'lab/services.html', context)
