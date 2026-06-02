@@ -6,11 +6,12 @@
       alt="Image"
     />
     <div class="p-4">
-      <p class="font-semibold text-sm text-{{ text }} tracking-[0.25em] uppercase truncate w-full">
+      <!-- <p class="font-semibold text-sm text-{{ text }} tracking-[0.25em] uppercase truncate w-full"> -->
+      <p class="text-[11px] font-medium text-blue-600 uppercase tracking-[0.08em] truncate w-full">
         {{ product.category }} : {{ product.brand_name }}
       </p>
       <p class="font-bold text-lg w-full">{{ product.title }}</p>
-      <p class="font-normal text-base text-light-gray1 w-full line-clamp-2 break-words">
+      <p class="font-normal text-base text-gray-700 w-full line-clamp-2 break-words">
         {{ product.description }}
       </p>
       <hr class="text-{{ text }} w-full mt-2" />

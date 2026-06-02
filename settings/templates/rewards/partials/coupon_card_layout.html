@@ -1,21 +1,28 @@
 {% for c in coupons %}
 <div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card">
-  <div class="flex lg:justify-between lg:items-stretch flex-col lg:flex-row h-full gap-4">
+  <!-- <div class="flex lg:justify-between lg:items-stretch flex-col lg:flex-row h-full gap-4"> -->
+  <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
     
     <!-- Left section -->
-    <div class="flex flex-col flex-1 justify-between">
-      <p class="font-semibold text-sm text-{{ text }} tracking-[0.25em] uppercase">
+    <!-- <div class="flex flex-col flex-1 justify-between"> -->
+    
+    <div class="flex flex-col flex-1">
+      <!-- <p class="font-semibold text-sm text-{{ text }} tracking-wide uppercase"> -->
+      <p class="text-[10px] font-semibold text-{{ text }} tracking-[0.15em] uppercase">
         {{ c.category }} : {{ c.brand_name }}
       </p>
-      <p class="font-bold text-lg mt-1">{{ c.title }}</p>
-      <p class="font-normal text-base text-light-gray1 w-full">
+      <p class="font-bold text-base mt-1">{{ c.title }}</p>
+      
+      <!-- <p class="font-normal text-base text-gray-700 w-full truncate"> -->
+      <p class="text-xs text-gray-500 w-full line-clamp-2">
         {{ c.description }}
       </p>
     </div>
 
     <!-- Middle section -->
-    <div class="flex flex-col justify-between pt-4 lg:pt-0 lg:w-48">
-      <div class="flex justify-between items-center gap-6">
+    <!-- <div class="flex flex-col justify-between pt-4 lg:pt-0 lg:w-48"> -->
+    <div class="flex flex-col justify-center lg:w-40">
+      <div class="flex justify-between items-center gap-4">
         <p class="font-normal text-base">Redeemed</p>
         <p class="text-xs font-medium">{{ c.redeemed_count }}/{{ c.max_redemptions }}</p>
       </div>
@@ -25,14 +32,17 @@
     </div>
 
     <!-- Divider -->
-    <div class="hidden lg:block h-auto w-px bg-{{ secondary_bg }} mx-4"></div>
+    <!-- <div class="hidden lg:block h-auto w-px bg-{{ secondary_bg }} mx-4"></div> -->
+    <!-- <div class="hidden lg:block self-stretch w-px bg-gray-200"></div> -->
+    <div class="hidden lg:block h-16 w-px bg-gray-200"></div>
 
     <!-- Right section -->
-    <div class="pt-4 lg:pt-0 lg:w-48 flex items-center lg:items-end">
+    <!-- <div class="pt-4 lg:pt-0 lg:w-48 flex items-center lg:items-end"> -->
+    <div class="lg:w-36 flex items-center justify-center">
       <button 
         data-coupon-id="{{ c.id }}" 
         data-code="{{ c.code }}"
-        class="bg-{{ secondary_bg }} font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer claim-btn"
+        class="bg-blue-600 font-semibold text-white w-full rounded-md p-2 shadow-sm flex items-center gap-2 justify-center cursor-pointer claim-btn"
       >
         {{ c.code }}
         <span class="material-symbols-outlined">content_copy</span>
