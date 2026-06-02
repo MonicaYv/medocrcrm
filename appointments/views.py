@@ -193,7 +193,7 @@ def update_appointment_status(request):
 
 @require_POST
 @dashboard_login_required
-def update_appointment_status(request):
+def update_lab_appointment_status(request):
 
     order_id = request.POST.get("order_id")
     status = request.POST.get("status")

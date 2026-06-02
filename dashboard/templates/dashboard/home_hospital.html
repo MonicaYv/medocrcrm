@@ -164,7 +164,7 @@
           <div class="pt-5 flex flex-col ml-3">
             <div class="flex justify-between items-center">
               <p class="font-semibold text-lg">Scheduled Appointments</p>
-              <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
+              <a href="{% url 'history' %}" class="text-dodger-blue text-sm font-normal">View all</a>
             </div>
             <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center pt-4 gap-2">
               <div
@@ -218,7 +218,7 @@
           <div class="pt-5 flex flex-col ml-3">
             <div class="flex justify-between items-center">
               <p class="font-semibold text-lg">Appointment Request</p>
-              <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
+              <a href="{% url 'appointment' %}" class="text-dodger-blue text-sm font-normal">View all</a>
             </div>
             <div
               class="bg-white shadow-md w-full h-[72px] mt-4 border-snow border rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-pale-azure hover:shadow-lg">

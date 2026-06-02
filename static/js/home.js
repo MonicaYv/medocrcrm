@@ -1958,19 +1958,242 @@ $(document).on("click", ".complete-appointment-btn", function () {
     });
 
 });
-$(".popup-btn").on("click", function () {
-  let popupId = $(this).data("popup");
-  console.log("Popup Btn Clicked");
-  $("." + popupId)
-    .removeClass("hidden")
-    .addClass("flex");
+// =============================
+// OPEN ORDER DETAILS POPUP
+// =============================
+$(".order-card").on("click", async function () {
+
+    const popupId = $(this).data("popup");
+    const orderId = $(this).data("order-id");
+
+    console.log("Order Clicked:", orderId);
+
+    if (!orderId) {
+        console.error("Missing data-order-id");
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `/dashboard/pharmacy/order/${orderId}/`
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP Error: ${response.status}`
+            );
+        }
+
+        const data = await response.json();
+
+        console.log("Order Data:", data);
+
+        populateOrderPopup(data);
+
+        $("." + popupId)
+            .removeClass("hidden")
+            .addClass("flex");
+
+    } catch (err) {
+
+        console.error(
+            "Failed to load order details:",
+            err
+        );
+
+    }
+
 });
 
-// Close popup
+
+// =============================
+// CLOSE POPUP
+// =============================
 $(".close-popup").on("click", function () {
-  let popupId = $(this).data("popup");
-  $(this)
-    .closest("." + popupId)
-    .addClass("hidden")
-    .removeClass("flex");
+
+    const popupId = $(this).data("popup");
+
+    $("." + popupId)
+        .addClass("hidden")
+        .removeClass("flex");
+
+});
+
+
+// =============================
+// POPULATE ORDER DETAILS
+// =============================
+function populateOrderPopup(data) {
+
+    // Patient Name
+    const patientName =
+        document.getElementById("patientName");
+
+    if (patientName) {
+        patientName.innerText =
+            data.patient_name || "N/A";
+    }
+
+    // Order Number
+    const orderNumber =
+        document.getElementById("orderNumber");
+
+    if (orderNumber) {
+        orderNumber.innerText =
+            "#" + data.id;
+    }
+
+    // Phone Number
+    const phoneNumber =
+        document.getElementById("phoneNumber");
+
+    if (phoneNumber) {
+        phoneNumber.innerText =
+            data.phone || "N/A";
+    }
+    document.getElementById("gender").innerText =
+    data.gender || "N/A";
+
+    document.getElementById("age").innerText =
+        data.age || "N/A";
+    
+    document.getElementById("addressText").innerText =
+        [
+            data.address?.address,
+            data.address?.city,
+            data.address?.state,
+            data.address?.pincode,
+            data.address?.country
+        ]
+        .filter(Boolean)
+        .join(", ");
+
+    const profileImage = document.getElementById("profileImage");
+
+    profileImage.src =
+        data.profile_photo
+            ? data.profile_photo
+            : "/static/images/dolly-paris1.svg";
+
+    profileImage.onerror = function () {
+        this.src = "/static/images/dolly-paris1.svg";
+    };
+
+    // Total Amount
+    const orderTotal =
+        document.getElementById("orderTotal");
+
+    if (orderTotal) {
+        orderTotal.innerText =
+            "₹" + data.total;
+    }
+
+    // Medicine List
+    const container =
+        document.getElementById("medicineContainer");
+
+    if (!container) {
+        console.error(
+            "medicineContainer not found"
+        );
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (
+        !data.medicines ||
+        !data.medicines.length
+    ) {
+
+        container.innerHTML = `
+            <div class="text-center py-4 text-gray-500">
+                No medicines found
+            </div>
+        `;
+
+        return;
+    }
+
+    data.medicines.forEach((med) => {
+
+        container.innerHTML += `
+            <div class="flex items-start gap-3 border-b border-grayish-gray pb-3">
+
+                <div class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
+                    <img
+                        src="/static/images/medicine.svg"
+                        alt="medicine"
+                        class="h-[92px] w-[92px]"
+                    />
+                </div>
+
+                <div class="flex-1">
+
+                    <p class="text-ebony font-semibold text-sm mb-1">
+                        ${med.name || "Medicine"}
+                    </p>
+
+                    <div class="flex items-center gap-2 mb-2">
+
+                        <span class="text-sm text-blue-gray">
+                            ${med.qty || 0} unit
+                        </span>
+
+                        <span
+                            class="px-2 py-0.5 rounded-md text-white text-[8px]
+                            ${
+                                med.requires_prescription
+                                    ? "bg-dark-crimson-red"
+                                    : "bg-ocean-green"
+                            }">
+
+                            ${
+                                med.requires_prescription
+                                    ? "Prescription Needed"
+                                    : "Prescription Received"
+                            }
+
+                        </span>
+
+                    </div>
+
+                    <div class="flex items-center gap-2">
+
+                        <span class="text-ebony text-sm">
+                            ₹${med.price || 0}
+                        </span>
+
+                        <span class="text-arctic-gray text-sm line-through">
+                            ₹${med.mrp || 0}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+    });
+
+}
+
+// Open Share Popup
+$(document).on("click", ".pharmacy-open-share", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    $(".pharmacy-share-modal")
+        .removeClass("hidden")
+        .addClass("flex");
+});
+
+// Close Share Popup
+$(document).on("click", ".pharmacy-close-share", function () {
+
+    $(".pharmacy-share-modal")
+        .addClass("hidden")
+        .removeClass("flex");
 });
