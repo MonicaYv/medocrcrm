@@ -456,7 +456,8 @@ function loadDashboardData(filterType) {
         url: "/reports/hospital-report-data/",
         type: "GET",
         data: {
-            filter: filterType
+            filter: filterType,
+            visit_type: $("#visitTypeFilter").val()
         },
 
         success: function(response) {
@@ -726,14 +727,35 @@ heatmapChart.validateData();
 // REPORT FILTER
 // ================================
 
+// $(".report-filter").click(function () {
+// $("#visitTypeFilter").change(function () {
+
+//     let visitType = $(this).val();
+
+//     loadDashboardData(
+//         $(".report-filter.active").data("type"),
+//         visitType
+//     );
+
+// });
+$("#visitTypeFilter").change(function () {
+
+    let activeType =
+        $(".report-filter.active").data("type") || "today";
+
+    loadDashboardData(activeType);
+
+});
 $(".report-filter").click(function () {
 
-    let type = $(this).data("type");
+    $(".report-filter").removeClass("active");
+    $(this).addClass("active");
 
-    // LOAD DATA
+    let type = $(this).data("type");
+    console.log("Filter Clicked:", type);
+
     loadDashboardData(type);
 
-    // ICON COLOR CHANGE
     $(".report-filter span")
         .removeClass("text-dodger-blue")
         .addClass("text-light-gray");
@@ -742,23 +764,12 @@ $(".report-filter").click(function () {
         .removeClass("text-light-gray")
         .addClass("text-dodger-blue");
 
-    // CUSTOM DATE
     if (type === "custom") {
-
-        $(".datepicker-container")
-            .removeClass("hidden");
-
+        $(".datepicker-container").removeClass("hidden");
     }
 
-    let revenue = "";
-    let highest = "";
-    let growth = "";
-    let avg = "";
-
-    
-
 });
-
+   
 // ================================
 // SEARCH FUNCTIONALITY
 // ================================
@@ -874,6 +885,8 @@ document.getElementById("searchInput")
 
 
 });
+$('.report-filter[data-type="today"]')
+    .addClass("active");
 
 // DEFAULT LOAD
 loadDashboardData("today");

@@ -1,16 +1,24 @@
 {% for product in products %}
-  <div class="w-full max-w-md rounded-xl overflow-hidden shadow-xl bg-white reward-card">
+  <div class="w-[390px] min-h-[370px] rounded-xl overflow-hidden shadow-xl bg-white reward-card">
     <img
-      class="w-full h-48 object-cover"
+      class="w-full h-44 object-cover"
       src="/static/images/tablets.svg"
       alt="Image"
     />
-    <div class="p-4">
-      <p class="font-semibold text-sm text-{{ text }} tracking-[0.25em] uppercase truncate w-full">
+    <div class="p-5">
+      <!-- <p class="font-semibold text-sm text-{{ text }} tracking-[0.25em] uppercase truncate w-full">
         {{ product.category }} : {{ product.brand_name }}
+      </p> -->
+      <p class="font-bold text-[10px] text-dodger-blue tracking-[0.18em] uppercase">
+        {{ product.category|default:"CATEGORY" }} :
+        {{ product.brand_name|default:"BRAND NAME" }}
       </p>
-      <p class="font-bold text-lg w-full">{{ product.title }}</p>
-      <p class="font-normal text-base text-light-gray1 w-full line-clamp-2 break-words">
+      <!-- <p class="font-bold text-lg w-full">{{ product.title }}</p> -->
+      <p class="font-semibold text-[18px] text-jet-black leading-6 line-clamp-2"></p>
+        {{ product.title }}
+      </p>
+      <!-- <p class="font-normal text-base text-light-gray1 w-full line-clamp-2 break-words"> -->
+      <p class="font-normal text-[14px] text-[#666666] leading-5 line-clamp-2">
         {{ product.description }}
       </p>
       <hr class="text-{{ text }} w-full mt-2" />
@@ -19,16 +27,23 @@
           <p class="font-normal text-base">Redeemed</p>
           <p class="text-xs font-medium">{{ product.redeemed_count }}/{{ product.max_redemptions }}</p>
         </div>
-        <div class="w-1/2 max-w-md pt-4">
+        <!-- <div class="w-1/2 max-w-md pt-4"> -->
+        <div class="w-[60%] pt-4">
           <div class="w-full bg-gray-200 rounded-full h-2">
             <div class="bg-{{ primary_bg }} h-2 rounded-full w-[50%]"></div>
           </div>
         </div>
         <div class="pt-4">
-          <button data-coupon-id="{{ product.id }}" data-code="{{ product.code }}"
-            class="bg-{{ primary_bg }} font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer claim-btn">
-            {{ product.code }}
-            <span class="material-symbols-outlined">content_copy</span>
+          <!-- <button data-coupon-id="{{ product.id }}" data-code="{{ product.code }}"
+            class="bg-{{ primary_bg }} font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer claim-btn"> -->
+            <button data-coupon-id="{{ product.id }}" data-code="{{ product.code }}"
+            class="bg-dodger-blue h-10 w-full rounded-lg flex items-center justify-center gap-2 font-semibold text-sm text-white claim-btn cursor-pointer">
+            #{{ product.code }}
+            <!-- <span class="material-symbols-outlined">content_copy</span> -->
+             
+            <span class="material-symbols-outlined text-[18px]">
+              content_copy
+            </span>
           </button>
         </div>
       </div>

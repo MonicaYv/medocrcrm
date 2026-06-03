@@ -164,12 +164,19 @@ function allrewards(search = '', dateRange = '', page = 1) {
 function setupPagination(totalPages, currentPage) {
   let paginationHtml = '';
 
+  // function pageBtn(i) {
+  //   return `<button 
+  //           class="px-3 py-2 rounded-lg cursor-pointer font-normal text-xs ${i === currentPage ? 'bg-living-coral text-white' : 'bg-pagination'}" 
+  //           data-page="${i}">
+  //           ${i}
+  //       </button>`;
+  // }
   function pageBtn(i) {
-    return `<button 
-            class="px-3 py-2 rounded-lg cursor-pointer font-normal text-xs ${i === currentPage ? 'bg-living-coral text-white' : 'bg-pagination'}" 
-            data-page="${i}">
-            ${i}
-        </button>`;
+    return `<button
+          class="coupons-page-btn px-3 py-2 rounded-lg cursor-pointer font-normal text-xs ${i === currentPage ? 'bg-dodger-blue text-white' : 'bg-pagination'}"
+          data-page="${i}">
+          ${i}
+      </button>`;
   }
 
   if (totalPages <= 5) {
@@ -293,12 +300,19 @@ $(document).ready(function() {
  function setupPopularPagination(totalPages, currentPage) {
     let paginationHtml = '';
 
+    // function pageBtn(i) {
+    //   return `<button 
+    //         class="px-3 py-2 rounded-lg cursor-pointer font-normal text-xs popular-page-btn ${i === currentPage ? 'bg-living-coral text-white' : 'bg-pagination'}" 
+    //         data-page="${i}">
+    //         ${i}
+    //     </button>`;
+    // }
     function pageBtn(i) {
-      return `<button 
-            class="px-3 py-2 rounded-lg cursor-pointer font-normal text-xs popular-page-btn ${i === currentPage ? 'bg-living-coral text-white' : 'bg-pagination'}" 
-            data-page="${i}">
-            ${i}
-        </button>`;
+      return `<button
+          class="coupons-page-btn px-3 py-2 rounded-lg cursor-pointer font-normal text-xs ${i === currentPage ? 'bg-dodger-blue text-white' : 'bg-pagination'}"
+          data-page="${i}">
+          ${i}
+      </button>`;
     }
 
     if (totalPages <= 5) {

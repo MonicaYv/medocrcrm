@@ -917,6 +917,7 @@ if (res.has_premium) {
 
     refreshTabs();
 }
+}
 
 $(document).on('click', '.open-add-service', function () {
   $('.add-service').removeClass('hidden').addClass('flex');
