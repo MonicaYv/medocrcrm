@@ -803,63 +803,63 @@ function getCookie(name) {
     return '';
 }
 
-$(document).on("click", ".complete-appointment", function () {
+// $(document).on("click", ".complete-appointment", function () {
 
-    const appointmentId = window.currentAppointmentId;
-    console.log("COMPLETE ID =", appointmentId);
+//     const appointmentId = window.currentAppointmentId;
+//     console.log("COMPLETE ID =", appointmentId);
 
-    $.ajax({
-        url: "/appointment/update-status/",
-        type: "POST",
+//     $.ajax({
+//         url: "/appointment/update-status/",
+//         type: "POST",
 
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
+//         headers: {
+//             "X-CSRFToken": getCookie("csrftoken")
+//         },
 
-        data: {
-            appointment_id: appointmentId,
-            status: "Completed"
-        },
+//         data: {
+//             appointment_id: appointmentId,
+//             status: "Completed"
+//         },
 
-        success: function (res) {
-            alert("Appointment Completed Successfully");
-        },
+//         success: function (res) {
+//             alert("Appointment Completed Successfully");
+//         },
 
-        error: function (err) {
-            console.log(err);
-            alert("Something went wrong");
-        }
-    });
-});
+//         error: function (err) {
+//             console.log(err);
+//             alert("Something went wrong");
+//         }
+//     });
+// });
 
-$(document).on("click", ".cancel-appointment", function () {
+// $(document).on("click", ".cancel-appointment", function () {
 
-    const appointmentId = window.currentAppointmentId;
-    console.log("CANCEL ID =", appointmentId);
+//     const appointmentId = window.currentAppointmentId;
+//     console.log("CANCEL ID =", appointmentId);
 
-    $.ajax({
-        url: "/appointment/update-status/",
-        type: "POST",
+//     $.ajax({
+//         url: "/appointment/update-status/",
+//         type: "POST",
 
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
+//         headers: {
+//             "X-CSRFToken": getCookie("csrftoken")
+//         },
 
-        data: {
-            appointment_id: appointmentId,
-            status: "Cancelled"
-        },
+//         data: {
+//             appointment_id: appointmentId,
+//             status: "Cancelled"
+//         },
 
-        success: function (res) {
-            alert("Appointment Cancelled Successfully");
-        },
+//         success: function (res) {
+//             alert("Appointment Cancelled Successfully");
+//         },
 
-        error: function (err) {
-            console.log(err);
-            alert("Something went wrong");
-        }
-    });
-});
+//         error: function (err) {
+//             console.log(err);
+//             alert("Something went wrong");
+//         }
+//     });
+// });
 
 $(document).on("click", ".proforma-bill-btn", function () {
 
@@ -879,4 +879,64 @@ $(document).on("click", ".proforma-bill-btn", function () {
     }
 
     $(".attachment-modal").removeClass("hidden");
+});
+
+$(document).on("click", ".doctor-accept-button", function () {
+
+    const appointmentId = $(".appointmentRequestDetail")
+        .attr("data-appointment-id");
+
+    if (!appointmentId) {
+        toastr.error("Appointment ID not found");
+        return;
+    }
+
+    $.ajax({
+        url: "/appointment/doctor-place-bid/",
+        type: "POST",
+
+        data: {
+            appointment_id: appointmentId,
+            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
+        },
+
+        success: function (resp) {
+
+            if (resp.success) {
+
+                toastr.success(
+                    resp.message || "Bid placed successfully"
+                );
+
+                $(".appointmentRequestDetail")
+                    .addClass("hidden")
+                    .removeClass("flex");
+
+                setTimeout(function () {
+                    location.reload();
+                }, 1000);
+
+            } else {
+
+                toastr.error(
+                    resp.message || "Unable to place bid"
+                );
+            }
+        },
+
+        error: function (xhr) {
+
+            let message = "Something went wrong";
+
+            if (
+                xhr.responseJSON &&
+                xhr.responseJSON.message
+            ) {
+                message = xhr.responseJSON.message;
+            }
+
+            toastr.error(message);
+        }
+    });
+
 });

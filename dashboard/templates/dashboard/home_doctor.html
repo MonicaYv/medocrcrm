@@ -165,6 +165,72 @@
 
           <!--Scheduled Appointments-->
           <div class="pt-5 flex flex-col ml-3">
+
+              <div class="flex justify-between items-center">
+                  <p class="font-semibold text-lg">Scheduled Appointments</p>
+                  <a href="{% url 'history' %}"
+                    class="text-dodger-blue text-sm font-normal">
+                      View all
+                  </a>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-3 pt-4 gap-2">
+
+                  {% for appointment in scheduled_appointments %}
+
+                  <div class="border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
+
+                      <div>
+                          <img src="/static/images/patient-1.svg"
+                              alt="Patient Profile">
+                      </div>
+
+                      <div class="flex flex-col gap-2">
+
+                          <div class="w-fit rounded-lg px-3 py-2
+                              {% if appointment.consultation_type == 'home_visit' %}
+                                  bg-peach text-burnt-orange
+                              {% else %}
+                                  bg-pale-azure text-dodger-blue
+                              {% endif %}
+                              font-semibold text-xs">
+
+                              {{ appointment.consultation_type|title }}
+
+                          </div>
+
+                          <p class="font-semibold text-sm">
+                              Pt.
+                              {{ appointment.user.userprofile.first_name }}
+                              {{ appointment.user.userprofile.last_name }}
+                          </p>
+
+                          <p class="font-normal text-sm text-green">
+                              {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
+                          </p>
+
+                          <p class="font-semibold text-sm">
+                              To be attended by
+                              Dr. {{ doctor_profile.first_name }}
+                              {{ doctor_profile.last_name }}
+                          </p>
+
+                      </div>
+
+                  </div>
+
+                  {% empty %}
+
+                  <div class="col-span-3 bg-white rounded-lg shadow-lg p-6 text-center">
+                      No scheduled appointments
+                  </div>
+
+                  {% endfor %}
+
+              </div>
+
+          </div>
+          {% comment %} <div class="pt-5 flex flex-col ml-3">
             <div class="flex justify-between items-center">
               <p class="font-semibold text-lg">Scheduled Appointments</p>
               <a href="{% url 'history' %}" class="text-dodger-blue text-sm font-normal">View all</a>
@@ -212,10 +278,105 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> {% endcomment %}
 
           <!--Appointment Requests-->
           <div class="pt-5 flex flex-col ml-3">
+
+              <div class="flex justify-between items-center">
+                  <p class="font-semibold text-lg">Appointment Request</p>
+
+                  <a href="{% url 'appointment' %}"
+                    class="text-dodger-blue text-sm font-normal">
+                      View all
+                  </a>
+              </div>
+
+              {% for appointment in appointment_requests %}
+
+              <div
+                  id="appointment-row-{{ appointment.id }}"
+                  class="appointment-row bg-white shadow-md w-full mt-4 border-snow border rounded-lg p-3 flex items-center justify-between hover:bg-pale-azure hover:shadow-lg">
+
+                  <!-- Patient -->
+
+                  <div class="flex items-center gap-2 w-[220px]">
+
+                      <img
+                          src="/static/images/patient-4.svg"
+                          alt="Patient Profile"
+                          class="w-10 h-10 rounded-full">
+
+                      <div class="flex flex-col gap-1">
+
+                          <p class="font-semibold text-sm">
+                              Pt.
+                              {{ appointment.user.userprofile.first_name }}
+                              {{ appointment.user.userprofile.last_name }}
+                          </p>
+
+                          <p class="font-normal text-xs text-spanish-gray">
+                              {{ appointment.description|truncatechars:30 }}
+                          </p>
+
+                      </div>
+
+                  </div>
+
+                  <!-- Date -->
+
+                  <p class="font-normal text-sm">
+                      {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
+                  </p>
+
+                  <!-- Consultation Type -->
+
+                  <p class="font-normal text-sm">
+                      {{ appointment.consultation_type|title }}
+                  </p>
+
+                  <!-- Actions -->
+
+                  <div class="flex items-center gap-4">
+
+                      <!-- Eye -->
+
+                      <span
+                          class="material-symbols-outlined cursor-pointer popup-btn doctor-appointment-detail-btn text-gray-700"
+                          data-id="{{ appointment.id }}">
+                          visibility
+                      </span>
+
+                      <!-- Place Bid -->
+
+                      <span
+                          class="material-symbols-outlined text-dodger-blue cursor-pointer doctor-place-bid-btn"
+                          data-id="{{ appointment.id }}">
+                          check_circle
+                      </span>
+
+                      <!-- Reject -->
+
+                      <span
+                          class="material-symbols-outlined text-strong-red cursor-pointer reject-bid-btn"
+                          data-id="{{ appointment.id }}">
+                          cancel
+                      </span>
+
+                  </div>
+
+              </div>
+
+              {% empty %}
+
+              <div class="bg-white shadow-md rounded-lg p-6 mt-4 text-center">
+                  No pending appointments available
+              </div>
+
+              {% endfor %}
+
+          </div>
+          {% comment %} <div class="pt-5 flex flex-col ml-3">
             <div class="flex justify-between items-center">
               <p class="font-semibold text-lg">Appointment Request</p>
               <a href="{% url 'appointment' %}" class="text-dodger-blue text-sm font-normal">View all</a>
@@ -305,7 +466,7 @@
                 </span>
               </div>
             </div>
-          </div>
+          </div> {% endcomment %}
 
           <!--Appointment Request Detail Popup-->
           <div
@@ -326,7 +487,7 @@
               <div class="mt-4 bg-pale-azure p-4 w-[648px] h-[196px] flex items-center gap-4">
                 <div class="flex flex-col ">
                   <img src="/static/images/patient-7.svg" alt="">
-                  <p class="font-normal text-sm text-center pt-4">Dolly Paris</p>
+                  <p id="popup-patient-name" class="font-normal text-sm text-center pt-4">Dolly Paris</p>
                 </div>
                 <div class="flex flex-col gap-4 w-[180px]">
                   <div class="flex  gap-2">
@@ -337,7 +498,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Gender</p>
-                      <p class="font-normal text-sm">Female</p>
+                      <p id="popup-gender" class="font-normal text-sm">Female</p>
                     </div>
                   </div>
 
@@ -349,7 +510,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Age</p>
-                      <p class="font-normal text-sm">25</p>
+                      <p id="popup-age" class="font-normal text-sm">25</p>
                     </div>
                   </div>
 
@@ -359,7 +520,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Visit Type</p>
-                      <p class="font-normal text-sm">Lab Walk-in</p>
+                      <p id="popup-visit-type" class="font-normal text-sm">Lab Walk-in</p>
                     </div>
                   </div>
                 </div>
@@ -372,7 +533,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
-                      <p class="font-normal text-sm">+91 7737533456</p>
+                      <p id="popup-phone" class="font-normal text-sm">+91 7737533456</p>
                     </div>
                   </div>
 
@@ -384,7 +545,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Appointment date</p>
-                      <p class="font-normal text-sm">22/07/2025,12:30 PM</p>
+                      <p id="popup-date" class="font-normal text-sm">22/07/2025,12:30 PM</p>
                     </div>
                   </div>
 
@@ -394,7 +555,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Address</p>
-                      <p class="font-normal text-sm">123 maple los Angeles, CA 90001 usa</p>
+                      <p id="popup-address" class="font-normal text-sm">123 maple los Angeles, CA 90001 usa</p>
                     </div>
                   </div>
                 </div>
@@ -411,7 +572,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray whitespace-nowrap">Medical Requirement</p>
-                      <p class="font-normal text-sm">RT-PCR</p>
+                      <p id="popup-medical-requirement" class="font-normal text-sm">RT-PCR</p>
                     </div>
                   </div>
 
@@ -423,7 +584,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Details</p>
-                      <p class="font-normal text-sm">Experiencing mild fever, sore throat, and body ache — <br>
+                      <p id="popup-details" class="font-normal text-sm">Experiencing mild fever, sore throat, and body ache — <br>
                         requesting
                         RT-PCR to rule out viral infection.
                       </p>
@@ -465,13 +626,13 @@
                     <p class="font-normal text-sm">Budget</p>
                   </div>
                   <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class="text-dodger-blue font-normal text-sm">&#8377;500</p>
+                    <p id="popup-order-id" class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                    <p id="popup-budget" class="text-dodger-blue font-normal text-sm">&#8377;500</p>
                   </div>
                 </div>
                 <div class="pt-4 flex justify-center items-center gap-2 mb-2">
                   <button
-                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">Accept</button>
+                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer doctor-accept-button">Accept</button>
                   <button
                     class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup"
                     data-popup="appointmentRequestDetail">Reject</button>
