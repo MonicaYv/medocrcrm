@@ -35,7 +35,7 @@ from services.models import LabBidding, LabBidStatus
 from services.models import HospitalBidding, HospitalBidStatus
 from services.models import DoctorBidding, DoctorBidStatus
 from appointments.models import LabAppointments
-from appointments.models import HospitalAppointments
+from appointments.models import HospitalAppointments, HospitalAppointmentStatus
 from appointments.models import DoctorAppointment
 from orders.models import UserPurchase, OrderStatusChoices, PurchaseMedicine
 from appointments.models import WalletTransaction
@@ -285,8 +285,28 @@ def dashboard_home(request):
 
         # ================= DOCTOR =================
         elif user_type == 'doctor':
-            doctor_profile = DoctorProfile.objects.get(user=user)
+            # doctor_profile = DoctorProfile.objects.get(user=user)
+            doctor_profile = DoctorProfile.objects.filter(
+                user=user
+            ).first()
 
+            appointment_requests = DoctorAppointment.objects.filter(
+                status="Pending"
+            ).exclude(
+                bids__doctor=doctor_profile
+            ).select_related(
+                "user__userprofile"
+            ).order_by("-created_at")[:5]
+
+            scheduled_appointments = DoctorAppointment.objects.filter(
+                doctor=doctor_profile,
+                status="Accepted"
+            ).select_related(
+                "user__userprofile"
+            ).order_by("preferred_date_time")[:3]
+
+            context["appointment_requests"] = appointment_requests
+            context["scheduled_appointments"] = scheduled_appointments
             context.update({
                 'doctor_profile': doctor_profile,
                 'user_display_name': doctor_profile.clinic_name,
@@ -313,8 +333,32 @@ def dashboard_home(request):
 
         # ================= HOSPITAL =================
         elif user_type == 'hospital':
-            hospital_profile = HospitalProfile.objects.get(user=user)
+            # hospital_profile = HospitalProfile.objects.get(user=user)
+            hospital_profile = HospitalProfile.objects.filter(
+                user=user
+            ).first()
 
+            appointment_requests = HospitalAppointments.objects.filter(
+                status="Pending"
+            ).exclude(
+                bids__hospital=hospital_profile
+            ).select_related(
+                "user__userprofile",
+                "category",
+                "description",
+            ).order_by("-created_at")[:5]
+            scheduled_appointments = HospitalAppointments.objects.filter(
+                accepted_hospital=hospital_profile,
+                status=HospitalAppointmentStatus.ACCEPTED
+            ).select_related(
+                "user__userprofile",
+                "category",
+                "description",
+            ).order_by(
+                "preferred_date_from"
+            )[:3]
+            context["appointment_requests"] = appointment_requests
+            context["scheduled_appointments"] = scheduled_appointments
             context.update({
                 'logo': '/static/images/hospital-logo.svg',
                 'hospital_profile': hospital_profile,

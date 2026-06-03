@@ -336,7 +336,8 @@
                     </div>
 
                     <!--Bed Inventory Tab Content-->
-                    <div class="equipment tab-content pt-5 space-y-6 hidden">
+                    {% include 'hospital/inventory.html' %}
+                    {% comment %} <div class="equipment tab-content pt-5 space-y-6 hidden">
                         <div id="cards-container">
                             <div
                                 class="card-equipment bg-white mt-4 p-4 rounded-md shadow-appointments border border-cool-slate-gray transition cursor-pointer ">
@@ -673,7 +674,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> {% endcomment %}
                 </div>
 
 

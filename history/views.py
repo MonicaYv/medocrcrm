@@ -12,7 +12,8 @@ from registration.models import PharmacyProfile
 from registration.models import DoctorProfile
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-
+from registration.models import HospitalProfile
+from services.models import HospitalRoomRateCard
 from appointments.models import LabAppointments, AppointmentStatus
 
 
@@ -59,7 +60,27 @@ def history(request):
     elif user.user_type == 'lab':
         return render(request, 'lab/history.html', context)
     elif user.user_type == 'hospital':
-        return render(request, 'hospital/history.html', context)
+
+        hospital = HospitalProfile.objects.filter(
+            user=user
+        ).first()
+
+        bed_inventory = HospitalRoomRateCard.objects.filter(
+            hospital=hospital,
+            is_active=True
+        ).select_related(
+            "bed_room"
+        )
+
+        context.update({
+            "bed_inventory": bed_inventory
+        })
+
+        return render(
+            request,
+            'hospital/history.html',
+            context
+        )
     elif user.user_type == 'doctor':
         return render(request, 'doctor/history.html', context)
     

@@ -127,6 +127,7 @@
     --color-light-white: #F1F1F1;
     --color-translucent-white: #FFFFFFB2;
     --color-vivid-orange: #F79E1B;
+    --color-transparent-black: #0000008C;
     --color-semi-transparent-black: #0000004D;
     --color-dark-blue: #123456;
     --color-transparent-dark-blue: #12345633;
@@ -728,6 +729,9 @@
   }
   .z-1000 {
     z-index: 1000;
+  }
+  .z-9999 {
+    z-index: 9999;
   }
   .z-\[60\] {
     z-index: 60;
@@ -1491,6 +1495,9 @@
   .min-h-\[320px\] {
     min-height: 320px;
   }
+  .min-h-\[370px\] {
+    min-height: 370px;
+  }
   .min-h-\[500px\] {
     min-height: 500px;
   }
@@ -1734,6 +1741,9 @@
   .w-\[50px\] {
     width: 50px;
   }
+  .w-\[60\%\] {
+    width: 60%;
+  }
   .w-\[60px\] {
     width: 60px;
   }
@@ -1857,6 +1867,12 @@
   .w-\[330px\] {
     width: 330px;
   }
+  .w-\[344px\] {
+    width: 344px;
+  }
+  .w-\[390px\] {
+    width: 390px;
+  }
   .w-\[452px\] {
     width: 452px;
   }
@@ -1883,6 +1899,9 @@
   }
   .w-\[680px\] {
     width: 680px;
+  }
+  .w-\[698px\] {
+    width: 698px;
   }
   .w-\[880px\] {
     width: 880px;
@@ -3090,6 +3109,9 @@
   .bg-transparent {
     background-color: transparent;
   }
+  .bg-transparent-black {
+    background-color: var(--color-transparent-black);
+  }
   .bg-transparent-dark-blue {
     background-color: var(--color-transparent-dark-blue);
   }
@@ -3185,6 +3207,9 @@
   }
   .p-6 {
     padding: calc(var(--spacing) * 6);
+  }
+  .p-8 {
+    padding: calc(var(--spacing) * 8);
   }
   .p-10 {
     padding: calc(var(--spacing) * 10);
@@ -3620,6 +3645,9 @@
   .text-\[13\.15px\] {
     font-size: 13.15px;
   }
+  .text-\[13px\] {
+    font-size: 13px;
+  }
   .text-\[14px\] {
     font-size: 14px;
   }
@@ -3649,6 +3677,14 @@
   }
   .text-\[32px\] {
     font-size: 32px;
+  }
+  .leading-5 {
+    --tw-leading: calc(var(--spacing) * 5);
+    line-height: calc(var(--spacing) * 5);
+  }
+  .leading-6 {
+    --tw-leading: calc(var(--spacing) * 6);
+    line-height: calc(var(--spacing) * 6);
   }
   .leading-none {
     --tw-leading: 1;
@@ -3693,6 +3729,10 @@
   .tracking-\[0\.15em\] {
     --tw-tracking: 0.15em;
     letter-spacing: 0.15em;
+  }
+  .tracking-\[0\.18em\] {
+    --tw-tracking: 0.18em;
+    letter-spacing: 0.18em;
   }
   .tracking-\[0\.25em\] {
     --tw-tracking: 0.25em;
@@ -3749,6 +3789,9 @@
   }
   .text-\[\#1F2937\] {
     color: #1F2937;
+  }
+  .text-\[\#666666\] {
+    color: #666666;
   }
   .text-\[\#a1a1a1\] {
     color: #a1a1a1;

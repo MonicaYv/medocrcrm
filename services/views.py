@@ -210,10 +210,6 @@ def services(request):
             "has_services": has_services,
             "subscription": sub,
         })
-        print("SERVICE COUNT:", len(service_cards))
-        print("ROOM COUNT:", len(room_cards))
-        print("HAS SERVICES:", bool(service_cards or room_cards))
-        print("Context:", context)
 
         return render(request, 'hospital/services.html', context)
 

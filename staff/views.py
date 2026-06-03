@@ -138,8 +138,9 @@ def save_hospital_doctor(request):
 def get_hospital_doctors(request):
     if request.user_obj.user_type != "hospital":
         return JsonResponse({"success": False, "error": "Unauthorized"}, status=403)
-
+    
     doctors = DoctorsProfile.objects.filter(
+        user = request.user_obj,
         created_by_hospital=True,
         is_active=True
     ).values(
@@ -153,7 +154,7 @@ def get_hospital_doctors(request):
     ).order_by("-created_at")
 
     data = []
-
+    print("✅ DOCTORS:", doctors)
     for d in doctors:
         data.append({
             "id": d["id"],
@@ -169,6 +170,50 @@ def get_hospital_doctors(request):
         "doctors": data
     })  
 
+@dashboard_login_required
+def doctor_details(request, doctor_id):
+
+    doctor = DoctorsProfile.objects.select_related(
+        "education",
+        "experience",
+        "specialization"
+    ).prefetch_related(
+        "availability"
+    ).filter(
+        id=doctor_id,
+        is_active=True
+    ).first()
+
+    if not doctor:
+        return JsonResponse({
+            "success": False,
+            "message": "Doctor not found"
+        })
+
+    availability = []
+
+    for item in doctor.availability.all():
+        availability.append({
+            "day": item.day_of_week,
+            "start_time": item.start_time,
+            "end_time": item.end_time
+        })
+
+    return JsonResponse({
+        "success": True,
+        "doctor": {
+            "id": doctor.id,
+            "name": f"Dr. {doctor.first_name} {doctor.last_name}",
+            "gender": doctor.gender,
+            "age": doctor.age,
+            "phone": f"{doctor.phone_country_code or ''} {doctor.phone_number or ''}",
+            "speciality": doctor.specialization.name if doctor.specialization else "",
+            "education": doctor.education.name if doctor.education else "",
+            "experience": doctor.experience.years if doctor.experience else 0,
+            "image": doctor.profile_pic_path or "/static/images/coolen-Smith.jpg",
+            "availability": availability
+        }
+    })
 
 
 # ✅ ADD TECHNICIAN

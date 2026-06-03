@@ -148,7 +148,7 @@ $(document).ready(function () {
     const doctorCards = doctorsToShow
       .map(
         (doctor) => `
-          <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments relative flex flex-col items-center gap-4 cursor-pointer doctorCard">
+          <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments relative flex flex-col items-center gap-4 cursor-pointer doctorCard" data-id="${doctor.id}">
             <img 
               src="${doctor.image || '/static/images/coolen-Smith.jpg'}"
               onerror="this.onerror=null; this.src='/static/images/coolen-Smith.jpg';"
@@ -247,13 +247,21 @@ $(document).ready(function () {
       .removeClass("flex");
   });
 
-  $(".doctorCard").on("click", function () {
-    $(".docInfoPopup").removeClass("hidden");
-  });
+$(document).on("click", ".doctorCard", function () {
 
-  $(".closeInfoPopup").on("click", function () {
-    $(".docInfoPopup").addClass("hidden");
-  });
+    $(".docInfoPopup")
+        .removeClass("hidden")
+        .addClass("flex");
+
+});
+
+$(document).on("click", ".closeInfoPopup", function () {
+
+    $(".docInfoPopup")
+        .addClass("hidden")
+        .removeClass("flex");
+
+});
 
   $(".historyBtn").on("click", function () {
     $(".docInfoPopup").addClass("hidden");
@@ -675,4 +683,62 @@ $(".registerDocBtn").on("click", function (e) {
     }
   });
 });
+});
+
+$(document).on("click", ".doctorCard", function () {
+
+    const doctorId = $(this).data("id");
+
+    $.ajax({
+        url: `/staff/hospital/doctors/${doctorId}/`,
+        type: "GET",
+
+        success: function(response) {
+
+            if (!response.success) {
+                toastr.error(response.message);
+                return;
+            }
+
+            const d = response.doctor;
+
+            $("#doctor-image").attr("src", d.image);
+
+            $("#doctor-name").text(d.name);
+            $("#doctor-gender").text(d.gender || "-");
+            $("#doctor-age").text(d.age || "-");
+            $("#doctor-phone").text(d.phone || "-");
+            $("#doctor-speciality").text(d.speciality || "-");
+            $("#doctor-education").text(d.education || "-");
+            $("#doctor-experience").text(
+                `${d.experience || 0} Years`
+            );
+
+            let availabilityHtml = "";
+
+            d.availability.forEach(item => {
+
+                availabilityHtml += `
+                    <div class="flex items-center justify-between">
+                        <span class="font-normal text-sm">
+                            ${item.day}
+                        </span>
+
+                        <span class="font-normal text-sm text-dodger-blue">
+                            ${item.start_time} to ${item.end_time}
+                        </span>
+                    </div>
+                `;
+            });
+
+            $("#doctor-availability").html(
+                availabilityHtml ||
+                "<p>No availability configured</p>"
+            );
+
+            $(".docInfoPopup")
+                .removeClass("hidden")
+                .addClass("flex");
+        }
+    });
 });

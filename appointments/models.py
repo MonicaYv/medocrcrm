@@ -208,6 +208,7 @@ class HospitalAppointmentStatus(models.TextChoices):
     ACCEPTED = "Accepted", "Accepted"
     COMPLETED = "Completed", "Completed"
     CANCELLED = "Cancelled", "Cancelled"
+    NO_SHOW = "No_Show", "No Show"
 
 class HospitalAppointments(models.Model):
     user = models.ForeignKey(
