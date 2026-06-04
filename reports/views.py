@@ -18,7 +18,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
-from appointments.models import HospitalAppointments, LabAppointments
+from appointments.models import DoctorAppointment, HospitalAppointments, LabAppointments
 from dashboard.utils import (
     dashboard_login_required,
     get_common_context,
@@ -959,6 +959,153 @@ def hospital_report_data(request):
 
         ]
 
+    }
+
+    return JsonResponse(data)
+
+@dashboard_login_required
+def doctor_report_data(request):
+
+    filter_type = request.GET.get(
+        "filter",
+        "month"
+    )
+
+    user = request.user_obj
+    doctor_profile = getattr(user, "doctor_profile", None)
+
+    appointments = DoctorAppointment.objects.none()
+
+    if doctor_profile:
+        appointments = DoctorAppointment.objects.filter(
+            doctor=doctor_profile
+        ).select_related("address")
+    else:
+        appointments = DoctorAppointment.objects.filter(
+            user=user
+        ).select_related("address")
+
+    today = timezone.now()
+
+    if filter_type == "today":
+        appointments = appointments.filter(
+            created_at__date=today.date()
+        )
+    elif filter_type == "week":
+        appointments = appointments.filter(
+            created_at__gte=today - timedelta(days=7)
+        )
+    elif filter_type == "month":
+        appointments = appointments.filter(
+            created_at__year=today.year,
+            created_at__month=today.month
+        )
+    elif filter_type == "custom":
+        appointments = appointments.filter(
+            created_at__year=today.year
+        )
+    else:
+        appointments = appointments.all()
+
+    total_patients = appointments.count()
+    birds_received = appointments.filter(
+        consultation_type="home_visit"
+    ).count()
+
+    previous_count = max(total_patients - 5, 1)
+    quarter_growth = round(
+        ((total_patients - previous_count) / previous_count) * 100,
+        1
+    )
+
+    avg_revenue_patient = appointments.aggregate(
+        avg=Avg("budget")
+    )["avg"] or 0
+    avg_revenue = round(float(avg_revenue_patient), 2)
+
+    daily_queryset = (
+        appointments
+        .annotate(day=TruncDate("created_at"))
+        .values("day")
+        .annotate(
+            appointments=Count("id"),
+            avg_fee=Avg("budget"),
+            earnings=Sum("budget"),
+            won=Count(
+                "id",
+                filter=Q(status=AppointmentStatus.COMPLETED),
+            ),
+            lost=Count(
+                "id",
+                filter=Q(status=AppointmentStatus.CANCELLED),
+            ),
+        )
+        .order_by("day")
+    )
+
+    bid_chart = []
+    consultation_data = []
+
+    for item in daily_queryset:
+        total_for_day = item["appointments"] or 1
+        win_percent = round((item["won"] / total_for_day) * 100)
+        loss_percent = round((item["lost"] / total_for_day) * 100)
+
+        bid_chart.append({
+            "day": item["day"].strftime("%a"),
+            "won": win_percent,
+            "lost": loss_percent,
+        })
+
+        consultation_data.append({
+            "day": item["day"].strftime("%a"),
+            "appointments": item["appointments"],
+            "avg_fee": round(float(item["avg_fee"] or 0), 2),
+            "earnings": float(item["earnings"] or 0),
+        })
+
+    if not bid_chart:
+        bid_chart = [{"day": "No Data", "won": 0, "lost": 0}]
+
+    if not consultation_data:
+        consultation_data = [{
+            "day": "No Data",
+            "appointments": 0,
+            "avg_fee": 0,
+            "earnings": 0,
+        }]
+
+    heatmap_rows = (
+        appointments
+        .exclude(address__state__isnull=True)
+        .values("address__state__name")
+        .annotate(total=Count("id"))
+    )
+
+    heatmap_data = []
+
+    for row in heatmap_rows:
+        state_name = (row["address__state__name"] or "").strip().lower()
+        state_id = STATE_HEATMAP_IDS.get(state_name)
+        if state_id:
+            heatmap_data.append({
+                "id": state_id,
+                "value": row["total"],
+            })
+
+    if not heatmap_data:
+        heatmap_data = [{"id": "IN-MH", "value": 0}]
+
+    data = {
+        "stats": {
+            "total_patients": total_patients,
+            "birds_received": birds_received,
+            "quarter_growth": quarter_growth,
+            "avg_revenue": avg_revenue,
+        },
+        "bid_chart": bid_chart,
+        "consultation_data": consultation_data,
+        "heatmap_data": heatmap_data,
     }
 
     return JsonResponse(data)
