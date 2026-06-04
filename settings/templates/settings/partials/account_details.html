@@ -1,3 +1,4 @@
+<!-- partials/account_details.html -->
 {% load static %}
 {% if user.user_type == 'ngo' %}
     <div class="grid sm:grid-cols-2 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6">
@@ -478,180 +479,180 @@
     </div>
 </div>
 {% elif user.user_type == 'pharmacy' %}
-<div class="grid sm:grid-cols-2 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6">
-    <!-- Email -->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base md:text-lg">
-        Email Address
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{email}}
-        </p>
-    </div>
+    <div class="grid sm:grid-cols-2 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6">
+        <!-- Email -->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base md:text-lg">
+            Email Address
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{email}}
+            </p>
+        </div>
 
-    <!-- Country Code + Phone -->
-    <div class="flex flex-col sm:flex-row sm:items-start gap-20">
-        <div class="flex flex-col">
-        <p
-            class="font-semibold text-base text-jet-black md:text-lg"
-        >
-            Country Code
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-            {{country_code}}
-        </p>
+        <!-- Country Code + Phone -->
+        <div class="flex flex-col sm:flex-row sm:items-start gap-20">
+            <div class="flex flex-col">
+            <p
+                class="font-semibold text-base text-jet-black md:text-lg"
+            >
+                Country Code
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+                {{country_code}}
+            </p>
+            </div>
+            <div class="flex flex-col">
+            <p
+                class="font-semibold text-base text-jet-black md:text-lg"
+            >
+                Phone No.
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+                {{phone_no}}
+            </p>
+            </div>
         </div>
+        <!-- Company Name -->
         <div class="flex flex-col">
-        <p
-            class="font-semibold text-base text-jet-black md:text-lg"
-        >
-            Phone No.
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-            {{phone_no}}
-        </p>
+            <p class="font-semibold text-base text-jet-black md:text-lg">
+            Company Name
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{company_name}}
+            </p>
         </div>
-    </div>
-    <!-- Company Name -->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base text-jet-black md:text-lg">
-        Company Name
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{company_name}}
-        </p>
-    </div>
-    <div></div>
+        <div></div>
 
-    <!-- Company Type -->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base text-jet-black md:text-lg">
-         Type Of Pharmacy
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {% for type in pharmacy_types %}
-            {{ type.name }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-        </p>
-    </div>
+        <!-- Company Type -->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base text-jet-black md:text-lg">
+            Type Of Pharmacy
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {% for type in pharmacy_types %}
+                {{ type.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            </p>
+        </div>
 
-    <!--Services You Are Interested in-->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base text-jet-black md:text-lg">
-        Services You Offer
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {% for service in services %}
-            {{ service.name }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-        </p>
-    </div>
-    <!--Website URL -->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base text-jet-black md:text-lg">
-        Website URL 
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{website_url}}
-        </p>
-    </div>
-    <div></div>
-    <!--Working Hours -->
-    <div class="flex flex-col">
-        <p class="font-semibold text-lg">
-            Working Hours
-        </p>
-        <p class="font-normal text-base text-medium-gray">
-            {{working_days}}
-        </p>
-    </div>
-    <!--Address-->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base md:text-lg">Address</p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{address}}
-        </p>
-    </div>
-    <div></div>
-    <!--City, Town, District-->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base md:text-lg">
-        City, Town, District
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{city}}
-        </p>
-    </div>
-    <!--State-->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base md:text-lg">State</p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{state}}
-        </p>
-    </div>
-    <!--Country-->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base md:text-lg">Country</p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-            {{ pharmacy_profile.country }}
-        </p>
-    </div>
-    <!--Pincode-->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base md:text-lg">Pincode</p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{pincode}}
-        </p>
-    </div>
-    <!--Contact persons name-->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base md:text-lg">
-        Contact Person's Name
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{contact_name}}
-        </p>
-    </div>
-    <!--Role-->
-    <div class="flex flex-col">
-        <p class="font-semibold text-base md:text-lg">Role</p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{contact_role}}
-        </p>
-    </div>
-    <!-- Country Code + Phone -->
-    <div class="flex flex-col sm:flex-row sm:items-start gap-20">
+        <!--Services You Are Interested in-->
         <div class="flex flex-col">
-        <p
-            class="font-semibold text-base text-jet-black md:text-lg"
-        >
-            Country Code
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-            {{country_code}}
-        </p>
+            <p class="font-semibold text-base text-jet-black md:text-lg">
+            Services You Offer
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {% for service in services %}
+                {{ service.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            </p>
         </div>
+        <!--Website URL -->
         <div class="flex flex-col">
-        <p
-            class="font-semibold text-base text-jet-black md:text-lg"
-        >
-            Phone Number
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-            {{contact_phone_number}}
-        </p>
+            <p class="font-semibold text-base text-jet-black md:text-lg">
+            Website URL 
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{website_url}}
+            </p>
+        </div>
+        <div></div>
+        <!--Working Hours -->
+        <div class="flex flex-col">
+            <p class="font-semibold text-lg">
+                Working Hours
+            </p>
+            <p class="font-normal text-base text-medium-gray">
+                {{working_days}}
+            </p>
+        </div>
+        <!--Address-->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base md:text-lg">Address</p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{address}}
+            </p>
+        </div>
+        <div></div>
+        <!--City, Town, District-->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base md:text-lg">
+            City, Town, District
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{city}}
+            </p>
+        </div>
+        <!--State-->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base md:text-lg">State</p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{state}}
+            </p>
+        </div>
+        <!--Country-->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base md:text-lg">Country</p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+                {{ pharmacy_profile.country }}
+            </p>
+        </div>
+        <!--Pincode-->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base md:text-lg">Pincode</p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{pincode}}
+            </p>
+        </div>
+        <!--Contact persons name-->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base md:text-lg">
+            Contact Person's Name
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{contact_name}}
+            </p>
+        </div>
+        <!--Role-->
+        <div class="flex flex-col">
+            <p class="font-semibold text-base md:text-lg">Role</p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{contact_role}}
+            </p>
+        </div>
+        <!-- Country Code + Phone -->
+        <div class="flex flex-col sm:flex-row sm:items-start gap-20">
+            <div class="flex flex-col">
+            <p
+                class="font-semibold text-base text-jet-black md:text-lg"
+            >
+                Country Code
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+                {{country_code}}
+            </p>
+            </div>
+            <div class="flex flex-col">
+            <p
+                class="font-semibold text-base text-jet-black md:text-lg"
+            >
+                Phone Number
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+                {{contact_phone_number}}
+            </p>
+            </div>
+        </div>
+        <!--Referral Code-->
+        <div class="flex items-center gap-4">
+            <p class="font-semibold text-base md:text-lg">
+            Referral Code
+            </p>
+            <p class="font-normal text-sm md:text-md text-medium-gray">
+            {{referral_code}}
+            </p>
         </div>
     </div>
-    <!--Referral Code-->
-    <div class="flex items-center gap-4">
-        <p class="font-semibold text-base md:text-lg">
-        Referral Code
-        </p>
-        <p class="font-normal text-sm md:text-md text-medium-gray">
-        {{referral_code}}
-        </p>
-    </div>
-</div>
 {% elif user.user_type == 'lab' %}
     <div class="grid lg:grid-cols-2 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6">
         <!-- Email -->

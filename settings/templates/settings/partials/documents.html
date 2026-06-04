@@ -1,3 +1,4 @@
+<!-- partials/documents.html -->
 {% load static %}
 {% if user.user_type == 'ngo' %}
     <div class="hidden tab-content documents">
@@ -785,8 +786,8 @@
             accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
          </div>
         </div>
+        </div>
       </div>
-
       <!-- GST -->
       <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
         <div class="flex flex-col gap-1">
@@ -858,6 +859,7 @@
            accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" />
 
           </div>
+        </div>
         </div>
       </div>
 
@@ -933,7 +935,6 @@
             </div>
           </div>
         </div>
-      </div>
 
       <!-- Storefront Image -->
       <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
@@ -1028,7 +1029,7 @@
                         <input 
                            type="file" 
                            class="hidden file-input" 
-                           data-doc="lab_certificate">
+                           data-doc="lab_certificate"
                            accept=".pdf,.doc,.docx,.jpg,.png,.jpeg"/>
                     </div>
                 </div>
