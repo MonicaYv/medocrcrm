@@ -478,7 +478,8 @@ loadLabHistory("accepted", 1);
   $("#lab-history-cards-container").on(
   "click",
   ".card-all-pending, .card-all-accepted, .card-all-completed, .card-all-cancelled, .card-all-missed",
-  function () {
+  function () { 
+    console.log("CARD CLICKED");
     const card = $(this);
 
     $("#modal-name").text(card.data("name") || "-");
@@ -538,18 +539,21 @@ loadLabHistory("accepted", 1);
     const orderId = card.data("order-id") || "-";
     const budget = card.data("budget") ? "₹" + card.data("budget") : "-";
     const visitType = card.data("visit-type") || "Home Visit";
-    const billImage = card.data("bill");
+//     const billImage = card.data("bill");
+//     console.log("===== PROFORMA DEBUG =====");
+//     console.log("Bill Image =", billImage);
+//     console.log("Appointment ID =", card.data("id"));
     
     
-    if (billImage) {
+//     if (billImage) {
 
-      $("#bill-preview-container").removeClass("hidden");
+//       $("#bill-preview-container").removeClass("hidden");
 
-      $("#proformaBillImage").attr("src", billImage);
+//       $("#proformaBillImage").attr("src", billImage);
 
-      $("#proformaBillLink").attr("href", billImage);
+//       $("#proformaBillLink").attr("href", billImage);
 
-}
+// }
     // console.log("Bill Image =", billImage);
 
     // if (billImage) {
@@ -669,6 +673,7 @@ loadLabHistory("accepted", 1);
           <p class="text-gray-400">Patient didn’t show up</p>
         </div>
 
+        
         <div class="flex justify-between items-center mt-4">
         <div class="flex items-center gap-2">
           <span>
@@ -686,32 +691,23 @@ loadLabHistory("accepted", 1);
           <span class="text-dodger-blue font-medium">
             ${budget.replace(".00", "")}
           </span>
-        </div>
+          </div>
 
-          <div class="border border-dodger-blue text-jet-black rounded-lg px-3 py-1 flex items-center gap-2 cursor-pointer">
-            <div class="mt-4">
+          <div class="proforma-btn border border-dodger-blue text-jet-black rounded-lg px-3 py-1 flex items-center gap-2 cursor-pointer">
 
-                <p class="font-semibold text-sm mb-2">
+         
+            
+
+                <p class="font-semibold text-sm mb-0 whitespace-nowrap">
                   Proforma Bill
                 </p>
 
-                <div id="bill-preview-container" class="hidden">
-
-                  <a id="proformaBillLink" target="_blank">
-
-                    <img
-                        id="proformaBillImage"
-                        src=""
-                         class="w-full h-64 object-contain border rounded-lg"
-                    >
-
-              </a>
-        </div>
-  </div>
+  
         <span class="material-symbols-outlined !text-lg">visibility</span>
 
           </div>
         </div>
+    </div>
 
         ${buttons}
 
@@ -720,15 +716,15 @@ loadLabHistory("accepted", 1);
 
     $("#modal-order-id").text("Order #" + (card.data("order-id") || "-"));
     $("#modal-budget").text(card.data("budget") ? "₹" + card.data("budget") : "-");
-    if (billImage) {
+//     if (billImage) {
 
-    $("#bill-preview-container").removeClass("hidden");
+//     $("#bill-preview-container").removeClass("hidden");
 
-    $("#proformaBillImage").attr("src", billImage);
+//     $("#proformaBillImage").attr("src", billImage);
 
-    $("#proformaBillLink").attr("href", billImage);
+//     $("#proformaBillLink").attr("href", billImage);
 
-} 
+// } 
 
     $(".modal-pending").removeClass("hidden");
   }
@@ -967,4 +963,16 @@ $(document).on("click", ".patient-share-app", function () {
     if (url) {
         window.open(url, "_blank");
     }
+});
+$(document).on("click", ".proforma-btn", function () {
+
+    console.log("PROFORMA CLICKED");
+
+    $(".proformaBillPopup").removeClass("hidden");
+
+});
+$(document).on("click", ".close-proforma", function () {
+
+    $(".proformaBillPopup").addClass("hidden");
+
 });

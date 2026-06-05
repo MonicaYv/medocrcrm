@@ -861,26 +861,32 @@ function getCookie(name) {
 //     });
 // });
 
+// $(document).on("click", ".proforma-bill-btn", function () {
+
+//     if (window.currentBill) {
+
+//         $("#attachment-preview-image")
+//             .attr("src", window.currentBill)
+//             .removeClass("hidden");
+
+//         $("#no-proforma-bill-message").addClass("hidden");
+
+//     } else {
+
+//         $("#attachment-preview-image").addClass("hidden");
+
+//         $("#no-proforma-bill-message").removeClass("hidden");
+//     }
+
+//     $(".attachment-modal").removeClass("hidden");
+// });
 $(document).on("click", ".proforma-bill-btn", function () {
-
-    if (window.currentBill) {
-
-        $("#attachment-preview-image")
-            .attr("src", window.currentBill)
-            .removeClass("hidden");
-
-        $("#no-proforma-bill-message").addClass("hidden");
-
-    } else {
-
-        $("#attachment-preview-image").addClass("hidden");
-
-        $("#no-proforma-bill-message").removeClass("hidden");
-    }
-
-    $(".attachment-modal").removeClass("hidden");
+    $(".proformaBillPopup").removeClass("hidden");
 });
 
+$(document).on("click", ".close-proforma", function () {
+    $(".proformaBillPopup").addClass("hidden");
+});
 $(document).on("click", ".doctor-accept-button", function () {
 
     const appointmentId = $(".appointmentRequestDetail")
