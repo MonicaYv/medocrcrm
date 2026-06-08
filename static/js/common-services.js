@@ -1,44 +1,46 @@
 /* -------- TABS HANDLER -------- */
-$('.tabs').each(function () {
-    const $tabsWrapper = $(this);
-    const $buttons = $tabsWrapper.find('.tab-btn, .tab-btn-lab');
-    const $indicator = $tabsWrapper.find('.tab-indicator');
+$(document).ready(function () {
+    $('.tabs').each(function () {
+        const $tabsWrapper = $(this);
+        const $buttons = $tabsWrapper.find('.tab-btn, .tab-btn-lab');
+        const $indicator = $tabsWrapper.find('.tab-indicator');
 
-    function moveIndicator($btn) {
-        if (!$btn || !$btn.length) return;   // 🛑 safety
+        function moveIndicator($btn) {
+            if (!$btn || !$btn.length) return;   // 🛑 safety
 
-        const pos = $btn.position();
-        if (!pos) return;                    // 🛑 safety
+            const pos = $btn.position();
+            if (!pos) return;                    // 🛑 safety
 
-        $indicator.css({
-            left: pos.left + 'px',
-            width: $btn.outerWidth() + 'px',
-            height: $btn.outerHeight() + 'px'
+            $indicator.css({
+                left: pos.left + 'px',
+                width: $btn.outerWidth() + 'px',
+                height: $btn.outerHeight() + 'px'
+            });
+        }
+
+        // Init
+        const $activeBtn = $buttons.filter('.active').first();
+
+        if ($activeBtn.length) {
+            moveIndicator($activeBtn);
+            showTabContent($activeBtn.data('type'), $tabsWrapper);
+        }
+
+
+        $tabsWrapper.on('click', '.tab-btn, .tab-btn-lab', function () {
+            const $btn = $(this);
+            const type = $btn.data('type');
+
+            $buttons.removeClass('active');
+            $btn.addClass('active');
+
+            moveIndicator($btn);
+            showTabContent(type, $tabsWrapper);
         });
-    }
 
-    // Init
-    const $activeBtn = $buttons.filter('.active').first();
-
-    if ($activeBtn.length) {
-        moveIndicator($activeBtn);
-        showTabContent($activeBtn.data('type'), $tabsWrapper);
-    }
-
-
-    $tabsWrapper.on('click', '.tab-btn, .tab-btn-lab', function () {
-        const $btn = $(this);
-        const type = $btn.data('type');
-
-        $buttons.removeClass('active');
-        $btn.addClass('active');
-
-        moveIndicator($btn);
-        showTabContent(type, $tabsWrapper);
-    });
-
-    $(window).on('resize', function () {
-        moveIndicator($buttons.filter('.active'));
+        $(window).on('resize', function () {
+            moveIndicator($buttons.filter('.active'));
+        });
     });
 });
 

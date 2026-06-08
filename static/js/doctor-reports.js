@@ -2,16 +2,70 @@ $(document).ready(function () {
 
     loadDoctorReportData();
 
+    // Filter dropdown toggle
+    $("#filterToggle").on("click", function (e) {
+        e.stopPropagation();
+        $("#filterDropdown").toggleClass("hidden");
+        $("#mainMenu").removeClass("hidden");
+        $("#dateMenu, #visitMenu").addClass("hidden");
+    });
+
+    // Prevent closing when clicking inside dropdown
+    $("#filterDropdown").on("click", function (e) {
+        e.stopPropagation();
+    });
+
+    // Close filter when clicking outside
+    $(document).on("click", function () {
+        $("#filterDropdown").addClass("hidden");
+        $("#dateMenu, #visitMenu").addClass("hidden");
+        $("#mainMenu").removeClass("hidden");
+    });
+
+    // Open submenu from main menu
+    $("#filterDropdown [data-open]").on("click", function (e) {
+        e.stopPropagation();
+        const target = $(this).data("open") + "Menu";
+        $("#mainMenu").addClass("hidden");
+        $("#dateMenu, #visitMenu").addClass("hidden");
+        $("#" + target).removeClass("hidden");
+    });
+
+    // Back button in submenu
+    $("#filterDropdown [data-back]").on("click", function (e) {
+        e.stopPropagation();
+        $("#dateMenu, #visitMenu").addClass("hidden");
+        $("#mainMenu").removeClass("hidden");
+    });
+
+    // Apply submenu option
+    $("#filterDropdown .option").on("click", function (e) {
+        e.stopPropagation();
+        const filterType = $(this).data("type");
+        const filterValue = $(this).data("value");
+
+        if (filterType === "date" && filterValue) {
+            loadDoctorReportData(filterValue.toLowerCase());
+        }
+
+        $("#filterDropdown").addClass("hidden");
+        $("#dateMenu, #visitMenu").addClass("hidden");
+        $("#mainMenu").removeClass("hidden");
+    });
+
 });
 
 
 
-function loadDoctorReportData() {
+function loadDoctorReportData(filter = "month") {
 
     $.ajax({
 
         url: "/reports/doctor-report-data/",
         method: "GET",
+        data: {
+            filter: filter,
+        },
 
         success: function (response) {
             // console.log(response);

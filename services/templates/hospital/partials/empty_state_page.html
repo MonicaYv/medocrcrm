@@ -117,14 +117,14 @@
                             <input type="hidden" class="category-id">
                             <input type="hidden" class="service-id">
 
-                            <div class="mb-4 custom-dropdown">
-                                <label class="text-base font-semibold">Select Category</label>
-                                <div class="dropdown-trigger mt-2">
+                            <div class="mb-5 custom-dropdown relative">
+                                <label class="text-base font-semibold block mb-2">Select Category</label>
+                                <div class="dropdown-trigger">
                                     <button type="button" class="category-dropdown-btn w-full border border-slate-gray rounded-md px-3 py-3 flex justify-between items-center">
                                         <span class="selected-text text-dark-gray">Select Category</span>
                                         <span class="material-symbols-outlined">keyboard_arrow_down</span>
                                     </button>
-                                    <ul class="dropdown-menu category-options hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll">
+                                    <ul class="dropdown-menu category-options hidden absolute top-full left-0 z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll">
                                         {% for category in hospital_categories %}
                                             <li class="dropdown-item px-3 py-2 cursor-pointer hover:bg-premium-light-blue" data-id="{{ category.id }}">{{ category.name }}</li>
                                         {% endfor %}
@@ -133,19 +133,19 @@
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="custom-dropdown">
-                                    <label class="text-base font-semibold">Select Service</label>
-                                    <div class="dropdown-trigger mt-2">
+                                <div class="custom-dropdown relative">
+                                    <label class="text-base font-semibold block mb-2">Select Service</label>
+                                    <div class="dropdown-trigger">
                                         <button type="button" class="service-dropdown-btn w-full border border-slate-gray rounded-md px-3 py-3 flex justify-between items-center">
                                             <span class="selected-text text-dark-gray">Select Service</span>
                                             <span class="material-symbols-outlined">keyboard_arrow_down</span>
                                         </button>
-                                        <ul class="dropdown-menu service-options hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
+                                        <ul class="dropdown-menu service-options hidden absolute top-full left-0 z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="text-base font-semibold">Price</label>
-                                    <input type="number" class="price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2" placeholder="0.00" min="0" step="0.01">
+                                    <label class="text-base font-semibold block mb-2">Price</label>
+                                    <input type="number" class="price-input w-full border border-slate-gray rounded-md px-3 py-3" placeholder="0.00" min="0" step="0.01">
                                 </div>
                             </div>
                         </div>
@@ -156,14 +156,14 @@
                         <input type="hidden" class="category-id">
                         <input type="hidden" class="service-id">
 
-                        <div class="mb-4 custom-dropdown">
-                            <label class="text-base font-semibold">Select Category</label>
-                            <div class="dropdown-trigger mt-2">
+                        <div class="mb-5 custom-dropdown relative">
+                            <label class="text-base font-semibold block mb-2">Select Category</label>
+                            <div class="dropdown-trigger">
                                 <button type="button" class="category-dropdown-btn w-full border border-slate-gray rounded-md px-3 py-3 flex justify-between items-center">
                                     <span class="selected-text text-dark-gray">Select Category</span>
                                     <span class="material-symbols-outlined">keyboard_arrow_down</span>
                                 </button>
-                                <ul class="dropdown-menu category-options hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll">
+                                <ul class="dropdown-menu category-options hidden absolute top-full left-0 z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll">
                                     {% for category in hospital_categories %}
                                         <li class="dropdown-item px-3 py-2 cursor-pointer hover:bg-premium-light-blue" data-id="{{ category.id }}">{{ category.name }}</li>
                                     {% endfor %}
@@ -172,19 +172,19 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="custom-dropdown">
-                                <label class="text-base font-semibold">Select Service</label>
-                                <div class="dropdown-trigger mt-2">
+                            <div class="custom-dropdown relative">
+                                <label class="text-base font-semibold block mb-2">Select Service</label>
+                                <div class="dropdown-trigger">
                                     <button type="button" class="service-dropdown-btn w-full border border-slate-gray rounded-md px-3 py-3 flex justify-between items-center">
                                         <span class="selected-text text-dark-gray">Select Service</span>
                                         <span class="material-symbols-outlined">keyboard_arrow_down</span>
                                     </button>
-                                    <ul class="dropdown-menu service-options hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
+                                    <ul class="dropdown-menu service-options hidden absolute top-full left-0 z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-base font-semibold">Price</label>
-                                <input type="number" class="price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2" placeholder="0.00" min="0" step="0.01">
+                                <label class="text-base font-semibold block mb-2">Price</label>
+                                <input type="number" class="price-input w-full border border-slate-gray rounded-md px-3 py-3" placeholder="0.00" min="0" step="0.01">
                             </div>
                         </div>
                     </div>
