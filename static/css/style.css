@@ -341,21 +341,23 @@ body {
 }
 
 .active-step {
-  @apply bg-dodger-blue text-white text-xs lg:text-lg font-bold w-8 lg:w-12 h-8 lg:h-12;
-  transform: scale(1.15);
+  background:#007BFF !important;
+  color:#FFFFFF !important;
+  font-weight:600;
 }
 
 .step-circle{
-    width:40px;
-    height:40px;
+    width:44px;
+    height:44px;
     border-radius:50%;
     display:flex;
     align-items:center;
     justify-content:center;
     background:#E5E7EB;
     color:#0F172A;
-    font-size:16px;
-    font-weight:600;
+    font-size:18px;
+    font-weight:700;
+    flex-shrink:0;
 }
 
 .step-circle.active-step {
@@ -365,20 +367,22 @@ body {
 
 .step-line{
     flex:1;
-    height:4px;
-    background:#CBD5E1;
+    height:3px;
+    background:#D1D5DB;
     margin:0 12px;
+    min-height:3px;
 }
 
 
 
 .active-heading{
     color:#007BFF;
-    font-weight:600;
+    font-weight:700;
 }
 
 .active-line {
-  @apply bg-dodger-blue;
+    background:#007BFF !important;
+    opacity:1 !important;
 }
 
 .pharmacy-stepper {
