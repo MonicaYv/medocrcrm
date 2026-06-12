@@ -1,6 +1,8 @@
 {% load static %}
+            <!-- <div
+                class="add-service popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden"> -->
             <div
-                class="add-service popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden">
+                class="services-section add-service popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden">
                 <div
                     class="popup-content bg-white rounded-[10px] max-w-[533px] h-[380px] p-5 w-full relative flex flex-col gap-4 shadow-17">
                     <div class="flex items-center justify-between border-b border-dodger-blue pb-4">
@@ -8,7 +10,7 @@
                         <span class="material-symbols-outlined text-jet-black close-icon cursor-pointer">close</span>
                     </div>
                     <!-- Category Dropdown -->
-                    <div class="mb-4 custom-dropdown">
+                    <div class="mb-4 custom-dropdown relative">
                         <label class="text-base sm:text-lg text-jet-black font-semibold">Select Category</label>
 
                         <div class="dropdown-trigger mt-2">
@@ -22,7 +24,7 @@
                             </button>
 
                             <ul
-                                class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
+                                class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
                                 <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Surgery
                                 </li>
                                 <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
@@ -35,8 +37,10 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="custom-dropdown">
+                    <div class="grid grid-cols-2 gap-4 items-end">
+                        <input type="hidden" class="category-id">
+                        <input type="hidden" class="service-id">
+                        <div class="custom-dropdown relative">
                             <label class="text-base sm:text-lg text-jet-black font-semibold">Select Service</label>
 
                             <div class="dropdown-trigger mt-2">
@@ -50,7 +54,7 @@
                                 </button>
 
                                 <ul
-                                    class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
+                                    class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
                                     <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
                                         Elective Surgery</li>
                                     <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
@@ -66,15 +70,34 @@
                         <!-- Price -->
                         <div>
                             <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
-                            <input type="text"
+                            <!-- <input type="text"
                                 class="w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
-                                value="₹ 0.00">
+                                value="₹ 0.00"> -->
+                                <input
+                                    type="number"
+                                    class="price-input h-[48px] w-full border border-slate-gray rounded-md px-3 mt-2 focus:outline-none"
+                                    placeholder="Enter Price">
                         </div>
                     </div>
 
+                    <!-- <button
+                    type="button"
+                    class="w-full rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-xs sm:text-sm text-white font-semibold cursor-pointer">
+                        Save
+                    </button> -->
                     <button
-                        class="w-full rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-xs sm:text-sm text-white font-semibold cursor-pointer">
+                    type="button"
+                    class="save-services-btn w-full rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-white font-semibold">
                         Save
                     </button>
                 </div>
             </div>
+            <template id="service-card-template">
+               <div class="service-card">
+                    <input type="hidden" class="category-id">
+                    <input type="hidden" class="service-id">
+                    <input type="number" class="price-input">
+                </div>
+            </template>
+
+            <div class="services-list hidden"></div>

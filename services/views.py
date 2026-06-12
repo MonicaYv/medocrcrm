@@ -133,6 +133,7 @@ def services(request):
             lab=lab_profile,
             is_active=True
         ).count()
+    
 
         has_services = package_count > 0 or mode_count > 0
 
@@ -171,6 +172,10 @@ def services(request):
         from .models import HospitalServiceRateCard, HospitalRoomRateCard
 
         hospital_profile = user.hospital_profile
+        print("================================")
+        print("CURRENT HOSPITAL ID =", hospital_profile.id)
+        print("CURRENT HOSPITAL NAME =", hospital_profile.hospital_name)
+        print("================================")
 
         categories = HospitalCategory.objects.values("id", "name")
         services = HospitalServiceDescription.objects.values("id", "description")
@@ -182,12 +187,14 @@ def services(request):
                 is_active=True
             ).select_related("category", "description").order_by("-updated_at", "-created_at")
         )
+        print("SERVICE COUNT =", len(service_cards))
         room_cards = list(
             HospitalRoomRateCard.objects.filter(
                 hospital=hospital_profile,
                 is_active=True
             ).select_related("bed_room").order_by("-updated_at", "-created_at")
         )
+        print("ROOM COUNT =", len(room_cards))
 
         sub = SellerSubscription.objects.filter(
             seller_type="hospital",
@@ -725,11 +732,29 @@ def get_hospital_services(request):
     })
 
 
+# @dashboard_login_required
+# @require_POST
+# def save_hospital_services(request):
+#     try:
+#         data = json.loads(request.body)
+
+    # except json.JSONDecodeError:
+    #     return JsonResponse(
+    #         {"success": False, "error": "Invalid JSON"},
+    #         status=400
+    #     )
 @dashboard_login_required
 @require_POST
 def save_hospital_services(request):
+
+    print("\n========== SAVE HOSPITAL SERVICES ==========")
+    print("RAW BODY =", request.body)
+
     try:
         data = json.loads(request.body)
+
+        print("PARSED DATA =", data)
+
     except json.JSONDecodeError:
         return JsonResponse(
             {"success": False, "error": "Invalid JSON"},
@@ -758,23 +783,52 @@ def save_hospital_services(request):
         except (HospitalCategory.DoesNotExist, HospitalServiceDescription.DoesNotExist):
             continue
         
-        obj, created = HospitalServiceRateCard.objects.update_or_create(
+        # obj, created = HospitalServiceRateCard.objects.update_or_create(
+        #     hospital=hospital,
+        #     category=category,
+        #     description=service,
+        #     defaults={
+        #         "price": s.get("price") or 0,
+        #         "is_active": True
+        #     }
+        # )
+        # existing = HospitalServiceRateCard.objects.filter(
+        #     hospital=hospital,
+        #     category=category,
+        #     description=service,
+        #     is_active=True
+        # ).first()
+
+        # if existing:
+
+        #     existing.price = s.get("price") or 0
+        #     existing.save()
+
+        #     obj = existing
+
+        # else:
+
+        #     obj = HospitalServiceRateCard.objects.create(
+        #        hospital=hospital,
+        #        category=category,
+        #        description=service,
+        #        price=s.get("price") or 0,
+        #        is_active=True
+        #     )
+        
+        # saved_services.append({
+        #     "id": obj.id,
+        #     "category": category.name,
+        #     "service": service.description[:50],
+        #     "price": str(obj.price)
+        # })
+        obj = HospitalServiceRateCard.objects.create(
             hospital=hospital,
             category=category,
             description=service,
-            defaults={
-                "price": s.get("price") or 0,
-                "is_active": True
-            }
+            price=s.get("price") or 0,
+            is_active=True
         )
-        
-        saved_services.append({
-            "id": obj.id,
-            "category": category.name,
-            "service": service.description[:50],
-            "price": str(obj.price)
-        })
-    
     # Save rooms
     for r in rooms:
         try:
@@ -782,17 +836,41 @@ def save_hospital_services(request):
         except HospitalBedRoom.DoesNotExist:
             continue
         
-        obj, created = HospitalRoomRateCard.objects.update_or_create(
+        # obj, created = HospitalRoomRateCard.objects.update_or_create(
+        #     hospital=hospital,
+        #     bed_room=bed_room,
+        #     ac=r.get("ac", False),
+        #     days=r.get("days") or 1,
+        #     defaults={
+        #         "price": r.get("price") or 0,
+        #         "is_active": True
+        #     }
+        # )
+        existing = HospitalRoomRateCard.objects.filter(
             hospital=hospital,
             bed_room=bed_room,
             ac=r.get("ac", False),
             days=r.get("days") or 1,
-            defaults={
-                "price": r.get("price") or 0,
-                "is_active": True
-            }
-        )
-        
+            is_active=True
+        ).first()
+
+        if existing:
+
+            existing.price = r.get("price") or 0
+            existing.save()
+
+            obj = existing
+
+        else:
+
+           obj = HospitalRoomRateCard.objects.create(
+                hospital=hospital,
+                bed_room=bed_room,
+                ac=r.get("ac", False),
+                days=r.get("days") or 1,
+                price=r.get("price") or 0,
+                is_active=True
+            )
         saved_rooms.append({
             "id": obj.id,
             "room": bed_room.name,

@@ -946,3 +946,13 @@ $(document).on("click", ".doctor-accept-button", function () {
     });
 
 });
+$(document).on("click", ".dropdown-item", function () {
+
+    const text = $(this).text().trim();
+
+    $(this)
+        .closest(".dropdown-trigger")
+        .find(".selected-text")
+        .text(text);
+
+});
