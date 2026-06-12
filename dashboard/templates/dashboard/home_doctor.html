@@ -357,11 +357,11 @@
 
                       <!-- Reject -->
 
-                      <span
+                      {% comment %} <span
                           class="material-symbols-outlined text-strong-red cursor-pointer reject-bid-btn"
                           data-id="{{ appointment.id }}">
                           cancel
-                      </span>
+                      </span> {% endcomment %}
 
                   </div>
 
@@ -633,9 +633,9 @@
                 <div class="pt-4 flex justify-center items-center gap-2 mb-2">
                   <button
                     class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer doctor-accept-button">Accept</button>
-                  <button
+                  {% comment %} <button
                     class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup"
-                    data-popup="appointmentRequestDetail">Reject</button>
+                    data-popup="appointmentRequestDetail">Reject</button> {% endcomment %}
                 </div>
               </div>
 

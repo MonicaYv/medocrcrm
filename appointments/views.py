@@ -111,20 +111,22 @@ def ajax_appointments(request):
 
     elif user_type == "doctor":
 
-        doctor_profile = DoctorProfile.objects.filter(user=user).first()
+        doctor_profile = DoctorProfile.objects.filter(
+            user=user
+        ).first()
 
         qs = DoctorAppointment.objects.select_related(
             "user__userprofile",
             "address",
             "user",
-            # "doctor",
+        ).filter(
+            status="Pending"
         )
 
-        # if doctor_profile:
-        #     qs = qs.filter(
-        #         models.Q(doctor=doctor_profile) |
-        #         models.Q(doctor__isnull=True)
-        #     )
+        if doctor_profile:
+            qs = qs.exclude(
+                bids__doctor=doctor_profile
+            ).distinct()
 
 
 

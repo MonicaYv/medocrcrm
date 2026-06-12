@@ -240,9 +240,6 @@ const ENQUIRY_TEMPLATES = {
             Accept
         </button>
 
-        <button class="reject-appointment border border-strong-red text-strong-red rounded-lg w-[180px] h-10">
-            Reject
-        </button>
       </div>
     </div>
   `,
