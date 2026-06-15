@@ -3,9 +3,13 @@
             <div class="flex flex-col lg:flex-row gap-3 w-full lg:min-h-[494px]">
                 <div class="relative flex-1 min-h-[280px]">
                     {% if hospital_profile.hospital_photo_path %}
-                        <img src="{{ hospital_profile.hospital_photo_path }}" alt="{{ hospital_profile.hospital_name }}" class="w-full h-full object-cover rounded-lg">
+                        <img src="/document/{{ hospital_profile.hospital_photo_path }}"
+                            alt="{{ hospital_profile.hospital_name }}"
+                            class="w-full h-full object-cover rounded-lg">
                     {% else %}
-                        <img src="{% static 'images/lab-bg.png' %}" alt="{{ hospital_profile.hospital_name }}" class="w-full h-full object-cover rounded-lg">
+                        <img src="{% static 'images/lab-bg.png' %}"
+                            alt="{{ hospital_profile.hospital_name }}"
+                            class="w-full h-full object-cover rounded-lg">
                     {% endif %}
                     <div class="absolute inset-0 flex items-end">
                         <div class="bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
