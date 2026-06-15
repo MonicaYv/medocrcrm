@@ -85,6 +85,47 @@
                     </div>
                 </div>
             </div>
+            <div class="w-full shadow-17 rounded-lg px-5 py-5">
+                <div class="tabs tabs-home w-[200px] sm:w-[290px]">
+                    <div class="flex flex-nowrap items-center justify-between py-0.5 text-sm px-2 relative">
+                        <div class="tab-indicator border border-blue-tint"></div>
+                        <button class="tab-btn active shrink-0" data-tab="services-home" data-type="services-home">Services</button>
+                        <button class="tab-btn shrink-0" data-tab="bed-rooms-home" data-type="bed-rooms-home">Bed & Rooms</button>
+                    </div>
+                </div>
+
+                <div id="services-home" class="tabs-home-content mt-5 tab-content" data-type="services-home">
+                    <div class="w-full flex items-center justify-center mt-5 min-h-[320px]">
+                        <div class="flex flex-col items-center gap-6 w-3/4 sm:w-3/5">
+                            <img src="{% static 'images/services-bg.svg' %}" alt="services">
+                            <span class="text-sm sm:text-base text-center font-normal text-black">
+                                At the moment, there are no Services in queue. We'll keep you updated!
+                            </span>
+                            <button type="button"
+                                class="home-add-service w-full max-w-[352px] h-[40px] rounded-lg border border-dodger-blue text-dodger-blue text-xs sm:text-sm font-semibold cursor-pointer"
+                                data-start-step="1">
+                                Add Services
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bed-rooms-home" class="tabs-home-content mt-5 tab-content hidden" data-type="bed-rooms-home">
+                    <div class="w-full flex items-center justify-center mt-5 min-h-[320px]">
+                        <div class="flex flex-col items-center gap-6 w-3/4 sm:w-3/5">
+                            <img src="{% static 'images/services-bg.svg' %}" alt="services">
+                            <span class="text-sm sm:text-base text-center font-normal text-black">
+                                At the moment, there are no Services in queue. We'll keep you updated!
+                            </span>
+                            <button type="button"
+                                class="home-add-service w-full max-w-[352px] h-[40px] rounded-lg border border-dodger-blue text-dodger-blue text-xs sm:text-sm font-semibold cursor-pointer"
+                                data-start-step="1">
+                                Add Services
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="services-section px-4 hidden">
@@ -192,11 +233,38 @@
 
                 <button type="button" class="add-service border border-dodger-blue text-dodger-blue text-sm rounded-lg w-full max-w-[182px] h-[40px]">+ Add More Services</button>
 
-                <div class="flex justify-end gap-5">
-                    <button id="cancel-steps" type="button" class="border border-strong-red text-strong-red px-4 py-2 rounded">
+                <div class="file-upload-wrapper flex flex-col sm:flex-row sm:items-center gap-3">
+                    <!-- Hidden File Input -->
+                    <input type="file" class="file-input hidden" accept=".csv,image/*">
+
+                    <!-- Upload Box -->
+                    <div class="upload-box flex-1 border border-dashed border-dodger-blue rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer">
+                        <div class="flex items-center gap-2 file-info">
+                            <span class="material-symbols-outlined">image</span>
+                            <span class="file-name text-sm font-normal text-jet-black">
+                                Upload CSV File
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="remove-file hidden text-red-500 text-lg">✕</button>
+                            <button type="button" class="upload-btn bg-dodger-blue text-white px-3 py-1 rounded text-lg">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button
+                        class="submit-btn w-full max-w-[120px] py-2 rounded-[10px] bg-light-gray text-sm sm:text-base cursor-not-allowed"
+                        disabled>
+                        Submit
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-end gap-5">
+                    <button id="cancel-steps" type="button" class="step-btn w-full max-w-[270px] border border-strong-red text-strong-red py-3 rounded-lg text-sm font-normal cursor-pointer">
                         Cancel
                     </button>
-                    <button type="button" class="step-btn bg-dodger-blue text-white px-4 py-2 rounded" data-target="2">
+                    <button type="button" class="step-btn w-full max-w-[270px] bg-dodger-blue text-white py-3 rounded-lg text-sm font-normal cursor-pointer" data-target="2">
                         Next
                     </button>
                 </div>
@@ -212,10 +280,10 @@
                             <input type="hidden" class="bed-room-id">
 
                             <div class="mb-4 custom-dropdown">
-                                <label class="text-base font-semibold">Select Bed & Room</label>
+                                <label class="text-base font-semibold">Select Category</label>
                                 <div class="dropdown-trigger mt-2">
                                     <button type="button" class="bed-room-dropdown-btn w-full border border-slate-gray rounded-md px-3 py-3 flex justify-between items-center">
-                                        <span class="selected-text text-dark-gray">Select Bed & Room</span>
+                                        <span class="selected-text text-dark-gray">Select Category</span>
                                         <span class="material-symbols-outlined">keyboard_arrow_down</span>
                                     </button>
                                     <ul class="dropdown-menu room-options hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll">
@@ -225,18 +293,29 @@
                                     </ul>
                                 </div>
                             </div>
+                            <div class="mb-4">
+                                <label class="text-base font-semibold block mb-2">
+                                    Bed No
+                                </label>
 
+                                <input type="text"
+                                    class="bed-number-input w-full border border-slate-gray rounded-md px-3 py-3"
+                                    placeholder="101">
+                            </div>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label class="text-base font-semibold">Days</label>
                                     <input type="number" class="days-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2" min="1" step="1" value="1">
                                 </div>
-                                <div class="flex flex-col gap-3">
-                                    <label class="text-base font-semibold">AC</label>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" class="ac-input w-4 h-4 accent-dodger-blue">
-                                        <span class="text-sm text-dark-gray">Air Conditioned</span>
+                                <div>
+                                    <label class="text-base font-semibold block mb-2">
+                                        AC
                                     </label>
+
+                                    <select class="ac-input w-full border border-slate-gray rounded-md px-3 py-3">
+                                        <option value="false">Non AC</option>
+                                        <option value="true">AC</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="text-base font-semibold">Price</label>
@@ -246,47 +325,85 @@
                         </div>
                     </template>
 
-                    <div class="rounded-lg px-4 py-6 relative bg-[#F9FAFB] bed-service-card">
-                        <button type="button" class="remove-service-bed absolute top-3 right-3 text-ebony hover:text-red-500">x</button>
-                        <input type="hidden" class="bed-room-id">
+                        <div class="rounded-lg px-4 py-6 relative bg-[#F9FAFB] bed-service-card">
+                            <button type="button" class="remove-service-bed absolute top-3 right-3 text-ebony hover:text-red-500">x</button>
+                            <input type="hidden" class="bed-room-id">
 
-                        <div class="mb-4 custom-dropdown">
-                            <label class="text-base font-semibold">Select Bed & Room</label>
-                            <div class="dropdown-trigger mt-2">
-                                <button type="button" class="bed-room-dropdown-btn w-full border border-slate-gray rounded-md px-3 py-3 flex justify-between items-center">
-                                    <span class="selected-text text-dark-gray">Select Bed & Room</span>
-                                    <span class="material-symbols-outlined">keyboard_arrow_down</span>
-                                </button>
-                                <ul class="dropdown-menu room-options hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                    {% for room in hospital_bed_rooms %}
-                                        <li class="dropdown-item px-3 py-2 cursor-pointer hover:bg-premium-light-blue" data-id="{{ room.id }}">{{ room.name }}</li>
-                                    {% endfor %}
-                                </ul>
+                            <div class="mb-4 custom-dropdown">
+                                <label class="text-base font-semibold">Select Category</label>
+                                <div class="dropdown-trigger mt-2">
+                                    <button type="button" class="bed-room-dropdown-btn w-full border border-slate-gray rounded-md px-3 py-3 flex justify-between items-center">
+                                        <span class="selected-text text-dark-gray">Select Category</span>
+                                        <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                                    </button>
+                                    <ul class="dropdown-menu room-options hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm text-dark-gray font-normal h-40 overflow-y-auto scroll">
+                                        {% for room in hospital_bed_rooms %}
+                                            <li class="dropdown-item px-3 py-2 cursor-pointer hover:bg-premium-light-blue" data-id="{{ room.id }}">{{ room.name }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="text-base font-semibold">Days</label>
-                                <input type="number" class="days-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2" min="1" step="1" value="1">
-                            </div>
-                            <div class="flex flex-col gap-3">
-                                <label class="text-base font-semibold">AC</label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" class="ac-input w-4 h-4 accent-dodger-blue">
-                                    <span class="text-sm text-dark-gray">Air Conditioned</span>
+                            <div class="mb-4">
+                                <label class="text-base font-semibold block mb-2">
+                                    Bed No
                                 </label>
+
+                                <input type="text"
+                                    class="bed-number-input w-full border border-slate-gray rounded-md px-3 py-3"
+                                    placeholder="101">
                             </div>
-                            <div>
-                                <label class="text-base font-semibold">Price</label>
-                                <input type="number" class="room-price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2" placeholder="0.00" min="0" step="0.01">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-base font-semibold">Days</label>
+                                    <input type="number" class="days-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2" min="1" step="1" value="1">
+                                </div>
+                                <div>
+                                    <label class="text-base font-semibold block mb-2">
+                                        AC
+                                    </label>
+
+                                    <select class="ac-input w-full border border-slate-gray rounded-md px-3 py-3">
+                                        <option value="false">Non AC</option>
+                                        <option value="true">AC</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-base font-semibold">Price</label>
+                                    <input type="number" class="room-price-input w-full border border-slate-gray rounded-md px-3 py-3" placeholder="0.00" min="0" step="0.01">
+                                </div>
                             </div>
                         </div>
-                    </div>
                 </div>
 
                 <button type="button" class="add-service-bed border border-dodger-blue text-dodger-blue text-xs sm:text-sm font-semibold rounded-lg w-full max-w-[182px] h-[40px]">+ Add More Rooms</button>
 
+                <div class="file-upload-wrapper flex flex-col sm:flex-row sm:items-center gap-3">
+                    <!-- Hidden File Input -->
+                    <input type="file" class="file-input hidden" accept=".csv,image/*">
+
+                    <!-- Upload Box -->
+                    <div class="upload-box flex-1 border border-dashed border-dodger-blue rounded-lg px-3 py-2 flex justify-between items-center cursor-pointer">
+                        <div class="flex items-center gap-2 file-info">
+                            <span class="material-symbols-outlined">image</span>
+                            <span class="file-name text-sm font-normal text-jet-black">
+                                Upload CSV File
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="remove-file hidden text-red-500 text-lg">✕</button>
+                            <button type="button" class="upload-btn bg-dodger-blue text-white px-3 py-1 rounded text-lg">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button
+                        class="submit-btn w-full max-w-[120px] py-2 rounded-[10px] bg-light-gray text-sm sm:text-base cursor-not-allowed"
+                        disabled>
+                        Submit
+                    </button>
+                </div>
+                
                 <div class="flex items-center justify-end gap-5">
                     <button type="button" class="step-btn w-full max-w-[270px] border border-strong-red text-strong-red py-3 rounded-lg text-sm font-normal cursor-pointer" data-target="1">
                         Cancel

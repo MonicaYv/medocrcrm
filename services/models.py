@@ -188,6 +188,7 @@ class HospitalRoomRateCard(models.Model):
     ac = models.BooleanField(default=False)
     days = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    bed_no = models.IntegerField()
     is_active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
