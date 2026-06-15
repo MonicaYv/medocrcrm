@@ -13,7 +13,6 @@
                     <div class="w-full shadow-17 rounded-lg px-5 py-5">
                         <div class="tabs tabs-home w-[200px] sm:w-[290px]">
                             <div class="flex flex-nowrap items-center justify-between py-0.5 text-sm px-2 relative">
-                            <div class="flex flex-nowrap items-center justify-between py-0.5 text-sm px-2 relative">
                                 <div class="tab-indicator border border-blue-tint"></div>
                                 <button class="tab-btn active shrink-0" data-tab="services-home" data-type="services-home">Services</button>
                                 <button class="tab-btn shrink-0" data-tab="bed-rooms-home" data-type="bed-rooms-home">Bed & Rooms</button>
@@ -103,7 +102,7 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <div class="w-full flex items-center justify-center mt-5 min-h-[320px]">
+                                {% comment %} <div class="w-full flex items-center justify-center mt-5 min-h-[320px]">
                                     <div class="flex flex-col items-center gap-6 w-3/4 sm:w-3/5">
                                         <img src="{% static 'images/services-bg.svg' %}" alt="services">
                                         <span class="text-sm sm:text-base text-center font-normal text-black">No Bed & Rooms have been added yet.</span>
@@ -111,7 +110,7 @@
                                             Add Services
                                         </button>
                                     </div>
-                                </div>
+                                </div> {% endcomment %}
                             {% endif %}
                         </div>
                     </div>

@@ -48,7 +48,7 @@
         {% endif %}
     </div>
             <!-- Add Service Popup -->
-            <!-- {% include 'hospital/partials/add_services_popup.html'%} -->
+            {% include 'hospital/partials/add_services_popup.html'%}
 </div>
 {{ hospital_categories|json_script:"hospital-categories-data" }}
 {{ hospital_services|json_script:"hospital-services-data" }}
@@ -59,4 +59,5 @@
 <script src="{% static 'js/tabs.js' %}"></script>
 <script src="{% static 'js/service-hospital.js' %}"></script>
 <script src="{% static 'js/common-services.js' %}"></script>
+<script src="{% static 'js/subscription.js' %}"></script>
 {% endblock %}

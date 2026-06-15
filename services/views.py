@@ -25,6 +25,13 @@ from registration.models import LabProfile
 from settings.models import SellerSubscription
 from core.settings import MONGO_COLLECTIONS
 from django.conf import settings
+from appointments.models import (
+    HospitalCategory,
+    HospitalServiceDescription,
+    HospitalBedRoom
+)
+from .models import HospitalServiceRateCard, HospitalRoomRateCard
+
 
 def build_media_url(path, default_subdir=""):
     if not path:
@@ -164,12 +171,7 @@ def services(request):
         return render(request, 'doctor/services.html', context)
 
     elif user.user_type == 'hospital':
-        from appointments.models import (
-            HospitalCategory,
-            HospitalServiceDescription,
-            HospitalBedRoom
-        )
-        from .models import HospitalServiceRateCard, HospitalRoomRateCard
+
 
         hospital_profile = user.hospital_profile
         print("================================")

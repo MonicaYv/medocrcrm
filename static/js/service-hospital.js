@@ -116,6 +116,7 @@ function resetRoomCard($card) {
 
 //     return rooms;
 // }
+
 function collectRooms() {
 
     const rooms = [];
@@ -129,6 +130,13 @@ function collectRooms() {
         const price = $card.find(".room-price-input").val();
         const ac = $card.find(".ac-input").is(":checked");
 
+        console.log(
+            "ROOM ID =", bedRoomId,
+            "DAYS =", days,
+            "PRICE =", price,
+            "AC =", ac
+        );
+
         if (bedRoomId && days && price) {
 
             rooms.push({
@@ -139,6 +147,8 @@ function collectRooms() {
             });
         }
     });
+
+    console.log("FINAL ROOMS =", rooms);
 
     return rooms;
 }
@@ -224,16 +234,42 @@ function renderSummary() {
 }
 
 $(document).ready(function () {
-    HOSPITAL_CATEGORIES = JSON.parse(document.getElementById("hospital-categories-data").textContent);
-    HOSPITAL_SERVICES = JSON.parse(document.getElementById("hospital-services-data").textContent);
-    HOSPITAL_BED_ROOMS = JSON.parse(document.getElementById("hospital-bed-rooms-data").textContent);
+
+    HOSPITAL_CATEGORIES = JSON.parse(
+        document.getElementById("hospital-categories-data").textContent
+    );
+
+    HOSPITAL_SERVICES = JSON.parse(
+        document.getElementById("hospital-services-data").textContent
+    );
+
+    HOSPITAL_BED_ROOMS = JSON.parse(
+        document.getElementById("hospital-bed-rooms-data").textContent
+    );
 
     $(".services-list .service-card").each(function () {
         resetServiceCard($(this));
     });
+
     $(".bed-services-list .bed-service-card").each(function () {
         resetRoomCard($(this));
     });
+
+    // create total 3 service cards
+    for (let i = 0; i < 2; i++) {
+        const template = document.getElementById("service-card-template");
+        const $card = $(template.content.firstElementChild.cloneNode(true));
+        resetServiceCard($card);
+        $(".services-list").append($card);
+    }
+
+    // create total 3 room cards
+    for (let i = 0; i < 2; i++) {
+        const template = document.getElementById("bed-room-card-template");
+        const $card = $(template.content.firstElementChild.cloneNode(true));
+        resetRoomCard($card);
+        $(".bed-services-list").append($card);
+    }
 
     showStep(1);
 });
@@ -288,29 +324,34 @@ $(document).on("click", ".step-btn[data-target]", function () {
 //     resetServiceCard($card);
 //     $(".services-list").append($card);
 // });
-$(document).on("click", ".add-service", function () {
 
-    const template =
-        document.getElementById("service-card-template");
 
-    if (!template) {
-        console.error("service-card-template not found");
-        return;
-    }
+// $(document).on("click", ".add-service", function () {
 
-    const $card =
-        $(template.content.firstElementChild.cloneNode(true));
+//     const template =
+//         document.getElementById("service-card-template");
 
-    resetServiceCard($card);
+//     if (!template) {
+//         console.error("service-card-template not found");
+//         return;
+//     }
 
-    $(".services-list").append($card);
-});
+//     const $card =
+//         $(template.content.firstElementChild.cloneNode(true));
+
+//     resetServiceCard($card);
+
+//     $(".services-list").append($card);
+// });
+
 
 $(document).on("click", ".add-service-bed", function () {
+    console.log("ADD ROOM CLICKED");
     const template = document.getElementById("bed-room-card-template");
     const $card = $(template.content.firstElementChild.cloneNode(true));
     resetRoomCard($card);
     $(".bed-services-list").append($card);
+    console.log("APPENDED");
 });
 
 $(document).on("click", ".remove-service", function () {
@@ -331,18 +372,18 @@ $(document).on("click", ".remove-service-bed", function () {
     $(this).closest(".bed-service-card").remove();
 });
 
-$(document).on("click", ".category-dropdown-btn, .service-dropdown-btn, .bed-room-dropdown-btn", function (e) {
-    e.stopPropagation();
-    $(".dropdown-menu").addClass("hidden");
-    $(this).closest(".dropdown-trigger").find(".dropdown-menu").toggleClass("hidden");
-});
+// $(document).on("click", ".category-dropdown-btn, .service-dropdown-btn, .bed-room-dropdown-btn", function (e) {
+//     e.stopPropagation();
+//     $(".dropdown-menu").addClass("hidden");
+//     $(this).closest(".dropdown-trigger").find(".dropdown-menu").toggleClass("hidden");
+// });
 
-$(document).on("click", function (e) {
-    if (!$(e.target).closest(".dropdown-trigger, .more-dropdown, .more-btn").length) {
-        $(".dropdown-menu").addClass("hidden");
-        $(".more-dropdown").addClass("hidden");
-    }
-});
+// $(document).on("click", function (e) {
+//     if (!$(e.target).closest(".dropdown-trigger, .more-dropdown, .more-btn").length) {
+//         $(".dropdown-menu").addClass("hidden");
+//         $(".more-dropdown").addClass("hidden");
+//     }
+// });
 
 $(document).on("click", ".category-options .dropdown-item", function () {
     const $item = $(this);
@@ -378,106 +419,69 @@ $(document).on("click", ".more-btn", function (e) {
 });
 
 $(document).on("click", ".save-services-btn", function () {
+
     console.log("SAVE BUTTON CLICKED");
-    // const services = collectServices();
-    // const rooms = collectRooms();
-    // console.log("SERVICES =", services);
-    // console.log("ROOMS =", rooms);
 
-    // if (!services.length && !rooms.length) {
-    //     alert("Please add at least one service or room.");
-    //     return;
-    // }
-//    const services = collectServices();
-//    const rooms = collectRooms();
-    const services = [{
-        category_id: 1,
-        service_id: 1,
-        price: $(".price-input").val()
-    }];
+    const services = collectServices();
+    const rooms = collectRooms();
 
-    const rooms = [];
+    console.log("SERVICES =", services);
+    console.log("ROOMS =", rooms);
 
-   console.log("SERVICES =", services);
-   console.log("ROOMS =", rooms);
-
-   if (!services.length && !rooms.length) {
-      alert("Please add at least one service or room.");
-      return;
+    if (!services.length && !rooms.length) {
+        alert("Please add at least one service or room.");
+        return;
     }
-    
+
     const $btn = $(this);
-    $btn.prop("disabled", true).text("Saving...");
 
-//     fetch("/services/hospital/services/save/", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",
-//             "X-CSRFToken": getCookie("csrftoken")
-//         },
-//         body: JSON.stringify({ services, rooms })
-//     })
-//         // .then((response) => response.json())
-//         // .then((data) => {
-//         //     if (!data.success) {
-//         //         throw new Error(data.error || "Unable to save hospital services");
-//         //     }
-//         //     window.location.reload();
-//         // })
-        
+    $btn.prop("disabled", true);
+    $btn.text("Saving...");
 
-//     .then((data) => {
+    fetch("/services/hospital/services/save/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({
+            services: services,
+            rooms: rooms
+        })
+    })
+    .then((response) => {
 
-//         if (!data.success) {
-//           throw new Error(data.error || "Unable to save hospital services");
-//         }
+        if (!response.ok) {
+            throw new Error("Failed to save hospital services");
+        }
 
-//        const toast = document.createElement("div");
+        return response.json();
+    })
+    .then((data) => {
 
-//        toast.innerHTML = "✅ Service saved successfully";
+        console.log("SAVE RESPONSE =", data);
 
-//        toast.className =
-//           "fixed top-5 right-5 bg-green-500 text-white px-5 py-3 rounded-lg z-[99999]";
+        if (!data.success) {
+            throw new Error(
+                data.error || "Unable to save hospital services"
+            );
+        }
 
-//        document.body.appendChild(toast);
+        showToast("Services saved successfully");
 
-//        setTimeout(() => {
-//            window.location.reload();
-//         }, 1500);
-//    })
-//         .catch((error) => {
-//             alert(error.message);
-//             $btn.prop("disabled", false).text("Save");
-//         });
-// });
-fetch("/services/hospital/services/save/", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken")
-    },
-    body: JSON.stringify({ services, rooms })
-})
-.then((response) => response.json())
-.then((data) => {
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    })
+    .catch((error) => {
 
-    if (!data.success) {
-        throw new Error(data.error || "Unable to save hospital services");
-    }
+        console.error(error);
 
-    const toast = document.createElement("div");
+        alert(error.message);
 
-    toast.innerHTML = "✅ Service saved successfully";
-
-    toast.className =
-        "fixed top-5 right-5 bg-green-500 text-white px-5 py-3 rounded-lg z-[99999]";
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        window.location.reload();
-    }, 1500);
-})
+        $btn.prop("disabled", false);
+        $btn.text("Save");
+    });
 });
 
 // $(document).on("click", ".delete-hospital-service", function () {
@@ -497,14 +501,11 @@ fetch("/services/hospital/services/save/", {
 //         })
 //         .catch((error) => alert(error.message));
 // });
+
 $(document).on("click", ".delete-hospital-service", function () {
 
     const $btn = $(this);
     const rateId = $btn.data("rate-id");
-
-    if (!confirm("Are you sure you want to delete this service?")) {
-        return;
-    }
 
     fetch(`/services/hospital/services/${rateId}/delete/`, {
         method: "POST",
@@ -554,9 +555,9 @@ $(document).on("click", ".delete-hospital-service", function () {
             $btn.closest(".service-card").remove();
 
             // Optional refresh after toast
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
+            // setTimeout(() => {
+            //     location.reload();
+            // }, 1000);
 
         } else {
 
@@ -573,6 +574,8 @@ $(document).on("click", ".delete-hospital-service", function () {
     });
 
 });
+
+
 $(document).on("click", ".delete-hospital-room", function () {
     const rateId = $(this).data("rate-id");
     fetch(`/services/hospital/rooms/${rateId}/delete/`, {
@@ -590,6 +593,8 @@ $(document).on("click", ".delete-hospital-room", function () {
         })
         .catch((error) => alert(error.message));
 });
+
+
 // $(document).on("click", ".save-services-btn", function () {
 
 //     const price = $(".price-input").val();
@@ -597,6 +602,8 @@ $(document).on("click", ".delete-hospital-room", function () {
 //     console.log("PRICE =", price);
 
 // });
+
+
 $(document).on("click", ".close-icon", function () {
 
     $(".add-service")
@@ -604,6 +611,7 @@ $(document).on("click", ".close-icon", function () {
         .removeClass("flex");
 
 });
+
 $(document).on("click", ".save-services-btn", function () {
 
     console.log("CATEGORY =", $(".category-id").val());
@@ -611,6 +619,7 @@ $(document).on("click", ".save-services-btn", function () {
     console.log("PRICE =", $(".price-input").val());
 
 });
+
 $(document).on("click", ".more-btn", function (e) {
 
     console.log("MORE CLICKED");
