@@ -181,36 +181,121 @@ $(document).ready(function () {
             }
         });
     });
-    //Permission Access
-    // Show popup on upload trigger click
-    let lastClickedTrigger = null;
-    let uploadConfirmShown = false;
+    // //Permission Access
+    // // Show popup on upload trigger click
+    // let lastClickedTrigger = null;
+    // let uploadConfirmShown = false;
 
-    // Show popup on upload trigger click
-    document.querySelectorAll(".uploadTrigger").forEach((trigger) => {
-        trigger.addEventListener("click", function () {
-        lastClickedTrigger = this; // store the clicked trigger
+    // // Show popup on upload trigger click
+    // document.querySelectorAll(".uploadTrigger").forEach((trigger) => {
+    //     trigger.addEventListener("click", function () {
+    //     lastClickedTrigger = this; // store the clicked trigger
+    //     if (!uploadConfirmShown) {
+    //         // Show popup only once
+    //         document.querySelector(".file-access-popup").classList.remove("hidden");
+    //     } else {
+    //         // Directly trigger input if already allowed
+    //         const uploadSection = lastClickedTrigger.closest(".upload-section");
+    //         const input = uploadSection.querySelector(".uploadInput");
+    //         input.click();
+    //         lastClickedTrigger = null;
+    //     }
+    //     });
+    // });
+
+    // // Hide popup on "No" click
+    // document.querySelector(".deny-access").addEventListener("click", function () {
+    //     document.querySelector(".file-access-popup").classList.add("hidden");
+    //     lastClickedTrigger = null; // reset
+    // });
+
+    // // Allow file access and trigger file input on "Yes" click
+    // document.querySelector(".allow-access").addEventListener("click", function () {
+    //     document.querySelector(".file-access-popup").classList.add("hidden");
+    //     uploadConfirmShown = true;
+
+    //     if (lastClickedTrigger) {
+    //         const uploadSection = lastClickedTrigger.closest(".upload-section");
+    //         const input = uploadSection.querySelector(".uploadInput");
+    //         input.click();
+    //         lastClickedTrigger = null;
+    //     }
+    //     });
+
+    // $('.uploadInput').on('change', function () {
+    //     const file = this.files[0];
+    //     if (!file) return;
+
+    //     const $section = $(this).closest('.upload-section');
+    //     const $display = $section.find('.upload-label-main');
+    //     const $trigger = $section.find('.uploadTrigger');
+    //     const $label = $trigger.find('.upload-label');
+    //     const $icon = $trigger.find('.upload-icon');
+            
+    //     if (file.name) {
+    //         // Show a success toaster when file is chosen
+    //         toastr.success(`File uploaded successfully.`);
+    //     } else {
+    //         // Optional: show error toaster if no file selected
+    //         toastr.error('No file selected.');
+    //     }
+    //     $label.text(file.name);
+    //     $display.text(file.name)
+
+    //     $icon.text('imagesmode').removeClass('text-primary-color').addClass('text-bright-green');
+        
+    //     $section.find('.remove-file-btn').removeClass('hidden');
+    //     $('.remove-file-btn').on('click', function () {
+    //         const $wrapper = $(this).closest('.upload-section');
+    //         const $fileInput = $wrapper.find('.uploadInput');
+
+            
+    //         $fileInput.val('');
+
+            
+    //         $wrapper.find('.upload-label').text('');
+    //         $wrapper.find('.upload-icon')
+    //             .text('upload')
+    //             .removeClass('text-green-600')
+    //             .addClass('text-primary-color');
+
+    //         $(this).addClass('hidden');
+    //     });
+    // });
+
+// ===================== PERMISSION ACCESS =====================
+let lastClickedTrigger = null;
+let uploadConfirmShown = false;
+
+document.querySelectorAll(".uploadTrigger").forEach((trigger) => {
+    trigger.addEventListener("click", function () {
+        lastClickedTrigger = this;
+        const popup = document.querySelector(".file-access-popup");
+        if (!popup) return; // safety check for pages without popup
+
         if (!uploadConfirmShown) {
-            // Show popup only once
-            document.querySelector(".file-access-popup").classList.remove("hidden");
+            popup.classList.remove("hidden");
         } else {
-            // Directly trigger input if already allowed
             const uploadSection = lastClickedTrigger.closest(".upload-section");
             const input = uploadSection.querySelector(".uploadInput");
             input.click();
             lastClickedTrigger = null;
         }
-        });
     });
+});
 
-    // Hide popup on "No" click
-    document.querySelector(".deny-access").addEventListener("click", function () {
+const denyBtn = document.querySelector(".deny-access");
+const allowBtn = document.querySelector(".allow-access");
+
+if (denyBtn) {
+    denyBtn.addEventListener("click", function () {
         document.querySelector(".file-access-popup").classList.add("hidden");
-        lastClickedTrigger = null; // reset
+        lastClickedTrigger = null;
     });
+}
 
-    // Allow file access and trigger file input on "Yes" click
-    document.querySelector(".allow-access").addEventListener("click", function () {
+if (allowBtn) {
+    allowBtn.addEventListener("click", function () {
         document.querySelector(".file-access-popup").classList.add("hidden");
         uploadConfirmShown = true;
 
@@ -220,49 +305,104 @@ $(document).ready(function () {
             input.click();
             lastClickedTrigger = null;
         }
-        });
-
-    $('.uploadInput').on('change', function () {
-        const file = this.files[0];
-        if (!file) return;
-
-        const $section = $(this).closest('.upload-section');
-        const $display = $section.find('.upload-label-main');
-        const $trigger = $section.find('.uploadTrigger');
-        const $label = $trigger.find('.upload-label');
-        const $icon = $trigger.find('.upload-icon');
-            
-        if (file.name) {
-            // Show a success toaster when file is chosen
-            toastr.success(`File uploaded successfully.`);
-        } else {
-            // Optional: show error toaster if no file selected
-            toastr.error('No file selected.');
-        }
-        $label.text(file.name);
-        $display.text(file.name)
-
-        $icon.text('imagesmode').removeClass('text-primary-color').addClass('text-bright-green');
-        
-        $section.find('.remove-file-btn').removeClass('hidden');
-        $('.remove-file-btn').on('click', function () {
-            const $wrapper = $(this).closest('.upload-section');
-            const $fileInput = $wrapper.find('.uploadInput');
-
-            
-            $fileInput.val('');
-
-            
-            $wrapper.find('.upload-label').text('');
-            $wrapper.find('.upload-icon')
-                .text('upload')
-                .removeClass('text-green-600')
-                .addClass('text-primary-color');
-
-            $(this).addClass('hidden');
-        });
     });
+}
 
+// ===================== FILE UPLOAD + VIRUS SCAN =====================
+$('.uploadInput').on('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const $input = $(this);
+    const $section = $input.closest('.upload-section');
+    const $display = $section.find('.upload-label-main');
+    const $trigger = $section.find('.uploadTrigger');
+    const $label = $trigger.find('.upload-label');
+    const $icon = $trigger.find('.upload-icon');
+    const $statusText = $section.nextAll('.flex').first().find('.status-text');
+    const $checkbox = $section.nextAll('.flex').first().find('.scan-toggle');
+
+    // File type check
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+        toastr.error('Only JPG, PNG, or PDF files are allowed.');
+        $input.val('');
+        $statusText.text('❌ Invalid file type').removeClass().addClass('text-strong-red text-16-nr');
+        $checkbox.prop('checked', false).prop('indeterminate', false);
+        return;
+    }
+
+    // Show scanning state immediately
+    $statusText.text('Scanning...').removeClass().addClass('text-primary-color text-16-nr');
+    $checkbox.prop('indeterminate', true);
+
+    // Virus scan API call
+    const formData = new FormData();
+    formData.append('file', file);
+
+    $.ajax({
+        url: '/user/file-scan/',
+        type: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            if (response.safe) {
+                // ✅ Safe — update UI
+                $statusText.text('✅ ' + (response.message || 'File is safe'))
+                    .removeClass().addClass('text-green text-16-nr');
+                $checkbox.prop('indeterminate', false).prop('checked', true);
+
+                // Show filename + icon
+                $label.text(file.name);
+                $display.text(file.name);
+                $icon.text('imagesmode').removeClass('text-primary-color').addClass('text-bright-green');
+                $section.find('.remove-file-btn').removeClass('hidden');
+
+                toastr.success('File uploaded successfully.');
+            } else {
+                // ❌ Unsafe — reject file
+                $statusText.text('❌ ' + (response.message || 'File may be unsafe'))
+                    .removeClass().addClass('text-strong-red text-16-nr');
+                $checkbox.prop('indeterminate', false).prop('checked', false);
+                $input.val('');
+                toastr.error(response.message || 'File failed virus scan.');
+            }
+        },
+        error: function () {
+            $statusText.text('⚠️ Scan failed. Try again.')
+                .removeClass().addClass('text-strong-red text-16-nr');
+            $checkbox.prop('indeterminate', true);
+            $input.val('');
+            toastr.error('Virus scan service unavailable.');
+        }
+    });
+});
+
+// Remove file button
+$(document).on('click', '.remove-file-btn', function () {
+    const $wrapper = $(this).closest('.upload-section');
+    const $fileInput = $wrapper.find('.uploadInput');
+    const $statusText = $wrapper.nextAll('.flex').first().find('.status-text');
+    const $checkbox = $wrapper.nextAll('.flex').first().find('.scan-toggle');
+
+    $fileInput.val('');
+    $wrapper.find('.upload-label').text('');
+    $wrapper.find('.upload-label-main').text('');
+    $wrapper.find('.upload-icon').text('upload').removeClass('text-bright-green').addClass('text-primary-color');
+
+    // Reset scan status
+    $statusText.text('Virus scan').removeClass().addClass('text-primary-color text-16-nr');
+    $checkbox.prop('checked', false).prop('indeterminate', false);
+
+    $(this).addClass('hidden');
+});
+
+// Prevent manual toggling of scan checkboxes
+$(document).on('click', '.scan-toggle', function (e) {
+    e.preventDefault();
+});
     // Toggle dropdown time trigger visibility
 //Dropdowns code
   const dropdownConfig = {

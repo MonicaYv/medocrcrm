@@ -4,12 +4,19 @@ from dashboard.utils import dashboard_login_required, get_common_context
 from orders.models import PurchaseMedicine, UserPurchase, OrderStatusChoices
 from registration.models import PharmacyProfile
 from django.views.decorators.http import require_POST
+from services.models import PharmacyBidding
 
 @dashboard_login_required
 def orders(request):
     user = request.user_obj
     context = get_common_context(request, user)
     pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+    placed_bid_order_ids = []
+
+    if pharmacy_profile:
+        placed_bid_order_ids = PharmacyBidding.objects.filter(
+            pharmacy=pharmacy_profile
+        ).values_list("order_id", flat=True)
 
     order_scope = Q()
     if pharmacy_profile:
@@ -22,11 +29,10 @@ def orders(request):
         UserPurchase.objects
         .filter(
             order_scope,
-            order_status__in=[
-                OrderStatusChoices.PENDING,
-                OrderStatusChoices.CONFIRMED,
-                OrderStatusChoices.SHIPPED,
-            ]
+            order_status=OrderStatusChoices.PENDING,
+        )
+        .exclude(
+            id__in=placed_bid_order_ids
         )
         .defer(
             "prescriptions",
@@ -50,7 +56,6 @@ def orders(request):
         )
         .order_by("-created_at")
     )
-
     status_counts = (
         UserPurchase.objects
         .filter(order_scope)
@@ -103,6 +108,26 @@ def update_order_status(request, order_id, status):
             assigned_pharmacy__isnull=True
         )
 
+    # order = get_object_or_404(
+    #     UserPurchase.objects.defer(
+    #         "prescriptions",
+    #         "doctor_name",
+    #         "patient_name",
+    #     ),
+    #     order_filter,
+    # )
+    # order.order_status = next_status
+    # update_fields = ["order_status", "updated_at"]
+    # if (
+    #     next_status in [OrderStatusChoices.CONFIRMED, OrderStatusChoices.CANCELLED]
+    #     and pharmacy_profile
+    #     and not order.assigned_pharmacy_id
+    # ):
+    #     order.assigned_pharmacy = pharmacy_profile
+    #     update_fields.append("assigned_pharmacy")
+    # order.save(update_fields=update_fields)
+
+    # return redirect("orders")
     order = get_object_or_404(
         UserPurchase.objects.defer(
             "prescriptions",
@@ -111,8 +136,15 @@ def update_order_status(request, order_id, status):
         ),
         order_filter,
     )
+
+    print("Before:", order.id, order.order_status)
+
     order.order_status = next_status
+
+    print("After:", order.id, order.order_status)
+
     update_fields = ["order_status", "updated_at"]
+
     if (
         next_status in [OrderStatusChoices.CONFIRMED, OrderStatusChoices.CANCELLED]
         and pharmacy_profile
@@ -120,7 +152,12 @@ def update_order_status(request, order_id, status):
     ):
         order.assigned_pharmacy = pharmacy_profile
         update_fields.append("assigned_pharmacy")
+
     order.save(update_fields=update_fields)
+
+    order.refresh_from_db()
+
+    print("DB Status:", order.id, order.order_status)
 
     return redirect("orders")
 

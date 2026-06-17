@@ -53,8 +53,21 @@ def history(request):
         )
 
         context.update({
-            "completed_orders": base_orders.filter(order_status=OrderStatusChoices.DELIVERED),
-            "cancelled_orders": base_orders.filter(order_status=OrderStatusChoices.CANCELLED),
+            "pending_orders": base_orders.filter(
+                order_status=OrderStatusChoices.PENDING
+            ),
+
+            "accepted_orders": base_orders.filter(
+                order_status=OrderStatusChoices.CONFIRMED
+            ),
+
+            "completed_orders": base_orders.filter(
+                order_status=OrderStatusChoices.DELIVERED
+            ),
+
+            "cancelled_orders": base_orders.filter(
+                order_status=OrderStatusChoices.CANCELLED
+            ),
         })
         return render(request, 'pharmacy/history.html', context)
     elif user.user_type == 'lab':

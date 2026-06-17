@@ -2,6 +2,7 @@ import os
 import re
 import pyotp
 from .models import *
+import requests
 from .email_otp import async_send_otp_email, send_forgot_password_email
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
@@ -1642,3 +1643,75 @@ def reset_password(request, token):
         token_obj.delete()
         return redirect("login_page")
     return render(request, "login/reset_password.html", {"token": token})
+
+def file_scan(file_obj):
+
+    try:
+        file_obj.seek(0)
+
+        files = {
+            "file": (
+                file_obj.name,
+                file_obj.read(),
+                file_obj.content_type
+            )
+        }
+
+        response = requests.post(
+            "http://122.170.111.109:8090/scan",
+            files=files,
+            timeout=60
+        )
+
+        if response.status_code != 200:
+            return False, "Virus scan service unavailable"
+
+        result = response.json()
+        print("CLAMAV RESPONSE =", result)
+
+        return result.get("safe", False), result.get(
+            "message",
+            "Virus scan failed"
+        )
+
+    except Exception as e:
+        return False, str(e)
+    
+# @require_POST
+# def file_scan_api(request):
+
+#     uploaded_file = request.FILES.get("file")
+
+#     if not uploaded_file:
+#         return JsonResponse({
+#             "safe": False,
+#             "message": "No file uploaded"
+#         })
+
+#     status, message = file_scan(uploaded_file)
+
+#     return JsonResponse({
+#         "safe": status,
+#         "message": message
+#     })
+
+@require_POST
+def file_scan_api(request):
+
+    uploaded_file = request.FILES.get("file")
+
+    if not uploaded_file:
+        return JsonResponse({
+            "safe": False,
+            "message": "No file uploaded"
+        })
+
+    status, message = file_scan(uploaded_file)
+
+    print("STATUS =", status)
+    print("MESSAGE =", message)
+
+    return JsonResponse({
+        "safe": status,
+        "message": message
+    })
