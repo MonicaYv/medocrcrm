@@ -453,3 +453,36 @@ document.querySelectorAll(".popup-overlay").forEach(popup => {
         }
     });
 });
+$(document).on("click", ".view-invoice-btn", function () {
+    $(".subscriptionTaxPopupInvoice")
+        .removeClass("hidden")
+        .addClass("flex");
+});
+
+$(document).on("click", ".close-popup-invoice", function () {
+    $(".subscriptionTaxPopupInvoice")
+        .addClass("hidden")
+        .removeClass("flex");
+});
+
+$(document).on("click", ".complete-order-submit", function () {
+    localStorage.setItem(
+        "order_success_toast",
+        "Order has been completed successfully."
+    );
+});
+
+$(document).ready(function () {
+    const msg = localStorage.getItem("order_success_toast");
+
+    if (msg) {
+        window.showToaster("success", msg);
+        localStorage.removeItem("order_success_toast");
+    }
+});
+$(document).on("click", ".accept-order-submit", function () {
+    localStorage.setItem(
+        "order_success_toast",
+        "Order has been accepted successfully."
+    );
+});

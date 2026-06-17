@@ -129,24 +129,90 @@
 
                 <hr class="mt-4 text-blue-haze">
 
+                <div class="open-order-map flex items-center justify-between p-[12px] border border-light-gray2 rounded-[8px] cursor-pointer"
+                    data-address="{% if address %}{{ address.address }}, {{ address.city.name|default:'' }}, {{ address.state.name|default:'' }}, {{ address.pincode }}{% endif %}">
+                    <div class="flex items-center gap-3">
+                        <img src="{% static 'images/map_button.svg' %}" alt="map icon" class="w-[33px] h-[30px]" />
+                        <div>
+                            <p class="text-raisin-black text-sm">
+                                Delivering to <span class="font-semibold">{{ address.address_type|default:"Customer address" }}</span>
+                            </p>
+                            <p class="text-jet-black text-xs">
+                                {% if address %}
+                                    {{ address.city.name|default:"" }}, {{ address.state.name|default:"" }}
+                                {% else %}
+                                    {{ address.address }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-dark-gray text-[18px]">chevron_right</span>
+                </div>
+
+                <div class="p-[12px] border border-light-gray2 rounded-[8px] qr-section">
+                    <div class="flex items-center justify-between cursor-pointer qr-toggle">
+                        <div>
+                            <p class="text-ebony font-bold text-sm">QR Code for Payment</p>
+                            <p class="text-ebony font-medium text-xs">
+                                Date: {{ order.created_at|date:"D, d M Y - g:i A" }}
+                            </p>
+                        </div>
+                        <span class="material-symbols-outlined pl-[6.43px] text-dark-gray qr-icon">
+                            expand_more
+                        </span>
+                    </div>
+
+                    <div class="qr-content hidden mt-4 w-full flex justify-center items-center">
+                        <img src="{% static 'images/sample-qr.png' %}"
+                            alt="Payment QR"
+                            class="w-[160px] h-[160px] object-contain mx-auto" />
+                    </div>
+                </div>
+
                 <div class="enquiredDetail">
                     <div class="flex flex-col mt-4 py-4 gap-4">
+                        {% if history_status == "accepted" %}
+
                         <div class="flex justify-center items-center gap-1">
                             <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
                             <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+
+                            <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                            <div class="w-[192px] h-0.5 bg-gray-300"></div>
+
+                            <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        </div>
+
+                        <div class="flex items-center justify-between mx-20">
+                            <p class="text-sm">Enquiry</p>
+                            <p class="text-sm">Ongoing</p>
+                            <p class="text-sm">Completed</p>
+                        </div>
+
+                        {% else %}
+
+                        <div class="flex justify-center items-center gap-1">
                             <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
                             <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+
+                            <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+                            <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+
                             <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
                         </div>
+
                         <div class="flex items-center justify-between mx-20">
-                            <p class="text-ebony font-normal text-sm">Enquiry</p>
-                            <p class="text-ebony font-normal text-sm">Ongoing</p>
+                            <p class="text-sm">Enquiry</p>
+                            <p class="text-sm">Ongoing</p>
+
                             {% if history_status == "cancelled" %}
-                                <p class="text-ebony font-normal text-sm">No-Show</p>
+                                <p class="text-sm">Cancelled</p>
                             {% else %}
-                                <p class="text-ebony font-normal text-sm">Completed</p>
+                                <p class="text-sm">Completed</p>
                             {% endif %}
                         </div>
+
+                        {% endif %}
                     </div>
                 </div>
 
@@ -179,38 +245,83 @@
                     {% endfor %}
                 </div>
 
-                <div class="flex items-center justify-center gap-2">
-                    {% if history_status == "cancelled" %}
-                        <p class="text-center text-base text-piano-black font-bold">You missed the Order</p>
-                        <img src="{% static 'images/missed.svg' %}" alt="missed icon" class="w-[18px] h-[18px]" />
+                <div class="w-full">
+
+                    {% if history_status == "accepted" %}
+                        <div class="pt-4 flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <p class="font-normal text-sm">Order ID</p>
+                            </div>
+
+                            <div class="flex justify-between items-center">
+                                <p class="font-normal text-sm text-blue-gray">
+                                    Order #{{ order.id }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <span class="font-normal text-sm">No Show</span>
+                                <input type="checkbox"
+                                    class="w-4 h-4 accent-dodger-blue rounded cursor-pointer">
+                            </label>
+
+                            <p class="font-normal text-sm text-spanish-gray">
+                                Customer did not show up
+                            </p>
+                        </div>
+                        <div class="mt-2 flex justify-between items-center">
+                            <div class="flex gap-2 items-center">
+                                <p class="font-normal text-sm">Total</p>
+
+                                <p class="font-normal text-sm text-dodger-blue">
+                                    ₹{{ order.final_amount|default:order.total_amount|default:"0.00" }}
+                                </p>
+                            </div>
+
+                            <div class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
+                                <p class="font-normal text-sm">View Invoice</p>
+                                <span class="material-symbols-outlined !text-lg">visibility</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center gap-4">
+                            <form method="post"
+                                action="{% url 'update_order_status' order.id 'complete' %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="w-[160px] px-6 py-3 rounded-[8px] bg-dodger-blue text-white">
+                                    Complete
+                                </button>
+                            </form>
+
+                            <button type="button"
+                                    class="w-[160px] px-6 py-3 rounded-[8px] border border-red-500 text-red-500 popup-btn"
+                                    data-popup="cancel-order-popup-{{ order.id }}">
+                                Cancel Order
+                            </button>
+                        </div>
+
+                    {% elif history_status == "cancelled" %}
+
+                        <p class="text-center text-base text-piano-black font-bold">
+                            You missed the Order
+                        </p>
+
                     {% else %}
-                        <p class="text-center text-base text-piano-black font-bold">You have completed Order</p>
-                        <img src="{% static 'images/ok.svg' %}" alt="ok icon" class="w-[18px] h-[18px]" />
+
+                        <p class="text-center text-base text-piano-black font-bold">
+                            You have completed Order
+                        </p>
+
                     {% endif %}
+
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <span class="text-ebony font-regular text-sm">
-                        Total <span class="text-dodger-blue font-semibold text-sm">₹{{ order.final_amount|default:order.total_amount|default:"0.00" }}</span>
-                    </span>
-                    <button type="button" class="flex items-center gap-2 h-[30px] p-2 rounded-[8px] border border-dodger-blue bg-pale-azure text-vivid-blue">
-                        <span class="text-sm font-regular text-ebony">View Invoice</span>
-                        <img src="{% static 'images/view.svg' %}" alt="visibility icon" class="w-[16px] h-[16px]" />
-                    </button>
-                </div>
+                
             </div>
 
-            <div class="border border-light-grayish-blue rounded-[12px] p-4">
-                <div class="flex items-center gap-3 rounded-[12px]">
-                    <div class="w-[48px] h-[48px] flex items-center justify-center rounded-full border border-dodger-blue bg-pale-azure">
-                        <span class="material-symbols-outlined text-dodger-blue text-[24px]">phone</span>
-                    </div>
-                    <div>
-                        <p class="text-blue-gray font-regular text-base mb-1">Need help with anything?</p>
-                        <p class="text-ebony font-semibold text-base">Call: (239) 555-0108</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

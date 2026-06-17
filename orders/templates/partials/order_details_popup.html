@@ -211,7 +211,6 @@
                         <p class="text-center text-gray-400">No medicines added in this order.</p>
                     {% endfor %}
                 </div>
-
                 <div class="pt-4 flex flex-col gap-2">
                     <div class="flex justify-between items-center">
                         <p class="font-normal text-sm">Order ID</p>
@@ -236,18 +235,35 @@
                         <p class="font-normal text-sm">Total</p>
                         <p class="font-normal text-sm text-dodger-blue">₹{{ order.final_amount|default:order.total_amount|default:"0.00" }}</p>
                     </div>
-                    <div class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
+                    <div class="view-invoice-btn border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer"
+                        data-order-id="{{ order.id }}">                        
                         <p class="font-normal text-sm">View Invoice</p>
                         <span class="material-symbols-outlined !text-lg">visibility</span>
                     </div>
                 </div>
             </div>
+            
+            {% if order.order_status == "pending" %}
 
+                <form method="post"
+                    action="{% url 'update_order_status' order.id 'confirm' %}"
+                    class="flex justify-center">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="accept-order-submit w-[160px] px-6 py-3 rounded-[8px] bg-dodger-blue text-white text-[15px]">
+                        Accept
+                    </button>
+                </form>
+
+                {% endif %}
+
+            {% if order.order_status == "confirmed" %}
             <div class="flex justify-center gap-3">
                 {% if order.order_status != "delivered" %}
                     <form method="post" action="{% url 'update_order_status' order.id 'complete' %}">
                         {% csrf_token %}
-                        <button type="submit" class="w-[160px] px-6 py-3 rounded-[8px] bg-dodger-blue text-white text-[15px]">
+                        <button type="submit"
+                                class="complete-order-submit w-[160px] px-6 py-3 rounded-[8px] bg-dodger-blue text-white text-[15px]">
                             Complete
                         </button>
                     </form>
@@ -261,6 +277,7 @@
                     </button>
                 {% endif %}
             </div>
+            {% endif %}
 
             <div class="cancel-order-popup-{{ order.id }} popup-overlay fixed inset-0 bg-black/40 hidden items-center justify-center z-50 px-3">
                 <div class="popup-content rounded-[8px] w-[616px] overflow-y-auto relative shadow-xl bg-white p-4 scroll">
@@ -277,7 +294,8 @@
                     </p>
                     <form method="post" action="{% url 'update_order_status' order.id 'cancel' %}">
                         {% csrf_token %}
-                        <button type="submit" class="block mx-auto w-[198px] px-6 py-3 rounded-[6px] bg-rosewater text-error font-semibold text-base">
+                        <button type="submit"
+                                class="cancel-order-submit block mx-auto w-[198px] px-6 py-3 rounded-[6px] bg-rosewater text-error font-semibold text-base">
                             Cancel Order
                         </button>
                     </form>
@@ -286,4 +304,5 @@
         </div>
     </div>
 </div>
+{% include 'partials/invoice-popup.html' %}
 {% endwith %}
