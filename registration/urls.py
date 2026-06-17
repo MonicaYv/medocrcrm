@@ -18,4 +18,5 @@ urlpatterns = [
     path("save/lab", views.save_lab, name="save_lab"),
     path("save/doctor", views.save_doctor, name="save_doctor"),
     path("save/hospital", views.save_hospital, name="save_hospital"),
+    path('file-scan/',views.file_scan_api,name='file_scan'),
 ]

@@ -105,7 +105,7 @@ $(document).ready(function () {
   });
 
 let selectedRole = null;
-let isMedicalProviderSubRole = false;
+let isMedicalProviderSubRole = true;
 
 // Check on page load if we need to show medical provider roles
 $(document).ready(function() {
@@ -155,32 +155,28 @@ $(".mainRoles .role-option").on("click", function () {
 });
 
 // Handle clicks on medical provider sub-roles
-$(".medicalProviderRoles .role-option").on("click", function () {
-  // Reset all options in sub-roles
+
+// With this (handles dynamically shown elements):
+$(document).on("click", ".medicalProviderRoles .role-option", function () {
   $(".medicalProviderRoles .role-option")
     .removeClass("bg-primary-color text-white")
-    .find("span")
-    .removeClass("text-white/80");
+    .find("span").removeClass("text-white/80");
 
-  // Highlight selected
   $(this)
     .addClass("bg-primary-color text-white")
-    .find("span")
-    .addClass("text-white/80");
+    .find("span").addClass("text-white/80");
 
   selectedRole = $(this).data("role");
+  console.log("Sub-role selected:", selectedRole); // debug
 
-  const redirects = {
-    doctor: "/user/register/doctor",
-    Pharmacy: "/user/register/Pharmacy",
-    hospital: "/user/register/hospital",
-    lab: "/user/register/lab",
-  };
-
-  // Auto-redirect on mobile
   if (window.innerWidth < 640) {
-    // Set flag before redirect
     sessionStorage.setItem('fromMedicalProviderRoles', 'true');
+    const redirects = {
+      doctor: "/user/register/doctor",
+      Pharmacy: "/user/register/Pharmacy",
+      hospital: "/user/register/hospital",
+      lab: "/user/register/lab",
+    };
     window.location.href = redirects[selectedRole] || "/user/register";
   }
 });
@@ -229,7 +225,13 @@ $(".continueBtn").on("click", function () {
     sessionStorage.setItem('fromMedicalProviderRoles', 'true');
   }
 
-  window.location.href = redirectUrl || "/";
+  if (!redirectUrl) {
+    toastr.error("Invalid role selected. Please try again.");
+    console.error("No redirect for role:", selectedRole, "isMedicalProviderSubRole:", isMedicalProviderSubRole);
+    return;
+  }
+
+  window.location.href = redirectUrl;
 });
 
 $(".backBtn").on("click", function () {

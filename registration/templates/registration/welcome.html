@@ -40,7 +40,7 @@
     <div class="hidden sm:flex flex-col gap-2">
       <p class="text-3xl md:text-5xl font-bold text-center">Welcome to Avatar</p>
       <p></p>
-      <p class="text-lg md:text-2xl pt-2 md:pt-3 text-center">Please select your role</p>
+      <p class="text-lg md:text-2xl pt-2 md:pt-3 text-center">Select your healthcare provider type</p>
     </div>
     <!-- Image : Displayed only on Mobile -->
     <div class="flex justify-center items-center sm:hidden">
@@ -48,9 +48,9 @@
     </div>
     <!-- Mobile Heading -->
     <p class="font-bold text-3xl text-primary-color text-center sm:hidden pt-6 pb-6">Choose Your Role</p>
-    <div class="pt-2 flex flex-col gap-6 md:gap-4 items-center mainRoles">
+    <div class="pt-2 flex flex-col gap-6 md:gap-4 items-center">
       <!-- Role Options -->
-      <div
+      {% comment %} <div
         data-role="customer"
         class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-2 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition"
       >
@@ -58,8 +58,8 @@
         <span class="text-nowrap font-normal text-sm md:text-lg text-blue-teal group-hover:text-white/80 group-active:text-white/80">
           I want to buy medicine or use health services
         </span>
-      </div>
-      <div data-role="medicalProvider"
+      </div> {% endcomment %}
+      {% comment %} <div data-role="medicalProvider"
         class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-2 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition">
         <p class="font-semibold text-sm sm:text-base md:text-lg text-nowrap">
           I’m a Medical Provider (Doctor,Pharmacy & Labs)
@@ -68,7 +68,7 @@
           class="text-nowrap font-normal text-sm md:text-lg text-blue-teal group-hover:text-white/80 group-active:text-white/80">
           I want to provide medical services
         </span>
-      </div>
+      </div> {% endcomment %}
       {% comment %} <div
         data-role="Pharmacy"
         class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-2 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition"
@@ -110,7 +110,7 @@
     </div>
 
     <!--Medical Provider sub roles-->
-    <div class="pt-2 flex flex-col gap-6 md:gap-4! items-center medicalProviderRoles hidden">
+    <div class="pt-2 flex flex-col gap-6 md:gap-4! items-center medicalProviderRoles">
       <!-- Role Option -->
       <div data-role="doctor"
         class="w-85 sm:w-full role-option group border-2 border-primary-color px-4 py-2 rounded-lg cursor-pointer hover:bg-primary-color hover:text-white active:bg-primary-color active:text-white transition">
