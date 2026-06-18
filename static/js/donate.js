@@ -125,11 +125,11 @@ function setupCardListeners() {
   });
 }
  
-function openPopup() {
+function openAssignmentPopup() {
   document.querySelector(".assignmentPopup").classList.remove("hidden");
 }
 
-function closePopup() {
+function closeAssignmentPopup() {
   document.querySelector(".assignmentPopup").classList.add("hidden");
 }
 
