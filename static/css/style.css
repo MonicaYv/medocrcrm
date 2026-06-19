@@ -844,8 +844,16 @@ body {
   display: none;
 }
 
-.custom-radio input:checked ~ .checkmark::after {
-  display: block;
+.custom-radio input:checked + .checkmark::after {
+    display: block !important;
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: teal !important;
 }
 
 .product-input{

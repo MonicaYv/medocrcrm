@@ -6749,10 +6749,9 @@ body {
   color: var(--color-dark-blue);
 }
 .tabs {
-  position: sticky;
-  top: calc(var(--spacing) * 0);
-  border-radius: var(--radius-lg);
-  background-color: #F4F6F8;
+    position: static;
+    border-radius: var(--radius-lg);
+    background-color: #F4F6F8;
 }
 .tabs .flex {
   position: relative;
@@ -7284,8 +7283,8 @@ body {
   background: var(--radio-fill-color);
   display: none;
 }
-.custom-radio input:checked ~ .checkmark::after {
-  display: block;
+.custom-radio input:checked + .checkmark::after {
+    display: block !important;
 }
 .product-input {
   border-radius: var(--radius-lg);
