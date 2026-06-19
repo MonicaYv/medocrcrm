@@ -504,19 +504,79 @@ def no_show_appointment(request):
         "message": "Appointment marked as no-show"
     })
 
+# @require_GET
+# @dashboard_login_required
+# def appointment_details(request, appointment_id):
+
+#     appointment = get_object_or_404(
+#         HospitalAppointments.objects.select_related(
+#             "user__userprofile",
+#             "category",
+#             "description",
+#             "bed_room",
+#         ),
+#         id=appointment_id
+#     )
+
+#     profile = appointment.user.userprofile
+
+#     return JsonResponse({
+#         "success": True,
+#         "appointment": {
+#             "id": appointment.id,
+#             "patient_name": f"{profile.first_name} {profile.last_name}",
+#             "gender": profile.gender,
+#             "phone": f"{appointment.user.phone_country_code or ''} {appointment.user.phone_number or ''}",
+#             "age": profile.age if hasattr(profile, "age") else "",
+#             "address": (
+#                 f"{appointment.address.address}, "
+#                 f"{appointment.address.city.name if appointment.address.city else ''}, "
+#                 f"{appointment.address.state.name if appointment.address.state else ''}, "
+#                 f"{appointment.address.pincode}"
+#                 if appointment.address
+#                 else ""
+#             ),
+
+#             "visit_type": appointment.preferred_mode.title(),
+
+#             "appointment_date": appointment.preferred_date_from.strftime("%d/%m/%Y, %I:%M %p")
+#             if appointment.preferred_date_from else "",
+
+#             "medical_requirement": (
+#                 appointment.category.name
+#                 if appointment.category else ""
+#             ),
+
+#             "details": (
+#                 appointment.description.description
+#                 if appointment.description else ""
+#             ),
+
+#             "order_id": f"APT-{appointment.id}",
+
+#             "budget": str(
+#                 appointment.budget
+#                 if hasattr(appointment, "budget")
+#                 else "0"
+#             ),
+#         }
+#     })
 @require_GET
 @dashboard_login_required
 def appointment_details(request, appointment_id):
 
-    appointment = get_object_or_404(
-        HospitalAppointments.objects.select_related(
-            "user__userprofile",
-            "category",
-            "description",
-            "bed_room",
-        ),
+    appointment = LabAppointments.objects.select_related(
+        "user__userprofile",
+        "address"
+    ).filter(
         id=appointment_id
-    )
+    ).first()
+
+    if not appointment:
+        return JsonResponse({
+            "success": False,
+            "message": "Appointment not found"
+        })
 
     profile = appointment.user.userprofile
 
@@ -524,43 +584,32 @@ def appointment_details(request, appointment_id):
         "success": True,
         "appointment": {
             "id": appointment.id,
-            "patient_name": f"{profile.first_name} {profile.last_name}",
+            "patient_name":
+                f"{profile.first_name} {profile.last_name or ''}",
+
             "gender": profile.gender,
-            "phone": f"{appointment.user.phone_country_code or ''} {appointment.user.phone_number or ''}",
-            "age": profile.age if hasattr(profile, "age") else "",
-            "address": (
-                f"{appointment.address.address}, "
-                f"{appointment.address.city.name if appointment.address.city else ''}, "
-                f"{appointment.address.state.name if appointment.address.state else ''}, "
-                f"{appointment.address.pincode}"
-                if appointment.address
-                else ""
-            ),
+            "age": profile.age,
 
-            "visit_type": appointment.preferred_mode.title(),
+            "phone":
+                appointment.user.phone_number,
 
-            "appointment_date": appointment.preferred_date_from.strftime("%d/%m/%Y, %I:%M %p")
-            if appointment.preferred_date_from else "",
+            "address":
+                appointment.address.address if appointment.address else "",
 
-            "medical_requirement": (
-                appointment.category.name
-                if appointment.category else ""
-            ),
+            "appointment_date":
+                appointment.preferred_date_time.strftime(
+                    "%d/%m/%Y, %I:%M %p"
+                ) if appointment.preferred_date_time else "",
 
-            "details": (
-                appointment.description.description
-                if appointment.description else ""
-            ),
+            "service_type":
+                appointment.service_type,
 
-            "order_id": f"APT-{appointment.id}",
-
-            "budget": str(
-                appointment.budget
-                if hasattr(appointment, "budget")
-                else "0"
-            ),
+            "order_id":
+                f"LAB-{appointment.id}"
         }
     })
+
+
 
 @require_POST
 @dashboard_login_required
