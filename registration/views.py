@@ -33,6 +33,9 @@ ROLE_TO_TEMPLATE = {
 @require_POST
 def send_otp(request):
     email = request.POST.get("email")
+    print("========== DEBUG ==========")
+    print("POST DATA =", request.POST)
+    print("EMAIL =", email)
     if not email:
         return JsonResponse({"success": False, "message": "Please enter email"}, status=400)
     try:
