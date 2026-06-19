@@ -63,86 +63,109 @@
             <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('savedDataPopup')">
               No
             </button>
-            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white" onclick="clearSavedData()">
+            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white">
               Yes
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Delete Account Popup -->
-      <div id="deleteAccountPopup"
-        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
-          <h2 class="text-lg font-semibold mb-3"></h2>
-          <p class="text-sm font-semibold mb-4">
+<!-- Delete Account Popup -->
+<div id="deleteAccountPopup"
+    class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
+
+        <h2 class="text-lg font-semibold mb-3"></h2>
+
+        <p class="text-sm font-semibold mb-4">
             Do you want to delete your profile ?
-          </p>
-          <div class="flex justify-end gap-3">
-            <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('deleteAccountPopup')">
-              No
+        </p>
+
+        <div class="flex justify-end gap-3">
+            <button class="px-8 py-1 border-1 rounded-xl text-gray-600"
+                onclick="closePopup('deleteAccountPopup')">
+                No
             </button>
-            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white" onclick="deleteAccount()">
-              Yes
+
+            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white"
+                onclick="deleteAccount()">
+                Yes
             </button>
-          </div>
-          <p class="font-semibold text-lg text-jet-black pt-6">
-            We are sorry you are going, Please select your reason
-          </p>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              I found a better alternative
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              This App is Hard To Use
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              Not Getting Enough Value
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              Just Taking A Break
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              Other (Please Specify)
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <input type="text" class="mt-2 rounded-sm p-2 focus:ring-0 w-full focus:!outline-none focus:ring-offset-0"
-            placeholder="Specify Your Reason (10 Words)" />
-          <div class="flex justify-end pt-2">
-            <button class="bg-{{  text   }} text-white rounded-md p-2 cursor-pointer submitBtn">
-              Submit
-            </button>
-          </div>
         </div>
-      </div>
+
+        <!-- Reason Section -->
+        <div class="reasonDiv">
+
+            <p class="font-semibold text-lg text-jet-black pt-6">
+                We are sorry you are going, Please select your reason
+            </p>
+
+            <div class="flex justify-between items-center pt-2">
+                <p class="font-normal text-base text-jet-black">
+                    I found a better alternative
+                </p>
+                <label class="custom-radio">
+                    <input type="radio" name="address" />
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+                <p class="font-normal text-base text-jet-black">
+                    This App is Hard To Use
+                </p>
+                <label class="custom-radio">
+                    <input type="radio" name="address" />
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+                <p class="font-normal text-base text-jet-black">
+                    Not Getting Enough Value
+                </p>
+                <label class="custom-radio">
+                    <input type="radio" name="address" />
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+                <p class="font-normal text-base text-jet-black">
+                    Just Taking A Break
+                </p>
+                <label class="custom-radio">
+                    <input type="radio" name="address" />
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+                <p class="font-normal text-base text-jet-black">
+                    Other (Please Specify)
+                </p>
+                <label class="custom-radio">
+                    <input type="radio" name="address" />
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+
+            <input type="text"
+                class="mt-2 rounded-sm p-2 focus:ring-0 w-full focus:!outline-none focus:ring-offset-0"
+                placeholder="Specify Your Reason (10 Words)" />
+
+            <div class="flex justify-end pt-2">
+                <button class="bg-{{ text }} text-white rounded-md p-2 cursor-pointer submitBtn">
+                    Submit
+                </button>
+            </div>
+
+        </div>
+        </div>
+
+    </div>
+</div>
       <!--Success Popup-->
       <div id="successPopup"
         class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">

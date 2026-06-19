@@ -351,12 +351,21 @@ $('.uploadInput').on('change', function () {
             if (response.safe) {
                 // ✅ Safe — update UI
                 $statusText.text('✅ ' + (response.message || 'File is safe'))
-                    .removeClass().addClass('text-green text-16-nr');
+                    .removeClass().addClass('status-text text-green text-16-nr');
                 $checkbox.prop('indeterminate', false).prop('checked', true);
 
                 // Show filename + icon
-                $label.text(file.name);
-                $display.text(file.name);
+                if ($label.length) {
+                    $label.text(file.name);
+                }
+
+                if ($display.length) {
+                    if ($display.is("input")) {
+                        $display.val(file.name);
+                    } else {
+                        $display.text(file.name);
+                    }
+                }
                 $icon.text('imagesmode').removeClass('text-primary-color').addClass('text-bright-green');
                 $section.find('.remove-file-btn').removeClass('hidden');
 
@@ -364,7 +373,7 @@ $('.uploadInput').on('change', function () {
             } else {
                 // ❌ Unsafe — reject file
                 $statusText.text('❌ ' + (response.message || 'File may be unsafe'))
-                    .removeClass().addClass('text-strong-red text-16-nr');
+                    .removeClass().addClass('status-text text-strong-red text-16-nr');
                 $checkbox.prop('indeterminate', false).prop('checked', false);
                 $input.val('');
                 toastr.error(response.message || 'File failed virus scan.');
@@ -387,17 +396,54 @@ $(document).on('click', '.remove-file-btn', function () {
     const $statusText = $wrapper.nextAll('.flex').first().find('.status-text');
     const $checkbox = $wrapper.nextAll('.flex').first().find('.scan-toggle');
 
+    // Clear file
     $fileInput.val('');
+
+    // Clear displayed filename
     $wrapper.find('.upload-label').text('');
-    $wrapper.find('.upload-label-main').text('');
-    $wrapper.find('.upload-icon').text('upload').removeClass('text-bright-green').addClass('text-primary-color');
+    $wrapper.find('.upload-label-main').val('');
 
-    // Reset scan status
-    $statusText.text('Virus scan').removeClass().addClass('text-primary-color text-16-nr');
-    $checkbox.prop('checked', false).prop('indeterminate', false);
+    // Reset icon
+    $wrapper.find('.upload-icon')
+        .text('upload')
+        .removeClass('text-bright-green')
+        .addClass('text-primary-color');
 
+    // Reset virus scan status
+    $statusText
+        .removeClass()
+        .addClass('status-text text-primary-color text-16-nr')
+        .text('Virus scan');
+
+    // Reset checkbox
+    $checkbox
+        .prop('checked', false)
+        .prop('indeterminate', false);
+
+    // Hide remove button
     $(this).addClass('hidden');
 });
+// $(document).on('click', '.remove-file-btn', function () {
+
+//     const $wrapper = $(this).closest('.upload-section');
+
+//     console.log("Wrapper:", $wrapper);
+
+//     console.log(
+//         "Next flex:",
+//         $wrapper.nextAll('.flex').first()
+//     );
+
+//     const $statusText =
+//         $wrapper.nextAll('.flex').first().find('.status-text');
+
+//     const $checkbox =
+//         $wrapper.nextAll('.flex').first().find('.scan-toggle');
+
+//     console.log("Status found:", $statusText.length);
+//     console.log("Checkbox found:", $checkbox.length);
+
+// });
 
 // Prevent manual toggling of scan checkboxes
 $(document).on('click', '.scan-toggle', function (e) {
