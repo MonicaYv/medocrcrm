@@ -26,8 +26,10 @@
     <!-- <div class="h-[calc(100vh-72px)] w-full flex"> -->
     <div class="h-[calc(100vh-72px)] w-full flex overflow-hidden">
         <!-- Sidebar -->
-        {% include 'dashboard/sidebar.html' %}
+        <div class="h-full flex-shrink-0 overflow-hidden">
+            {% include 'dashboard/sidebar.html' %}
         <!-- Main Content Area -->
+        </div>
         
         <div class="flex-1 overflow-y-auto scroll px-4 py-2">
             {% block content %}
