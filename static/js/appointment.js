@@ -111,6 +111,7 @@ loadAppointments("all", 1);
       const orderId = card.data("order-id") || "-";
       const appointmentId = card.data("id");
       window.currentAppointmentId = appointmentId;
+      $(".modal-pending").attr("data-appointment-id", appointmentId);
       console.log("APPOINTMENT ID =", appointmentId);
       const budget = card.data("budget");
 
@@ -306,183 +307,7 @@ const ENQUIRY_TEMPLATES = {
     </div>
   `
 };
-/* ------------------------------
- * ACCEPT APPOINTMENT
- * ------------------------------ */
 
-// $(document).on("click", ".accept-btn", function () {
-
-//     const orderId = $(this).data("order");
-
-//     $.ajax({
-
-//         url: "/appointment/update-status/",
-
-//         type: "POST",
-
-//         // data: {
-
-//         //     order_id: orderId,
-
-//         //     status: "Accepted",
-
-//         //     csrfmiddlewaretoken:
-//         //     $("input[name=csrfmiddlewaretoken]").val()
-
-//         // },
-//         data: {
-
-//             order_id: orderId,
-
-//             status: "Accepted"
-
-//           },
-
-//          headers: {
-
-//             "X-CSRFToken": getCookie("csrftoken")
-
-//          },
-
-//         // success: function () {
-
-          
-//         //     showToast("Appointment Accepted Successfully", "success");
-
-//         //     location.reload();
-
-//         // }
-//       success: function (response) {
-
-//     if (response.success) {
-
-//         showToast("Appointment Accepted Successfully", "success");
-
-//         $(".modal-pending").addClass("hidden");
-
-//         setTimeout(() => {
-
-//             loadAppointments(currentStatus, 1);
-
-//         }, 300);
-
-//     } else {
-
-//         showToast(response.message || "Something went wrong", "error");
-
-//     }
-
-// }
-
-// });
-
-
-/* ------------------------------
- * REJECT APPOINTMENT
- * ------------------------------ */
-
-// $(document).on("click", ".reject-btn", function () {
-
-//     const orderId = $(this).data("order");
-
-//     $.ajax({
-
-//         url: "/appointment/update-status/",
-//         type: "POST",
-
-//         data: {
-//             order_id: orderId,
-//             status: "Cancelled"
-//         },
-
-//         headers: {
-//             "X-CSRFToken": getCookie("csrftoken")
-//         },
-
-//         success: function (response) {
-
-//             if (response.success) {
-
-//                 showToast("Appointment Cancelled Successfully", "error");
-
-//                 $(".modal-pending").addClass("hidden");
-
-//                 setTimeout(() => {
-//                     loadAppointments(currentStatus, 1);
-//                 }, 300);
-
-//             } else {
-
-//                 showToast(response.message || "Something went wrong", "error");
-
-//             }
-
-//         },
-
-//         error: function (xhr) {
-
-//             console.log(xhr.responseText);
-
-//             alert("Error");
-//         }
-
-//     });
-
-// });
-
-
-/* ------------------------------
- * ACCEPT APPOINTMENT
- * ------------------------------ */
-
-// $(document).on("click", ".accept-btn", function () {
-
-//     const orderId = $(this).data("order");
-
-//     $.ajax({
-
-//         url: "/appointment/update-status/",
-//         type: "POST",
-
-//         data: {
-//             order_id: orderId,
-//             status: "Accepted"
-//         },
-
-//         headers: {
-//             "X-CSRFToken": getCookie("csrftoken")
-//         },
-
-//         success: function (response) {
-
-//             if (response.success) {
-
-//                 showToast("Appointment Accepted Successfully", "success");
-
-//                 $(".modal-pending").addClass("hidden");
-
-//                 setTimeout(() => {
-//                     loadAppointments(currentStatus, 1);
-//                 }, 300);
-
-//             } else {
-
-//                 showToast(response.message || "Something went wrong", "error");
-
-//             }
-
-//         },
-
-//         error: function (xhr) {
-
-//             console.log(xhr.responseText);
-
-//             showToast("Error updating appointment", "error");
-//         }
-
-//     });
-
-// });
 
 function getCookie(name) {
 
@@ -712,80 +537,6 @@ function getCookie(name) {
     return '';
 }
 
-$(document).on("click", ".accept-appointment", function () {
-
-    const appointmentId = window.currentAppointmentId;
-
-    $.ajax({
-        url: "/appointment/update-status/",
-        type: "POST",
-
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
-
-        data: {
-            appointment_id: appointmentId,
-            status: "Accepted"
-        },
-
-        // success: function (res) {
-        //     alert("Appointment Accepted Successfully");
-        // },
-        success: function (res) {
-
-          showToast("Appointment Accepted Successfully", "success");
-
-          $(".modal-pending").addClass("hidden");
-
-          setTimeout(() => {
-            loadAppointments(currentStatus, 1);
-          }, 500);
-        },
-        error: function (err) {
-            console.log(err);
-            showToaster("error", "Something went wrong");
-        }
-    });
-});
-
-$(document).on("click", ".reject-appointment", function () {
-
-    const appointmentId = window.currentAppointmentId;
-
-    $.ajax({
-        url: "/appointment/update-status/",
-        type: "POST",
-
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken")
-        },
-
-        data: {
-            appointment_id: appointmentId,
-            status: "Cancelled"
-        },
-
-        // success: function (res) {
-        //     alert("Appointment Rejected Successfully");
-        // },
-        success: function (res) {
-
-          showToast("Appointment Rejected Successfully", "success");
-
-          $(".modal-pending").addClass("hidden");
-
-          setTimeout(() => {
-            loadAppointments(currentStatus, 1);
-          }, 500);
-        },
-
-        error: function (err) {
-            console.log(err);
-            alert("Something went wrong");
-        }
-    });
-});
 
 $(document).on("click", ".patient-share-app", function () {
 
@@ -828,4 +579,325 @@ $(document).on("click", "#copy-patient-link", function () {
     navigator.clipboard.writeText(link);
 
     alert("Link copied");
+});
+// ============================================================
+// UNIFIED APPOINTMENT HANDLERS
+// ============================================================
+
+// ── View appointment details (eye icon) ─────────────────────
+$(document).on("click", ".appointment-detail-btn, .view-appointment", function () {
+
+    const appointmentId = $(this).data("id");
+    if (!appointmentId) return;
+
+    $.ajax({
+        url: `/appointment/appointment-details/${appointmentId}/`,
+        type: "GET",
+
+        success: function (response) {
+
+            if (!response.success) {
+                toastr.error(response.message || "Unable to load details");
+                return;
+            }
+
+            const a = response.appointment;
+
+            // Common fields (all user types)
+            $("#popup-patient-name, #modal-name").text(a.patient_name || "-");
+            $("#popup-gender,    #modal-gender").text(a.gender          || "-");
+            $("#popup-age,       #modal-age").text(a.age                || "-");
+            $("#popup-phone,     #modal-phone").text(a.phone            || "-");
+            $("#popup-address,   #modal-address").text(a.address        || "-");
+            $("#popup-date,      #modal-date").text(a.appointment_date  || "-");
+            $("#popup-order-id").text(a.order_id || "-");
+
+            // Lab-specific
+            $("#popup-service,   #modal-service-type").text(
+                a.service_type || "-"
+            );
+
+            // Doctor/Hospital-specific
+            $("#popup-visit-type,  #modal-visit-type").text(
+                a.visit_type || a.consultation_type || "-"
+            );
+            $("#popup-medical-requirement").text(
+                a.medical_requirement || a.consultation_type || "-"
+            );
+            $("#popup-details, #modal-details").text(a.details || "-");
+            $("#popup-budget").text(a.budget ? "₹" + a.budget : "-");
+
+            // Store appointment ID on both popup containers
+            $(".appointmentRequestDetail, .modal-pending")
+                .attr("data-appointment-id", appointmentId);
+
+            // Show popup (whichever is present on this page)
+            $(".appointmentRequestDetail")
+                .removeClass("hidden")
+                .addClass("flex");
+
+            $(".modal-pending")
+                .removeClass("hidden")
+                .addClass("flex");
+        },
+
+        error: function () {
+            toastr.error("Unable to load appointment details");
+        }
+    });
+});
+
+
+// ── Place bid (check_circle icon on list row) ────────────────
+$(document).on("click", ".place-bid-btn", function () {
+
+    const appointmentId = $(this).data("id");
+    if (!appointmentId) return;
+
+    _placeBid(appointmentId, $(this).closest(".appointment-row, tr"));
+});
+
+
+// ── Accept button inside popup ───────────────────────────────
+$(document).on("click", ".accept-button, .hospital-accept-button, .accept-appointment", function () {
+
+    const appointmentId = $(".appointmentRequestDetail, .modal-pending")
+        .filter(":visible")
+        .attr("data-appointment-id");
+
+    if (!appointmentId) {
+        toastr.error("Appointment ID not found");
+        return;
+    }
+
+    _placeBid(appointmentId, null);
+});
+
+
+// ── Shared place-bid AJAX ────────────────────────────────────
+function _placeBid(appointmentId, $row) {
+
+    $.ajax({
+        url: "/appointment/place-bid/",
+        type: "POST",
+
+        data: {
+            appointment_id: appointmentId,
+            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
+        },
+
+        success: function (resp) {
+
+            if (resp.success) {
+
+                toastr.success(resp.message || "Bid placed successfully");
+
+                // Close any open popup
+                $(".appointmentRequestDetail, .modal-pending")
+                    .addClass("hidden")
+                    .removeClass("flex");
+
+                // Remove the row from list if passed
+                if ($row && $row.length) {
+                    $row.fadeOut(300, function () { $(this).remove(); });
+                } else {
+                    setTimeout(function () { location.reload(); }, 1000);
+                }
+
+            } else {
+                toastr.error(resp.message || "Unable to place bid");
+            }
+        },
+
+        error: function (xhr) {
+            toastr.error(
+                xhr.responseJSON?.message || "Something went wrong"
+            );
+        }
+    });
+}
+
+
+// ── Cancel bid ───────────────────────────────────────────────
+$(document).on("click", ".cancel-bid-btn", function () {
+
+    const bidId = $(this).data("bid-id");
+    if (!bidId) return;
+
+    $.ajax({
+        url: "/appointment/cancel-bid/",
+        type: "POST",
+
+        data: {
+            bid_id: bidId,
+            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
+        },
+
+        success: function (resp) {
+
+            if (resp.success) {
+                toastr.success("Bid cancelled successfully");
+                setTimeout(function () { location.reload(); }, 1000);
+            } else {
+                toastr.error(resp.message || "Unable to cancel bid");
+            }
+        },
+
+        error: function (xhr) {
+            toastr.error(
+                xhr.responseJSON?.message || "Something went wrong"
+            );
+        }
+    });
+});
+
+
+// ── Complete appointment ─────────────────────────────────────
+$(document).on("click", ".complete-btn, .complete-appointment-btn", function () {
+
+    const appointmentId = $(this).data("id") ||
+        $(".appointmentRequestDetail, .modal-pending")
+            .filter(":visible")
+            .attr("data-appointment-id");
+
+    // For lab: also grab bid_id if present
+    const bidId = $(this).data("bid-id") || null;
+
+    if (!appointmentId && !bidId) {
+        toastr.error("Appointment not found");
+        return;
+    }
+
+    $.ajax({
+        url: "/appointment/complete-appointment/",
+        type: "POST",
+
+        data: {
+            appointment_id: appointmentId || "",
+            bid_id: bidId || "",
+            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
+        },
+
+        success: function (resp) {
+
+            if (resp.success) {
+
+                toastr.success(resp.message || "Completed successfully");
+
+                $(".acceptedDetail").addClass("hidden");
+                $(".completedDetail").removeClass("hidden");
+
+                setTimeout(function () { location.reload(); }, 1500);
+
+            } else {
+                toastr.error(resp.message || "Unable to complete");
+            }
+        },
+
+        error: function (xhr) {
+            toastr.error(
+                xhr.responseJSON?.message || "Something went wrong"
+            );
+        }
+    });
+});
+
+
+// ── No-show ──────────────────────────────────────────────────
+$(document).on("click", ".no-show-btn", function () {
+
+    const appointmentId = $(this).data("id") ||
+        $(".appointmentRequestDetail, .modal-pending")
+            .filter(":visible")
+            .attr("data-appointment-id");
+
+    const bidId = $(this).data("bid-id") || null;
+
+    $.ajax({
+        url: "/appointment/no-show-appointment/",
+        type: "POST",
+
+        data: {
+            appointment_id: appointmentId || "",
+            bid_id: bidId || "",
+            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
+        },
+
+        success: function (resp) {
+
+            if (resp.success) {
+                toastr.success(resp.message || "Marked as no-show");
+                setTimeout(function () { location.reload(); }, 1500);
+            } else {
+                toastr.error(resp.message || "Unable to mark no-show");
+            }
+        },
+
+        error: function (xhr) {
+            toastr.error(
+                xhr.responseJSON?.message || "Something went wrong"
+            );
+        }
+    });
+});
+
+
+// ── Cancel appointment (popup confirm flow) ──────────────────
+$(document).on("click", ".cancelAppointmentBtn", function () {
+
+    const bidId = $(this).data("bid-id") || null;
+
+    $.ajax({
+        url: "/appointment/cancel-bid/",
+        type: "POST",
+
+        data: {
+            bid_id: bidId || "",
+            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
+        },
+
+        success: function (resp) {
+
+            toastr.success("Cancelled successfully");
+
+            $(".cancelAppointmentPopup").addClass("hidden");
+            $(".acceptedDetail").addClass("hidden");
+            $(".cancelDetails").removeClass("hidden");
+
+            setTimeout(function () { location.reload(); }, 1500);
+        },
+
+        error: function (xhr) {
+            toastr.error(
+                xhr.responseJSON?.message || "Something went wrong"
+            );
+        }
+    });
+});
+
+
+// ── Close popups ─────────────────────────────────────────────
+$(document).on("click", ".close-popup, .modal-close-pending", function () {
+
+    const popupId = $(this).data("popup");
+
+    if (popupId) {
+        $("." + popupId).addClass("hidden").removeClass("flex");
+    } else {
+        // Generic close for modals without data-popup
+        $(this).closest(
+            ".appointmentRequestDetail, .modal-pending, .cancelAppointmentPopup"
+        ).addClass("hidden").removeClass("flex");
+    }
+});
+
+
+// ── Reject/cancel from popup (no API, UI only) ───────────────
+$(document).on("click", ".reject-button", function () {
+
+    $(".appointmentRequestDetail, .modal-pending")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    toastr.info("Dismissed");
 });

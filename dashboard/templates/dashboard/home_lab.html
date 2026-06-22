@@ -366,329 +366,126 @@
 
 
           <!--Appointment Requests-->
-          <div class="mt-4">
-          <div class="grid grid-cols-4 items-center mb-4">
-              <p class="font-semibold text-lg">Appointment Request</p>
-              <a href="#" class="text-dodger-blue text-sm">View all</a>
-          </div>
-          {% for appointment in appointment_requests %}
-          <!-- <p class="font-semibold text-lg">Appointment Request</p> -->
-            <div
-              class="bg-white shadow-md w-full mt-4 border-snow border rounded-lg p-3 flex justify-between items-center hover:bg-pale-azure hover:shadow-lg">
+          <div class="mt-6">
 
-    <div class="flex items-center gap-2">
-        <!-- <img src="/static/images/patient-4.svg" alt="Patient Profile"> -->
-        <!-- <img src="/static/images/patient-4.svg"
-            class="w-10 h-10 rounded-full"> -->
-            {% if appointment.user.userprofile.profile_photo_path %}
-            <img
-            src="/media/{{ appointment.user.userprofile.profile_photo_path }}"
-            onerror="this.src='/static/images/patient-4.svg'"
-            class="w-20 h-20 rounded-lg object-cover">
-            {% else %}
-            <img
-            src="/static/images/patient-4.svg"
-            class="w-20 h-20 rounded-lg object-cover">
-            {% endif %}
+              <!-- Header -->
+              <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-lg font-semibold">
+                      Appointment Requests
+                  </h2>
 
-        {{ appointment.user.id }}
-
-        <div class="flex flex-col gap-1">
-            <!-- <p class="font-semibold text-sm">
-                Appointment #{{ appointment.id }}
-            </p>
-
-            <p class="font-normal text-xs text-spanish-gray">
-                {{ appointment.test_type.name }}
-            </p> -->
-            <p class="font-semibold text-sm">
-              {{ appointment.user.userprofile.first_name }}
-              {{ appointment.user.userprofile.last_name }}
-            </p>
-
-            <p class="font-normal text-sm text-green">
-              {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
-            </p>
-
-            
-              <!-- To be attended by Technician -->
-              <p class="font-normal text-xs text-spanish-gray">
-                  {{ appointment.test_type.name }}
-              </p>
-            
-        </div>
-    </div>
-
-    
-
-    <p class="font-normal text-sm">
-        {{ appointment.service_type }}
-    </p>
-
-    <div class="flex items-center gap-2">
-
-        <!-- <span class="material-symbols-outlined text-gray-500">
-            visibility
-        </span> -->
-        <span
-        class="material-symbols-outlined appointment-detail-btn"
-        data-id="{{ appointment.id }}">
-        visibility
-        </span>
-
-        {% if appointment.status == "Pending" %}
-            <!-- <span class="material-symbols-outlined text-dodger-blue">
-                check_circle
-            </span>
-
-            <span class="material-symbols-outlined text-strong-red">
-                cancel
-            </span> -->
-            <span
-            class="material-symbols-outlined text-dodger-blue cursor-pointer accept-button"
-            data-id="{{ appointment.id }}">
-            check_circle
-            </span>
-
-            <span
-            class="material-symbols-outlined text-strong-red cursor-pointer reject-button"
-            data-id="{{ appointment.id }}">
-            cancel
-            </span>
-
-        {% elif appointment.status == "Accepted" %}
-            <span class="text-dodger-blue">
-                Accepted
-            </span>
-
-        <!-- {% elif appointment.status == "Rejected" %} -->
-        {% elif appointment.status == "Cancelled" %}
-            <span class="text-strong-red">
-                Rejected
-            </span>
-        {% endif %}
-
-    </div>
-
-</div>
-
-{% empty %}
-
-<div class="text-center py-5">
-    No Appointment Requests Found
-</div>
-
-{% endfor %}
-
-          <!-- <div class="pt-5 flex flex-col ml-3">
-            <div class="grid grid-cols-4 items-center">
-              <p class="font-semibold text-lg">Appointment Request</p>
-              <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
-            </div> -->
-            <!-- <div
-              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg">
-              <div class="flex items-center gap-2">
-                <img src="/static/images/patient-4.svg" alt="Patient Profile">
-                <div class="flex flex-col gap-1">
-                  <p class="font-semibold text-sm text-nowrap">Pt. Dolly Paris</p>
-                  <p class="font-normal text-xs text-spanish-gray">RT-PCR</p>
-                </div>
+                  <a href="#" class="text-dodger-blue text-sm font-medium">
+                      View All
+                  </a>
               </div>
-              <p class="font-normal text-sm text-nowrap">22/07/2025, 12:30 PM</p>
-              <p class="font-normal text-sm">Lab Walk-in</p> -->
-              <!-- <div class="flex items-center gap-4">
-                <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
-                  check_circle
-                </span>
-                <span class="material-symbols-outlined text-strong-red reject-icon">
-                  cancel
-                </span>
-                <span class="text-dodger-blue hidden accepted">Accepted</span>
-                <span class="text-strong-red hidden rejected">Rejected</span>
-              </div>
-            </div> -->
-            <!-- <div
-              class="bg-white shadow-sm border border-snow rounded-xl px-4 py-3 mt-4 flex items-center justify-between hover:bg-pale-azure transition-all duration-200">
 
-              <! PATIENT -->
-              <!-- <div class="flex items-center gap-3 w-[250px]">
+              {% for appointment in appointment_requests %}
 
-                <img src="/static/images/patient-4.svg"
-                  alt="Patient Profile"
-                  class="w-10 h-10 rounded-full">
+              <div
+                  class="bg-white border border-snow rounded-xl px-5 py-4 mb-3
+                        shadow-sm hover:shadow-md transition-all">
 
-                <div class="flex flex-col">
-                  <p class="font-semibold text-sm">Pt. Dolly Paris</p>
-                  <p class="text-xs text-spanish-gray">RT-PCR</p>
-                </div>
-            </div> -->
+                  <div class="grid grid-cols-12 items-center gap-4">
 
-          <!-- DATE -->
-    <!-- <div class="w-[220px]">
-        <p class="text-sm text-gray-700">
-            22/07/2025, 12:30 PM
-        </p>
-    </div> -->
+                      <!-- Patient -->
+                      <div class="col-span-5 flex items-center gap-3">
 
-    <!-- TYPE -->
-    <!-- <div class="w-[180px]">
-        <p class="text-sm text-gray-700">
-            Lab Walk-in
-        </p>
-    </div> -->
+                          {% if appointment.user.userprofile.profile_photo_path %}
+                          <img
+                              src="/media/{{ appointment.user.userprofile.profile_photo_path }}"
+                              class="w-12 h-12 rounded-full object-cover"
+                              onerror="this.src='/static/images/patient-4.svg'">
+                          {% else %}
+                          <img
+                              src="/static/images/patient-4.svg"
+                              class="w-12 h-12 rounded-full object-cover">
+                          {% endif %}
 
-    <!-- ACTIONS -->
-    <!-- <div class="flex items-center gap-3"> -->
+                          <div>
+                              <p class="font-semibold text-sm">
+                                  {{ appointment.user.userprofile.first_name }}
+                                  {{ appointment.user.userprofile.last_name }}
+                              </p>
 
-        <!-- VIEW -->
-        <!-- <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
-            visibility
-        </span> -->
+                              <p class="text-xs text-spanish-gray">
+                                  {{ appointment.test_type.name }}
+                              </p>
+                          </div>
 
-        <!-- ACCEPT -->
-        <!-- <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
-            check_circle
-        </span> -->
+                      </div>
 
-        <!-- REJECT -->
-        <!-- <span class="material-symbols-outlined text-strong-red cursor-pointer reject-icon">
-            cancel
-        </span>
+                      <!-- Date -->
+                      <div class="col-span-3">
 
-    </div>
+                          <p class="text-sm text-gray-700">
+                              {{ appointment.preferred_date_time|date:"d/m/Y" }}
+                          </p>
 
-</div> -->
-            
+                          <p class="text-xs text-gray-500">
+                              {{ appointment.preferred_date_time|date:"h:i A" }}
+                          </p>
 
-            <!-- <div
-              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg ">
-              <div class="flex items-center gap-2">
-                <img src="/static/images/patient-5.svg" alt="Patient Profile">
-                <div class="flex flex-col gap-1">
-                  <p class="font-semibold text-sm text-nowrap">Pt. Steve Lamark</p>
-                  <p class="font-normal text-xs text-spanish-gray">Blood Test</p>
-                </div>
-              </div>
-              <p class="font-normal text-sm  text-nowrap">22/07/2025, 01:30 PM</p>
-              <p class="font-normal text-sm text-nowrap">Home Collection</p> -->
-              <!-- <div class="flex items-center gap-4">
-                <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
-                  check_circle
-                </span> -->
-                <!-- <div
-                 class="bg-white shadow-sm border border-snow rounded-xl px-4 py-3 mt-4 flex items-center justify-between hover:bg-pale-azure transition-all duration-200"> -->
+                      </div>
 
-                  <!-- PATIENT -->
-                  <!-- <div class="flex items-center gap-3 w-[250px]">
+                      <!-- Service -->
+                      <div class="col-span-2">
 
-                    <img src="/static/images/patient-5.svg"
-                      alt="Patient Profile"
-                      class="w-10 h-10 rounded-full">
+                          {% if appointment.service_type == "Home Collection" %}
+                          <span
+                              class="px-3 py-1 rounded-full bg-orange-100 text-orange-600 text-xs font-medium">
+                              Home Collection
+                          </span>
+                          {% else %}
+                          <span
+                              class="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-xs font-medium">
+                              Lab Walk-in
+                          </span>
+                          {% endif %}
 
-                    <div class="flex flex-col">
-                      <p class="font-semibold text-sm">Pt. Steve Lamark</p>
-                      <p class="text-xs text-spanish-gray">Blood Test</p>
-                    </div>
-                </div> -->
+                      </div>
 
-        <!-- DATE -->
-    <!-- <div class="w-[220px]">
-        <p class="text-sm text-gray-700">
-            22/07/2025, 01:30 PM
-        </p>
-    </div> -->
+                      <!-- Actions -->
+                      <div class="col-span-2 flex justify-end items-center gap-3">
 
-    <!-- TYPE -->
-    <!-- <div class="w-[180px]">
-        <p class="text-sm text-gray-700">
-            Home Collection
-        </p>
-    </div>
+                          <button
+                              class="appointment-detail-btn"
+                              data-id="{{ appointment.id }}">
 
-    
-      <div class="flex items-center gap-3"> -->
+                              <span
+                                  class="material-symbols-outlined popup-btn text-gray-500 hover:text-dodger-blue">
+                                  visibility
+                              </span>
 
-                    <!-- VIEW -->
-                    <!-- <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
-                      visibility
-                    </span> -->
+                          </button>
 
-                    <!-- ACCEPT -->
-                    <!-- <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
-                      check_circle
-                    </span> -->
+                          {% if appointment.status == "Pending" %}
+                          <button
+                              class="accept-button"
+                              data-id="{{ appointment.id }}">
 
-                    <!-- REJECT -->
-                    <!-- <span class="material-symbols-outlined text-strong-red reject-icon">
-                      cancel
-                     </span>
+                              <span
+                                  class="material-symbols-outlined text-green-600 hover:scale-110 transition">
+                                  check_circle
+                              </span>
+
+                          </button>
+                          {% endif %}
+
+                      </div>
 
                   </div>
-                
-                
+
               </div>
-            </div> -->
 
-            <!-- <div
-              class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg ">
-              <div class="flex items-center gap-2">
-                <img src="/static/images/patient-4.svg" alt="Patient Profile">
-                <div class="flex flex-col gap-1">
-                  <p class="font-semibold text-sm text-nowrap">Pt. Rachel Kate</p>
-                  <p class="font-normal text-xs text-spanish-gray">Pregnancy Test</p>
-                </div>
+              {% empty %}
+
+              <div class="bg-white rounded-xl p-8 text-center text-gray-500">
+                  No Appointment Requests Found
               </div>
-              <p class="font-normal text-sm text-nowrap">22/07/2025, 10:30 AM</p>
-              <p class="font-normal text-sm text-nowrap">Home Collection</p> -->
-              <!-- <div class="flex items-center gap-4">
-                <span class=" text-dodger-blue">
-                  Accepted
-                </span>
-              </div> -->
-              <!-- <div class="flex items-center gap-3"> -->
 
-                <!-- VIEW -->
-                <!-- <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
-                  visibility
-                </span>
+              {% endfor %}
 
-                <span class="text-dodger-blue text-sm font-medium">
-                  Accepted
-                </span> -->
-
-              <!-- </div>
-            </div>
-
-            <div
-              class="bg-white shadow-md w-full mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg ">
-              <div class="flex items-center gap-2">
-                <img src="/static/images/patient-4.svg" alt="Patient Profile">
-                <div class="flex flex-col gap-1">
-                  <p class="font-semibold text-sm text-nowrap">Pt. Joolen Smith</p>
-                  <p class="font-normal text-xs text-spanish-gray">Hormone Test</p>
-                </div>
-              </div>
-              <p class="font-normal text-sm text-nowrap">22/07/2025, 10:30 AM</p>
-              <p class="font-normal text-sm">Lab Walk-in</p> -->
-              <!-- <div class="flex items-center gap-4">
-                <span class=" text-strong-red">
-                  Rejected
-                </span>
-              </div> -->
-              <!-- <div class="flex items-center gap-3"> -->
-
-                <!-- VIEW -->
-                <!-- <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
-                  visibility
-                </span>
-
-                <span class="text-strong-red text-sm font-medium">
-                  Rejected
-                </span>  -->
-
-              <!-- </div>
-            </div>
-          </div> -->
+          </div>
          
 
           <!--Appointment Request Detail Popup-->
@@ -866,10 +663,10 @@
                     class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">
                     Accept
                   </button>
-                  <button
+                  {% comment %} <button
                     class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer reject-button">
                     Reject
-                  </button>
+                  </button> {% endcomment %}
                 </div>
               </div>
 

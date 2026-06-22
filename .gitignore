@@ -25,3 +25,5 @@ build/
 # package files
 
 medocr_crm/
+views_copy.py
+appointment_copy.js
