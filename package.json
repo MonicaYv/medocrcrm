@@ -1,0 +1,24 @@
+{
+  "name": "medocrcrm_old",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MonicaYv/medocrcrm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MonicaYv/medocrcrm/issues"
+  },
+  "homepage": "https://github.com/MonicaYv/medocrcrm#readme",
+  "description": "",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "tailwindcss": "^4.3.0"
+  }
+}
