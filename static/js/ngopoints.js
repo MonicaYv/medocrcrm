@@ -258,9 +258,9 @@ function truncateDescriptions() {
 }
 
 // Call after coupons are loaded
-$(document).ready(function() {
-  truncateDescriptions();
-});
+// $(document).ready(function() {
+//   truncateDescriptions();
+// });
 
   // Listen for button click with data-tab="all-rewards"
   $('[data-tab="all-rewards"]').on('click', function () {

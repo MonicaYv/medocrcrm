@@ -30,3 +30,4 @@ urlpatterns = [
     path("pharmacy/order/<int:order_id>/", views.pharmacy_order_details, name="pharmacy_order_details"),
 
 ]
+

@@ -17,6 +17,7 @@ $(document).ready(function () {
     $(".tabs").show();
     $(".setting-header").show();
     $(".edit-toggle").show();
+    $('.tcBox').show();
   });
 
   // Form submit for edit details
@@ -180,6 +181,7 @@ $(".tab-btn").on("click", function () {
     $(".setting-header").hide(); // Hide the settings header
     $(".account-detail").hide();
     $(".tabs").hide();
+    $('.tcBox').hide();
     $(`.toggle-section[data-section="${target}"]`).removeClass("hidden");
   });
 
