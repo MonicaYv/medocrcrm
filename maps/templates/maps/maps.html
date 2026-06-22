@@ -105,8 +105,11 @@
                     data-state="{{ state }}"
                     data-address="{{ address }}"
                     data-pincode="{{ pincode }}">
+                    
                     <p class="text-xs">Current Location</p>
-                    <p class="font-semibold">{{ city }}, {{ state }}</p>
+                    <p class="font-semibold" id="location-text">
+                        Fetching location...
+                    </p>
                 </div>
                 <!-- Filter Dropdown -->
                 <div class="relative dropdown">

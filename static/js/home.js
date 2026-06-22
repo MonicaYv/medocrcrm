@@ -637,7 +637,10 @@ $(document).ready(function () {
             const state = components.state || "";
             const country = components.country || "";
 
-            $("#location-text").text(` ${city},  ${country}`);
+            const locationText = `${city}, ${country}`;
+
+            $("#location-text").text(locationText);
+            $("#user-location-text").text(locationText);
           } else {
             $("#location").text("Location not found.");
           }
@@ -1885,102 +1888,22 @@ $(document).ready(function () {
     });
 
 });
-    $(".accept-button").click(function () {
 
-    $(".enquiredDetail").addClass("hidden");
-
-    $(".acceptedDetail").removeClass("hidden");
-
-  });
-
-    $(".close-popup").click(function () {
-
-        $(".appointmentRequestDetail").addClass("hidden");
-
-        $("body").removeClass("overflow-hidden");
-    });
 
 });
-$(document).on("click", ".accept-button", function () {
-    toastr.success("Accepted Successfully");
-    $(".enquiredDetail").addClass("hidden");
-    $(".acceptedDetail").removeClass("hidden");
+// $(document).on("click", ".cancelAppointmentBtn", function () {
 
-    Swal.fire({
-        icon: "success",
-        title: "Appointment Accepted",
-        text: "Appointment accepted successfully",
-        showConfirmButton: false,
-        timer: 2000
-    });
+//     console.log("Final Cancel Clicked");
+//     toastr.success("Cancelled Successfully");
 
-});
-$(document).on("click", ".cancel-appointment", function () {
-    alert("Cancel Click Working");
-});
-$(document).on("click", ".complete-button", function () {
-    alert("Complete Working");
-});
+//     $(".cancelAppointmentPopup").addClass("hidden");
 
-$(document).on("click", ".cancel-appointment", function () {
-    alert("Cancel Working");
-});
-// Appointment Request Popup
+//     $(".acceptedDetail").addClass("hidden");
 
-$(document).on("click", ".accept-button", function () {
-
-    $(".enquiredDetail").addClass("hidden");
-    $(".acceptedDetail").removeClass("hidden");
-
-});
-
-// $(document).on("click", ".reject-button", function () {
-
-//     $(".appointmentRequestDetail").addClass("hidden");
+//     $(".cancelDetails").removeClass("hidden");
 
 // });
-$(document).on("click", ".reject-button", function () {
 
-    toastr.success("Cancelled Successfully");
-
-    $(".appointmentRequestDetail").addClass("hidden");
-
-});
-// Complete Appointment
-
-$(document).on("click", ".complete-btn", function () {
-    toastr.success("Completed Successfully");
-
-    console.log("Complete Button Clicked");
-
-    $(".acceptedDetail").addClass("hidden");
-
-    $(".completedDetail").removeClass("hidden");
-
-});
-
-
-// Cancel Appointment
-
-$(document).on("click", "[data-popup='cancelAppointmentPopup']", function () {
-
-    console.log("Cancel Appointment Clicked");
-
-    $(".cancelAppointmentPopup").removeClass("hidden");
-
-});
-$(document).on("click", ".cancelAppointmentBtn", function () {
-
-    console.log("Final Cancel Clicked");
-    toastr.success("Cancelled Successfully");
-
-    $(".cancelAppointmentPopup").addClass("hidden");
-
-    $(".acceptedDetail").addClass("hidden");
-
-    $(".cancelDetails").removeClass("hidden");
-
-});
 $(document).on("click", ".complete-appointment-btn", function () {
 
     const appointmentId = $(this).data("id");
@@ -2299,105 +2222,105 @@ $(document).on("click", ".place-bid-btn", function () {
 
 });
 
+// $(document).on("click", ".appointment-detail-btn", function () {
+
+//     const appointmentId = $(this).data("id");
+
+//     $.ajax({
+//         url: `/appointment/appointment-details/${appointmentId}/`,
+//         type: "GET",
+
+//         success: function (response) {
+
+//             if (!response.success) return;
+
+//             const a = response.appointment;
+
+//             $("#popup-patient-name").text(a.patient_name);
+//             $("#popup-gender").text(a.gender || "-");
+//             $("#popup-age").text(a.age || "-");
+//             $("#popup-phone").text(a.phone || "-");
+//             $("#popup-address").text(a.address || "-");
+
+//             $("#popup-visit-type").text(a.visit_type);
+//             $("#popup-date").text(a.appointment_date);
+
+//             $("#popup-medical-requirement").text(
+//                 a.medical_requirement
+//             );
+
+//             $("#popup-details").text(
+//                 a.details
+//             );
+
+//             $("#popup-order-id").text(
+//                 a.order_id
+//             );
+
+//             $("#popup-budget").text(
+//                 "₹" + a.budget
+//             );
+
+//             $(".appointmentRequestDetail")
+//               .attr("data-appointment-id", appointmentId)
+//               .removeClass("hidden")
+//               .addClass("flex");
+//         }
+//     });
+// });
+
+// $(document).on("click", ".hospital-accept-button", function () {
+
+//     const appointmentId = $(".appointmentRequestDetail")
+//         .attr("data-appointment-id");
+
+//     $.ajax({
+//         url: "/appointment/place-bid/",
+//         type: "POST",
+//         data: {
+//             appointment_id: appointmentId,
+//             csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr('content')
+//         },
+
+//         success: function (resp) {
+
+//             if (resp.success) {
+
+//                 toastr.success(
+//                     resp.message || "Bid placed successfully"
+//                 );
+
+//                 $(".appointmentRequestDetail")
+//                     .addClass("hidden")
+//                     .removeClass("flex");
+
+//                 location.reload();
+
+//             } else {
+
+//                 toastr.error(
+//                     resp.message || "Unable to place bid"
+//                 );
+//             }
+//         },
+
+//         error: function (xhr) {
+
+//             toastr.error(
+//                 xhr.responseJSON?.message ||
+//                 "Something went wrong"
+//             );
+//         }
+//     });
+
+// });
+
 $(document).on("click", ".appointment-detail-btn", function () {
 
     const appointmentId = $(this).data("id");
 
     $.ajax({
         url: `/appointment/appointment-details/${appointmentId}/`,
-        type: "GET",
-
-        success: function (response) {
-
-            if (!response.success) return;
-
-            const a = response.appointment;
-
-            $("#popup-patient-name").text(a.patient_name);
-            $("#popup-gender").text(a.gender || "-");
-            $("#popup-age").text(a.age || "-");
-            $("#popup-phone").text(a.phone || "-");
-            $("#popup-address").text(a.address || "-");
-
-            $("#popup-visit-type").text(a.visit_type);
-            $("#popup-date").text(a.appointment_date);
-
-            $("#popup-medical-requirement").text(
-                a.medical_requirement
-            );
-
-            $("#popup-details").text(
-                a.details
-            );
-
-            $("#popup-order-id").text(
-                a.order_id
-            );
-
-            $("#popup-budget").text(
-                "₹" + a.budget
-            );
-
-            $(".appointmentRequestDetail")
-              .attr("data-appointment-id", appointmentId)
-              .removeClass("hidden")
-              .addClass("flex");
-        }
-    });
-});
-
-$(document).on("click", ".hospital-accept-button", function () {
-
-    const appointmentId = $(".appointmentRequestDetail")
-        .attr("data-appointment-id");
-
-    $.ajax({
-        url: "/appointment/place-bid/",
-        type: "POST",
-        data: {
-            appointment_id: appointmentId,
-            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr('content')
-        },
-
-        success: function (resp) {
-
-            if (resp.success) {
-
-                toastr.success(
-                    resp.message || "Bid placed successfully"
-                );
-
-                $(".appointmentRequestDetail")
-                    .addClass("hidden")
-                    .removeClass("flex");
-
-                location.reload();
-
-            } else {
-
-                toastr.error(
-                    resp.message || "Unable to place bid"
-                );
-            }
-        },
-
-        error: function (xhr) {
-
-            toastr.error(
-                xhr.responseJSON?.message ||
-                "Something went wrong"
-            );
-        }
-    });
-
-});
-
-$(document).on("click", ".doctor-appointment-detail-btn", function () {
-
-    const appointmentId = $(this).data("id");
-
-    $.ajax({
-        url: `/appointment/doctor-appointment-details/${appointmentId}/`,
         type: "GET",
 
         success: function (response) {
@@ -2455,51 +2378,51 @@ $(document).on("click", ".doctor-appointment-detail-btn", function () {
 
 });
 
-$(document).on("click", ".doctor-place-bid-btn", function () {
+// $(document).on("click", ".place-bid-btn", function () {
 
-    const appointmentId = $(this).data("id");
+//     const appointmentId = $(this).data("id");
 
-    $.ajax({
-        url: "/appointment/doctor-place-bid/",
-        type: "POST",
+//     $.ajax({
+//         url: "/appointment/place-bid/",
+//         type: "POST",
 
-        data: {
-            appointment_id: appointmentId,
-            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr('content')
-        },
+//         data: {
+//             appointment_id: appointmentId,
+//             csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr('content')
+//         },
 
-        success: function (resp) {
+//         success: function (resp) {
 
-            if (resp.success) {
+//             if (resp.success) {
 
-                toastr.success(
-                    resp.message || "Bid placed successfully"
-                );
+//                 toastr.success(
+//                     resp.message || "Bid placed successfully"
+//                 );
 
-                setTimeout(function () {
-                    location.reload();
-                }, 1000);
+//                 setTimeout(function () {
+//                     location.reload();
+//                 }, 1000);
 
-            } else {
+//             } else {
 
-                toastr.error(
-                    resp.message || "Unable to place bid"
-                );
-            }
-        },
+//                 toastr.error(
+//                     resp.message || "Unable to place bid"
+//                 );
+//             }
+//         },
 
-        error: function (xhr) {
+//         error: function (xhr) {
 
-            toastr.error(
-                xhr.responseJSON?.message ||
-                "Something went wrong"
-            );
-        }
-    });
+//             toastr.error(
+//                 xhr.responseJSON?.message ||
+//                 "Something went wrong"
+//             );
+//         }
+//     });
 
-});
+// });
 
-$(document).on("click", ".doctor-accept-button", function () {
+$(document).on("click", ".accept-button", function () {
 
     const appointmentId = $(".appointmentRequestDetail")
         .attr("data-appointment-id");
@@ -2510,7 +2433,7 @@ $(document).on("click", ".doctor-accept-button", function () {
     }
 
     $.ajax({
-        url: "/appointment/doctor-place-bid/",
+        url: "/appointment/place-bid/",
         type: "POST",
 
         data: {
@@ -2554,65 +2477,6 @@ $(document).on("click", ".doctor-accept-button", function () {
             }
 
             toastr.error(message);
-        }
-    });
-
-});
-$(document).on("click",".view-appointment",function(){
-
-    const appointmentId = $(this).data("id");
-
-    console.log("Viewing:",appointmentId);
-
-});
-$(document).on("click",".accept-button",function(){
-
-    toastr.success("Accepted Successfully");
-
-});
-$(document).on("click",".reject-button",function(){
-
-    toastr.success("Cancelled Successfully");
-
-});
-$(document).on("click",".accept-button",function(){
-
-    const id = $(this).data("id");
-
-    $.ajax({
-        url:"/dashboard/appointment/accept/",
-        type:"POST",
-        data:{
-            id:id,
-            csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val()
-        },
-
-        success:function(resp){
-
-            toastr.success("Accepted Successfully");
-
-            location.reload();
-        }
-    });
-
-});
-$(document).on("click",".reject-button",function(){
-
-    const id = $(this).data("id");
-
-    $.ajax({
-        url:"/dashboard/appointment/reject/",
-        type:"POST",
-        data:{
-            id:id,
-            csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val()
-        },
-
-        success:function(resp){
-
-            toastr.success("Cancelled Successfully");
-
-            location.reload();
         }
     });
 
