@@ -42,8 +42,9 @@ from appointments.models import WalletTransaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse  
-from settings.models import SellerSubscription, SellerType  
-
+from settings.models import SellerSubscription, SellerType 
+from registration.models import ContactPerson
+from django.db.models import Count
 def build_media_url(path):
     if not path:
         return ""
@@ -258,11 +259,126 @@ def dashboard_home(request):
         # ================= LAB =================
         elif user_type == 'lab':
             lab_profile = LabProfile.objects.get(user=user)
+            today = timezone.now().date()
+
+            today_appointments = LabAppointments.objects.filter(
+                accepted_lab=lab_profile,
+                preferred_date_time__date=today
+            )
+
+            confirmed_count = today_appointments.filter(
+               status="Accepted" 
+            ).count()
+
+            pending_count = today_appointments.filter(
+                status="Pending" 
+            ).count()
+
+            total_appointments = today_appointments.count()
+
+            contact_person = ContactPerson.objects.filter(
+                profile_type="lab",
+                profile=user
+            ).first()
+
+            most_requested = (
+                LabAppointments.objects
+                .filter(accepted_lab=lab_profile)
+                .values("test_type__name")
+                .annotate(total=Count("id"))
+                .order_by("-total")
+                .first()
+            )
+
+            most_requested_test = (
+                most_requested["test_type__name"]
+                if most_requested else "N/A"
+            )
+
+            most_requested_count = (
+               most_requested["total"]
+               if most_requested else 0
+            )
+            print("LAB ID =", lab_profile.id)
+
+            all_appts = LabAppointments.objects.filter(
+                accepted_lab=lab_profile
+            )
+
+            print("TOTAL LAB APPOINTMENTS =", all_appts.count())
+
+            accepted_appts = all_appts.filter(
+                status="Accepted"
+            )
+ 
+            print("ACCEPTED =", accepted_appts.count())
+
+            # scheduled_appointments = LabAppointments.objects.all()[:3]
+            # scheduled_appointments = LabAppointments.objects.filter(
+            #     accepted_lab=lab_profile,
+            #     status="Accepted"
+            # ).order_by("preferred_date_time")[:3]
+            # scheduled_appointments = LabAppointments.objects.filter(
+            #    accepted_lab=lab_profile
+            # ).order_by("preferred_date_time")[:3]
+            scheduled_appointments = LabAppointments.objects.filter(
+                accepted_lab=lab_profile
+            ).exclude(
+                status="Cancelled"
+            ).order_by("preferred_date_time")[:3]
+            print("LAB ID =", lab_profile.id)
+            print("SCHEDULED =", scheduled_appointments.count())
+
+            # scheduled_appointments = LabAppointments.objects.filter(
+            #     accepted_lab=lab_profile,
+            #     status="Accepted"
+            # ).select_related(
+            #   "test_type",
+            #    "user"
+            # ).order_by("preferred_date_time")[:3]
+
+            # appointment_requests = LabAppointments.objects.filter(
+            #     status="Pending"
+            # ).order_by("-created_at")[:5]
+            # appointment_requests = LabAppointments.objects.filter(
+            #    status="Pending",
+               
+            # ).order_by("-created_at")[:5]
+            appointment_requests = LabAppointments.objects.filter(
+                status="Pending"
+            ).order_by("-created_at")[:5]
+            print("\n===== APPOINTMENT REQUESTS =====")
+
+            for a in appointment_requests:
+                print(
+                    a.id,
+                    a.user_id,
+                    a.user.userprofile.first_name,
+                    a.user.userprofile.profile_photo_path
+                )  
+            print("\n===== SCHEDULED =====")
+
+            for appointment in scheduled_appointments:
+                print(
+                    appointment.id,
+                    appointment.user.id,
+                    appointment.user.userprofile.first_name,
+                    appointment.user.userprofile.profile_photo_path
+                )
 
             context.update({
                 'lab_profile': lab_profile,
+                'today_appointments': total_appointments,
+                'confirmed_count': confirmed_count,
+                'pending_count': pending_count,
+                'contact_person': contact_person,
                 'user_display_name': lab_profile.lab_name,
+                'most_requested_test': most_requested_test,
+                'most_requested_count': most_requested_count,
+                'scheduled_appointments': scheduled_appointments,
+                'appointment_requests': appointment_requests,
                 'quotes_given': LabBidding.objects.filter(lab=lab_profile).count(),
+                
                 'active_bids': LabBidding.objects.filter(
                     lab=lab_profile,
                     bid_status__in=[

@@ -1850,14 +1850,41 @@ $(document).ready(function () {
 });
 $(document).ready(function () {
 
-    $(".view-appointment").click(function (e) {
+    // $(".view-appointment").click(function (e) {
 
-        e.stopPropagation();
+    //     e.stopPropagation();
 
-        $(".appointmentRequestDetail").removeClass("hidden");
+    //     $(".appointmentRequestDetail").removeClass("hidden");
 
-        $("body").addClass("overflow-hidden");
+    //     $("body").addClass("overflow-hidden");
+    // });
+    $(document).on("click",".view-appointment",function(){
+
+    const appointmentId = $(this).data("id");
+
+    $.ajax({
+        url: `/appointment/appointment-details/${appointmentId}/`,
+        type: "GET",
+
+        success:function(response){
+
+            const a = response.appointment;
+
+            $("#popup-name").text(a.patient_name);
+            $("#popup-gender").text(a.gender);
+            $("#popup-age").text(a.age);
+            $("#popup-phone").text(a.phone);
+            $("#popup-address").text(a.address);
+            $("#popup-date").text(a.appointment_date);
+            $("#popup-service").text(a.visit_type);
+
+            $(".appointmentRequestDetail")
+                .removeClass("hidden");
+
+        }
     });
+
+});
     $(".accept-button").click(function () {
 
     $(".enquiredDetail").addClass("hidden");
@@ -1875,7 +1902,7 @@ $(document).ready(function () {
 
 });
 $(document).on("click", ".accept-button", function () {
-
+    toastr.success("Accepted Successfully");
     $(".enquiredDetail").addClass("hidden");
     $(".acceptedDetail").removeClass("hidden");
 
@@ -1907,7 +1934,14 @@ $(document).on("click", ".accept-button", function () {
 
 });
 
+// $(document).on("click", ".reject-button", function () {
+
+//     $(".appointmentRequestDetail").addClass("hidden");
+
+// });
 $(document).on("click", ".reject-button", function () {
+
+    toastr.success("Cancelled Successfully");
 
     $(".appointmentRequestDetail").addClass("hidden");
 
@@ -1915,6 +1949,7 @@ $(document).on("click", ".reject-button", function () {
 // Complete Appointment
 
 $(document).on("click", ".complete-btn", function () {
+    toastr.success("Completed Successfully");
 
     console.log("Complete Button Clicked");
 
@@ -1937,6 +1972,7 @@ $(document).on("click", "[data-popup='cancelAppointmentPopup']", function () {
 $(document).on("click", ".cancelAppointmentBtn", function () {
 
     console.log("Final Cancel Clicked");
+    toastr.success("Cancelled Successfully");
 
     $(".cancelAppointmentPopup").addClass("hidden");
 
@@ -2518,6 +2554,65 @@ $(document).on("click", ".doctor-accept-button", function () {
             }
 
             toastr.error(message);
+        }
+    });
+
+});
+$(document).on("click",".view-appointment",function(){
+
+    const appointmentId = $(this).data("id");
+
+    console.log("Viewing:",appointmentId);
+
+});
+$(document).on("click",".accept-button",function(){
+
+    toastr.success("Accepted Successfully");
+
+});
+$(document).on("click",".reject-button",function(){
+
+    toastr.success("Cancelled Successfully");
+
+});
+$(document).on("click",".accept-button",function(){
+
+    const id = $(this).data("id");
+
+    $.ajax({
+        url:"/dashboard/appointment/accept/",
+        type:"POST",
+        data:{
+            id:id,
+            csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val()
+        },
+
+        success:function(resp){
+
+            toastr.success("Accepted Successfully");
+
+            location.reload();
+        }
+    });
+
+});
+$(document).on("click",".reject-button",function(){
+
+    const id = $(this).data("id");
+
+    $.ajax({
+        url:"/dashboard/appointment/reject/",
+        type:"POST",
+        data:{
+            id:id,
+            csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val()
+        },
+
+        success:function(resp){
+
+            toastr.success("Cancelled Successfully");
+
+            location.reload();
         }
     });
 

@@ -23,8 +23,5 @@ yarn-error.log*
 dist/
 build/
 # package files
-package.json
-package-lock.json
-tailwind.config.js
 
 medocr_crm/

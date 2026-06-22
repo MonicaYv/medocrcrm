@@ -1,4 +1,5 @@
 {% extends "dashboard/layout.html" %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
@@ -63,7 +64,7 @@
                         {{ lab_profile.pincode|default:"" }}
                       </p>
                       <div class="bg-pale-azure rounded-lg p-2 flex items-center justify-center">
-                        <span class="font-semibold text-xs text-dodger-blue">Active Bids: 7</span>
+                        <span class="font-semibold text-xs text-dodger-blue">Active Bids: {{ active_bids }}</span>
                       </div>
                     </div>
                   </div>
@@ -76,9 +77,22 @@
                 <img src="/static/images/admin-profile.svg" alt="">
               </div>
               <div class="flex flex-col items-center gap-2">
-                <p class="font-semibold text-sm">Jhon Doe</p>
-                <p class="font-semibold text-sm text-dodger-blue">+91 7763847590</p>
-                <p class="font-semibold text-sm">Designation: Receptionist</p>
+                <!-- <p class="font-semibold text-sm">Jhon Doe</p> -->
+                <p class="font-semibold text-sm">
+                  {{ contact_person.name|default:"N/A" }}
+                </p>
+
+                <p class="font-semibold text-sm text-dodger-blue">
+                    {{ contact_person.phone_country_code }}
+                    {{ contact_person.phone_number }}
+                </p>
+
+                <p class="font-semibold text-sm">
+                  Designation:
+                  {{ contact_person.role|default:"N/A" }}
+                </p>
+                <!-- <p class="font-semibold text-sm text-dodger-blue">+91 7763847590</p>
+                <p class="font-semibold text-sm">Designation: Receptionist</p> -->
               </div>
             </div>
           </div>
@@ -135,8 +149,11 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Total Appointments Today</p>
-                  <p class="font-semibold text-2xl">12</p>
-                  <p class="text-green font-normal text-xs">7 Confirmed,5 Pending</p>
+                  <!-- <p class="font-semibold text-2xl">12</p> -->
+                  <p class="font-semibold text-2xl">
+                      {{ today_appointments }}
+                  </p>
+                  <p class="text-green font-normal text-xs">{{ confirmed_count }} Confirmed,{{ pending_count }} Pending</p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                   <img src="/static/images/book.svg" alt="">
@@ -146,7 +163,10 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Total Technician Registered</p>
-                  <p class="font-semibold text-2xl">24</p>
+                  <!-- <p class="font-semibold text-2xl">24</p> -->
+                  <p class="font-semibold text-2xl">
+                      {{ total_technicians }}
+                  </p>
                   <p class="font-normal text-xs"><span class="text-dodger-blue">Day Shift: 16</span> | <span
                       class="text-electric-indigo">Night Shift: 8</span> </p>
                 </div>
@@ -158,8 +178,14 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Most Requested Test</p>
-                  <p class="font-semibold text-2xl">20</p>
-                  <p class="text-nautical-blue font-normal text-xs">Blood Test, Endoscopy</p>
+                  <!-- <p class="font-semibold text-2xl">20</p> -->
+                  <p class="font-semibold text-2xl">
+                    {{ most_requested_count }}
+                  </p>
+                  <!-- <p class="text-nautical-blue font-normal text-xs"></p> -->
+                  <p class="text-nautical-blue font-normal text-xs">
+                      {{ most_requested_test }}
+                  </p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                   <img src="/static/images/user-group.svg" alt="">
@@ -169,7 +195,7 @@
           </div>
 
           <!--Scheduled Appointments-->
-          <div class="pt-5 flex flex-col ml-3">
+          <!-- <div class="pt-5 flex flex-col ml-3">
             <div class="flex justify-between items-center">
               <p class="font-semibold text-lg">Scheduled Appointments</p>
               <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
@@ -217,14 +243,248 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!--Appointment Requests-->
+          </div> -->
           <div class="pt-5 flex flex-col ml-3">
+
             <div class="flex justify-between items-center">
-              <p class="font-semibold text-lg">Appointment Request</p>
+              <p class="font-semibold text-lg">Scheduled Appointments</p>
               <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
             </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 pt-4 gap-2">
+            
+
+          {% for appointment in scheduled_appointments %}
+
+          <!-- <div class="border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4"> -->
+          <div class="border border-snow rounded-xl bg-white shadow-sm p-3 flex items-center gap-3">
+            <div>
+              <!-- <img src="/static/images/patient-1.svg" alt="Patient Profile"> -->
+               <!-- {% if forloop.counter == 1 %}
+               <img src="/static/images/patient-4.svg"
+                  class="w-20 h-20 rounded-lg object-cover">
+
+               {% elif forloop.counter == 2 %}
+               <img src="/static/images/patient-7.svg"
+                    class="w-20 h-20 rounded-lg object-cover">
+
+               {% else %}
+               <img src="/static/images/admin-profile.svg"
+                  class="w-20 h-20 rounded-lg object-cover">
+               {% endif %} -->
+               {% if appointment.user.userprofile.profile_photo_path %}
+                <img
+              
+                  src="/media/{{ appointment.user.userprofile.profile_photo_path }}"
+                  onerror="this.onerror=null;this.src='/static/images/patient-4.svg';"
+                  class="w-20 h-20 rounded-lg object-cover">
+                {% else %}
+                <img
+                  src="/static/images/patient-4.svg"
+                  class="w-20 h-20 rounded-lg object-cover">
+                {% endif %}
+            </div>
+
+            <!-- <div class="flex flex-col gap-2"> -->
+
+              <!-- <div class="w-[110px] h-[30px] rounded-lg p-2 bg-pale-azure text-dodger-blue font-semibold text-xs"> -->
+                   <!-- {% if appointment.service_type == "Home Collection" %}
+
+                   <div class="px-2 py-1 rounded bg-orange-100 text-orange-500 text-xs font-semibold inline-block">
+
+                   {% else %}
+
+                   <div class="px-2 py-1 rounded bg-blue-100 text-blue-500 text-xs font-semibold inline-block">
+
+                   {% endif %}
+
+                   {{ appointment.service_type }}
+
+                   </div>
+                <p> -->
+                    <!-- {% if appointment.collection_type %}
+                      {{ appointment.collection_type }}
+                    {% else %}
+                      Appointment
+                   {% endif %} -->
+                    <!-- {% if appointment.service_type %}
+                      {{ appointment.service_type }}
+                    {% else %}
+                      Lab Walk-in
+                    {% endif %}
+                </p>
+               </div> -->
+               <div class="flex flex-col gap-2">
+
+                <!-- {% if appointment.service_type == "Home Collection" %} -->
+                
+                <!-- <div class="px-2 py-1 rounded bg-orange-100 text-orange-500 text-[10px] font-semibold"> -->
+                <!-- <div class="inline-block w-fit px-2 py-1 rounded bg-orange-100 text-orange-500 text-[10px] font-semibold">
+                  Home Collection
+                </div>
+
+                {% else %}
+                <div class="inline-block w-fit px-2 py-1 rounded bg-blue-100 text-blue-500 text-[10px] font-semibold">
+                  Lab Walk-in
+                </div>
+  
+                {% endif %} -->
+                <div class="inline-block w-fit px-2 py-1 rounded bg-blue-100 text-blue-500 text-[10px] font-semibold">
+                    {{ appointment.service_type }} 
+                </div>
+                <!-- <p class="font-semibold text-xs">
+                  Pt. {{ appointment.user.first_name }}
+                  {{ appointment.user.last_name }}
+                </p> -->
+                <p class="font-semibold text-xs">
+                  Pt. {{ appointment.user.userprofile.first_name }}
+                  {{ appointment.user.userprofile.last_name }}
+                </p>
+
+                  <p class="text-green-500 text-xs">
+                    {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
+                  </p>
+
+                  <p class="text-xs font-semibold">
+                    To be attended by Technician
+                  </p>
+
+                </div>
+         </div>
+
+      {% empty %}
+
+      <div class="col-span-3 text-center py-6">
+        No Scheduled Appointments Found
+      </div>
+
+     {% endfor %}
+
+     </div>
+
+           
+
+
+          <!--Appointment Requests-->
+          <div class="mt-4">
+          <div class="grid grid-cols-4 items-center mb-4">
+              <p class="font-semibold text-lg">Appointment Request</p>
+              <a href="#" class="text-dodger-blue text-sm">View all</a>
+          </div>
+          {% for appointment in appointment_requests %}
+          <!-- <p class="font-semibold text-lg">Appointment Request</p> -->
+            <div
+              class="bg-white shadow-md w-full mt-4 border-snow border rounded-lg p-3 flex justify-between items-center hover:bg-pale-azure hover:shadow-lg">
+
+    <div class="flex items-center gap-2">
+        <!-- <img src="/static/images/patient-4.svg" alt="Patient Profile"> -->
+        <!-- <img src="/static/images/patient-4.svg"
+            class="w-10 h-10 rounded-full"> -->
+            {% if appointment.user.userprofile.profile_photo_path %}
+            <img
+            src="/media/{{ appointment.user.userprofile.profile_photo_path }}"
+            onerror="this.src='/static/images/patient-4.svg'"
+            class="w-20 h-20 rounded-lg object-cover">
+            {% else %}
+            <img
+            src="/static/images/patient-4.svg"
+            class="w-20 h-20 rounded-lg object-cover">
+            {% endif %}
+
+        {{ appointment.user.id }}
+
+        <div class="flex flex-col gap-1">
+            <!-- <p class="font-semibold text-sm">
+                Appointment #{{ appointment.id }}
+            </p>
+
+            <p class="font-normal text-xs text-spanish-gray">
+                {{ appointment.test_type.name }}
+            </p> -->
+            <p class="font-semibold text-sm">
+              {{ appointment.user.userprofile.first_name }}
+              {{ appointment.user.userprofile.last_name }}
+            </p>
+
+            <p class="font-normal text-sm text-green">
+              {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
+            </p>
+
+            
+              <!-- To be attended by Technician -->
+              <p class="font-normal text-xs text-spanish-gray">
+                  {{ appointment.test_type.name }}
+              </p>
+            
+        </div>
+    </div>
+
+    
+
+    <p class="font-normal text-sm">
+        {{ appointment.service_type }}
+    </p>
+
+    <div class="flex items-center gap-2">
+
+        <!-- <span class="material-symbols-outlined text-gray-500">
+            visibility
+        </span> -->
+        <span
+        class="material-symbols-outlined appointment-detail-btn"
+        data-id="{{ appointment.id }}">
+        visibility
+        </span>
+
+        {% if appointment.status == "Pending" %}
+            <!-- <span class="material-symbols-outlined text-dodger-blue">
+                check_circle
+            </span>
+
+            <span class="material-symbols-outlined text-strong-red">
+                cancel
+            </span> -->
+            <span
+            class="material-symbols-outlined text-dodger-blue cursor-pointer accept-button"
+            data-id="{{ appointment.id }}">
+            check_circle
+            </span>
+
+            <span
+            class="material-symbols-outlined text-strong-red cursor-pointer reject-button"
+            data-id="{{ appointment.id }}">
+            cancel
+            </span>
+
+        {% elif appointment.status == "Accepted" %}
+            <span class="text-dodger-blue">
+                Accepted
+            </span>
+
+        <!-- {% elif appointment.status == "Rejected" %} -->
+        {% elif appointment.status == "Cancelled" %}
+            <span class="text-strong-red">
+                Rejected
+            </span>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% empty %}
+
+<div class="text-center py-5">
+    No Appointment Requests Found
+</div>
+
+{% endfor %}
+
+          <!-- <div class="pt-5 flex flex-col ml-3">
+            <div class="grid grid-cols-4 items-center">
+              <p class="font-semibold text-lg">Appointment Request</p>
+              <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
+            </div> -->
             <!-- <div
               class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg">
               <div class="flex items-center gap-2">
@@ -247,11 +507,11 @@
                 <span class="text-strong-red hidden rejected">Rejected</span>
               </div>
             </div> -->
-            <div
+            <!-- <div
               class="bg-white shadow-sm border border-snow rounded-xl px-4 py-3 mt-4 flex items-center justify-between hover:bg-pale-azure transition-all duration-200">
 
-              <!-- PATIENT -->
-              <div class="flex items-center gap-3 w-[250px]">
+              <! PATIENT -->
+              <!-- <div class="flex items-center gap-3 w-[250px]">
 
                 <img src="/static/images/patient-4.svg"
                   alt="Patient Profile"
@@ -261,43 +521,43 @@
                   <p class="font-semibold text-sm">Pt. Dolly Paris</p>
                   <p class="text-xs text-spanish-gray">RT-PCR</p>
                 </div>
-            </div>
+            </div> -->
 
           <!-- DATE -->
-    <div class="w-[220px]">
+    <!-- <div class="w-[220px]">
         <p class="text-sm text-gray-700">
             22/07/2025, 12:30 PM
         </p>
-    </div>
+    </div> -->
 
     <!-- TYPE -->
-    <div class="w-[180px]">
+    <!-- <div class="w-[180px]">
         <p class="text-sm text-gray-700">
             Lab Walk-in
         </p>
-    </div>
+    </div> -->
 
     <!-- ACTIONS -->
-    <div class="flex items-center gap-3">
+    <!-- <div class="flex items-center gap-3"> -->
 
         <!-- VIEW -->
-        <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
+        <!-- <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
             visibility
-        </span>
+        </span> -->
 
         <!-- ACCEPT -->
-        <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
+        <!-- <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
             check_circle
-        </span>
+        </span> -->
 
         <!-- REJECT -->
-        <span class="material-symbols-outlined text-strong-red cursor-pointer reject-icon">
+        <!-- <span class="material-symbols-outlined text-strong-red cursor-pointer reject-icon">
             cancel
         </span>
 
     </div>
 
-</div>
+</div> -->
             
 
             <!-- <div
@@ -315,11 +575,11 @@
                 <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
                   check_circle
                 </span> -->
-                <div
-                 class="bg-white shadow-sm border border-snow rounded-xl px-4 py-3 mt-4 flex items-center justify-between hover:bg-pale-azure transition-all duration-200">
+                <!-- <div
+                 class="bg-white shadow-sm border border-snow rounded-xl px-4 py-3 mt-4 flex items-center justify-between hover:bg-pale-azure transition-all duration-200"> -->
 
                   <!-- PATIENT -->
-                  <div class="flex items-center gap-3 w-[250px]">
+                  <!-- <div class="flex items-center gap-3 w-[250px]">
 
                     <img src="/static/images/patient-5.svg"
                       alt="Patient Profile"
@@ -329,37 +589,37 @@
                       <p class="font-semibold text-sm">Pt. Steve Lamark</p>
                       <p class="text-xs text-spanish-gray">Blood Test</p>
                     </div>
-                </div>
+                </div> -->
 
         <!-- DATE -->
-    <div class="w-[220px]">
+    <!-- <div class="w-[220px]">
         <p class="text-sm text-gray-700">
             22/07/2025, 01:30 PM
         </p>
-    </div>
+    </div> -->
 
     <!-- TYPE -->
-    <div class="w-[180px]">
+    <!-- <div class="w-[180px]">
         <p class="text-sm text-gray-700">
             Home Collection
         </p>
     </div>
 
     
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3"> -->
 
                     <!-- VIEW -->
-                    <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
+                    <!-- <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
                       visibility
-                    </span>
+                    </span> -->
 
                     <!-- ACCEPT -->
-                    <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
+                    <!-- <span class="material-symbols-outlined text-dodger-blue cursor-pointer accept-icon">
                       check_circle
-                    </span>
+                    </span> -->
 
                     <!-- REJECT -->
-                    <span class="material-symbols-outlined text-strong-red reject-icon">
+                    <!-- <span class="material-symbols-outlined text-strong-red reject-icon">
                       cancel
                      </span>
 
@@ -367,9 +627,9 @@
                 
                 
               </div>
-            </div>
+            </div> -->
 
-            <div
+            <!-- <div
               class="bg-white shadow-md w-full  mt-4 border-snow border rounded-lg p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-60 items-center cursor-pointer hover:bg-pale-azure hover:shadow-lg ">
               <div class="flex items-center gap-2">
                 <img src="/static/images/patient-4.svg" alt="Patient Profile">
@@ -379,24 +639,24 @@
                 </div>
               </div>
               <p class="font-normal text-sm text-nowrap">22/07/2025, 10:30 AM</p>
-              <p class="font-normal text-sm text-nowrap">Home Collection</p>
+              <p class="font-normal text-sm text-nowrap">Home Collection</p> -->
               <!-- <div class="flex items-center gap-4">
                 <span class=" text-dodger-blue">
                   Accepted
                 </span>
               </div> -->
-              <div class="flex items-center gap-3">
+              <!-- <div class="flex items-center gap-3"> -->
 
                 <!-- VIEW -->
-                <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
+                <!-- <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
                   visibility
                 </span>
 
                 <span class="text-dodger-blue text-sm font-medium">
                   Accepted
-                </span>
+                </span> -->
 
-              </div>
+              <!-- </div>
             </div>
 
             <div
@@ -409,26 +669,27 @@
                 </div>
               </div>
               <p class="font-normal text-sm text-nowrap">22/07/2025, 10:30 AM</p>
-              <p class="font-normal text-sm">Lab Walk-in</p>
+              <p class="font-normal text-sm">Lab Walk-in</p> -->
               <!-- <div class="flex items-center gap-4">
                 <span class=" text-strong-red">
                   Rejected
                 </span>
               </div> -->
-              <div class="flex items-center gap-3">
+              <!-- <div class="flex items-center gap-3"> -->
 
                 <!-- VIEW -->
-                <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
+                <!-- <span class="material-symbols-outlined text-gray-500 cursor-pointer view-appointment">
                   visibility
                 </span>
 
                 <span class="text-strong-red text-sm font-medium">
                   Rejected
-                </span>
+                </span>  -->
 
-              </div>
+              <!-- </div>
             </div>
-          </div>
+          </div> -->
+         
 
           <!--Appointment Request Detail Popup-->
           <div
@@ -449,7 +710,8 @@
               <div class="mt-4 bg-pale-azure p-4 w-[648px] h-[196px] flex items-center gap-4">
                 <div class="flex flex-col ">
                   <img src="/static/images/patient-7.svg" alt="">
-                  <p class="font-normal text-sm text-center pt-4">Dolly Paris</p>
+                  <!-- <p class="font-normal text-sm text-center pt-4">Dolly Paris</p> -->
+                  <p id="popup-name"></p>
                 </div>
                 <div class="flex flex-col gap-4 w-[180px]">
                   <div class="flex  gap-2">
@@ -460,7 +722,8 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Gender</p>
-                      <p class="font-normal text-sm">Female</p>
+                      <!-- <p class="font-normal text-sm">Female</p> -->
+                      <p id="popup-gender"></p>
                     </div>
                   </div>
 
@@ -472,7 +735,8 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Age</p>
-                      <p class="font-normal text-sm">25</p>
+                      <!-- <p class="font-normal text-sm">25</p> -->
+                      <p id="popup-age"></p>
                     </div>
                   </div>
 
@@ -482,11 +746,13 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Visit Type</p>
-                      <p class="font-normal text-sm">Lab Walk-in</p>
+                      <!-- <p class="font-normal text-sm">Lab Walk-in</p> -->
+                      <p id="popup-service"></p>
                     </div>
                   </div>
                 </div>
-                <div class="flex flex-col gap-4">
+                <!-- <div class="flex flex-col gap-4"> -->
+                <div class="grid grid-cols-3 gap-4">
                   <div class="flex  gap-2">
                     <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
                       <span class="material-symbols-outlined text-dodger-blue !text-lg">
@@ -495,7 +761,8 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
-                      <p class="font-normal text-sm">+91 7737533456</p>
+                      <!-- <p class="font-normal text-sm">+91 7737533456</p> -->
+                      <p id="popup-phone"></p>
                     </div>
                   </div>
 
@@ -507,7 +774,8 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Appointment date</p>
-                      <p class="font-normal text-sm">22/07/2025,12:30 PM</p>
+                      <!-- <p class="font-normal text-sm">22/07/2025,12:30 PM</p> -->
+                      <p id="popup-date"></p>
                     </div>
                   </div>
 
@@ -517,7 +785,8 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <p class="font-normal text-xs text-spanish-gray">Address</p>
-                      <p class="font-normal text-sm">123 maple los Angeles, CA 90001 usa</p>
+                      <!-- <p class="font-normal text-sm">123 maple los Angeles, CA 90001 usa</p> -->
+                      <p id="popup-address"></p>
                     </div>
                   </div>
                 </div>
