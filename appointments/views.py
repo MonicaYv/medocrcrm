@@ -15,6 +15,7 @@ from .models import (
     DoctorAppointment,
     LabAppointments,
     HospitalAppointments,
+    AppointmentStatus,
 )
 from services.models import HospitalBidding
 from registration.models import HospitalProfile
@@ -90,6 +91,8 @@ def ajax_appointments(request):
         status = "cancelled"
 
     if user_type == "lab":
+        lab_profile = LabProfile.objects.filter(user=user).first()
+
         qs = LabAppointments.objects.select_related(
             "user__userprofile",
             "test_package",
@@ -97,7 +100,14 @@ def ajax_appointments(request):
             "test_description",
             "address",
             "user",
+        ).filter(
+            status=AppointmentStatus.PENDING
         )
+
+        if lab_profile:
+            qs = qs.exclude(
+                lab_bids__lab=lab_profile
+            ).distinct()
 
     elif user_type == "doctor":
         doctor_profile = DoctorProfile.objects.filter(user=user).first()
@@ -110,6 +120,7 @@ def ajax_appointments(request):
             qs = qs.exclude(bids__doctor=doctor_profile).distinct()
 
     elif user_type == "hospital":
+        hospital_profile = HospitalProfile.objects.filter(user=user).first()
         qs = HospitalAppointments.objects.select_related(
             "user__userprofile",
             "service_type",
@@ -118,7 +129,12 @@ def ajax_appointments(request):
             "bed_room",
             "address",
             "user",
-        )
+        ).filter(status=HospitalAppointmentStatus.PENDING)
+
+        if hospital_profile:
+            qs = qs.exclude(
+                bids__hospital=hospital_profile
+            ).distinct()
     else:
         qs = HospitalAppointments.objects.none()
 
@@ -308,7 +324,7 @@ def place_bid(request):
                 "message": "No matching rate package found for this appointment.",
                 "missing_ratecard": {
                     "package_id": appointment.test_package_id,
-                    "package_name": appointment.test_package.name if appointment.test_package else None,
+                    "package_name": appointment.test_package.packages if appointment.test_package else None,
                     "category_id": appointment.test_type_id,
                     "category_name": appointment.test_type.name if appointment.test_type else None,
                 },

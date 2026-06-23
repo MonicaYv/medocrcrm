@@ -248,7 +248,7 @@
 
             <div class="flex justify-between items-center">
               <p class="font-semibold text-lg">Scheduled Appointments</p>
-              <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
+              <a href="{% url 'history' %}" class="text-dodger-blue text-sm font-normal">View all</a>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 pt-4 gap-2">
@@ -374,7 +374,7 @@
                       Appointment Requests
                   </h2>
 
-                  <a href="#" class="text-dodger-blue text-sm font-medium">
+                  <a href="{% url 'appointment' %}" class="text-dodger-blue text-sm font-medium">
                       View All
                   </a>
               </div>
@@ -498,7 +498,7 @@
                   <button class="cursor-pointer">
                     <span class="material-symbols-outlined !text-xl">share</span>
                   </button>
-                  <button class="close-popup cursor-pointer">
+                  <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail">
                     <span class="material-symbols-outlined !text-2xl">close</span>
                   </button>
                 </div>

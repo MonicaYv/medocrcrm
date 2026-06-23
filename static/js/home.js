@@ -2424,8 +2424,16 @@ $(document).on("click", ".appointment-detail-btn", function () {
 
 $(document).on("click", ".accept-button", function () {
 
-    const appointmentId = $(".appointmentRequestDetail")
-        .attr("data-appointment-id");
+    // First try button's own data-id
+    let appointmentId = $(this).data("id");
+
+    // If clicked inside popup, fallback to popup attribute
+    if (!appointmentId) {
+        appointmentId = $(".appointmentRequestDetail")
+            .attr("data-appointment-id");
+    }
+
+    console.log("Appointment ID:", appointmentId);
 
     if (!appointmentId) {
         toastr.error("Appointment ID not found");
@@ -2435,15 +2443,14 @@ $(document).on("click", ".accept-button", function () {
     $.ajax({
         url: "/appointment/place-bid/",
         type: "POST",
-
         data: {
             appointment_id: appointmentId,
             csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
         },
 
-        success: function (resp) {
+        success: function(resp){
 
-            if (resp.success) {
+            if(resp.success){
 
                 toastr.success(
                     resp.message || "Bid placed successfully"
@@ -2453,9 +2460,9 @@ $(document).on("click", ".accept-button", function () {
                     .addClass("hidden")
                     .removeClass("flex");
 
-                setTimeout(function () {
+                setTimeout(function(){
                     location.reload();
-                }, 1000);
+                },1000);
 
             } else {
 
@@ -2463,20 +2470,6 @@ $(document).on("click", ".accept-button", function () {
                     resp.message || "Unable to place bid"
                 );
             }
-        },
-
-        error: function (xhr) {
-
-            let message = "Something went wrong";
-
-            if (
-                xhr.responseJSON &&
-                xhr.responseJSON.message
-            ) {
-                message = xhr.responseJSON.message;
-            }
-
-            toastr.error(message);
         }
     });
 
