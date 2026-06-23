@@ -144,7 +144,7 @@
                             </p>
                             <!-- <p class="text-[13px] text-sea-green-dark1 text-center">~&#8377;600.00</p> -->
                             <p class="text-[13px] text-sea-green-dark1 text-center">
-                                ~₹{{ appointment.accepted_total_amount|default:appointment.budget }}
+                               ~₹{% if appointment.accepted_total_amount %}{{ appointment.accepted_total_amount }}{% else %}{{ appointment.budget }}{% endif %}
                             </p>
                         </div>
                     </div>
@@ -154,7 +154,7 @@
                         <p class="font-bold text-[13px] text-deep-red">Estimated Paybale Amount</p>
                         <!-- <p class="font-bold text-[13px] text-sea-green-dark1">~&#8377;600.00</p> -->
                         <p class="font-bold text-[13px] text-sea-green-dark1">
-                            ~₹{{ appointment.accepted_total_amount|default:appointment.budget }}
+                           ~₹{% if appointment.accepted_total_amount %}{{ appointment.accepted_total_amount }}{% else %}{{ appointment.budget }}{% endif %}
                         </p>
                     </div>
 

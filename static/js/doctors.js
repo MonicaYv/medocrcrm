@@ -229,9 +229,7 @@ $(document).ready(function () {
  $(".popup-btn").on("click", function () {
   let popupId = $(this).data("popup");
 
-  // if (popupId === "addDoctorPopup") {
-  //   clearAddDoctorForm();
-  // }
+
 
   $("." + popupId)
     .removeClass("hidden")
@@ -609,136 +607,161 @@ $(document).on("click", ".closeInfoPopup", function () {
   });
 
 // Handle Register button click with validation
-$(".registerDocBtn").on("click", function (e) {
-  e.preventDefault();
-  // if (!validateAddDoctorForm()) return;
+  $(".registerDocBtn").on("click", function (e) {
+    e.preventDefault();
+    // if (!validateAddDoctorForm()) return;
 
-  const $popup = $(".addDoctorPopup");
+    const $popup = $(".addDoctorPopup");
 
-  const name = $popup.find('input[type="text"]').eq(0).val().trim();
-  const phone = $popup.find('input[type="number"]').eq(0).val().trim();
-  const gender = $popup.find('input[type="text"]').eq(1).val().trim();
-  const age = $popup.find('input[type="number"]').eq(1).val().trim();
-  const specialty = $popup.find(".dropdown-text").eq(0).text().trim();
-  const education = $popup.find(".dropdown-text").eq(1).text().trim();
-  const experience = parseInt($popup.find(".increaseBtn").siblings("span").text()) || 0;
+    const name = $popup.find('input[type="text"]').eq(0).val().trim();
+    const phone = $popup.find('input[type="number"]').eq(0).val().trim();
+    const gender = $popup.find('input[type="text"]').eq(1).val().trim();
+    const age = $popup.find('input[type="number"]').eq(1).val().trim();
+    const specialty = $popup.find(".dropdown-text").eq(0).text().trim();
+    const education = $popup.find(".dropdown-text").eq(1).text().trim();
+    const experience = parseInt($popup.find(".increaseBtn").siblings("span").text()) || 0;
 
-  const availability = [];
+    const availability = [];
 
-  $popup.find(".bg-white.border.border-blue-haze.p-4 > .flex.items-center.justify-between").each(function () {
-    const $row = $(this);
-    const day = $row.find("span.font-normal.text-sm").eq(0).text().trim();
-    const statusText = $row.find(".flex.items-center.gap-10 span.font-normal.text-sm").text().trim();
+    $popup.find(".bg-white.border.border-blue-haze.p-4 > .flex.items-center.justify-between").each(function () {
+      const $row = $(this);
+      const day = $row.find("span.font-normal.text-sm").eq(0).text().trim();
+      const statusText = $row.find(".flex.items-center.gap-10 span.font-normal.text-sm").text().trim();
 
-    if (statusText && statusText !== "Not Available") {
-      const parts = statusText.split(" - ");
-      availability.push({
-        day: day,
-        start_time: parts[0] || "",
-        end_time: parts[1] || ""
-      });
-    }
-  });
-
-  const formData = new FormData();
-
-  formData.append("name", name);
-  formData.append("phone", phone);
-  formData.append("gender", gender);
-  formData.append("age", age);
-  formData.append("specialty", specialty);
-  formData.append("education", education);
-  formData.append("experience", experience);
-  formData.append("availability", JSON.stringify(availability));
-
-  const photoFile = fileInput[0].files[0];
-  if (photoFile) {
-    formData.append("photo", photoFile);
-  }
-
-  $.ajax({
-    url: "/staff/hospital/doctors/save/",
-    method: "POST",
-    headers: {
-      "X-CSRFToken": getCookie("csrftoken")
-    },
-    data: formData,
-    processData: false,
-    contentType: false,
-
-    success: function (res) {
-      if (res.success) {
-        toastr.success("Doctor registered successfully!");
-        loadHospitalDoctors();
-
-        $(".addDoctorPopup").addClass("hidden").removeClass("flex");
-        clearAddDoctorForm();
-      } else {
-        toastr.error(res.error || "Failed to register doctor");
+      if (statusText && statusText !== "Not Available") {
+        const parts = statusText.split(" - ");
+        availability.push({
+          day: day,
+          start_time: parts[0] || "",
+          end_time: parts[1] || ""
+        });
       }
-    },
+    });
 
-    error: function (xhr) {
-      toastr.error(xhr.responseJSON?.error || "Something went wrong");
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("phone", phone);
+    formData.append("gender", gender);
+    formData.append("age", age);
+    formData.append("specialty", specialty);
+    formData.append("education", education);
+    formData.append("experience", experience);
+    formData.append("availability", JSON.stringify(availability));
+
+    const photoFile = fileInput[0].files[0];
+    if (photoFile) {
+      formData.append("photo", photoFile);
     }
-  });
-});
-});
-
-$(document).on("click", ".doctorCard", function () {
-
-    const doctorId = $(this).data("id");
 
     $.ajax({
-        url: `/staff/hospital/doctors/${doctorId}/`,
-        type: "GET",
+      url: "/staff/hospital/doctors/save/",
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken")
+      },
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function (res) {
+  if (res.success) {
+    toastr.success("Doctor registered successfully!");
 
-        success: function(response) {
+    // 1. If backend gave us the single doctor data, append it to our local state array
+    if (res.doctor) {
+      // Create a unified schema matching exactly what renderDoctors needs
+      const newDoctor = {
+        id: res.doctor.id,
+        name: res.doctor.name,
+        phone: res.doctor.phone,
+        specialty: res.doctor.specialty, // Aligns perfectly with your map structure
+        rating: res.doctor.rating || "0.0",
+        image: res.doctor.image
+      };
+      
+      allDoctors.unshift(newDoctor); // Adds the new doctor to the top/beginning of the array
+      
+      // 2. Re-render the grid and pagination instantly with the new data
+      renderDoctors(currentPage);
+      renderPagination();
+    } else {
+      // Fallback to reloading if no doctor object was provided
+      loadHospitalDoctors();
+    }
 
-            if (!response.success) {
-                toastr.error(response.message);
-                return;
-            }
-
-            const d = response.doctor;
-
-            $("#doctor-image").attr("src", d.image);
-
-            $("#doctor-name").text(d.name);
-            $("#doctor-gender").text(d.gender || "-");
-            $("#doctor-age").text(d.age || "-");
-            $("#doctor-phone").text(d.phone || "-");
-            $("#doctor-speciality").text(d.speciality || "-");
-            $("#doctor-education").text(d.education || "-");
-            $("#doctor-experience").text(
-                `${d.experience || 0} Years`
-            );
-
-            let availabilityHtml = "";
-
-            d.availability.forEach(item => {
-
-                availabilityHtml += `
-                    <div class="flex items-center justify-between">
-                        <span class="font-normal text-sm">
-                            ${item.day}
-                        </span>
-
-                        <span class="font-normal text-sm text-dodger-blue">
-                            ${item.start_time} to ${item.end_time}
-                        </span>
-                    </div>
-                `;
-            });
-
-            $("#doctor-availability").html(
-                availabilityHtml ||
-                "<p>No availability configured</p>"
-            );
-
-            $(".docInfoPopup")
-                .removeClass("hidden")
-                .addClass("flex");
-        }
+    $(".addDoctorPopup").addClass("hidden").removeClass("flex");
+    clearAddDoctorForm();
+  } else {
+    toastr.error(res.error || "Failed to register doctor");
+  }
+},
+      error: function (xhr) {
+        toastr.error(xhr.responseJSON?.error || "Something went wrong");
+      }
     });
+  }); // Closes register button click cleanly
+  
+}); // THIS CLOSES THE MAIN $(document).ready(function () { CONTEXT CLEANLY
+
+// ==========================================
+// GLOBAL EVENT LISTENERS & HELPER FUNCTIONS 
+// (Keep these outside $(document).ready)
+// ==========================================
+
+$(document).on("click", ".doctorCard", function () {
+  const doctorId = $(this).data("id");
+
+  $.ajax({
+    url: `/staff/hospital/doctors/${doctorId}/`,
+    type: "GET",
+    success: function(response) {
+      if (!response.success) {
+        toastr.error(response.message);
+        return;
+      }
+
+      const d = response.doctor;
+
+      $("#doctor-image").attr("src", d.image || "/static/images/coolen-Smith.jpg");
+      $("#doctor-name").text(d.name);
+      $("#doctor-gender").text(d.gender || "-");
+      $("#doctor-age").text(d.age || "-");
+      $("#doctor-phone").text(d.phone || "-");
+      $("#doctor-specialty").text(d.specialty || "-");
+      $("#doctor-education").text(d.education || "-");
+      $("#doctor-experience").text(`${d.experience || 0} Years`);
+
+      let availabilityHtml = "";
+      d.availability.forEach(item => {
+        availabilityHtml += `
+          <div class="flex items-center justify-between">
+              <span class="font-normal text-sm">${item.day}</span>
+              <span class="font-normal text-sm text-dodger-blue">
+                  ${item.start_time} to ${item.end_time}
+              </span>
+          </div>
+        `;
+      });
+
+      $("#doctor-availability").html(availabilityHtml || "<p>No availability configured</p>");
+      $(".docInfoPopup").removeClass("hidden").addClass("flex");
+    }
+  });
 });
+
+function clearAddDoctorForm() {
+  const $popup = $(".addDoctorPopup");
+  
+  // Clear all text and number inputs
+  $popup.find('input[type="text"], input[type="number"]').val('');
+  
+  // Reset drop-downs to a default placeholder text
+  $popup.find(".dropdown-text").text('Select...'); 
+  
+  // Reset experience counter text back to 0
+  $popup.find(".increaseBtn").siblings("span").text('0');
+  
+  // Reset file input preview if your custom framework relies on it
+  if (typeof resetUploadDiv === "function") {
+    resetUploadDiv();
+  }
+}
