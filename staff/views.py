@@ -325,7 +325,11 @@ def get_technicians(request):
             #     "image": image_url
             # })
             data.append({
+                # "id": t.id,
+                # "full_name": t.full_name,
+                
                 "id": t.id,
+                "technician_id": f"TECH-{t.id:05d}",
                 "full_name": t.full_name,
                 "phone_number": t.phone_number,
                 "specialization": t.specialization.name if t.specialization else "Technician",
