@@ -406,6 +406,11 @@ def dashboard_home(request):
                 user=user
             ).first()
 
+            contact_person = ContactPerson.objects.filter(
+                profile_type="doctor",
+                profile=user
+            ).first()
+
             appointment_requests = DoctorAppointment.objects.filter(
                 status="Pending"
             ).exclude(
@@ -425,6 +430,7 @@ def dashboard_home(request):
             context["scheduled_appointments"] = scheduled_appointments
             context.update({
                 'doctor_profile': doctor_profile,
+                'contact_person': contact_person,
                 'user_display_name': doctor_profile.clinic_name,
                 'quotes_given': DoctorBidding.objects.filter(doctor=doctor_profile).count(),
                 'active_bids': DoctorBidding.objects.filter(

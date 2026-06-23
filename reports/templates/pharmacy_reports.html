@@ -32,35 +32,35 @@
                                     <span class="material-symbols-outlined flex justify-center items-center">tune</span>
                                 </button>
                                 <div
-                                    class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                                    <div
-                                        class="p-2 pl-4 hover:bg-forest-green  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                                        <span class="material-symbols-outlined !text-lg text-dodger-blue">
-                                            check
-                                        </span>Today
-                                    </div>
-                                    <div
-                                        class="p-2 pl-4 hover:bg-forest-green  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                                        <span class="material-symbols-outlined !text-lg text-light-gray">
-                                            check
-                                        </span>Week
-                                    </div>
-                                    <div
-                                        class="p-2 pl-4 hover:bg-forest-green  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                                        <span class="material-symbols-outlined !text-lg text-light-gray">
-                                            check
-                                        </span>Month
-                                    </div>
-                                    <div
-                                        class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-forest-green  rounded font-normal text-base text-dark-gray">
-                                        <div class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined !text-lg text-light-gray">
-                                                check
-                                            </span>Custom
-                                        </div>
-                                        <span class="material-symbols-outlined calendar-icon">calendar_today</span>
-                                    </div>
-                                </div>
+    class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
+    <div data-period="today"
+        class="p-2 pl-4 hover:bg-forest-green rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+        <span class="material-symbols-outlined !text-lg text-dodger-blue">
+            check
+        </span>Today
+    </div>
+    <div data-period="week"
+        class="p-2 pl-4 hover:bg-forest-green rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+        <span class="material-symbols-outlined !text-lg text-light-gray">
+            check
+        </span>Week
+    </div>
+    <div data-period="month"
+        class="p-2 pl-4 hover:bg-forest-green rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+        <span class="material-symbols-outlined !text-lg text-light-gray">
+            check
+        </span>Month
+    </div>
+    <div data-period="custom"
+        class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-forest-green rounded font-normal text-base text-dark-gray">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined !text-lg text-light-gray">
+                check
+            </span>Custom
+        </div>
+        <span class="material-symbols-outlined calendar-icon">calendar_today</span>
+    </div>
+</div>
                                 <div
                                     class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
                                     <div class="datepicker-inline"></div>

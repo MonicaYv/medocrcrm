@@ -15,6 +15,7 @@ from .models import (
     DoctorAppointment,
     LabAppointments,
     HospitalAppointments,
+    AppointmentStatus,
 )
 from services.models import HospitalBidding
 from registration.models import HospitalProfile
@@ -90,6 +91,8 @@ def ajax_appointments(request):
         status = "cancelled"
 
     if user_type == "lab":
+        lab_profile = LabProfile.objects.filter(user=user).first()
+
         qs = LabAppointments.objects.select_related(
             "user__userprofile",
             "test_package",
@@ -97,7 +100,14 @@ def ajax_appointments(request):
             "test_description",
             "address",
             "user",
+        ).filter(
+            status=AppointmentStatus.PENDING
         )
+
+        if lab_profile:
+            qs = qs.exclude(
+                lab_bids__lab=lab_profile
+            ).distinct()
 
     elif user_type == "doctor":
         doctor_profile = DoctorProfile.objects.filter(user=user).first()
@@ -110,6 +120,7 @@ def ajax_appointments(request):
             qs = qs.exclude(bids__doctor=doctor_profile).distinct()
 
     elif user_type == "hospital":
+        hospital_profile = HospitalProfile.objects.filter(user=user).first()
         qs = HospitalAppointments.objects.select_related(
             "user__userprofile",
             "service_type",
@@ -118,7 +129,12 @@ def ajax_appointments(request):
             "bed_room",
             "address",
             "user",
-        )
+        ).filter(status=HospitalAppointmentStatus.PENDING)
+
+        if hospital_profile:
+            qs = qs.exclude(
+                bids__hospital=hospital_profile
+            ).distinct()
     else:
         qs = HospitalAppointments.objects.none()
 
@@ -308,7 +324,7 @@ def place_bid(request):
                 "message": "No matching rate package found for this appointment.",
                 "missing_ratecard": {
                     "package_id": appointment.test_package_id,
-                    "package_name": appointment.test_package.name if appointment.test_package else None,
+                    "package_name": appointment.test_package.packages if appointment.test_package else None,
                     "category_id": appointment.test_type_id,
                     "category_name": appointment.test_type.name if appointment.test_type else None,
                 },
@@ -517,238 +533,5 @@ def place_bid(request):
                 "delivery_time": bid.delivery_time,
             },
         })
-
-    return JsonResponse({"success": False, "message": "Invalid user type"})
-
-
-@require_POST
-@dashboard_login_required
-def cancel_bid(request):
-    user = request.user_obj
-    user_type = user.user_type
-
-    bid_id = request.POST.get("bid_id")
-
-    # ── LAB ───────────────────────────────────────────
-    if user_type == "lab":
-        lab = LabProfile.objects.filter(user=user).first()
-        bid = LabBidding.objects.filter(id=bid_id, lab=lab).first()
-        if not bid:
-            return JsonResponse({"success": False, "message": "Bid not found"})
-
-        if bid.bid_status not in [LabBidStatus.PENDING, LabBidStatus.ACCEPTED]:
-            return JsonResponse({"success": False, "message": "Only pending or accepted bids can be cancelled"})
-
-        was_accepted = bid.bid_status == LabBidStatus.ACCEPTED
-        bid.bid_status = LabBidStatus.CANCELLED
-        bid.is_active = False
-        bid.save()
-
-        if was_accepted:
-            appointment = bid.appointment
-            appointment.status = "Pending"
-            appointment.accepted_bid_id = None
-            appointment.accepted_lab_id = None
-            appointment.accepted_total_amount = None
-            appointment.save()
-
-        return JsonResponse({"success": True, "appointment_reset": was_accepted})
-
-    # ── HOSPITAL ──────────────────────────────────────
-    elif user_type == "hospital":
-        hospital = HospitalProfile.objects.filter(user=user).first()
-        bid = HospitalBidding.objects.filter(id=bid_id, hospital=hospital).first()
-        if not bid:
-            return JsonResponse({"success": False, "message": "Bid not found"})
-
-        was_accepted = bid.bid_status == "Accepted"
-        bid.bid_status = "Cancelled"
-        bid.is_active = False
-        bid.save()
-
-        if was_accepted:
-            appointment = bid.appointment
-            appointment.status = "Pending"
-            appointment.accepted_bid = None
-            appointment.accepted_hospital = None
-            appointment.accepted_total_amount = None
-            appointment.save()
-
-        return JsonResponse({"success": True, "message": "Bid cancelled successfully"})
-
-    # ── DOCTOR ────────────────────────────────────────
-    elif user_type == "doctor":
-        doctor = DoctorProfile.objects.filter(user=user).first()
-        bid = DoctorBidding.objects.filter(id=bid_id, doctor=doctor).first()
-        if not bid:
-            return JsonResponse({"success": False, "message": "Bid not found"})
-
-        was_accepted = bid.bid_status == DoctorBidStatus.ACCEPTED
-        bid.bid_status = "cancelled"
-        bid.is_active = False
-        bid.save()
-
-        if was_accepted:
-            appointment = bid.appointment
-            appointment.status = "Pending"
-            appointment.doctor = None
-            appointment.save()
-
-        return JsonResponse({"success": True, "appointment_reset": was_accepted})
-
-    return JsonResponse({"success": False, "message": "Invalid user type"})
-
-
-@require_POST
-@dashboard_login_required
-def complete_appointment(request):
-    user = request.user_obj
-    user_type = user.user_type
-
-    appointment_id = request.POST.get("appointment_id")
-
-    # ── LAB ───────────────────────────────────────────
-    if user_type == "lab":
-        lab = LabProfile.objects.filter(user=user).first()
-
-        # Lab completes via bid_id since that's the accepted entity
-        bid_id = request.POST.get("bid_id")
-        bid = LabBidding.objects.filter(
-            id=bid_id, lab=lab, bid_status=LabBidStatus.ACCEPTED
-        ).first()
-
-        if not bid:
-            return JsonResponse({"success": False, "message": "Accepted bid not found"})
-
-        bid.bid_status = LabBidStatus.COMPLETED
-        bid.save()
-
-        appointment = bid.appointment
-        if appointment:
-            appointment.status = "Completed"
-            appointment.save()
-
-        return JsonResponse({
-            "success": True,
-            "message": "Appointment completed successfully",
-            "bid_id": bid.id,
-            "appointment_id": bid.appointment_id,
-        })
-
-    # ── HOSPITAL ──────────────────────────────────────
-    elif user_type == "hospital":
-        hospital = HospitalProfile.objects.filter(user=user).first()
-        appointment = HospitalAppointments.objects.filter(
-            id=appointment_id, accepted_hospital=hospital
-        ).first()
-
-        if not appointment:
-            return JsonResponse({"success": False, "message": "Appointment not found"})
-        if appointment.status != "Accepted":
-            return JsonResponse({"success": False, "message": "Only accepted appointments can be completed"})
-
-        appointment.status = "Completed"
-        appointment.save()
-
-        if appointment.accepted_bid:
-            appointment.accepted_bid.bid_status = "Completed"
-            appointment.accepted_bid.save()
-
-        return JsonResponse({"success": True, "message": "Appointment completed successfully"})
-
-    # ── DOCTOR ────────────────────────────────────────
-    elif user_type == "doctor":
-        doctor = DoctorProfile.objects.filter(user=user).first()
-        appointment = DoctorAppointment.objects.filter(
-            id=appointment_id, doctor=doctor, status="Accepted"
-        ).first()
-
-        if not appointment:
-            return JsonResponse({"success": False, "message": "Appointment not found"})
-
-        appointment.status = "Completed"
-        appointment.save()
-
-        DoctorBidding.objects.filter(
-            appointment=appointment, bid_status=DoctorBidStatus.ACCEPTED
-        ).update(bid_status="completed")
-
-        return JsonResponse({"success": True, "message": "Appointment marked as completed"})
-
-    return JsonResponse({"success": False, "message": "Invalid user type"})
-
-
-@require_POST
-@dashboard_login_required
-def no_show_appointment(request):
-    user = request.user_obj
-    user_type = user.user_type
-
-    appointment_id = request.POST.get("appointment_id")
-
-    # ── LAB ───────────────────────────────────────────
-    if user_type == "lab":
-        lab = LabProfile.objects.filter(user=user).first()
-
-        bid_id = request.POST.get("bid_id")
-        bid = LabBidding.objects.filter(
-            id=bid_id, lab=lab, bid_status=LabBidStatus.ACCEPTED
-        ).first()
-
-        if not bid:
-            return JsonResponse({"success": False, "message": "Accepted bid not found"})
-
-        # Per FastAPI logic: bid status stays accepted, only appointment is updated
-        appointment = bid.appointment
-        if appointment:
-            appointment.status = "No_Show"
-            appointment.save()
-
-        return JsonResponse({
-            "success": True,
-            "message": "Appointment marked as no-show",
-            "bid_id": bid.id,
-            "appointment_id": bid.appointment_id,
-        })
-
-    # ── HOSPITAL ──────────────────────────────────────
-    elif user_type == "hospital":
-        hospital = HospitalProfile.objects.filter(user=user).first()
-        appointment = HospitalAppointments.objects.filter(
-            id=appointment_id, accepted_hospital=hospital
-        ).first()
-
-        if not appointment:
-            return JsonResponse({"success": False, "message": "Appointment not found"})
-        if appointment.status != "Accepted":
-            return JsonResponse({"success": False, "message": "Only accepted appointments can be marked no-show"})
-
-        appointment.status = "No_Show"
-        appointment.save()
-
-        if appointment.accepted_bid:
-            appointment.accepted_bid.bid_status = "No_Show"
-            appointment.accepted_bid.save()
-
-        return JsonResponse({"success": True, "message": "Appointment marked as no-show"})
-
-    # ── DOCTOR ────────────────────────────────────────
-    elif user_type == "doctor":
-        doctor = DoctorProfile.objects.filter(user=user).first()
-        appointment = DoctorAppointment.objects.filter(
-            id=appointment_id, doctor=doctor, status="Accepted"
-        ).first()
-
-        if not appointment:
-            return JsonResponse({"success": False, "message": "Appointment not found"})
-
-        appointment.status = "No_Show"
-        appointment.save()
-
-        DoctorBidding.objects.filter(
-            appointment=appointment, bid_status=DoctorBidStatus.ACCEPTED
-        ).update(bid_status="no_show")
-
-        return JsonResponse({"success": True, "message": "Appointment marked as no-show"})
 
     return JsonResponse({"success": False, "message": "Invalid user type"})

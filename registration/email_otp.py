@@ -1,11 +1,12 @@
 import pyotp
-import asyncio
-import aiosmtplib
 from asgiref.sync import sync_to_async
-from email.message import EmailMessage
 from .models import PasswordResetToken
 # from concurrent.futures import ThreadPoolExecutor
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+import logging
+
+logger = logging.getLogger(__name__)
 
 # SMTP_HOST = "mail.sizaf.com"
 # SMTP_PORT = 465
@@ -35,29 +36,22 @@ def generate_otp(secret: str, interval: int = 300) -> str:
 def verify_otp(secret: str, otp: str, interval: int = 300) -> bool:
     return pyotp.TOTP(secret, interval=interval).verify(otp, valid_window=5)
 
+def _send_email_sync(recipient: str, subject: str, body: str) -> bool:
+    from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
+    msg = EmailMultiAlternatives(subject, body, from_email, [recipient])
+    return msg.send(fail_silently=False) > 0
+
 async def send_email(recipient: str, subject: str, body: str):
-    msg = EmailMessage()
-    msg["From"] = settings.DEFAULT_FROM_EMAIL
-    msg["To"] = recipient
-    msg["Subject"] = subject
-    msg.set_content(body)
-
-    await aiosmtplib.send(
-    msg,
-    hostname=settings.EMAIL_HOST,
-    port=settings.EMAIL_PORT,
-    username=settings.EMAIL_HOST_USER,
-    password=settings.EMAIL_HOST_PASSWORD,
-    start_tls=True,
-)
-
-    return True
+    try:
+        return await sync_to_async(_send_email_sync)(recipient, subject, body)
+    except Exception:
+        logger.exception("Failed to send email to %s", recipient)
+        return False
     
 async def async_send_otp_email(user):
     otp_secret = generate_otp_secret()
     otp = generate_otp(otp_secret)
     email_sent = await send_email(user.email, "Your OTP Code", f"Your OTP is: {otp}")
-    print(otp)
     if not email_sent:
         return {"success": False, "message": "Failed to send email."}
 

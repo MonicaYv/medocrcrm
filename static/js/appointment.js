@@ -887,7 +887,7 @@ $(document).on("click", ".close-popup, .modal-close-pending", function () {
         // Generic close for modals without data-popup
         $(this).closest(
             ".appointmentRequestDetail, .modal-pending, .cancelAppointmentPopup"
-        ).addClass("hidden").removeClass("flex");
+        ).addClass("hidden")
     }
 });
 
@@ -900,4 +900,43 @@ $(document).on("click", ".reject-button", function () {
         .removeClass("flex");
 
     toastr.info("Dismissed");
+});
+// ===============================
+// SEARCH APPOINTMENT BY NAME
+// ===============================
+
+$(document).on("keyup", "#appointmentSearch", function () {
+
+    let value = $(this).val().toLowerCase();
+
+    $("#cards-container .card-all-pending, \
+      #cards-container .card-all-accepted, \
+      #cards-container .card-all-completed, \
+      #cards-container .card-all-cancelled, \
+      #cards-container .card-all-missed")
+    .each(function () {
+
+        let patientName = ($(this).data("name") || "").toLowerCase();
+
+        if (patientName.indexOf(value) > -1) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+
+    });
+
+});
+$(document).on("keyup", "#appointmentSearch", function () {
+
+    let value = $(this).val().toLowerCase();
+
+    $(".card-all-pending,.card-all-accepted,.card-all-completed,.card-all-cancelled,.card-all-missed").each(function () {
+
+        let patientName = ($(this).data("name") || "").toLowerCase();
+
+        $(this).toggle(patientName.includes(value));
+
+    });
+
 });

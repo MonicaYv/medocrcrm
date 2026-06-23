@@ -407,8 +407,14 @@
                             <div class="flex items-center justify-between">
                                 <p class="font-semibold text-sm">Technician Information</p>
                                 <div class="flex items-center gap-4">
-                                    <span class="material-symbols-outlined cursor-pointer !text-lg">edit</span>
-                                    <span class="material-symbols-outlined cursor-pointer !text-lg">share</span>
+                                    <!-- <span class="material-symbols-outlined cursor-pointer !text-lg">edit</span> -->
+                                    <span class="material-symbols-outlined cursor-pointer !text-lg editTechnicianBtn">
+                                        edit
+                                    </span>
+                                    
+                                    <span class="material-symbols-outlined cursor-pointer !text-lg shareTechnicianBtn">
+                                        share
+                                    </span>
                                     <span
                                         class="material-symbols-outlined cursor-pointer !text-lg closeInfoPopup">close</span>
                                 </div>
@@ -553,7 +559,10 @@
                             </div>
                             <div class="flex items-center justify-between">
                                 <span class="font-normal text-sm">Technician ID</span>
-                                <span class="font-normal text-sm text-blue-gray">#R32512</span>
+                                <!-- <span class="font-normal text-sm text-blue-gray">#R32512</span> -->
+                                <span id="popupTechnicianId"
+                                    class="font-normal text-sm text-blue-gray">
+                                </span>
                             </div>
                         </div>
                     </div>

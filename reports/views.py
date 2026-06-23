@@ -119,14 +119,28 @@ def _parse_report_range(request):
     elif period == "week":
         start_date = today - timedelta(days=6)
     elif period == "custom":
-        try:
-            start_date = timezone.datetime.strptime(
-                request.GET.get("start", ""), "%Y-%m-%d"
-            ).date()
-            today = timezone.datetime.strptime(
-                request.GET.get("end", ""), "%Y-%m-%d"
-            ).date()
-        except ValueError:
+        start_str = request.GET.get("start", "").strip()
+        end_str = request.GET.get("end", "").strip()
+        
+        # Try multiple parsing variations to catch different frontend inputs
+        parsed_start = None
+        parsed_end = None
+        
+        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"):
+            try:
+                if not parsed_start and start_str:
+                    parsed_start = timezone.datetime.strptime(start_str, fmt).date()
+                if not parsed_end and end_str:
+                    parsed_end = timezone.datetime.strptime(end_str, fmt).date()
+            except ValueError:
+                continue
+
+        # Fallback only if the parsed results are completely missing or invalid
+        if parsed_start and parsed_end:
+            start_date = parsed_start
+            today = parsed_end
+        else:
+            # Logger alert or fallback default
             start_date = today - timedelta(days=29)
     else:
         start_date = today - timedelta(days=29)
@@ -1110,427 +1124,223 @@ def doctor_report_data(request):
 
     return JsonResponse(data)
 
+from datetime import timedelta
+from django.db.models import Sum, Avg, Count
+from django.db.models.functions import TruncHour, ExtractWeek
+from django.http import JsonResponse
+from django.utils import timezone
+from appointments.models import LabAppointments, AppointmentStatus
+from dashboard.utils import dashboard_login_required
+
+
 @dashboard_login_required
 def lab_report_data(request):
-
-    filter_type = request.GET.get(
-        "filter",
-        "today"
-    )
-
-    # =========================================
-    # CURRENT LOGGED-IN LAB
-    # =========================================
-
+    filter_type = request.GET.get("filter", "today").strip().lower()
     user = request.user_obj
+    current_lab = getattr(user, "lab_profile", None)
 
-    current_lab = user.lab_profile
+    # Early exit if the user profile doesn't map to a lab
+    if not current_lab:
+        return JsonResponse({"error": "Unauthorized lab profile access."}, status=403)
 
-    appointments = LabAppointments.objects.filter(
-        accepted_lab=current_lab
-    )
-    
+    appointments = LabAppointments.objects.filter(accepted_lab=current_lab)
 
     # =========================================
     # FILTER LOGIC
     # =========================================
-
     today = timezone.now()
 
     if filter_type == "today":
-
-        appointments = appointments.filter(
-             created_at__date=today.date()
-        )
+        appointments = appointments.filter(created_at__date=today.date())
 
     elif filter_type == "week":
-
-        appointments = appointments.filter(
-            created_at__gte=today - timedelta(days=7)
-        )
+        # Rolling last 7 days inclusive
+        appointments = appointments.filter(created_at__gte=today - timedelta(days=7))
 
     elif filter_type == "month":
-
-        appointments = appointments.filter(
-            created_at__year=today.year,
-            created_at__month=today.month
-        )
+        # Rolling 30 days to avoid empty states at the beginning of a calendar month
+        appointments = appointments.filter(created_at__gte=today - timedelta(days=30))
 
     elif filter_type == "custom":
+        start_str = request.GET.get("start", "").strip()
+        end_str = request.GET.get("end", "").strip()
+        
+        parsed_start, parsed_end = None, None
+        # Safely evaluate date formats passed down from frontend inputs
+        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"):
+            try:
+                if not parsed_start and start_str:
+                    parsed_start = timezone.datetime.strptime(start_str, fmt).date()
+                if not parsed_end and end_str:
+                    parsed_end = timezone.datetime.strptime(end_str, fmt).date()
+            except ValueError:
+                continue
 
-        appointments = appointments.filter(
-            created_at__year=today.year
-        )
-
+        if parsed_start and parsed_end:
+            appointments = appointments.filter(created_at__date__range=[parsed_start, parsed_end])
+        else:
+            # Fallback configuration parameter if inputs are completely missing/malformed
+            appointments = appointments.filter(created_at__year=today.year)
     else:
-
         appointments = appointments.all()
 
-    
-   
     # =========================================
-    # STATS
+    # STATS AGGREGATION
     # =========================================
+    metrics = appointments.aggregate(
+        total_bookings=Count("id"),
+        total_revenue=Sum("accepted_total_amount"),
+        avg_bid=Avg("budget")
+    )
 
-    total_bookings = appointments.count()
+    total_bookings = metrics["total_bookings"] or 0
+    total_revenue = metrics["total_revenue"] or 0
+    avg_bid = metrics["avg_bid"] or 0
 
-    total_revenue = appointments.aggregate(
-        total=Sum("accepted_total_amount")
-    )["total"] or 0
-
-    avg_bid = appointments.aggregate(
-        avg=Avg("budget")
-    )["avg"] or 0
-
+    # Currency Layout Formatting (Indian Numbering System)
     if total_revenue >= 10000000:
-
-       revenue = f"₹{round(float(total_revenue)/10000000,2)} Cr"
-
+        revenue_display = f"₹{round(float(total_revenue) / 10000000, 2)} Cr"
     elif total_revenue >= 100000:
-
-       revenue = f"₹{round(float(total_revenue)/100000,2)} L"
-
+        revenue_display = f"₹{round(float(total_revenue) / 100000, 2)} L"
     else:
+        revenue_display = f"₹{round(float(total_revenue), 2)}"
 
-       revenue = f"₹{round(float(total_revenue),2)}"
+    # =========================================
+    # MOST REQUESTED TEST & PIE CHART (DB-SIDE)
+    # =========================================
+    test_aggregates = (
+        appointments.exclude(test_type__isnull=True)
+        .values("test_type__name")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
 
-    bookings = str(total_bookings)
+    if test_aggregates.exists():
+        labels = [item["test_type__name"] for item in test_aggregates]
+        values = [item["count"] for item in test_aggregates]
+        total_tests = sum(values)
+        pie_data = [round((v / total_tests) * 100) for v in values]
+    else:
+        labels = ["No Data"]
+        values = [1]
+        pie_data = [0]
+
+    # =========================================
+    # LINE CHART (UPGRADED FROM EXTRA TO EXTRACTWEEK)
+    # =========================================
+    weekly_data = (
+        appointments
+        .annotate(week=ExtractWeek("created_at"))
+        .values("week")
+        .annotate(total=Count("id"))
+        .order_by("week")
+    )
+
+    bid_labels = []
+    cbc_data = []
+    rtpcr_data = []
+
+    for item in weekly_data:
+        if item["week"] is not None:
+            bid_labels.append(f"Week {int(item['week'])}")
+            cbc_data.append(item["total"])
+            rtpcr_data.append(item["total"])
+
+    if not bid_labels:
+        bid_labels = ["No Data"]
+        cbc_data = [0]
+        rtpcr_data = [0]
 
     # =========================================
     # DYNAMIC RATINGS
     # =========================================
-
-    completed_count = appointments.filter(
-        status=AppointmentStatus.COMPLETED
-    ).count()
-
-    accepted_count = appointments.filter(
-       status=AppointmentStatus.ACCEPTED
-    ).count()
-
-    positive_reviews = completed_count + accepted_count
-
-    if total_bookings > 0:
-
-        ratings_percent = round(
-           (positive_reviews / total_bookings) * 100
-        )
-
-    else:
-
-       ratings_percent = 0
-
-    ratings = f"{ratings_percent}%"
-
-    # =========================================
-    # MOST REQUESTED TEST
-    # =========================================
-
-    test_counts = {}
-
-    for appointment in appointments:
-
-        if appointment.test_type:
-
-            name = appointment.test_type.name
-
-            if name not in test_counts:
-
-                test_counts[name] = 1
-
-            else:
-
-                test_counts[name] += 1
-
-    if test_counts:
-
-        labels = list(test_counts.keys())
-
-        values = list(test_counts.values())
-
-    else:
-
-        labels = ["No Data"]
-
-        values = [1]
-
-    # =========================================
-    # PIE CHART
-    # =========================================
-
-    pie_labels = labels
-
-    total_tests = sum(values)
-
-    if total_tests > 0:
-
-        pie_data = [
-
-            round((v / total_tests) * 100)
-
-            for v in values
-
-        ]
-
-    else:
-
-        pie_data = [0]
-
-    # =========================================
-    # LINE CHART
-    # =========================================
-
-    weekly_data = (
-        appointments
-        .extra(
-            select={
-                'week':
-                "EXTRACT(WEEK FROM created_at)"
-            }
-        )
-        .values('week')
-        .annotate(
-            total=Count('id')
-        )
-        .order_by('week')
+    status_metrics = appointments.aggregate(
+        completed=Count("id", filter=Q(status=AppointmentStatus.COMPLETED)),
+        accepted=Count("id", filter=Q(status=AppointmentStatus.ACCEPTED)),
+        pending=Count("id", filter=Q(status=AppointmentStatus.PENDING)),
+        cancelled=Count("id", filter=Q(status=AppointmentStatus.CANCELLED)),
     )
 
-    bid_labels = []
+    completed_count = status_metrics["completed"] or 0
+    accepted_count = status_metrics["accepted"] or 0
+    pending_count = status_metrics["pending"] or 0
+    cancelled_count = status_metrics["cancelled"] or 0
 
-    cbc_data = []
+    positive_reviews = completed_count + accepted_count
+    ratings_percent = round((positive_reviews / total_bookings) * 100) if total_bookings > 0 else 0
+    ratings_display = f"{ratings_percent}%"
 
-    rtpcr_data = []
-
-    for item in weekly_data:
-
-        bid_labels.append(
-            f"Week {int(item['week'])}"
-        )
-
-        cbc_data.append(
-            item['total']
-        )
-
-        rtpcr_data.append(
-            item['total']
-        )
-
-    if not bid_labels:
-
-        bid_labels = ["No Data"]
-
-        cbc_data = [1]
-
-        rtpcr_data = [1]
-
-    # =========================================
-    # RATINGS DATA
-    # =========================================
-
-    total_count = appointments.count()
-
-    five_star = int(total_count * 0.45)
-
-    four_star = int(total_count * 0.25)
-
-    three_star = int(total_count * 0.15)
-
-    two_star = int(total_count * 0.10)
-
-    one_star = int(total_count * 0.05)
-
-    def calculate_percent(value):
-
-        if total_count == 0:
-
-            return 0
-
-        return round(
-            (value / total_count) * 100
-        )
+    def calculate_percent(val):
+        return round((val / total_bookings) * 100) if total_bookings > 0 else 0
 
     ratings_data = [
-
-        {
-            "stars": 5,
-            "percent": calculate_percent(five_star)
-        },
-
-        {
-            "stars": 4,
-            "percent": calculate_percent(four_star)
-        },
-
-        {
-            "stars": 3,
-            "percent": calculate_percent(three_star)
-        },
-
-        {
-            "stars": 2,
-            "percent": calculate_percent(two_star)
-        },
-
-        {
-            "stars": 1,
-            "percent": calculate_percent(one_star)
-        }
-
+        {"stars": 5, "percent": calculate_percent(int(total_bookings * 0.45))},
+        {"stars": 4, "percent": calculate_percent(int(total_bookings * 0.25))},
+        {"stars": 3, "percent": calculate_percent(int(total_bookings * 0.15))},
+        {"stars": 2, "percent": calculate_percent(int(total_bookings * 0.10))},
+        {"stars": 1, "percent": calculate_percent(int(total_bookings * 0.05))},
     ]
 
     # =========================================
     # HEATMAP DATA
     # =========================================
-
     hourly_data = (
         appointments
-        .annotate(
-            hour=TruncHour("created_at")
-        )
+        .annotate(hour=TruncHour("created_at"))
         .values("hour")
-        .annotate(
-            total=Count("id")
-        )
+        .annotate(total=Count("id"))
         .order_by("hour")
     )
 
-    heatmap_data = []
-
-    for item in hourly_data:
-
-        if item["hour"]:
-
-            heatmap_data.append({
-
-                "hour":
-                item["hour"].strftime("%I %p"),
-
-                "count":
-                item["total"]
-
-            })
-
-    # =========================================
-    # BID WIN VS LOSS
-    # =========================================
-
-    completed_count = appointments.filter(
-       status=AppointmentStatus.COMPLETED
-    ).count()
-
-    accepted_count = appointments.filter(
-       status=AppointmentStatus.ACCEPTED
-    ).count()
-
-    pending_count = appointments.filter(
-      status=AppointmentStatus.PENDING
-    ).count()
-
-    cancelled_count = appointments.filter(
-      status=AppointmentStatus.CANCELLED
-    ).count()
-
-    total_status = (
-        completed_count +
-        accepted_count +
-        pending_count +
-        cancelled_count
-    )
-
-    if total_status == 0:
-
-        total_status = 1
-
-    win_percent = round(
-
-        (
-            completed_count +
-            accepted_count
-        )
-
-        / total_status * 100
-
-    )
-
-    loss_percent = round(
-
-        cancelled_count
-        / total_status * 100
-
-    )
-
-    # =========================================
-    # FINAL RESPONSE
-    # =========================================
-
-    data = {
-
-        "stats": {
-
-            "revenue": revenue,
-
-            "bookings": bookings,
-
-            "ratings": ratings,
-
-            "avg_bid": round(
-                float(avg_bid),
-                2
-            )
-
-        },
-
-        "most_requested_test": {
-
-            "labels": labels,
-
-            "data": values
-
-        },
-
-        "revenue_by_test": {
-
-            "labels": pie_labels,
-
-            "data": pie_data
-
-        },
-
-        "bid_trend": {
-
-            "labels": bid_labels,
-
-            "cbc": cbc_data,
-
-            "rtpcr": rtpcr_data
-
-        },
-
-        "ratings_data":
-        ratings_data,
-
-        "heatmap_data":
-        heatmap_data,
-
-        "bid_win_loss": {
-
-            "win":
-            win_percent,
-
-            "loss":
-            loss_percent,
-
-            "completed":
-            completed_count,
-
-            "cancelled":
-            cancelled_count
-
+    heatmap_data = [
+        {
+            "hour": item["hour"].strftime("%I %p"),
+            "count": item["total"]
         }
+        for item in hourly_data if item["hour"]
+    ]
 
-    }
-     
-    return JsonResponse(data)
+    # =========================================
+    # BID WIN VS LOSS RATE
+    # =========================================
+    total_status = completed_count + accepted_count + pending_count + cancelled_count
+    total_divisor = total_status if total_status > 0 else 1
+
+    win_percent = round(((completed_count + accepted_count) / total_divisor) * 100)
+    loss_percent = round((cancelled_count / total_divisor) * 100)
+
+    # =========================================
+    # PACKAGED COMPACT PAYLOAD OBJECT
+    # =========================================
+    return JsonResponse({
+        "stats": {
+            "revenue": revenue_display,
+            "bookings": str(total_bookings),
+            "ratings": ratings_display,
+            "avg_bid": round(float(avg_bid), 2),
+        },
+        "most_requested_test": {
+            "labels": labels,
+            "data": values,
+        },
+        "revenue_by_test": {
+            "labels": labels,
+            "data": pie_data,
+        },
+        "bid_trend": {
+            "labels": bid_labels,
+            "cbc": cbc_data,
+            "rtpcr": rtpcr_data,
+        },
+        "ratings_data": ratings_data,
+        "heatmap_data": heatmap_data,
+        "bid_win_loss": {
+            "win": win_percent,
+            "loss": loss_percent,
+            "completed": completed_count,
+            "cancelled": cancelled_count,
+        }
+    })
 
 
 

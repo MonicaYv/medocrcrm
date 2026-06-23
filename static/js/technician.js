@@ -1,4 +1,5 @@
 console.log("🚀 JS LOADED");
+console.log("NEW TECHNICIAN JS LOADED");
 
 function getCSRFToken() {
     let cookieValue = null;
@@ -411,6 +412,10 @@ function resetUploadDiv() {
 //     $(".docInfoPopup").removeClass("hidden");
 //  });
 $(document).on("click", ".doctorCard", function () {
+    console.log("ID:", $(this).data("id"));
+    console.log("TECH ID:", $(this).data("techid"));
+    console.log("NAME:", $(this).data("name"));
+    window.selectedTechnicianId = $(this).data("id");
 
     $("#popupName").text($(this).data("name"));
     $("#popupPhone").text($(this).data("phone"));
@@ -420,7 +425,18 @@ $(document).on("click", ".doctorCard", function () {
     $("#popupSpecialization").text($(this).data("specialization"));
     $("#popupExperience").text($(this).data("experience") + " Years");
 
-    $("#popupImage").attr("src", $(this).data("image"));
+    $("#popupTechnicianId").text(
+      $(this).data("techid")
+    );
+
+    // $("#popupImage").attr("src", $(this).data("image"));
+    let img = $(this).data("image");
+
+    if (!img) {
+      img = "/static/images/dummy.jpg";
+    }
+
+    $("#popupImage").attr("src", img);
 
     $(".docInfoPopup").removeClass("hidden");
 });
@@ -811,6 +827,7 @@ function renderTechnicians(data) {
    html += `
   <div class="doctorCard border border-cool-slate-gray rounded-lg py-4 shadow-appointments flex flex-col items-center gap-3 cursor-pointer"
       data-id="${t.id}"
+      data-techid="${t.technician_id}"
       data-name="${t.full_name}"
       data-phone="${t.phone_number}"
       data-gender="${t.gender}"
@@ -819,6 +836,8 @@ function renderTechnicians(data) {
       data-specialization="${t.specialization}"
       data-experience="${t.experience_years}"
       data-image="${t.image}">
+      
+      
 
         <img src="${imgSrc}"
              class="w-[90px] h-[90px] rounded-full object-cover">
@@ -1246,5 +1265,42 @@ $("#technicianForm").submit(function (e) {
         console.log(res);
     }
 });
+
+});
+
+$(document).on("click", ".editTechnicianBtn", function () {
+
+    $(".docInfoPopup").addClass("hidden");
+
+    $(".addDoctorPopup")
+        .removeClass("hidden")
+        .addClass("flex");
+
+});
+$(document).on("click", ".shareTechnicianBtn", function () {
+
+    let technicianInfo =
+        "Name: " + $("#popupName").text() + "\n" +
+        "Phone: " + $("#popupPhone").text() + "\n" +
+        "Technician ID: " + $("#popupTechnicianId").text();
+
+    if (navigator.share) {
+
+        navigator.share({
+            title: "Technician Details",
+            text: technicianInfo
+        });
+
+    } else {
+
+        navigator.clipboard.writeText(technicianInfo)
+        .then(() => {
+            toastr.success("Technician details copied");
+        })
+        .catch(() => {
+            alert(technicianInfo);
+        });
+
+    }
 
 });

@@ -130,7 +130,10 @@ $(document).ready(function () {
     const productLabels = topProducts.labels && topProducts.labels.length ? topProducts.labels : emptySeries("No sales yet").labels;
     const productUnits = topProducts.units && topProducts.units.length ? topProducts.units : emptySeries("No sales yet").values;
     const revenueLabels = topProducts.revenueLabels && topProducts.revenueLabels.length ? topProducts.revenueLabels : emptySeries("No revenue yet").labels;
-    const revenueValues = topProducts.revenue && topProducts.revenue.length ? topProducts.revenue : emptySeries("No revenue yet").values;
+    // Change revenue values collection to use raw float numbers
+  const revenueValues = topProducts.revenue && topProducts.revenue.length 
+    ? topProducts.revenue.map(val => parseFloat(String(val).replace(/,/g, ''))) 
+    : emptySeries("No revenue yet").values;
 
     upsertChart("barChartPharmacy", {
       type: "bar",
@@ -235,14 +238,22 @@ $(document).ready(function () {
 
   loadReport();
 
+  // $(".filterDropdown > div").on("click", function () {
+  //   const label = $(this).text().trim().toLowerCase();
+  //   const period = label.includes("today") ? "today" : label.includes("week") ? "week" : label.includes("month") ? "month" : "custom";
+  //   const url = new URL(window.location.href);
+  //   url.searchParams.set("period", period);
+  //   window.history.replaceState({}, "", url.toString());
+  //   loadReport({ period });
+  // });
+
   $(".filterDropdown > div").on("click", function () {
-    const label = $(this).text().trim().toLowerCase();
-    const period = label.includes("today") ? "today" : label.includes("week") ? "week" : label.includes("month") ? "month" : "custom";
+    const period = $(this).data("period") || "month";
     const url = new URL(window.location.href);
     url.searchParams.set("period", period);
     window.history.replaceState({}, "", url.toString());
     loadReport({ period });
-  });
+});
 
   $(".download-btn").on("click", function () {
     const targetId = $(this).data("target");

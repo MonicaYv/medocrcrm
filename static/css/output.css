@@ -1290,9 +1290,6 @@
   .h-\[50px\] {
     height: 50px;
   }
-  .h-\[55px\] {
-    height: 55px;
-  }
   .h-\[60px\] {
     height: 60px;
   }
@@ -1869,9 +1866,6 @@
   .w-\[240px\] {
     width: 240px;
   }
-  .w-\[250px\] {
-    width: 250px;
-  }
   .w-\[280px\] {
     width: 280px;
   }
@@ -1934,9 +1928,6 @@
   }
   .w-full {
     width: 100%;
-  }
-  .w-full\! {
-    width: 100% !important;
   }
   .w-px {
     width: 1px;
@@ -2412,6 +2403,15 @@
   .gap-x-10 {
     column-gap: calc(var(--spacing) * 10);
   }
+  .gap-x-50 {
+    column-gap: calc(var(--spacing) * 50);
+  }
+  .gap-x-60 {
+    column-gap: calc(var(--spacing) * 60);
+  }
+  .gap-x-70 {
+    column-gap: calc(var(--spacing) * 70);
+  }
   .space-x-1 {
     :where(& > :not(:last-child)) {
       --tw-space-x-reverse: 0;
@@ -2461,6 +2461,9 @@
   }
   .gap-y-6 {
     row-gap: calc(var(--spacing) * 6);
+  }
+  .gap-y-10 {
+    row-gap: calc(var(--spacing) * 10);
   }
   .gap-y-12 {
     row-gap: calc(var(--spacing) * 12);
