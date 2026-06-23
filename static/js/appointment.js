@@ -887,7 +887,7 @@ $(document).on("click", ".close-popup, .modal-close-pending", function () {
         // Generic close for modals without data-popup
         $(this).closest(
             ".appointmentRequestDetail, .modal-pending, .cancelAppointmentPopup"
-        ).addClass("hidden").removeClass("flex");
+        ).addClass("hidden")
     }
 });
 
