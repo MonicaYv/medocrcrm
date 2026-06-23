@@ -32,10 +32,7 @@ ROLE_TO_TEMPLATE = {
 
 @require_POST
 def send_otp(request):
-    email = request.POST.get("email")
-    print("========== DEBUG ==========")
-    print("POST DATA =", request.POST)
-    print("EMAIL =", email)
+    email = request.POST.get("email", "").strip()
     if not email:
         return JsonResponse({"success": False, "message": "Please enter email"}, status=400)
     try:
@@ -47,6 +44,11 @@ def send_otp(request):
 
     # Generate secret + OTP
     token_data = async_to_sync(async_send_otp_email)(type("obj", (object,), {"email": email}))
+    if not token_data.get("success"):
+        return JsonResponse(
+            {"success": False, "message": token_data.get("message", "Failed to send OTP email.")},
+            status=500,
+        )
     secret = token_data["otp_token"]
 
     # Cache secret (NOT otp value) for 5 minutes
@@ -58,27 +60,37 @@ def send_otp(request):
 
     return JsonResponse({"success": True, "token": secret, "message": "OTP sent successfully"})
 
-@require_POST
-def verify_otp(request):
-    bearer_token = request.POST.get("token")
-    otp = request.POST.get("otp")
-
+def verify_otp_token(email, otp, bearer_token):
     if not bearer_token or not otp:
-        return JsonResponse({"success": False, "message": "Missing token or OTP"}, status=400)
+        return {"success": False, "message": "Missing token or OTP"}
 
     cache_key = f"otp:{bearer_token}"
     otp_data = cache.get(cache_key)
     if not otp_data:
-        return JsonResponse({"success": False, "message": "OTP expired or invalid"}, status=400)
+        return {"success": False, "message": "OTP expired or invalid"}
     
     if bearer_token != otp_data.get("secret"):
-        return JsonResponse({"success": False, "message": "Invalid or forged token"}, status=400)
+        return {"success": False, "message": "Invalid or forged token"}
+
+    if email and otp_data.get("email") != email:
+        return {"success": False, "message": "OTP does not match this email"}
 
     secret = otp_data["secret"]
     totp = pyotp.TOTP(secret, interval=300)  # must match send_otp.py
     if not totp.verify(otp, valid_window=1):
-        return JsonResponse({"success": False, "message": "Invalid OTP"}, status=400)
+        return {"success": False, "message": "Invalid OTP"}
 
+    return {"success": True, "message": "OTP verified successfully"}
+
+@require_POST
+def verify_otp(request):
+    result = verify_otp_token(
+        request.POST.get("email"),
+        request.POST.get("otp"),
+        request.POST.get("token"),
+    )
+    if not result["success"]:
+        return JsonResponse(result, status=400)
     return JsonResponse({"success": True, "message": "OTP verified successfully"})
 
 def welcome(request):
@@ -226,7 +238,7 @@ def save_user(request):
     email_otp = data.get("otp1")  # from HTML field "otp1"
     if not email_otp:
         errors["otp1"] = "OTP is required."
-    otp_verification = verify_otp(email, email_otp, otp_token)
+    otp_verification = verify_otp_token(email, email_otp, otp_token)
     if not otp_verification["success"]:
         errors["otp1"] = otp_verification["message"]
 
@@ -1261,8 +1273,18 @@ def save_hospital(request):
     if not email:
         errors["email"] = "Email is required."
     else:
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["email"] = "Invalid email."
         if User.objects.filter(email=email).exists():
             errors["email"] = "Email already registered."
+
+    otp_token = data.get("otp_token")
+    email_otp = data.get("otp1")
+    otp_verification = verify_otp_token(email, email_otp, otp_token)
+    if not otp_verification["success"]:
+        errors["otp1"] = otp_verification["message"]
 
     pincode = data.get("pincode", "")
     if pincode and not re.match(r"^\d{4,10}$", pincode):
@@ -1413,6 +1435,12 @@ def save_doctor(request):
             errors["email"] = "Invalid email."
         if User.objects.filter(email=email).exists():
             errors["email"] = "Email already registered."
+
+    otp_token = data.get("otp_token")
+    email_otp = data.get("otp1")
+    otp_verification = verify_otp_token(email, email_otp, otp_token)
+    if not otp_verification["success"]:
+        errors["otp1"] = otp_verification["message"]
     if not password or len(password) < 8:
         errors["password"] = "Password must be at least 8 characters."
     if password != confirm_password:

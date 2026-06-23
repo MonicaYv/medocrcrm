@@ -77,12 +77,18 @@ $(document).ready(function () {
     //     $('.dropdown-option').hide();
     //     $(".dropdown-arrow").removeClass("rotate-180");
     // });
-    // resend
-    $('.resend').on('click', function () {
-        toastr.success("OTP Resent on Mail");
-        const $btn = $(this);
+    function storeOtpToken(token) {
+        let $tokenInput = $('input[name="otp_token"]');
+        if ($tokenInput.length === 0) {
+            $tokenInput = $('<input type="hidden" name="otp_token" id="otp_token" class="otp-input">');
+            $("form").append($tokenInput);
+        }
+        $tokenInput.attr("id", "otp_token").val(token);
+    }
+
+    function startResendTimer($btn) {
         let timeLeft = 30;
-        $btn.off('click');
+        $btn.addClass("disabled");
         const timer = setInterval(function () {
             const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
             const seconds = String(timeLeft % 60).padStart(2, '0');
@@ -90,16 +96,55 @@ $(document).ready(function () {
             timeLeft--;
             if (timeLeft < 0) {
                 clearInterval(timer);
-                $(".otp").html("Code resent").addClass("!text-bright-green");
-                setTimeout(function () {
-                    $(".otp").html("Try again in 60 seconds").addClass("!text-dark-red");
-                    $btn.on('click', arguments.callee);
-                }, 2000);
+                $btn.removeClass("disabled").html("Resend");
             }
         }, 1000);
+    }
+
+    function sendOtp($btn, successMessage) {
+        if ($btn.hasClass("disabled")) return;
+        let email = $('input[name="email"]').val();
+        if (!email) {
+            toastr.error("Please enter your email address.");
+            return;
+        }
+        $.ajax({
+            url: "/user/otp/send",
+            type: "POST",
+            headers: { 'X-CSRFToken': csrftoken },
+            data: { "email": email },
+            beforeSend: function(){
+                $btn.addClass("!bg-Dark-Cornflower-Blue disabled");
+            },
+            success: function (response) {
+                toastr.success(successMessage || response.message);
+                storeOtpToken(response.token);
+                $('input[name="email"]').prop("readonly", true);
+                $(".otp").removeClass("hidden");
+            },
+            error: function (response) {
+                console.error("Failed to send OTP:", response);
+                if (response.responseJSON && response.responseJSON.message) {
+                    toastr.error(response.responseJSON.message);
+                } else {
+                    toastr.error("Something went wrong while sending OTP.");
+                }
+                $btn.removeClass("!bg-Dark-Cornflower-Blue disabled");
+            }
+        });
+    }
+
+    // resend
+    $('.resend').on('click', function () {
+        const $btn = $(this);
+        if ($btn.hasClass("disabled")) return;
+        sendOtp($btn, "OTP resent on mail");
+        startResendTimer($btn);
     });
     // Send OTP
     $(".send-otp").click(function () {
+        sendOtp($(this));
+        return;
         const $btn = $(this);
         if ($btn.hasClass("disabled")) return;
         let email = $('input[name="email"]').val();
@@ -163,7 +208,8 @@ $(document).ready(function () {
             headers: { 'X-CSRFToken': csrftoken },
             data: {
                 "otp": otp,
-                "token": token
+                "token": token,
+                "email": email
             },
             success: function (response) {
                 toastr.success(response.message);

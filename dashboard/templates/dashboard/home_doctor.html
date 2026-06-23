@@ -56,7 +56,7 @@
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <p class="font-semibold text-sm">
-                        {{ doctor_profile.address|default:"Address not available" }},
+                        {{ doctor_profile.full_address|default:"Address not available" }},
                         {{ doctor_profile.city|default:"" }},
                         {{ doctor_profile.state|default:"" }} –
                         {{ doctor_profile.pincode|default:"" }}
@@ -67,14 +67,19 @@
               </div>
             </div>
             <div class="bg-pale-azure flex-1 h-[330px] px-4 py-2 rounded-lg">
-              <h1 class="text-center text-lg font-semibold">Profile</h1>
+              <h1 class="text-center text-lg font-semibold">Admin Details</h1>
               <div class="flex items-center justify-center py-[22.5px]">
                 <img src="/static/images/admin-profile.svg" alt="">
               </div>
               <div class="flex flex-col items-center gap-2">
-                <p class="font-semibold text-sm">Dr. Jhon Doe</p>
-                <p class="font-semibold text-sm text-dodger-blue">+91 7763847590</p>
-                <p class="font-semibold text-sm">Neurologist</p>
+                <p class="font-semibold text-sm">{{ contact_person.name|default:doctor_profile.owner_name|default:"N/A" }}</p>
+                <p class="font-semibold text-sm text-dodger-blue">
+                  {{ contact_person.phone_country_code|default:"+91" }}
+                  {{ contact_person.phone_number|default:doctor_profile.contact_number|default:"N/A" }}
+                </p>
+                <p class="font-semibold text-sm">
+                  Designation: {{ contact_person.role|default:"N/A" }}
+                </p>
               </div>
             </div>
           </div>

@@ -51,21 +51,21 @@
                         <p class="font-normal text-lg text-jet-black">
                             Make It Perfect—Update Your Settings!
                         </p>
-                        <div class="flex gap-4 sm:gap-5 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar tabs">
+                        <div class="flex gap-4 sm:gap-5 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar tabs h-[70px] items-center">
                             <button
-                            class="{{ tab_class }} {% if active_tab == 'account-details' %}{{ active_tab_class }}{% endif %} px-4 py-3 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                            class="{{ tab_class }} {% if active_tab == 'account-details' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
                             data-tab="account-details"
                             data-parent="settings">
                             Account Details
                             </button>
                             <button
-                            class="{{ tab_class }} {% if active_tab == 'documents' %}{{ active_tab_class }}{% endif %} px-4 py-3 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                            class="{{ tab_class }} {% if active_tab == 'documents' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
                             data-tab="documents"
                             data-parent="settings">
                             Documents
                             </button>
                             <button
-                            class="{{ tab_class }} {% if active_tab == 'notification-control' %}{{ active_tab_class }}{% endif %} px-4 py-3 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                            class="{{ tab_class }} {% if active_tab == 'notification-control' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
                             data-tab="notification-control"
                             data-parent="settings">
                             Notification Control Center
