@@ -33,7 +33,7 @@
   >
 
 
-  <div class="flex lg:justify-between items-center flex-col lg:flex-row gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-60 gap-y-10">
 
     <!-- Patient -->
     <div class="flex items-center gap-3">
@@ -42,13 +42,13 @@
            class="w-12 h-12 rounded-full object-cover">
 
       <div class="flex flex-col">
-        <p class="font-semibold text-sm text-jet-black">
+        <p class="font-semibold text-sm text-jet-black text-nowrap">
           Pt.
           {{ appointment.user.userprofile.first_name }}
           {{ appointment.user.userprofile.last_name|default:"" }}
         </p>
 
-        <span class="text-xs text-spanish-gray">
+        <span class="text-xs text-spanish-gray text-nowrap truncate">
           {% if appointment.description %}
             {{ appointment.description }}
           {% elif appointment.health_issue_ids %}
@@ -62,7 +62,7 @@
 
     <!-- Date -->
     <div class="flex flex-col justify-center">
-      <p class="font-normal text-sm text-jet-black">
+      <p class="font-normal text-sm text-jet-black text-nowrap">
         {% if appointment.preferred_date_time %}
           {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
         {% elif appointment.preferred_date_from %}
@@ -75,7 +75,7 @@
 
     <!-- Visit Type -->
     <div class="flex flex-col justify-center">
-      <p class="font-normal text-sm text-jet-black">
+      <p class="font-normal text-sm text-jet-black text-nowrap">
         {% if appointment.preferred_mode %}
           {{ appointment.preferred_mode|capfirst }}
         {% else %}
