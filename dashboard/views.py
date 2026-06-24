@@ -66,6 +66,11 @@ from django.http import HttpResponse
 def dashboard_home(request):
     user = request.user_obj
     user_type = user.user_type
+    print("=" * 50)
+    print("LOGGED USER ID =", user.id)
+    print("LOGGED USER EMAIL =", user.email)
+    print("LOGGED USER TYPE =", user.user_type)
+    print("=" * 50)
 
     menu_items = SettingMenu.objects.filter(
         is_active=True,
@@ -280,6 +285,16 @@ def dashboard_home(request):
                 profile_type="lab",
                 profile=user
             ).first()
+            print("========== CONTACT PERSON ==========")
+            print("USER ID =", user.id)
+
+            if contact_person:
+                print("CONTACT ID =", contact_person.id)
+                print("NAME =", contact_person.name)
+                print("PHONE =", contact_person.phone_number)
+                print("ROLE =", contact_person.role)
+            else:
+                print("CONTACT PERSON NOT FOUND")
 
             most_requested = (
                 LabAppointments.objects

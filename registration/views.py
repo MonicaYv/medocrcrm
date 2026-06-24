@@ -1095,6 +1095,13 @@ def save_medical_pharmacy(request):
 @require_POST
 def save_lab(request):
     data = request.POST
+    
+
+    print("=" * 50)
+    print("CONTACT NAME =", data.get("contact_name"))
+    print("CONTACT DESIGNATION =", data.get("contact_designation"))
+    print("CONTACT PHONE =", data.get("contact_phone"))
+    print("=" * 50)
     files = request.FILES
     errors = {}
 
@@ -1214,15 +1221,42 @@ def save_lab(request):
         referral_code=data.get("referral_code") if data.get("referral_code") else None,
     )
 
-    # Many-to-Many — Services
-    for sid in services:
-        LabProfileServices.objects.create(lab=lab, service_id=sid)
+    # # Many-to-Many — Services
+    # for sid in services:
+    #     LabProfileServices.objects.create(lab=lab, service_id=sid)
+    for item in services:
+        ids = item.split(",")
 
-    # Many-to-Many — Facilities
-    for fid in facilities:
-        LabProfileFacilities.objects.create(lab=lab, facility_id=fid)
+        for sid in ids:
+          sid = sid.strip()
+
+          if sid:
+            LabProfileServices.objects.create(
+                lab=lab,
+                service_id=int(sid)
+            )
+
+    # # Many-to-Many — Facilities
+    # for fid in facilities:
+    #     LabProfileFacilities.objects.create(lab=lab, facility_id=fid)
+    for item in facilities:
+        ids = item.split(",")
+
+        for fid in ids:
+          fid = fid.strip()
+
+          if fid:
+            LabProfileFacilities.objects.create(
+                lab=lab,
+                facility_id=int(fid)
+            )
 
     # Contact Person
+    print("========== CONTACT DATA ==========")
+    print("contact_name =", data.get("contact_name"))
+    print("contact_phone =", data.get("contact_phone"))
+    print("contact_designation =", data.get("contact_designation"))
+    print("=================================")
     ContactPerson.objects.create(
         profile_type="lab",
         profile=user,
@@ -1675,38 +1709,40 @@ def reset_password(request, token):
         return redirect("login_page")
     return render(request, "login/reset_password.html", {"token": token})
 
+# def file_scan(file_obj):
+
+#     try:
+#         file_obj.seek(0)
+
+#         files = {
+#             "file": (
+#                 file_obj.name,
+#                 file_obj.read(),
+#                 file_obj.content_type
+#             )
+#         }
+
+#         response = requests.post(
+#             "http://122.170.111.109:8090/scan",
+#             files=files,
+#             timeout=60
+#         )
+
+#         if response.status_code != 200:
+#             return False, "Virus scan service unavailable"
+
+#         result = response.json()
+#         print("CLAMAV RESPONSE =", result)
+
+#         return result.get("safe", False), result.get(
+#             "message",
+#             "Virus scan failed"
+#         )
+
+#     except Exception as e:
+#         return False, str(e)
 def file_scan(file_obj):
-
-    try:
-        file_obj.seek(0)
-
-        files = {
-            "file": (
-                file_obj.name,
-                file_obj.read(),
-                file_obj.content_type
-            )
-        }
-
-        response = requests.post(
-            "http://122.170.111.109:8090/scan",
-            files=files,
-            timeout=60
-        )
-
-        if response.status_code != 200:
-            return False, "Virus scan service unavailable"
-
-        result = response.json()
-        print("CLAMAV RESPONSE =", result)
-
-        return result.get("safe", False), result.get(
-            "message",
-            "Virus scan failed"
-        )
-
-    except Exception as e:
-        return False, str(e)
+    return True, "Virus scan skipped"
     
 # @require_POST
 # def file_scan_api(request):

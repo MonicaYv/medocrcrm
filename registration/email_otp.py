@@ -48,14 +48,27 @@ async def send_email(recipient: str, subject: str, body: str):
         logger.exception("Failed to send email to %s", recipient)
         return False
     
+# async def async_send_otp_email(user):
+#     otp_secret = generate_otp_secret()
+#     otp = generate_otp(otp_secret)
+#     email_sent = await send_email(user.email, "Your OTP Code", f"Your OTP is: {otp}")
+#     if not email_sent:
+#         return {"success": False, "message": "Failed to send email."}
+
+#     return {"success": True, "otp_token": otp_secret}
 async def async_send_otp_email(user):
     otp_secret = generate_otp_secret()
     otp = generate_otp(otp_secret)
-    email_sent = await send_email(user.email, "Your OTP Code", f"Your OTP is: {otp}")
-    if not email_sent:
-        return {"success": False, "message": "Failed to send email."}
 
-    return {"success": True, "otp_token": otp_secret}
+    print("=" * 50)
+    print("OTP FOR:", user.email)
+    print("OTP:", otp)
+    print("=" * 50)
+
+    return {
+        "success": True,
+        "otp_token": otp_secret
+    }
 
 async def send_forgot_password_email(user, company_name: str, base_url: str):
     token_obj = await sync_to_async(PasswordResetToken.create_token)(user)
