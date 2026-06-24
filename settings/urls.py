@@ -22,4 +22,8 @@ urlpatterns = [
     path("subscription/status/", views.seller_subscription_status, name="seller-subscription-status"),
     path("subscription/cancel/", views.cancel_subscription, name="seller-subscription-cancel"),
     path("subscription/subscribe/",views.subscribe_subscription,name="seller-subscription-subscribe"),
+    path('terms-conditions/',views.terms_conditions,name="terms-conditions"),
+    path('privacy-policy/',views.privacy_policy,name="privacy-policy"),
+    path('disclaimer/',views.disclaimer,name="disclaimer")
+
 ]

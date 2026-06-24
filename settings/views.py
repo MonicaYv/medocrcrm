@@ -1474,3 +1474,30 @@ def cancel_subscription(request):
     ).update(is_active=False)
 
     return JsonResponse({"success": True})
+
+@dashboard_login_required
+def terms_conditions(request):
+    user = request.user_obj
+    user_type = user.user_type
+    context = get_common_context(request, user)
+    context.update(get_base_context(user))
+    context["active_main_tab"] = request.GET.get("tab", "settings")
+    return render(request, 'settings/partials/terms-conditions.html',context)
+
+@dashboard_login_required
+def privacy_policy(request):
+    user = request.user_obj
+    user_type = user.user_type
+    context = get_common_context(request, user)
+    context.update(get_base_context(user))
+    context["active_main_tab"] = request.GET.get("tab", "settings")
+    return render(request, 'settings/partials/privacy-policy.html',context)
+
+@dashboard_login_required
+def disclaimer(request):
+    user = request.user_obj
+    user_type = user.user_type
+    context = get_common_context(request, user)
+    context.update(get_base_context(user))
+    context["active_main_tab"] = request.GET.get("tab", "settings")
+    return render(request, 'settings/partials/disclaimer.html',context)

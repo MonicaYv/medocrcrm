@@ -1,0 +1,158 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+{% block title %}Terms & Conditions{% endblock %}
+{% block content %}
+<main class="flex flex-col gap-4 mt-4">
+    <div class="flex flex-col gap-2">
+        <div class="mt-5 flex items-center gap-2.5">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="font-semibold text-base">Settings</span>
+        </div>
+        <p class="font-normal text-lg text-jet-black">
+            Make It Perfect—Update Your Settings!
+        </p>
+    </div>
+    <div class=" text-medium-gray">
+        <div class="text-white mt-4 mb-2 items-center p-4 rounded bg-dodger-blue flex justify-between">
+            <h1 class="text-3xl">Terms of Usage</h1>
+            <span class="material-symbols-outlined closeBtnLegal cursor-pointer">
+                close
+            </span>
+        </div>
+        <div class="flex flex-col gap-2">
+            <h2 class="text-black text-xl mb-2 font-semibold">
+                1. Acceptance of Terms
+            </h2>
+            <p class="">
+                Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
+            </p>
+            <p>
+                By creating an account or using the platform, you agree to comply with these Terms and all applicable
+                laws and
+                regulations.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                2. Description of Services
+            </h2>
+            <p>
+                MedOCR provides healthcare document digitization, OCR processing, data extraction, document
+                organization, and
+                related services.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                3. User Responsibilities
+            </h2>
+            <p>
+                Users agree to:
+            </p>
+            <ul class="list-decimal pl-4">
+                <li>Provide accurate information</li>
+                <li>Maintain account security</li>
+                <li>Use the platform lawfully</li>
+                <li>Obtain necessary permissions before uploading documents</li>
+                <li>Protect patient confidentiality where applicable</li>
+            </ul>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                4. Healthcare Data Compliance
+            </h2>
+            <p>
+                Users are responsible for ensuring that their use of MedOCR complies with applicable healthcare privacy
+                and data
+                protection laws.
+                Where applicable, healthcare organizations must obtain appropriate patient consent before uploading
+                healthcare
+                records.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                5. Intellectual Property
+            </h2>
+            <p>
+                All platform content, software, trademarks, logos, designs, and technology are the property of MedOCR or
+                its
+                licensors and are protected by applicable intellectual property laws.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                6. Account Suspension
+            </h2>
+            <p>
+                We reserve the right to suspend or terminate accounts that violate these Terms or present security,
+                legal, or
+                operational risks.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                7. Service Availability
+            </h2>
+            <p>
+                While we strive to maintain uninterrupted services, MedOCR does not guarantee continuous availability
+                and may
+                perform maintenance, upgrades, or modifications at any time.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                8. Indemnification
+            </h2>
+            <p>
+                Users agree to indemnify and hold harmless MedOCR, its employees, affiliates, and partners from claims
+                arising
+                from misuse of the platform or violation of these Terms.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                9. Governing Law
+            </h2>
+            <p>
+                These Terms shall be governed by the laws of [Jurisdiction/Country].
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                10. Changes to Terms
+            </h2>
+            <p>
+                We may modify these Terms from time to time. Continued use of the platform constitutes acceptance of
+                updated
+                Terms.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+                11. Contact Information
+            </h2>
+            <p>
+                For questions regarding these Terms:
+                MedOCR
+                Email: [support@medocr.com]
+            </p>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/sidebar.js"></script>
+{% endblock %}

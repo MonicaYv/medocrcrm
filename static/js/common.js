@@ -705,3 +705,7 @@ function closeNotificationModal() {
   const modal = document.querySelector(".notificationDropdown");
   modal.classList.add("hidden");
 }
+
+$('.closeBtnLegal').on('click',function() {
+    window.history.back()
+})
