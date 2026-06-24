@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Count, Prefetch, Q
+from django.core.paginator import Paginator
 from dashboard.utils import dashboard_login_required, get_common_context
 from orders.models import PurchaseMedicine, UserPurchase, OrderStatusChoices
 from registration.models import PharmacyProfile
@@ -83,8 +84,12 @@ def orders(request):
 
     total_accepted = total_confirmed
 
+    paginator = Paginator(orders_qs, 5)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
     context.update({
-        "orders": orders_qs,
+        "orders": page_obj,
         "total_pending": total_pending,
         "total_confirmed": total_confirmed,
         "total_accepted": total_accepted,
