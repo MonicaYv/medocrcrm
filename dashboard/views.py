@@ -587,7 +587,10 @@ def dashboard_home(request):
             hospital_profile = HospitalProfile.objects.filter(
                 user=user
             ).first()
-
+            contact_person = ContactPerson.objects.filter(
+                profile_type="hospital",
+                profile=user
+            ).first()
             appointment_requests = HospitalAppointments.objects.filter(
                 status="Pending"
             ).exclude(
@@ -612,6 +615,7 @@ def dashboard_home(request):
             context.update({
                 'logo': '/static/images/hospital-logo.svg',
                 'hospital_profile': hospital_profile,
+                'contact_person': contact_person,
                 'user_display_name': hospital_profile.hospital_name,
                 'quotes_given': HospitalBidding.objects.filter(hospital=hospital_profile).count(),
                 'active_bids': HospitalBidding.objects.filter(
