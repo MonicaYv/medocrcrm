@@ -60,10 +60,12 @@ async def async_send_otp_email(user):
     otp_secret = generate_otp_secret()
     otp = generate_otp(otp_secret)
 
-    print("=" * 50)
-    print("OTP FOR:", user.email)
-    print("OTP:", otp)
-    print("=" * 50)
+    subject = "Your OTP Code"
+    body = f"Your OTP is: {otp}"
+
+    email_sent = await send_email(user.email, subject, body)
+    if not email_sent:
+        return {"success": False, "message": "Failed to send email."}
 
     return {
         "success": True,

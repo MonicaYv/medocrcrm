@@ -76,8 +76,8 @@ def verify_otp_token(email, otp, bearer_token):
         return {"success": False, "message": "OTP does not match this email"}
 
     secret = otp_data["secret"]
-    totp = pyotp.TOTP(secret, interval=300)  # must match send_otp.py
-    if not totp.verify(otp, valid_window=1):
+    totp = pyotp.TOTP(secret, interval=300)
+    if not totp.verify(otp, valid_window=5):
         return {"success": False, "message": "Invalid OTP"}
 
     return {"success": True, "message": "OTP verified successfully"}
