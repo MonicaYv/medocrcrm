@@ -486,3 +486,8 @@ $(document).on("click", ".accept-order-submit", function () {
         "Order has been accepted successfully."
     );
 });
+
+// Order search and filter - submit form on change
+$('#orderStatusFilter').on('change', function () {
+    $('#orderFilterForm').submit();
+});

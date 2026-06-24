@@ -253,3 +253,50 @@ function loadHeatmap(heatmapData) {
 
     hs.properties.fill = am4core.color("#FF6B00");
 }
+
+$(".download-btn").on("click", function () {
+    const targetId = $(this).data("target");
+    const exportType = $(this).data("type");
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    if (exportType === "excel") {
+      const rows = [];
+      const headers = [];
+      $(target).find("thead th").each(function () {
+        headers.push($(this).text().trim());
+      });
+      rows.push(headers.join(","));
+      $(target).find("tbody tr").each(function () {
+        const cols = [];
+        $(this).find("td").each(function () {
+          cols.push($(this).text().trim());
+        });
+        if (cols.length) {
+          rows.push(cols.join(","));
+        }
+      });
+      const csvContent = rows.join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${targetId}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    if (!window.jspdf) return;
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    pdf.html(target, {
+      callback: function (doc) {
+        doc.save(`${targetId}.pdf`);
+      },
+      x: 10,
+      y: 10,
+    });
+  });

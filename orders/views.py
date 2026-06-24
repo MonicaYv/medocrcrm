@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Count, Prefetch, Q
+from django.core.paginator import Paginator
 from dashboard.utils import dashboard_login_required, get_common_context
 from orders.models import PurchaseMedicine, UserPurchase, OrderStatusChoices
 from registration.models import PharmacyProfile
@@ -25,12 +26,12 @@ def orders(request):
             order_status=OrderStatusChoices.PENDING,
         )
 
+    search_query = request.GET.get("search", "").strip()
+    status_filter = request.GET.get("status", "").strip().lower()
+
     orders_qs = (
         UserPurchase.objects
-        .filter(
-            order_scope,
-            order_status=OrderStatusChoices.PENDING,
-        )
+        .filter(order_scope)
         .exclude(
             id__in=placed_bid_order_ids
         )
@@ -56,6 +57,12 @@ def orders(request):
         )
         .order_by("-created_at")
     )
+
+    if search_query:
+        orders_qs = orders_qs.filter(id__icontains=search_query)
+
+    if status_filter:
+        orders_qs = orders_qs.filter(order_status=status_filter.upper())
     status_counts = (
         UserPurchase.objects
         .filter(order_scope)
@@ -77,8 +84,12 @@ def orders(request):
 
     total_accepted = total_confirmed
 
+    paginator = Paginator(orders_qs, 5)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
     context.update({
-        "orders": orders_qs,
+        "orders": page_obj,
         "total_pending": total_pending,
         "total_confirmed": total_confirmed,
         "total_accepted": total_accepted,

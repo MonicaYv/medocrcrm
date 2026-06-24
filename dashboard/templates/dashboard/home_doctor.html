@@ -1,4 +1,5 @@
 {% extends "dashboard/layout.html" %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
@@ -46,7 +47,14 @@
           <!--Hospital Image and Admin Details-->
           <div class="flex flex-col lg:flex-row gap-2  pt-5 ml-3">
             <div class="relative">
-              <img src="{% if doctor_profile.clinic_photo_path %}/document/{{ doctor_profile.clinic_photo_path }}{% else %}/static/images/doctor-bg.png{% endif %}" alt="Doctor" class="w-[880px] h-[330px] object-cover rounded-lg">
+              <!-- <img src="{% if doctor_profile.clinic_photo_path %}/document/{{ doctor_profile.clinic_photo_path }}{% else %}/static/images/doctor-bg.png{% endif %}" alt="Doctor" class="w-[880px] h-[330px] object-cover rounded-lg"> -->
+                <!-- <img src="{% if doctor_profile.clinic_photo %}{{ doctor_profile.clinic_photo.url }}{% else %}/static/images/doctor-bg.png{% endif %}"
+                    alt="Doctor"
+                    class="w-[880px] h-[330px] object-cover rounded-lg"> -->
+                   
+                    <img src="{% static 'images/hospital-bg.jpg' %}"
+                        alt="Doctor"
+                        class="w-[880px] h-[330px] object-cover rounded-lg">
               <div class="absolute inset-0 flex items-end">
                 <div class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
                   <div class="flex flex-col gap-2">
@@ -136,8 +144,16 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Total Appointments Today</p>
-                  <p class="font-semibold text-2xl">12</p>
-                  <p class="text-green font-normal text-xs">7 Confirmed,5 Pending</p>
+                  <!-- <p class="font-semibold text-2xl">12</p>
+                  <p class="text-green font-normal text-xs">7 Confirmed,5 Pending</p> -->
+                  <p class="font-semibold text-2xl">
+                    {{ total_appointments_today }}
+                  </p>
+
+                  <p class="text-green font-normal text-xs">
+                      {{ confirmed_count }} Confirmed,
+                      {{ pending_count }} Pending
+                  </p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                   <img src="/static/images/book.svg" alt="">
@@ -147,7 +163,10 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Pending Request</p>
-                  <p class="font-semibold text-2xl">24</p>
+                  <!-- <p class="font-semibold text-2xl">24</p> -->
+                  <p class="font-semibold text-2xl">
+                      {{ pending_requests_count }}
+                  </p>
                   <p class="font-normal text-xs text-dodger-blue">Today</p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
@@ -158,8 +177,16 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Ratings</p>
-                  <p class="font-semibold text-2xl">78.2%</p>
-                  <p class="text-burnt-orange font-normal text-xs">3/5 Patient are satisfied with service</p>
+                  <!-- <p class="font-semibold text-2xl">78.2%</p>
+                  <p class="text-burnt-orange font-normal text-xs">3/5 Patient are satisfied with service</p> -->
+                  <p class="font-semibold text-2xl">
+                    {{ rating_percentage|default:"0" }}%
+                  </p>
+
+                  <p class="text-burnt-orange font-normal text-xs">
+                    {{ satisfied_patients|default:"0" }}/{{ total_reviews|default:"0" }}
+                    Patient are satisfied with service
+                  </p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                   <img src="/static/images/user-group.svg" alt="">
@@ -214,10 +241,14 @@
                               {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
                           </p>
 
-                          <p class="font-semibold text-sm">
+                          <!-- <p class="font-semibold text-sm">
                               To be attended by
                               Dr. {{ doctor_profile.first_name }}
                               {{ doctor_profile.last_name }}
+                          </p> -->
+                          <p class="font-semibold text-sm">
+                            To be attended by
+                            {{ doctor_profile.full_name }}
                           </p>
 
                       </div>
@@ -314,10 +345,15 @@
 
                       <div class="flex flex-col gap-1">
 
-                          <p class="font-semibold text-sm">
+                          <!-- <p class="font-semibold text-sm">
                               Pt.
                               {{ appointment.user.userprofile.first_name }}
                               {{ appointment.user.userprofile.last_name }}
+                          </p> -->
+                          <p class="font-semibold text-sm">
+                              Pt.
+                              {{ appointment.user.first_name }}
+                              {{ appointment.user.last_name }}
                           </p>
 
                           <p class="font-normal text-xs text-spanish-gray">
