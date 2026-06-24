@@ -1,6 +1,22 @@
 {% load static %}
 
 <div class="tab-content upcoming w-full">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div class="relative w-full sm:w-80">
+            <span class="material-symbols-outlined absolute top-1/2 left-2 -translate-y-1/2 text-gray-400">search</span>
+            <input type="text" id="orderSearchInput" placeholder="Search by Order ID..."
+                class="py-2 pl-8 pr-4 w-full text-sm rounded-md border border-blue-haze placeholder:text-medium-gray focus:outline-none focus:border-dodger-blue" />
+        </div>
+        <div class="relative w-full sm:w-48">
+            <select id="orderStatusFilter" class="py-2 px-4 w-full text-sm rounded-md border border-blue-haze focus:outline-none focus:border-dodger-blue appearance-none bg-white">
+                <option value="">All Orders</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+            <span class="material-symbols-outlined absolute top-1/2 right-2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+        </div>
+    </div>
     {% for order in orders %}
         {% with address=order.address %}
             <div class="order-card popup-btn mb-4 mt-4 sm:mt-6 rounded-lg shadow-(--box-shadow-5) overflow-hidden cursor-pointer"

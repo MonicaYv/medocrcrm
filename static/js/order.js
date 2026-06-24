@@ -486,3 +486,32 @@ $(document).on("click", ".accept-order-submit", function () {
         "Order has been accepted successfully."
     );
 });
+
+// Order search and filter
+$('#orderSearchInput').on('input', function () {
+    filterOrders();
+});
+
+$('#orderStatusFilter').on('change', function () {
+    filterOrders();
+});
+
+function filterOrders() {
+    const searchQuery = $('#orderSearchInput').val().trim().toLowerCase();
+    const statusFilter = $('#orderStatusFilter').val().toLowerCase();
+
+    $('.order-card').each(function () {
+        const $card = $(this);
+        const orderId = $card.find('.text-electric-purple').text().toLowerCase();
+        const orderStatus = $card.find('.text-dodger-blue').text().trim().toLowerCase();
+
+        const matchesSearch = !searchQuery || orderId.includes(searchQuery);
+        const matchesStatus = !statusFilter || orderStatus === statusFilter;
+
+        if (matchesSearch && matchesStatus) {
+            $card.removeClass('hidden');
+        } else {
+            $card.addClass('hidden');
+        }
+    });
+}

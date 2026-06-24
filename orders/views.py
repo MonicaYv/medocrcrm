@@ -25,12 +25,12 @@ def orders(request):
             order_status=OrderStatusChoices.PENDING,
         )
 
+    search_query = request.GET.get("search", "").strip()
+    status_filter = request.GET.get("status", "").strip().lower()
+
     orders_qs = (
         UserPurchase.objects
-        .filter(
-            order_scope,
-            order_status=OrderStatusChoices.PENDING,
-        )
+        .filter(order_scope)
         .exclude(
             id__in=placed_bid_order_ids
         )
@@ -56,6 +56,12 @@ def orders(request):
         )
         .order_by("-created_at")
     )
+
+    if search_query:
+        orders_qs = orders_qs.filter(id__icontains=search_query)
+
+    if status_filter:
+        orders_qs = orders_qs.filter(order_status=status_filter.upper())
     status_counts = (
         UserPurchase.objects
         .filter(order_scope)
