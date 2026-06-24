@@ -285,6 +285,10 @@ def handle_pharmacy_profile(user):
         'pan_number': profile.pan_number,
         'pan_doc_path': os.path.basename(profile.pan_doc_path) if profile.pan_doc_path else "",
         'storefront_image_path': os.path.basename(profile.storefront_image_path) if profile.storefront_image_path else "",
+        
+        # Clean string extraction to guarantee the file name is captured perfectly
+        'tan_number': profile.tan_number if profile.tan_number else "",
+        'tan_doc_path': profile.tan_doc_path.split('/')[-1] if profile.tan_doc_path else "",
     }
     data.update(handle_contact_person(user.user_type, user))
     return data
@@ -440,23 +444,150 @@ def update_notification_field(request):
     user.save()
     return JsonResponse({"status": "success"})
 
+# @dashboard_login_required
+# @require_POST
+# def update_user_document(request):
+#     user = request.user_obj
+#     user_type = user.user_type
+#     doc_type = request.POST.get('doc_type')
+#     file = request.FILES.get('document')
+
+#     print(file)
+
+#     if not doc_type or not file:
+#         return JsonResponse({'success': False, 'error': 'Missing document or type.'}, status=400)
+
+#     subdir_map = {
+#         'hospital_license': 'registration',
+#         'admin_identity_proof': 'aadhar',      
+#         'pan_doc': 'pan',
+#         'hospital_image': 'hospital_image',
+#         'ngo_registration_doc': 'registration',
+#         'lab_certificate': 'lab_certificate',
+#         'identity_proof_aadhar': 'aadhar',
+#         'identity_proof_pan': 'pan',
+#         'gov_license': 'gov_license',
+#         'lab_photo': 'lab_photo',
+#         'incorporation_doc': 'incorporation',
+#         'gst_doc': 'gst',
+#         'pan_doc': 'pan',
+#         'tan_doc': 'tan',
+#         'section8_doc': 'section8',
+#         'doc_12a': 'doc_12a',
+#         'brand_image': 'brand_image',
+#         'medical_license_doc': 'medical_license',
+#         'storefront_image': 'store_front',
+#         'clinic_registration': 'registration',
+#         'aadhar_doc': 'aadhar',
+#         'doctor_pan': 'pan',
+#         'clinic_logo': 'clinic_logo',
+#         'clinic_photo': 'clinic_photo',
+#     }
+        
+#     upload_subdir = subdir_map.get(doc_type)
+#     if not upload_subdir:
+#         return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
+
+#     file_path, error = validate_and_save_file(file, upload_subdir, doc_type.replace('_', ' ').title(), user_type=user_type)
+#     if error:
+#         return JsonResponse({'success': False, 'error': error}, status=400)
+
+#     # profile_model = {
+#     #     'ngo': NGOProfile,
+#     #     'advertiser': AdvertiserProfile,
+#     #     'client': ClientProfile,
+#     #     'pharmacy': PharmacyProfile,
+#     # }.get(user_type)
+    
+
+#     profile_model = {
+#         'ngo': NGOProfile,
+#         'advertiser': AdvertiserProfile,
+#         'client': ClientProfile,
+#         'pharmacy': PharmacyProfile,
+#         'lab': LabProfile,
+#         'hospital': HospitalProfile,
+#         'doctor': DoctorProfile,
+#     }.get(user_type)
+#     if not profile_model:
+#         return JsonResponse({'success': False, 'error': 'Invalid user type for document upload.'}, status=400)
+
+#     profile = profile_model.objects.filter(user=user).first()
+#     print("PROFILE =", profile)
+#     print("DOC TYPE =", doc_type)
+#     print("FILE =", file)
+#     if not profile:
+#         return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
+
+#     doc_field_map = {
+#         'hospital_license': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
+#         'admin_identity_proof': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
+#         'hospital_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
+#         'hospital_image': ('hospital_photo_path', 'hospital_photo_virus_scanned'),
+#         'ngo_registration_doc': ('ngo_registration_doc_path', 'ngo_registration_doc_virus_scanned'),
+#         'lab_certificate': ('lab_certificate_path', 'lab_certificate_virus_scanned'),
+#         'identity_proof_aadhar': ('identity_proof_aadhar_path', 'identity_proof_aadhar_virus_scanned'),
+#         'identity_proof_pan': ('identity_proof_pan_path', 'identity_proof_pan_virus_scanned'),
+#         'gov_license': ('gov_license_path', 'gov_license_virus_scanned'),
+#         'lab_photo': ('lab_photo_path', 'lab_photo_virus_scanned'),
+#         'incorporation_doc': ('incorporation_doc_path', 'incorporation_doc_virus_scanned'),
+#         'gst_doc': ('gst_doc_path', 'gst_doc_virus_scanned'),
+#         'pan_doc': ('pan_doc_path', 'pan_doc_virus_scanned'),
+#         'tan_doc': ('tan_doc_path', 'tan_doc_virus_scanned'),
+#         'section8_doc': ('section8_doc_path', 'section8_doc_virus_scanned'),
+#         'doc_12a': ('doc_12a_path', 'doc_12a_virus_scanned'),
+#         'brand_image': ('brand_image_path', 'brand_image_virus_scanned'),
+#         'medical_license_doc': ('medical_license_doc_path', 'medical_license_doc_virus_scanned'),
+#         'storefront_image': ('storefront_image_path', 'storefront_image_virus_scanned'),
+#         'clinic_registration': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
+#         'aadhar_doc': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
+#         'doctor_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
+#         'clinic_logo': ('clinic_logo_path', 'clinic_logo_virus_scanned'),
+#         'clinic_photo': ('clinic_photo_path', 'clinic_photo_virus_scanned'),
+#     }
+
+#     doc_fields = doc_field_map.get(doc_type)
+#     if not doc_fields:
+#         return JsonResponse({'success': False, 'error': 'Unknown document type.'}, status=400)
+
+#     setattr(profile, doc_fields[0], file_path)
+#     print("SETTING:", doc_fields[0], "=", file_path)
+#     setattr(profile, doc_fields[1], True)
+#     print("FILE PATH =", file_path)
+#     print("DOC FIELD =", doc_fields[0])
+#     profile.save()
+
+#     return JsonResponse({'success': True, 'message': 'Document updated successfully.'})
+
 @dashboard_login_required
 @require_POST
 def update_user_document(request):
     user = request.user_obj
     user_type = user.user_type
     doc_type = request.POST.get('doc_type')
-    file = request.FILES.get('document')
+    
+    # Check for a generic 'document' key first; fall back to the dynamic doc_type name 
+    file = request.FILES.get('document') or request.FILES.get(doc_type)
 
-    print(file)
+    # ==================== DEBUGGING BLOCK 1 ====================
+    print("\n--- [DEBUG TAN START] ---")
+    print(f"USER TYPE: {user_type}")
+    print(f"INCOMING DOC TYPE: '{doc_type}'")
+    print(f"FILES IN REQUEST: {list(request.FILES.keys())}")
+    print(f"POST FIELDS IN REQUEST: {list(request.POST.keys())}")
+    print(f"RESOLVED FILE OBJECT: {file}")
+    # ===========================================================
 
     if not doc_type or not file:
+        print("[DEBUG ERROR] Short-circuited: Missing doc_type or file object!")
+        print("--- [DEBUG TAN END] ---\n")
         return JsonResponse({'success': False, 'error': 'Missing document or type.'}, status=400)
 
     subdir_map = {
         'hospital_license': 'registration',
         'admin_identity_proof': 'aadhar',      
         'pan_doc': 'pan',
+        'hospital_pan': 'pan',
         'hospital_image': 'hospital_image',
         'ngo_registration_doc': 'registration',
         'lab_certificate': 'lab_certificate',
@@ -466,7 +597,6 @@ def update_user_document(request):
         'lab_photo': 'lab_photo',
         'incorporation_doc': 'incorporation',
         'gst_doc': 'gst',
-        'pan_doc': 'pan',
         'tan_doc': 'tan',
         'section8_doc': 'section8',
         'doc_12a': 'doc_12a',
@@ -481,20 +611,19 @@ def update_user_document(request):
     }
         
     upload_subdir = subdir_map.get(doc_type)
+    print(f"MAPPED SUBDIRECTORY: '{upload_subdir}'")
+    
     if not upload_subdir:
+        print(f"[DEBUG ERROR] Short-circuited: '{doc_type}' not found in subdir_map!")
+        print("--- [DEBUG TAN END] ---\n")
         return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
 
     file_path, error = validate_and_save_file(file, upload_subdir, doc_type.replace('_', ' ').title(), user_type=user_type)
-    if error:
-        return JsonResponse({'success': False, 'error': error}, status=400)
-
-    # profile_model = {
-    #     'ngo': NGOProfile,
-    #     'advertiser': AdvertiserProfile,
-    #     'client': ClientProfile,
-    #     'pharmacy': PharmacyProfile,
-    # }.get(user_type)
+    print(f"VALIDATE & SAVE RESULT - Path: '{file_path}', Error: '{error}'")
     
+    if error:
+        print("--- [DEBUG TAN END] ---\n")
+        return JsonResponse({'success': False, 'error': error}, status=400)
 
     profile_model = {
         'ngo': NGOProfile,
@@ -505,14 +634,17 @@ def update_user_document(request):
         'hospital': HospitalProfile,
         'doctor': DoctorProfile,
     }.get(user_type)
+    
     if not profile_model:
+        print(f"[DEBUG ERROR] Short-circuited: No profile model mapped for user type '{user_type}'")
+        print("--- [DEBUG TAN END] ---\n")
         return JsonResponse({'success': False, 'error': 'Invalid user type for document upload.'}, status=400)
 
     profile = profile_model.objects.filter(user=user).first()
-    print("PROFILE =", profile)
-    print("DOC TYPE =", doc_type)
-    print("FILE =", file)
+    print(f"TARGET PROFILE OBJECT FOUND: {profile}")
+    
     if not profile:
+        print("--- [DEBUG TAN END] ---\n")
         return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
 
     doc_field_map = {
@@ -543,15 +675,23 @@ def update_user_document(request):
     }
 
     doc_fields = doc_field_map.get(doc_type)
+    print(f"MAPPED MODEL FIELDS TO SAVE: {doc_fields}")
+    
     if not doc_fields:
+        print(f"[DEBUG ERROR] Short-circuited: '{doc_type}' not found in doc_field_map!")
+        print("--- [DEBUG TAN END] ---\n")
         return JsonResponse({'success': False, 'error': 'Unknown document type.'}, status=400)
 
+    # Set paths dynamically and update verification flag fields
     setattr(profile, doc_fields[0], file_path)
-    print("SETTING:", doc_fields[0], "=", file_path)
     setattr(profile, doc_fields[1], True)
-    print("FILE PATH =", file_path)
-    print("DOC FIELD =", doc_fields[0])
+    
+    # Extra check before saving to confirm fields were changed in memory
+    print(f"CONFIRMING PROPERTY ATTR VALUE SET ON INSTANCE: '{getattr(profile, doc_fields[0])}'")
+    
     profile.save()
+    print("[DEBUG SUCCESS] profile.save() executed smoothly without an exception crash.")
+    print("--- [DEBUG TAN END] ---\n")
 
     return JsonResponse({'success': True, 'message': 'Document updated successfully.'})
 
