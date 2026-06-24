@@ -253,3 +253,18 @@ function loadHeatmap(heatmapData) {
 
     hs.properties.fill = am4core.color("#FF6B00");
 }
+
+$(".download-btn").on("click", function () {
+    const targetId = $(this).data("target");
+    const target = document.getElementById(targetId);
+    if (!target || !window.jspdf) return;
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    pdf.html(target, {
+      callback: function (doc) {
+        doc.save(`${targetId}.pdf`);
+      },
+      x: 10,
+      y: 10,
+    });
+  });
