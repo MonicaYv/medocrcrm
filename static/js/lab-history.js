@@ -12,8 +12,13 @@ $(document).ready(function () {
       url: "/history/lab/history/ajax/",
       type: "GET",
       data: { status: status, page: page },
+      // success: function (res) {
+      //   $("#lab-history-cards-container").html(res.html);
+      // },
       success: function (res) {
-        $("#lab-history-cards-container").html(res.html);
+          $("#lab-history-cards-container").html(res.html);
+
+          applyHistorySearch();
       },
       error: function () {
         $("#lab-history-cards-container").html(
@@ -24,6 +29,7 @@ $(document).ready(function () {
   }
 
 loadLabHistory("accepted", 1);
+
   const itemsPerPage = 5;
 
   // Toggle disease dropdown
@@ -976,3 +982,34 @@ $(document).on("click", ".close-proforma", function () {
     $(".proformaBillPopup").addClass("hidden");
 
 });
+function applyHistorySearch() {
+
+    $("#historySearch").off("keyup").on("keyup", function () {
+
+        let value = $(this).val().toLowerCase().trim();
+
+        let visibleCount = 0;
+
+        $("#lab-history-cards-container [class*='card-all-']")
+        .each(function () {
+
+            let cardText = $(this).text().toLowerCase();
+
+            if (cardText.includes(value)) {
+                $(this).show();
+                visibleCount++;
+            } else {
+                $(this).hide();
+            }
+
+        });
+
+        // if (visibleCount === 0) {
+        //     $("#noSearchResults").removeClass("hidden");
+        // } else {
+        //     $("#noSearchResults").addClass("hidden");
+        // }
+
+    });
+
+}
