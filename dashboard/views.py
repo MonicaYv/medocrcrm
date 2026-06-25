@@ -610,6 +610,36 @@ def dashboard_home(request):
             ).order_by(
                 "preferred_date_from"
             )[:3]
+
+            today = timezone.now().date()
+            today_appointments = HospitalAppointments.objects.filter(
+                accepted_hospital=hospital_profile,
+                preferred_date_from__date=today
+            )
+            total_appointments_today = today_appointments.count()
+            confirmed_count = today_appointments.filter(
+                status=HospitalAppointmentStatus.ACCEPTED
+            ).count()
+            pending_count = today_appointments.filter(
+                status=HospitalAppointmentStatus.PENDING
+            ).count()
+
+            total_doctors = DoctorProfile.objects.filter(
+                hospital=hospital_profile
+            ).count()
+
+            bed_capacity = getattr(hospital_profile, 'bed_capacity', 20) or 20
+            icu_beds = getattr(hospital_profile, 'icu_beds', 4) or 4
+            private_beds = getattr(hospital_profile, 'private_beds', 4) or 4
+            general_beds = bed_capacity - icu_beds - private_beds
+
+            active_subscription = (
+                SubscriptionHistory.objects.select_related("plan")
+                .filter(user=user, status="active", expiry_date__gte=timezone.now())
+                .order_by("-activation_date")
+                .first()
+            )
+
             context["appointment_requests"] = appointment_requests
             context["scheduled_appointments"] = scheduled_appointments
             context.update({
@@ -635,6 +665,15 @@ def dashboard_home(request):
                 ).count(),
                 'events': CalendarEvent.objects.all().order_by('date'),
                 'user': user,
+                'total_appointments_today': total_appointments_today,
+                'confirmed_count': confirmed_count,
+                'pending_count': pending_count,
+                'total_doctors': total_doctors,
+                'bed_capacity': bed_capacity,
+                'icu_beds': icu_beds,
+                'private_beds': private_beds,
+                'general_beds': general_beds,
+                'active_subscription': active_subscription,
             })
             return render(request, "dashboard/home_hospital.html", context)
 

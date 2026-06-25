@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import random
+import subscription.models as subscription_models
 
 from django.db.models import (
     Avg,
@@ -153,9 +154,19 @@ def _pharmacy_reports_context(request, user):
     start_date, end_date = _parse_report_range(request)
     search = request.GET.get("q", "").strip()
 
+    active_subscription = None
+    if user and user.is_authenticated:
+        active_subscription = (
+            subscription_models.SubscriptionHistory.objects.select_related("plan")
+            .filter(user=user, status="active", expiry_date__gte=timezone.now())
+            .order_by("-activation_date")
+            .first()
+        )
+
     context = {
         "pharmacy_profile": pharmacy_profile,
         "report_range_label": f"{start_date:%b %d, %Y} - {end_date:%b %d, %Y}",
+        "active_subscription": active_subscription,
     }
     if not pharmacy_profile:
         context["pharmacy_report_data"] = {}

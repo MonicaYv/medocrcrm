@@ -136,8 +136,8 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center lg:w-[362px] h-[120px]">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Total Appointments Today</p>
-                  <p class="font-semibold text-2xl">12</p>
-                  <p class="text-green font-normal text-xs">7 Confirmed,5 Pending</p>
+                  <p class="font-semibold text-2xl">{{ total_appointments_today|default:0 }}</p>
+                  <p class="text-green font-normal text-xs">{{ confirmed_count }} Confirmed, {{ pending_count }} Pending</p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                   <img src="/static/images/book.svg" alt="">
@@ -147,9 +147,9 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center lg:w-[362px] h-[120px]">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Total Doctors Registered</p>
-                  <p class="font-semibold text-2xl">24</p>
-                  <p class="font-normal text-xs"><span class="text-dodger-blue">Day Shift: 16</span> | <span
-                      class="text-electric-indigo">Night Shift: 8</span> </p>
+                  <p class="font-semibold text-2xl">{{ total_doctors|default:0 }}</p>
+                  <p class="font-normal text-xs"><span class="text-dodger-blue">Day Shift: {{ confirmed_count }}</span> | <span
+                      class="text-electric-indigo">Night Shift: {{ pending_count }}</span> </p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                   <img src="/static/images/user-community.svg" alt="">
@@ -159,8 +159,8 @@
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center lg:w-[362px] h-[120px]">
                 <div class="flex flex-col gap-2">
                   <p class="font-normal text-sm">Total Beds</p>
-                  <p class="font-semibold text-2xl">20</p>
-                  <p class="text-steel-blue font-normal text-xs">ICU 4 | Private Bed 4 | Gr Bed 12</p>
+                  <p class="font-semibold text-2xl">{{ bed_capacity|default:20 }}</p>
+                  <p class="text-steel-blue font-normal text-xs">ICU {{ icu_beds|default:4 }} | Private Bed {{ private_beds|default:4 }} | Gr Bed {{ general_beds|default:12 }}</p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                   <img src="/static/images/user-group.svg" alt="">
@@ -290,31 +290,34 @@
           </div> {% endcomment %}
 
           <!--Subscription Details-->
+          {% if active_subscription %}
           <div class="bg-white border border-cool-ice-gray rounded-sm p-4 flex flex-col gap-4 mt-5 ml-3">
             <div class="flex items-center justify-between">
               <p class="font-semibold text-lg text-midnight-blue-gray">Subscription Details</p>
+              {% if active_subscription.status == "active" %}
               <div class="w-[120px] h-10 flex items-center justify-center bg-premium-light-blue rounded-[10px]">
                 <span class="font-semibold text-base text-primary-blue">Active</span>
               </div>
+              {% endif %}
             </div>
             <div class="flex items-center justify-between">
-              <p class="font-normal text-lg text-midnight-blue-gray">Premium Subscription Plan</p>
-              <p class="font-bold text-[32px] text-blue-charcoal">&#8377;999<span
-                  class="font-normal text-base">/month</span></p>
+              <p class="font-normal text-lg text-midnight-blue-gray">{{ active_subscription.plan.name }}</p>
+              <p class="font-bold text-[32px] text-blue-charcoal">&#8377;{{ active_subscription.plan.price }}<span
+                  class="font-normal text-base">/{{ active_subscription.plan.billing_cycle }}</span></p>
             </div>
             <div class="flex flex-col gap-3">
+              {% if active_subscription.plan.discount_text %}
               <div class="flex items-center justify-between">
-                <p class="font-semibold text-base text-cool-gray">High-value leads</p>
-                <p class="font-normal text-sm text-cool-gray text-left">24th May, 2026 (32 days left)</p>
+                <p class="font-semibold text-base text-cool-gray">{{ active_subscription.plan.discount_text }}</p>
               </div>
+              {% endif %}
+              {% if active_subscription.plan.features.all %}
+              {% for feature in active_subscription.plan.features.all|slice:":3" %}
               <div class="flex items-center justify-between">
-                <p class="font-semibold text-base text-cool-gray">Fewer but richer bids</p>
-                <p class="font-normal text-sm text-cool-gray text-left! shrink-0">Featured listing</p>
+                <p class="font-semibold text-base text-cool-gray">{{ feature.text }}</p>
               </div>
-              <div class="flex items-center justify-between">
-                <p class="font-semibold text-base text-cool-gray">Doctors gain in efficiency</p>
-                <p class="font-normal text-sm text-cool-gray ">Analytics Dashboard</p>
-              </div>
+              {% endfor %}
+              {% endif %}
             </div>
             <div class="pt-3.5 flex items-center justify-center">
               <a href="{% url 'settings_page' %}?tab=subscription" class="bg-primary-blue w-[322px] h-10 rounded-lg flex items-center justify-center">
@@ -322,6 +325,7 @@
               </a>
             </div>
           </div>
+          {% endif %}
 
           <!--Appointment Requests-->
           <div class="pt-5 flex flex-col ml-3">
