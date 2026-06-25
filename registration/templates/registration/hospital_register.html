@@ -321,9 +321,13 @@
                         </div>
                         <!-- Send OTP -->
                         <div>
-                            <div
+                            <!-- <div
                                 class="bg-primary-color cursor-pointer rounded-md p-[0.95rem] w-full text-white text-center mt-[2.0 rem] send-otp">
                                 Send OTP
+                            </div> -->
+                            <div
+                               class="bg-primary-color cursor-pointer rounded-md p-[0.95rem] w-full text-white text-center mt-[2.0 rem] send-otp-email">
+                               Send OTP
                             </div>
                             <p class="text-xs mt-1 flex justify-start otp">Didn’t get the code ?&nbsp;<span
                                     class="text-charcoal-black resend cursor-pointer">Resend</span></p>
@@ -425,6 +429,7 @@
                                 class="mt-2 block w-full rounded-md border border-primary-color p-4 text-sm focus:outline-none placeholder:text-blue-teal" />
                             <p class="text-xs mt-1 flex justify-end mt-1 otp-message "></p>
                         </div>
+                        <input type="hidden" name="otp_token" class="otp-input" />
                     </div>
                 </div>
                 <h1 class="text-3xl font-semibold">Contact person</h1>
@@ -455,9 +460,13 @@
                             </div>
                         </div>
                         <div>
-                            <div
+                            <!-- <div
                                 class="bg-primary-color rounded-md p-[0.95rem] w-full text-white text-center mt-6 send-otp">
                                 Send OTP
+                            </div> -->
+                            <div
+                               class="bg-primary-color rounded-md p-[0.95rem] w-full text-white text-center mt-6 send-otp-contact">
+                               Send OTP
                             </div>
                             <p class="text-xs mt-1 flex justify-start otp">Didn’t get the code ?&nbsp;<span
                                     class="text-charcoal-black resend cursor-pointer">Resend</span></p>

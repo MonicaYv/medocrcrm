@@ -142,50 +142,129 @@ $(document).ready(function () {
         startResendTimer($btn);
     });
     // Send OTP
-    $(".send-otp").click(function () {
-        sendOtp($(this));
-        return;
-        const $btn = $(this);
-        if ($btn.hasClass("disabled")) return;
-        let email = $('input[name="email"]').val();
-        console.log(email)
-        if (!email) {
-            toastr.error("Please enter your email address.");
-            console.log(email.type)
-            return;
-        }
-        $.ajax({
-            url: "/user/otp/send",
-            type: "POST",
-            headers: { 'X-CSRFToken': csrftoken },
-            data: { "email": email },
-            beforeSend: function(){
-                $btn.addClass("!bg-Dark-Cornflower-Blue disabled");
-            },
-            success: function (response) {
-                console.log("Success")
-                toastr.success(response.message);
-                // Store token in hidden field
-                if ($("#otp_token").length === 0) {
-                    $("form").append('<input type="hidden" id="otp_token" value="' + response.token + '">');
-                } else {
-                    $("#otp_token").val(response.token);
-                }
-                // ✅ Make email readonly immediately after OTP is sent
-                $('input[name="email"]').prop("readonly", true);
-
-                $(".otp").removeClass("hidden");
-            },
-            error: function (response) {
-                console.error("Failed to send OTP:", response);
-                if (response.responseJSON && response.responseJSON.message) {
-                    toastr.error(response.responseJSON.message);
-                } else {
-                    toastr.error("Something went wrong while sending OTP.");
-                }
-            }
-        });
+    // $(".send-otp").click(function () {
+    //     sendOtp($(this));
+    // Email OTP
+    $(".send-otp-email").on("click", function () {
+       sendOtp($(this));
     });
+
+//    // Contact Person OTP
+//     $(".send-otp-contact").on("click", function () {
+//         toastr.info("Contact person OTP is not implemented yet.");
+//     });
+
+
+$(".send-otp-contact").on("click", function () {
+
+    // Hospital email same hai
+    const email = $('input[name="email"]').val().trim();
+
+    if (!email) {
+        toastr.error("Please enter Hospital Email first.");
+        return;
+    }
+
+    // Hospital OTP already generated
+    if ($("input[name='otp_token']").val()) {
+
+        // Same OTP contact field me bhi use hoga
+        $("input[name='otp2']").val($("input[name='otp1']").val());
+
+        toastr.success("OTP has already been sent to the registered email.");
+
+        return;
+    }
+
+    // First time
+    $(".send-otp-email").trigger("click");
+});
+$(".send-otp-contact-pharmacy").click(function () {
+
+    let phone = $("input[name='contact_person_phone']").val();
+
+    if (!phone) {
+        toastr.error("Please enter Contact Person phone.");
+        return;
+    }
+
+    $.ajax({
+
+        url: "/user/send-contact-person-otp/",
+
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+
+        data: {
+            phone: phone
+        },
+
+        success: function (response) {
+
+            $("#contact_otp_token").val(response.otp_token);
+
+            toastr.success(response.message);
+
+        },
+
+        error: function (xhr) {
+
+            toastr.error(xhr.responseJSON.message);
+
+        }
+
+    });
+
+});
+    // Contact Person OTP
+    // $(".send-otp-contact").on("click", function () {
+    //     sendOtp($(this), "Contact person OTP sent successfully.");
+    // });
+
+//         const $btn = $(this);
+//         if ($btn.hasClass("disabled")) return;
+//         let email = $('input[name="email"]').val();
+//         console.log(email)
+//         if (!email) {
+//             toastr.error("Please enter your email address.");
+//             console.log(email.type)
+//             return;
+//         }
+//         $.ajax({
+//             url: "/user/otp/send",
+//             type: "POST",
+//             headers: { 'X-CSRFToken': csrftoken },
+//             data: { "email": email },
+//             beforeSend: function(){
+//                 $btn.addClass("!bg-Dark-Cornflower-Blue disabled");
+//             },
+//             success: function (response) {
+//                 console.log("Success")
+//                 toastr.success(response.message);
+//                 // Store token in hidden field
+//                 if ($("#otp_token").length === 0) {
+//                     $("form").append('<input type="hidden" id="otp_token" value="' + response.token + '">');
+//                 } else {
+//                     $("#otp_token").val(response.token);
+//                 }
+//                 // ✅ Make email readonly immediately after OTP is sent
+//                 $('input[name="email"]').prop("readonly", true);
+
+//                 $(".otp").removeClass("hidden");
+//             },
+//             error: function (response) {
+//                 console.error("Failed to send OTP:", response);
+//                 if (response.responseJSON && response.responseJSON.message) {
+//                     toastr.error(response.responseJSON.message);
+//                 } else {
+//                     toastr.error("Something went wrong while sending OTP.");
+//                 }
+//             }
+//         });
+    // });
     // Verify OTP button
     $(".verify-otp").click(function () {
         let otp = $('input[name="otp1"]').val();

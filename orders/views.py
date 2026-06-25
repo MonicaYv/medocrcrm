@@ -59,10 +59,14 @@ def orders(request):
     )
 
     if search_query:
-        orders_qs = orders_qs.filter(id__icontains=search_query)
+        try:
+            order_id = int(search_query)
+            orders_qs = orders_qs.filter(id=order_id)
+        except ValueError:
+            orders_qs = orders_qs.none()
 
     if status_filter:
-        orders_qs = orders_qs.filter(order_status=status_filter.upper())
+        orders_qs = orders_qs.filter(order_status=status_filter)
     status_counts = (
         UserPurchase.objects
         .filter(order_scope)

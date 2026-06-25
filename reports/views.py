@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import random
+import subscription.models as subscription_models
 
 from django.db.models import (
     Avg,
@@ -153,9 +154,19 @@ def _pharmacy_reports_context(request, user):
     start_date, end_date = _parse_report_range(request)
     search = request.GET.get("q", "").strip()
 
+    active_subscription = None
+    if user and user.is_authenticated:
+        active_subscription = (
+            subscription_models.SubscriptionHistory.objects.select_related("plan")
+            .filter(user=user, status="active", expiry_date__gte=timezone.now())
+            .order_by("-activation_date")
+            .first()
+        )
+
     context = {
         "pharmacy_profile": pharmacy_profile,
         "report_range_label": f"{start_date:%b %d, %Y} - {end_date:%b %d, %Y}",
+        "active_subscription": active_subscription,
     }
     if not pharmacy_profile:
         context["pharmacy_report_data"] = {}
@@ -537,6 +548,198 @@ def reports(request):
             context
         )
 
+# @dashboard_login_required
+# def hospital_report_data(request):
+
+#     filter_type = request.GET.get(
+#         "filter",
+#         "month"
+#     )
+
+#     appointments = (
+#         HospitalAppointments.objects
+#         .select_related(
+#             "category",
+#             "service_type",
+#             "address"
+#         )
+#     )
+
+#     print("FILTER:", filter_type)
+#     print("TOTAL:", appointments.count())
+
+#     # ==========================================================
+#     # PRINT ORIGINAL RAW DATA TO TERMINAL FOR INSPECTION
+#     # ==========================================================
+#     print("\n" + "="*50)
+#     print(f"--- DEBUGGING ORIGINAL DATA (FILTER: {filter_type.upper()}) ---")
+#     print(f"Total Appointments in Queryset: {appointments.count()}")
+    
+#     # 1. Check raw revenue accumulation
+#     raw_revenue = appointments.aggregate(total=Sum("accepted_total_amount"))["total"]
+#     print(f"Original Raw Revenue Sum: {raw_revenue}")
+
+#     # 2. Check Department Breakdown data
+#     print("\n--- Raw Department Breakdown (Bar Chart Data) ---")
+#     department_queryset = appointments.values("category__name").annotate(total=Sum("accepted_total_amount"))
+#     for item in department_queryset:
+#         print(f"Dept: {item['category__name']} | Raw Revenue: {item['total']}")
+
+#     # 3. Check Service Type Breakdown data
+#     print("\n--- Raw Service Type Breakdown (Pie Chart Data) ---")
+#     service_queryset = appointments.values("service_type__name").annotate(total=Count("id"))
+#     for item in service_queryset:
+#         print(f"Service: {item['service_type__name']} | Total Count: {item['total']}")
+
+#     # 4. Check Statuses for Patient Journey
+#     print("\n--- Raw Status Counts (Patient Journey Funnel) ---")
+#     print(f"Total Leads: {appointments.count()}")
+#     print(f"Accepted/Completed Status Count: {appointments.filter(status__in=['Accepted', 'Completed']).count()}")
+#     print(f"Has Accepted Bid Count: {appointments.filter(accepted_bid__isnull=False).count()}")
+#     print(f"Completed Status Count: {appointments.filter(status='Completed').count()}")
+#     print("="*50 + "\n")
+
+#     # ==========================================================
+#     # TEMPORARY MOCK DATA FOR TESTING (FORCE OVERWRITE)
+#     # ==========================================================
+#     formatted_revenue = "₹99.99 Cr"  # Distinct mock value to verify cards
+#     highest_revenue = "₹44.44 L"
+#     growth = "+88.8%"
+#     avg_revenue = "₹9,999"
+#     total_appointments = 500
+
+#     # Test values for the Bar Chart (Department Revenue)
+#     bar_labels = ["Test Dept A", "Test Dept B", "Test Dept C"]
+#     bar_values = [900.0, 450.0, 750.0]
+
+#     # Test values for the Pie Chart (Revenue by Test Type / Package Demand)
+#     pie_labels = ["Mock Traffic Direct", "Mock Traffic Referral", "Mock Traffic Ads"]
+#     pie_values = [10, 20, 70]
+
+#     # Test values for the Line Chart (Bid Trend / Hourly Analytics)
+#     line_labels = ["01:00 AM", "02:00 AM", "03:00 AM"]
+#     line_values = [5, 15, 45]
+
+#     # Test values for the Heatmap (Simulating a single state match)
+#     heatmap_labels = ["Maharashtra"]
+#     heatmap_values = [100]
+
+#     # Test values for the Patient Journey Funnel
+#     total_leads = 1000
+#     qualified_leads = 500
+#     opportunities = 250
+#     proposals = 125
+#     closed = 50
+
+#     # ==========================================================
+#     # FINAL RESPONSE DATA STRUCTURE
+#     # ==========================================================
+#     data = {
+
+#         "stats": {
+
+#             "revenue": formatted_revenue,
+
+#             "highest_revenue": highest_revenue,
+
+#             "growth": growth,
+
+#             "avg_revenue": avg_revenue,
+
+#             "avg_budget": 5000.0,
+
+#             "total_appointments": total_appointments
+
+#         },
+
+#         "most_requested_test": {
+
+#             "labels": bar_labels,
+
+#             "data": bar_values
+
+#         },
+
+#         "revenue_by_test": {
+
+#             "labels": pie_labels,
+
+#             "data": pie_values
+
+#         },
+
+#         "bid_trend": {
+
+#             "labels": line_labels,
+
+#             "cbc": line_values
+
+#         },
+
+#         "heatmap": {
+
+#             "labels": heatmap_labels,
+
+#             "data": heatmap_values
+
+#         },
+
+#         "patient_journey": {
+
+#             "labels": [
+
+#                 "Leads Generated",
+#                 "Qualified Leads",
+#                 "Opportunities Created",
+#                 "Proposals Sent",
+#                 "Deals Closed"
+
+#             ],
+
+#             "data": [
+
+#                 total_leads,
+#                 qualified_leads,
+#                 opportunities,
+#                 proposals,
+#                 closed
+
+#             ],
+
+#             "conversion": [
+
+#                 "100%",
+#                 f"{round((qualified_leads / total_leads) * 100) if total_leads > 0 else 0}%",
+#                 f"{round((opportunities / total_leads) * 100) if total_leads > 0 else 0}%",
+#                 f"{round((proposals / total_leads) * 100) if total_leads > 0 else 0}%",
+#                 f"{round((closed / total_leads) * 100) if total_leads > 0 else 0}%"
+
+#             ]
+
+#         },
+
+#         "package_table": [
+
+#             {
+
+#                 "package": label,
+
+#                 "bookings": value,
+
+#                 "conversion":
+#                 f"{round((value / total_appointments) * 100) if total_appointments > 0 else 0}%"}
+
+#             for label, value in zip(
+#                 pie_labels,
+#                 pie_values
+#             )
+
+#         ]
+
+#     }
+
+#     return JsonResponse(data)
+
 @dashboard_login_required
 def hospital_report_data(request):
 
@@ -554,183 +757,101 @@ def hospital_report_data(request):
         )
     )
 
-    print("FILTER:", filter_type)
-    print("TOTAL:", appointments.count())
-
     # =========================================
     # FILTER LOGIC
     # =========================================
-
     if filter_type == "week":
-
         current_week = datetime.now().isocalendar()[1]
-
-        appointments = appointments.filter(
-            created_at__week=current_week
-        )
+        appointments = appointments.filter(created_at__week=current_week)
 
     elif filter_type == "month":
-
         current_month = datetime.now().month
-
-        appointments = appointments.filter(
-            created_at__month=current_month
-        )
+        appointments = appointments.filter(created_at__month=current_month)
 
     elif filter_type == "custom":
-
-        appointments = appointments.filter(
-            created_at__year=datetime.now().year
-        )
+        appointments = appointments.filter(created_at__year=datetime.now().year)
 
     else:
-
-        appointments = appointments.filter(
-            created_at__date=datetime.now().date()
-        )
+        appointments = appointments.filter(created_at__date=datetime.now().date())
 
     # =========================================
-    # MAIN STATS
+    # MAIN STATS & TOTAL REVENUE FORMAT
     # =========================================
-
     total_revenue = appointments.aggregate(
         total=Sum("accepted_total_amount")
-    )["total"] or 0
-
-    # =========================================
-    # TOTAL REVENUE FORMAT
-    # =========================================
+    )["total"] or 0  # Added fallback to 0 to prevent None errors
 
     if total_revenue >= 10000000:
-
-        formatted_revenue = (
-            f"₹{round(total_revenue / 10000000, 2)} Cr"
-        )
-
+        formatted_revenue = f"₹{round(total_revenue / 10000000, 2)} Cr"
     elif total_revenue >= 100000:
-
-        formatted_revenue = (
-            f"₹{round(total_revenue / 100000, 2)} L"
-        )
-
+        formatted_revenue = f"₹{round(total_revenue / 100000, 2)} L"
     else:
-
-        formatted_revenue = (
-            f"₹{round(total_revenue, 2)}"
-        )
+        formatted_revenue = f"₹{round(total_revenue, 2)}"
 
     # =========================================
     # HIGHEST REVENUE DEPARTMENT
     # =========================================
-
     highest_department = (
         appointments
         .values("category__name")
-        .annotate(
-            total=Sum("accepted_total_amount")
-        )
+        .annotate(total=Sum("accepted_total_amount"))
         .order_by("-total")
         .first()
     )
 
     highest_revenue = "₹0"
-
     if highest_department and highest_department["total"]:
-
-        highest_amount = (
-            highest_department["total"]
-        )
-
+        highest_amount = highest_department["total"]
         if highest_amount >= 100000:
-
-            highest_revenue = (
-                f"₹{round(highest_amount / 100000, 2)}L"
-            )
-
+            highest_revenue = f"₹{round(highest_amount / 100000, 2)}L"
         else:
-
-            highest_revenue = (
-                f"₹{round(highest_amount, 2)}"
-            )
+            highest_revenue = f"₹{round(highest_amount, 2)}"
 
     # =========================================
     # QUARTER GROWTH
     # =========================================
-
     current_count = appointments.count()
-
-    previous_count = max(
-        current_count - 5,
-        1
-    )
-
-    growth_percent = round(
-
-        (
-            (current_count - previous_count)
-            / previous_count
-        ) * 100,
-
-        1
-
-    )
-
+    previous_count = max(current_count - 5, 1)
+    growth_percent = round(((current_count - previous_count) / previous_count) * 100, 1)
     growth = f"+{growth_percent}%"
 
     # =========================================
     # AVG REVENUE / PATIENT
     # =========================================
-
     avg_revenue_patient = appointments.aggregate(
         avg=Avg("accepted_total_amount")
     )["avg"] or 0
+    avg_revenue = f"₹{round(avg_revenue_patient, 2)}"
 
-    avg_revenue = (
-        f"₹{round(avg_revenue_patient, 2)}"
-    )
-
-    avg_budget = appointments.aggregate(
-        avg=Avg("budget")
-    )["avg"] or 0
-
+    avg_budget = appointments.aggregate(avg=Avg("budget"))["avg"] or 0
     total_appointments = appointments.count()
 
     # =========================================
-    # BAR CHART
+    # BAR CHART (Department Revenue)
     # =========================================
-
     department_queryset = (
         appointments
         .values("category__name")
-        .annotate(
-            total=Sum("accepted_total_amount")
-        )
+        .annotate(total=Sum("accepted_total_amount"))
     )
 
     bar_labels = []
     bar_values = []
 
     for item in department_queryset:
-
         if item["category__name"]:
-
-            bar_labels.append(
-                item["category__name"]
-            )
-
-            bar_values.append(
-                float(item["total"] or 0)
-            )
+            bar_labels.append(item["category__name"])
+            # CRITICAL FIX: Safe numeric conversion replacing None with 0.0
+            raw_val = item["total"] if item["total"] is not None else 0
+            bar_values.append(float(raw_val))
 
     if not bar_labels:
-
         bar_labels = ["OPD"]
         bar_values = [0]
 
     # =========================================
-    # PIE CHART
+    # PIE CHART (Revenue by Service Type)
     # =========================================
-
     service_queryset = (
         appointments
         .values("service_type__name")
@@ -741,31 +862,20 @@ def hospital_report_data(request):
     pie_values = []
 
     for item in service_queryset:
-
         if item["service_type__name"]:
-
-            pie_labels.append(
-                item["service_type__name"]
-            )
-
-            pie_values.append(
-                item["total"]
-            )
+            pie_labels.append(item["service_type__name"])
+            pie_values.append(item["total"])
 
     if not pie_labels:
-
         pie_labels = ["Emergency"]
         pie_values = [0]
 
     # =========================================
-    # LOAD ANALYTICS
+    # LINE CHART (Load Analytics)
     # =========================================
-
     hourly_queryset = (
         appointments
-        .annotate(
-            hour=TruncHour("created_at")
-        )
+        .annotate(hour=TruncHour("created_at"))
         .values("hour")
         .annotate(total=Count("id"))
         .order_by("hour")
@@ -775,26 +885,17 @@ def hospital_report_data(request):
     line_values = []
 
     for item in hourly_queryset:
-
         if item["hour"]:
-
-            line_labels.append(
-                item["hour"].strftime("%I:%M %p")
-            )
-
-            line_values.append(
-                item["total"]
-            )
+            line_labels.append(item["hour"].strftime("%I:%M %p"))
+            line_values.append(item["total"])
 
     if not line_labels:
-
         line_labels = ["10:00 AM"]
         line_values = [0]
 
     # =========================================
     # HEATMAP DATA
     # =========================================
-
     state_queryset = (
         appointments
         .exclude(address__isnull=True)
@@ -806,176 +907,528 @@ def hospital_report_data(request):
     heatmap_values = []
 
     city_state_map = {
-
-        "Mumbai": "Maharashtra",
-        "Pune": "Maharashtra",
-        "Nagpur": "Maharashtra",
-        "Delhi": "Delhi",
-        "Bangalore": "Karnataka",
-        "Chennai": "Tamil Nadu",
-        "Ahmedabad": "Gujarat",
-        "Jaipur": "Rajasthan",
-        "Lucknow": "Uttar Pradesh",
+        "Mumbai": "Maharashtra", "Pune": "Maharashtra", "Nagpur": "Maharashtra",
+        "Delhi": "Delhi", "Bangalore": "Karnataka", "Chennai": "Tamil Nadu",
+        "Ahmedabad": "Gujarat", "Jaipur": "Rajasthan", "Lucknow": "Uttar Pradesh",
         "Kolkata": "West Bengal"
-
     }
 
     for item in state_queryset:
-
         city = item["address__city"]
-
         if city in city_state_map:
-
-            heatmap_labels.append(
-                city_state_map[city]
-            )
-
-            heatmap_values.append(
-                item["total"]
-            )
+            heatmap_labels.append(city_state_map[city])
+            heatmap_values.append(item["total"])
 
     # =========================================
-    # PATIENT JOURNEY
+    # PATIENT JOURNEY (Funnel Data)
     # =========================================
-
     total_leads = appointments.count()
-
-    qualified_leads = appointments.filter(
-        status__in=[
-            "Accepted",
-            "Completed"
-        ]
-    ).count()
-
-    opportunities = appointments.filter(
-        accepted_bid__isnull=False
-    ).count()
-
-    proposals = appointments.filter(
-        accepted_total_amount__isnull=False
-    ).count()
-
-    closed = appointments.filter(
-        status="Completed"
-    ).count()
+    qualified_leads = appointments.filter(status__in=["Accepted", "Completed"]).count()
+    opportunities = appointments.filter(accepted_bid__isnull=False).count()
+    proposals = appointments.filter(accepted_total_amount__isnull=False).count()
+    closed = appointments.filter(status="Completed").count()
 
     # =========================================
     # FINAL RESPONSE
     # =========================================
-
     data = {
-
         "stats": {
-
             "revenue": formatted_revenue,
-
             "highest_revenue": highest_revenue,
-
             "growth": growth,
-
             "avg_revenue": avg_revenue,
-
-            "avg_budget":
-            round(float(avg_budget), 2),
-
-            "total_appointments":
-            total_appointments
-
+            "avg_budget": round(float(avg_budget), 2),
+            "total_appointments": total_appointments
         },
-
         "most_requested_test": {
-
             "labels": bar_labels,
-
             "data": bar_values
-
         },
-
         "revenue_by_test": {
-
             "labels": pie_labels,
-
             "data": pie_values
-
         },
-
         "bid_trend": {
-
             "labels": line_labels,
-
             "cbc": line_values
-
         },
-
         "heatmap": {
-
             "labels": heatmap_labels,
-
             "data": heatmap_values
-
         },
-
         "patient_journey": {
-
             "labels": [
-
                 "Leads Generated",
                 "Qualified Leads",
                 "Opportunities Created",
                 "Proposals Sent",
                 "Deals Closed"
-
             ],
-
             "data": [
-
                 total_leads,
                 qualified_leads,
                 opportunities,
                 proposals,
                 closed
-
             ],
-
             "conversion": [
-
                 "100%",
-
                 f"{round((qualified_leads / total_leads) * 100) if total_leads > 0 else 0}%",
-
                 f"{round((opportunities / total_leads) * 100) if total_leads > 0 else 0}%",
-
                 f"{round((proposals / total_leads) * 100) if total_leads > 0 else 0}%",
-
                 f"{round((closed / total_leads) * 100) if total_leads > 0 else 0}%"
-
             ]
-
         },
-
         "package_table": [
-
             {
-
                 "package": label,
-
                 "bookings": value,
-
-                "conversion":
-                f"{round((value / total_appointments) * 100) if total_appointments > 0 else 0}%"
-
+                "conversion": f"{round((value / total_appointments) * 100) if total_appointments > 0 else 0}%"
             }
-
-            for label, value in zip(
-                pie_labels,
-                pie_values
-            )
-
+            for label, value in zip(pie_labels, pie_values)
         ]
-
     }
 
     return JsonResponse(data)
+# @dashboard_login_required
+# def hospital_report_data(request):
+
+#     filter_type = request.GET.get(
+#         "filter",
+#         "month"
+#     )
+
+#     appointments = (
+#         HospitalAppointments.objects
+#         .select_related(
+#             "category",
+#             "service_type",
+#             "address"
+#         )
+#     )
+
+#     print("FILTER:", filter_type)
+#     print("TOTAL:", appointments.count())
+
+#     # =========================================
+#     # FILTER LOGIC
+#     # =========================================
+
+#     if filter_type == "week":
+
+#         current_week = datetime.now().isocalendar()[1]
+
+#         appointments = appointments.filter(
+#             created_at__week=current_week
+#         )
+
+#     elif filter_type == "month":
+
+#         current_month = datetime.now().month
+
+#         appointments = appointments.filter(
+#             created_at__month=current_month
+#         )
+
+#     elif filter_type == "custom":
+
+#         appointments = appointments.filter(
+#             created_at__year=datetime.now().year
+#         )
+
+#     else:
+
+#         appointments = appointments.filter(
+#             created_at__date=datetime.now().date()
+#         )
+
+#     # =========================================
+#     # MAIN STATS
+#     # =========================================
+
+#     total_revenue = appointments.aggregate(
+#         total=Sum("accepted_total_amount")
+#     )["total"] or 0
+
+#     # =========================================
+#     # TOTAL REVENUE FORMAT
+#     # =========================================
+
+#     if total_revenue >= 10000000:
+
+#         formatted_revenue = (
+#             f"₹{round(total_revenue / 10000000, 2)} Cr"
+#         )
+
+#     elif total_revenue >= 100000:
+
+#         formatted_revenue = (
+#             f"₹{round(total_revenue / 100000, 2)} L"
+#         )
+
+#     else:
+
+#         formatted_revenue = (
+#             f"₹{round(total_revenue, 2)}"
+#         )
+
+#     # =========================================
+#     # HIGHEST REVENUE DEPARTMENT
+#     # =========================================
+
+#     highest_department = (
+#         appointments
+#         .values("category__name")
+#         .annotate(
+#             total=Sum("accepted_total_amount")
+#         )
+#         .order_by("-total")
+#         .first()
+#     )
+
+#     highest_revenue = "₹0"
+
+#     if highest_department and highest_department["total"]:
+
+#         highest_amount = (
+#             highest_department["total"]
+#         )
+
+#         if highest_amount >= 100000:
+
+#             highest_revenue = (
+#                 f"₹{round(highest_amount / 100000, 2)}L"
+#             )
+
+#         else:
+
+#             highest_revenue = (
+#                 f"₹{round(highest_amount, 2)}"
+#             )
+
+#     # =========================================
+#     # QUARTER GROWTH
+#     # =========================================
+
+#     current_count = appointments.count()
+
+#     previous_count = max(
+#         current_count - 5,
+#         1
+#     )
+
+#     growth_percent = round(
+
+#         (
+#             (current_count - previous_count)
+#             / previous_count
+#         ) * 100,
+
+#         1
+
+#     )
+
+#     growth = f"+{growth_percent}%"
+
+#     # =========================================
+#     # AVG REVENUE / PATIENT
+#     # =========================================
+
+#     avg_revenue_patient = appointments.aggregate(
+#         avg=Avg("accepted_total_amount")
+#     )["avg"] or 0
+
+#     avg_revenue = (
+#         f"₹{round(avg_revenue_patient, 2)}"
+#     )
+
+#     avg_budget = appointments.aggregate(
+#         avg=Avg("budget")
+#     )["avg"] or 0
+
+#     total_appointments = appointments.count()
+
+#     # =========================================
+#     # BAR CHART
+#     # =========================================
+
+#     department_queryset = (
+#         appointments
+#         .values("category__name")
+#         .annotate(
+#             total=Sum("accepted_total_amount")
+#         )
+#     )
+
+#     bar_labels = []
+#     bar_values = []
+
+#     for item in department_queryset:
+
+#         if item["category__name"]:
+
+#             bar_labels.append(
+#                 item["category__name"]
+#             )
+
+#             bar_values.append(
+#                 float(item["total"] or 0)
+#             )
+
+#     if not bar_labels:
+
+#         bar_labels = ["OPD"]
+#         bar_values = [0]
+
+#     # =========================================
+#     # PIE CHART
+#     # =========================================
+
+#     service_queryset = (
+#         appointments
+#         .values("service_type__name")
+#         .annotate(total=Count("id"))
+#     )
+
+#     pie_labels = []
+#     pie_values = []
+
+#     for item in service_queryset:
+
+#         if item["service_type__name"]:
+
+#             pie_labels.append(
+#                 item["service_type__name"]
+#             )
+
+#             pie_values.append(
+#                 item["total"]
+#             )
+
+#     if not pie_labels:
+
+#         pie_labels = ["Emergency"]
+#         pie_values = [0]
+
+#     # =========================================
+#     # LOAD ANALYTICS
+#     # =========================================
+
+#     hourly_queryset = (
+#         appointments
+#         .annotate(
+#             hour=TruncHour("created_at")
+#         )
+#         .values("hour")
+#         .annotate(total=Count("id"))
+#         .order_by("hour")
+#     )
+
+#     line_labels = []
+#     line_values = []
+
+#     for item in hourly_queryset:
+
+#         if item["hour"]:
+
+#             line_labels.append(
+#                 item["hour"].strftime("%I:%M %p")
+#             )
+
+#             line_values.append(
+#                 item["total"]
+#             )
+
+#     if not line_labels:
+
+#         line_labels = ["10:00 AM"]
+#         line_values = [0]
+
+#     # =========================================
+#     # HEATMAP DATA
+#     # =========================================
+
+#     state_queryset = (
+#         appointments
+#         .exclude(address__isnull=True)
+#         .values("address__city")
+#         .annotate(total=Count("id"))
+#     )
+
+#     heatmap_labels = []
+#     heatmap_values = []
+
+#     city_state_map = {
+
+#         "Mumbai": "Maharashtra",
+#         "Pune": "Maharashtra",
+#         "Nagpur": "Maharashtra",
+#         "Delhi": "Delhi",
+#         "Bangalore": "Karnataka",
+#         "Chennai": "Tamil Nadu",
+#         "Ahmedabad": "Gujarat",
+#         "Jaipur": "Rajasthan",
+#         "Lucknow": "Uttar Pradesh",
+#         "Kolkata": "West Bengal"
+
+#     }
+
+#     for item in state_queryset:
+
+#         city = item["address__city"]
+
+#         if city in city_state_map:
+
+#             heatmap_labels.append(
+#                 city_state_map[city]
+#             )
+
+#             heatmap_values.append(
+#                 item["total"]
+#             )
+
+#     # =========================================
+#     # PATIENT JOURNEY
+#     # =========================================
+
+#     total_leads = appointments.count()
+
+#     qualified_leads = appointments.filter(
+#         status__in=[
+#             "Accepted",
+#             "Completed"
+#         ]
+#     ).count()
+
+#     opportunities = appointments.filter(
+#         accepted_bid__isnull=False
+#     ).count()
+
+#     proposals = appointments.filter(
+#         accepted_total_amount__isnull=False
+#     ).count()
+
+#     closed = appointments.filter(
+#         status="Completed"
+#     ).count()
+
+#     # =========================================
+#     # FINAL RESPONSE
+#     # =========================================
+
+#     data = {
+
+#         "stats": {
+
+#             "revenue": formatted_revenue,
+
+#             "highest_revenue": highest_revenue,
+
+#             "growth": growth,
+
+#             "avg_revenue": avg_revenue,
+
+#             "avg_budget":
+#             round(float(avg_budget), 2),
+
+#             "total_appointments":
+#             total_appointments
+
+#         },
+
+#         "most_requested_test": {
+
+#             "labels": bar_labels,
+
+#             "data": bar_values
+
+#         },
+
+#         "revenue_by_test": {
+
+#             "labels": pie_labels,
+
+#             "data": pie_values
+
+#         },
+
+#         "bid_trend": {
+
+#             "labels": line_labels,
+
+#             "cbc": line_values
+
+#         },
+
+#         "heatmap": {
+
+#             "labels": heatmap_labels,
+
+#             "data": heatmap_values
+
+#         },
+
+#         "patient_journey": {
+
+#             "labels": [
+
+#                 "Leads Generated",
+#                 "Qualified Leads",
+#                 "Opportunities Created",
+#                 "Proposals Sent",
+#                 "Deals Closed"
+
+#             ],
+
+#             "data": [
+
+#                 total_leads,
+#                 qualified_leads,
+#                 opportunities,
+#                 proposals,
+#                 closed
+
+#             ],
+
+#             "conversion": [
+
+#                 "100%",
+
+#                 f"{round((qualified_leads / total_leads) * 100) if total_leads > 0 else 0}%",
+
+#                 f"{round((opportunities / total_leads) * 100) if total_leads > 0 else 0}%",
+
+#                 f"{round((proposals / total_leads) * 100) if total_leads > 0 else 0}%",
+
+#                 f"{round((closed / total_leads) * 100) if total_leads > 0 else 0}%"
+
+#             ]
+
+#         },
+
+#         "package_table": [
+
+#             {
+
+#                 "package": label,
+
+#                 "bookings": value,
+
+#                 "conversion":
+#                 f"{round((value / total_appointments) * 100) if total_appointments > 0 else 0}%"
+
+#             }
+
+#             for label, value in zip(
+#                 pie_labels,
+#                 pie_values
+#             )
+
+#         ]
+
+#     }
+
+#     return JsonResponse(data)
 
 @dashboard_login_required
 def doctor_report_data(request):

@@ -3,7 +3,14 @@ import re
 import pyotp
 from .models import *
 import requests
-from .email_otp import async_send_otp_email, send_forgot_password_email
+from .email_otp import (
+    async_send_otp_email,
+    send_forgot_password_email,
+    generate_otp_secret,
+    generate_otp,
+    verify_otp as verify_totp
+)
+# from .email_otp import async_send_otp_email, send_forgot_password_email
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
 from django.conf import settings
@@ -60,25 +67,86 @@ def send_otp(request):
 
     return JsonResponse({"success": True, "token": secret, "message": "OTP sent successfully"})
 
+# def verify_otp_token(email, otp, bearer_token):
+#     if not bearer_token or not otp:
+#         return {"success": False, "message": "Missing token or OTP"}
+
+#     cache_key = f"otp:{bearer_token}"
+#     otp_data = cache.get(cache_key)
+#     if not otp_data:
+#         return {"success": False, "message": "OTP expired or invalid"}
+    
+#     if bearer_token != otp_data.get("secret"):
+#         return {"success": False, "message": "Invalid or forged token"}
+
+#     if email and otp_data.get("email") != email:
+#         return {"success": False, "message": "OTP does not match this email"}
+
+#     secret = otp_data["secret"]
+#     totp = pyotp.TOTP(secret, interval=300)
+#     if not totp.verify(otp, valid_window=5):
+#         return {"success": False, "message": "Invalid OTP"}
+
+#     return {"success": True, "message": "OTP verified successfully"}
+# def verify_otp_token(email, otp, bearer_token):
+#     print("=" * 60)
+#     print("EMAIL =", email)
+#     print("OTP =", otp)
+#     print("TOKEN =", bearer_token)
+
+#     cache_key = f"otp:{bearer_token}"
+#     otp_data = cache.get(cache_key)
 def verify_otp_token(email, otp, bearer_token):
-    if not bearer_token or not otp:
-        return {"success": False, "message": "Missing token or OTP"}
+    otp = str(otp).strip()   # <-- ADD THIS
+
+    print("=" * 60)
+    print("EMAIL =", email)
+    print("OTP RECEIVED =", repr(otp))   # <-- CHANGE THIS
+    print("TOKEN =", bearer_token)
 
     cache_key = f"otp:{bearer_token}"
     otp_data = cache.get(cache_key)
+
+    print("CACHE DATA =", otp_data)
+
+    if not bearer_token or not otp:
+        print("FAILED : Missing token or OTP")
+        return {"success": False, "message": "Missing token or OTP"}
+
     if not otp_data:
+        print("FAILED : OTP expired")
         return {"success": False, "message": "OTP expired or invalid"}
-    
-    if bearer_token != otp_data.get("secret"):
-        return {"success": False, "message": "Invalid or forged token"}
 
-    if email and otp_data.get("email") != email:
-        return {"success": False, "message": "OTP does not match this email"}
+    print("CACHE EMAIL =", otp_data.get("email"))
+    print("CACHE SECRET =", otp_data.get("secret"))
 
-    secret = otp_data["secret"]
+    # secret = otp_data["secret"]
+
+    # totp = pyotp.TOTP(secret, interval=300)
+
+    # print("VERIFY RESULT =", totp.verify(otp, valid_window=5))
+
+    # if not totp.verify(otp, valid_window=5):
+    otp = str(otp).strip()
+    secret = otp_data["secret"].strip()
+
     totp = pyotp.TOTP(secret, interval=300)
-    if not totp.verify(otp, valid_window=5):
+
+    print("OTP GENERATED NOW =", totp.now())
+    print("OTP RECEIVED      =", otp)
+
+    result = totp.verify(otp, valid_window=5)
+
+    print("VERIFY RESULT =", result)
+
+    if not result:
+        print("FAILED : Invalid OTP")
         return {"success": False, "message": "Invalid OTP"}
+        # print("FAILED : Invalid OTP")
+        # return {"success": False, "message": "Invalid OTP"}
+
+    print("SUCCESS")
+    print("=" * 60)
 
     return {"success": True, "message": "OTP verified successfully"}
 
@@ -1025,6 +1093,32 @@ def save_medical_pharmacy(request):
     contact_phone = data.get("contact_person_phone")
     contact_role = data.get("contact_person_role")
     ref_otp = data.get("otp2")
+    contact_otp_token = data.get("contact_otp_token")
+
+    
+
+    # otp_result = verify_otp_token(
+    #    None,
+    #    ref_otp,
+    #    contact_otp_token
+    # )
+
+    # if not otp_result["success"]:
+    if not verify_contact_person_otp(ref_otp, contact_otp_token):
+        return JsonResponse(
+          {
+            "success": False,
+            "message": "Invalid Contact Person OTP"
+          },
+          status=400
+        )
+        # return JsonResponse(
+        #   {
+        #     "success": False,
+        #     "message": otp_result["message"]
+        #   },
+        #   status=400
+        # )
     if not contact_name:
         errors["contact_person_name"] = "Contact name required."
     if not contact_phone:
@@ -1273,6 +1367,9 @@ def save_lab(request):
 def save_hospital(request):
     data = request.POST
     files = request.FILES
+    print("=" * 100)
+    print("FILES =", request.FILES)
+    print("=" * 100)
     errors = {}
 
     required_fields = {
@@ -1314,9 +1411,30 @@ def save_hospital(request):
         if User.objects.filter(email=email).exists():
             errors["email"] = "Email already registered."
 
+    # otp_token = data.get("otp_token")
+    # print("OTP TOKEN =", otp_token)
+    # print("OTP1 =", email_otp)
+    # print("CACHE =", cache.get(f"otp:{otp_token}"))
+    # email_otp = data.get("otp1")
+    # otp_verification = verify_otp_token(email, email_otp, otp_token)
+    # print("Bearer =", bearer_token)
+    # print("Cache =", otp_data)
+    # print("Email =", email) 
+    # print("OTP =", otp)
+    # email_otp = data.get("otp1")
+    email_otp = data.get("otp1", "").strip()
     otp_token = data.get("otp_token")
-    email_otp = data.get("otp1")
+
+    print("=" * 50)
+    print("OTP TOKEN FROM FORM =", repr(otp_token))
+    print("OTP FROM FORM =", repr(email_otp))
+    print("CACHE =", cache.get(f"otp:{otp_token}"))
+    print("=" * 50)
+
     otp_verification = verify_otp_token(email, email_otp, otp_token)
+
+
+    print("VERIFY RESULT =", otp_verification)
     if not otp_verification["success"]:
         errors["otp1"] = otp_verification["message"]
 
@@ -1368,6 +1486,10 @@ def save_hospital(request):
     )
     if photo_err:
         errors["photo"] = photo_err
+    print("=" * 100)
+    print("POST DATA =", request.POST)
+    print("ERRORS =", errors)
+    print("=" * 100)
 
     if errors:
         return JsonResponse({"success": False, "errors": errors}, status=400)
@@ -1782,3 +1904,53 @@ def file_scan_api(request):
         "safe": status,
         "message": message
     })
+@csrf_protect
+@require_POST
+def send_contact_person_otp(request):
+
+    phone = request.POST.get("phone")
+
+    if not phone:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Phone is required."
+            },
+            status=400
+        )
+
+    otp_secret = generate_otp_secret()
+
+    otp = generate_otp(otp_secret)
+
+    print("="*50)
+    print("CONTACT PERSON OTP =", otp)
+    print("PHONE =", phone)
+    print("="*50)
+    cache.set(
+        f"otp:{otp_secret}",
+        {
+            "phone": phone,
+            "secret": otp_secret,
+            "created_at": timezone.now().isoformat()
+        },
+        timeout=300
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "otp_token": otp_secret,
+            "message": "OTP Sent Successfully"
+        }
+    )
+def verify_contact_person_otp(otp, token):
+
+    otp_data = cache.get(f"otp:{token}")
+
+    if not otp_data:
+        return False
+
+    secret = otp_data["secret"]
+
+    return verify_totp(secret, otp)

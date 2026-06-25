@@ -481,259 +481,273 @@ loadLabHistory("accepted", 1);
   });
 
   /* Open modal on history card click */
-  $("#lab-history-cards-container").on(
-  "click",
-  ".card-all-pending, .card-all-accepted, .card-all-completed, .card-all-cancelled, .card-all-missed",
-  function () { 
-    console.log("CARD CLICKED");
-    const card = $(this);
+$("#lab-history-cards-container").on(
+    "click",
+    ".card-all-pending, .card-all-accepted, .card-all-completed, .card-all-cancelled, .card-all-missed",
+    function () {
 
-    $("#modal-name").text(card.data("name") || "-");
-    $("#modal-gender").text(card.data("gender") || "-");
-    $("#modal-age").text(card.data("age") || "-");
-    let phone = String(card.data("phone") || "-");
+        const card = $(this);
+        const status = (card.data("status") || "").toLowerCase();
 
-    if (phone !== "-" && !phone.startsWith("+91")) {
-      phone = "+91 " + phone;
-    }
+        let modal;
 
-    $("#modal-phone").text(phone);
-    $("#modal-visit-type").text(
-    (card.data("visit-type") || "Visit")
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, c => c.toUpperCase())
-    );
-    $("#modal-date").text(card.data("date") || "-");
-    let address = String(card.data("address") || "-");
+        switch (status) {
+            case "accepted":
+                modal = $(".modal-accepted");
+                break;
 
-    if (
-      address === "string -" ||
-      address === "string" ||
-      address.trim() === ""
-    ) {
-      address = "-";
-    }
+            case "pending":
+                modal = $(".modal-pending");
+                break;
 
-    $("#modal-address").text(address);
-    $("#modal-service-type").text(card.data("service-type") || "-");
-    $("#modal-details").text(card.data("details") || "-");
-    const status = (card.data("status") || "").toLowerCase();
-    let step1 = "bg-blue-haze";
-    let step2 = "bg-blue-haze";
-    let step3 = "bg-blue-haze";
-    let step4 = "bg-blue-haze";
+            case "cancelled":
+            case "canceled":
+                modal = $(".modal-canceled");
+                break;
 
-    if (status === "pending") {
-      step1 = "bg-dodger-blue";
-    }
+            case "missed":
+                modal = $(".modal-missed");
+                break;
 
-    if (status === "accepted") {
-      step1 = "bg-dodger-blue";
-      step2 = "bg-dodger-blue";
-    }
+            default:
+                modal = $(".modal-pending");
+        }
+        // Store globally for ajax actions
+        window.currentAppointmentId = card.data("id");
+        window.currentBidId = card.data("bid-id");
+        const appointmentId = card.data("id");
+        const bidId = card.data("bid-id");
+        window.currentBidId = bidId;
+        modal.find("#modal-name").text(card.data("name") || "-");
+        modal.find("#modal-gender").text(card.data("gender") || "-");
+        modal.find("#modal-age").text(card.data("age") || "-");
 
-    if (status === "completed") {
-      step1 = "bg-dodger-blue";
-      step2 = "bg-dodger-blue";
-      step3 = "bg-dodger-blue";
-    }
+        let phone = String(card.data("phone") || "-");
+        if (phone !== "-" && !phone.startsWith("+91")) {
+            phone = "+91 " + phone;
+        }
+        modal.find("#modal-phone").text(phone);
 
-  if (status === "cancelled" || status === "cancelled") {
-    step1 = "bg-dodger-blue";
-    step4 = "bg-dodger-blue";
-  }
-    const orderId = card.data("order-id") || "-";
-    const budget = card.data("budget") ? "₹" + card.data("budget") : "-";
-    const visitType = card.data("visit-type") || "Home Visit";
-//     const billImage = card.data("bill");
-//     console.log("===== PROFORMA DEBUG =====");
-//     console.log("Bill Image =", billImage);
-//     console.log("Appointment ID =", card.data("id"));
-    
-    
-//     if (billImage) {
-
-//       $("#bill-preview-container").removeClass("hidden");
-
-//       $("#proformaBillImage").attr("src", billImage);
-
-//       $("#proformaBillLink").attr("href", billImage);
-
-// }
-    // console.log("Bill Image =", billImage);
-
-    // if (billImage) {
-
-    //   $("#bill-preview-container").removeClass("hidden");
-
-    //   $("#proformaBillImage").attr("src", billImage);
-
-    //   $("#proformaBillLink").attr("href", billImage);
-
-    // } else {
-
-    // $("#bill-preview-container").html(`
-    //     <p class="text-red-500 text-sm">
-    //         No Proforma Bill Available
-    //     </p>
-    // `);
-
-    // $("#bill-preview-container").removeClass("hidden");
-
-    // }
-    
-    let rightTitle = "Budget";
-    let rightValue = budget;
-    let buttons = "";
-
-    // 🔵 Status logic
-    if (status === "accepted") {
-      rightTitle = card.data("distance") || "6 km";
-      rightValue = card.data("time") || "20 mins away";
-
-      // buttons = `
-      //   <div class="pt-4 flex justify-center items-center gap-3">
-      //     <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
-      //     <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
-      //   </div>
-      // `;
-      buttons = `
-          <div class="pt-4 flex justify-center items-center gap-3">
-  
-            <button 
-              class="complete-appointment-btn bg-dodger-blue text-white rounded-lg w-[180px] h-10"
-              data-id="${card.data("id")}">
-              Complete
-            </button>
-
-            <button 
-              class="cancel-appointment-btn border border-red-500 text-red-500 rounded-lg w-[180px] h-10"
-              data-id="${card.data("id")}">
-              Cancel Appointment
-            </button>
-
-          </div>
-        `;
-    }
-
-    if (status === "pending") {
-      buttons = `
-        <div class="pt-4 flex justify-center items-center gap-3">
-          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
-          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Reject</button>
-        </div>
-      `;
-    }
-
-    if (status === "cancelled" || status === "cancelled") {
-      rightTitle = "Canceled by";
-      rightValue = "Technician";
-    }
-
-    if (status === "missed") {
-      rightTitle = "Reason";
-      rightValue = "Patient didn’t show up";
-    }
-
-    // 🧠 Bottom UI inject
-    $("#modal-enquiry-detail").html(`
-      <div class="flex flex-col py-4 gap-4">
-        <div class="flex justify-center items-center gap-1">
-          <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-          <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-
-          <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-          <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-
-          <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-          <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-
-          <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-        </div>
-
-        <div class="flex items-center justify-between px-10 text-sm">
-          <p>Enquiry</p>
-          <p>Appointment</p>
-          <p class="text-spanish-gray">Completed</p>
-          <p class="text-spanish-gray">Cancel/Expired</p>
-        </div>
-      </div>
-      <div class="mt-6">
-        
-        <div class="flex justify-between">
-          <p>Order ID</p>
-          <p>${rightTitle}</p>
-        </div>
-
-        <div class="flex justify-between mt-1">
-          <p class="text-gray-500">Order #${orderId}</p>
-          <p>${rightValue}</p>
-        </div>
-
-        <div class="flex justify-between items-center mt-3">
-          <label class="flex items-center gap-2">
-            <span>No Show</span>
-            <input type="checkbox" class="w-4 h-4 accent-dodger-blue">
-          </label>
-
-          <p class="text-gray-400">Patient didn’t show up</p>
-        </div>
-
-        
-        <div class="flex justify-between items-center mt-4">
-        <div class="flex items-center gap-2">
-          <span>
-            ${
-              (visitType || "Visit")
+        $("#modal-visit-type").text(
+            (card.data("visit-type") || "Visit")
                 .replaceAll("_", " ")
-                .toLowerCase() === "home collection"
-                ? "Home Visit"
-                : (visitType || "Visit")
-                    .replaceAll("_", " ")
-                    .replace(/\b\w/g, c => c.toUpperCase())
-            }
-          </span>
+                .replace(/\b\w/g, c => c.toUpperCase())
+        );
 
-          <span class="text-dodger-blue font-medium">
-            ${budget.replace(".00", "")}
-          </span>
-          </div>
+        modal.find("#modal-date").text(card.data("date") || "-");
 
-          <div class="proforma-btn border border-dodger-blue text-jet-black rounded-lg px-3 py-1 flex items-center gap-2 cursor-pointer">
+        let address = String(card.data("address") || "-");
+        if (
+            address === "string -" ||
+            address === "string" ||
+            address.trim() === ""
+        ) {
+            address = "-";
+        }
 
-         
-            
+        modal.find("#modal-address").text(address);
+        modal.find("#modal-service-type").text(card.data("service-type") || "-");
+        modal.find("#modal-details").text(card.data("details") || "-");
 
-                <p class="font-semibold text-sm mb-0 whitespace-nowrap">
-                  Proforma Bill
-                </p>
+        // const status = String(card.data("status") || "").toLowerCase();
+        console.log("STATUS =", status);
+        console.log("RAW STATUS =", card.data("status"));
+        console.log(card);
 
-  
-        <span class="material-symbols-outlined !text-lg">visibility</span>
+        let step1 = "bg-blue-haze";
+        let step2 = "bg-blue-haze";
+        let step3 = "bg-blue-haze";
+        let step4 = "bg-blue-haze";
 
-          </div>
-        </div>
-    </div>
+        if (status === "pending") {
+            step1 = "bg-dodger-blue";
+        }
 
-        ${buttons}
+        if (status === "accepted") {
+            step1 = step2 = "bg-dodger-blue";
+        }
 
-      </div>
-    `);
+        if (status === "completed") {
+            step1 = step2 = step3 = "bg-dodger-blue";
+        }
 
-    $("#modal-order-id").text("Order #" + (card.data("order-id") || "-"));
-    $("#modal-budget").text(card.data("budget") ? "₹" + card.data("budget") : "-");
-//     if (billImage) {
+        if (status === "cancelled") {
+            step1 = step4 = "bg-dodger-blue";
+        }
 
-//     $("#bill-preview-container").removeClass("hidden");
+        const orderId = card.data("order-id") || "-";
+        const budget = card.data("budget")
+            ? "₹" + card.data("budget")
+            : "-";
 
-//     $("#proformaBillImage").attr("src", billImage);
+        const visitType = card.data("visit-type") || "Visit";
 
-//     $("#proformaBillLink").attr("href", billImage);
+        let rightTitle = "Budget";
+        let rightValue = budget;
+        let buttons = "";
 
-// } 
+        if (status === "accepted") {
 
-    $(".modal-pending").removeClass("hidden");
-  }
+            rightTitle = card.data("distance") || "6 km";
+            rightValue = card.data("time") || "20 mins away";
+
+            buttons = `
+                <div class="pt-5 flex justify-center gap-3">
+
+                    <button
+                        class="complete-appointment-btn bg-dodger-blue text-white rounded-lg w-[180px] h-10"
+                        data-id="${card.data("id")}"
+                        data-bid-id="${card.data("bid-id")}">
+                        Complete
+                    </button>
+
+                    <button
+                        class="cancel-bid-btn border border-red-500 text-red-500 rounded-lg w-[180px] h-10"
+                        data-bid-id="${card.data("bid-id")}">
+                        Cancel Bid
+                    </button>
+
+                </div>
+            `;
+        }
+
+        if (status === "pending") {
+
+            buttons = `
+                <div class="pt-5 flex justify-center">
+
+                    <button
+                        class="cancel-bid-btn border border-red-500 text-red-500 rounded-lg w-[220px] h-10"
+                        data-bid-id="${card.data("bid-id")}">
+                        Cancel Bid
+                    </button>
+
+                </div>
+            `;
+        }
+
+        if (status === "completed") {
+
+            rightTitle = "Completed";
+            rightValue = card.data("completed-date") || "-";
+        }
+
+        if (status === "cancelled") {
+
+            rightTitle = "Cancelled";
+            rightValue = "Bid Cancelled";
+        }
+
+        if (status === "missed") {
+
+            rightTitle = "Reason";
+            rightValue = "Patient didn't show up";
+        }
+        console.log("BUTTONS =", buttons);
+        modal.find(".modal-enquiry-detail").html(`
+
+            <div class="flex flex-col py-4 gap-4">
+
+                <div class="flex justify-center items-center gap-1">
+
+                    <div class="w-2 h-2 ${step1} rounded-full"></div>
+                    <div class="w-[138px] h-0.5 ${step2}"></div>
+
+                    <div class="w-2 h-2 ${step2} rounded-full"></div>
+                    <div class="w-[138px] h-0.5 ${step3}"></div>
+
+                    <div class="w-2 h-2 ${step3} rounded-full"></div>
+                    <div class="w-[138px] h-0.5 ${step4}"></div>
+
+                    <div class="w-2 h-2 ${step4} rounded-full"></div>
+
+                </div>
+
+                <div class="flex justify-between px-10 text-sm">
+                    <p>Enquiry</p>
+                    <p>Appointment</p>
+                    <p>Completed</p>
+                    <p>Cancelled</p>
+                </div>
+
+            </div>
+
+            <div class="mt-5">
+
+                <div class="flex justify-between">
+                    <p>Order ID</p>
+                    <p>${rightTitle}</p>
+                </div>
+
+                <div class="flex justify-between mt-1">
+                    <p class="text-gray-500">Order #${orderId}</p>
+                    <p>${rightValue}</p>
+                </div>
+
+                ${
+                    status === "accepted"
+                        ? `
+                <div class="flex justify-between items-center mt-3">
+
+                    <label class="flex items-center gap-2">
+
+                        <span>No Show</span>
+
+                        <input
+                            type="checkbox"
+                            id="no-show-checkbox"
+                            class="accent-dodger-blue">
+
+                    </label>
+
+                    <span class="text-gray-500">
+                        Patient didn't show up
+                    </span>
+
+                </div>
+                `
+                        : ""
+                }
+
+                <div class="flex justify-between items-center mt-4">
+
+                    <div class="flex items-center gap-2">
+
+                        <span>
+                        ${
+                            visitType
+                                .replaceAll("_", " ")
+                                .replace(/\b\w/g, c => c.toUpperCase())
+                        }
+                        </span>
+
+                        <span class="text-dodger-blue font-semibold">
+                            ${budget.replace(".00", "")}
+                        </span>
+
+                    </div>
+
+                    <button
+                        class="proforma-btn border border-dodger-blue rounded-lg px-4 py-2 flex items-center gap-2">
+
+                        <span>Proforma Bill</span>
+
+                        <span class="material-symbols-outlined !text-lg">
+                            visibility
+                        </span>
+
+                    </button>
+
+                </div>
+
+                ${buttons}
+
+            </div>
+        `);
+
+        $(".modal-pending").removeClass("hidden");
+
+    }
 );
 
 
@@ -766,60 +780,142 @@ function getCookie(name) {
 
     return cookieValue;
 }
-$(document).on("click", ".complete-appointment-btn", function (e) {
 
-    e.preventDefault();
+// const csrftoken = getCookie("csrftoken");
 
-    const appointmentId = $(this).data("id");
+$(document).on("click", ".cancel-bid-btn", function () {
 
     $.ajax({
-        url: "/history/lab/complete/",
+        url: "/history/cancel-bid/",
         type: "POST",
-
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
         data: {
-            id: appointmentId,
-            csrfmiddlewaretoken: getCookie("csrftoken")
+            bid_id: window.currentBidId
         },
 
-        success: function () {
+        success: function (response) {
 
-          showToast("Appointment Completed Successfully", "success");
+            if (response.success) {
 
-          $(".modal-pending").addClass("hidden");
+                toastr.success("Bid cancelled successfully");
 
-          setTimeout(() => {
-             location.reload();
-          }, 1000);
+                $(".modal-pending").addClass("hidden");
+
+                loadLabHistory(currentHistoryStatus, 1);
+
+            } else {
+
+                toastr.error(response.message);
+
+            }
+
+        },
+
+        error: function () {
+
+            toastr.error("Something went wrong");
+
         }
-        
+
     });
+
 });
-$(document).on("click", ".cancel-appointment-btn", function (e) {
 
-    e.preventDefault();
-
-    const appointmentId = $(this).data("id");
+$(document).on("click", ".complete-appointment-btn", function () {
 
     $.ajax({
-        url: "/history/lab/cancel/",
+
+        url: "/history/complete-appointment/",
         type: "POST",
 
-        data: {
-            id: appointmentId,
-            csrfmiddlewaretoken: getCookie("csrftoken")
+        headers: {
+            "X-CSRFToken": csrftoken
         },
 
-        success: function () {
+        data: {
 
-          showToast("Appointment Cancelled Successfully", "success");
+            appointment_id: window.currentAppointmentId,
+            bid_id: window.currentBidId
 
-          $(".modal-pending").addClass("hidden");
+        },
 
-          setTimeout(() => {
-            location.reload();
-          }, 1000);
+        success: function (response) {
+
+            if (response.success) {
+
+                toastr.success("Appointment completed successfully");
+
+                $(".modal-pending").addClass("hidden");
+
+                loadLabHistory(currentHistoryStatus, 1);
+
+            } else {
+
+                toastr.error(response.message);
+
+            }
+
+        },
+
+        error: function () {
+
+            toastr.error("Something went wrong");
+
         }
+
     });
+
+});
+
+$(document).on("change", "#no-show-checkbox", function () {
+
+    if (!this.checked) return;
+
+    $.ajax({
+
+        url: "/history/no-show-appointment/",
+
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+
+        data: {
+
+            appointment_id: window.currentAppointmentId,
+            bid_id: window.currentBidId
+
+        },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                toastr.success("Appointment marked as No Show");
+
+                $(".modal-pending").addClass("hidden");
+
+                loadLabHistory(currentHistoryStatus, 1);
+
+            } else {
+
+                toastr.error(response.message);
+
+            }
+
+        },
+
+        error: function () {
+
+            toastr.error("Something went wrong");
+
+        }
+
+    });
+
 });
 function showToast(message, type = "success") {
 
@@ -860,26 +956,6 @@ $(document).on("click", "#shareBtn", function () {
     );
 });
 
-$(document).on("click", ".complete-appointment-btn", function (e) {
-
-    console.log("COMPLETE CLICKED");
-
-    e.preventDefault();
-
-    const appointmentId = $(this).data("id");
-
-    console.log("Appointment ID =", appointmentId);
-});
-$(document).on("click", ".cancel-appointment-btn", function (e) {
-
-    console.log("CANCEL CLICKED");
-
-    e.preventDefault();
-
-    const appointmentId = $(this).data("id");
-
-    console.log("Appointment ID =", appointmentId);
-});
 $(document).on("click", "#shareBtn", function (e) {
 
     e.preventDefault();

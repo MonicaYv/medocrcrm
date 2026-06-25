@@ -882,14 +882,14 @@ document.getElementById("searchInput")
   }
 
    
-
-
-});
 $('.report-filter[data-type="today"]')
     .addClass("active");
 
 // DEFAULT LOAD
 loadDashboardData("today");
+
+
+});
 
 
 

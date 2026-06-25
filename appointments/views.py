@@ -346,7 +346,13 @@ def place_bid(request):
             bid_status=LabBidStatus.PENDING,
             is_active=True,
         )
-
+        appointment.refresh_from_db()
+        print(
+            appointment.id,
+            appointment.status,
+            appointment.accepted_lab_id,
+            appointment.accepted_bid_id,
+        )
         return JsonResponse({
             "success": True,
             "message": "Bid placed successfully",

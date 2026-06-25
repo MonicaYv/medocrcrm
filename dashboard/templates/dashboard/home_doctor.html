@@ -241,11 +241,11 @@
                               {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
                           </p>
 
-                          <!-- <p class="font-semibold text-sm">
+                          {% comment %} <p class="font-semibold text-sm">
                               To be attended by
                               Dr. {{ doctor_profile.first_name }}
                               {{ doctor_profile.last_name }}
-                          </p> -->
+                          </p> {% endcomment %}
                           <p class="font-semibold text-sm">
                             To be attended by
                             {{ doctor_profile.full_name }}
@@ -345,16 +345,16 @@
 
                       <div class="flex flex-col gap-1">
 
-                          <!-- <p class="font-semibold text-sm">
+                          <p class="font-semibold text-sm">
                               Pt.
                               {{ appointment.user.userprofile.first_name }}
                               {{ appointment.user.userprofile.last_name }}
-                          </p> -->
-                          <p class="font-semibold text-sm">
+                          </p>
+                          {% comment %} <p class="font-semibold text-sm">
                               Pt.
                               {{ appointment.user.first_name }}
                               {{ appointment.user.last_name }}
-                          </p>
+                          </p> {% endcomment %}
 
                           <p class="font-normal text-xs text-spanish-gray">
                               {{ appointment.description|truncatechars:30 }}

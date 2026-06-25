@@ -184,7 +184,23 @@ def dashboard_home(request):
 
         # ================= PHARMACY =================
         elif user_type == 'pharmacy':
+            contact_person = ContactPerson.objects.filter(
+                profile_type="pharmacy",
+                profile=user
+            ).first()
+
+            print("========== CONTACT PERSON ==========")
+
+            if contact_person:
+                print("NAME =", contact_person.name)
+                print("PHONE =", contact_person.phone_number)
+                print("ROLE =", contact_person.role)
+            else:
+                print("CONTACT PERSON NOT FOUND")
             pharmacy_profile = PharmacyProfile.objects.get(user=user)
+            
+            
+            
 
             pending_orders = UserPurchase.objects.filter(
                 assigned_pharmacy=pharmacy_profile,
@@ -231,7 +247,10 @@ def dashboard_home(request):
             popular_coupons = Coupon.objects.all().order_by('-redeemed_count')[:5]
 
             context.update({
+                
                 'pharmacy_profile': pharmacy_profile,
+                 
+                'contact_person': contact_person,
 
                 'scheduled_orders': scheduled_orders,
                 'popular_coupons': popular_coupons,
@@ -285,6 +304,12 @@ def dashboard_home(request):
                 profile_type="lab",
                 profile=user
             ).first()
+            print("=" * 60   )
+            print("LOGGED USER ID =", user.id)
+            print("LOGGED USER EMAIL =", user.email)
+            print("LOGGED USER TYPE =", user.user_type)
+            print("CONTACT PERSON =", contact_person)
+            print("=" * 60)
             print("========== CONTACT PERSON ==========")
             print("USER ID =", user.id)
 
@@ -610,6 +635,36 @@ def dashboard_home(request):
             ).order_by(
                 "preferred_date_from"
             )[:3]
+
+            today = timezone.now().date()
+            today_appointments = HospitalAppointments.objects.filter(
+                accepted_hospital=hospital_profile,
+                preferred_date_from__date=today
+            )
+            total_appointments_today = today_appointments.count()
+            confirmed_count = today_appointments.filter(
+                status=HospitalAppointmentStatus.ACCEPTED
+            ).count()
+            pending_count = today_appointments.filter(
+                status=HospitalAppointmentStatus.PENDING
+            ).count()
+
+            total_doctors = DoctorProfile.objects.filter(
+                hospital=hospital_profile
+            ).count()
+
+            bed_capacity = getattr(hospital_profile, 'bed_capacity', 20) or 20
+            icu_beds = getattr(hospital_profile, 'icu_beds', 4) or 4
+            private_beds = getattr(hospital_profile, 'private_beds', 4) or 4
+            general_beds = bed_capacity - icu_beds - private_beds
+
+            active_subscription = (
+                SubscriptionHistory.objects.select_related("plan")
+                .filter(user=user, status="active", expiry_date__gte=timezone.now())
+                .order_by("-activation_date")
+                .first()
+            )
+
             context["appointment_requests"] = appointment_requests
             context["scheduled_appointments"] = scheduled_appointments
             context.update({
@@ -635,6 +690,15 @@ def dashboard_home(request):
                 ).count(),
                 'events': CalendarEvent.objects.all().order_by('date'),
                 'user': user,
+                'total_appointments_today': total_appointments_today,
+                'confirmed_count': confirmed_count,
+                'pending_count': pending_count,
+                'total_doctors': total_doctors,
+                'bed_capacity': bed_capacity,
+                'icu_beds': icu_beds,
+                'private_beds': private_beds,
+                'general_beds': general_beds,
+                'active_subscription': active_subscription,
             })
             return render(request, "dashboard/home_hospital.html", context)
 
