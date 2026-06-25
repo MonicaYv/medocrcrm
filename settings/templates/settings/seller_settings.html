@@ -4,152 +4,195 @@
 {% block content %}
 
 <!-- Main Content -->
-            <div
-                class=" relative transition-all duration-300 main-content h-full flex-1 flex flex-col gap-8 overflow-y-auto scroll p-5">
-                <div
-                    class="show-sidebar-toggle hidden fixed top-[100px] left-12 z-50 h-10 w-10 bg-{{secondary_bg}} items-center justify-center rounded-r-md cursor-pointer">
-                    <span class="material-symbols-outlined bold-weight text-{{ text }}">
-                        arrow_forward_ios
-                    </span>
-                </div>
-                <div class="shadow p-4 rounded-lg m-2 max-w-full bg-white">
-                        <div
-                            class="bg-{{secondary_bg}} rounded-[20px] flex justify-between items-center py-3.5 px-[30px] mb-10 tabs-menu overflow-x-auto gap-5 lg:gap-0">
-                            <div class="{{main_tab_class}} {{active_main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
-                                data-tab="settings">
-                                <span class="material-symbols-outlined">settings</span>
-                                <span>Settings</span>
-                            </div>
-                            <div class="{{main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
-                                data-tab="subscription">
-                                <span class="material-symbols-outlined">credit_score</span>
-                                <span>Subscription</span>
-                            </div>
-                            <div class="{{main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
-                                data-tab="rewards">
-                                <span class="material-symbols-outlined material-filled">trophy</span>
-                                <span>Rewards</span>
-                            </div>
-                            <div class="{{main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
-                                data-tab="support">
-                                <span class="material-symbols-outlined">search_activity</span>
-                                <span>Support</span>
-                            </div>
-                            <div class="{{main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
-                                data-tab="donate">
-                                <span class="material-symbols-outlined">volunteer_activism</span>
-                                <span>Donate</span>
-                            </div>
-                        </div>
+<div
+    class=" relative transition-all duration-300 main-content h-full flex-1 flex flex-col gap-8 overflow-y-auto scroll p-5">
+    <div
+        class="show-sidebar-toggle hidden fixed top-[100px] left-12 z-50 h-10 w-10 bg-{{secondary_bg}} items-center justify-center rounded-r-md cursor-pointer">
+        <span class="material-symbols-outlined bold-weight text-{{ text }}">
+            arrow_forward_ios
+        </span>
+    </div>
+    <div class="shadow p-4 rounded-lg m-2 max-w-full bg-white">
+        <div
+            class="bg-{{secondary_bg}} rounded-[20px] flex justify-between items-center py-3.5 px-[30px] mb-10 tabs-menu overflow-x-auto gap-5 lg:gap-0">
+            <div class="{{main_tab_class}} {{active_main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
+                data-tab="settings">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Settings</span>
+            </div>
+            <div class="{{main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
+                data-tab="subscription">
+                <span class="material-symbols-outlined">credit_score</span>
+                <span>Subscription</span>
+            </div>
+            <div class="{{main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
+                data-tab="rewards">
+                <span class="material-symbols-outlined material-filled">trophy</span>
+                <span>Rewards</span>
+            </div>
+            <div class="{{main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
+                data-tab="support">
+                <span class="material-symbols-outlined">search_activity</span>
+                <span>Support</span>
+            </div>
+            <div class="{{main_tab_class}} flex items-center gap-2.5 cursor-pointer text-dark-gray text-lg font-normal"
+                data-tab="donate">
+                <span class="material-symbols-outlined">volunteer_activism</span>
+                <span>Donate</span>
+            </div>
+        </div>
 
-                    <!--Settings Section-->
-                    <div class="mainTab-content" id="settings">
-                        <div class="mt-5 flex items-center gap-2.5">
-                            <span class="material-symbols-outlined">settings</span>
-                            <span class="font-semibold text-base">Settings</span>
-                        </div>
-                        <p class="font-normal text-lg text-jet-black">
-                            Make It Perfect—Update Your Settings!
-                        </p>
-                        <div class="flex gap-4 sm:gap-5 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar tabs h-[70px] items-center">
-                            <button
-                            class="{{ tab_class }} {% if active_tab == 'account-details' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
-                            data-tab="account-details"
-                            data-parent="settings">
-                            Account Details
-                            </button>
-                            <button
-                            class="{{ tab_class }} {% if active_tab == 'documents' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
-                            data-tab="documents"
-                            data-parent="settings">
-                            Documents
-                            </button>
-                            <button
-                            class="{{ tab_class }} {% if active_tab == 'notification-control' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
-                            data-tab="notification-control"
-                            data-parent="settings">
-                            Notification Control Center
-                            </button>
-                        </div>
-                        <div
-                            class="relative edit-toggle flex items-center gap-4 pl-6 mt-4 sm:mt-7 sm:ml-auto sm:justify-end justify-between w-full sm:w-auto flex-wrap sm:flex-nowrap">
-                            <div class="flex flex-col items-end gap-1">
-                            <p class="font-normal text-base text-dark-gray lastEditMsg hidden lg:!block !hidden">Last Edit on
-                                {{updated_at}}</p>
-                            <p class="font-normal text-xs text-medium-gray fileLimit hidden">All the image of documents should not
-                                exceed the file size limit of 3MB</p>
-                            </div>
-                            <div class="relative inline-block group">
-                            <span class="material-symbols-outlined cursor-pointer border p-0.5 rounded-sm editIcon" id="editIcon">
-                                edit
-                            </span>
-                            <!-- Tooltip for Tablet screens -->
-                            <div id="editTooltip" class="absolute right-0 mb-1 px-2 py-1 bg-white border border-{{  secondary_bg   }} rounded-md text-xs
+        <!--Settings Section-->
+        <div class="mainTab-content" id="settings">
+            <div class="mt-5 flex items-center gap-2.5">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="font-semibold text-base">Settings</span>
+            </div>
+            <p class="font-normal text-lg text-jet-black">
+                Make It Perfect—Update Your Settings!
+            </p>
+            <div
+                class="flex gap-4 sm:gap-5 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar tabs h-[70px] items-center">
+                <button
+                    class="{{ tab_class }} {% if active_tab == 'account-details' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                    data-tab="account-details" data-parent="settings">
+                    Account Details
+                </button>
+                <button
+                    class="{{ tab_class }} {% if active_tab == 'documents' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                    data-tab="documents" data-parent="settings">
+                    Documents
+                </button>
+                <button
+                    class="{{ tab_class }} {% if active_tab == 'notification-control' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                    data-tab="notification-control" data-parent="settings">
+                    Notification Control Center
+                </button>
+            </div>
+            <div
+                class="relative edit-toggle flex items-center gap-4 pl-6 mt-4 sm:mt-7 sm:ml-auto sm:justify-end justify-between w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                <div class="flex flex-col items-end gap-1">
+                    <p class="font-normal text-base text-dark-gray lastEditMsg hidden lg:!block !hidden">Last Edit on
+                        {{updated_at}}</p>
+                    <p class="font-normal text-xs text-medium-gray fileLimit hidden">All the image of documents should
+                        not
+                        exceed the file size limit of 3MB</p>
+                </div>
+                <div class="relative inline-block group">
+                    <span class="material-symbols-outlined cursor-pointer border p-0.5 rounded-sm editIcon"
+                        id="editIcon">
+                        edit
+                    </span>
+                    <!-- Tooltip for Tablet screens -->
+                    <div id="editTooltip" class="absolute right-0 mb-1 px-2 py-1 bg-white border border-{{  secondary_bg   }} rounded-md text-xs
                                     whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
                                         md:block lg:hidden">
-                                Last Edit on {{updated_at}}
-                            </div>
-
-                            <!-- Tooltip for Desktop screens -->
-                            <div class="absolute  left-1/2 -translate-x-1/2 mb-1 px-2 py-1  bg-white border border-{{  secondary_bg   }} rounded-md text-xs
-                                    whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
-                                    hidden lg:block">
-                                Edit
-                            </div>
-                            </div>
-                        </div>
-                        {% include 'settings/settings.html' %}
+                        Last Edit on {{updated_at}}
                     </div>
 
-                    <!--Subscription Section-->
-                    {% include 'subscription/subscription.html'%}
-
-
-                    <!--Rewards Section-->
-                    {% include 'rewards/rewards.html'%}
-
-
-                    <!--Support Section-->
-                    {% include 'settings-support/support.html'%}
-
-
-                    <!--Donate Section-->
-                        {% include 'donate/donate.html'%}
-                </div>
-                <div class="fixed bottom-6 right-8 z-50">
-                    <button
-                        class="chatTrigger cursor-pointer w-16 h-16 bg-dodger-blue text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-                        <img src="/static/images/avatar.png" alt="avatar" class="w-full h-full object-contain" />
-                    </button>
-                </div>
-                <div class="relative ">
-                    <div class="avatar fixed bottom-6 right-8 hidden  z-100">
-                        <img src="/static/images/avatar.svg" alt="avatar">
-                        <img src="/static/images/avatar-chatbox.svg" alt="chatbox" class="absolute bottom-0 right-50">
-                        <button class="absolute cursor-pointer bottom-65 right-0 close-avatar-btn rounded-full bg-white shadow-[3.93px_5.24px_5.24px_0px_#00000040]
-    ">
-                            <span
-                                class="material-symbols-outlined flex items-center justify-center p-[0.35rem] text-dark-gray">close</span>
-                        </button>
-                        <button
-                            class="absolute cursor-pointer bottom-6 right-18 bg-dodger-blue text-white p-2 rounded-md">
-                            Talk
-                        </button>
+                    <!-- Tooltip for Desktop screens -->
+                    <div class="absolute  left-1/2 -translate-x-1/2 mb-1 px-2 py-1  bg-white border border-{{  secondary_bg   }} rounded-md text-xs
+                                    whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
+                                    hidden lg:block">
+                        Edit
                     </div>
                 </div>
             </div>
+            {% include 'settings/settings.html' %}
+        </div>
+
+        <!--Subscription Section-->
+        {% include 'subscription/subscription.html'%}
+
+
+        <!--Rewards Section-->
+        {% include 'rewards/rewards.html'%}
+
+
+        <!--Support Section-->
+        {% include 'settings-support/support.html'%}
+
+
+        <!--Donate Section-->
+        {% include 'donate/donate.html'%}
+    </div>
+    <div class="fixed bottom-6 right-8 z-50">
+        <button
+            class="chatTrigger cursor-pointer w-16 h-16 bg-dodger-blue text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
+            <img src="/static/images/avatar.png" alt="avatar" class="w-full h-full object-contain" />
+        </button>
+    </div>
+    <div class="relative ">
+        <div class="avatar fixed bottom-6 right-8 hidden  z-100">
+            <img src="/static/images/avatar.svg" alt="avatar">
+            <img src="/static/images/avatar-chatbox.svg" alt="chatbox" class="absolute bottom-0 right-50">
+            <button class="absolute cursor-pointer bottom-65 right-0 close-avatar-btn rounded-full bg-white shadow-[3.93px_5.24px_5.24px_0px_#00000040]
+    ">
+                <span
+                    class="material-symbols-outlined flex items-center justify-center p-[0.35rem] text-dark-gray">close</span>
+            </button>
+            <button class="absolute cursor-pointer bottom-6 right-18 bg-dodger-blue text-white p-2 rounded-md talkBtn">
+                Talk
+            </button>
+        </div>
+
+        <div class="fixed bottom-6 right-8 hidden z-9999 chatbot ">
+            <div class="w-101.25  bg-white shadow-lg rounded-xl">
+                <div class="bg-pale-cyan rounded-tr-xl rounded-tl-xl p-1.5 flex flex-col">
+                    <div class="flex items-center justify-between">
+                        <span class="material-symbols-outlined cursor-pointer rotate-90">open_in_full</span>
+                        <span class="material-symbols-outlined cursor-pointer closeChatbot">close</span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <img src="/static/images/chatbot-avatar.svg" alt="avatar">
+                        <p class="font-bold text-[26px] text-cerulean">Ask me anything.</p>
+                    </div>
+                </div>
+
+                <div class="bg-dropdown h-74.25 overflow-y-auto no-scrollbar p-5.5 flex flex-col gap-5">
+                    <div
+                        class="border border-muted-silver-gray bg-white py-5 px-2.5 rounded-xl flex items-center justify-center">
+                        <p class="font-medium text-base text-center">Ask about login,settings, reports, users,
+                            privileges, or any features in this manual</p>
+                    </div>
+                    <div class="flex justify-end">
+                        <div class="border border-muted-silver-gray bg-pale-aqua w-52.75 py-5 px-2.5 rounded-xl ">
+                            <p class="font-medium text-base">Market Place</p>
+                        </div>
+                    </div>
+
+
+                    <div
+                        class="border border-muted-silver-gray bg-white py-5 px-2.5 rounded-xl flex items-center justify-center">
+                        <p class="font-medium text-base text-center">Ask about login,settings, reports, users,
+                            privileges, or any features in this manual</p>
+                    </div>
+                </div>
+
+                <div class="p-4 flex items-center gap-2.5">
+                    <input type="text" id="chat-input"
+                        class="flex-1 border border-muted-silver-gray rounded-[10px] p-3 focus:ring-0 focus:outline-none placeholder:text-stone-gray placeholder:font-medium placeholder:text-base text-base font-medium"
+                        placeholder="Ask about the manual...">
+                    <button
+                        class="w-15 h-12 flex items-center justify-center rounded-xl cursor-pointer bg-cerulean text-white">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {{ chart_labels|json_script:"chartLabelsData" }}
 {{ chart_data|json_script:"chartDataData"}}
 {% endblock %}
 
 {% block extra_js %}
-    <script src="/static/js/sidebar.js"></script>
-    <script src="{% static 'js/ngopoints.js' %}"></script>
-    <script src="/static/js/forms.js"></script>
-    <script src="/static/js/countryCodes.js"></script>
-    <script src="/static/js/toaster.js"></script>
-    <script src="/static/js/tabs.js"></script>
-    <script src="/static/js/table-pagination.js"></script>
+<script src="/static/js/sidebar.js"></script>
+<script src="{% static 'js/ngopoints.js' %}"></script>
+<script src="/static/js/forms.js"></script>
+<script src="/static/js/countryCodes.js"></script>
+<script src="/static/js/toaster.js"></script>
+<script src="/static/js/tabs.js"></script>
+<script src="/static/js/table-pagination.js"></script>
 <script src="{% static 'js/settings.js' %}"></script>
 <script src="{% static 'js/subscription.js' %}"></script>
 <script src="{% static 'js/help.js' %}"></script>
@@ -163,13 +206,13 @@
     const ticketDetailsDateWise = "{% url 'get-tickets-filters' %}";
     const faqLists = "{% url 'get-faq-lists' %}";
     const sendMail = "{% url 'send-support-email' %}";
-$(document).ready(function () {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
+    $(document).ready(function () {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
 
-    if (tab) {
-        $(`.tabs-menu [data-tab="${tab}"]`).trigger('click');
-    }
-});
+        if (tab) {
+            $(`.tabs-menu [data-tab="${tab}"]`).trigger('click');
+        }
+    });
 </script>
 {% endblock %}

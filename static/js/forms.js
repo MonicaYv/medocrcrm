@@ -6,6 +6,8 @@ $(document).ready(function () {
     $(".account-detail").hide();
     $(".tabs").hide();
     $(".edit-toggle").hide();
+    $(".tcBox").hide();
+    
   });
 
   // Cancel button
