@@ -907,35 +907,25 @@ $(document).on("click", ".reject-button", function () {
 
 $(document).on("keyup", "#appointmentSearch", function () {
 
-    let value = $(this).val().toLowerCase();
-
-    $("#cards-container .card-all-pending, \
-      #cards-container .card-all-accepted, \
-      #cards-container .card-all-completed, \
-      #cards-container .card-all-cancelled, \
-      #cards-container .card-all-missed")
-    .each(function () {
-
-        let patientName = ($(this).data("name") || "").toLowerCase();
-
-        if (patientName.indexOf(value) > -1) {
-            $(this).show();
-        } else {
-            $(this).hide();
-        }
-
-    });
-
-});
-$(document).on("keyup", "#appointmentSearch", function () {
-
-    let value = $(this).val().toLowerCase();
+    let value = $(this).val().toLowerCase().trim();
 
     $(".card-all-pending,.card-all-accepted,.card-all-completed,.card-all-cancelled,.card-all-missed").each(function () {
 
         let patientName = ($(this).data("name") || "").toLowerCase();
 
-        $(this).toggle(patientName.includes(value));
+        let serviceType = (($(this).data("service-type") || "") + "")
+            .replace(/_/g, " ")
+            .toLowerCase();
+
+        let visitType = (($(this).data("visit-type") || "") + "")
+            .replace(/_/g, " ")
+            .toLowerCase();
+
+        $(this).toggle(
+            patientName.includes(value) ||
+            serviceType.includes(value) ||
+            visitType.includes(value)
+        );
 
     });
 

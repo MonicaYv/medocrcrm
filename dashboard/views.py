@@ -184,7 +184,23 @@ def dashboard_home(request):
 
         # ================= PHARMACY =================
         elif user_type == 'pharmacy':
+            contact_person = ContactPerson.objects.filter(
+                profile_type="pharmacy",
+                profile=user
+            ).first()
+
+            print("========== CONTACT PERSON ==========")
+
+            if contact_person:
+                print("NAME =", contact_person.name)
+                print("PHONE =", contact_person.phone_number)
+                print("ROLE =", contact_person.role)
+            else:
+                print("CONTACT PERSON NOT FOUND")
             pharmacy_profile = PharmacyProfile.objects.get(user=user)
+            
+            
+            
 
             pending_orders = UserPurchase.objects.filter(
                 assigned_pharmacy=pharmacy_profile,
@@ -231,7 +247,10 @@ def dashboard_home(request):
             popular_coupons = Coupon.objects.all().order_by('-redeemed_count')[:5]
 
             context.update({
+                
                 'pharmacy_profile': pharmacy_profile,
+                 
+                'contact_person': contact_person,
 
                 'scheduled_orders': scheduled_orders,
                 'popular_coupons': popular_coupons,
@@ -285,6 +304,12 @@ def dashboard_home(request):
                 profile_type="lab",
                 profile=user
             ).first()
+            print("=" * 60   )
+            print("LOGGED USER ID =", user.id)
+            print("LOGGED USER EMAIL =", user.email)
+            print("LOGGED USER TYPE =", user.user_type)
+            print("CONTACT PERSON =", contact_person)
+            print("=" * 60)
             print("========== CONTACT PERSON ==========")
             print("USER ID =", user.id)
 

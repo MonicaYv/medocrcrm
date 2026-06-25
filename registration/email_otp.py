@@ -60,6 +60,12 @@ async def async_send_otp_email(user):
     otp_secret = generate_otp_secret()
     otp = generate_otp(otp_secret)
 
+    print("=" * 50)
+    print("EMAIL =", user.email)
+    print("OTP =", otp)
+    print("SECRET =", otp_secret)
+    print("=" * 50)
+
     subject = "Your OTP Code"
     body = f"Your OTP is: {otp}"
 
