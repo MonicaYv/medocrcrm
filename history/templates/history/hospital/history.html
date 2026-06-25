@@ -135,8 +135,11 @@
                     <div class="accepted tab-content pt-5">
                         <div id="hospital-cards-container"></div>
 
-                        {% include "partials/pending-view-modal.html" %}
-                        {% include "partials/performa-bill.html" %}
+                        {% include "history/partials/pending-view-modal.html" %}
+                        {% include "history/partials/cancelled-view-modal.html" %}
+                        {% include "history/partials/accepted-view-modal.html" %}
+                        {% include "history/partials/missed-view-modal.html" %}
+                        {% include "history/partials/performa-bill.html" %}
                     </div>
 
                     <!--Pending Appointments Tab Content-->
@@ -337,7 +340,7 @@
                     </div>
 
                     <!--Bed Inventory Tab Content-->
-                    {% include 'hospital/inventory.html' %}
+                    {% include 'history/hospital/inventory.html' %}
                     {% comment %} <div class="equipment tab-content pt-5 space-y-6 hidden">
                         <div id="cards-container">
                             <div

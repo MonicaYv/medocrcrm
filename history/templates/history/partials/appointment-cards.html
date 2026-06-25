@@ -1,0 +1,104 @@
+{% load humanize %}
+
+<div
+  class="card-all-{{ appointment.status|lower }} bg-white mt-4 p-4 rounded-md shadow-lg cursor-pointer"
+  data-id="{{ appointment.id }}"
+
+  data-name="Pt. {{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name|default:'' }}"
+  data-profile-img="/static/images/rachel-kate.svg"
+
+  data-gender="{{ appointment.user.userprofile.gender|default:'' }}"
+  data-age="{{ appointment.user.userprofile.age|default:'' }}"
+  data-phone="{{ appointment.user.phone_number|default:'-' }}"
+
+  data-visit-type="{{ appointment.preferred_mode|default:'Visit' }}"
+  data-date="{% firstof appointment.preferred_date_time|date:'d/m/Y, h:i A' appointment.preferred_date_from|date:'d/m/Y, h:i A' '-' %}"
+
+  data-address="{{ appointment.address|default:'' }}"
+
+  data-test="{% if appointment.test_package %}{{ appointment.test_package }}{% endif %}"
+  data-service-type="{% if appointment.service_type %}{{ appointment.service_type }}{% endif %}"
+  data-details="{% if appointment.test_package %}{{ appointment.test_package }}{% elif appointment.test_type %}{{ appointment.test_type }}{% elif appointment.description %}{{ appointment.description }}{% elif appointment.health_issue_ids %}Health Consultation{% else %}-{% endif %}"
+
+  data-budget="{{ appointment.budget|default:'' }}"
+  data-id="{{ appointment.id }}"
+  data-order-id="R{{ appointment.id }}"
+  data-status="{{ appointment.status }}"
+  data-cancelled-by="{{ appointment.cancelled_by|default:'Doctor' }}"
+  data-distance="{{ appointment.distance|default:'6 km' }}"
+  data-time="{{ appointment.eta|default:'20 mins away' }}"
+  data-attachment="/static/images/attachment.png"
+  
+
+  >
+
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-60 gap-y-10">
+
+    <!-- Patient -->
+    <div class="flex items-center gap-3">
+      <img src="/static/images/rachel-kate.svg"
+           alt="Profile"
+           class="w-12 h-12 rounded-full object-cover">
+
+      <div class="flex flex-col">
+        <p class="font-semibold text-sm text-jet-black text-nowrap">
+          Pt.
+          {{ appointment.user.userprofile.first_name }}
+          {{ appointment.user.userprofile.last_name|default:"" }}
+        </p>
+
+        <span class="text-xs text-spanish-gray text-nowrap truncate">
+          {% if appointment.description %}
+            {{ appointment.description }}
+          {% elif appointment.health_issue_ids %}
+            Health Consultation
+          {% else %}
+            Consultation
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="flex flex-col justify-center">
+      <p class="font-normal text-sm text-jet-black text-nowrap">
+        {% if appointment.preferred_date_time %}
+          {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
+        {% elif appointment.preferred_date_from %}
+          {{ appointment.preferred_date_from|date:"d/m/Y, h:i A" }}
+        {% else %}
+          —
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- Visit Type -->
+    <div class="flex flex-col justify-center">
+      <p class="font-normal text-sm text-jet-black text-nowrap">
+        {% if appointment.preferred_mode %}
+          {{ appointment.preferred_mode|capfirst }}
+        {% else %}
+          Visit
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- Status -->
+    <div class="flex flex-col justify-center">
+      {% if appointment.status == "Completed" %}
+        <p class="font-semibold text-sm text-green">Completed</p>
+      {% elif appointment.status == "Pending" %}
+        <p class="font-semibold text-sm text-dodger-blue">Pending</p>
+      {% elif appointment.status == "Accepted" %}
+        <p class="font-semibold text-sm text-burnt-orange">Accepted</p>
+      {% else %}
+        <p class="font-semibold text-sm text-spanish-gray">
+          {{ appointment.status }}
+        </p>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% include "history/partials/performa-bill.html" %}

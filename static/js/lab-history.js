@@ -766,60 +766,119 @@ function getCookie(name) {
 
     return cookieValue;
 }
-$(document).on("click", ".complete-appointment-btn", function (e) {
 
-    e.preventDefault();
+// const csrftoken = getCookie("csrftoken");
 
-    const appointmentId = $(this).data("id");
+$(document).on("click", ".cancel-bid", function () {
 
     $.ajax({
-        url: "/history/lab/complete/",
+        url: "/history/cancel-bid/",
         type: "POST",
-
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
         data: {
-            id: appointmentId,
-            csrfmiddlewaretoken: getCookie("csrftoken")
+            bid_id: window.currentBidId
         },
 
-        success: function () {
+        success: function (response) {
 
-          showToast("Appointment Completed Successfully", "success");
+            if (response.success) {
 
-          $(".modal-pending").addClass("hidden");
+                $(".modal-accepted").addClass("hidden");
 
-          setTimeout(() => {
-             location.reload();
-          }, 1000);
+                loadHospitalHistory();   // reload cards
+
+            } else {
+
+                alert(response.message);
+
+            }
+
         }
-        
+
     });
+
 });
-$(document).on("click", ".cancel-appointment-btn", function (e) {
 
-    e.preventDefault();
-
-    const appointmentId = $(this).data("id");
+$(document).on("click", ".complete-appointment", function () {
 
     $.ajax({
-        url: "/history/lab/cancel/",
+
+        url: "/history/complete-appointment/",
         type: "POST",
 
-        data: {
-            id: appointmentId,
-            csrfmiddlewaretoken: getCookie("csrftoken")
+        headers: {
+            "X-CSRFToken": csrftoken
         },
 
-        success: function () {
+        data: {
 
-          showToast("Appointment Cancelled Successfully", "success");
+            appointment_id: window.currentAppointmentId,
+            bid_id: window.currentBidId
 
-          $(".modal-pending").addClass("hidden");
+        },
 
-          setTimeout(() => {
-            location.reload();
-          }, 1000);
+        success: function (response) {
+
+            if (response.success) {
+
+                $(".modal-accepted").addClass("hidden");
+
+                loadlabHistory();
+
+            } else {
+
+                alert(response.message);
+
+            }
+
         }
+
     });
+
+});
+
+$(document).on("change", "#no-show-checkbox", function () {
+
+    if (!this.checked)
+        return;
+
+    $.ajax({
+
+        url: "/history/no-show-appointment/",
+
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+
+        data: {
+
+            appointment_id: window.currentAppointmentId,
+            bid_id: window.currentBidId
+
+        },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                $(".modal-accepted").addClass("hidden");
+
+                loadHospitalHistory();
+
+            } else {
+
+                alert(response.message);
+
+            }
+
+        }
+
+    });
+
 });
 function showToast(message, type = "success") {
 
@@ -860,26 +919,6 @@ $(document).on("click", "#shareBtn", function () {
     );
 });
 
-$(document).on("click", ".complete-appointment-btn", function (e) {
-
-    console.log("COMPLETE CLICKED");
-
-    e.preventDefault();
-
-    const appointmentId = $(this).data("id");
-
-    console.log("Appointment ID =", appointmentId);
-});
-$(document).on("click", ".cancel-appointment-btn", function (e) {
-
-    console.log("CANCEL CLICKED");
-
-    e.preventDefault();
-
-    const appointmentId = $(this).data("id");
-
-    console.log("Appointment ID =", appointmentId);
-});
 $(document).on("click", "#shareBtn", function (e) {
 
     e.preventDefault();

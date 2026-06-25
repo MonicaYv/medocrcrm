@@ -230,6 +230,10 @@ $(document).ready(function () {
     $(".modal-pending").addClass("hidden");
   });
 
+    $(".modal-close-accepted").on("click", function () {
+    $(".modal-accepted").addClass("hidden");
+  });
+
   // Image Attachment Preview (for all)
 $(document).on("click", ".view-attachment", function () {
 
@@ -502,25 +506,52 @@ $("#hospital-cards-container, #doctor-cards-container").on(
   ".card-all-pending, .card-all-accepted, .card-all-completed, .card-all-cancelled, .card-all-canceled, .card-all-missed",
   function () {
     const card = $(this);
+    const status = (card.data("status") || "").toLowerCase();
+
+    let modal;
+
+    switch (status) {
+        case "accepted":
+            modal = $(".modal-accepted");
+            break;
+
+        case "pending":
+            modal = $(".modal-pending");
+            break;
+
+        case "cancelled":
+        case "canceled":
+            modal = $(".modal-canceled");
+            break;
+
+        case "missed":
+            modal = $(".modal-missed");
+            break;
+
+        default:
+            modal = $(".modal-pending");
+    }
     const attachment = card.data("attachment");
     window.currentAttachment = attachment;
 
     const bill = card.data("bill");
     window.currentBill = bill;
     const appointmentId = card.data("id");
+    const bidId = card.data("bid-id");
+    window.currentBidId = bidId;
     window.currentAppointmentId = appointmentId;
     console.log("APPOINTMENT ID =", appointmentId);
     const isDoctorPage = $("#doctor-cards-container").length > 0;
 
-    $("#modal-name").text(card.data("name") || "-");
-    $("#modal-gender").text(card.data("gender") || "-");
-    $("#modal-age").text(card.data("age") || "-");
+    modal.find("#modal-name").text(card.data("name") || "-");
+    modal.find("#modal-gender").text(card.data("gender") || "-");
+    modal.find("#modal-age").text(card.data("age") || "-");
 
     let phone = String(card.data("phone") || "-");
     if (phone !== "-" && !phone.startsWith("+91")) {
       phone = "+91 " + phone;
     }
-    $("#modal-phone").text(phone);
+    modal.find("#modal-phone").text(phone);
 
     const visitType = card.data("visit-type") || "Visit";
 
@@ -533,23 +564,23 @@ $("#hospital-cards-container, #doctor-cards-container").on(
               .replaceAll("_", " ")
               .replace(/\b\w/g, c => c.toUpperCase());
 
-    $("#modal-visit-type").text(formattedVisitType);
+    modal.find("#modal-visit-type").text(formattedVisitType);
 
-    $("#modal-date").text(card.data("date") || "-");
+    modal.find("#modal-date").text(card.data("date") || "-");
 
     let address = String(card.data("address") || "-");
     if (address === "string -" || address === "string" || address.trim() === "") {
       address = "-";
     }
-    $("#modal-address").text(address);
+    modal.find("#modal-address").text(address);
     if (isDoctorPage) {
       $("#modal-requirement-label").text("Medical Requirement");
     } else {
       $("#modal-requirement-label").text("Test Requirement");
     }
-    $("#modal-service-type").text(card.data("service-type") || "-");
-    $("#modal-details").text(card.data("details") || "-");
-    const status = (card.data("status") || "").toLowerCase();
+    modal.find("#modal-service-type").text(card.data("service-type") || "-");
+    modal.find("#modal-details").text(card.data("details") || "-");
+
     const isCancelled = status === "cancelled" || status === "canceled";
 
     let step1 = "bg-blue-haze";
@@ -592,8 +623,7 @@ $("#hospital-cards-container, #doctor-cards-container").on(
 
       buttons = `
         <div class="pt-4 flex justify-center items-center gap-3">
-          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
-          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Reject</button>
+          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10 cancel-bid">Cancel Bid</button>
         </div>
       `;
     }
@@ -604,8 +634,8 @@ $("#hospital-cards-container, #doctor-cards-container").on(
 
       buttons = `
         <div class="pt-4 flex justify-center items-center gap-3">
-          <button class="complete-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10">Complete</button>
-          <button class="cancel-appointment border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Cancel Appointment</button>
+          <button class="complete-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10 complete-appointment">Complete</button>
+          <button class="cancel-appointment border border-red-500 text-red-500 rounded-lg w-[180px] h-10 cancel-bid">Cancel Appointment</button>
         </div>
       `;
     }
@@ -630,8 +660,7 @@ $("#hospital-cards-container, #doctor-cards-container").on(
     if (status === "pending") {
       buttons = `
         <div class="pt-4 flex justify-center items-center gap-3">
-          <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10">Accept</button>
-          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10">Reject</button>
+          <button class="border border-red-500 text-red-500 rounded-lg w-[180px] h-10 cancel-bid">Cancel Bid</button>
         </div>
       `;
     }
@@ -686,8 +715,8 @@ $("#hospital-cards-container, #doctor-cards-container").on(
         </div>
       </div>
     `;
-    $("#modal-enquiry-detail").html(`
-      ${timelineHtml}
+    modal.find(".modal-enquiry-detail").html(`
+    ${timelineHtml}
 
   <div class="mt-6">
     <div class="flex justify-between">
@@ -735,8 +764,33 @@ $("#hospital-cards-container, #doctor-cards-container").on(
   </div>
 `);
 
-    $(".modal-pending").removeClass("hidden");
-  });
+$(".modal-pending, .modal-accepted, .modal-completed, .modal-canceled")
+    .addClass("hidden");
+
+switch (status) {
+
+    case "pending":
+        $(".modal-pending").removeClass("hidden");
+        break;
+
+    case "accepted":
+        $(".modal-accepted").removeClass("hidden");
+        break;
+
+    case "completed":
+        $(".modal-completed").removeClass("hidden");
+        break;
+
+    case "cancelled":
+    case "canceled":
+        $(".modal-cancelled").removeClass("hidden");
+        break;
+
+    case "missed":
+        $(".modal-missed").removeClass("hidden"); // or modal-missed if you create one
+        break;
+}
+});
 });
 
 $(document).on("click", ".patient-share-btn", function () {
@@ -803,63 +857,119 @@ function getCookie(name) {
     return '';
 }
 
-// $(document).on("click", ".complete-appointment", function () {
+// const csrftoken = getCookie("csrftoken");
 
-//     const appointmentId = window.currentAppointmentId;
-//     console.log("COMPLETE ID =", appointmentId);
+$(document).on("click", ".cancel-bid", function () {
 
-//     $.ajax({
-//         url: "/appointment/update-status/",
-//         type: "POST",
+    $.ajax({
+        url: "/history/cancel-bid/",
+        type: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+        data: {
+            bid_id: window.currentBidId
+        },
 
-//         headers: {
-//             "X-CSRFToken": getCookie("csrftoken")
-//         },
+        success: function (response) {
 
-//         data: {
-//             appointment_id: appointmentId,
-//             status: "Completed"
-//         },
+            if (response.success) {
 
-//         success: function (res) {
-//             alert("Appointment Completed Successfully");
-//         },
+                $(".modal-accepted").addClass("hidden");
 
-//         error: function (err) {
-//             console.log(err);
-//             alert("Something went wrong");
-//         }
-//     });
-// });
+                loadHospitalHistory();   // reload cards
 
-// $(document).on("click", ".cancel-appointment", function () {
+            } else {
 
-//     const appointmentId = window.currentAppointmentId;
-//     console.log("CANCEL ID =", appointmentId);
+                alert(response.message);
 
-//     $.ajax({
-//         url: "/appointment/update-status/",
-//         type: "POST",
+            }
 
-//         headers: {
-//             "X-CSRFToken": getCookie("csrftoken")
-//         },
+        }
 
-//         data: {
-//             appointment_id: appointmentId,
-//             status: "Cancelled"
-//         },
+    });
 
-//         success: function (res) {
-//             alert("Appointment Cancelled Successfully");
-//         },
+});
 
-//         error: function (err) {
-//             console.log(err);
-//             alert("Something went wrong");
-//         }
-//     });
-// });
+$(document).on("click", ".complete-appointment", function () {
+
+    $.ajax({
+
+        url: "/history/complete-appointment/",
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+
+        data: {
+
+            appointment_id: window.currentAppointmentId,
+            bid_id: window.currentBidId
+
+        },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                $(".modal-accepted").addClass("hidden");
+
+                loadHospitalHistory();
+
+            } else {
+
+                alert(response.message);
+
+            }
+
+        }
+
+    });
+
+});
+
+$(document).on("change", "#no-show-checkbox", function () {
+
+    if (!this.checked)
+        return;
+
+    $.ajax({
+
+        url: "/history/no-show-appointment/",
+
+        type: "POST",
+
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+
+        data: {
+
+            appointment_id: window.currentAppointmentId,
+            bid_id: window.currentBidId
+
+        },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                $(".modal-accepted").addClass("hidden");
+
+                loadHospitalHistory();
+
+            } else {
+
+                alert(response.message);
+
+            }
+
+        }
+
+    });
+
+});
 
 // $(document).on("click", ".proforma-bill-btn", function () {
 

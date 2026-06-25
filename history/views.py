@@ -68,9 +68,9 @@ def history(request):
                 order_status=OrderStatusChoices.CANCELLED
             ),
         })
-        return render(request, 'pharmacy/history.html', context)
+        return render(request, 'history/pharmacy/history.html', context)
     elif user.user_type == 'lab':
-        return render(request, 'lab/history.html', context)
+        return render(request, 'history/lab/history.html', context)
     elif user.user_type == 'hospital':
 
         hospital = HospitalProfile.objects.filter(
@@ -90,11 +90,11 @@ def history(request):
 
         return render(
             request,
-            'hospital/history.html',
+            'history/hospital/history.html',
             context
         )
     elif user.user_type == 'doctor':
-        return render(request, 'doctor/history.html', context)
+        return render(request, 'history/doctor/history.html', context)
     
     
 @dashboard_login_required
@@ -106,7 +106,7 @@ def doctor_history_view(request):
 
     return render(
         request,
-        "doctor/doctor_history.html",
+        "history/doctor/doctor_history.html",
         context
     )
 
@@ -173,7 +173,7 @@ def ajax_doctor_history(request):
     page_obj = paginator.get_page(page_number)
 
     html = render_to_string(
-        "doctor/doctor-history-cards.html",
+        "history/doctor/doctor-history-cards.html",
         {
             "appointments": page_obj,
             "page_obj": page_obj,
@@ -202,7 +202,22 @@ def ajax_lab_history(request):
     lab = LabProfile.objects.filter(
         user=user
     ).first()
+    print("LAB =", lab.id)
 
+    bids = LabBidding.objects.filter(lab=lab)
+
+    print("TOTAL BIDS =", bids.count())
+
+    # for b in bids:
+    #     print(
+    #         "Bid:",
+    #         b.id,
+    #         "Appointment:", b.appointment_id,
+    #         "Status:", b.bid_status,
+    #         "Appointment Status:", b.appointment.status,
+    #         "Accepted Lab:", b.appointment.accepted_lab_id,
+    #         "Accepted Bid:", b.appointment.accepted_bid_id,
+    #     )
     qs = LabAppointments.objects.select_related(
         "user__userprofile",
         "test_package",
@@ -266,7 +281,7 @@ def ajax_lab_history(request):
     page_obj = paginator.get_page(page_number)
 
     html = render_to_string(
-        "lab/lab_history_cards.html",
+        "history/lab/lab_history_cards.html",
         {
             "appointments": page_obj,
             "page_obj": page_obj,
@@ -302,7 +317,7 @@ def ajax_hospital_history(request):
     if status == "pending":
 
         qs = qs.filter(
-            hospital_bids__hospital=hospital,
+            bids__hospital=hospital,
             accepted_bid__isnull=True,
             accepted_hospital__isnull=True,
             status="Pending"
@@ -345,7 +360,7 @@ def ajax_hospital_history(request):
     page_obj = paginator.get_page(page_number)
 
     html = render_to_string(
-        "hospital/hospital_history_cards.html",
+        "history/hospital/hospital_history_cards.html",
         {
             "appointments": page_obj,
             "page_obj": page_obj,
