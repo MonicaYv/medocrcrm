@@ -416,10 +416,58 @@ def dashboard_home(request):
 
         # ================= DOCTOR =================
         elif user_type == 'doctor':
+            # today = timezone.now().date()
+
+            # total_appointments_today = DoctorAppointment.objects.filter(
+            #    doctor=doctor_profile,
+            #     preferred_date_time__date=today
+            # ).count()
+
+            # confirmed_count = DoctorAppointment.objects.filter(
+            #    doctor=doctor_profile,
+            #    status="Accepted",
+            # preferred_date_time__date=today
+            # ).count()
+
+            # pending_count = DoctorAppointment.objects.filter(
+            #    doctor=doctor_profile,
+            #    status="Pending",
+            # preferred_date_time__date=today
+            # ).count()
+
+            # pending_requests_count = DoctorAppointment.objects.filter(
+            #   status="Pending"
+            # ).count()
             # doctor_profile = DoctorProfile.objects.get(user=user)
             doctor_profile = DoctorProfile.objects.filter(
                 user=user
             ).first()
+            print("CLINIC PHOTO =", doctor_profile.clinic_photo_path)
+            if not doctor_profile:
+                return render(request, "dashboard/not_found.html")
+
+            today = timezone.now().date()
+
+            total_appointments_today = DoctorAppointment.objects.filter(
+                doctor=doctor_profile,
+                preferred_date_time__date=today
+            ).count()
+
+            confirmed_count = DoctorAppointment.objects.filter(
+                doctor=doctor_profile,
+                status="Accepted",
+                 preferred_date_time__date=today
+            ).count()
+
+            pending_count = DoctorAppointment.objects.filter(
+               doctor=doctor_profile,
+               status="Pending",
+               preferred_date_time__date=today
+            ).count()
+
+            pending_requests_count = DoctorAppointment.objects.filter(
+               status="Pending"
+            ).count()
 
             contact_person = ContactPerson.objects.filter(
                 profile_type="doctor",
@@ -433,19 +481,83 @@ def dashboard_home(request):
             ).select_related(
                 "user__userprofile"
             ).order_by("-created_at")[:5]
+            print("DOCTOR PROFILE =", doctor_profile.id)
+            print(
+                "TOTAL APPOINTMENTS TABLE =",
+                DoctorAppointment.objects.count()
+            )
 
+            for a in DoctorAppointment.objects.all()[:20]:
+                print(
+                   "ID =", a.id,
+                   "DOCTOR =", a.doctor_id,
+                    "STATUS =", a.status
+                )
+
+            print(
+                "ALL DOCTOR APPOINTMENTS =",
+                DoctorAppointment.objects.filter(
+                doctor=doctor_profile
+            ).count()
+            )
+
+            print(
+                "ACCEPTED APPOINTMENTS =",
+                DoctorAppointment.objects.filter(
+                doctor=doctor_profile,
+                status="Accepted"
+            ).count()
+            )
+
+            print(
+               "PENDING APPOINTMENTS =",
+                DoctorAppointment.objects.filter(
+                doctor=doctor_profile,
+                status="Pending"
+            ).count()
+            )
+
+            # scheduled_appointments = DoctorAppointment.objects.filter(
+            #     doctor=doctor_profile,
+            #     status="Accepted"
+            # ).select_related(
+            #     "user__userprofile"
+            # ).order_by("preferred_date_time")[:3]
+            # scheduled_appointments = DoctorAppointment.objects.filter(
+            #     status="Pending"
+            # ).select_related(
+            #     "user__userprofile"
+            # ).order_by("-created_at")[:3]
             scheduled_appointments = DoctorAppointment.objects.filter(
                 doctor=doctor_profile,
                 status="Accepted"
             ).select_related(
-                "user__userprofile"
-            ).order_by("preferred_date_time")[:3]
+                "user__userprofile",
+                "doctor"
+            ).order_by("-preferred_date_time")[:3]
+            for a in scheduled_appointments:
+                print(
+                    "SCHEDULED =>",
+                    a.id,
+                    a.doctor_id,
+                    a.status
+                )
+            for a in scheduled_appointments:
+                print(
+                    "ID =", a.id,
+                    "DOCTOR =", a.doctor_id,
+                    "STATUS =", a.status
+                )
 
             context["appointment_requests"] = appointment_requests
             context["scheduled_appointments"] = scheduled_appointments
             context.update({
                 'doctor_profile': doctor_profile,
                 'contact_person': contact_person,
+                'total_appointments_today': total_appointments_today,
+                'confirmed_count': confirmed_count,
+                'pending_count': pending_count,
+                'pending_requests_count': pending_requests_count,
                 'user_display_name': doctor_profile.clinic_name,
                 'quotes_given': DoctorBidding.objects.filter(doctor=doctor_profile).count(),
                 'active_bids': DoctorBidding.objects.filter(
@@ -459,6 +571,7 @@ def dashboard_home(request):
                     doctor=doctor_profile,
                     status="Accepted"
                 ).count(),
+                
                 'pending_orders': DoctorAppointment.objects.filter(
                     doctor=doctor_profile,
                     status="Pending"
@@ -474,7 +587,10 @@ def dashboard_home(request):
             hospital_profile = HospitalProfile.objects.filter(
                 user=user
             ).first()
-
+            contact_person = ContactPerson.objects.filter(
+                profile_type="hospital",
+                profile=user
+            ).first()
             appointment_requests = HospitalAppointments.objects.filter(
                 status="Pending"
             ).exclude(
@@ -499,6 +615,7 @@ def dashboard_home(request):
             context.update({
                 'logo': '/static/images/hospital-logo.svg',
                 'hospital_profile': hospital_profile,
+                'contact_person': contact_person,
                 'user_display_name': hospital_profile.hospital_name,
                 'quotes_given': HospitalBidding.objects.filter(hospital=hospital_profile).count(),
                 'active_bids': HospitalBidding.objects.filter(
