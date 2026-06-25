@@ -791,7 +791,12 @@ $(".closeChatbot").on("click", function () {
 });
 
 function sendMessage() {
-  const text = $("#chat-input").val().trim();
+  const input = $("#chat-input");
+
+  if (!input.length) return;
+
+  const text = (input.val() || "").trim();
+
   if (!text) return;
 
   const bubble = `
@@ -806,7 +811,7 @@ function sendMessage() {
   $("#chat-input").val("").focus();
 }
 
-$(document).on("click", "button", function () {
+$(document).on("click", "#send-message-btn", function () {
   sendMessage();
 });
 
