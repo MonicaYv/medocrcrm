@@ -733,13 +733,21 @@
 
         <!--Working Days-->
         <div class="issue-type-wrapper w-full  rounded-[6px] text-dark-gray border border-slate-gray pl-0.5 text-sm flex items-center justify-between relative mb-3">
-            <select name="working_days" class="rounded px-3 py-2 w-full" data-selected="{{working_days}}">
+            <!-- <select name="working_days" class="rounded px-3 py-2 w-full" data-selected="{{working_days}}">
                 {% for day in all_workingdays %}
                     <option value="{{ day }}"
                         {% if day == working_days %}selected{% endif %}>
                         {{ day }}
                     </option>
                 {%endfor%}
+            </select> -->
+            <select name="working_days" class="rounded px-3 py-2 w-full">
+                {% for day in all_workingdays %}
+                    <option value="{{ day.id }}"
+                        {% if working_days and day.id == working_days.id %}selected{% endif %}>
+                        {{ day }}
+                    </option>
+                {% endfor %}
             </select>
             <span class="error working_daysError text-red-500 text-sm mt-1 hidden"></span>
         </div>
