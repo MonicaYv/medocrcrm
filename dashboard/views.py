@@ -649,9 +649,10 @@ def dashboard_home(request):
                 status=HospitalAppointmentStatus.PENDING
             ).count()
 
-            total_doctors = DoctorProfile.objects.filter(
-                hospital=hospital_profile
-            ).count()
+            # total_doctors = DoctorProfile.objects.filter(
+            #     hospital=hospital_profile
+            # ).count()
+            total_doctors = 0
 
             bed_capacity = getattr(hospital_profile, 'bed_capacity', 20) or 20
             icu_beds = getattr(hospital_profile, 'icu_beds', 4) or 4

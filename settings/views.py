@@ -2,6 +2,9 @@ import os
 import re
 import json
 import traceback
+
+from registration.models import State, City, LabTiming
+from registration.models import State, City
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
@@ -271,9 +274,14 @@ def handle_pharmacy_profile(user):
         'services_offered': profile.services.all(),
         'all_services': all_services,
         'all_workingdays': all_workingdays,
+        'website_url': profile.website,
+        'country': profile.country,
+        'working_days': profile.pharmacy_timing,
         'address': profile.address,
-        'city': profile.city,
-        'state': profile.state,
+        # 'city': profile.city,
+        # 'state': profile.state,
+        'city': profile.city.name if profile.city else "",
+        'state': profile.state.name if profile.state else "",
         'pincode': profile.pincode,
         'referral_code': profile.referral_code or '',
         'incorporation_number': profile.incorporation_number,
@@ -306,12 +314,19 @@ def handle_lab_profile(user):
         'alt_contact_number': profile.alt_contact_number,
         'lab_registration_number': profile.lab_registration_number,
         'address': profile.address,
-        'city': profile.city,
-        'state': profile.state,
+        # 'city': profile.city,
+        # 'state': profile.state,
+        # 'lab_timing': profile.lab_timing,
+        'lab_timing': (
+            f"{profile.lab_timing.open_time} - {profile.lab_timing.close_time}"
+            if profile.lab_timing else ""
+        ),
+        'city': profile.city.name if profile.city else "",
+        'state': profile.state.name if profile.state else "",
         'country': profile.country,
         'pincode': profile.pincode,
         'all_timings': all_timings,
-        'lab_timing': profile.lab_timing,
+        # 'lab_timing': profile.lab_timing,
         'services_selected': profile.services.all(),
         'all_services': all_services,
         'facilities_selected': profile.facilities.all(),
@@ -355,10 +370,15 @@ def handle_hospital_profile(user):
         'contact_no': profile.contact_no,
         'alternate_contact_no': profile.alternate_contact_no,
         'address': profile.address,
-        'country': profile.country,
-        'city': profile.city,
-        'state': profile.state,
-        'pincode': profile.pincode,
+        # 'country': profile.country,
+        # 'city': profile.city,
+        # 'state': profile.state,
+        # 'pincode': profile.pincode,
+        # 'hospital_timing': profile.hospital_timing,
+        'country': profile.country or "",
+        'city': profile.city.name if profile.city else "",
+        'state': profile.state.name if profile.state else "",
+        'pincode': profile.pincode or "",
         'hospital_timing': profile.hospital_timing,
         'home_visit': profile.home_visit,
         'registration_no': profile.registration_no,
@@ -404,8 +424,10 @@ def handle_doctor_profile(user):
         'contact_number': profile.contact_number,
         'alt_contact_number': profile.alt_contact_number,
         'address': profile.full_address,
-        'city': profile.city,
-        'state': profile.state,
+        # 'city': profile.city,
+        # 'state': profile.state,
+        'city': profile.city.name if profile.city else "",
+        'state': profile.state.name if profile.state else "",
         'pincode': profile.pincode,
         'clinic_timing_from': profile.clinic_timing_from,
         'clinic_timing_to': profile.clinic_timing_to,
@@ -886,14 +908,45 @@ def update_pharmacy_profile(request):
             pharmacy_profile.company_name = post_data.get("company_name")
             pharmacy_profile.website = post_data.get("website_url")
             pharmacy_profile.address = post_data.get("address")
-            pharmacy_profile.city_id = None
-            pharmacy_profile.state_id = None
+           # -------- STATE --------
+
+        state_name = post_data.get("state", "").split(",")[0].strip()
+
+        state = State.objects.filter(
+           name__iexact=state_name
+        ).first()
+
+        if state:
+           pharmacy_profile.state = state
+
+
+        # -------- CITY --------
+
+        city_name = post_data.get("city", "").split(",")[0].strip()
+
+        city = City.objects.filter(
+            name__iexact=city_name,
+            state=state
+        ).first()
+
+        if city:
+            pharmacy_profile.city = city
+
+
+            # ---------- Update Working Hours ----------
+            timing_id = post_data.get("working_days") or post_data.get("pharmacy_timing")
+
+            if timing_id:
+                pharmacy_profile.pharmacy_timing_id = int(timing_id)
+            # pharmacy_profile.city_id = None
+            # pharmacy_profile.state_id = None
 
             pharmacy_profile.owner_name = post_data.get("owner_name")
             pharmacy_profile.country = post_data.get("country")
             # pharmacy_profile.city = post_data.get("city")
             # pharmacy_profile.state = post_data.get("state")
             pharmacy_profile.pincode = post_data.get("pincode")
+         
 
             # Many-to-many pharmacy types
             # pharmacy_type_values = post_data.getlist("pharmacy_type")
@@ -918,6 +971,17 @@ def update_pharmacy_profile(request):
             # services_offered_value = post_data.get("services_offered")
             # if services_offered_value:
             #     pharmacy_profile.services_offered = get_object_or_404(PharmacyServices, name=services_offered_value)
+            print(post_data.dict())
+            print("POST =", post_data.dict())
+
+            print("State POST =", post_data.get("state"))
+            print("City POST =", post_data.get("city"))
+            print("Working =", post_data.get("working_days"))
+
+            print("Before save")
+            print("pharmacy_profile.state =", pharmacy_profile.state)
+            print("pharmacy_profile.city =", pharmacy_profile.city)
+            print("pharmacy_profile.pharmacy_timing =", pharmacy_profile.pharmacy_timing)
 
             pharmacy_profile.save()
 
@@ -940,9 +1004,10 @@ def update_pharmacy_profile(request):
     # except Exception as e:
     #     return JsonResponse({"success": False, "message": str(e)}, status=500)
     except Exception as e:
-         print("PHARMACY SAVE ERROR:", e)
+        traceback.print_exc()
+        print("PHARMACY SAVE ERROR:", e)
 
-         return JsonResponse({
+        return JsonResponse({
             "success": False,
             "message": str(e)
         }, status=500)
@@ -985,9 +1050,44 @@ def update_lab_profile(request):
              lab_profile.country = post_data.get("country")
 
              lab_profile.pincode = post_data.get("pincode")
+            # ---------------- STATE ----------------
+
+             state_name = post_data.get("state", "").strip()
+
+             state = State.objects.filter(
+                name__iexact=state_name
+            ).first()
+
+             if state:
+                lab_profile.state = state
+
+
+            # ---------------- CITY ----------------
+
+             city_name = post_data.get("city", "").split(",")[0].strip()
+
+             if state:
+              city = City.objects.filter(
+                name__iexact=city_name,
+                state=state
+            ).first()
+
+             if city:
+              lab_profile.city = city
+
+
+            # ---------------- WORKING HOURS ----------------
+
+             timing_id = post_data.get("lab_timing_id")
+
+             if timing_id:
+                lab_profile.lab_timing_id = int(timing_id)
 
     # DO NOT TOUCH city/state for now
     # because they are ForeignKeys
+             print("State =", lab_profile.state)
+             print("City =", lab_profile.city)
+             print("Timing =", lab_profile.lab_timing)
 
              lab_profile.save()
 
@@ -1058,13 +1158,36 @@ def update_hospital_profile(request):
                 hospital_profile.address = post_data.get("address")
                 # hospital_profile.city = post_data.get("city")
                 # hospital_profile.state = post_data.get("state")
-                hospital_profile.city_name = post_data.get("city")
-                hospital_profile.state_id = None
+                # hospital_profile.city_name = post_data.get("city")
+                # hospital_profile.state_id = None
                 hospital_profile.owner_name = post_data.get("owner_name")
                 user.phone_country_code = post_data.get("phone_country_code")
                 user.phone_number = post_data.get("phone")
                 # hospital_profile.country = post_data.get("country")
                 # hospital_profile.pincode = post_data.get("pincode")
+                hospital_profile.owner_name = post_data.get("owner_name")
+
+                state_name = post_data.get("state", "").strip()
+                # city_name = post_data.get("city", "").strip()
+                city_name = post_data.get("city", "").split(",")[0].strip()
+
+                state = State.objects.filter(
+                   name__iexact=state_name
+                ).first()
+
+                if state:
+                    hospital_profile.state = state
+
+                    city = City.objects.filter(
+                        name__iexact=city_name,
+                        state=state
+                    ).first()
+
+                    if city:
+                        hospital_profile.city = city
+
+                hospital_profile.country = post_data.get("country")
+                hospital_profile.pincode = post_data.get("pincode")
 
                 hospital_profile.save()
 
@@ -1181,6 +1304,30 @@ def update_doctor_profile(request):
             )
 
             doctor_profile.full_address = post_data.get("address")
+            # ---------------- STATE ----------------
+
+            state_name = post_data.get("state", "").strip()
+
+            state = State.objects.filter(
+                name__iexact=state_name
+            ).first()
+
+            if state:
+               doctor_profile.state = state
+
+
+            # ---------------- CITY ----------------
+
+            city_name = post_data.get("city", "").split(",")[0].strip()
+
+            if state:
+                city = City.objects.filter(
+                  name__iexact=city_name,
+                  state=state
+                ).first()
+
+                if city:
+                  doctor_profile.city = city
 
             # doctor_profile.city = post_data.get("city")
 
