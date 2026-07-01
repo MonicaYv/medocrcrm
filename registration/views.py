@@ -10,6 +10,7 @@ from .email_otp import (
     generate_otp,
     verify_otp as verify_totp
 )
+
 # from .email_otp import async_send_otp_email, send_forgot_password_email
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
@@ -1438,6 +1439,11 @@ def save_hospital(request):
     print("VERIFY RESULT =", otp_verification)
     if not otp_verification["success"]:
         errors["otp1"] = otp_verification["message"]
+    contact_otp = data.get("otp2")
+    contact_otp_token = data.get("contact_otp_token")
+
+    if not verify_contact_person_otp(email,contact_otp, contact_otp_token):
+       errors["otp2"] = "Invalid Contact Person OTP"
 
     pincode = data.get("pincode", "")
     if pincode and not re.match(r"^\d{4,10}$", pincode):
@@ -1945,13 +1951,29 @@ def send_contact_person_otp(request):
             "message": "OTP Sent Successfully"
         }
     )
-def verify_contact_person_otp(otp, token):
+# def verify_contact_person_otp(otp, token):
 
-    otp_data = cache.get(f"otp:{token}")
+#     otp_data = cache.get(f"otp:{token}")
 
-    if not otp_data:
-        return False
+#     if not otp_data:
+#         return False
 
-    secret = otp_data["secret"]
+#     secret = otp_data["secret"]
 
-    return verify_totp(secret, otp)
+#     return verify_totp(secret, otp)
+
+
+def verify_contact_person_otp(email, otp, token):
+
+    print("=" * 50)
+    print("CONTACT PERSON OTP VERIFY")
+    print("EMAIL =", email)
+    print("TOKEN =", token)
+    print("OTP =", otp)
+
+    result = verify_otp_token(email, otp, token)
+
+    print("VERIFY RESULT =", result)
+    print("=" * 50)
+
+    return result["success"]

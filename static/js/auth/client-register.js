@@ -155,42 +155,134 @@ $(document).ready(function () {
 //     });
 
 
-$(".send-otp-contact").on("click", function () {
+// $(".send-otp-contact").on("click", function () {
 
-    // Hospital email same hai
-    const email = $('input[name="email"]').val().trim();
+//     // Hospital email same hai
+//     const email = $('input[name="email"]').val().trim();
+
+//     if (!email) {
+//         toastr.error("Please enter Hospital Email first.");
+//         return;
+//     }
+
+//     // Hospital OTP already generated
+//     if ($("input[name='otp_token']").val()) {
+
+//         // Same OTP contact field me bhi use hoga
+//         $("input[name='otp2']").val($("input[name='otp1']").val());
+
+//         toastr.success("OTP has already been sent to the registered email.");
+
+//         return;
+//     }
+
+//     // First time
+//     $(".send-otp-email").trigger("click");
+// });
+// $(".send-otp-contact-pharmacy").click(function () {
+
+//     let phone = $("input[name='contact_person_phone']").val();
+
+//     if (!phone) {
+//         toastr.error("Please enter Contact Person phone.");
+//         return;
+//     }
+
+//     $.ajax({
+
+//         url: "/user/send-contact-person-otp/",
+
+//         type: "POST",
+
+//         headers: {
+//             "X-CSRFToken": csrftoken
+//         },
+
+//         data: {
+//             phone: phone
+//         },
+
+//         success: function (response) {
+
+//             $("#contact_otp_token").val(response.otp_token);
+
+//             toastr.success(response.message);
+
+//         },
+
+//         error: function (xhr) {
+
+//             toastr.error(xhr.responseJSON.message);
+
+//         }
+
+//     });
+
+// });
+// $(".send-otp-contact").on("click", function () {
+
+//     let email = $("input[name='email']").val();
+
+//     if (!email) {
+//         toastr.error("Please enter Hospital Email.");
+//         return;
+//     }
+
+//     $.ajax({
+
+//         url: "/user/otp/send",
+
+//         type: "POST",
+
+//         headers: {
+//             "X-CSRFToken": csrftoken
+//         },
+
+//         data: {
+//             email: email
+//         },
+
+//         success: function(response){
+
+//             $("input[name='contact_otp_token']").val(response.token);
+
+//             toastr.success("Contact Person OTP sent.");
+
+//         },
+
+//         error:function(xhr){
+
+//             toastr.error(xhr.responseJSON.message);
+
+//         }
+
+//     });
+
+// });
+let contactOtpSending = false;
+
+$(".send-otp-contact").off("click").on("click", function () {
+
+    if (contactOtpSending) {
+        return;
+    }
+
+    let email = $("input[name='email']").val();
 
     if (!email) {
-        toastr.error("Please enter Hospital Email first.");
+        toastr.error("Please enter Hospital Email.");
         return;
     }
 
-    // Hospital OTP already generated
-    if ($("input[name='otp_token']").val()) {
+    contactOtpSending = true;
 
-        // Same OTP contact field me bhi use hoga
-        $("input[name='otp2']").val($("input[name='otp1']").val());
+    const $btn = $(this);
 
-        toastr.success("OTP has already been sent to the registered email.");
-
-        return;
-    }
-
-    // First time
-    $(".send-otp-email").trigger("click");
-});
-$(".send-otp-contact-pharmacy").click(function () {
-
-    let phone = $("input[name='contact_person_phone']").val();
-
-    if (!phone) {
-        toastr.error("Please enter Contact Person phone.");
-        return;
-    }
+    $btn.prop("disabled", true);
 
     $.ajax({
 
-        url: "/user/send-contact-person-otp/",
+        url: "/user/otp/send",
 
         type: "POST",
 
@@ -199,20 +291,22 @@ $(".send-otp-contact-pharmacy").click(function () {
         },
 
         data: {
-            phone: phone
+            email: email
         },
 
         success: function (response) {
 
-            $("#contact_otp_token").val(response.otp_token);
+            $("input[name='contact_otp_token']").val(response.token);
 
-            toastr.success(response.message);
+            toastr.success("Contact Person OTP sent.");
 
         },
 
-        error: function (xhr) {
+        complete: function () {
 
-            toastr.error(xhr.responseJSON.message);
+            contactOtpSending = false;
+
+            $btn.prop("disabled", false);
 
         }
 
