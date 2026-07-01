@@ -57,8 +57,13 @@
                       <span class="material-symbols-outlined">home</span>
                       <p class="text-base font-semibold">{{ hospital_profile.hospital_name }}</p>
                     </div>
-                    <p class="font-semibold text-sm">221/A, 2nd Floor, Shanti Nagar Road, Sector 10, Andheri East, <br>
-                      Mumbai, Maharashtra - 400093</p>
+                    <p class="font-semibold text-sm">
+                      {% if hospital_profile.address %}{{ hospital_profile.address }}{% endif %}
+                      {% if hospital_profile.city %}{% if hospital_profile.address %}, {% endif %}{{ hospital_profile.city.name }}{% endif %}
+                      {% if hospital_profile.state %}{% if hospital_profile.city or hospital_profile.address %}, {% endif %}{{ hospital_profile.state.name }}{% endif %}
+                      {% if hospital_profile.pincode %}{% if hospital_profile.city or hospital_profile.address or hospital_profile.state %} - {% endif %}{{ hospital_profile.pincode }}{% endif %}
+                      {% if hospital_profile.country %}{% if hospital_profile.pincode or hospital_profile.city or hospital_profile.address or hospital_profile.state %}, {% endif %}{{ hospital_profile.country }}{% endif %}
+                    </p>
                   </div>
                 </div>
               </div>
