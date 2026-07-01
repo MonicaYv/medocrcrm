@@ -162,8 +162,8 @@
                                 <div class="w-full space-y-2 text-sm" id="topProductsList">
                                     {% for product in top_products %}
                                     <div class="flex justify-between gap-3">
-                                        <span class="truncate">{{ product.name }}</span>
-                                        <span class="text-dodger-blue whitespace-nowrap">{{ product.units }} units</span>
+                                        <span class="truncate">{{ product.name|default:"Unknown" }}</span>
+                                        <span class="text-dodger-blue whitespace-nowrap">{{ product.units|default:"0" }} units</span>
                                     </div>
                                     {% empty %}
                                     <p class="text-medium-gray text-center">No product sales found for this range.</p>
@@ -192,8 +192,8 @@
                                 <div class="w-full space-y-2 text-sm" id="revenueProductsList">
                                     {% for product in top_products %}
                                     <div class="flex justify-between gap-3">
-                                        <span class="truncate">{{ product.name }}</span>
-                                        <span class="font-semibold whitespace-nowrap">&#8377;{{ product.revenue }}</span>
+                                        <span class="truncate">{{ product.name|default:"Unknown" }}</span>
+                                        <span class="font-semibold whitespace-nowrap">&#8377;{{ product.revenue|default:"0" }}</span>
                                     </div>
                                     {% empty %}
                                     <p class="text-medium-gray text-center">No revenue split available.</p>
@@ -321,8 +321,8 @@
                                 <div class="space-y-2 text-sm" id="stockAlertsList">
                                     {% for stock in stock_alerts %}
                                     <div class="flex justify-between gap-3">
-                                        <span class="truncate">{{ stock.name }}</span>
-                                        <span class="text-strong-red whitespace-nowrap">{{ stock.quantity }}</span>
+                                        <span class="truncate">{{ stock.name|default:"Unknown" }}</span>
+                                        <span class="text-strong-red whitespace-nowrap">{{ stock.quantity|default:"0" }}</span>
                                     </div>
                                     {% empty %}
                                     <p class="text-medium-gray">No active stock items added.</p>
