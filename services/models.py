@@ -7,6 +7,7 @@ class DoctorBidStatus(models.TextChoices):
     ACCEPTED = "accepted", "Accepted"
     REJECTED = "rejected", "Rejected"
     EXPIRED = "expired", "Expired"
+    CANCELLED = "cancelled", "Cancelled"
 
 
 class HospitalBidStatus(models.TextChoices):
@@ -95,7 +96,7 @@ class DoctorBidding(models.Model):
     visit_charges = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_bid_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
-    delivery_time = models.IntegerField(default=2)
+    delivery_time = models.CharField(max_length=50)
     remarks = models.CharField(max_length=255, blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
