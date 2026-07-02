@@ -1595,6 +1595,7 @@ def save_hospital(request):
         profile_type="hospital",
         profile=user,
         name=data.get("contact_name"),
+        phone_country_code="+91",
         phone_number=data.get("contact_phone"),
         role=data.get("contact_role"),
     )
@@ -1786,6 +1787,7 @@ def save_doctor(request):
         profile_type="doctor",
         profile=user,
         name=contact_name,
+        phone_country_code="+91",
         phone_number=contact_phone,
         role=contact_role,
         email_otp=data.get("otp2"),
