@@ -291,12 +291,40 @@ $(".download-btn").on("click", function () {
 
     if (!window.jspdf) return;
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.html(target, {
-      callback: function (doc) {
-        doc.save(`${targetId}.pdf`);
-      },
-      x: 10,
-      y: 10,
-    });
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    // Use html2canvas to capture the element
+    if (typeof html2canvas !== 'undefined') {
+      html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 190;
+        const pageHeight = 297;
+        const margin = 10;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = margin;
+
+        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+        heightLeft -= (pageHeight - margin * 2);
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight + margin;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+          heightLeft -= (pageHeight - margin * 2);
+        }
+
+        pdf.save(`${targetId}.pdf`);
+      }).catch(err => {
+        console.error('PDF generation failed:', err);
+        alert('Failed to generate PDF. Please try again.');
+      });
+    } else {
+      alert('PDF generation library not loaded. Please refresh the page.');
+    }
   });
