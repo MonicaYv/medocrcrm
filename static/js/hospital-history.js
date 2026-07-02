@@ -1,4 +1,3 @@
-$(document).ready(function () {
   let currentStatus = "accepted";
 
   function loadHospitalHistory(status = "accepted", page = 1) {
@@ -32,6 +31,8 @@ $(document).ready(function () {
     }
   });
 }
+$(document).ready(function () {
+
 
   $(document).on("click", ".page-btn, .prev-btn, .next-btn", function () {
     let page = $(this).data("page");
@@ -216,9 +217,9 @@ $(document).ready(function () {
   // });
 
   // Close "canceled" modal
-  $(".modal-close-canceled").on("click", function () {
-    $(".modal-canceled").addClass("hidden");
-  });
+  // $(".modal-close-canceled").on("click", function () {
+  //   $(".modal-canceled").addClass("hidden");
+  // });
 
   // For "pending" modal
   // $(document).on("click", ".card-pending", function () {
@@ -228,6 +229,10 @@ $(document).ready(function () {
   // Close "pending" modal
   $(".modal-close-pending").on("click", function () {
     $(".modal-pending").addClass("hidden");
+  });
+
+  $(".modal-close-cancelled").on("click", function () {
+    $(".modal-cancelled").addClass("hidden");
   });
 
     $(".modal-close-accepted").on("click", function () {
@@ -521,7 +526,7 @@ $("#hospital-cards-container, #doctor-cards-container").on(
 
         case "cancelled":
         case "canceled":
-            modal = $(".modal-canceled");
+            modal = $(".modal-cancelled");
             break;
 
         case "missed":
@@ -541,6 +546,8 @@ $("#hospital-cards-container, #doctor-cards-container").on(
     window.currentBidId = bidId;
     window.currentAppointmentId = appointmentId;
     console.log("APPOINTMENT ID =", appointmentId);
+    console.log("BID ID =", bidId);
+    console.log("CARD =", card);
     const isDoctorPage = $("#doctor-cards-container").length > 0;
 
     modal.find("#modal-name").text(card.data("name") || "-");
@@ -741,7 +748,7 @@ $("#hospital-cards-container, #doctor-cards-container").on(
       <div class="flex justify-between items-center mt-3">
         <label class="flex items-center gap-2">
           <span class="font-normal text-sm">No Show</span>
-          <input type="checkbox" class="w-4 h-4 accent-dodger-blue">
+          <input type="checkbox" id="no-show-checkbox" class="w-4 h-4 accent-dodger-blue">
         </label>
         <p class="font-normal text-sm text-blue-gray">Patient didn’t show up</p>
       </div>
@@ -764,7 +771,7 @@ $("#hospital-cards-container, #doctor-cards-container").on(
   </div>
 `);
 
-$(".modal-pending, .modal-accepted, .modal-completed, .modal-canceled")
+$(".modal-pending, .modal-accepted, .modal-completed, .modal-cancelled")
     .addClass("hidden");
 
 switch (status) {
@@ -860,6 +867,7 @@ function getCookie(name) {
 // const csrftoken = getCookie("csrftoken");
 
 $(document).on("click", ".cancel-bid", function () {
+    console.log("Sending bid_id:", window.currentBidId);
 
     $.ajax({
         url: "/history/cancel-bid/",
@@ -873,18 +881,24 @@ $(document).on("click", ".cancel-bid", function () {
 
         success: function (response) {
 
-            if (response.success) {
+          if (response.success) {
 
-                $(".modal-accepted").addClass("hidden");
+              toastr.success(response.message || "Bid cancelled successfully");
 
-                loadHospitalHistory();   // reload cards
+              $(".modal-pending, .modal-accepted, .modal-cancelled, .modal-missed")
+                  .addClass("hidden");
 
-            } else {
+              loadHospitalHistory(currentStatus, 1);
 
-                alert(response.message);
+          } else {
 
-            }
+              toastr.error(response.message || "Unable to cancel bid");
 
+          }
+
+        },
+        error: function () {
+            toastr.error("Something went wrong");
         }
 
     });
@@ -913,16 +927,22 @@ $(document).on("click", ".complete-appointment", function () {
 
             if (response.success) {
 
-                $(".modal-accepted").addClass("hidden");
+                toastr.success(response.message || "Appointment completed successfully");
 
-                loadHospitalHistory();
+                $(".modal-pending, .modal-accepted, .modal-completed")
+                    .addClass("hidden");
+
+                loadHospitalHistory(currentStatus, 1);
 
             } else {
 
-                alert(response.message);
+                toastr.error(response.message);
 
             }
 
+        },
+        error: function () {
+            toastr.error("Something went wrong");
         }
 
     });
@@ -955,16 +975,21 @@ $(document).on("change", "#no-show-checkbox", function () {
 
             if (response.success) {
 
+                toastr.success(response.message || "Appointment marked as no show");
+
                 $(".modal-accepted").addClass("hidden");
 
-                loadHospitalHistory();
+                loadHospitalHistory(currentStatus, 1);
 
             } else {
 
-                alert(response.message);
+                toastr.error(response.message);
 
             }
 
+        },
+        error: function () {
+            toastr.error("Something went wrong");
         }
 
     });

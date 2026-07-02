@@ -1588,7 +1588,8 @@ from dashboard.utils import dashboard_login_required
 
 @dashboard_login_required
 def lab_report_data(request):
-    filter_type = request.GET.get("filter", "today").strip().lower()
+    # filter_type = request.GET.get("filter", "today").strip().lower()
+    filter_type = request.GET.get("filter", "all").strip().lower()
     user = request.user_obj
     current_lab = getattr(user, "lab_profile", None)
 
@@ -1602,40 +1603,81 @@ def lab_report_data(request):
     # FILTER LOGIC
     # =========================================
     today = timezone.now()
+    first_record = (
+        LabAppointments.objects
+        .filter(accepted_lab=current_lab)
+        .order_by("created_at")
+        .first()
+    )
 
-    if filter_type == "today":
-        appointments = appointments.filter(created_at__date=today.date())
+    if first_record:
+        range_label = (
+          f"{first_record.created_at.strftime('%b %d, %Y')} - "
+          f"{today.strftime('%b %d, %Y')}"
+        )
+    else:
+        range_label = today.strftime("%b %d, %Y")
+
+    # if filter_type == "today":
+    #     appointments = appointments.filter(created_at__date=today.date())
+
+    # elif filter_type == "week":
+    #     # Rolling last 7 days inclusive
+    #     appointments = appointments.filter(created_at__gte=today - timedelta(days=7))
+
+    # elif filter_type == "month":
+    #     # Rolling 30 days to avoid empty states at the beginning of a calendar month
+    #     appointments = appointments.filter(created_at__gte=today - timedelta(days=30))
+
+    # elif filter_type == "custom":
+    #     start_str = request.GET.get("start", "").strip()
+    #     end_str = request.GET.get("end", "").strip()
+        
+    #     parsed_start, parsed_end = None, None
+    #     # Safely evaluate date formats passed down from frontend inputs
+    #     for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"):
+    #         try:
+    #             if not parsed_start and start_str:
+    #                 parsed_start = timezone.datetime.strptime(start_str, fmt).date()
+    #             if not parsed_end and end_str:
+    #                 parsed_end = timezone.datetime.strptime(end_str, fmt).date()
+    #         except ValueError:
+    #             continue
+
+    #     if parsed_start and parsed_end:
+    #         appointments = appointments.filter(created_at__date__range=[parsed_start, parsed_end])
+    #     else:
+    #         # Fallback configuration parameter if inputs are completely missing/malformed
+    #         appointments = appointments.filter(created_at__year=today.year)
+    # else:
+    #     appointments = appointments.all()
+    if filter_type == "all":
+       # Registration se ab tak ka saara data
+       pass
+
+    elif filter_type == "today":
+       appointments = appointments.filter(
+           created_at__date=today.date()
+        )
 
     elif filter_type == "week":
-        # Rolling last 7 days inclusive
-        appointments = appointments.filter(created_at__gte=today - timedelta(days=7))
+        appointments = appointments.filter(
+           created_at__gte=today - timedelta(days=7)
+        )
 
     elif filter_type == "month":
-        # Rolling 30 days to avoid empty states at the beginning of a calendar month
-        appointments = appointments.filter(created_at__gte=today - timedelta(days=30))
+        appointments = appointments.filter(
+            created_at__gte=today - timedelta(days=30)
+        )
 
     elif filter_type == "custom":
         start_str = request.GET.get("start", "").strip()
         end_str = request.GET.get("end", "").strip()
-        
-        parsed_start, parsed_end = None, None
-        # Safely evaluate date formats passed down from frontend inputs
-        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"):
-            try:
-                if not parsed_start and start_str:
-                    parsed_start = timezone.datetime.strptime(start_str, fmt).date()
-                if not parsed_end and end_str:
-                    parsed_end = timezone.datetime.strptime(end_str, fmt).date()
-            except ValueError:
-                continue
 
-        if parsed_start and parsed_end:
-            appointments = appointments.filter(created_at__date__range=[parsed_start, parsed_end])
-        else:
-            # Fallback configuration parameter if inputs are completely missing/malformed
-            appointments = appointments.filter(created_at__year=today.year)
-    else:
-        appointments = appointments.all()
+        if start_str and end_str:
+            appointments = appointments.filter(
+                created_at__date__range=[start_str, end_str]
+        )
 
     # =========================================
     # STATS AGGREGATION
@@ -1766,6 +1808,7 @@ def lab_report_data(request):
     # PACKAGED COMPACT PAYLOAD OBJECT
     # =========================================
     return JsonResponse({
+        "range_label": range_label,
         "stats": {
             "revenue": revenue_display,
             "bookings": str(total_bookings),

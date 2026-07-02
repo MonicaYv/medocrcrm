@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from appointments.models import LabAppointments, AppointmentStatus, DoctorAppointment, LabAppointments, HospitalAppointments
 from registration.models import LabProfile, HospitalProfile, DoctorProfile, PharmacyProfile
 from services.models import (
+    HospitalBidStatus,
     HospitalBidding,
     HospitalRoomRateCard,
     DoctorBidding,
@@ -131,10 +132,11 @@ def ajax_doctor_history(request):
     if status == "pending":
 
         qs = qs.filter(
-            bids__doctor=doctor,
-            doctor__isnull=True,
-            status="Pending"
-        ).distinct()
+        bids__doctor=doctor,
+        bids__is_active=True,
+        bids__bid_status=DoctorBidStatus.PENDING,
+        status="Pending",
+    ).distinct()
 
     elif status == "accepted":
 
@@ -153,9 +155,9 @@ def ajax_doctor_history(request):
     elif status == "cancelled":
 
         qs = qs.filter(
-            doctor=doctor,
-            status="Cancelled"
-        )
+            bids__doctor=doctor,
+            bids__bid_status=DoctorBidStatus.CANCELLED,
+        ).distinct()
 
     elif status == "all":
 
@@ -171,12 +173,48 @@ def ajax_doctor_history(request):
 
     paginator = Paginator(qs, 5)
     page_obj = paginator.get_page(page_number)
+    for appointment in page_obj:
 
+        if status == "pending":
+            appointment.current_bid = DoctorBidding.objects.filter(
+                appointment=appointment,
+                doctor=doctor,
+                bid_status=DoctorBidStatus.PENDING,
+                is_active=True,
+            ).first()
+
+        elif status == "accepted":
+            appointment.current_bid = DoctorBidding.objects.filter(
+                appointment=appointment,
+                doctor=doctor,
+                bid_status=DoctorBidStatus.ACCEPTED,
+            ).first()
+
+        elif status == "completed":
+            appointment.current_bid = DoctorBidding.objects.filter(
+                appointment=appointment,
+                doctor=doctor,
+                bid_status=DoctorBidStatus.COMPLETED,
+            ).first()
+
+        elif status == "cancelled":
+            appointment.current_bid = DoctorBidding.objects.filter(
+                appointment=appointment,
+                doctor=doctor,
+                bid_status=DoctorBidStatus.CANCELLED,
+            ).first()
+
+        else:
+            appointment.current_bid = DoctorBidding.objects.filter(
+                appointment=appointment,
+                doctor=doctor,
+            ).order_by("-id").first()
     html = render_to_string(
         "history/doctor/doctor-history-cards.html",
         {
             "appointments": page_obj,
             "page_obj": page_obj,
+            "current_tab": status,
         },
         request=request,
     )
@@ -279,12 +317,19 @@ def ajax_lab_history(request):
         )
     paginator = Paginator(qs, 5)
     page_obj = paginator.get_page(page_number)
+    for appointment in page_obj:
+        appointment.current_bid = LabBidding.objects.filter(
+            appointment=appointment,
+            lab=lab,
+            is_active=True
+        ).first()
 
     html = render_to_string(
         "history/lab/lab_history_cards.html",
         {
             "appointments": page_obj,
             "page_obj": page_obj,
+            "current_tab": status,
         },
         request=request,
     )
@@ -358,12 +403,18 @@ def ajax_hospital_history(request):
 
     paginator = Paginator(qs, 5)
     page_obj = paginator.get_page(page_number)
-
+    for appointment in page_obj:
+        appointment.current_bid = HospitalBidding.objects.filter(
+            appointment=appointment,
+            hospital=hospital,
+            is_active=True
+        ).first()
     html = render_to_string(
         "history/hospital/hospital_history_cards.html",
         {
             "appointments": page_obj,
             "page_obj": page_obj,
+            "current_tab": status,
         },
         request=request,
     )
@@ -416,8 +467,8 @@ def cancel_bid(request):
         if not bid:
             return JsonResponse({"success": False, "message": "Bid not found"})
 
-        was_accepted = bid.bid_status == "Accepted"
-        bid.bid_status = "Cancelled"
+        was_accepted = bid.bid_status == HospitalBidStatus.ACCEPTED
+        bid.bid_status = HospitalBidStatus.CANCELLED
         bid.is_active = False
         bid.save()
 
@@ -439,7 +490,7 @@ def cancel_bid(request):
             return JsonResponse({"success": False, "message": "Bid not found"})
 
         was_accepted = bid.bid_status == DoctorBidStatus.ACCEPTED
-        bid.bid_status = "cancelled"
+        bid.bid_status = DoctorBidStatus.CANCELLED
         bid.is_active = False
         bid.save()
 
