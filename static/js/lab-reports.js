@@ -286,6 +286,9 @@ function loadDashboardData(filterType = "today") {
 
         success: function (response) {
            console.log(response);
+            $("#reportRange").text(
+                "Data shown: " + response.range_label
+            );
            updateHeatmap(
               response.heatmap_data
            );
@@ -427,7 +430,8 @@ function loadDashboardData(filterType = "today") {
 }
 
 // DEFAULT LOAD
-loadDashboardData("today");
+// loadDashboardData("today");
+loadDashboardData("all");
 // =====================================
 // SEARCH
 // =====================================
