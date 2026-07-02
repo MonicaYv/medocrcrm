@@ -156,4 +156,9 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
+# Fallback to console backend in development when SMTP is not configured
+if DJANGO_ENV == 'development':
+    if not EMAIL_HOST or 'yourprovider' in EMAIL_HOST or not EMAIL_HOST_USER or 'your@email' in EMAIL_HOST_USER:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
