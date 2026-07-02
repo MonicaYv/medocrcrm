@@ -261,28 +261,22 @@ $(document).ready(function () {
 // });
 let contactOtpSending = false;
 
+// $(".send-otp-contact-pharmacy").off("click").on("click", function () {
 $(".send-otp-contact").off("click").on("click", function () {
+    console.log("Hospital Contact OTP Button Clicked");
 
-    if (contactOtpSending) {
+    // let phone = $("input[name='contact_person_phone']").val();
+    let phone = $("input[name='contact_phone']").val().trim();
+    console.log("Phone =", phone);
+
+    if (!phone) {
+        toastr.error("Please enter Contact Person Phone.");
         return;
     }
-
-    let email = $("input[name='email']").val();
-
-    if (!email) {
-        toastr.error("Please enter Hospital Email.");
-        return;
-    }
-
-    contactOtpSending = true;
-
-    const $btn = $(this);
-
-    $btn.prop("disabled", true);
 
     $.ajax({
 
-        url: "/user/otp/send",
+        url: "/user/send-contact-person-otp/",
 
         type: "POST",
 
@@ -291,22 +285,20 @@ $(".send-otp-contact").off("click").on("click", function () {
         },
 
         data: {
-            email: email
+            phone: phone
         },
 
-        success: function (response) {
+        success: function(response){
 
-            $("input[name='contact_otp_token']").val(response.token);
+            $("input[name='contact_otp_token']").val(response.otp_token);
 
-            toastr.success("Contact Person OTP sent.");
+            toastr.success(response.message);
 
         },
 
-        complete: function () {
+        error:function(xhr){
 
-            contactOtpSending = false;
-
-            $btn.prop("disabled", false);
+            toastr.error(xhr.responseJSON.message);
 
         }
 

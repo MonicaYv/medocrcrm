@@ -1093,8 +1093,8 @@ def save_medical_pharmacy(request):
     contact_name = data.get("contact_person_name")
     contact_phone = data.get("contact_person_phone")
     contact_role = data.get("contact_person_role")
-    ref_otp = data.get("otp2")
-    contact_otp_token = data.get("contact_otp_token")
+    # ref_otp = data.get("otp2")
+    # contact_otp_token = data.get("contact_otp_token")
 
     
 
@@ -1105,14 +1105,29 @@ def save_medical_pharmacy(request):
     # )
 
     # if not otp_result["success"]:
-    if not verify_contact_person_otp(ref_otp, contact_otp_token):
-        return JsonResponse(
-          {
-            "success": False,
-            "message": "Invalid Contact Person OTP"
-          },
-          status=400
-        )
+    # if not verify_contact_person_otp(ref_otp, contact_otp_token):
+    #     return JsonResponse(
+    #       {
+    #         "success": False,
+    #         "message": "Invalid Contact Person OTP"
+    #       },
+    #       status=400
+    #     )
+    ref_otp = data.get("otp2")
+    contact_otp_token = data.get("contact_otp_token")
+    
+    if not ref_otp:
+       errors["otp2"] = "Please enter Contact Person OTP."
+
+    elif not contact_otp_token:
+       errors["otp2"] = "Please click Send OTP first."
+
+    elif not verify_contact_person_otp(
+        email,
+        ref_otp,
+        contact_otp_token
+    ):
+        errors["otp2"] = "Invalid Contact Person OTP"
         # return JsonResponse(
         #   {
         #     "success": False,
@@ -1126,6 +1141,7 @@ def save_medical_pharmacy(request):
         errors["contact_person_phone"] = "Phone required."
     if not contact_role:
         errors["contact_person_role"] = "Role required."
+   
     if errors:
         return JsonResponse({"success": False, "errors": errors}, status=400)
 
@@ -1150,8 +1166,8 @@ def save_medical_pharmacy(request):
     profile = PharmacyProfile.objects.create(
         user=user,
         company_name=company_name,
-        pharmacy_type=pharmacy_type,
-        services_offered=services_offered,
+        # pharmacy_type=pharmacy_type,
+        # services_offered=services_offered,
         pharmacy_timing=pharmacy_timing,
         personal_email=email,
         website=website,
@@ -1173,6 +1189,11 @@ def save_medical_pharmacy(request):
         storefront_image_path=storefront_image_path,
         referral_code=data.get("referral_code")
     )
+    if pharmacy_type:
+       profile.pharmacy_types.add(pharmacy_type)
+
+    if services_offered:
+       profile.services.add(services_offered)
 
     ContactPerson.objects.create(
         profile_type="pharmacy",
@@ -1439,11 +1460,26 @@ def save_hospital(request):
     print("VERIFY RESULT =", otp_verification)
     if not otp_verification["success"]:
         errors["otp1"] = otp_verification["message"]
-    contact_otp = data.get("otp2")
+    # contact_otp = data.get("otp2")
+    # contact_otp_token = data.get("contact_otp_token")
+
+    # if not verify_contact_person_otp(email,contact_otp, contact_otp_token):
+    #    errors["otp2"] = "Invalid Contact Person OTP"
+    contact_otp = data.get("otp2", "").strip()
     contact_otp_token = data.get("contact_otp_token")
 
-    if not verify_contact_person_otp(email,contact_otp, contact_otp_token):
-       errors["otp2"] = "Invalid Contact Person OTP"
+    if not contact_otp:
+       errors["otp2"] = "Please enter Contact Person OTP."
+
+    elif not contact_otp_token:
+       errors["otp2"] = "Please click Send OTP first."
+
+    elif not verify_contact_person_otp(
+        email,
+        contact_otp,
+        contact_otp_token
+    ):
+      errors["otp2"] = "Invalid Contact Person OTP"
 
     pincode = data.get("pincode", "")
     if pincode and not re.match(r"^\d{4,10}$", pincode):
@@ -1963,17 +1999,27 @@ def send_contact_person_otp(request):
 #     return verify_totp(secret, otp)
 
 
+# def verify_contact_person_otp(email, otp, token):
+
+#     print("=" * 50)
+#     print("CONTACT PERSON OTP VERIFY")
+#     print("EMAIL =", email)
+#     print("TOKEN =", token)
+#     print("OTP =", otp)
+
+#     result = verify_otp_token(email, otp, token)
+
+#     print("VERIFY RESULT =", result)
+#     print("=" * 50)
+
+#     return result["success"]
 def verify_contact_person_otp(email, otp, token):
 
-    print("=" * 50)
-    print("CONTACT PERSON OTP VERIFY")
-    print("EMAIL =", email)
-    print("TOKEN =", token)
-    print("OTP =", otp)
+    otp_data = cache.get(f"otp:{token}")
 
-    result = verify_otp_token(email, otp, token)
+    if not otp_data:
+        return False
 
-    print("VERIFY RESULT =", result)
-    print("=" * 50)
+    secret = otp_data["secret"]
 
-    return result["success"]
+    return verify_totp(secret, otp)
