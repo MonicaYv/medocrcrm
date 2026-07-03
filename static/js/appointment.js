@@ -9,8 +9,9 @@
 
 
 let currentStatus = "all";
-
-function loadAppointments(status = "all", page = 1) {
+let currentSearch = "";
+// function loadAppointments(status = "all", page = 1) {
+function loadAppointments(status = "all", page = 1, search = "") {
 
     currentStatus = status;
 
@@ -23,7 +24,12 @@ function loadAppointments(status = "all", page = 1) {
     $.ajax({
       url: "/appointment/ajax/appointments/",
       type: "GET",
-      data: { status, page },
+    //   data: { status, page },
+      data: {
+          status,
+          page,
+          search
+        },
 
       success: function (res) {
         $("#cards-container").html(res.html);
@@ -69,7 +75,8 @@ function loadAppointments(status = "all", page = 1) {
 //   loadAppointments("all", 1);
 $(document).ready(function () {
 
-loadAppointments("all", 1);
+// loadAppointments("all", 1);
+loadAppointments("all", 1, "");
 
   /* ------------------------------
    * Tabs
@@ -86,7 +93,8 @@ loadAppointments("all", 1);
     } else {
       $("#tab-content-area > div").addClass("hidden");
       $("#appointments-container").removeClass("hidden");
-      loadAppointments(tab, 1);
+    //   loadAppointments(tab, 1);
+      loadAppointments(tab, 1, currentSearch);
     }
   });
 
@@ -94,7 +102,12 @@ loadAppointments("all", 1);
    * Pagination
    * ------------------------------ */
   $("#cards-container").on("click", ".pagination-btn", function () {
-    loadAppointments(currentStatus, $(this).data("page"));
+    // loadAppointments(currentStatus, $(this).data("page"));
+    loadAppointments(
+        currentStatus,
+        $(this).data("page"),
+        currentSearch
+    );
   });
 
   /* ------------------------------
@@ -905,28 +918,35 @@ $(document).on("click", ".reject-button", function () {
 // SEARCH APPOINTMENT BY NAME
 // ===============================
 
+// $(document).on("keyup", "#appointmentSearch", function () {
+
+//     let value = $(this).val().toLowerCase().trim();
+
+//     $(".card-all-pending,.card-all-accepted,.card-all-completed,.card-all-cancelled,.card-all-missed").each(function () {
+
+//         let patientName = ($(this).data("name") || "").toLowerCase();
+
+//         let serviceType = (($(this).data("service-type") || "") + "")
+//             .replace(/_/g, " ")
+//             .toLowerCase();
+
+//         let visitType = (($(this).data("visit-type") || "") + "")
+//             .replace(/_/g, " ")
+//             .toLowerCase();
+
+//         $(this).toggle(
+//             patientName.includes(value) ||
+//             serviceType.includes(value) ||
+//             visitType.includes(value)
+//         );
+
+//     });
+
+// });
 $(document).on("keyup", "#appointmentSearch", function () {
 
-    let value = $(this).val().toLowerCase().trim();
+    currentSearch = $(this).val().trim();
 
-    $(".card-all-pending,.card-all-accepted,.card-all-completed,.card-all-cancelled,.card-all-missed").each(function () {
-
-        let patientName = ($(this).data("name") || "").toLowerCase();
-
-        let serviceType = (($(this).data("service-type") || "") + "")
-            .replace(/_/g, " ")
-            .toLowerCase();
-
-        let visitType = (($(this).data("visit-type") || "") + "")
-            .replace(/_/g, " ")
-            .toLowerCase();
-
-        $(this).toggle(
-            patientName.includes(value) ||
-            serviceType.includes(value) ||
-            visitType.includes(value)
-        );
-
-    });
+    loadAppointments(currentStatus, 1, currentSearch);
 
 });

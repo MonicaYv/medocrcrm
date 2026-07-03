@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
+from django.db.models import Q
 from registration.models import DoctorProfile, LabProfile
 from django.views.decorators.http import require_GET, require_POST
 from dashboard.models import SettingMenu
@@ -86,6 +87,7 @@ def ajax_appointments(request):
 
     status = request.GET.get("status", "all").strip().lower()
     page_number = request.GET.get("page", 1)
+    search = request.GET.get("search", "").strip()
 
     if status == "canceled":
         status = "cancelled"
@@ -143,6 +145,37 @@ def ajax_appointments(request):
             qs = qs.none()
         else:
             qs = qs.filter(status__iexact=status)
+    if search:
+
+        if user_type == "lab":
+            qs = qs.filter(
+                Q(user__userprofile__first_name__icontains=search) |
+                Q(user__userprofile__last_name__icontains=search) |
+                Q(test_type__name__icontains=search) |
+                Q(test_package__packages__icontains=search) |
+                Q(service_type__icontains=search) |
+                Q(preferred_mode__icontains=search) |
+                Q(status__icontains=search)
+            )
+
+        elif user_type == "doctor":
+            qs = qs.filter(
+                Q(user__userprofile__first_name__icontains=search) |
+                Q(user__userprofile__last_name__icontains=search) |
+                Q(consultation_type__icontains=search) |
+                Q(service_type__icontains=search) |
+                Q(status__icontains=search)
+            )
+
+        elif user_type == "hospital":
+            qs = qs.filter(
+               Q(user__userprofile__first_name__icontains=search) |
+               Q(user__userprofile__last_name__icontains=search) |
+               Q(preferred_mode__icontains=search) |
+               Q(service_mode__icontains=search) |
+               Q(service_type__name__icontains=search) |
+               Q(status__icontains=search)
+            )
 
     qs = qs.order_by("-created_at")
 
