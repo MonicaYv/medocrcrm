@@ -262,11 +262,13 @@ $(document).ready(function () {
 let contactOtpSending = false;
 
 // $(".send-otp-contact-pharmacy").off("click").on("click", function () {
-$(".send-otp-contact").off("click").on("click", function () {
+
+$(".send-otp-contact-pharmacy").off("click").on("click", function () {
     console.log("Hospital Contact OTP Button Clicked");
 
     // let phone = $("input[name='contact_person_phone']").val();
-    let phone = $("input[name='contact_phone']").val().trim();
+    
+    let phone = $("input[name='contact_person_phone']").val().trim();
     console.log("Phone =", phone);
 
     if (!phone) {
@@ -305,6 +307,41 @@ $(".send-otp-contact").off("click").on("click", function () {
     });
 
 });
+$(".send-otp-contact").off("click").on("click", function () {
+
+    let phone = $("input[name='contact_phone']").val().trim();
+
+    if (!phone) {
+        toastr.error("Please enter Contact Person Phone.");
+        return;
+    }
+
+    $.ajax({
+        url: "/user/send-contact-person-otp/",
+        type: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+        data: {
+            phone: phone
+        },
+        success: function (response) {
+
+            $("input[name='contact_otp_token']").val(response.otp_token);
+
+            toastr.success(response.message);
+
+        },
+        error: function (xhr) {
+
+            toastr.error(xhr.responseJSON?.message || "Server error. Try again.");
+
+        }
+    });
+
+});
+
+
     // Contact Person OTP
     // $(".send-otp-contact").on("click", function () {
     //     sendOtp($(this), "Contact person OTP sent successfully.");
@@ -1036,4 +1073,3 @@ function resetCapture() {
     document.getElementById("selfie-input").value = "";
 }
 });
-

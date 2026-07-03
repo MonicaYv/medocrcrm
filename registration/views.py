@@ -1141,7 +1141,20 @@ def save_medical_pharmacy(request):
         errors["contact_person_phone"] = "Phone required."
     if not contact_role:
         errors["contact_person_role"] = "Role required."
-   
+    
+
+    # print("=" * 60)
+    # print("EMAIL =", email)
+    # print("CONTACT OTP =", contact_otp)
+    # print("CONTACT TOKEN =", contact_otp_token)
+    # print("ERRORS =", errors)
+    # print("=" * 60)
+    print("=" * 60)
+    print("EMAIL =", email)
+    print("CONTACT OTP =", ref_otp)
+    print("CONTACT TOKEN =", contact_otp_token)
+    print("ERRORS =", errors)
+    print("=" * 60)
     if errors:
         return JsonResponse({"success": False, "errors": errors}, status=400)
 
@@ -2017,11 +2030,32 @@ def send_contact_person_otp(request):
 #     return result["success"]
 def verify_contact_person_otp(email, otp, token):
 
+    print("=" * 60)
+    print("VERIFY CONTACT OTP")
+    print("EMAIL =", email)
+
+    otp = str(otp).strip()
+
     otp_data = cache.get(f"otp:{token}")
 
+    print("CACHE DATA =", otp_data)
+
     if not otp_data:
+        print("CACHE NOT FOUND")
         return False
 
-    secret = otp_data["secret"]
+    secret = str(otp_data["secret"]).strip()
 
-    return verify_totp(secret, otp)
+    print("SECRET =", repr(secret))
+    print("OTP RECEIVED =", repr(otp))
+
+    # 👇 Ye 2 line add karo
+    current_otp = generate_otp(secret)
+    print("CURRENT OTP =", current_otp)
+
+    result = verify_totp(secret, otp)
+
+    print("VERIFY RESULT =", result)
+    print("=" * 60)
+
+    return result
