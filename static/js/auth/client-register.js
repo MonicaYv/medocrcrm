@@ -78,10 +78,10 @@ $(document).ready(function () {
     //     $(".dropdown-arrow").removeClass("rotate-180");
     // });
     function storeOtpToken(token) {
-        let $tokenInput = $('input[name="otp_token"]');
+        let $tokenInput = $('#register-form').find('input[name="otp_token"]');
         if ($tokenInput.length === 0) {
             $tokenInput = $('<input type="hidden" name="otp_token" id="otp_token" class="otp-input">');
-            $("form").append($tokenInput);
+            $("#register-form").append($tokenInput);
         }
         $tokenInput.attr("id", "otp_token").val(token);
     }
@@ -141,12 +141,9 @@ $(document).ready(function () {
         sendOtp($btn, "OTP resent on mail");
         startResendTimer($btn);
     });
-    // Send OTP
-    // $(".send-otp").click(function () {
-    //     sendOtp($(this));
-    // Email OTP
-    $(".send-otp-email").on("click", function () {
-       sendOtp($(this));
+    // Send OTP for both standard and email-specific buttons
+    $(".send-otp, .send-otp-email").on("click", function () {
+        sendOtp($(this));
     });
 
 //    // Contact Person OTP
