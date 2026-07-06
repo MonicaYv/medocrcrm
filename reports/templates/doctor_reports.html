@@ -93,48 +93,44 @@
           <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Total Patient</h2>
-              <p class="text-base sm:text-lg font-semibold total-patient-count">
-                  50
+              <p id="totalPatients" class="text-base sm:text-lg font-semibold total-patient-count">
+                  {{ total_patients|default:"0" }}
               </p>
             </div>
-            <div
-              class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
-              <span class="material-symbols-outlined !font-semibold">currency_rupee_circle</span>
+            <div class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
+              <span class="material-symbols-outlined !font-semibold">patient_list</span>
             </div>
           </div>
           <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
-              <h2 class="text-xs sm:text-sm text-medium-gray">Birds Received</h2>
-              <p class="text-base sm:text-lg font-semibold birds-received-count">
-                  84
+              <h2 class="text-xs sm:text-sm text-medium-gray">Bids Received</h2>
+              <p id="birdsReceived" class="text-base sm:text-lg font-semibold birds-received-count">
+                  {{ bids_received|default:"0" }}
               </p>
             </div>
-            <div
-              class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
+            <div class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
               <span class="material-symbols-outlined !font-semibold">star</span>
             </div>
           </div>
           <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Quarter growth</h2>
-              <p class="text-base sm:text-lg font-semibold quarter-growth">
-                  +12.5%
+              <p id="quarterGrowth" class="text-base sm:text-lg font-semibold quarter-growth">
+                  {{ growth|default:"0%" }}
               </p>
             </div>
-            <div
-              class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
+            <div class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
               <span class="material-symbols-outlined !font-semibold">paid</span>
             </div>
           </div>
           <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Average Revenue/Patient</h2>
-              <p class="text-base sm:text-lg font-semibold avg-revenue">
-                ₹3,150
-            </p>
+              <p id="avgRevenue" class="text-base sm:text-lg font-semibold avg-revenue">
+                  {{ avg_revenue|default:"₹0" }}
+              </p>
             </div>
-            <div
-              class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
+            <div class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
               <span class="material-symbols-outlined !font-semibold">money_range</span>
             </div>
           </div>
