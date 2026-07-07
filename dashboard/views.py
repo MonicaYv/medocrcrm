@@ -303,7 +303,7 @@ def dashboard_home(request):
             contact_person = ContactPerson.objects.filter(
                 profile_type="lab",
                 profile=user
-            ).first()
+            ).order_by('-id').first()
             print("=" * 60   )
             print("LOGGED USER ID =", user.id)
             print("LOGGED USER EMAIL =", user.email)
@@ -497,7 +497,7 @@ def dashboard_home(request):
             contact_person = ContactPerson.objects.filter(
                 profile_type="doctor",
                 profile=user
-            ).first()
+            ).order_by('-id').first()
 
             appointment_requests = DoctorAppointment.objects.filter(
                 status="Pending"
@@ -615,7 +615,7 @@ def dashboard_home(request):
             contact_person = ContactPerson.objects.filter(
                 profile_type="hospital",
                 profile=user
-            ).first()
+            ).order_by('-id').first()
             appointment_requests = HospitalAppointments.objects.filter(
                 status="Pending"
             ).exclude(

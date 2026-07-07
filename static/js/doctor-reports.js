@@ -1,330 +1,217 @@
+//doctor reports.js
+let heatmapChart;
+let polygonSeries;
+
 $(document).ready(function () {
-
-    loadDoctorReportData();
-
-    // Filter dropdown toggle
-    $("#filterToggle").on("click", function (e) {
-        e.stopPropagation();
-        $("#filterDropdown").toggleClass("hidden");
-        $("#mainMenu").removeClass("hidden");
-        $("#dateMenu, #visitMenu").addClass("hidden");
-    });
-
-    // Prevent closing when clicking inside dropdown
-    $("#filterDropdown").on("click", function (e) {
-        e.stopPropagation();
-    });
-
-    // Close filter when clicking outside
-    $(document).on("click", function () {
-        $("#filterDropdown").addClass("hidden");
-        $("#dateMenu, #visitMenu").addClass("hidden");
-        $("#mainMenu").removeClass("hidden");
-    });
-
-    // Open submenu from main menu
-    $("#filterDropdown [data-open]").on("click", function (e) {
-        e.stopPropagation();
-        const target = $(this).data("open") + "Menu";
-        $("#mainMenu").addClass("hidden");
-        $("#dateMenu, #visitMenu").addClass("hidden");
-        $("#" + target).removeClass("hidden");
-    });
-
-    // Back button in submenu
-    $("#filterDropdown [data-back]").on("click", function (e) {
-        e.stopPropagation();
-        $("#dateMenu, #visitMenu").addClass("hidden");
-        $("#mainMenu").removeClass("hidden");
-    });
-
-    // Apply submenu option
-    $("#filterDropdown .option").on("click", function (e) {
-        e.stopPropagation();
-        const filterType = $(this).data("type");
-        const filterValue = $(this).data("value");
-
-        if (filterType === "date" && filterValue) {
-            loadDoctorReportData(filterValue.toLowerCase());
-        }
-
-        $("#filterDropdown").addClass("hidden");
-        $("#dateMenu, #visitMenu").addClass("hidden");
-        $("#mainMenu").removeClass("hidden");
-    });
-
-});
-
-
-
-function loadDoctorReportData(filter = "month") {
-
-    $.ajax({
-
-        url: "/reports/doctor-report-data/",
-        method: "GET",
-        data: {
-            filter: filter,
-        },
-
-        success: function (response) {
-            // console.log(response);
-            // console.log(response.consultation_data);
-
-            updateStats(response.stats);
-
-            loadBidChart(response.bid_chart);
-
-            loadConsultationTable(response.consultation_data);
-            loadHeatmap(response.heatmap_data);
-
-        },
-
-        error: function (error) {
-
-            console.log("Doctor report API error", error);
-
-        }
-
-    });
-
-}
-
-
-
-function updateStats(stats) {
-
-    $(".total-patient-count").text(stats.total_patients);
-
-    $(".birds-received-count").text(stats.birds_received);
-
-    $(".quarter-growth").text(stats.quarter_growth + "%");
-
-    $(".avg-revenue").text("₹" + stats.avg_revenue);
-
-}
-
-
-
-function loadBidChart(chartData) {
-    // console.log("CHART DATA:", chartData);
-
-    $(".bid-chart-container").empty();
-
-    chartData.forEach((item) => {
-        // console.log(item);
-
-        $(".bid-chart-container").append(`
-
-            <div class="flex flex-col items-center gap-2">
-
-                <div class="w-10 sm:w-[56px] h-36 sm:h-44 flex flex-col justify-end overflow-hidden gap-[2px]">
-
-                    <div
-                        class="bg-red-500 w-full"
-                        style="height:${item.lost}%">
-                    </div>
-
-                    <div
-                        class="bg-green-500 w-full"
-                        style="height:${item.won}%">
-                    </div>
-
-                </div>
-
-                <span class="text-xs text-gray-500">
-                    ${item.day}
-                </span>
-
-            </div>
-
-        `);
-
-    });
-
-}
-
-
-
-function loadConsultationTable(data) {
-
-    $(".consultation-table-body").empty();
-
-    data.forEach((item) => {
-
-        $(".consultation-table-body").append(`
-
-            <tr>
-
-                <td class="px-4 py-1 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-azure-radiance"></span>
-                    ${item.day}
-                </td>
-
-                <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">
-                    ${item.appointments}
-                </td>
-
-                <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">
-                    ₹${item.avg_fee}
-                </td>
-
-                <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">
-                    ₹${item.earnings}
-                </td>
-
-            </tr>
-
-        `);
-
-    });
-
-}
-
-function loadHeatmap(heatmapData) {
-
+  // --------- 1. INTERACTIVE FILTER DROPDOWN TOGGLES ----------
+  $("#filterToggle").on("click", function (e) {
+    e.stopPropagation();
+    $("#filterDropdown").toggleClass("hidden");
+  });
+
+  // Handle dropdown internal submenus navigation
+  $(document).on("click", "[data-open]", function (e) {
+    e.stopPropagation();
+    const targetMenu = $(this).data("open");
+    $("#mainMenu").addClass("hidden");
+    if (targetMenu === "date") $("#dateMenu").removeClass("hidden");
+    if (targetMenu === "visit") $("#visitMenu").removeClass("hidden");
+  });
+
+  $(document).on("click", "[data-back]", function (e) {
+    e.stopPropagation();
+    $("#dateMenu, #visitMenu").addClass("hidden");
+    $("#mainMenu").removeClass("hidden");
+  });
+
+  // Global closure scripts for clicking outside dropdowns
+  $(document).on("click", function () {
+    $("#filterDropdown").addClass("hidden");
+    $(".datepicker-container").addClass("hidden");
+    $(".dropdown-menu").addClass("hidden");
+    $(".calendarPopup, .heatmapCalendarPopup, .consolidationCalendarPopup").addClass("hidden");
+  });
+
+  // Individual card calendar popup triggers
+  $(".calendarToggle, .heatmapCalendarToggle, .consolidationCalendarToggle").on("click", function (e) {
+    e.stopPropagation();
+    $(this).next("div").toggleClass("hidden");
+  });
+
+  // Standard select input fields handler adjustments
+  $(document).on("click", ".dropdown-btn", function (e) {
+    e.stopPropagation();
+    const $dropdown = $(this).closest(".dropdown");
+    $(".dropdown-menu").not($dropdown.find(".dropdown-menu")).addClass("hidden");
+    $dropdown.find(".dropdown-menu").toggleClass("hidden");
+  });
+
+  $(document).on("click", ".dropdown-menu li", function (e) {
+    e.stopPropagation();
+    const $dropdown = $(this).closest(".dropdown");
+    $dropdown.find(".dropdown-value").text($(this).text());
+    $dropdown.find(".dropdown-menu").addClass("hidden");
+  });
+
+  // --------- 2. amCharts VECTOR HEATMAP INITIALIZATION ----------
+  if (typeof am4core !== "undefined") {
     am4core.useTheme(am4themes_animated);
+    heatmapChart = am4core.create("heatmap", am4maps.MapChart);
+    heatmapChart.geodata = am4geodata_india2019High;
+    heatmapChart.homeZoomLevel = 1;
+    heatmapChart.homeGeoPoint = { longitude: 78.9629, latitude: 22.5937 };
 
-    var chart = am4core.create("heatmap", am4maps.MapChart);
-
-    chart.geodata = am4geodata_india2019High;
-    var zoomControl = new am4maps.ZoomControl();
-
-    chart.zoomControl = zoomControl;
-    zoomControl.plusButton.background.cornerRadius(8,8,8,8);
-
-    zoomControl.minusButton.background.cornerRadius(8,8,8,8);
-
-    zoomControl.plusButton.width = 30;
-    zoomControl.plusButton.height = 30;
-
-    zoomControl.minusButton.width = 30;
-    zoomControl.minusButton.height = 30;
-
-    zoomControl.slider.height = 2;
-
-    zoomControl.slider.background.fill = am4core.color("#ffffff");
-
-    zoomControl.slider.startGrip.background.fill = am4core.color("#ffffff");
-
-    zoomControl.slider.startGrip.width = 12;
-
-    zoomControl.slider.startGrip.height = 12;
-
-    zoomControl.valign = "bottom";
-
-    zoomControl.align = "right";
-
-    zoomControl.marginRight = 20;
-
-    zoomControl.marginBottom = 20;
-
-    chart.homeZoomLevel = 1;
-
-    chart.homeGeoPoint = {
-        longitude: 78.9629,
-        latitude: 22.5937
-    };
-
-    var polygonSeries = chart.series.push(
-        new am4maps.MapPolygonSeries()
-    );
+    polygonSeries = heatmapChart.series.push(new am4maps.MapPolygonSeries());
+    polygonSeries.heatRules.push({
+      property: "fill",
+      target: polygonSeries.mapPolygons.template,
+      min: heatmapChart.colors.getIndex(1).brighten(1),
+      max: heatmapChart.colors.getIndex(1).brighten(-0.3)
+    });
 
     polygonSeries.useGeodata = true;
-
-    polygonSeries.heatRules.push({
-        property: "fill",
-        target: polygonSeries.mapPolygons.template,
-        min: am4core.color("#FFD580"),
-        max: am4core.color("#FF3B30")
-    });
-
-    polygonSeries.data = heatmapData;
+    polygonSeries.geodata = am4geodata_india2019High;
+    polygonSeries.calculateVisualCenter = true;
+    polygonSeries.exclude = ["AQ"];
+    polygonSeries.dataFields.value = "value";
+    polygonSeries.dataFields.id = "id";
+    polygonSeries.mapPolygons.template.propertyFields.fill = "fill";
+    polygonSeries.mapPolygons.template.applyOnClones = true;
+    polygonSeries.data = [];
 
     var polygonTemplate = polygonSeries.mapPolygons.template;
-
+    polygonTemplate.fill = am4core.color("#DCEBFF");
     polygonTemplate.tooltipText = "{name}: {value}";
-
+    polygonTemplate.nonScalingStroke = true;
     polygonTemplate.strokeWidth = 0.5;
 
-    polygonTemplate.nonScalingStroke = true;
-
     var hs = polygonTemplate.states.create("hover");
+    hs.properties.fill = am4core.color("#3c5bdc");
 
-    hs.properties.fill = am4core.color("#FF6B00");
-}
+    // Once map structure initializes, pull default month dataset layout fields
+    heatmapChart.events.on("ready", function() {
+        console.log("Doctor Map Engine operational.");
+        loadDoctorDashboardData("month");
+    });
+  }
 
-$(".download-btn").on("click", function () {
-    const targetId = $(this).data("target");
-    const exportType = $(this).data("type");
-    const target = document.getElementById(targetId);
-    if (!target) return;
-
-    if (exportType === "excel") {
-      const rows = [];
-      const headers = [];
-      $(target).find("thead th").each(function () {
-        headers.push($(this).text().trim());
-      });
-      rows.push(headers.join(","));
-      $(target).find("tbody tr").each(function () {
-        const cols = [];
-        $(this).find("td").each(function () {
-          cols.push($(this).text().trim());
-        });
-        if (cols.length) {
-          rows.push(cols.join(","));
-        }
-      });
-      const csvContent = rows.join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${targetId}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      return;
-    }
-
-    if (!window.jspdf) return;
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-
-    // Use html2canvas to capture the element
-    if (typeof html2canvas !== 'undefined') {
-      html2canvas(target, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff'
-      }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 190;
-        const pageHeight = 297;
-        const margin = 10;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        let heightLeft = imgHeight;
-        let position = margin;
-
-        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-        heightLeft -= (pageHeight - margin * 2);
-
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight + margin;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-          heightLeft -= (pageHeight - margin * 2);
-        }
-
-        pdf.save(`${targetId}.pdf`);
-      }).catch(err => {
-        console.error('PDF generation failed:', err);
-        alert('Failed to generate PDF. Please try again.');
-      });
-    } else {
-      alert('PDF generation library not loaded. Please refresh the page.');
-    }
+  // --------- 3. ASYNCHRONOUS SUBMENU TABS ACTION EVENTS ----------
+  $(document).on("click", "#filterDropdown .option", function (e) {
+    e.stopPropagation();
+    const value = $(this).data("value");
+    $("#filterDropdown").addClass("hidden");
+    loadDoctorDashboardData(value.toLowerCase());
   });
+
+  // Sync secondary action listeners
+  $(document).on("click", ".calendar-option, .heatmap-cal-option, .consolidation-cal-option", function (e) {
+    e.stopPropagation();
+    const value = $(this).data("value");
+    $(this).parent().addClass("hidden");
+    $(this).closest(".relative").find(".calendar-date-text").text($(this).text().trim().replace("check", ""));
+    loadDoctorDashboardData(value.toLowerCase());
+  });
+
+  // Default fallback load invocation if map engine is bypassed
+  if (typeof am4core === "undefined") {
+      loadDoctorDashboardData("month");
+  }
+});
+
+// =========================================================================
+// CENTRAL WORKFLOW ENGINE: DISPATCH AJAX AND INJECT INTO DOM ELEMENTS
+// =========================================================================
+function loadDoctorDashboardData(filterType) {
+    $.ajax({
+        url: "/reports/doctor-report-data/", // Update to point to your routing path url configuration
+        type: "GET",
+        data: { filter: filterType },
+        success: function (response) {
+            console.log("DOCTOR LIVE PIPELINE DISPATCH MATRIX RECIEVED:", response);
+
+            // 1. Hydrate Overview Stats Cards selectors text values
+            $("#totalPatients").text(response.stats.total_patients);
+            $("#birdsReceived").text(response.stats.birds_received);
+            $("#quarterGrowth").text(response.stats.quarter_growth);
+            $("#avgRevenue").text(response.stats.avg_revenue);
+
+            // 2. Hydrate Custom HTML Vector Bars (Bid Win/Loss Chart Layout Matrix)
+            let chartContainer = $("#bidChartContainer");
+            if (chartContainer.length) {
+                chartContainer.empty();
+                response.bid_trend.labels.forEach((day, index) => {
+                    let wonVal = response.bid_trend.won[index] || 0;
+                    let lostVal = response.bid_trend.lost[index] || 0;
+                    
+                    chartContainer.append(`
+                        <div class="flex flex-col items-center flex-1 group">
+                          <div class="w-full flex justify-center gap-1 sm:gap-2 h-32 items-end border-b border-gray-200 pb-1">
+                            <div class="w-3 sm:w-4 bg-mint-emerald rounded-t" style="height: ${wonVal}%;" title="Won: ${wonVal}%"></div>
+                            <div class="w-3 sm:w-4 bg-bright-red rounded-t" style="height: ${lostVal}%;" title="Lost: ${lostVal}%"></div>
+                          </div>
+                          <span class="text-[10px] text-gray-500 mt-2">${day}</span>
+                        </div>
+                    `);
+                });
+            }
+
+            // 3. Hydrate Appointments & Fee Earnings Table body context elements
+            let tableBody = $(".consultation-table-body");
+            if (tableBody.length) {
+                tableBody.empty();
+                let cumAppts = 0;
+                let cumEarnings = 0;
+                const bulletColors = ["bg-azure-radiance", "bg-light-green", "bg-golden-gold", "bg-safety-orange", "bg-dark-yellow", "bg-dodger-blue", "bg-crimson-red"];
+
+                response.consultation_data.forEach((row, i) => {
+                    cumAppts += row.appointments || 0;
+                    cumEarnings += row.earnings || 0;
+                    let colorClass = bulletColors[i % bulletColors.length];
+
+                    tableBody.append(`
+                        <tr class="border-b border-gray-100">
+                          <td class="px-4 py-2.5 flex items-center gap-2 text-sm text-jungle-navy font-medium">
+                            <span class="w-2 h-2 rounded-full ${colorClass}"></span> ${row.day}
+                          </td>
+                          <td class="text-right px-4 py-2.5 text-deep-blue text-sm font-medium">${row.appointments}</td>
+                          <td class="text-right px-4 py-2.5 text-deep-blue text-sm">₹${row.avg_fee.toLocaleString()}</td>
+                          <td class="text-right px-4 py-2.5 text-deep-blue text-sm font-semibold">₹${row.earnings.toLocaleString()}</td>
+                        </tr>
+                    `);
+                });
+
+                // Add cumulative total summarizing calculation row inside footer block boundary
+                tableBody.append(`
+                    <tr class="bg-gray-50/50 font-semibold">
+                      <td class="px-4 py-3 text-sm font-bold text-jungle-navy">Total</td>
+                      <td class="text-right px-4 py-3 text-sm text-deep-blue font-bold">${cumAppts}</td>
+                      <td class="text-right px-4 py-3 text-sm text-gray-400 font-normal">-</td>
+                      <td class="text-right px-4 py-3 text-sm text-dodger-blue font-bold">₹${cumEarnings.toLocaleString()}</td>
+                    </tr>
+                `);
+            }
+
+            // 4. Hydrate Vector Maps Matrix Shading Values
+            if (response.heatmap && window.polygonSeries) {
+                const stateMap = {
+                    "Maharashtra": "IN-MH", "Delhi": "IN-DL", "Karnataka": "IN-KA",
+                    "Tamil Nadu": "IN-TN", "Gujarat": "IN-GJ", "Rajasthan": "IN-RJ",
+                    "Uttar Pradesh": "IN-UP", "Madhya Pradesh": "IN-MP", "West Bengal": "IN-WB"
+                };
+
+                let mapData = [];
+                response.heatmap.labels.forEach((state, idx) => {
+                    let mId = stateMap[state.trim()];
+                    if (mId) mapData.push({ id: mId, value: parseInt(response.heatmap.data[idx]) || 0 });
+                });
+
+                window.polygonSeries.data = mapData.length ? mapData : [{ id: "IN-MH", value: 0 }];
+                window.polygonSeries.invalidateRawData();
+                if (window.heatmapChart) window.heatmapChart.validateData();
+            }
+        },
+        error: function (err) {
+            print("[ERROR]: Interface failed to parse dynamic doctor metrics dataset stream:", err);
+        }
+    });
+}

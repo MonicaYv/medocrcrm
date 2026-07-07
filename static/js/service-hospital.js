@@ -255,41 +255,84 @@ $(document).ready(function () {
         resetRoomCard($(this));
     });
 
-    // create total 3 service cards
-    for (let i = 0; i < 0; i++) {
-        const template = document.getElementById("service-card-template");
-        const $card = $(template.content.firstElementChild.cloneNode(true));
-        resetServiceCard($card);
-        $(".services-list").append($card);
-    }
-
-    // create total 3 room cards
+  // --- INITIALIZATION ON PAGE LOAD ---
+    // Note: The loop for services is removed because 1 card is already provided by your HTML.
+    // This loop generates exactly 1 initial room card dynamically on startup.
     for (let i = 0; i < 1; i++) {
         const template = document.getElementById("bed-room-card-template");
-        const $card = $(template.content.firstElementChild.cloneNode(true));
-        resetRoomCard($card);
-        $(".bed-services-list").append($card);
+        if (template) {
+            const $card = $(template.content.firstElementChild.cloneNode(true));
+            resetRoomCard($card);
+            $(".bed-services-list").append($card);
+        }
     }
 
     showStep(1);
 });
 
-// --- FIXED: RE-INJECT DROPDOWN TOGGLE ENGINE FOR ALL DYNAMIC CARDS ---
-$(document).on("click", ".category-dropdown-btn, .service-dropdown-btn, .bed-room-dropdown-btn", function (e) {
+// =========================================================================
+// --- DROPDOWN ENGINE: TOGGLE OPEN/CLOSE VISIBILITY FOR ALL CARDS ---
+// =========================================================================
+$(document).off("click", ".category-dropdown-btn, .service-dropdown-btn, .bed-room-dropdown-btn")
+           .on("click", ".category-dropdown-btn, .service-dropdown-btn, .bed-room-dropdown-btn", function (e) {
     e.stopPropagation();
+    e.preventDefault();
     
-    // Close any other open dropdowns first to keep layout clean
-    const $currentMenu = $(this).closest(".dropdown-trigger").find(".dropdown-menu");
-    $(".dropdown-menu").not($currentMenu).addClass("hidden");
+    // Target the specific menu sibling under this dropdown button container
+    const $currentMenu = $(this).next(".dropdown-menu");
     
-    // Toggle the targeted card dropdown visibility status
-    $currentMenu.toggleClass("hidden");
+    // Force populate data items array if cloner didn't catch it
+    if ($currentMenu.hasClass("category-options") && $currentMenu.children().length === 0) {
+        if (window.HOSPITAL_CATEGORIES && HOSPITAL_CATEGORIES.length) {
+            const listItems = HOSPITAL_CATEGORIES.map(cat => `
+                <li class="dropdown-item px-3 py-2 cursor-pointer hover:bg-premium-light-blue" data-id="${cat.id}">
+                    ${cat.name}
+                </li>
+            `).join("");
+            $currentMenu.html(listItems);
+        }
+    }
+
+    // Automatically dismiss any other open dropdowns on screen
+    $(".dropdown-menu").not($currentMenu).addClass("hidden").css("display", "none");
+    
+    // Toggle the targeted card dropdown visibility status safely
+    if ($currentMenu.hasClass("hidden")) {
+        $currentMenu.removeClass("hidden").css({
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1"
+        });
+    } else {
+        $currentMenu.addClass("hidden").css("display", "none");
+    }
 });
 
-// Hide dropdowns if a user clicks anywhere else on the document area screen
+// =========================================================================
+// --- SELECTION HANDLERS: ASSIGN VALUES WHEN AN OPTION IS CLICKED ---
+// =========================================================================
+
+// Handle Category Option Selection
+$(document).on("click", ".category-options .dropdown-item", function (e) {
+    e.stopPropagation();
+    const $item = $(this);
+    const $card = $item.closest(".service-card");
+    
+    $card.find(".category-id").val($item.data("id"));
+    $card.find(".category-dropdown-btn .selected-text").text($item.text().trim());
+    
+    // Reset service sub-selections to force user re-validation
+    $card.find(".service-id").val("");
+    $card.find(".service-dropdown-btn .selected-text").text("Select Service");
+    
+    // Hide the menu wrapper
+    $item.closest(".dropdown-menu").addClass("hidden").css("display", "none");
+});
+
+// Global Click Dismiss: Hide menus if a user clicks anywhere else on the screen
 $(document).on("click", function (e) {
     if (!$(e.target).closest(".dropdown-trigger, .more-dropdown, .more-btn").length) {
-        $(".dropdown-menu").addClass("hidden");
+        $(".dropdown-menu").addClass("hidden").css("display", "none");
         $(".more-dropdown").addClass("hidden");
     }
 });

@@ -78,10 +78,10 @@ $(document).ready(function () {
     //     $(".dropdown-arrow").removeClass("rotate-180");
     // });
     function storeOtpToken(token) {
-        let $tokenInput = $('input[name="otp_token"]');
+        let $tokenInput = $('#register-form').find('input[name="otp_token"]');
         if ($tokenInput.length === 0) {
             $tokenInput = $('<input type="hidden" name="otp_token" id="otp_token" class="otp-input">');
-            $("form").append($tokenInput);
+            $("#register-form").append($tokenInput);
         }
         $tokenInput.attr("id", "otp_token").val(token);
     }
@@ -141,12 +141,9 @@ $(document).ready(function () {
         sendOtp($btn, "OTP resent on mail");
         startResendTimer($btn);
     });
-    // Send OTP
-    // $(".send-otp").click(function () {
-    //     sendOtp($(this));
-    // Email OTP
-    $(".send-otp-email").on("click", function () {
-       sendOtp($(this));
+    // Send OTP for both standard and email-specific buttons
+    $(".send-otp, .send-otp-email").on("click", function () {
+        sendOtp($(this));
     });
 
 //    // Contact Person OTP
@@ -262,11 +259,13 @@ $(document).ready(function () {
 let contactOtpSending = false;
 
 // $(".send-otp-contact-pharmacy").off("click").on("click", function () {
-$(".send-otp-contact").off("click").on("click", function () {
+
+$(".send-otp-contact-pharmacy").off("click").on("click", function () {
     console.log("Hospital Contact OTP Button Clicked");
 
     // let phone = $("input[name='contact_person_phone']").val();
-    let phone = $("input[name='contact_phone']").val().trim();
+    
+    let phone = $("input[name='contact_person_phone']").val().trim();
     console.log("Phone =", phone);
 
     if (!phone) {
@@ -305,6 +304,41 @@ $(".send-otp-contact").off("click").on("click", function () {
     });
 
 });
+$(".send-otp-contact").off("click").on("click", function () {
+
+    let phone = $("input[name='contact_phone']").val().trim();
+
+    if (!phone) {
+        toastr.error("Please enter Contact Person Phone.");
+        return;
+    }
+
+    $.ajax({
+        url: "/user/send-contact-person-otp/",
+        type: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+        data: {
+            phone: phone
+        },
+        success: function (response) {
+
+            $("input[name='contact_otp_token']").val(response.otp_token);
+
+            toastr.success(response.message);
+
+        },
+        error: function (xhr) {
+
+            toastr.error(xhr.responseJSON?.message || "Server error. Try again.");
+
+        }
+    });
+
+});
+
+
     // Contact Person OTP
     // $(".send-otp-contact").on("click", function () {
     //     sendOtp($(this), "Contact person OTP sent successfully.");
@@ -1036,4 +1070,3 @@ function resetCapture() {
     document.getElementById("selfie-input").value = "";
 }
 });
-
