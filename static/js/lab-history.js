@@ -487,7 +487,8 @@ $("#lab-history-cards-container").on(
     function () {
 
         const card = $(this);
-        const status = (card.data("status") || "").toLowerCase();
+        const status = currentHistoryStatus.toLowerCase();
+        const bidStatus = (card.data("status") || "").toLowerCase();
 
         let modal;
 
@@ -502,7 +503,7 @@ $("#lab-history-cards-container").on(
 
             case "cancelled":
             case "canceled":
-                modal = $(".modal-canceled");
+                modal = $(".modal-cancelled");
                 break;
 
             case "missed":
@@ -745,7 +746,7 @@ $("#lab-history-cards-container").on(
             </div>
         `);
 
-        $(".modal-pending").removeClass("hidden");
+        modal.removeClass("hidden");
 
     }
 );
@@ -756,7 +757,17 @@ $(document).on("click", ".modal-close-pending", function () {
   $(".modal-pending").addClass("hidden");
 });
 });
+$(document).on("click", ".modal-close-accepted", function () {
+    $(".modal-accepted").addClass("hidden");
+});
 
+$(document).on("click", ".modal-close-cancelled", function () {
+    $(".modal-cancelled").addClass("hidden");
+});
+
+$(document).on("click", ".modal-close-missed", function () {
+    $(".modal-missed").addClass("hidden");
+});
 function getCookie(name) {
 
     let cookieValue = null;
@@ -784,7 +795,8 @@ function getCookie(name) {
 // const csrftoken = getCookie("csrftoken");
 
 $(document).on("click", ".cancel-bid-btn", function () {
-
+    console.log("Appointment ID =", window.currentAppointmentId);
+    console.log("Bid ID =", window.currentBidId);
     $.ajax({
         url: "/history/cancel-bid/",
         type: "POST",
@@ -801,7 +813,8 @@ $(document).on("click", ".cancel-bid-btn", function () {
 
                 toastr.success("Bid cancelled successfully");
 
-                $(".modal-pending").addClass("hidden");
+                $(".modal-pending, .modal-accepted, .modal-cancelled, .modal-missed")
+                  .addClass("hidden");
 
                 loadLabHistory(currentHistoryStatus, 1);
 
@@ -824,7 +837,8 @@ $(document).on("click", ".cancel-bid-btn", function () {
 });
 
 $(document).on("click", ".complete-appointment-btn", function () {
-
+    console.log("Appointment ID =", window.currentAppointmentId);
+    console.log("Bid ID =", window.currentBidId);
     $.ajax({
 
         url: "/history/complete-appointment/",
@@ -847,7 +861,8 @@ $(document).on("click", ".complete-appointment-btn", function () {
 
                 toastr.success("Appointment completed successfully");
 
-                $(".modal-pending").addClass("hidden");
+                $(".modal-pending, .modal-accepted, .modal-cancelled, .modal-missed")
+                  .addClass("hidden");
 
                 loadLabHistory(currentHistoryStatus, 1);
 
@@ -872,7 +887,8 @@ $(document).on("click", ".complete-appointment-btn", function () {
 $(document).on("change", "#no-show-checkbox", function () {
 
     if (!this.checked) return;
-
+    console.log("Appointment ID =", window.currentAppointmentId);
+    console.log("Bid ID =", window.currentBidId);
     $.ajax({
 
         url: "/history/no-show-appointment/",
@@ -896,7 +912,8 @@ $(document).on("change", "#no-show-checkbox", function () {
 
                 toastr.success("Appointment marked as No Show");
 
-                $(".modal-pending").addClass("hidden");
+                $(".modal-pending, .modal-accepted, .modal-cancelled, .modal-missed")
+                  .addClass("hidden");
 
                 loadLabHistory(currentHistoryStatus, 1);
 

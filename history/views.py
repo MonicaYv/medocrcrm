@@ -308,21 +308,38 @@ def ajax_lab_history(request):
     qs = qs.order_by("-created_at")
     print("STATUS =", status)
     print("COUNT =", qs.count())
-    for a in qs:
-        print(
-            a.id,
-            a.status,
-            a.accepted_lab_id,
-            a.accepted_bid_id
-        )
+    # for a in qs:
+    #     print(
+    #         a.id,
+    #         a.status,
+    #         a.accepted_lab_id,
+    #         a.accepted_bid_id
+    #     )
     paginator = Paginator(qs, 5)
     page_obj = paginator.get_page(page_number)
     for appointment in page_obj:
-        appointment.current_bid = LabBidding.objects.filter(
-            appointment=appointment,
-            lab=lab,
-            is_active=True
-        ).first()
+        if status == "accepted":
+            appointment.current_bid = LabBidding.objects.filter(
+                appointment=appointment,
+                lab=lab,
+                bid_status=LabBidStatus.ACCEPTED,
+                is_active=True,
+            ).first()
+
+        elif status == "cancelled":
+            appointment.current_bid = LabBidding.objects.filter(
+                appointment=appointment,
+                lab=lab,
+                bid_status=LabBidStatus.CANCELLED,
+            ).first()
+
+        elif status == "pending":
+            appointment.current_bid = LabBidding.objects.filter(
+                appointment=appointment,
+                lab=lab,
+                bid_status=LabBidStatus.PENDING,
+                is_active=True,
+            ).first()
 
     html = render_to_string(
         "history/lab/lab_history_cards.html",
