@@ -86,27 +86,26 @@
     </div>
 
     <!-- Status -->
+    {% comment %} <div class="flex flex-col justify-center border border-red-500">
+        <p>Status: {{ appointment.current_bid.bid_status }}</p>
+        <p>Current Tab: {{ current_tab }}</p>
+    </div> {% endcomment %}
     <div class="flex flex-col justify-center">
-      {% if appointment.current_bid.bid_status == "completed" %}
-          <p class="font-semibold text-sm text-green">Completed</p>
+      {% with status=appointment.current_bid.bid_status|lower %}
+          {% if status == "completed" %}
+              <p class="font-semibold text-sm text-green">Completed</p>
 
-      {% elif appointment.current_bid.bid_status == "accepted" %}
-          <p class="font-semibold text-sm text-burnt-orange">Accepted</p>
+          {% elif status == "accepted" %}
+              <p class="font-semibold text-sm text-burnt-orange">Accepted</p>
 
-      {% elif appointment.current_bid.bid_status == "pending" %}
-          <p class="font-semibold text-sm text-dodger-blue">Pending</p>
+          {% elif status == "pending" %}
+              <p class="font-semibold text-sm text-dodger-blue">Pending</p>
 
-      {% elif appointment.current_bid.bid_status == "cancelled" %}
-          <p class="font-semibold text-sm text-red-500">Cancelled</p>
+          {% elif status == "cancelled" %}
+              <p class="font-semibold text-sm text-red-500">Cancelled</p>
 
-      {% elif appointment.current_bid.bid_status == "rejected" %}
-          <p class="font-semibold text-sm text-red-500">Rejected</p>
-
-      {% else %}
-          <p class="font-semibold text-sm text-spanish-gray">
-              {{ appointment.current_bid.bid_status }}
-          </p>
-      {% endif %}
+          {% endif %}
+      {% endwith %}
     </div>
 
   </div>
