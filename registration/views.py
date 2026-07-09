@@ -64,7 +64,7 @@ def send_otp(request):
         "email": email,
         "secret": secret,
         "created_at": timezone.now().isoformat()
-    }, timeout=300)
+    }, timeout=600)
 
     return JsonResponse({"success": True, "token": secret, "message": "OTP sent successfully"})
 
@@ -131,7 +131,7 @@ def verify_otp_token(email, otp, bearer_token):
     otp = str(otp).strip()
     secret = otp_data["secret"].strip()
 
-    totp = pyotp.TOTP(secret, interval=300)
+    totp = pyotp.TOTP(secret, interval=600)
 
     print("OTP GENERATED NOW =", totp.now())
     print("OTP RECEIVED      =", otp)
@@ -1992,7 +1992,7 @@ def send_contact_person_otp(request):
             "secret": otp_secret,
             "created_at": timezone.now().isoformat()
         },
-        timeout=300
+        timeout=600
     )
 
     return JsonResponse(

@@ -3,6 +3,8 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.db.models import Value
+from django.db.models.functions import Concat
 from registration.models import DoctorProfile, LabProfile
 from django.views.decorators.http import require_GET, require_POST
 from dashboard.models import SettingMenu
@@ -89,6 +91,16 @@ def ajax_appointments(request):
     page_number = request.GET.get("page", 1)
     search = request.GET.get("search", "").strip()
 
+    if search:
+       search = search.strip()
+
+    # Remove Pt. prefix
+       if search.lower().startswith("pt."):
+            search = search[3:].strip()
+
+       elif search.lower().startswith("pt"):
+            search = search[2:].strip()
+
     if status == "canceled":
         status = "cancelled"
 
@@ -110,6 +122,15 @@ def ajax_appointments(request):
             qs = qs.exclude(
                 lab_bids__lab=lab_profile
             ).distinct()
+        
+
+        qs = qs.annotate(
+           full_name=Concat(
+            "user__userprofile__first_name",
+             Value(" "),
+            "user__userprofile__last_name",
+            )
+        )
 
     elif user_type == "doctor":
         doctor_profile = DoctorProfile.objects.filter(user=user).first()
@@ -149,6 +170,9 @@ def ajax_appointments(request):
 
         if user_type == "lab":
             qs = qs.filter(
+                # Q(user__userprofile__first_name__icontains=search) |
+                # Q(user__userprofile__last_name__icontains=search) |
+                Q(full_name__icontains=search) |
                 Q(user__userprofile__first_name__icontains=search) |
                 Q(user__userprofile__last_name__icontains=search) |
                 Q(test_type__name__icontains=search) |
