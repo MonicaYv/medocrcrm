@@ -30,10 +30,10 @@ logger = logging.getLogger(__name__)
 def generate_otp_secret() -> str:
     return pyotp.random_base32()
 
-def generate_otp(secret: str, interval: int = 300) -> str:
+def generate_otp(secret: str, interval: int = 600) -> str:
     return pyotp.TOTP(secret, interval=interval).now()
 
-def verify_otp(secret: str, otp: str, interval: int = 300) -> bool:
+def verify_otp(secret: str, otp: str, interval: int = 600) -> bool:
     return pyotp.TOTP(secret, interval=interval).verify(otp, valid_window=5)
 
 def _send_email_sync(recipient: str, subject: str, body: str) -> bool:
