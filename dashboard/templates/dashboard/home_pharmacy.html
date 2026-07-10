@@ -322,7 +322,7 @@
                         </div>
                     </div>
 
-                   <!-- Popular Coupons -->
+                    <!-- Popular Coupons -->
                     <div class="pt-5 flex flex-col ml-3">
                         <div class="flex justify-between items-center">
                         <p class="font-semibold text-lg">Popular Coupons </p>
@@ -330,118 +330,43 @@
                         </div>
 
                         <div id="popular-coupons">
-                        <!--Coupon1-->
-                        <div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card">
-                            <div class="flex lg:justify-between lg:items-center flex-col lg:flex-row">
-                            <div class="flex flex-col">
-                                <p class="font-bold text-sm text-dodger-blue tracking-[0.25em] uppercase">
-                                Category : Brand name
-                                </p>
-                                <p class="font-bold text-lg text-jet-black">
-                                25% Off Premium Supplements
-                                </p>
-                                <p class="font-normal text-base text-dark-gray">
-                                Complete health assessment including blood work, cardiac
-                                evaluation, and nutritionist consultation
-                                </p>
-                            </div>
-                            <div class="flex flex-col pt-4">
-                                <div class="flex lg:justify-between lg:items-center gap-6">
-                                <p class="font-normal text-base text-jet-black">Redeemed</p>
-                                <p class="text-xs font-medium text-jet-black">50/100</p>
+                        {% if popular_coupons %}
+                            {% for cp in popular_coupons %}
+                                <div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card">
+                                    <div class="flex lg:justify-between lg:items-center flex-col lg:flex-row">
+                                        <div class="flex flex-col">
+                                            <p class="font-bold text-sm text-dodger-blue tracking-[0.25em] uppercase">
+                                                Category : {{ cp.brand_name.name|default:"Brand name" }}
+                                            </p>
+                                            <p class="font-bold text-lg text-jet-black">{{ cp.title }}</p>
+                                            <p class="font-normal text-base text-dark-gray">{{ cp.description|truncatechars:80 }}</p>
+                                        </div>
+                                        <div class="flex flex-col pt-4">
+                                            <div class="flex lg:justify-between lg:items-center gap-6">
+                                                <p class="font-normal text-base text-jet-black">Redeemed</p>
+                                                <p class="text-xs font-medium text-jet-black">{{ cp.redeemed_count }}/{{ cp.max_redemptions }}</p>
+                                            </div>
+                                            <div class="w-full max-w-md pt-4">
+                                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                                    <div class="bg-dodger-blue h-2 rounded-full" style="width: {{ cp.redeemed_count|floatformat:0 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
+                                        <div class="pt-4">
+                                            <button
+                                                class="copy-coupon bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer"
+                                                data-code="{{ cp.code }}">
+                                                {{ cp.code }}
+                                                <span class="material-symbols-outlined">content_copy</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="w-full max-w-md pt-4">
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-dodger-blue h-2 rounded-full w-[50%]"></div>
-                                </div>
-                                </div>
-                            </div>
-                            <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
-                            <div class="pt-4">
-                                <button
-                                class="bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer">
-                                #123GHJSAI<span class="material-symbols-outlined">
-                                    content_copy
-                                </span>
-                                </button>
-                            </div>
-                            </div>
-                        </div>
-                        <!--Coupon2-->
-                        <div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card">
-                            <div class="flex lg:justify-between lg:items-center flex-col lg:flex-row">
-                            <div class="flex flex-col">
-                                <p class="font-bold text-sm text-dodger-blue tracking-[0.25em] uppercase">
-                                Category : Brand name
-                                </p>
-                                <p class="font-bold text-lg text-jet-black">
-                                25% Off Premium Supplements
-                                </p>
-                                <p class="font-normal text-base text-dark-gray">
-                                Complete health assessment including blood work, cardiac
-                                evaluation, and nutritionist consultation
-                                </p>
-                            </div>
-                            <div class="flex flex-col pt-4">
-                                <div class="flex lg:justify-between lg:items-center gap-6">
-                                <p class="font-normal text-base text-jet-black">Redeemed</p>
-                                <p class="text-xs font-medium text-jet-black">50/100</p>
-                                </div>
-                                <div class="w-full max-w-md pt-4">
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-dodger-blue h-2 rounded-full w-[50%]"></div>
-                                </div>
-                                </div>
-                            </div>
-                            <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
-                            <div class="pt-4">
-                                <button
-                                class="bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer">
-                                #123GHJSAI<span class="material-symbols-outlined">
-                                    content_copy
-                                </span>
-                                </button>
-                            </div>
-                            </div>
-                        </div>
-                        <!--Coupon3-->
-                        <div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card">
-                            <div class="flex lg:justify-between lg:items-center flex-col lg:flex-row">
-                            <div class="flex flex-col">
-                                <p class="font-bold text-sm text-dodger-blue tracking-[0.25em] uppercase">
-                                Category : Brand name
-                                </p>
-                                <p class="font-bold text-lg text-jet-black">
-                                25% Off Premium Supplements
-                                </p>
-                                <p class="font-normal text-base text-dark-gray">
-                                Complete health assessment including blood work, cardiac
-                                evaluation, and nutritionist consultation
-                                </p>
-                            </div>
-                            <div class="flex flex-col pt-4">
-                                <div class="flex lg:justify-between lg:items-center gap-6">
-                                <p class="font-normal text-base text-jet-black">Redeemed</p>
-                                <p class="text-xs font-medium text-jet-black">50/100</p>
-                                </div>
-                                <div class="w-full max-w-md pt-4">
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-dodger-blue h-2 rounded-full w-[50%]"></div>
-                                </div>
-                                </div>
-                            </div>
-                            <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
-                            <div class="pt-4">
-                                <button
-                                class="bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer">
-                                #123GHJSAI<span class="material-symbols-outlined">
-                                    content_copy
-                                </span>
-                                </button>
-                            </div>
-                            </div>
-                        </div>
-
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-center text-gray-500 mt-6">No coupons available.</p>
+                        {% endif %}
                         </div>
 
                     </div>
@@ -758,4 +683,8 @@
                     </div>
                 </div>
             </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/coupons.js' %}"></script>
 {% endblock %}

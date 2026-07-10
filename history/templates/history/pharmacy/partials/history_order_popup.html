@@ -98,7 +98,7 @@
                             <div class="flex flex-col gap-2">
                                 <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
                                 <p class="font-normal text-sm">
-                                    {% if address.phone_number %}
+                                    {% if address and address.phone_number %}
                                         {{ address.phone_number }}
                                     {% elif order.user.phone_number %}
                                         {{ order.user.phone_country_code|default:"" }} {{ order.user.phone_number }}

@@ -245,6 +245,13 @@ function fetchPlaces(type, buttonElement, mode = "map") {
     clearMarkers();
     allFetchedPlaces = [];
 
+    const typeLabels = {
+        hospital: "hospitals",
+        doctor: "doctors",
+        pharmacy: "pharmacies",
+        lab: "labs"
+    };
+
     fetch("get_places/", {
         method: "POST",
         headers: {
@@ -315,21 +322,15 @@ function fetchPlaces(type, buttonElement, mode = "map") {
                     renderListView(allFetchedPlaces);
                 }
         } else {
-        const typeLabels = {
-            hospital: "hospitals",
-            doctor: "doctors",
-            pharmacy: "pharmacies",
-            lab: "labs"
-        };
         // toastr.error(`No ${type}s found nearby.`);
         toastr.error(`No ${typeLabels[type]} found nearby.`);
         }
     })
     .catch((err) => {
         console.error("Fetch error:", err);
-        toastr.error(`Failed to load nearby ${type}s.`);
+        toastr.error(`Failed to load nearby ${typeLabels[type]}.`);
         $(".cards, #pagination").addClass('hidden');
-        $(".placeholder").removeClass('hidden').text(`No ${type}s found nearby.`);
+        $(".placeholder").removeClass('hidden').text(`No ${typeLabels[type]} found nearby.`);
     });
 }
 
