@@ -89,7 +89,7 @@
 
                         </div>
 
-                        {% if address.phone_number %}
+                        {% if address and address.phone_number %}
                             <a href="tel:{{ address.phone_number }}"
                             class="w-[155px] h-[36px] rounded-[8px] bg-dodger-blue text-white text-xs sm:text-sm font-medium flex items-center justify-center">
                                 Call Customer
@@ -108,7 +108,7 @@
                                 data-popup="order-details-popup-{{ order.id }}">
                             View Details
                         </button>
-                        {% if address.phone_number %}
+                        {% if address and address.phone_number %}
                             <a href="tel:{{ address.phone_number }}" class="ml-auto bg-dodger-blue text-white px-4 py-2 rounded text-sm">
                                 Call Customer
                             </a>
