@@ -105,24 +105,24 @@ $(document).ready(function () {
     function sendOtp($btn, successMessage) {
 
     // Doctor/Lab Contact Person OTP Disable
-    if (
-        $btn.closest("#contact-person").length ||
-        $btn.closest(".contact-person").length ||
-        $btn.closest(".contactPerson").length
-    ) {
-        toastr.info("Contact Person OTP is disabled.");
-        return;
-    }
+    // if (
+    //     $btn.closest("#contact-person").length ||
+    //     $btn.closest(".contact-person").length ||
+    //     $btn.closest(".contactPerson").length
+    // ) {
+    //     toastr.info("Contact Person OTP is disabled.");
+    //     return;
+    // }
 
     if ($btn.hasClass("disabled")) return;
 
     // remaining code...
 
-        // Contact Person button ke liye OTP mat bhejo
-        if ($btn.closest(".contact-person").length) {
-           toastr.info("Contact Person OTP is disabled.");
-           return;
-        }
+        // // Contact Person button ke liye OTP mat bhejo
+        // if ($btn.closest(".contact-person").length) {
+        //    toastr.info("Contact Person OTP is disabled.");
+        //    return;
+        // }
 
         if ($btn.hasClass("disabled")) return;
         let email = $('input[name="email"]').val();
@@ -167,26 +167,35 @@ $(document).ready(function () {
     // $(".send-otp, .send-otp-email").on("click", function () {
     //     sendOtp($(this));
     // });
-    $(".send-otp, .send-otp-email").on("click", function (e) {
+  $(".send-otp").on("click", function (e) {
 
-       console.log("Button Clicked");
-       console.log($(this));
+    // Check if this button belongs to the SECOND otp-div (Contact Person)
+    const otpIndex = $(".otp-div").index($(this).closest(".otp-div"));
 
-       sendOtp($(this));
-    });
+    if (otpIndex === 1) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        toastr.info("Contact Person OTP is disabled.");
+
+        return false;
+    }
+
+    sendOtp($(this));
+});
 
 
     // Disable Contact Person OTP
-$(document).on("click", ".send-otp-contact, .send-otp-contact-pharmacy", function (e) {
+// $(document).on("click", ".send-otp-contact, .send-otp-contact-pharmacy", function (e) {
 
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
+//     e.preventDefault();
+//     e.stopPropagation();
+//     e.stopImmediatePropagation();
 
-    toastr.info("Contact Person OTP is disabled.");
+//     toastr.info("Contact Person OTP is disabled.");
 
-    return false;
-});
+//     return false;
+// });
     
    
 
@@ -1125,22 +1134,4 @@ $(document).on("click", ".send-otp-contact-disabled", function (e) {
 });
 
 
-// ================================
-// Disable Contact Person OTP
-// ================================
-
-$(document).ready(function () {
-
-    $(".send-otp-contact, .send-otp-contact-pharmacy").off("click");
-
-    $(".send-otp-contact, .send-otp-contact-pharmacy").on("click", function (e) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-
-        toastr.info("Contact Person OTP is disabled.");
-
-        return false;
-    });
-
-});
 
