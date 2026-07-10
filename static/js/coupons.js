@@ -1,8 +1,12 @@
 $(document).ready(function () {
-  $(".createCouponBtn").on("click", function () {
-    $(".myCoupons").hide();
+  $(".createCouponBtn").on("click", function (e) {
+    e.preventDefault();
+
+    console.log("Create Coupon Button Clicked");
+
+    $(".myCoupons").addClass("hidden");
     $(".createCouponSection").removeClass("hidden");
-  });
+ });
 
   $("#expiryDate").datepicker({
     dateFormat: "dd/mm/yy",
@@ -73,49 +77,49 @@ $(document).ready(function () {
     }
   });
 
-  $(".createCouponForm").on("submit", function (e) {
-    e.preventDefault();
-    $(".error-message").addClass("hidden");
+  // $(".createCouponForm").on("submit", function (e) {
+  //   e.preventDefault();
+  //   $(".error-message").addClass("hidden");
 
-    let isValid = true;
-    const couponName = $("#couponName").val().trim();
-    if (!couponName) {
-      $("#couponNameError").removeClass("hidden");
-      isValid = false;
-    }
-    const couponCode = $("#couponCode").val().trim();
-    if (!couponCode) {
-      $("#couponCodeError").removeClass("hidden");
-      isValid = false;
-    }
-    const discountValue = $("#discountValue").val().trim();
-    if (!discountValue) {
-      $("#discountValueError").removeClass("hidden");
-      isValid = false;
-    }
-    const expiryDate = $("#expiryDate").val().trim();
-    if (!expiryDate) {
-      $("#expiryDateError").removeClass("hidden");
-      isValid = false;
-    }
-    const usagesLimit = $("#usagesLimit").val().trim();
-    if (!usagesLimit) {
-      $("#usagesLimitError").removeClass("hidden");
-      isValid = false;
-    }
+  //   let isValid = true;
+  //   const couponName = $("#couponName").val().trim();
+  //   if (!couponName) {
+  //     $("#couponNameError").removeClass("hidden");
+  //     isValid = false;
+  //   }
+  //   const couponCode = $("#couponCode").val().trim();
+  //   if (!couponCode) {
+  //     $("#couponCodeError").removeClass("hidden");
+  //     isValid = false;
+  //   }
+  //   const discountValue = $("#discountValue").val().trim();
+  //   if (!discountValue) {
+  //     $("#discountValueError").removeClass("hidden");
+  //     isValid = false;
+  //   }
+  //   const expiryDate = $("#expiryDate").val().trim();
+  //   if (!expiryDate) {
+  //     $("#expiryDateError").removeClass("hidden");
+  //     isValid = false;
+  //   }
+  //   const usagesLimit = $("#usagesLimit").val().trim();
+  //   if (!usagesLimit) {
+  //     $("#usagesLimitError").removeClass("hidden");
+  //     isValid = false;
+  //   }
 
-    if (isValid) {
-      const discountType = $("#percentageCheck").is(":checked")
-        ? "Percentage"
-        : "Fixed Amount";
-      $("#successMessage").removeClass("hidden");
-      $(".createCouponForm")[0].reset();
-      $("#percentageCheck").prop("checked", true);
-      setTimeout(function () {
-        $("#successMessage").addClass("hidden");
-      }, 3000);
-    }
-  });
+  //   if (isValid) {
+  //     const discountType = $("#percentageCheck").is(":checked")
+  //       ? "Percentage"
+  //       : "Fixed Amount";
+  //     $("#successMessage").removeClass("hidden");
+  //     $(".createCouponForm")[0].reset();
+  //     $("#percentageCheck").prop("checked", true);
+  //     setTimeout(function () {
+  //       $("#successMessage").addClass("hidden");
+  //     }, 3000);
+  //   }
+  // });
 
   // Cancel button functionality
   $("#cancelBtn").on("click", function () {
@@ -123,7 +127,7 @@ $(document).ready(function () {
     $("#percentageCheck").prop("checked", true);
     $(".error-message").addClass("hidden");
     $("#successMessage").addClass("hidden");
-    $(".myCoupons").show();
+    $(".myCoupons").removeClass("hidden");
     $(".createCouponSection").addClass("hidden");
   });
 
@@ -233,12 +237,15 @@ $(".createCouponForm").on("submit", function (e) {
     usage_limit: $("#usagesLimit").val().trim(),
     csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
   };
+  console.log(payload);
   console.log("Expiry date:", $("#expiryDate").val());
   $.ajax({
     url: "/coupons/seller/create/",
     method: "POST",
     data: payload,
 
+
+    
     success: function (data) {
       if (data.success) {
         toastr.success("Coupon Creation Successful");
@@ -247,9 +254,17 @@ $(".createCouponForm").on("submit", function (e) {
         $("#percentageCheck").prop("checked", true);
         $("#percentIcon").show();
 
+        // setTimeout(function () {
+        //   $(".myCoupons").show();
+        //   $(".createCouponSection").addClass("hidden");
+        // }, 1500);
         setTimeout(function () {
-          $(".myCoupons").show();
-          $(".createCouponSection").addClass("hidden");
+
+            loadCreatedCoupons(1);
+
+            $(".myCoupons").removeClass("hidden");
+            $(".createCouponSection").addClass("hidden");
+
         }, 1500);
       } else {
         toastr.error(data.error || "Coupon Creation failed");

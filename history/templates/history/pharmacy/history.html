@@ -39,17 +39,24 @@
 
         <div class="tab-content completed">
             {% for order in completed_orders %}
-                {% include "pharmacy/partials/history_order_card.html" with order=order history_status="completed" %}
-                {% include "pharmacy/partials/history_order_popup.html" with order=order history_status="completed" %}
+                {% include "history/pharmacy/partials/history_order_card.html" with order=order history_status="completed" %}
+                {% include "history/pharmacy/partials/history_order_popup.html" with order=order history_status="completed" %}
             {% empty %}
                 <p class="history-empty text-center text-gray-400 mt-8">No completed orders found</p>
             {% endfor %}
         </div>
 
+        <!-- <div class="tab-content cancelled hidden">
+            {% for order in cancelled_orders %}
+            
+            {% empty %}
+                <p class="history-empty text-center text-gray-400 mt-8">No cancelled orders found</p>
+            {% endfor %}
+        </div> -->
         <div class="tab-content cancelled hidden">
             {% for order in cancelled_orders %}
-                {% include "pharmacy/partials/history_order_card.html" with order=order history_status="cancelled" %}
-                {% include "pharmacy/partials/history_order_popup.html" with order=order history_status="cancelled" %}
+                {% include "history/pharmacy/partials/history_order_card.html" with order=order history_status="cancelled" %}
+                {% include "history/pharmacy/partials/history_order_popup.html" with order=order history_status="cancelled" %}
             {% empty %}
                 <p class="history-empty text-center text-gray-400 mt-8">No cancelled orders found</p>
             {% endfor %}

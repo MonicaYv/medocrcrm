@@ -62,7 +62,7 @@ async def async_send_otp_email(user):
 
     print("=" * 50)
     print("EMAIL =", user.email)
-    print("OTP =", otp)
+    print("OTP For Email =", otp)
     print("SECRET =", otp_secret)
     print("=" * 50)
 
