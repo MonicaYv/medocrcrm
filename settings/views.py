@@ -932,72 +932,71 @@ def update_pharmacy_profile(request):
         if city:
             pharmacy_profile.city = city
 
+        # ---------- Update Working Hours ----------
+        timing_id = post_data.get("working_days") or post_data.get("pharmacy_timing")
 
-            # ---------- Update Working Hours ----------
-            timing_id = post_data.get("working_days") or post_data.get("pharmacy_timing")
+        if timing_id:
+            pharmacy_profile.pharmacy_timing_id = int(timing_id)
+        # pharmacy_profile.city_id = None
+        # pharmacy_profile.state_id = None
 
-            if timing_id:
-                pharmacy_profile.pharmacy_timing_id = int(timing_id)
-            # pharmacy_profile.city_id = None
-            # pharmacy_profile.state_id = None
-
-            pharmacy_profile.owner_name = post_data.get("owner_name")
-            pharmacy_profile.country = post_data.get("country")
-            # pharmacy_profile.city = post_data.get("city")
-            # pharmacy_profile.state = post_data.get("state")
-            pharmacy_profile.pincode = post_data.get("pincode")
+        pharmacy_profile.owner_name = post_data.get("owner_name")
+        pharmacy_profile.country = post_data.get("country")
+        # pharmacy_profile.city = post_data.get("city")
+        # pharmacy_profile.state = post_data.get("state")
+        pharmacy_profile.pincode = post_data.get("pincode")
          
 
-            # Many-to-many pharmacy types
-            # pharmacy_type_values = post_data.getlist("pharmacy_type")
+        # Many-to-many pharmacy types
+        # pharmacy_type_values = post_data.getlist("pharmacy_type")
 
-            # if pharmacy_type_values:
-            #     pharmacy_types = PharmacyType.objects.filter(
-            #         name__in=pharmacy_type_values
-            #     )
-            #     pharmacy_profile.pharmacy_types.set(pharmacy_types)
+        # if pharmacy_type_values:
+        #     pharmacy_types = PharmacyType.objects.filter(
+        #         name__in=pharmacy_type_values
+        #     )
+        #     pharmacy_profile.pharmacy_types.set(pharmacy_types)
 
-            # # Many-to-many pharmacy services
-            # services_offered_values = post_data.getlist("services_offered")
+        # # Many-to-many pharmacy services
+        # services_offered_values = post_data.getlist("services_offered")
 
-            # if services_offered_values:
-            #     pharmacy_services = PharmacyServices.objects.filter(
-            #         name__in=services_offered_values
-            #     )
-            #     pharmacy_profile.services.set(pharmacy_services)
-            # pharmacy_type_value = post_data.get("pharmacy_type")
-            # if pharmacy_type_value:
-            #     pharmacy_profile.pharmacy_type = get_object_or_404(PharmacyType, name=pharmacy_type_value)
-            # services_offered_value = post_data.get("services_offered")
-            # if services_offered_value:
-            #     pharmacy_profile.services_offered = get_object_or_404(PharmacyServices, name=services_offered_value)
-            print(post_data.dict())
-            print("POST =", post_data.dict())
+        # if services_offered_values:
+        #     pharmacy_services = PharmacyServices.objects.filter(
+        #         name__in=services_offered_values
+        #     )
+        #     pharmacy_profile.services.set(pharmacy_services)
+        # pharmacy_type_value = post_data.get("pharmacy_type")
+        # if pharmacy_type_value:
+        #     pharmacy_profile.pharmacy_type = get_object_or_404(PharmacyType, name=pharmacy_type_value)
+        # services_offered_value = post_data.get("services_offered")
+        # if services_offered_value:
+        #     pharmacy_profile.services_offered = get_object_or_404(PharmacyServices, name=services_offered_value)
+        print(post_data.dict())
+        print("POST =", post_data.dict())
 
-            print("State POST =", post_data.get("state"))
-            print("City POST =", post_data.get("city"))
-            print("Working =", post_data.get("working_days"))
+        print("State POST =", post_data.get("state"))
+        print("City POST =", post_data.get("city"))
+        print("Working =", post_data.get("working_days"))
 
-            print("Before save")
-            print("pharmacy_profile.state =", pharmacy_profile.state)
-            print("pharmacy_profile.city =", pharmacy_profile.city)
-            print("pharmacy_profile.pharmacy_timing =", pharmacy_profile.pharmacy_timing)
+        print("Before save")
+        print("pharmacy_profile.state =", pharmacy_profile.state)
+        print("pharmacy_profile.city =", pharmacy_profile.city)
+        print("pharmacy_profile.pharmacy_timing =", pharmacy_profile.pharmacy_timing)
 
-            pharmacy_profile.save()
+        pharmacy_profile.save()
 
-            # --- Update or Create ContactPerson ---
-            contact_name = post_data.get("contact_name")
-            contact_phone = post_data.get("contact_phone_number")
-            if contact_name or contact_phone:
-                contact, _ = ContactPerson.objects.get_or_create(
-                    profile_type="pharmacy",
-                    profile=user
-                )
-                contact.name = contact_name
-                contact.role = post_data.get("contact_role")
-                contact.phone_country_code = post_data.get("contact_countryCodes")
-                contact.phone_number = contact_phone
-                contact.save()
+        # --- Update or Create ContactPerson ---
+        contact_name = post_data.get("contact_name")
+        contact_phone = post_data.get("contact_phone_number")
+        if contact_name or contact_phone:
+            contact, _ = ContactPerson.objects.get_or_create(
+                profile_type="pharmacy",
+                profile=user
+            )
+            contact.name = contact_name
+            contact.role = post_data.get("contact_role")
+            contact.phone_country_code = post_data.get("contact_countryCodes")
+            contact.phone_number = contact_phone
+            contact.save()
 
         return JsonResponse({'success': True, 'message': 'Pharmacy profile updated successfully'})
     
