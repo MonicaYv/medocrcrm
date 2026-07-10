@@ -1116,31 +1116,31 @@ def save_medical_pharmacy(request):
     ref_otp = data.get("otp2")
     contact_otp_token = data.get("contact_otp_token")
     
-    if not ref_otp:
-       errors["otp2"] = "Please enter Contact Person OTP."
+    # if not ref_otp:
+    #    errors["otp2"] = "Please enter Contact Person OTP."
 
-    elif not contact_otp_token:
-       errors["otp2"] = "Please click Send OTP first."
+    # elif not contact_otp_token:
+    #    errors["otp2"] = "Please click Send OTP first."
 
-    elif not verify_contact_person_otp(
-        email,
-        ref_otp,
-        contact_otp_token
-    ):
-        errors["otp2"] = "Invalid Contact Person OTP"
-        # return JsonResponse(
-        #   {
-        #     "success": False,
-        #     "message": otp_result["message"]
-        #   },
-        #   status=400
-        # )
-    if not contact_name:
-        errors["contact_person_name"] = "Contact name required."
-    if not contact_phone:
-        errors["contact_person_phone"] = "Phone required."
-    if not contact_role:
-        errors["contact_person_role"] = "Role required."
+    # elif not verify_contact_person_otp(
+    #     email,
+    #     ref_otp,
+    #     contact_otp_token
+    # ):
+    #     errors["otp2"] = "Invalid Contact Person OTP"
+    #     # return JsonResponse(
+    #     #   {
+    #     #     "success": False,
+    #     #     "message": otp_result["message"]
+    #     #   },
+    #     #   status=400
+    #     # )
+    # if not contact_name:
+    #     errors["contact_person_name"] = "Contact name required."
+    # if not contact_phone:
+    #     errors["contact_person_phone"] = "Phone required."
+    # if not contact_role:
+    #     errors["contact_person_role"] = "Role required."
     
 
     # print("=" * 60)
@@ -1208,15 +1208,15 @@ def save_medical_pharmacy(request):
     if services_offered:
        profile.services.add(services_offered)
 
-    ContactPerson.objects.create(
-        profile_type="pharmacy",
-        profile=user,
-        name=contact_name,
-        phone_country_code=phone_country_code,
-        phone_number=contact_phone,
-        role=contact_role,
-        otp=ref_otp
-    )
+    # ContactPerson.objects.create(
+    #     profile_type="pharmacy",
+    #     profile=user,
+    #     name=contact_name,
+    #     phone_country_code=phone_country_code,
+    #     phone_number=contact_phone,
+    #     role=contact_role,
+    #     otp=ref_otp
+    # )
 
     return JsonResponse({"success": True, "message": "Pharmacy registered successfully"})
 
@@ -1387,14 +1387,14 @@ def save_lab(request):
     print("contact_phone =", data.get("contact_phone"))
     print("contact_designation =", data.get("contact_designation"))
     print("=================================")
-    ContactPerson.objects.create(
-        profile_type="lab",
-        profile=user,
-        name=data.get("contact_name"),
-        phone_country_code="+91",
-        role=data.get("contact_designation"),
-        phone_number=data.get("contact_phone"),
-    )
+    # ContactPerson.objects.create(
+    #     profile_type="lab",
+    #     profile=user,
+    #     name=data.get("contact_name"),
+    #     phone_country_code="+91",
+    #     role=data.get("contact_designation"),
+    #     phone_number=data.get("contact_phone"),
+    # )
 
     return JsonResponse({"success": True, "message": "Lab registered successfully!"})
 
@@ -1478,21 +1478,21 @@ def save_hospital(request):
 
     # if not verify_contact_person_otp(email,contact_otp, contact_otp_token):
     #    errors["otp2"] = "Invalid Contact Person OTP"
-    contact_otp = data.get("otp2", "").strip()
-    contact_otp_token = data.get("contact_otp_token")
+    # contact_otp = data.get("otp2", "").strip()
+    # contact_otp_token = data.get("contact_otp_token")
 
-    if not contact_otp:
-       errors["otp2"] = "Please enter Contact Person OTP."
+    # if not contact_otp:
+    #    errors["otp2"] = "Please enter Contact Person OTP."
 
-    elif not contact_otp_token:
-       errors["otp2"] = "Please click Send OTP first."
+    # elif not contact_otp_token:
+    #    errors["otp2"] = "Please click Send OTP first."
 
-    elif not verify_contact_person_otp(
-        email,
-        contact_otp,
-        contact_otp_token
-    ):
-      errors["otp2"] = "Invalid Contact Person OTP"
+    # elif not verify_contact_person_otp(
+    #     email,
+    #     contact_otp,
+    #     contact_otp_token
+    # ):
+    #   errors["otp2"] = "Invalid Contact Person OTP"
 
     pincode = data.get("pincode", "")
     if pincode and not re.match(r"^\d{4,10}$", pincode):
@@ -1604,14 +1604,14 @@ def save_hospital(request):
         phone_for_otp=data.get("phone"),
     )
 
-    ContactPerson.objects.create(
-        profile_type="hospital",
-        profile=user,
-        name=data.get("contact_name"),
-        phone_country_code="+91",
-        phone_number=data.get("contact_phone"),
-        role=data.get("contact_role"),
-    )
+    # ContactPerson.objects.create(
+    #     profile_type="hospital",
+    #     profile=user,
+    #     name=data.get("contact_name"),
+    #     phone_country_code="+91",
+    #     phone_number=data.get("contact_phone"),
+    #     role=data.get("contact_role"),
+    # )
 
     return JsonResponse({"success": True, "message": "Hospital registered successfully!"})
 
@@ -1728,11 +1728,11 @@ def save_doctor(request):
     contact_phone = data.get("contact_phone")
     referral_code = data.get("referral_code")
 
-    if not contact_name:
-        errors["contact_name"] = "Contact person name required."
+    # if not contact_name:
+    #     errors["contact_name"] = "Contact person name required."
 
-    if not contact_role:
-        errors["contact_role"] = "Contact person role required."
+    # if not contact_role:
+    #     errors["contact_role"] = "Contact person role required."
 
     if errors:
         return JsonResponse({"success": False, "errors": errors}, status=400)
@@ -1796,16 +1796,16 @@ def save_doctor(request):
         otp=data.get("otp1")
     )
 
-    ContactPerson.objects.create(
-        profile_type="doctor",
-        profile=user,
-        name=contact_name,
-        phone_country_code="+91",
-        phone_number=contact_phone,
-        role=contact_role,
-        email_otp=data.get("otp2"),
-        referral_code=referral_code,
-    )
+    # ContactPerson.objects.create(
+    #     profile_type="doctor",
+    #     profile=user,
+    #     name=contact_name,
+    #     phone_country_code="+91",
+    #     phone_number=contact_phone,
+    #     role=contact_role,
+    #     email_otp=data.get("otp2"),
+    #     referral_code=referral_code,
+    # )
 
     return JsonResponse({"success": True, "message": "Doctor registered successfully!"})
 

@@ -101,7 +101,29 @@ $(document).ready(function () {
         }, 1000);
     }
 
+    
     function sendOtp($btn, successMessage) {
+
+    // Doctor/Lab Contact Person OTP Disable
+    if (
+        $btn.closest("#contact-person").length ||
+        $btn.closest(".contact-person").length ||
+        $btn.closest(".contactPerson").length
+    ) {
+        toastr.info("Contact Person OTP is disabled.");
+        return;
+    }
+
+    if ($btn.hasClass("disabled")) return;
+
+    // remaining code...
+
+        // Contact Person button ke liye OTP mat bhejo
+        if ($btn.closest(".contact-person").length) {
+           toastr.info("Contact Person OTP is disabled.");
+           return;
+        }
+
         if ($btn.hasClass("disabled")) return;
         let email = $('input[name="email"]').val();
         if (!email) {
@@ -142,9 +164,31 @@ $(document).ready(function () {
         startResendTimer($btn);
     });
     // Send OTP for both standard and email-specific buttons
-    $(".send-otp, .send-otp-email").on("click", function () {
-        sendOtp($(this));
+    // $(".send-otp, .send-otp-email").on("click", function () {
+    //     sendOtp($(this));
+    // });
+    $(".send-otp, .send-otp-email").on("click", function (e) {
+
+       console.log("Button Clicked");
+       console.log($(this));
+
+       sendOtp($(this));
     });
+
+
+    // Disable Contact Person OTP
+$(document).on("click", ".send-otp-contact, .send-otp-contact-pharmacy", function (e) {
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    toastr.info("Contact Person OTP is disabled.");
+
+    return false;
+});
+    
+   
 
 //    // Contact Person OTP
 //     $(".send-otp-contact").on("click", function () {
@@ -256,87 +300,87 @@ $(document).ready(function () {
 //     });
 
 // });
-let contactOtpSending = false;
+// let contactOtpSending = false;
 
 // $(".send-otp-contact-pharmacy").off("click").on("click", function () {
 
-$(".send-otp-contact-pharmacy").off("click").on("click", function () {
-    console.log("Hospital Contact OTP Button Clicked");
+// $(".send-otp-contact-pharmacy").off("click").on("click", function () {
+//     console.log("Hospital Contact OTP Button Clicked");
 
-    // let phone = $("input[name='contact_person_phone']").val();
+//     // let phone = $("input[name='contact_person_phone']").val();
     
-    let phone = $("input[name='contact_person_phone']").val().trim();
-    console.log("Phone =", phone);
+//     let phone = $("input[name='contact_person_phone']").val().trim();
+//     console.log("Phone =", phone);
 
-    if (!phone) {
-        toastr.error("Please enter Contact Person Phone.");
-        return;
-    }
+//     if (!phone) {
+//         toastr.error("Please enter Contact Person Phone.");
+//         return;
+//     }
 
-    $.ajax({
+//     $.ajax({
 
-        url: "/user/send-contact-person-otp/",
+//         url: "/user/send-contact-person-otp/",
 
-        type: "POST",
+//         type: "POST",
 
-        headers: {
-            "X-CSRFToken": csrftoken
-        },
+//         headers: {
+//             "X-CSRFToken": csrftoken
+//         },
 
-        data: {
-            phone: phone
-        },
+//         data: {
+//             phone: phone
+//         },
 
-        success: function(response){
+//         success: function(response){
 
-            $("input[name='contact_otp_token']").val(response.otp_token);
+//             $("input[name='contact_otp_token']").val(response.otp_token);
 
-            toastr.success(response.message);
+//             toastr.success(response.message);
 
-        },
+//         },
 
-        error:function(xhr){
+//         error:function(xhr){
 
-            toastr.error(xhr.responseJSON.message);
+//             toastr.error(xhr.responseJSON.message);
 
-        }
+//         }
 
-    });
+//     });
 
-});
-$(".send-otp-contact").off("click").on("click", function () {
+// });
+// $(".send-otp-contact").off("click").on("click", function () {
 
-    let phone = $("input[name='contact_phone']").val().trim();
+//     let phone = $("input[name='contact_phone']").val().trim();
 
-    if (!phone) {
-        toastr.error("Please enter Contact Person Phone.");
-        return;
-    }
+//     if (!phone) {
+//         toastr.error("Please enter Contact Person Phone.");
+//         return;
+//     }
 
-    $.ajax({
-        url: "/user/send-contact-person-otp/",
-        type: "POST",
-        headers: {
-            "X-CSRFToken": csrftoken
-        },
-        data: {
-            phone: phone
-        },
-        success: function (response) {
+//     $.ajax({
+//         url: "/user/send-contact-person-otp/",
+//         type: "POST",
+//         headers: {
+//             "X-CSRFToken": csrftoken
+//         },
+//         data: {
+//             phone: phone
+//         },
+//         success: function (response) {
 
-            $("input[name='contact_otp_token']").val(response.otp_token);
+//             $("input[name='contact_otp_token']").val(response.otp_token);
 
-            toastr.success(response.message);
+//             toastr.success(response.message);
 
-        },
-        error: function (xhr) {
+//         },
+//         error: function (xhr) {
 
-            toastr.error(xhr.responseJSON?.message || "Server error. Try again.");
+//             toastr.error(xhr.responseJSON?.message || "Server error. Try again.");
 
-        }
-    });
+//         }
+//     });
 
-});
+// });
 
 
     // Contact Person OTP
@@ -1070,3 +1114,33 @@ function resetCapture() {
     document.getElementById("selfie-input").value = "";
 }
 });
+$(document).on("click", ".send-otp-contact-disabled", function (e) {
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    toastr.info("Contact Person OTP is temporarily disabled.");
+
+    return false;
+});
+
+
+// ================================
+// Disable Contact Person OTP
+// ================================
+
+$(document).ready(function () {
+
+    $(".send-otp-contact, .send-otp-contact-pharmacy").off("click");
+
+    $(".send-otp-contact, .send-otp-contact-pharmacy").on("click", function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        toastr.info("Contact Person OTP is disabled.");
+
+        return false;
+    });
+
+});
+

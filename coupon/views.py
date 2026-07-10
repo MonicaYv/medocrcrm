@@ -120,8 +120,19 @@ def create_seller_coupon(request):
         except ValueError:
             errors["expiry_date"] = "Invalid expiry date format"
 
+    # if errors:
+    #     return JsonResponse({"success": False, "errors": errors}, status=400)
     if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+       print("Validation Errors:", errors)
+       print("POST Data:", request.POST)
+
+       return JsonResponse(
+          {
+            "success": False,
+            "errors": errors
+         },
+         status=400
+        )
 
     # ---- Save Coupon ----
     SellerCoupon.objects.create(
@@ -176,6 +187,13 @@ def get_created_coupons(request):
 
     paginator = Paginator(coupons_qs, per_page)
     coupons = paginator.get_page(page)
+    for coupon in coupons:
+        if coupon.usage_limit:
+            coupon.redeemed_percentage = (
+              coupon.used_count * 100
+            ) / coupon.usage_limit
+        else:
+           coupon.redeemed_percentage = 0
 
     html = render_to_string(
         "partials/ajax_created_coupon_list.html",
