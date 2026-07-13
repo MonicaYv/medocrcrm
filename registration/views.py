@@ -1149,12 +1149,7 @@ def save_medical_pharmacy(request):
     # print("CONTACT TOKEN =", contact_otp_token)
     # print("ERRORS =", errors)
     # print("=" * 60)
-    print("=" * 60)
-    print("EMAIL =", email)
-    print("CONTACT OTP =", ref_otp)
-    print("CONTACT TOKEN =", contact_otp_token)
-    print("ERRORS =", errors)
-    print("=" * 60)
+
     if errors:
         return JsonResponse({"success": False, "errors": errors}, status=400)
 
