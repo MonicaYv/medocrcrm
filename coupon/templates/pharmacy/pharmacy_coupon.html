@@ -3,14 +3,15 @@
 {% block title %}Coupons{% endblock %}
 {% block content %}
             <div
-                class="relative transition-all duration-300 main-content bg-slate-white h-full flex-1  p-6 overflow-y-auto scroll">
+                class="relative transition-all duration-300 main-content bg-slate-white p-6 overflow-y-auto scroll">
                 <div
                     class="show-sidebar-toggle hidden fixed top-[100px] left-0 z-50 h-10 w-10 bg-light-dodger-blue items-center justify-center rounded-r-md cursor-pointer">
                     <span class="material-symbols-outlined bold-weight text-dodger-blue">
                         arrow_forward_ios
                     </span>
                 </div>
-                <div class="bg-white rounded-[10px] p-5 myCoupons">
+                <!-- <div class="bg-white rounded-[10px] p-5 myCoupons"> -->
+                <div id="myCouponsSection" class="bg-white rounded-[10px] p-5 myCoupons">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2.5">
                             <span class="material-symbols-outlined text-xl! font-semibold!">home</span>

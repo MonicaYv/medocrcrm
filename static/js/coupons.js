@@ -1,12 +1,25 @@
 $(document).ready(function () {
-  $(".createCouponBtn").on("click", function (e) {
+//   $(".createCouponBtn").on("click", function (e) {
+//     e.preventDefault();
+
+//     console.log("Create Coupon Button Clicked");
+
+//     $(".myCoupons").addClass("hidden");
+//     $(".createCouponSection").removeClass("hidden");
+//  });
+$(".createCouponBtn").on("click", function (e) {
     e.preventDefault();
 
-    console.log("Create Coupon Button Clicked");
-
     $(".myCoupons").addClass("hidden");
-    $(".createCouponSection").removeClass("hidden");
- });
+
+    $(".createCouponSection")
+        .removeClass("hidden")
+        .css("display", "block");
+
+    $("html, body").animate({
+        scrollTop: $(".createCouponSection").offset().top
+    }, 200);
+});
 
   $("#expiryDate").datepicker({
     dateFormat: "dd/mm/yy",
@@ -127,8 +140,10 @@ $(document).ready(function () {
     $("#percentageCheck").prop("checked", true);
     $(".error-message").addClass("hidden");
     $("#successMessage").addClass("hidden");
-    $(".myCoupons").removeClass("hidden");
-    $(".createCouponSection").addClass("hidden");
+    // $(".myCoupons").removeClass("hidden");
+    // $(".createCouponSection").addClass("hidden");
+    $(".myCoupons").show();
+    $(".createCouponSection").hide().addClass("hidden");
   });
 
   setupPagination({
