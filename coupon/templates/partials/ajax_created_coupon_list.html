@@ -1,4 +1,5 @@
-{% if created_coupons %}
+<!-- {% if created_coupons %} -->
+{% if created_coupons.object_list %}
     {% for c in created_coupons %}
         <div class="bg-white mt-4 p-4 rounded-md shadow-lg created-coupon">
             <div class="flex lg:justify-between lg:items-center flex-col lg:flex-row">
@@ -51,6 +52,15 @@
             </div>
         </div>
     {% endfor %}
-{% else %}
+<!-- {% else %}
     <p class="text-center text-gray-500 mt-6">No coupons created yet.</p>
+{% endif %} -->
+{% else %}
+<div class="w-full bg-white rounded-lg shadow-md mt-4 py-10">
+    <div class="flex justify-center items-center">
+        <p class="text-base font-semibold text-gray-500">
+            No Record Found
+        </p>
+    </div>
+</div>
 {% endif %}

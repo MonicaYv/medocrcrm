@@ -181,6 +181,7 @@ def get_created_coupons(request):
     per_page = 3   # change if you want more per page
 
     coupons_qs = SellerCoupon.objects.filter(
+    
         seller_type=user.user_type,
         seller_id=profile.id
     ).order_by("-created_at")
