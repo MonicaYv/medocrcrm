@@ -6879,8 +6879,7 @@ body {
   color: var(--color-dark-blue);
 }
 .tabs {
-  position: sticky;
-  top: calc(var(--spacing) * 0);
+  position: static;
   border-radius: var(--radius-lg);
   background-color: #F4F6F8;
 }
