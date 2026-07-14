@@ -3,8 +3,12 @@ import re
 import json
 import traceback
 
+from django.core.cache import cache
+from django.utils import timezone
+from asgiref.sync import async_to_sync
 from registration.models import State, City, LabTiming
 from registration.models import State, City
+from registration.views import verify_otp_token, async_send_otp_email
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
@@ -1504,12 +1508,51 @@ def clear_saved_data(request):
 
 @dashboard_login_required
 @require_POST
+def send_change_password_otp(request):
+    user = request.user_obj
+
+    token_data = async_to_sync(async_send_otp_email)(user)
+
+    if not token_data.get("success"):
+        return JsonResponse({
+            "success": False,
+            "message": "Failed to send OTP."
+        })
+
+    secret = token_data["otp_token"]
+
+    cache.set(
+        f"otp:{secret}",
+        {
+            "email": user.email,
+            "secret": secret,
+            "created_at": timezone.now().isoformat(),
+        },
+        timeout=600,
+    )
+
+    return JsonResponse({
+        "success": True,
+        "token": secret,
+        "message": "OTP sent successfully."
+    })
+
+@dashboard_login_required
+@require_POST
 def change_password(request):
     try:
         user = request.user_obj
         current_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
+        otp = request.POST.get("otp")
+        token = request.POST.get("token")
+        otp_result = verify_otp_token(user.email, otp, token)
+        
+        if not otp_result["success"]: return JsonResponse({
+            "success": False,
+            "message": otp_result["message"]
+        })
         errors={}
         error=''
         if not current_password or len(current_password) <= 8:

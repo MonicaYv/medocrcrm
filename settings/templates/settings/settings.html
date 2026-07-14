@@ -220,9 +220,10 @@
       <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
     </div>
     <div class="flex justify-end mb-4">
-      <p class="text-{{ text }} pl-4 font-bold cursor-pointer sm:pl-6">
+      <a href="/user/forgot-password"
+       class="text-{{ text }} pl-4 font-bold cursor-pointer sm:pl-6">
         Forgot Password?
-      </p>
+    </a>
     </div>
     <div class="flex flex-col">
       <input name="new_password" type="text" class="border rounded mb-5 px-3 py-2"
@@ -237,19 +238,21 @@
     <!--Send OTP-->
     <div class="flex items-center justify-end gap-2">
       <div>
-        <button type="button" class="bg-{{ text }} text-white px-2 py-2.5 rounded w-full cursor-pointer">
-          Send Phone OTP
+        <button type="button" id="sendEmailOtpBtn" class="bg-{{ text }} text-white px-2 py-2.5 rounded w-full cursor-pointer">
+          Send Email OTP
         </button>
         <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
-          <span class="text-black">Resend</span></span>
+          <span class="text-black" id="resendOtp">Resend</span></span>
       </div>
       <div>
-        <input name="otp" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6"
+        <input id="emailOtp" name="otp" type="text" class="border rounded px-2 py-2 w-full" placeholder="234567" maxlength="6"
           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" />
+          <input type="hidden" id="otpToken" name="token">
+          <input type="hidden" id="otpVerified" value="0">
         <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
         <div class="flex items-center gap-2 justify-end">
           <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
-          <p class="font-normal text-xs text-bright-green">Verified</p>
+          <p class="font-normal text-xs text-bright-green" id="verifyStatus">Verified</p>
         </div>
       </div>
     </div>

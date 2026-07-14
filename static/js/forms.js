@@ -23,7 +23,7 @@ $(document).ready(function () {
   });
 
   // Form submit for edit details
-$(".save-btn").on("click", function (e) {
+$("#editForm .save-btn").on("click", function (e) {
     e.preventDefault();
 
     const $form = $("#editForm");
@@ -244,8 +244,40 @@ $(".tab-btn").on("click", function () {
 
     // Here you would typically make an AJAX call to update the password
     // Example:
-   
-    const csrftoken = getCookie('csrftoken');  // make sure getCookie is defined
+    
+    const csrftoken = getCookie('csrftoken');
+
+$.ajax({
+    url: '/settings/change-password/',
+    method: 'POST',
+    headers: {
+        'X-CSRFToken': csrftoken
+    },
+    data: {
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+        otp: $("#emailOtp").val(),
+        token: $("#otpToken").val(),
+    },
+    success: function(response) {
+        console.log("SUCCESS RESPONSE", response);
+
+        if(response.success){
+            $(".toggle-section").addClass("hidden");
+            $(".account-detail").show();
+            $(".tabs").show();
+            toastr.success(response.message);
+        } else {
+            toastr.error(response.message);
+        }
+    },
+    error: function(xhr) {
+        console.log("AJAX ERROR", xhr);
+        console.log(xhr.responseText);
+        toastr.error("Error changing password");
+    }
+});  // make sure getCookie is defined
     $.ajax({
       url: '/settings/change-password/',
       method: 'POST',
@@ -256,6 +288,8 @@ $(".tab-btn").on("click", function () {
         current_password: currentPassword,
         new_password: newPassword,
         confirm_password:confirmPassword,
+        otp: $("#emailOtp").val(),
+        token: $("#otpToken").val(),
       },
       success: function(response) {
         if(response.success == true){
@@ -535,4 +569,94 @@ $('[data-tab="points"][data-parent="rewards"]').on('click', function () {
       initReferralChart();
     }
   }, 150);
+});
+
+let otpToken = "";
+
+$("#sendEmailOtpBtn, #resendOtp").on("click", function () {
+
+    const csrftoken = getCookie("csrftoken");
+
+    $.ajax({
+        url: "/settings/send-change-password-otp/",
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                otpToken = response.token;
+
+                $("#otpToken").val(response.token);
+
+                $("#otpVerified").val("0");
+
+                $("#verifyStatus").addClass("hidden");
+
+                toastr.success(response.message);
+
+            } else {
+
+                toastr.error(response.message);
+
+            }
+
+        },
+
+        error: function (xhr) {
+
+            toastr.error(xhr.responseJSON?.message || "Unable to send OTP");
+
+        }
+
+    });
+
+});
+
+$("#emailOtp").on("keyup", function () {
+
+    if ($(this).val().length !== 6)
+        return;
+
+    $.ajax({
+
+        url: "/user/otp/verify",
+
+        method: "POST",
+
+        data: {
+
+            email: $("#email").val(),
+
+            otp: $("#emailOtp").val(),
+
+            token: $("#otpToken").val(),
+
+            csrfmiddlewaretoken: getCookie("csrftoken")
+
+        },
+
+        success: function () {
+
+            $("#otpVerified").val("1");
+
+            $("#verifyStatus").removeClass("hidden");
+
+            toastr.success("OTP Verified");
+
+        },
+
+        error: function (xhr) {
+
+            $("#otpVerified").val("0");
+
+            toastr.error(xhr.responseJSON.message);
+
+        }
+
+    });
+
 });
