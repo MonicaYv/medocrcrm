@@ -24,6 +24,6 @@ urlpatterns = [
     path("subscription/subscribe/",views.subscribe_subscription,name="seller-subscription-subscribe"),
     path('terms-conditions/',views.terms_conditions,name="terms-conditions"),
     path('privacy-policy/',views.privacy_policy,name="privacy-policy"),
-    path('disclaimer/',views.disclaimer,name="disclaimer")
-
+    path('disclaimer/',views.disclaimer,name="disclaimer"),
+    path("send-change-password-otp/", views.send_change_password_otp, name="send_change_password_otp")
 ]
