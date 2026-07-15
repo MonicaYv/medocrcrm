@@ -6,7 +6,7 @@
       <select
         name="issue_type"
         id="issue_type"
-        class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer"
+        class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md"
       >
       <option>Select Issue Type</option>
         {% for issue_type in issue_types %}
@@ -14,7 +14,7 @@
         {% endfor %}
       </select>
 
-      <select name="select_issue" id="select_issue" class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer">
+      <select name="select_issue" id="select_issue" class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md">
         <option value="">Select Issue Option</option>
 
         {% for option in issue_options %}
