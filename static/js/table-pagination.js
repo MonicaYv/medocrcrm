@@ -23,7 +23,11 @@ console.log(activeColorClass)
   const rowsPerPage = 5;
 
   function initPagination(tabContent) {
+    if (tabContent.hasClass('created-coupons')) {
+      return;
+    }
     const table = tabContent.find('.docTable');
+    
     const rows = table.find('tbody tr');
 
     if (rows.length === 0) {
@@ -91,8 +95,11 @@ console.log(activeColorClass)
 
     showPage(1);
   }
- $('.tab-content').each(function () {
-  initPagination($(this));
+//  $('.tab-content').each(function () {
+//   initPagination($(this));
+// });
+$('.tab-content').not('.created-coupons').each(function () {
+    initPagination($(this));
 });
 
 // $('.tab-button').on('click', function () {

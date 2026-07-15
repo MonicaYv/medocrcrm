@@ -644,7 +644,7 @@
         </div>
     </form>
 {% elif user.user_type == 'pharmacy' %}
-    <form id="editForm" method="POST" action="{% url 'update_pharmacy_profile' %}" class="submit-formgrid grid-cols-1 gap-x-6 md:gap-x-12 gap-y-6 px-4 sm:px-6 pt-6 text-sm">
+    <form id="editForm" method="POST" action="{% url 'update_pharmacy_profile' %}" class="submit-form grid grid-cols-1 gap-x-6 md:gap-x-12 gap-y-6 px-4 sm:px-6 pt-6 text-sm">
         {% csrf_token %}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm mb-2">
             <!-- Email + Phone -->
