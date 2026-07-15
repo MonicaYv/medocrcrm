@@ -1203,15 +1203,15 @@ def save_medical_pharmacy(request):
     if services_offered:
        profile.services.add(services_offered)
 
-    # ContactPerson.objects.create(
-    #     profile_type="pharmacy",
-    #     profile=user,
-    #     name=contact_name,
-    #     phone_country_code=phone_country_code,
-    #     phone_number=contact_phone,
-    #     role=contact_role,
-    #     otp=ref_otp
-    # )
+    ContactPerson.objects.create(
+        profile_type="pharmacy",
+        profile=user,
+        name=contact_name,
+        phone_country_code=phone_country_code,
+        phone_number=contact_phone,
+        role=contact_role,
+        otp=ref_otp
+    )
 
     return JsonResponse({"success": True, "message": "Pharmacy registered successfully"})
 
@@ -1599,14 +1599,14 @@ def save_hospital(request):
         phone_for_otp=data.get("phone"),
     )
 
-    # ContactPerson.objects.create(
-    #     profile_type="hospital",
-    #     profile=user,
-    #     name=data.get("contact_name"),
-    #     phone_country_code="+91",
-    #     phone_number=data.get("contact_phone"),
-    #     role=data.get("contact_role"),
-    # )
+    ContactPerson.objects.create(
+        profile_type="hospital",
+        profile=user,
+        name=data.get("contact_name"),
+        phone_country_code="+91",
+        phone_number=data.get("contact_phone"),
+        role=data.get("contact_role"),
+    )
 
     return JsonResponse({"success": True, "message": "Hospital registered successfully!"})
 

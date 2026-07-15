@@ -164,14 +164,14 @@ $(".createCouponBtn").on("click", function (e) {
     cardsPerPage: 3,
   });
 
-  setupPagination({
-    containerId: "created-coupons",
-    cardClass: "created-coupon",
-    prevBtnId: "prevPage3",
-    nextBtnId: "nextPage3",
-    paginationContainerId: "pagination-numbers3",
-    cardsPerPage: 5,
-  });
+  // setupPagination({
+  //   containerId: "created-coupons",
+  //   cardClass: "created-coupon",
+  //   prevBtnId: "prevPage3",
+  //   nextBtnId: "nextPage3",
+  //   paginationContainerId: "pagination-numbers3",
+  //   cardsPerPage: 5,
+  // });
   
   function setupPagination({
     containerId,
@@ -316,7 +316,11 @@ function loadCreatedCoupons(page = 1) {
         },
         success: function (res) {
             if (res.success) {
+                // $("#created-coupons").html(res.html);
                 $("#created-coupons").html(res.html);
+
+                // Remove duplicate pagination if any
+                $(".created-coupons .pagination-wrapper").remove();
                 currentPage = res.current_page;
                 renderPagination(res.total_pages);
             } else {
