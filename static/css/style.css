@@ -317,6 +317,7 @@
 
 body {
     font-family: 'MyFont';
+    zoom: 0.9;
 }
 
 /* scroll */
@@ -703,6 +704,8 @@ body {
     transition: 0.1s;
     line-height: 1.2;
 }
+
+
 
 .check-img:checked {
     @apply bg-green;
