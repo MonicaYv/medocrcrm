@@ -317,6 +317,7 @@
 
 body {
     font-family: 'MyFont';
+    zoom: 0.9;
 }
 
 /* scroll */
