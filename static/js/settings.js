@@ -600,7 +600,182 @@ $(document).on("click",".issue-type-wrapper" ,function (e) {
     });
   });
 
-  // Close on outside click
-  $(document).on("click", function () {
+// Close on outside click
+$(document).on("click", function () {
     $(".issue-type-dropdown").hide();
-  });
+});
+
+// Handle profile update form submission
+$(document).on("submit", ".submit-form", function(e) {
+    e.preventDefault();
+    
+    const form = $(this);
+    const formData = new FormData(this);
+    const csrftoken = getCookie("csrftoken");
+    const submitBtn = form.find('.save-btn');
+    const originalText = submitBtn.text();
+    
+    // Disable button and show loading state
+    submitBtn.prop('disabled', true).text('Saving...');
+    
+    fetch(form.attr('action'), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            toastr.success(data.message || 'Profile updated successfully');
+            // Reload page after short delay to show updated data
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            toastr.error(data.message || data.errors || 'Failed to update profile');
+            submitBtn.prop('disabled', false).text(originalText);
+        }
+    })
+    .catch(err => {
+        console.error('Profile update error:', err);
+        toastr.error('Failed to update profile. Please try again.');
+        submitBtn.prop('disabled', false).text(originalText);
+    });
+});
+
+// City autocomplete functionality
+let citiesCache = {};
+let currentCitySuggestions = [];
+
+function showCitySuggestions(cities, inputElement) {
+    // Remove existing suggestions
+    $('.city-suggestions').remove();
+    
+    if (!cities || cities.length === 0) return;
+    
+    currentCitySuggestions = cities;
+    
+    // Create suggestions dropdown
+    const suggestionsDiv = $('<div class="city-suggestions absolute z-50 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"></div>');
+    
+    cities.slice(0, 10).forEach(city => {
+        const suggestionItem = $(`<div class="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm city-suggestion-item" data-city="${city}">${city}</div>`);
+        suggestionsDiv.append(suggestionItem);
+    });
+    
+    // Position the dropdown
+    inputElement.auto = inputElement.position();
+    inputElement.parent().css('position', 'relative');
+    suggestionsDiv.css({
+        'top': (inputElement.outerHeight() + inputElement.position().top - inputElement.auto.top) + 'px',
+        'left': inputElement.position().left + 'px'
+    });
+    
+    inputElement.parent().append(suggestionsDiv);
+    
+    // Handle click on suggestion
+    suggestionsDiv.on('click', '.city-suggestion-item', function() {
+        const selectedCity = $(this).data('city');
+        inputElement.val(selectedCity);
+        suggestionsDiv.remove();
+    });
+}
+
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Fetch cities based on state
+function fetchCities(stateName) {
+    if (!stateName) {
+        citiesCache = {};
+        return Promise.resolve([]);
+    }
+    
+    // Check cache first
+    if (citiesCache[stateName.toLowerCase()]) {
+        return Promise.resolve(citiesCache[stateName.toLowerCase()]);
+    }
+    
+    // Fetch from API
+    return fetch('/settings/api/cities/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie("csrftoken")
+        },
+        body: JSON.stringify({ state: stateName })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const cities = data.cities || [];
+        citiesCache[stateName.toLowerCase()] = cities;
+        return cities;
+    })
+    .catch(err => {
+        console.error('Error fetching cities:', err);
+        return [];
+    });
+}
+
+// Setup city autocomplete for all forms
+$(document).on('focus', 'input[name="city"]', function() {
+    const $cityInput = $(this);
+    const $form = $cityInput.closest('form');
+    const stateName = $form.find('input[name="state"]').val();
+    
+    if (stateName) {
+        fetchCities(stateName).then(cities => {
+            if (cities.length > 0) {
+                showCitySuggestions(cities, $cityInput);
+            }
+        });
+    }
+});
+
+// Handle city input typing
+$(document).on('input', 'input[name="city"]', function() {
+    const $cityInput = $(this);
+    const $form = $cityInput.closest('form');
+    const stateName = $form.find('input[name="state"]').val();
+    const query = $(this).val().toLowerCase();
+    
+    if (!stateName) {
+        toastr.warning('Please select a state first');
+        return;
+    }
+    
+    // Fetch cities if not cached
+    fetchCities(stateName).then(cities => {
+        if (cities.length > 0 && query) {
+            // Filter cities based on query
+            const filteredCities = cities.filter(city => 
+                city.toLowerCase().includes(query)
+            );
+            showCitySuggestions(filteredCities, $cityInput);
+        }
+    });
+});
+
+// Close suggestions when clicking outside
+$(document).on('click', function(e) {
+    if (!$(e.target).closest('.city-suggestions, input[name="city"]').length) {
+        $('.city-suggestions').remove();
+    }
+});
+
+// Remove suggestions on escape key
+$(document).on('keydown', 'input[name="city"]', function(e) {
+    if (e.key === 'Escape') {
+        $('.city-suggestions').remove();
+    }
+});

@@ -25,5 +25,6 @@ urlpatterns = [
     path('terms-conditions/',views.terms_conditions,name="terms-conditions"),
     path('privacy-policy/',views.privacy_policy,name="privacy-policy"),
     path('disclaimer/',views.disclaimer,name="disclaimer"),
-    path("send-change-password-otp/", views.send_change_password_otp, name="send_change_password_otp")
+    path("send-change-password-otp/", views.send_change_password_otp, name="send_change_password_otp"),
+    path("api/cities/", views.get_cities_by_state, name="get_cities_by_state")
 ]
