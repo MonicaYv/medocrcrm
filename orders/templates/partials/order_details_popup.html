@@ -287,7 +287,7 @@
                     <form method="post" action="{% url 'update_order_status' order.id 'cancel' %}">
                         {% csrf_token %}
                         <button type="submit"
-                                class="cancel-order-submit block mx-auto w-[198px] px-6 py-3 rounded-[6px] bg-rosewater text-error font-semibold text-base">
+                                class="cancel-order-submit border block mx-auto w-[198px] px-6 py-3 rounded-[6px] bg-rosewater text-error font-semibold text-base">
                             Cancel Order
                         </button>
                     </form>

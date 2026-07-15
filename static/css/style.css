@@ -705,6 +705,8 @@ body {
     line-height: 1.2;
 }
 
+
+
 .check-img:checked {
     @apply bg-green;
 }
