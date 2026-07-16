@@ -73,6 +73,9 @@ def services(request):
                 }
             },
             {
+                "$limit": 10
+            },
+            {
                 "$project": {
                     "_id": 0,
                     "category": "$_id",
