@@ -17,12 +17,6 @@
                             <span class="material-symbols-outlined text-xl! font-semibold!">home</span>
                             <h1 class="text-base font-semibold">My Coupons</h1>
                         </div>
-                        <button
-                            type="button"
-                            class="w-[206px] h-12 bg-dodger-blue flex items-center justify-center gap-2 cursor-pointer createCouponBtn rounded-[10px]">
-                            <span class="material-symbols-outlined text-white">add</span>
-                            <span class="font-bold text-lg text-white">Create Coupon</span>
-                        </button>
                     </div>
                     <a href="{% url 'settings_page' %}">
                         <div class="mt-5 bg-soft-pastel-mint rounded-2xl p-2.5 flex items-center justify-between">
@@ -58,9 +52,6 @@
                     <!--Created Coupons Section-->
                     {% include 'partials/pharmacy_created_coupons.html' %}
                 </div>
-
-                <!--Create New Coupon-->
-                {% include 'partials/pharmacy_create_coupon.html' %}
             </div>
 {% endblock%}
 
