@@ -146,6 +146,14 @@ $(document).on('click', '.more-btn', function (e) {
     e.stopPropagation();
 
     const card = $(this).closest('.service-card');
+    
+    // If not inside a .service-card (e.g. hospital uses different structure), toggle directly
+    if (!card.length) {
+        const $dropdown = $(this).siblings('.more-dropdown');
+        $('.more-dropdown').not($dropdown).addClass('hidden');
+        $dropdown.toggleClass('hidden');
+        return;
+    }
 
     // Close other open dropdowns
     $('.more-dropdown').not(card.find('.more-dropdown')).addClass('hidden');
@@ -371,6 +379,9 @@ $(document).on('click', '.submit-btn', function () {
 });
 
 $(document).on('click', '.add-service', function () {
+    // Only handle for pharmacy pages where hospital-categories-data doesn't exist
+    if ($("#hospital-categories-data").length > 0) return;
+    
     const $list = $(this).closest('.step-content').find('.services-list');
     if (!$list.length) return;
 
