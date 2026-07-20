@@ -918,42 +918,42 @@ def update_pharmacy_profile(request):
             # Remove extra spaces and normalize
             state_name = ' '.join(state_raw.split())
             
-            # Try exact match first (case-insensitive)
-            state = State.objects.filter(
-               name__iexact=state_name
-            ).first()
-            
-            # If not found, try partial match (for dropdown formatted values)
-            if not state and state_name:
-                # Try to find state containing the search term
-                state = State.objects.filter(
-                   name__icontains=state_name.replace(' ', '')
+            state_obj = None
+            if state_name:
+                # Try exact match first (case-insensitive)
+                state_obj = State.objects.filter(
+                   name__iexact=state_name
                 ).first()
-            
-            if state:
-               pharmacy_profile.state = state
-               print(f"State found: '{state.name}' for input: '{state_raw}'")
-            else:
-               print(f"State NOT found for: '{state_name}' (raw: '{state_raw}')")
-
+                
+                # If not found, try partial match
+                if not state_obj:
+                    state_obj = State.objects.filter(
+                       name__icontains=state_name
+                    ).first()
+                
+                if state_obj:
+                    pharmacy_profile.state = state_obj
+                    print(f"State found: '{state_obj.name}' for input: '{state_raw}'")
+                else:
+                    print(f"State NOT found for: '{state_name}' (raw: '{state_raw}')")
 
             # -------- CITY --------
             city_name = post_data.get("city", "").split(",")[0].strip()
 
-            if city_name and state:
+            if city_name and state_obj:
                 # Try to find existing city (case-insensitive)
                 city = City.objects.filter(
                     name__iexact=city_name,
-                    state=state
+                    state=state_obj
                 ).first()
                 
                 # If city doesn't exist, create it
                 if not city:
                     city = City.objects.create(
                         name=city_name.title(),  # Title case for consistency
-                        state=state
+                        state=state_obj
                     )
-                    print(f"Created new city: {city_name} in {state.name}")
+                    print(f"Created new city: {city_name} in {state_obj.name}")
                 
                 pharmacy_profile.city = city
 
@@ -963,21 +963,21 @@ def update_pharmacy_profile(request):
             if timing_id:
                 pharmacy_profile.pharmacy_timing_id = int(timing_id)
 
-            pharmacy_profile.owner_name = post_data.get("owner_name")
-            pharmacy_profile.country = post_data.get("country")
+            pharmacy_profile.owner_name = post_data.get("owner_name", "")
+            pharmacy_profile.country = post_data.get("country", "")
             pharmacy_profile.pincode = post_data.get("pincode")
             
-            print(post_data.dict())
             print("POST =", post_data.dict())
-
             print("State POST =", post_data.get("state"))
             print("City POST =", post_data.get("city"))
+            print("Country POST =", post_data.get("country"))
             print("Working =", post_data.get("working_days"))
 
             print("Before save")
             print("pharmacy_profile.state =", pharmacy_profile.state)
             print("pharmacy_profile.city =", pharmacy_profile.city)
-            print("pharmacy_profile.pharmacy_timing =", pharmacy_profile.pharmacy_timing)
+            print("pharmacy_profile.country =", pharmacy_profile.country)
+            print("pharmacy_profile.pincode =", pharmacy_profile.pincode)
 
             pharmacy_profile.save()
 

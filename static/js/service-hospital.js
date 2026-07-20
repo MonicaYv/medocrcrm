@@ -403,15 +403,18 @@ $(document).on("click", ".remove-service-bed", function () {
 });
 
 // --- GUARANTEED ADD SERVICE TEMPLATE CLONER ---
-// Added .off("click") to explicitly prevent any double-binding behavior
-$(document).off("click", ".add-service").on("click", ".add-service", function (e) {
+// Using document with a namespace to avoid conflicts with common-services.js
+$(document).on("click", ".hospital-add-service, .add-service", function (e) {
     e.preventDefault();
+    // Only handle if we're on the hospital page (has hospital-specific elements)
+    if ($("#hospital-categories-data").length === 0) return;
+    
     const template = document.getElementById("service-card-template");
     
     if (!template) {
         console.error("service-card-template not found in DOM");
         return; 
-    } // Fixed the syntax error here!
+    }
 
     // Clone cleanly from the global abstract <template> fragment blueprint
     const clone = template.content.cloneNode(true);
