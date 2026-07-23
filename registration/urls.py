@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('register', views.welcome, name='welcome'),
+    path('new-welcome', views.new_welcome, name='new_welcome'),
     path('register/<str:role>', views.register_by_role, name='register_by_role'),
     path('save/customer', views.save_user, name='save_user'),
     path('save/ngo', views.save_ngo, name='save_ngo'),
@@ -19,9 +20,8 @@ urlpatterns = [
     path("save/doctor", views.save_doctor, name="save_doctor"),
     path("save/hospital", views.save_hospital, name="save_hospital"),
     path('file-scan/',views.file_scan_api,name='file_scan'),
-    path(
-    "send-contact-person-otp/",
-    views.send_contact_person_otp,
-    name="send_contact_person_otp",
-),
+    path("send-contact-person-otp/",views.send_contact_person_otp,name="send_contact_person_otp",),
+    path("new-signin/", views.new_signin, name="new_signin"),
+    path("new-otp-verify/", views.new_otp_verify, name="new_otp_verify"),
+    path("new-signup/", views.new_signup, name="new_signup"),
 ]

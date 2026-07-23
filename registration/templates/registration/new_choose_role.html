@@ -1,0 +1,168 @@
+{% extends "new_layout.html" %}
+{% load static %}
+
+{% block title %}Choose Your Provider Role · Avior{% endblock %}
+
+{% block panel_art %}
+<svg viewBox="0 0 220 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- shopping cart -->
+  <g stroke="#0f2f63" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 26 H36 L46 108 H150 L168 54 H54" fill="none"/>
+    <circle cx="66" cy="132" r="9" fill="#0f2f63" stroke="none"/>
+    <circle cx="132" cy="132" r="9" fill="#0f2f63" stroke="none"/>
+  </g>
+  <!-- blister pack of pills -->
+  <g>
+    <rect x="120" y="24" width="72" height="112" rx="10" fill="#ffffff" stroke="#1a4a95" stroke-width="3"/>
+    <g fill="#f2924a">
+      <ellipse cx="140" cy="44" rx="10" ry="7"/>
+      <ellipse cx="172" cy="44" rx="10" ry="7"/>
+      <ellipse cx="140" cy="68" rx="10" ry="7"/>
+      <ellipse cx="172" cy="68" rx="10" ry="7"/>
+      <ellipse cx="140" cy="92" rx="10" ry="7"/>
+      <ellipse cx="172" cy="92" rx="10" ry="7"/>
+      <ellipse cx="140" cy="116" rx="10" ry="7"/>
+      <ellipse cx="172" cy="116" rx="10" ry="7"/>
+    </g>
+    <g fill="#fce3cf">
+      <ellipse cx="140" cy="44" rx="4" ry="7"/>
+      <ellipse cx="172" cy="44" rx="4" ry="7"/>
+      <ellipse cx="140" cy="68" rx="4" ry="7"/>
+      <ellipse cx="172" cy="68" rx="4" ry="7"/>
+      <ellipse cx="140" cy="92" rx="4" ry="7"/>
+      <ellipse cx="172" cy="92" rx="4" ry="7"/>
+      <ellipse cx="140" cy="116" rx="4" ry="7"/>
+      <ellipse cx="172" cy="116" rx="4" ry="7"/>
+    </g>
+  </g>
+</svg>
+{% endblock %}
+
+{% block panel_dots %}
+<span class="is-active"></span><span></span><span></span>
+{% endblock %}
+
+{% block content %}
+<h1>Choose Your Provider Role</h1>
+<p class="auth-content__subtitle">Hey, Which Role Are You Thinking About?</p>
+
+<form method="get" id="roleForm">
+  {% csrf_token %}
+
+  <div class="role-list" role="radiogroup" aria-label="Provider role">
+
+    <button type="button"
+            class="role-option{% if selected_role == 'hospital' %} is-selected{% endif %}"
+            data-role="hospital" role="radio"
+            aria-checked="{% if selected_role == 'hospital' %}true{% else %}false{% endif %}">
+      <span class="role-option__icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 21V9l8-5 8 5v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M12 6v5M9.5 8.5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="role-option__text">
+        <span class="role-option__title">I'm a Hospital</span>
+        <span class="role-option__desc">I want to manage my hospital, staff, patients and services</span>
+      </span>
+      <span class="role-option__chevron">&rsaquo;</span>
+    </button>
+
+    <button type="button"
+            class="role-option{% if selected_role == 'doctor' %} is-selected{% endif %}"
+            data-role="doctor" role="radio"
+            aria-checked="{% if selected_role == 'doctor' %}true{% else %}false{% endif %}">
+      <span class="role-option__icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M5 21c0-4 3.1-6.5 7-6.5S19 17 19 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="role-option__text">
+        <span class="role-option__title">I'm a Doctor</span>
+        <span class="role-option__desc">I want to manage my profile, appointments and patients</span>
+      </span>
+      <span class="role-option__chevron">&rsaquo;</span>
+    </button>
+
+    <button type="button"
+            class="role-option{% if selected_role == 'lab' %} is-selected{% endif %}"
+            data-role="lab" role="radio"
+            aria-checked="{% if selected_role == 'lab' %}true{% else %}false{% endif %}">
+      <span class="role-option__icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 3h6M10 3v6.5L5.5 18a2 2 0 0 0 1.8 3h9.4a2 2 0 0 0 1.8-3L14 9.5V3" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M8 15h8" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+      </span>
+      <span class="role-option__text">
+        <span class="role-option__title">I'm a Lab</span>
+        <span class="role-option__desc">I want to manage test bookings, reports and lab operations</span>
+      </span>
+      <span class="role-option__chevron">&rsaquo;</span>
+    </button>
+
+    <button type="button"
+            class="role-option{% if selected_role == 'pharmacy' %} is-selected{% endif %}"
+            data-role="pharmacy" role="radio"
+            aria-checked="{% if selected_role == 'pharmacy' %}true{% else %}false{% endif %}">
+      <span class="role-option__icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="7" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M8 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 11v5M9.5 13.5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="role-option__text">
+        <span class="role-option__title">I'm a Pharmacy</span>
+        <span class="role-option__desc">I want to manage medicines, orders and deliveries</span>
+      </span>
+      <span class="role-option__chevron">&rsaquo;</span>
+    </button>
+
+  </div>
+
+  <input type="hidden" name="provider_role" id="id_provider_role" value="{{ selected_role|default:'' }}">
+
+  <button type="submit" class="btn btn-primary" id="id_continue_btn" {% if not selected_role %}disabled{% endif %}>
+    Continue
+  </button>
+</form>
+
+<a href="#" class="auth-help">Need Help? Get in Touch</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var options = document.querySelectorAll('.role-option');
+    var hiddenInput = document.getElementById('id_provider_role');
+    var continueBtn = document.getElementById('id_continue_btn');
+    var form = document.getElementById('roleForm');
+
+    options.forEach(function (opt) {
+        opt.addEventListener('click', function () {
+            options.forEach(function (o) {
+                o.classList.remove('is-selected');
+                o.setAttribute('aria-checked', 'false');
+            });
+
+            opt.classList.add('is-selected');
+            opt.setAttribute('aria-checked', 'true');
+
+            hiddenInput.value = opt.getAttribute('data-role');
+            continueBtn.disabled = false;
+        });
+    });
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        if (!hiddenInput.value) return;
+
+        window.location.href = "/user/new-signup/?role=" + hiddenInput.value;
+    });
+})();
+</script>
+{% endblock %}

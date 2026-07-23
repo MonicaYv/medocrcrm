@@ -1,0 +1,118 @@
+{% extends "new_layout.html" %}
+{% load static %}
+
+{% block title %}Verify OTP · Avior{% endblock %}
+
+{% block panel_art %}
+<svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- floating medical badges -->
+  <circle cx="34" cy="46" r="22" fill="#1a4a95"/>
+  <path d="M24 46h20M34 36v20" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="34" cy="112" r="20" fill="#e2503c"/>
+  <path d="M25 112h9l4-9 5 15 4-6h7" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="16" y="150" width="40" height="26" rx="6" fill="#f2924a"/>
+  <rect x="16" y="150" width="14" height="26" rx="6" fill="#fce3cf"/>
+  <circle cx="188" cy="70" r="18" fill="#1a4a95"/>
+  <path d="M180 70h16M188 62v16" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <rect x="14" y="80" width="46" height="34" rx="6" fill="#ffffff" stroke="#1a4a95" stroke-width="2.5"/>
+  <path d="M22 92h30M22 100h20" stroke="#c9d6e6" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- doctor figure -->
+  <circle cx="118" cy="120" r="98" fill="none"/>
+  <path d="M78 220 C78 176 96 156 122 156 C148 156 166 176 166 220"
+        fill="#ffffff" stroke="none"/>
+  <ellipse cx="122" cy="90" rx="30" ry="32" fill="#f4c6a0"/>
+  <path d="M92 84 C92 60 152 60 152 84 C152 74 138 66 122 66 C106 66 92 74 92 84 Z" fill="#3a2b22"/>
+  <path d="M78 220 C78 176 96 156 122 156 C148 156 166 176 166 220 Z" fill="#f4f6f8" stroke="#1a4a95" stroke-width="2.5"/>
+  <path d="M110 156 h24 v14 a12 12 0 0 1 -24 0 z" fill="#e3ab84"/>
+  <path d="M96 168 q26 22 52 0" stroke="#1a4a95" stroke-width="3" fill="none"/>
+  <!-- stethoscope -->
+  <path d="M100 172 q0 26 22 26 q22 0 22 -24" stroke="#4c5b73" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="100" cy="170" r="5" fill="#4c5b73"/>
+  <circle cx="144" cy="176" r="7" fill="#4c5b73"/>
+</svg>
+{% endblock %}
+
+{% block panel_dots %}
+<span></span><span></span><span class="is-active"></span>
+{% endblock %}
+
+{% block content %}
+<h1>Verify OTP</h1>
+<p class="otp-meta">
+  Provided OTP sent to {{ masked_phone }}
+  <a href="#">Edit</a>
+</p>
+
+<form method="post" action="#" id="id_otp_form">
+  {% csrf_token %}
+  <input type="hidden" name="phone" value="{{ phone }}">
+
+  <div class="otp-inputs">
+    <input type="text" name="otp_1" inputmode="numeric" maxlength="1" required autofocus>
+    <input type="text" name="otp_2" inputmode="numeric" maxlength="1" required>
+    <input type="text" name="otp_3" inputmode="numeric" maxlength="1" required>
+    <input type="text" name="otp_4" inputmode="numeric" maxlength="1" required>
+  </div>
+
+  <div class="otp-resend-row">
+    <span id="id_resend_timer">Resend in 00:34</span>
+    <a href="#" id="id_resend_link">Resend Code</a>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Done</button>
+</form>
+
+<div class="otp-alt-actions">
+  <a href="#"?channel=sms">Get OTP on SMS</a>
+  <span>|</span>
+  <a href="#"?channel=call">Get OTP on Call</a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    // Auto-advance between OTP boxes
+    var inputs = document.querySelectorAll('.otp-inputs input');
+    inputs.forEach(function (input, index) {
+      input.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        if (this.value && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+      });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace' && !this.value && index > 0) {
+          inputs[index - 1].focus();
+        }
+      });
+    });
+
+    // Resend countdown
+    var seconds = 34;
+    var timerEl = document.getElementById('id_resend_timer');
+    var resendLink = document.getElementById('id_resend_link');
+
+    var countdown = setInterval(function () {
+      seconds -= 1;
+      if (seconds <= 0) {
+        clearInterval(countdown);
+        timerEl.style.display = 'none';
+        resendLink.classList.add('is-enabled');
+      } else {
+        var mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+        var ss = String(seconds % 60).padStart(2, '0');
+        timerEl.textContent = 'Resend in ' + mm + ':' + ss;
+      }
+    }, 1000);
+
+    resendLink.addEventListener('click', function (e) {
+      if (!resendLink.classList.contains('is-enabled')) {
+        e.preventDefault();
+      }
+    });
+  })();
+</script>
+{% endblock %}

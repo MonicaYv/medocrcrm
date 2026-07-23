@@ -981,6 +981,26 @@ def update_pharmacy_profile(request):
 
             pharmacy_profile.save()
 
+            pharmacy_profile.referral_code = post_data.get("referral_code", "")
+
+            pharmacy_type_name = post_data.get("pharmacy_type", "").strip()
+
+            if pharmacy_type_name:
+                type_obj = PharmacyType.objects.filter(name__iexact=pharmacy_type_name).first()
+
+            if type_obj:
+                pharmacy_profile.pharmacy_types.set([type_obj])
+
+            service_name = post_data.get("services_offered", "").strip()
+
+            if service_name:
+                service_obj = PharmacyServices.objects.filter(name__iexact=service_name).first()
+
+            if service_obj:
+                pharmacy_profile.services.set([service_obj])
+
+            pharmacy_profile.save()
+
         # --- Update or Create ContactPerson ---
         contact_name = post_data.get("contact_name")
         contact_phone = post_data.get("contact_phone_number")
