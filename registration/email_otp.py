@@ -5,27 +5,11 @@ from .models import PasswordResetToken
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 import logging
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
-
-# SMTP_HOST = "mail.sizaf.com"
-# SMTP_PORT = 465
-# SMTP_USERNAME = "dotsdesktop@sizaf.com"
-# SMTP_PASSWORD = "eri$45;e]H0K"
-# SMTP_FROM = "dotsdesktop@sizaf.com"
-# RESET_TOKEN_EXPIRY = 1800 
-
-# executor = ThreadPoolExecutor(max_workers=5)
-
-# def send_email_background(msg):
-#     asyncio.run(aiosmtplib.send(
-#         msg,
-#         hostname=SMTP_HOST,
-#         port=SMTP_PORT,
-#         username=SMTP_USERNAME,
-#         password=SMTP_PASSWORD,
-#         use_tls=True,
-#     ))
 
 def generate_otp_secret() -> str:
     return pyotp.random_base32()
@@ -36,9 +20,19 @@ def generate_otp(secret: str, interval: int = 600) -> str:
 def verify_otp(secret: str, otp: str, interval: int = 600) -> bool:
     return pyotp.TOTP(secret, interval=interval).verify(otp, valid_window=5)
 
-def _send_email_sync(recipient: str, subject: str, body: str) -> bool:
+def _send_email_sync(recipient, subject, text_body, html_body=None):
     from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
-    msg = EmailMultiAlternatives(subject, body, from_email, [recipient])
+
+    msg = EmailMultiAlternatives(
+        subject,
+        text_body,
+        from_email,
+        [recipient]
+    )
+
+    if html_body:
+        msg.attach_alternative(html_body, "text/html")
+
     return msg.send(fail_silently=False) > 0
 
 async def send_email(recipient: str, subject: str, body: str):
@@ -48,30 +42,43 @@ async def send_email(recipient: str, subject: str, body: str):
         logger.exception("Failed to send email to %s", recipient)
         return False
     
-# async def async_send_otp_email(user):
-#     otp_secret = generate_otp_secret()
-#     otp = generate_otp(otp_secret)
-#     email_sent = await send_email(user.email, "Your OTP Code", f"Your OTP is: {otp}")
-#     if not email_sent:
-#         return {"success": False, "message": "Failed to send email."}
-
-#     return {"success": True, "otp_token": otp_secret}
 async def async_send_otp_email(user):
     otp_secret = generate_otp_secret()
     otp = generate_otp(otp_secret)
 
     print("=" * 50)
     print("EMAIL =", user.email)
-    print("OTP For Email =", otp)
-    print("SECRET =", otp_secret)
+    print("OTP =", otp)
     print("=" * 50)
 
-    subject = "Your OTP Code"
-    body = f"Your OTP is: {otp}"
+    subject = "Verify your MedOCR Email"
 
-    email_sent = await send_email(user.email, subject, body)
+    context = {
+        "name": getattr(user, "first_name", "") or "User",
+        "otp": list(str(otp)),
+        "verify_url": "https://medcrm.aibuzz.net/user/new-otp-verify/",
+        "year": datetime.now().year,
+    }
+
+    html_body = render_to_string(
+        "email/otp_email.html",
+        context
+    )
+
+    text_body = strip_tags(html_body)
+
+    email_sent = await sync_to_async(_send_email_sync)(
+        user.email,
+        subject,
+        text_body,
+        html_body,
+    )
+
     if not email_sent:
-        return {"success": False, "message": "Failed to send email."}
+        return {
+            "success": False,
+            "message": "Failed to send email."
+        }
 
     return {
         "success": True,
