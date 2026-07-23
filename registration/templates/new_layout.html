@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Avior{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="auth-page">
+
+  <div class="auth-modal">
+    <button type="button" class="auth-modal__close" aria-label="Close" onclick="{% block close_action %}window.history.back(){% endblock %}">
+      &times;
+    </button>
+
+    <!-- Left illustration panel -->
+    <div class="auth-panel">
+      {% block panel_badge %}{% endblock %}
+
+      <div class="auth-panel__logo">
+        {% include "registration/logo_marker.html" %}
+      </div>
+
+      <div class="auth-panel__art">
+        {% block panel_art %}{% endblock %}
+      </div>
+
+      <div class="auth-panel__dots">
+        {% block panel_dots %}
+        <span></span><span></span><span></span>
+        {% endblock %}
+      </div>
+    </div>
+
+    <!-- Right content panel -->
+    <div class="auth-content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

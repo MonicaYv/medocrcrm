@@ -38,6 +38,15 @@ ROLE_TO_TEMPLATE = {
     'doctor': "registration/doctor_register.html",
 }
 
+def new_signin(request):
+    return render(request, 'registration/new_signin.html')
+
+def new_otp_verify(request):
+    return render(request, 'registration/new_otp_verify.html')
+
+def new_signup(request):
+    return render(request, 'registration/new_signup.html')
+
 @require_POST
 def send_otp(request):
     email = request.POST.get("email", "").strip()
@@ -161,6 +170,9 @@ def verify_otp(request):
     if not result["success"]:
         return JsonResponse(result, status=400)
     return JsonResponse({"success": True, "message": "OTP verified successfully"})
+
+def new_welcome(request):
+    return render(request, 'registration/new_choose_role.html')
 
 def welcome(request):
     return render(request, 'registration/welcome.html')
