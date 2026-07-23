@@ -77,35 +77,6 @@ def send_otp(request):
 
     return JsonResponse({"success": True, "token": secret, "message": "OTP sent successfully"})
 
-# def verify_otp_token(email, otp, bearer_token):
-#     if not bearer_token or not otp:
-#         return {"success": False, "message": "Missing token or OTP"}
-
-#     cache_key = f"otp:{bearer_token}"
-#     otp_data = cache.get(cache_key)
-#     if not otp_data:
-#         return {"success": False, "message": "OTP expired or invalid"}
-    
-#     if bearer_token != otp_data.get("secret"):
-#         return {"success": False, "message": "Invalid or forged token"}
-
-#     if email and otp_data.get("email") != email:
-#         return {"success": False, "message": "OTP does not match this email"}
-
-#     secret = otp_data["secret"]
-#     totp = pyotp.TOTP(secret, interval=300)
-#     if not totp.verify(otp, valid_window=5):
-#         return {"success": False, "message": "Invalid OTP"}
-
-#     return {"success": True, "message": "OTP verified successfully"}
-# def verify_otp_token(email, otp, bearer_token):
-#     print("=" * 60)
-#     print("EMAIL =", email)
-#     print("OTP =", otp)
-#     print("TOKEN =", bearer_token)
-
-#     cache_key = f"otp:{bearer_token}"
-#     otp_data = cache.get(cache_key)
 def verify_otp_token(email, otp, bearer_token):
     otp = str(otp).strip()   # <-- ADD THIS
 
