@@ -1,0 +1,125 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Sign Up{% endblock %}
+{% block extra_css %}
+<style>
+  .page-bg {
+    background: linear-gradient(180deg, rgba(236, 248, 255, 1) 0%, rgba(249, 250, 255, 1) 100%);
+  }
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-bg min-h-screen flex items-center justify-center px-4 py-10">
+  <div class="relative w-full max-w-6xl overflow-hidden rounded-[32px] shadow-2xl ring-1 ring-slate-200">
+    <div class="absolute -left-16 -top-16 h-40 w-40 rounded-full bg-[#E4EEFF] opacity-90 blur-2xl"></div>
+    <div class="absolute -right-16 top-24 h-28 w-28 rounded-full bg-[#FFE8DD] opacity-90 blur-2xl"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-0 lg:gap-0">
+      <div class="relative hidden lg:block bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_#82c7ff_0,_transparent_45%)] opacity-70"></div>
+        <div class="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18)_0,_transparent_55%)]"></div>
+        <div class="relative flex min-h-full flex-col justify-between p-10">
+          <div>
+            <img src="{% static 'images/supportAdmin-logo.svg' %}" alt="AiBuzz" class="h-14 w-auto mb-10" />
+            <p class="max-w-xl text-3xl font-semibold leading-tight">Create your provider account and start managing appointments, orders, and patients effortlessly.</p>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-start gap-4 rounded-3xl bg-white/10 p-5">
+              <div class="mt-1 h-12 w-12 rounded-2xl bg-[#3B82F6]/10 flex items-center justify-center text-white">
+                <span class="material-symbols-outlined text-xl">local_hospital</span>
+              </div>
+              <div>
+                <p class="font-semibold">Easy onboarding</p>
+                <p class="text-sm text-slate-300">Select your role and fill a tailored registration form.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 rounded-3xl bg-white/10 p-5">
+              <div class="mt-1 h-12 w-12 rounded-2xl bg-[#F97316]/10 flex items-center justify-center text-white">
+                <span class="material-symbols-outlined text-xl">medical_services</span>
+              </div>
+              <div>
+                <p class="font-semibold">Verified providers</p>
+                <p class="text-sm text-slate-300">Secure signup with OTP verification and trusted workflows.</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 text-slate-300">
+            <div class="h-px flex-1 bg-white/10"></div>
+            <span class="text-sm uppercase tracking-[0.3em]">Starting is simple</span>
+            <div class="h-px flex-1 bg-white/10"></div>
+          </div>
+          <div class="flex flex-wrap gap-3 text-sm text-slate-300">
+            <span class="rounded-full border border-white/10 bg-white/5 px-3 py-2">Doctor</span>
+            <span class="rounded-full border border-white/10 bg-white/5 px-3 py-2">Hospital</span>
+            <span class="rounded-full border border-white/10 bg-white/5 px-3 py-2">Lab</span>
+            <span class="rounded-full border border-white/10 bg-white/5 px-3 py-2">Pharmacy</span>
+          </div>
+        </div>
+      </div>
+      <div class="glass-panel relative flex min-h-[700px] flex-col justify-center px-6 py-10 sm:px-10 lg:px-12">
+        <div class="absolute left-0 top-0 h-28 w-28 rounded-full bg-[#CFFAFE] opacity-60 blur-2xl"></div>
+        <div class="absolute right-0 bottom-0 h-32 w-32 rounded-full bg-[#FED7AA] opacity-70 blur-2xl"></div>
+        <div class="relative z-10 mx-auto w-full max-w-xl">
+          <div class="mb-8 flex flex-col gap-3 text-center sm:text-left">
+            <span class="inline-flex items-center justify-center rounded-full bg-blue-100 px-4 py-1 text-sm font-semibold text-blue-700">Sign Up</span>
+            <h1 class="text-3xl font-semibold sm:text-4xl">Create your provider account</h1>
+            <p class="max-w-2xl text-sm text-slate-600 sm:text-base">Choose your role and complete registration to access appointments, inventory, and analytics.</p>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <a href="{% url 'register_by_role' 'doctor' %}" class="group rounded-[28px] border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFF6FF] text-sky-700">
+                <span class="material-symbols-outlined text-2xl">medical_information</span>
+              </div>
+              <div class="mt-4">
+                <h2 class="text-lg font-semibold">Doctor</h2>
+                <p class="mt-2 text-sm text-slate-500">Register as a doctor and onboard your consultation services.</p>
+              </div>
+            </a>
+
+            <a href="{% url 'register_by_role' 'hospital' %}" class="group rounded-[28px] border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FEF3C7] text-amber-700">
+                <span class="material-symbols-outlined text-2xl">local_hospital</span>
+              </div>
+              <div class="mt-4">
+                <h2 class="text-lg font-semibold">Hospital</h2>
+                <p class="mt-2 text-sm text-slate-500">Add your hospital or clinic and manage patients, beds and services.</p>
+              </div>
+            </a>
+
+            <a href="{% url 'register_by_role' 'lab' %}" class="group rounded-[28px] border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ECFDF5] text-emerald-700">
+                <span class="material-symbols-outlined text-2xl">science</span>
+              </div>
+              <div class="mt-4">
+                <h2 class="text-lg font-semibold">Lab</h2>
+                <p class="mt-2 text-sm text-slate-500">Set up your laboratory profile and publish tests for patients.</p>
+              </div>
+            </a>
+
+            <a href="{% url 'register_by_role' 'Pharmacy' %}" class="group rounded-[28px] border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FCE7F3] text-fuchsia-700">
+                <span class="material-symbols-outlined text-2xl">medical_services</span>
+              </div>
+              <div class="mt-4">
+                <h2 class="text-lg font-semibold">Pharmacy</h2>
+                <p class="mt-2 text-sm text-slate-500">Register your pharmacy to manage medicine inventory and orders.</p>
+              </div>
+            </a>
+          </div>
+
+          <div class="mt-10 rounded-[28px] border border-slate-200 bg-slate-50 p-6 text-center">
+            <p class="text-sm font-semibold text-slate-800">Need help choosing your role?</p>
+            <p class="mt-2 text-sm text-slate-500">Contact support or continue with the option that best describes your service type.</p>
+            <a href="{% url 'login' %}" class="mt-4 inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">Already have an account? Log In</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
