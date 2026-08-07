@@ -188,10 +188,10 @@ class User(models.Model):
         ('hospital', 'Hospital'),
         ('user', 'User'),
     ]
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
     phone_country_code = models.CharField(max_length=8, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=255, blank=True, null=True)
     user_type = models.CharField(max_length=32, choices=USER_TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

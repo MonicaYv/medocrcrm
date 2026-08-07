@@ -1,293 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sign up · Choose Role · Verify OTP</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  :root{
-    --navy:#0f2a4a;
-    --navy-dark:#0a1f3a;
-    --blue-panel-1:#bfe0f2;
-    --blue-panel-2:#8fc7e8;
-    --teal:#1f8fae;
-    --orange:#f2762e;
-    --ink:#16223a;
-    --muted:#7c8aa0;
-    --line:#e6eaf0;
-  }
-  body{
-    font-family:'Segoe UI', ui-sans-serif, system-ui, -apple-system, sans-serif;
-    background:#eef1f5;
-  }
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Register as Pharmacy{% endblock %}
 
-  .stage{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:32px 16px;
-  }
-
-  .card{
-    width:100%;
-    max-width:1000px;
-    background:#fff;
-    border-radius:14px;
-    overflow:hidden;
-    box-shadow:0 20px 60px -12px rgba(15,42,74,.35), 0 0 0 1px rgba(15,42,74,.04);
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    position:relative;
-    min-height:520px;
-  }
-  @media (max-width:720px){
-    .card{grid-template-columns:1fr; max-width:420px;}
-    .illus-panel{display:none;}
-  }
-
-  .illus-panel{
-    position:relative;
-    background:linear-gradient(160deg, var(--blue-panel-1), var(--blue-panel-2));
-    overflow:hidden;
-  }
-  .illus-panel::before{
-    content:"";
-    position:absolute; inset:0;
-    background:
-      radial-gradient(circle at 20% 15%, rgba(255,255,255,.35), transparent 40%),
-      radial-gradient(circle at 85% 90%, rgba(255,255,255,.25), transparent 45%);
-  }
-  .brand-mark{
-    position:absolute; top:20px; left:20px;
-    width:34px; height:34px;
-    display:flex; align-items:center; justify-content:center;
-    z-index:5;
-  }
-  .badge-mark{
-    position:absolute; top:14px; right:14px;
-    width:46px; height:46px;
-    border-radius:999px;
-    background:#fff;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 14px rgba(0,0,0,.18);
-    z-index:5;
-    border:2px solid #fff;
-    font-size:8px;
-    font-weight:800;
-    letter-spacing:.3px;
-    color:var(--navy);
-    text-align:center;
-    line-height:1.05;
-  }
-  .dots{
-    position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
-    display:flex; gap:6px; z-index:5;
-  }
-  .dots span{width:6px;height:6px;border-radius:999px;background:rgba(15,42,74,.25); transition:.2s;}
-  .dots span.active{background:var(--navy); width:16px; border-radius:999px;}
-
-  .illus-scene{
-    position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-  }
-
-  .form-panel{
-    padding:44px 40px;
-    display:flex;
-    flex-direction:column;
-    position:relative;
-  }
-  @media (max-width:720px){
-    .form-panel{padding:40px 24px;}
-  }
-
-  .close-btn{
-    position:absolute; top:18px; right:18px;
-    width:30px; height:30px;
-    display:flex; align-items:center; justify-content:center;
-    border-radius:999px;
-    color:#9aa5b5;
-    transition:.15s;
-  }
-  .close-btn:hover{background:#f2f4f7; color:var(--ink);}
-
-  h1.title{
-    font-size:26px;
-    font-weight:700;
-    color:var(--ink);
-    letter-spacing:-.01em;
-  }
-  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
-
-  .input-shell{
-    display:flex;
-    border:1.5px solid var(--line);
-    border-radius:8px;
-    overflow:hidden;
-    transition:.15s;
-  }
-  .input-shell:focus-within{
-    border-color: var(--navy);
-    box-shadow:0 0 0 3px rgba(15,42,74,.08);
-  }
-  .cc-select{
-    border:none; outline:none;
-    background:#fff;
-    padding:0 10px;
-    font-size:14px;
-    color:var(--ink);
-    border-right:1.5px solid var(--line);
-  }
-  .phone-input, .text-input{
-    border:none; outline:none; flex:1;
-    padding:12px 14px;
-    font-size:14px;
-    color:var(--ink);
-  }
-  .field-label{
-    font-size:13px; font-weight:600; color:var(--ink); margin-bottom:6px; display:block;
-  }
-  .std-input{
-    width:100%;
-    border:1.5px solid var(--line);
-    border-radius:8px;
-    padding:12px 14px;
-    font-size:14px;
-    color:var(--ink);
-    outline:none;
-    transition:.15s;
-  }
-  .std-input:focus{
-    border-color: var(--navy);
-    box-shadow:0 0 0 3px rgba(15,42,74,.08);
-  }
-
-  .btn-primary{
-    background:var(--navy);
-    color:#fff;
-    font-weight:600;
-    font-size:14px;
-    border-radius:8px;
-    padding:12px 16px;
-    transition:.15s;
-    border:none;
-  }
-  .btn-primary:hover{background:var(--navy-dark);}
-  .btn-primary:disabled{opacity:.45; cursor:not-allowed;}
-
-  .divider{
-    display:flex; align-items:center; gap:12px;
-    color:#b7c0cd; font-size:12px; margin:18px 0;
-  }
-  .divider::before, .divider::after{
-    content:""; flex:1; height:1px; background:var(--line);
-  }
-
-  .btn-google{
-    border:1.5px solid var(--line);
-    border-radius:8px;
-    padding:11px 16px;
-    font-size:14px;
-    font-weight:500;
-    color:var(--ink);
-    display:flex; align-items:center; justify-content:center; gap:10px;
-    transition:.15s;
-  }
-  .btn-google:hover{background:#f8fafc; border-color:#cfd7e2;}
-
-  .service-tile{
-    border:1.5px solid var(--line);
-    border-radius:10px;
-    padding:12px 6px 10px;
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-    cursor:pointer;
-    transition:.15s;
-    background:#fff;
-  }
-  .service-tile:hover{border-color:#c7d2e0;}
-  .service-tile.active{
-    border-color:var(--navy);
-    background:#eef3fa;
-  }
-  .service-tile .icon-wrap{
-    width:34px; height:34px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .service-tile span{font-size:11.5px; color:var(--ink); font-weight:500;}
-
-  .footer-link{
-    text-align:center; font-size:13px; color:var(--muted);
-  }
-  .footer-link a{color:var(--navy); font-weight:600; text-decoration:none;}
-  .footer-link a:hover{text-decoration:underline;}
-
-  .otp-box{
-    width:52px; height:56px;
-    border:1.5px solid var(--line);
-    border-radius:8px;
-    text-align:center;
-    font-size:20px;
-    font-weight:600;
-    color:var(--ink);
-    outline:none;
-    transition:.15s;
-  }
-  .otp-box:focus{
-    border-color:var(--navy);
-    box-shadow:0 0 0 3px rgba(15,42,74,.08);
-  }
-  .otp-box.filled{border-color:var(--teal); background:#f4fbfd;}
-
-  .link-edit{color:#d64545; font-weight:600; font-size:13px; text-decoration:none;}
-  .link-teal{color:var(--teal); font-weight:600; text-decoration:none;}
-  .link-teal:hover{text-decoration:underline;}
-
-  .screen{display:none;}
-  .screen.active{display:flex; flex-direction:column; height:100%;}
-
-  .fade-in{animation:fadeIn .25s ease;}
-  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
-
-  /* ---- role cards (Choose Provider Role) ---- */
-  .role-card{
-    display:flex; align-items:center; gap:14px;
-    border:1.5px solid var(--line);
-    border-radius:10px;
-    padding:13px 14px;
-    cursor:pointer;
-    transition:.15s;
-    background:#fff;
-  }
-  .role-card:hover{border-color:#c7d2e0;}
-  .role-card.selected{
-    background:var(--navy);
-    border-color:var(--navy);
-  }
-  .role-icon{
-    width:40px; height:40px; border-radius:10px;
-    display:flex; align-items:center; justify-content:center;
-    flex-shrink:0;
-    background:#eef3fa;
-  }
-  .role-card.selected .role-icon{
-    background:rgba(255,255,255,.15);
-  }
-  .role-text h3{
-    font-size:14px; font-weight:700; color:var(--ink); margin:0;
-  }
-  .role-card.selected .role-text h3{ color:#fff; }
-  .role-text p{
-    font-size:12px; color:var(--muted); margin:2px 0 0;
-    line-height:1.35;
-  }
-  .role-card.selected .role-text p{ color:rgba(255,255,255,.75); }
-  .role-chevron{ margin-left:auto; flex-shrink:0; color:#b7c0cd; }
-  .role-card.selected .role-chevron{ color:#fff; }
-</style>
-</head>
-<body>
+{% block content %}
 
 <div class="stage">
   <div class="card">
@@ -323,7 +38,7 @@
 
     <!-- ============ FORM PANEL ============ -->
     <div class="form-panel">
-      <button class="close-btn" aria-label="Close">
+      <button class="close-btn" aria-label="Close" id="closeBtn" data-url="{% url 'login' %}">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
 
@@ -386,68 +101,74 @@
       </div>
 
       <!-- ---------------- SCREEN 1: SIGN UP ---------------- -->
-      <div class="screen" id="screenSignUp">
-        <div class="pt-1">
-          <h1 class="title">Sign up</h1>
-          <p class="subtitle">Enter your mobile number for an OTP.</p>
+      <form id="signupForm" data-check-url="{% url 'check_phone' %}" data-url="{% url 'save_user' %}">
+
+        {% csrf_token %}
+        <input type="hidden" name="user_type" id="userType" value="hospital">
+
+        <div class="screen" id="screenSignUp">
+          <div class="pt-1">
+            <h1 class="title">Sign up</h1>
+            <p class="subtitle">Enter your mobile number for an OTP.</p>
+          </div>
+
+          <div class="mt-6">
+            <div class="input-shell">
+              <select id="countryCode" name="phone_country_code" class="cc-select">
+                <option value="+91">+91</option>
+                <option value="+1">+1</option>
+                <option value="+44">+44</option>
+                <option value="+65">+65</option>
+              </select>
+              <input id="phoneInput" name="phone_number" class="phone-input" type="tel" maxlength="10" placeholder="Phone no." />
+            </div>
+          </div>
+
+          <button type="button" id="continueBtn" class="btn-primary w-full mt-4" disabled>Continue</button>
+
+          <div class="divider">or</div>
+
+          <button class="btn-google w-full">
+            <svg width="16" height="16" viewBox="0 0 18 18">
+              <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.56 2.7-3.87 2.7-6.62z"/>
+              <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.9v2.33A9 9 0 0 0 9 18z"/>
+              <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.9A9 9 0 0 0 0 9c0 1.45.35 2.83.9 4.03l3.05-2.33z"/>
+              <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .9 4.97l3.05 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          <div class="grid grid-cols-4 gap-2 mt-6" id="signupTiles">
+            <div class="service-tile" data-tile="hospital">
+              <div class="icon-wrap">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="12" rx="1.5" fill="#0f2a4a"/><path d="M6 9V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3" stroke="#0f2a4a" stroke-width="1.6"/><path d="M12 12v6M9 15h6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </div>
+              <span>Hospital</span>
+            </div>
+            <div class="service-tile" data-tile="doctor">
+              <div class="icon-wrap">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#3fa8d8"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" stroke="#3fa8d8" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </div>
+              <span>Doctor</span>
+            </div>
+            <div class="service-tile" data-tile="lab">
+              <div class="icon-wrap">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M9 2v6.5L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L15 8.5V2" stroke="#e0473f" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 2h8" stroke="#e0473f" stroke-width="1.6" stroke-linecap="round"/><path d="M6.5 15h11" stroke="#e0473f" stroke-width="1.4"/></svg>
+              </div>
+              <span>Lab</span>
+            </div>
+            <div class="service-tile" data-tile="pharmacy">
+              <div class="icon-wrap">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="8" width="16" height="12" rx="1.5" fill="#f2a93b"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#f2a93b" stroke-width="1.6"/><path d="M12 11v6M9 14h6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </div>
+              <span>Pharmacy</span>
+            </div>
+          </div>
+
+          <div class="flex-1"></div>
+          <p class="footer-link mt-6">Already have an account? <a href="#" id="backToRoleBtn">Sign in instead</a></p>
         </div>
-
-        <div class="mt-6">
-          <div class="input-shell">
-            <select class="cc-select">
-              <option>+91</option>
-              <option>+1</option>
-              <option>+44</option>
-              <option>+65</option>
-            </select>
-            <input id="phoneInput" class="phone-input" type="tel" maxlength="10" placeholder="Phone no." />
-          </div>
-        </div>
-
-        <button id="continueBtn" class="btn-primary w-full mt-4" disabled>Continue</button>
-
-        <div class="divider">or</div>
-
-        <button class="btn-google w-full">
-          <svg width="16" height="16" viewBox="0 0 18 18">
-            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.56 2.7-3.87 2.7-6.62z"/>
-            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.9v2.33A9 9 0 0 0 9 18z"/>
-            <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.9A9 9 0 0 0 0 9c0 1.45.35 2.83.9 4.03l3.05-2.33z"/>
-            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .9 4.97l3.05 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <div class="grid grid-cols-4 gap-2 mt-6" id="signupTiles">
-          <div class="service-tile" data-tile="hospital">
-            <div class="icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="12" rx="1.5" fill="#0f2a4a"/><path d="M6 9V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3" stroke="#0f2a4a" stroke-width="1.6"/><path d="M12 12v6M9 15h6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </div>
-            <span>Hospital</span>
-          </div>
-          <div class="service-tile" data-tile="doctor">
-            <div class="icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#3fa8d8"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" stroke="#3fa8d8" stroke-width="1.8" stroke-linecap="round"/></svg>
-            </div>
-            <span>Doctor</span>
-          </div>
-          <div class="service-tile" data-tile="lab">
-            <div class="icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M9 2v6.5L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L15 8.5V2" stroke="#e0473f" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 2h8" stroke="#e0473f" stroke-width="1.6" stroke-linecap="round"/><path d="M6.5 15h11" stroke="#e0473f" stroke-width="1.4"/></svg>
-            </div>
-            <span>Lab</span>
-          </div>
-          <div class="service-tile" data-tile="pharmacy">
-            <div class="icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="8" width="16" height="12" rx="1.5" fill="#f2a93b"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#f2a93b" stroke-width="1.6"/><path d="M12 11v6M9 14h6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </div>
-            <span>Pharmacy</span>
-          </div>
-        </div>
-
-        <div class="flex-1"></div>
-        <p class="footer-link mt-6">Already have an account? <a href="#" id="backToRoleBtn">Sign in instead</a></p>
-      </div>
+      </form>
 
       <!-- ---------------- SCREEN 2: OTP VERIFY ---------------- -->
       <div class="screen" id="screenOtp">
@@ -459,6 +180,8 @@
         </div>
 
         <div class="flex gap-3 mt-7">
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
           <input class="otp-box" maxlength="1" inputmode="numeric" />
           <input class="otp-box" maxlength="1" inputmode="numeric" />
           <input class="otp-box" maxlength="1" inputmode="numeric" />
@@ -484,150 +207,8 @@
   </div>
 </div>
 
-<script>
-  const roleScene = document.getElementById('roleScene');
-  const signupScene = document.getElementById('signupScene');
-  const otpScene = document.getElementById('otpScene');
-  const dot0 = document.getElementById('dot0');
-  const dot1 = document.getElementById('dot1');
-  const dot2 = document.getElementById('dot2');
+{% endblock %}
 
-  const screenRole = document.getElementById('screenRole');
-  const screenSignUp = document.getElementById('screenSignUp');
-  const screenOtp = document.getElementById('screenOtp');
-
-  let selectedRole = 'hospital';
-
-  // ---- role selection ----
-  document.querySelectorAll('.role-card').forEach(card => {
-    card.addEventListener('click', () => {
-      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      selectedRole = card.dataset.role;
-    });
-  });
-
-  function showScreen(scene, dotIndex){
-    [screenRole, screenSignUp, screenOtp].forEach(s => s.classList.remove('active'));
-    [roleScene, signupScene, otpScene].forEach(s => s.style.display = 'none');
-    scene.screenEl.classList.add('active');
-    scene.screenEl.classList.add('fade-in');
-    scene.illusEl.style.display = 'flex';
-    [dot0, dot1, dot2].forEach(d => d.classList.remove('active'));
-    [dot0, dot1, dot2][dotIndex].classList.add('active');
-  }
-
-  document.getElementById('roleContinueBtn').addEventListener('click', () => {
-    // pre-select matching tile on the sign up screen
-    document.querySelectorAll('#signupTiles .service-tile').forEach(t => {
-      t.classList.toggle('active', t.dataset.tile === selectedRole);
-    });
-    showScreen({screenEl: screenSignUp, illusEl: signupScene}, 1);
-  });
-
-  document.getElementById('backToRoleBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    showScreen({screenEl: screenRole, illusEl: roleScene}, 0);
-  });
-
-  document.querySelectorAll('#signupTiles .service-tile').forEach(tile => {
-    tile.addEventListener('click', () => {
-      document.querySelectorAll('#signupTiles .service-tile').forEach(t => t.classList.remove('active'));
-      tile.classList.add('active');
-      selectedRole = tile.dataset.tile;
-    });
-  });
-
-  const phoneInput = document.getElementById('phoneInput');
-  const continueBtn = document.getElementById('continueBtn');
-  const otpPhoneDisplay = document.getElementById('otpPhoneDisplay');
-  const editNumberBtn = document.getElementById('editNumberBtn');
-
-  phoneInput.addEventListener('input', () => {
-    phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 10);
-    continueBtn.disabled = phoneInput.value.length !== 10;
-  });
-
-  function maskNumber(num){
-    if(num.length < 5) return num + '*****';
-    return num.slice(0,5) + '*****';
-  }
-
-  continueBtn.addEventListener('click', () => {
-    if(continueBtn.disabled) return;
-    otpPhoneDisplay.textContent = maskNumber(phoneInput.value || '81022');
-    showScreen({screenEl: screenOtp, illusEl: otpScene}, 2);
-    startTimer();
-    setTimeout(() => document.querySelector('.otp-box').focus(), 100);
-  });
-
-  editNumberBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    showScreen({screenEl: screenSignUp, illusEl: signupScene}, 1);
-  });
-
-  // OTP boxes
-  const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
-  otpBoxes.forEach((box, i) => {
-    box.addEventListener('input', () => {
-      box.value = box.value.replace(/\D/g, '').slice(0,1);
-      box.classList.toggle('filled', box.value.length === 1);
-      if(box.value && otpBoxes[i+1]) otpBoxes[i+1].focus();
-    });
-    box.addEventListener('keydown', (e) => {
-      if(e.key === 'Backspace' && !box.value && otpBoxes[i-1]){
-        otpBoxes[i-1].focus();
-      }
-    });
-    box.addEventListener('paste', (e) => {
-      e.preventDefault();
-      const digits = (e.clipboardData.getData('text') || '').replace(/\D/g,'').slice(0,4).split('');
-      digits.forEach((d, idx) => {
-        if(otpBoxes[idx]){
-          otpBoxes[idx].value = d;
-          otpBoxes[idx].classList.add('filled');
-        }
-      });
-      if(otpBoxes[digits.length]) otpBoxes[digits.length].focus();
-    });
-  });
-
-  let timerInterval;
-  function startTimer(){
-    clearInterval(timerInterval);
-    let seconds = 34;
-    const timerEl = document.getElementById('timer');
-    const resendLink = document.getElementById('resendLink');
-    resendLink.classList.add('hidden');
-    timerEl.parentElement.classList.remove('hidden');
-    timerEl.textContent = '00:' + String(seconds).padStart(2,'0');
-    timerInterval = setInterval(() => {
-      seconds--;
-      if(seconds <= 0){
-        clearInterval(timerInterval);
-        timerEl.parentElement.classList.add('hidden');
-        resendLink.classList.remove('hidden');
-      } else {
-        timerEl.textContent = '00:' + String(seconds).padStart(2,'0');
-      }
-    }, 1000);
-  }
-
-  document.getElementById('resendLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    startTimer();
-    otpBoxes.forEach(b => { b.value=''; b.classList.remove('filled'); });
-    otpBoxes[0].focus();
-  });
-
-  document.getElementById('doneBtn').addEventListener('click', () => {
-    const code = otpBoxes.map(b => b.value).join('');
-    if(code.length === 4){
-      alert('Account created & OTP verified: ' + code + ' (role: ' + selectedRole + ')');
-    } else {
-      otpBoxes.find(b => !b.value)?.focus();
-    }
-  });
-</script>
-</body>
-</html>
+{% block extra_js %}
+    <script src="{% static 'js/sign-up.js' %}"></script>
+{% endblock %}
