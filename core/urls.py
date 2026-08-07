@@ -8,6 +8,8 @@ from dashboard import views as dashboard_views
 urlpatterns = [
     path('', views.login_page, name='login'),
     path('new-signin/', views.new_signin, name='new_signin'),
+    path('new-kyc/', views.new_kyc, name='new_kyc'),
+    path('profile-verification/', views.profile_verification, name='profile_verification'),
     path('admin/', admin.site.urls),
     path('user/', include('registration.urls')),
     path('dashboard', dashboard_views.dashboard_home, name='dashboard'),

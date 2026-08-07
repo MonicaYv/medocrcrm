@@ -24,4 +24,6 @@ urlpatterns = [
     path("new-signin/", views.new_signin, name="new_signin"),
     path("new-otp-verify/", views.new_otp_verify, name="new_otp_verify"),
     path("new-signup/", views.new_signup, name="new_signup"),
+    path("new-kyc/", views.new_kyc, name="new_kyc"),
+    path("profile-verification/", views.profile_verification, name="profile_verification"),
 ]

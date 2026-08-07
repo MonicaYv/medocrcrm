@@ -47,6 +47,46 @@ def new_otp_verify(request):
 def new_signup(request):
     return render(request, 'registration/new_signup.html')
 
+def new_kyc(request):
+    from dashboard.utils import get_common_context
+    from registration.models import User
+    
+    user_id = request.session.get('user_id')
+    user = User.objects.filter(id=user_id).first() if user_id else None
+    
+    if user:
+        context = get_common_context(request, user)
+    else:
+        context = {
+            'border': 'dodger-blue',
+            'secondary_bg': 'light-dodger-blue',
+            'text': 'dodger-blue',
+            'logo': '/static/images/logo.svg',
+            'user_display_name': 'Guest User',
+        }
+    context['is_kyc'] = True
+    return render(request, 'registration/new_kyc.html', context)
+
+def profile_verification(request):
+    from dashboard.utils import get_common_context
+    from registration.models import User
+    
+    user_id = request.session.get('user_id')
+    user = User.objects.filter(id=user_id).first() if user_id else None
+    
+    if user:
+        context = get_common_context(request, user)
+    else:
+        context = {
+            'border': 'dodger-blue',
+            'secondary_bg': 'light-dodger-blue',
+            'text': 'dodger-blue',
+            'logo': '/static/images/logo.svg',
+            'user_display_name': 'Guest User',
+        }
+    context['is_kyc'] = True
+    return render(request, 'registration/profile_verification.html', context)
+
 @require_POST
 def send_otp(request):
     email = request.POST.get("email", "").strip()

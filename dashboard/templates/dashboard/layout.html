@@ -22,11 +22,15 @@
 <body>
 <main class="h-screen w-full">
     <!-- Header -->
+    {% block header %}
     {% include 'dashboard/header.html' %}
+    {% endblock %}
     <!-- <div class="h-[calc(100vh-72px)] w-full flex"> -->
     <div class=" w-full flex">
         <!-- Sidebar -->
+        {% block sidebar %}
         {% include 'dashboard/sidebar.html' %}
+        {% endblock %}
         <!-- Main Content Area -->
         
         <div class="flex-1 overflow-y-auto scroll px-4 py-2">
