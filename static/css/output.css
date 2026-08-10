@@ -7103,6 +7103,7 @@ html, body {
 }
 body {
   font-family: 'MyFont';
+  overflow: hidden;
 }
 .scroll::-webkit-scrollbar {
   margin-right: 10px;

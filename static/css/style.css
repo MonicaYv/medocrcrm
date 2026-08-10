@@ -328,6 +328,7 @@ html, body{
 
 body {
     font-family: 'MyFont';
+    overflow: hidden;
 }
 
 /* scroll */
