@@ -87,6 +87,9 @@ def profile_verification(request):
     context['is_kyc'] = True
     return render(request, 'registration/profile_verification.html', context)
 
+def profile_review(request):
+    return render(request, 'registration/profile_review.html')
+
 @require_POST
 def send_otp(request):
     email = request.POST.get("email", "").strip()

@@ -1091,8 +1091,8 @@
                     $('#next-btn-text').text('Submit Verification');
                 }
             } else {
-                // final submit
-                $('#profile-verification-form').submit();
+                // final submit - redirect to profile review page
+                window.location.href = "{% url 'profile_review' %}";
             }
         });
 
