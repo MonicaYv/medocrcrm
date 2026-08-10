@@ -253,7 +253,7 @@ def login_page(request):
 
 @csrf_protect
 @require_POST
-def login_auth(request):
+def login_auth_OLD(request):
     data = request.POST
     email = data.get("email").strip()
     password = data.get("password").strip()
@@ -309,7 +309,7 @@ def login_auth(request):
     
 @csrf_protect
 @require_POST
-def save_user(request):
+def save_user_OLD(request):
     data = request.POST
     errors = {}
     # Email
@@ -2077,3 +2077,158 @@ def verify_contact_person_otp(email, otp, token):
     print("=" * 60)
 
     return result
+
+
+
+@csrf_protect
+@require_POST
+def login_auth(request):
+
+    phone_number = request.POST.get("phone_number")
+
+    if not phone_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number is required."
+        }, status=400)
+
+    try:
+        user = User.objects.get(phone_number=phone_number)
+
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number not found."
+        }, status=404)
+
+    allowed_user_types = [
+        "user",
+        "hospital",
+        "doctor",
+        "lab",
+        "pharmacy",
+    ]
+
+    if user.user_type not in allowed_user_types:
+        return JsonResponse({
+            "success": False,
+            "message": "This account type is not allowed to login."
+        }, status=403)
+
+    if not user.is_active:
+        return JsonResponse({
+            "success": False,
+            "message": "Your account is inactive."
+        }, status=403)
+
+    # Store user id in session
+    request.session["user_id"] = user.id
+
+    return JsonResponse({
+        "success": True,
+        "redirect": reverse("dashboard")
+    })
+    
+@csrf_protect
+@require_POST
+def verify_login_otp(request):
+
+    phone_number = request.POST.get("phone_number")
+    otp = request.POST.get("otp")
+
+    if otp != "123456":
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid OTP."
+        })
+
+    try:
+        user = User.objects.get(phone_number=phone_number)
+
+        allowed_user_types = [
+            "user",
+            "pharmacy",
+            "lab",
+            "doctor",
+            "hospital"
+        ]
+
+        if user.user_type not in allowed_user_types:
+            return JsonResponse({
+                "success": False,
+                "message": "This account type is not allowed."
+            })
+
+        if not user.is_active:
+            return JsonResponse({
+                "success": False,
+                "message": "Your account is inactive."
+            })
+
+        request.session["user_id"] = user.id
+
+        user.last_login = timezone.now()
+        user.save(update_fields=["last_login"])
+
+        return JsonResponse({
+            "success": True,
+            "redirect": reverse("dashboard")
+        })
+
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        })
+		
+		
+@csrf_protect
+@require_POST
+def check_phone(request):
+    phone_number = request.POST.get("phone_number")
+
+    if not phone_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number is required."
+        }, status=400)
+
+    if User.objects.filter(phone_number=phone_number).exists():
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number already exists."
+        }, status=400)
+
+    return JsonResponse({
+        "success": True
+    })
+	
+@csrf_protect
+@require_POST
+def save_user(request):
+    
+    data = request.POST
+    errors = {}         
+    
+    user_type = data.get("user_type")
+    phone_country_code = data.get("phone_country_code")
+    phone_number = data.get("phone_number")
+    
+    # Validate phone number
+    if not phone_number or not re.match(r"^\d{10}$", phone_number):
+        errors["phone_number"] = "Enter a valid phone number (10 digits)."   
+    
+    # Check if phone number already exists
+    if User.objects.filter(phone_number=phone_number).exists():
+        errors["phone_number"] = "This phone number is already registered." 
+
+    # If any errors, return as JSON
+    if errors:
+        return JsonResponse({"success": False, "errors": errors}, status=400)
+
+    user = User.objects.create(
+        phone_country_code=phone_country_code,
+        phone_number = phone_number,
+        user_type = user_type
+    )    
+    return JsonResponse({"success": True, "message": "User registered successfully."})
