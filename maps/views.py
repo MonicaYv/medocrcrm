@@ -152,7 +152,10 @@ def get_amenities(request):
         }
     }
 
-    docs = coll.find(query)
+    docs = list(
+        coll.find(query)
+        .limit(100)
+        )
     amenities = []
     for d in docs:
         coords = d.get("location", {}).get("coordinates", [None, None])
@@ -443,7 +446,15 @@ def search_history(request):
             return JsonResponse({"error": "Invalid MongoDB ID"}, status=400)
 
         coll = settings.MONGO_COLLECTIONS.get(amenity_type)
-        if not coll or not coll.find_one({"_id": oid}):
+        if coll is None:
+            return JsonResponse({"error": "Invalid amenity type"}, status=400)
+
+        doc = coll.find_one({"_id": oid})
+
+        print("Collection:", coll.name)
+        print("Mongo Document Found:", doc is not None)
+
+        if doc is None:
             return JsonResponse({"error": "Amenity not found"}, status=404)
 
         saved, created = SearchHistory.objects.get_or_create(
