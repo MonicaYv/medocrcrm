@@ -9,6 +9,7 @@ urlpatterns = [
     path('save/ngo', views.save_ngo, name='save_ngo'),
     path('login', views.login_page, name='login_page'),
     path('auth/login', views.login_auth, name='login_auth'),
+    path('auth/login-old', views.login_auth_OLD, name='login_auth_old'),
     path('save/advertiser', views.save_advertiser, name='save_advertiser'),
     path('save/client', views.save_client, name='save_client'),
     path('save/medical_pharmacy', views.save_medical_pharmacy, name='save_pharmacy'),        

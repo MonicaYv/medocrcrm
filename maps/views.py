@@ -152,7 +152,10 @@ def get_amenities(request):
         }
     }
 
-    docs = coll.find(query)
+    docs = list(
+        coll.find(query)
+        .limit(100)
+        )
     amenities = []
     for d in docs:
         coords = d.get("location", {}).get("coordinates", [None, None])

@@ -181,8 +181,97 @@ function showLocation(position) {
     console.log("Map initialized at:", currentLat, currentLon);
 }
 
+// function showError(error) {
+//     toastr.error("Error getting location: " + error.message);
+// }
+
+// ==========================================
+// SHARE PLACE
+// ==========================================
+
+function sharePlace(place) {
+
+    const title = place.title || place.name || "Healthcare Location";
+
+    const address = place.address || "";
+
+    const lat = place.lat ?? place.latitude;
+    const lon = place.lon ?? place.longitude;
+
+    const shareText = `${title}\n${address}`;
+
+    const shareUrl = (
+        lat != null && lon != null
+    )
+        ? `${window.location.origin}/maps/?lat=${lat}&lng=${lon}`
+        : window.location.href;
+
+    // Native mobile/browser share
+    if (navigator.share) {
+
+        navigator.share({
+            title: title,
+            text: shareText,
+            url: shareUrl
+        })
+        .then(() => {
+            console.log("Place shared successfully");
+        })
+        .catch(err => {
+            // User cancelled share dialog
+            if (err.name !== "AbortError") {
+                console.error("Share failed:", err);
+            }
+        });
+
+        return;
+    }
+
+    // Desktop fallback
+    const fallbackText = `${title}\n${address}\n${shareUrl}`;
+
+    if (navigator.clipboard) {
+
+        navigator.clipboard.writeText(fallbackText)
+            .then(() => {
+                toastr.success("Location link copied!");
+            })
+            .catch(err => {
+                console.error("Clipboard error:", err);
+                toastr.error("Could not share location.");
+            });
+
+    } else {
+
+        toastr.info("Sharing is not supported on this browser.");
+    }
+}
+
 function showError(error) {
-    toastr.error("Error getting location: " + error.message);
+
+    console.error("Geolocation Error:", error);
+
+    // Show warning instead of stopping the map
+    toastr.warning("Location permission denied. Showing default location.");
+
+    // Default location (Mumbai)
+    currentLat = 19.0760;
+    currentLon = 72.8777;
+
+    // Initialize map
+    map = L.map("map").setView([currentLat, currentLon], 13);
+
+    L.tileLayer(tile_url, {
+        crossOrigin: true,
+        maxZoom: 19,
+        minZoom: 7,
+    }).addTo(map);
+
+    // Add marker
+    L.marker([currentLat, currentLon])
+        .addTo(map)
+        .bindPopup("Default Location")
+        .openPopup();
 }
 
 function clearMarkers() {
@@ -210,20 +299,98 @@ function getCookie(name) {
     $(".map-view").fadeIn(300);
     $(".listview").hide();
     
-    $('.view-toggle').change(function () {
-        const isChecked = $(this).is(":checked");
-        $('.view-toggle').prop('checked', isChecked);
+    // $('.view-toggle').change(function () {
+    //     const isChecked = $(this).is(":checked");
+    //     $('.view-toggle').prop('checked', isChecked);
 
-        if (isChecked) {
+    //     if (isChecked) {
+    //     $(".listview").fadeOut(200, function () {
+    //         $(".map-view").fadeIn(300);
+    //     });
+    //     } else {
+    //     $(".map-view").fadeOut(200, function () {
+    //         $(".listview").fadeIn(300);
+    //     });
+    //     }
+    // });
+    $('.view-toggle').change(function () {
+
+    const isChecked = $(this).is(":checked");
+
+    $('.view-toggle').prop('checked', isChecked);
+
+    if (isChecked) {
+
         $(".listview").fadeOut(200, function () {
             $(".map-view").fadeIn(300);
         });
-        } else {
-        $(".map-view").fadeOut(200, function () {
-            $(".listview").fadeIn(300);
+
+        // $("#mapViewLabel,#mapViewLabel2").css({
+        //     color: bgColor,
+        //     fontWeight: "600"
+        // });
+
+        // $("#listViewLabel,#listViewLabel2").css({
+        //     color: "#888",
+        //     fontWeight: "400"
+        // });
+        $("#mapViewLabel,#mapViewLabel2").css({
+            backgroundColor: bgColor,
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontWeight: "600"
         });
-        }
-    });
+
+        $("#listViewLabel,#listViewLabel2").css({
+            backgroundColor: "transparent",
+            color: "#666",
+            fontWeight: "400"
+        });
+
+    } else {
+
+        $(".map-view").fadeOut(200, function () {
+            $(".listview").fadeIn(300, function () {
+
+                // Automatically select Doctor tab
+                const $doctorBtn = $('.list-search-btn').filter(function () {
+                    return String($(this).data('type')).toLowerCase() === 'doctor';
+                });
+
+                if ($doctorBtn.length) {
+                    $doctorBtn.trigger("click");
+                }
+            });
+        });
+
+        // $("#listViewLabel,#listViewLabel2").css({
+        //     color: bgColor,
+        //     fontWeight: "600"
+        // });
+
+        // $("#mapViewLabel,#mapViewLabel2").css({
+        //     color: "#888",
+        //     fontWeight: "400"
+        // });
+        $("#listViewLabel,#listViewLabel2").css({
+            backgroundColor: bgColor,
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontWeight: "600"
+        });
+
+        $("#mapViewLabel,#mapViewLabel2").css({
+            backgroundColor: "transparent",
+            color: "#666",
+            fontWeight: "400"
+       });
+
+    }
+
+});
+
 
 
     /****** Handles fetching, displaying, and paginating nearby places by type in either map or list view  ******/
@@ -245,13 +412,6 @@ function fetchPlaces(type, buttonElement, mode = "map") {
     clearMarkers();
     allFetchedPlaces = [];
 
-    const typeLabels = {
-        hospital: "hospitals",
-        doctor: "doctors",
-        pharmacy: "pharmacies",
-        lab: "labs"
-    };
-
     fetch("get_places/", {
         method: "POST",
         headers: {
@@ -262,7 +422,7 @@ function fetchPlaces(type, buttonElement, mode = "map") {
             lat: currentLat,
             lng: currentLon,
             type: type,
-            range: 250000  // you can increase to 5000 if needed
+            range: 100000  // you can increase to 5000 if needed
         }),
     })
     .then((res) => res.json())
@@ -290,31 +450,27 @@ function fetchPlaces(type, buttonElement, mode = "map") {
             allFetchedPlaces.push(formattedPlace);
 
             if (mode === "map" && typeof lat === "number" && typeof lon === "number") {
+
                 const marker = L.marker([lat, lon], {
                     icon: icons[type],
-                }).addTo(map).bindPopup(() => {
-                    const popupContent = document.createElement('div');
-                    popupContent.innerHTML = `
-                        <div>
-                            <strong>${place.title}</strong><br>
-                            ${place.address ? place.address + "<br>" : ""}
-                            Phone: ${place.phone_number || ""}<br>
-                            <button class="show-details-btn mt-2 text-sm text-white px-2 py-1 bg-${selectedColor} rounded" data-id="${place.mongo_id}">
-                                Show Details
-                            </button>
-                        </div>
-                    `;
-                    // Defer adding click listener after popup renders
-                    setTimeout(() => {
-                        popupContent.querySelector(".show-details-btn").addEventListener("click", function (e) {
-                            e.stopPropagation();
-                            showOverview(place);
-                        });
-                    }, 10);
+                }).addTo(map);
 
-                    return popupContent;
+                // Directly open the right-side details panel
+                marker.on("click", function (e) {
+                    L.DomEvent.stopPropagation(e);
+
+                    showOverview({
+                        ...formattedPlace,
+                        latitude: lat,
+                        longitude: lon,
+                        phone_number: place.phone_number,
+                        email: place.email || "",
+                        imageUrl: place.imageUrl || "",
+                        services: place.services || []
+                    });
                 });
-            activeMarkers.push(marker);
+
+                activeMarkers.push(marker);
             }
         });
 
@@ -322,15 +478,14 @@ function fetchPlaces(type, buttonElement, mode = "map") {
                     renderListView(allFetchedPlaces);
                 }
         } else {
-        // toastr.error(`No ${type}s found nearby.`);
-        toastr.error(`No ${typeLabels[type]} found nearby.`);
+        toastr.error(`No ${type}s found nearby.`);
         }
     })
     .catch((err) => {
         console.error("Fetch error:", err);
-        toastr.error(`Failed to load nearby ${typeLabels[type]}.`);
+        toastr.error(`Failed to load nearby ${type}s.`);
         $(".cards, #pagination").addClass('hidden');
-        $(".placeholder").removeClass('hidden').text(`No ${typeLabels[type]} found nearby.`);
+        $(".placeholder").removeClass('hidden').text(`No ${type}s found nearby.`);
     });
 }
 
@@ -465,7 +620,7 @@ function generateStars(rating, reviews) {
             const card = `
                 <div class="places-card">
                     <div>
-                        <img class="rounded-t-[10px]" src="/static/images/Hospital.svg" alt="${place.title}" loading="lazy" />
+                        <img class="rounded-t-[10px]" src="/static/images/hospital.svg" alt="${place.title}" loading="lazy" />
                     </div>
                     <div class="px-4 py-5 space-y-3">
                         <div class="flex items-center justify-between">
@@ -483,7 +638,11 @@ function generateStars(rating, reviews) {
                             <p class="text-medium-gray text-16-nr">${place.phone || "No phone"}</p>
                         </div>
                         <div class="flex items-center justify-around gap-5">
-                            <button class="flex flex-col items-center text-dark-gray text-16-nr">
+                            <button 
+                                class="list-direction-btn flex flex-col items-center text-dark-gray text-16-nr"
+                                data-lat="${place.lat}"
+                                data-lon="${place.lon}"
+                                data-id="${place.mongo_id}">
                                 <span class="material-symbols-outlined material-filled">directions</span>
                                 Direction
                             </button>
@@ -491,7 +650,10 @@ function generateStars(rating, reviews) {
                                 <span class="material-symbols-outlined material-filled">call</span>
                                 Call
                             </button>
-                            <button class="flex flex-col items-center text-dark-gray text-16-nr">
+                            <button
+                                class="list-share-btn flex flex-col items-center text-dark-gray text-16-nr"
+                                data-id="${place.mongo_id}"
+                            >
                                 <span class="material-symbols-outlined material-filled">share</span>
                                 Share
                             </button>
@@ -508,6 +670,71 @@ function generateStars(rating, reviews) {
         setupPagination();
         
     }
+    // ==========================================
+    // LIST VIEW → SHARE
+    // ==========================================
+
+    $(document).on("click", ".list-share-btn", function (e) {
+
+        e.stopPropagation();
+
+        const mongoId = String($(this).data("id"));
+
+        const place = allFetchedPlaces.find(
+            p => String(p.mongo_id) === mongoId
+        );
+
+        if (!place) {
+            toastr.error("Could not find this location.");
+            return;
+        }
+
+        sharePlace(place);
+    });
+    // ==========================================
+    // LIST VIEW → DIRECTIONS
+    // ==========================================
+
+    $(document).on("click", ".list-direction-btn", function (e) {
+
+        e.stopPropagation();
+
+        const lat = parseFloat($(this).data("lat"));
+        const lon = parseFloat($(this).data("lon"));
+        const mongoId = $(this).data("id");
+
+        console.log("========== LIST DIRECTION ==========");
+        console.log("START:", currentLat, currentLon);
+        console.log("END:", lat, lon);
+        console.log("PLACE ID:", mongoId);
+        console.log("====================================");
+
+        // Find the actual place object
+        const place = allFetchedPlaces.find(
+            p => String(p.mongo_id) === String(mongoId)
+        );
+
+        if (!place) {
+            toastr.error("Could not find selected place.");
+            return;
+        }
+
+        // Switch to Map View
+        $('.view-toggle').prop('checked', true).trigger('change');
+
+        // Wait for Map View to become visible
+        setTimeout(() => {
+
+            // Make sure Leaflet recalculates its size
+            if (map) {
+                map.invalidateSize();
+            }
+
+            // Show route + right-side directions panel
+            showDirections(lat, lon, place);
+
+        }, 350);
+    });
 
     // Attach click handlers to map buttons to fetch and display places by category.
     $(".map-search-btn:contains('Hospital')").on("click", function () {
@@ -595,18 +822,18 @@ function generateStars(rating, reviews) {
 
     // Fetches and shows routes with mode toggle and interactive map directions.
     function showDirections(lat, lon, place = null) {
-    fetch("search_history/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken")
-        },
-        body: JSON.stringify({ mongo_id: place.mongo_id, type: place.type })
-    })
-    .catch(err => {
-            console.error("Searching History error:", err);
-            toastr.error(err.message || "Searching History failed.");
-        });
+    // fetch("search_history/", {
+    //     method: "POST",
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //         "X-CSRFToken": getCookie("csrftoken")
+    //     },
+    //     body: JSON.stringify({ mongo_id: place.mongo_id, type: place.type })
+    // })
+    // .catch(err => {
+    //         console.error("Searching History error:", err);
+    //         toastr.error(err.message || "Searching History failed.");
+    //     });
 
     lastLat = lat; lastLon = lon; lastPlace = place;
 
@@ -618,7 +845,20 @@ function generateStars(rating, reviews) {
 
         const startLat = currentLat;
         const startLng = currentLon;
-        console.log("Fetching routes from:", startLat, startLng, "to:", lat, lon);
+        // console.log("========== ROUTE DEBUG ==========");
+        // console.log("START LOCATION:");
+        // console.log("Latitude:", startLat);
+        // console.log("Longitude:", startLng);
+
+        // console.log("END LOCATION:");
+        // console.log("Latitude:", lat);
+        // console.log("Longitude:", lon);
+
+        // console.log("DESTINATION PLACE:", place?.title);
+
+        // console.log("MODE:", currentMode);
+        // console.log("=================================");
+        // console.log("Fetching routes from:", startLat, startLng, "to:", lat, lon);
 
         const payload = {
         start_lat: startLat,
@@ -642,6 +882,9 @@ function generateStars(rating, reviews) {
             return res.json();
         })
         .then(data => {
+            // console.log("========== VALHALLA ROUTE RESPONSE ==========");
+            // console.log(JSON.stringify(data, null, 2));
+            // console.log("==============================================");
             const routes = data.routes;
             if (!routes.length) {
                 toastr.info("No routes found.");
@@ -720,9 +963,68 @@ function generateStars(rating, reviews) {
                         </div>
                         <span class="material-symbols-outlined">swap_vert</span>
                     </div>
+                    
+                    <div class="mt-4 p-3 rounded-lg border border-gray-300 bg-gray-50">
+
+                        <p class="font-semibold text-sm mb-2">
+                            Route Debug Information
+                        </p>
+
+                        <div class="flex flex-col gap-1 text-xs">
+
+                            <div>
+                                <strong>Start:</strong>
+                                ${startLat.toFixed(6)}, ${startLng.toFixed(6)}
+                            </div>
+
+                            <div>
+                                <strong>End:</strong>
+                                ${lat.toFixed(6)}, ${lon.toFixed(6)}
+                            </div>
+
+                            <div>
+                                <strong>Destination:</strong>
+                                ${place?.title || "Unknown"}
+                            </div>
+
+                            <div>
+                                <strong>Mode:</strong>
+                                ${currentMode}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-3 p-3 rounded-lg border border-gray-300">
+
+                        <p class="font-semibold text-sm mb-2">
+                            Route Summary
+                        </p>
+
+                        <div class="flex justify-between">
+
+                            <div>
+                                <p class="text-xs text-gray-500">Total Distance</p>
+                                <p class="font-semibold">
+                                    ${routes[0].distance.toFixed(2)} km
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500">Total Time</p>
+                                <p class="font-semibold">
+                                    ${Math.ceil(routes[0].duration / 60)} min
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
 
                     <div class="flex gap-2 items-center justify-center py-5">
-                        <span class="material-symbols-outlined !text-lg">share</span>Share directions
+                        <span class="material-symbols-outlined !text-lg">share</span>
+                        Share directions
                     </div>
 
                     <div class="flex flex-col gap-4 route-steps">
@@ -822,8 +1124,13 @@ function generateStars(rating, reviews) {
                 <a href="tel:${place.phone_number}" title="Call" class="flex flex-col gap-2 text-xs cursor-pointer">
                     <span class='material-symbols-outlined material-filled !text-xl !font-semibold'>call</span><span>Call</span>
                     </a>
-                <button class="flex flex-col gap-2 text-xs cursor-pointer" data-name="${encodeURIComponent(place.title)}">
-                    <span class='material-symbols-outlined material-filled !text-xl !font-semibold'>share</span><span>Share</span>
+                <button
+                    class="place-share-btn flex flex-col gap-2 text-xs cursor-pointer"
+                >
+                    <span class='material-symbols-outlined material-filled !text-xl !font-semibold'>
+                        share
+                    </span>
+                    <span>Share</span>
                 </button>
                 </div>
             </div>
@@ -835,7 +1142,34 @@ function generateStars(rating, reviews) {
             });
 
             $item.on("click", function () {
-                showOverview(place);
+
+            // Save to search history
+            fetch("search_history/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify({
+                    mongo_id: place.mongo_id,
+                    type: place.type
+                })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Failed to save search history");
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("Search history:", data.message);
+            })
+            .catch(err => {
+                console.error("Searching History error:", err);
+            });
+
+            // Open the overview popup
+            showOverview(place);
         });
 
         return $item;
@@ -1061,7 +1395,108 @@ function generateStars(rating, reviews) {
         }, 300); // adjust debounce delay as needed
     });
 
+    // ==========================================
+    // LIST VIEW SEARCH
+    // ==========================================
 
+    const $listSearchBox = $(".listview input[type='text']");
+
+    let listSearchAbortController = null;
+    let listSearchDebounceTimer = null;
+
+    $listSearchBox.on("input", function () {
+
+        clearTimeout(listSearchDebounceTimer);
+
+        const query = $(this).val().trim().toLowerCase();
+
+        if (!query) {
+            // If search is cleared, show the currently loaded places again
+            if (allFetchedPlaces.length) {
+                renderListView(allFetchedPlaces);
+            }
+            return;
+        }
+
+        listSearchDebounceTimer = setTimeout(() => {
+
+            // Cancel previous request
+            if (listSearchAbortController) {
+                listSearchAbortController.abort();
+            }
+
+            listSearchAbortController = new AbortController();
+
+            fetch("search/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                signal: listSearchAbortController.signal,
+                body: JSON.stringify({
+                    q: query,
+                    lat: currentLat,
+                    lng: currentLon
+                })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Search request failed");
+                }
+                return res.json();
+            })
+            .then(data => {
+
+                const matches = data.results || [];
+
+                if (!matches.length) {
+                    $(".cards").empty();
+                    $("#pagination").html("");
+                    $(".placeholder")
+                        .removeClass("hidden")
+                        .text("No results found.");
+                    return;
+                }
+
+                $(".placeholder").addClass("hidden");
+
+                // Convert search API format to list-card format
+                const places = matches.map(place => ({
+                    mongo_id: place.mongo_id,
+                    title: place.title,
+                    type: place.type,
+                    lat: place.latitude,
+                    lon: place.longitude,
+                    latitude: place.latitude,
+                    longitude: place.longitude,
+                    address: place.address,
+                    phone: place.phone_number,
+                    phone_number: place.phone_number,
+                    email: place.email || "",
+                    rating: place.rating || 0,
+                    reviews: place.reviews || 0,
+                    website: place.website || "",
+                    tags: place.tags || {}
+                }));
+
+                allFetchedPlaces = places;
+
+                renderListView(places);
+            })
+            .catch(err => {
+
+                if (err.name === "AbortError") {
+                    return;
+                }
+
+                console.error("List search error:", err);
+
+                toastr.error("Failed to fetch search results.");
+            });
+
+        }, 300);
+    });
     // Clear search input and hide suggestions on close icon click    
     $closeIcon.on("click", function () {
         $searchBox.val("").trigger("input");
@@ -1207,47 +1642,172 @@ $(".bookmark-icon").on("click", function (e) {
     });
 });
 
-// Fetch and display recent search history on click.
-$(".history-icon").on("click", function (e) {
-    e.stopPropagation();
-    fetch("search_history/", {
-        method: "GET",
-        headers: { "X-CSRFToken": getCookie("csrftoken") }
-    })
-    .then(res => res.json())
-    .then(data => {
-        const history = data.clicked_results || [];
-        const places = history.map(p => ({
-            mongo_id: p.mongo_id,
-            title: p.title,
-            lat: p.latitude,
-            lon: p.longitude,
-            address: p.address,
-            phone: p.phone_number,
-            reviews: p.reviews || 0,
-            rating: p.rating || 0,
-            type: p.type,
-            isHistory: true
-        }));
+// ==========================================
+// RECENT SEARCH HISTORY
+// Works for BOTH Map View and List View
+// ==========================================
 
-        // Store it globally
-        searchHistory = places;
-        allFetchedPlaces = [...places];        
-        const view = $(this).data("view") || "map";
-        if (view === "list") {
-            renderListView(places); 
-        }
-        else {
-            showFilteredSuggestions("Recent Locations", place =>
-                places.find(p => p.lat === place.lat && p.lon === place.lon)
+$(document)
+    .off("click.recentHistory", ".history-icon")
+    .on("click.recentHistory", ".history-icon", function (e) {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const $button = $(this);
+
+        // Map button normally has no data-view,
+        // List button has data-view="list"
+        const view = String($button.data("view") || "map").toLowerCase();
+
+        console.log("========== RECENT HISTORY ==========");
+        console.log("View:", view);
+        console.log("Button:", this);
+        console.log("====================================");
+
+        fetch("search_history/", {
+            method: "GET",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(
+                    `History request failed: ${res.status}`
+                );
+            }
+
+            return res.json();
+        })
+        .then(data => {
+
+            console.log("Recent history response:", data);
+
+            const history = data.clicked_results || [];
+
+            const places = history.map(p => ({
+                mongo_id: p.mongo_id,
+                title: p.title,
+
+                // Keep both formats because different
+                // functions use different property names
+                lat: Number(p.latitude),
+                lon: Number(p.longitude),
+
+                latitude: Number(p.latitude),
+                longitude: Number(p.longitude),
+
+                address: p.address || "",
+                phone: p.phone_number || "",
+
+                phone_number: p.phone_number || "",
+
+                reviews: Number(p.reviews || 0),
+                rating: Number(p.rating || 0),
+
+                type: p.type || "",
+                isHistory: true
+            }));
+
+            // Store globally
+            searchHistory = places;
+            allFetchedPlaces = [...places];
+
+            console.log("History places:", places);
+
+            // ==========================================
+            // LIST VIEW
+            // ==========================================
+
+            if (view === "list") {
+
+                // Highlight Recent button
+                $(".list-search-btn, .list-saved-btn")
+                    .removeAttr("style");
+
+                $button.css({
+                    "background-color": bgColor,
+                    "color": "white"
+                });
+
+                $(".placeholder").addClass("hidden");
+
+                if (!places.length) {
+
+                    $(".cards").empty();
+                    $("#pagination").html("");
+
+                    $(".placeholder")
+                        .removeClass("hidden")
+                        .text("No recent searches found.");
+
+                    return;
+                }
+
+                renderListView(places);
+
+                return;
+            }
+
+            // ==========================================
+            // MAP VIEW
+            // ==========================================
+
+            if (!places.length) {
+
+                $suggestionBox
+                    .html(`
+                        <div class="p-4 text-center text-gray-500">
+                            No recent searches found.
+                        </div>
+                    `)
+                    .show();
+
+                return;
+            }
+
+            // Make sure map search UI is visible
+            $(".map-search").css(
+                "background-color",
+                bgColor
             );
-        }
-    })
-    .catch(err => {
-        console.error("Error fetching history:", err);
-        toastr.error("Could not fetch recent searches.");
+
+            $bookmarkIcon.addClass("!hidden");
+            $historyIcon.addClass("!hidden");
+            $closeIcon.removeClass("!hidden");
+
+            $(".map-search,.search,.close-icon")
+                .addClass("text-white");
+
+            $(".map-search")
+                .addClass("placeholder:text-white");
+
+            // Render recent locations in map suggestion panel
+            showFilteredSuggestions(
+                "Recent Locations",
+                function (place) {
+                    return places.find(
+                        p =>
+                            Number(p.lat) === Number(place.lat) &&
+                            Number(p.lon) === Number(place.lon)
+                    );
+                }
+            );
+
+        })
+        .catch(err => {
+
+            console.error(
+                "Error fetching recent history:",
+                err
+            );
+
+            toastr.error(
+                "Could not fetch recent searches."
+            );
+        });
     });
-});
 
     // Handle bookmark toggle: save location on click and update UI with feedback.
     $(document).on("click", ".bookmark-fill", function () {
@@ -1269,7 +1829,7 @@ $(".history-icon").on("click", function (e) {
                 $btn.html("bookmark");
                 $btn.addClass(`material-filled text-${selectedColor}`);
                 bookmarkedPlaceIds.add(mongo_id);
-                toastr.error("Saved to bookmarks!");
+                toastr.success("Saved to bookmarks!");
             } else {
                 bookmarkedPlaceIds.delete(mongo_id);
                 toastr.info("Already bookmarked.");
