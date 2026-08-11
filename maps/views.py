@@ -186,6 +186,13 @@ def haversine(lat1, lon1, lat2, lon2):
     a = sin(d_lat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(d_lon/2)**2
     return R * 2 * atan2(sqrt(a), sqrt(1-a))
 
+SEARCH_COLLECTIONS = {
+    "doctor": settings.MONGO_COLLECTIONS["doctor"],
+    "hospital": settings.MONGO_COLLECTIONS["hospital"],
+    "lab": settings.MONGO_COLLECTIONS["lab"],
+    "pharmacy": settings.MONGO_COLLECTIONS["pharmacy"],
+}
+
 @dashboard_login_required
 @require_POST
 def search_by_name(request):
@@ -203,7 +210,7 @@ def search_by_name(request):
     results = []
     places = []
 
-    for type_key, collection in settings.MONGO_COLLECTIONS.items():
+    for type_key, collection in SEARCH_COLLECTIONS.items():
         matches = collection.find({
             "title": {"$regex": query, "$options": "i"},
             "location": {

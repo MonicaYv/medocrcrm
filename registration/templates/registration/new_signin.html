@@ -1,241 +1,8 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Register as Pharmacy{% endblock %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sign in · Verify OTP</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  :root{
-    --navy:#0f2a4a;
-    --navy-dark:#0a1f3a;
-    --blue-panel-1:#bfe0f2;
-    --blue-panel-2:#8fc7e8;
-    --teal:#1f8fae;
-    --ink:#16223a;
-    --muted:#7c8aa0;
-    --line:#e6eaf0;
-  }
-
-  /* ---- outer stage ---- */
-  .stage{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:32px 16px;
-  }
-
-  /* ---- card ---- */
-  .card{
-    width:100%;
-    max-width:900px;
-    background:#fff;
-    border-radius:14px;
-    overflow:hidden;
-    box-shadow:0 20px 60px -12px rgba(15,42,74,.35), 0 0 0 1px rgba(15,42,74,.04);
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    position:relative;
-    min-height:520px;
-  }
-  @media (max-width:720px){
-    .card{grid-template-columns:1fr; max-width:420px;}
-    .illus-panel{display:none;}
-  }
-
-  /* ---- illustration panel ---- */
-  .illus-panel{
-    position:relative;
-    background:linear-gradient(160deg, var(--blue-panel-1), var(--blue-panel-2));
-    overflow:hidden;
-  }
-  .illus-panel::before{
-    content:"";
-    position:absolute; inset:0;
-    background:
-      radial-gradient(circle at 20% 15%, rgba(255,255,255,.35), transparent 40%),
-      radial-gradient(circle at 85% 90%, rgba(255,255,255,.25), transparent 45%);
-  }
-  .brand-mark{
-    position:absolute; top:20px; left:20px;
-    width:34px; height:34px;
-    display:flex; align-items:center; justify-content:center;
-    z-index:5;
-  }
-  .badge-mark{
-    position:absolute; top:14px; right:14px;
-    width:46px; height:46px;
-    border-radius:999px;
-    background:#fff;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 14px rgba(0,0,0,.18);
-    z-index:5;
-    border:2px solid #fff;
-    font-size:8px;
-    font-weight:800;
-    letter-spacing:.3px;
-    color:var(--navy);
-    text-align:center;
-    line-height:1.05;
-  }
-  .dots{
-    position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
-    display:flex; gap:6px; z-index:5;
-  }
-  .dots span{width:6px;height:6px;border-radius:999px;background:rgba(15,42,74,.25);}
-  .dots span.active{background:var(--navy); width:16px; border-radius:999px;}
-
-  .illus-scene{
-    position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-  }
-
-  /* ---- form panel ---- */
-  .form-panel{
-    padding:44px 40px;
-    display:flex;
-    flex-direction:column;
-    position:relative;
-  }
-  @media (max-width:720px){
-    .form-panel{padding:40px 24px;}
-  }
-
-  .close-btn{
-    position:absolute; top:18px; right:18px;
-    width:30px; height:30px;
-    display:flex; align-items:center; justify-content:center;
-    border-radius:999px;
-    color:#9aa5b5;
-    transition:.15s;
-  }
-  .close-btn:hover{background:#f2f4f7; color:var(--ink);}
-
-  h1.title{
-    font-size:26px;
-    font-weight:700;
-    color:var(--ink);
-    letter-spacing:-.01em;
-  }
-  .subtitle{color:var(--muted); font-size:14px; margin-top:6px;}
-
-  .input-shell{
-    display:flex;
-    border:1.5px solid var(--line);
-    border-radius:8px;
-    overflow:hidden;
-    transition:.15s;
-  }
-  .input-shell:focus-within{
-    border-color: var(--navy);
-    box-shadow:0 0 0 3px rgba(15,42,74,.08);
-  }
-  .cc-select{
-    border:none; outline:none;
-    background:#fff;
-    padding:0 10px;
-    font-size:14px;
-    color:var(--ink);
-    border-right:1.5px solid var(--line);
-  }
-  .phone-input{
-    border:none; outline:none; flex:1;
-    padding:12px 14px;
-    font-size:14px;
-    color:var(--ink);
-  }
-
-  .btn-primary{
-    background:var(--navy);
-    color:#fff;
-    font-weight:600;
-    font-size:14px;
-    border-radius:8px;
-    padding:12px 16px;
-    transition:.15s;
-    border:none;
-  }
-  .btn-primary:hover{background:var(--navy-dark);}
-  .btn-primary:disabled{opacity:.45; cursor:not-allowed;}
-
-  .divider{
-    display:flex; align-items:center; gap:12px;
-    color:#b7c0cd; font-size:12px; margin:18px 0;
-  }
-  .divider::before, .divider::after{
-    content:""; flex:1; height:1px; background:var(--line);
-  }
-
-  .btn-google{
-    border:1.5px solid var(--line);
-    border-radius:8px;
-    padding:11px 16px;
-    font-size:14px;
-    font-weight:500;
-    color:var(--ink);
-    display:flex; align-items:center; justify-content:center; gap:10px;
-    transition:.15s;
-  }
-  .btn-google:hover{background:#f8fafc; border-color:#cfd7e2;}
-
-  .service-tile{
-    border:1.5px solid var(--line);
-    border-radius:10px;
-    padding:12px 6px 10px;
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-    cursor:pointer;
-    transition:.15s;
-    background:#fff;
-  }
-  .service-tile:hover{border-color:#c7d2e0;}
-  .service-tile.active{
-    border-color:var(--navy);
-    background:#eef3fa;
-  }
-  .service-tile .icon-wrap{
-    width:34px; height:34px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .service-tile span{font-size:11.5px; color:var(--ink); font-weight:500;}
-
-  .footer-link{
-    text-align:center; font-size:13px; color:var(--muted);
-  }
-  .footer-link a{color:var(--navy); font-weight:600; text-decoration:none;}
-  .footer-link a:hover{text-decoration:underline;}
-
-  /* OTP */
-  .otp-box{
-    width:52px; height:56px;
-    border:1.5px solid var(--line);
-    border-radius:8px;
-    text-align:center;
-    font-size:20px;
-    font-weight:600;
-    color:var(--ink);
-    outline:none;
-    transition:.15s;
-  }
-  .otp-box:focus{
-    border-color:var(--navy);
-    box-shadow:0 0 0 3px rgba(15,42,74,.08);
-  }
-  .otp-box.filled{border-color:var(--teal); background:#f4fbfd;}
-
-  .link-edit{color:#d64545; font-weight:600; font-size:13px; text-decoration:none;}
-  .link-teal{color:var(--teal); font-weight:600; text-decoration:none;}
-  .link-teal:hover{text-decoration:underline;}
-
-  .screen{display:none;}
-  .screen.active{display:flex; flex-direction:column; height:100%;}
-
-  .fade-in{animation:fadeIn .25s ease;}
-  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
-</style>
-</head>
-<body>
+{% block content %}
 
 <div class="stage">
   <div class="card">
@@ -276,19 +43,25 @@
           <p class="subtitle">Enter your mobile number for an OTP.</p>
         </div>
 
-        <div class="mt-6">
-          <div class="input-shell">
-            <select class="cc-select">
-              <option>+91</option>
-              <option>+1</option>
-              <option>+44</option>
-              <option>+65</option>
-            </select>
-            <input id="phoneInput" class="phone-input" type="tel" maxlength="10" placeholder="Phone no." />
-          </div>
-        </div>
+        <form id="loginForm"
+          data-check-url="{% url 'login_auth' %}"
+          data-login-url="{% url 'verify_login_otp' %}">
 
-        <button id="continueBtn" class="btn-primary w-full mt-4" disabled>Continue</button>
+          {% csrf_token %}
+          <div class="mt-6">
+            <div class="input-shell">
+              <select id="countryCode" name="phone_country_code" class="cc-select">
+                  <option value="+91">+91</option>
+                  <option value="+1">+1</option>
+                  <option value="+44">+44</option>
+              </select>
+              <input id="phoneInput" name="phone_number" class="phone-input" type="tel" maxlength="10" placeholder="Phone no." />
+            </div>
+          </div>
+
+          <button type="button" id="continueBtn" class="btn-primary w-full mt-4" disabled>Continue</button>
+        </form>
+
 
         <div class="divider">or</div>
 
@@ -347,6 +120,8 @@
           <input class="otp-box" maxlength="1" inputmode="numeric" />
           <input class="otp-box" maxlength="1" inputmode="numeric" />
           <input class="otp-box" maxlength="1" inputmode="numeric" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" />
         </div>
 
         <div class="flex items-center justify-between mt-3 text-sm">
@@ -368,128 +143,8 @@
   </div>
 </div>
 
-<script>
-  const phoneInput = document.getElementById('phoneInput');
-  const continueBtn = document.getElementById('continueBtn');
-  const screenSignIn = document.getElementById('screenSignIn');
-  const screenOtp = document.getElementById('screenOtp');
-  const signinScene = document.getElementById('signinScene');
-  const otpScene = document.getElementById('otpScene');
-  const dot0 = document.getElementById('dot0');
-  const dot1 = document.getElementById('dot1');
-  const otpPhoneDisplay = document.getElementById('otpPhoneDisplay');
-  const editNumberBtn = document.getElementById('editNumberBtn');
+{% endblock %}
 
-  // enable Continue only with 10 digit number
-  phoneInput.addEventListener('input', () => {
-    phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 10);
-    continueBtn.disabled = phoneInput.value.length !== 10;
-  });
-
-  // service tiles
-  document.querySelectorAll('.service-tile').forEach(tile => {
-    tile.addEventListener('click', () => {
-      document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('active'));
-      tile.classList.add('active');
-    });
-  });
-
-  function maskNumber(num){
-    if(num.length < 5) return num + '*****';
-    return num.slice(0,5) + '*****';
-  }
-
-  function goToOtp(){
-    screenSignIn.classList.remove('active');
-    screenOtp.classList.add('active');
-    screenOtp.classList.add('fade-in');
-    signinScene.style.display = 'none';
-    otpScene.style.display = 'flex';
-    dot0.classList.remove('active');
-    dot1.classList.add('active');
-    otpPhoneDisplay.textContent = maskNumber(phoneInput.value || '81022');
-    startTimer();
-    setTimeout(() => document.querySelector('.otp-box').focus(), 100);
-  }
-
-  function goToSignIn(){
-    screenOtp.classList.remove('active');
-    screenSignIn.classList.add('active');
-    screenSignIn.classList.add('fade-in');
-    otpScene.style.display = 'none';
-    signinScene.style.display = 'flex';
-    dot1.classList.remove('active');
-    dot0.classList.add('active');
-  }
-
-  continueBtn.addEventListener('click', () => {
-    if(!continueBtn.disabled) goToOtp();
-  });
-  editNumberBtn.addEventListener('click', (e) => { e.preventDefault(); goToSignIn(); });
-
-  // OTP boxes: auto advance / backspace / paste
-  const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
-  otpBoxes.forEach((box, i) => {
-    box.addEventListener('input', () => {
-      box.value = box.value.replace(/\D/g, '').slice(0,1);
-      box.classList.toggle('filled', box.value.length === 1);
-      if(box.value && otpBoxes[i+1]) otpBoxes[i+1].focus();
-    });
-    box.addEventListener('keydown', (e) => {
-      if(e.key === 'Backspace' && !box.value && otpBoxes[i-1]){
-        otpBoxes[i-1].focus();
-      }
-    });
-    box.addEventListener('paste', (e) => {
-      e.preventDefault();
-      const digits = (e.clipboardData.getData('text') || '').replace(/\D/g,'').slice(0,4).split('');
-      digits.forEach((d, idx) => {
-        if(otpBoxes[idx]){
-          otpBoxes[idx].value = d;
-          otpBoxes[idx].classList.add('filled');
-        }
-      });
-      if(otpBoxes[digits.length]) otpBoxes[digits.length].focus();
-    });
-  });
-
-  // resend timer
-  let timerInterval;
-  function startTimer(){
-    clearInterval(timerInterval);
-    let seconds = 34;
-    const timerEl = document.getElementById('timer');
-    const resendLink = document.getElementById('resendLink');
-    resendLink.classList.add('hidden');
-    timerEl.parentElement.classList.remove('hidden');
-    timerEl.textContent = '00:' + String(seconds).padStart(2,'0');
-    timerInterval = setInterval(() => {
-      seconds--;
-      if(seconds <= 0){
-        clearInterval(timerInterval);
-        timerEl.parentElement.classList.add('hidden');
-        resendLink.classList.remove('hidden');
-      } else {
-        timerEl.textContent = '00:' + String(seconds).padStart(2,'0');
-      }
-    }, 1000);
-  }
-
-  document.getElementById('resendLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    startTimer();
-    otpBoxes.forEach(b => { b.value=''; b.classList.remove('filled'); });
-    otpBoxes[0].focus();
-  });
-
-  document.getElementById('doneBtn').addEventListener('click', () => {
-    const code = otpBoxes.map(b => b.value).join('');
-    if(code.length === 4){
-      alert('OTP verified: ' + code);
-    } else {
-      otpBoxes.find(b => !b.value)?.focus();
-    }
-  });
-</script>
-</body>
-</html>
+{% block extra_js %}
+<script src="{% static 'js/sign-in.js' %}"></script>
+{% endblock %}
