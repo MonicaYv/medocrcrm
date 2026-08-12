@@ -48,61 +48,51 @@
                     <div class="w-48 bg-slate-100 h-2.5 rounded-full mt-2 relative overflow-hidden">
                         <div class="absolute left-0 top-0 h-full bg-{{ border }} rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
-                    <span class="text-xs text-slate-400 mt-1">0 of 4 steps completed</span>
+                    <span class="text-xs text-slate-400 mt-1">0 of 3 steps completed</span>
                 </div>
             </div>
 
             <!-- Steps Section -->
             <div class="relative py-4">
                 <!-- Connecting Dashed Line (Desktop Only) -->
-                <div class="hidden md:block absolute top-[44px] left-[8%] right-[8%] h-0.5 border-t-2 border-dashed border-slate-200 -z-10"></div>
+                <div class="hidden md:block absolute top-[44px] left-[16.6%] right-[16.6%] h-0.5 border-t-2 border-dashed border-slate-200 -z-10"></div>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 justify-between">
-                    <!-- Step 1: Personal Details -->
+                <div class="grid grid-cols-3 md:grid-cols-3 gap-8 md:gap-4 justify-between">
+                    <!-- Step 1: Hospital Details -->
                     <div class="flex flex-col items-center text-center group">
                         <!-- Step Circle -->
                         <div class="w-16 h-16 rounded-full border-2 border-kyc-icon bg-white text-kyc-icon flex items-center justify-center font-bold text-lg shadow-md transition-all duration-300 transform group-hover:scale-105 relative z-10">
-                            <span class="material-symbols-outlined medium-icon">person</span>
+                            <span class="material-symbols-outlined medium-icon">
+                                {% if user.user_type == 'hospital' %}local_hospital{% elif user.user_type == 'pharmacy' %}local_pharmacy{% else %}storefront{% endif %}
+                            </span>
                             <!-- Badge Number -->
                             <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-{{ border }} text-white font-extrabold text-xs flex items-center justify-center shadow-sm">1</span>
                         </div>
-                        <span class="font-bold text-slate-800 text-sm mt-3">Personal Details</span>
+                        <span class="font-bold text-slate-800 text-sm mt-3">
+                            Hospital Details
+                        </span>
                         <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-kyc-blue text-kyc-icon mt-2">Not Started</span>
                     </div>
 
-                    <!-- Step 2: Identity Verification -->
+                    <!-- Step 2: Personal Details -->
                     <div class="flex flex-col items-center text-center group">
                         <!-- Step Circle -->
                         <div class="w-16 h-16 rounded-full border-2 border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center font-bold text-lg transition-all duration-300 relative z-10">
-                            <span class="material-symbols-outlined medium-icon">lock</span>
+                            <span class="material-symbols-outlined medium-icon">person</span>
                             <!-- Badge Number -->
                             <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-slate-200 text-slate-500 font-extrabold text-xs flex items-center justify-center">2</span>
                         </div>
-                        <span class="font-semibold text-kyc-black text-sm mt-3">Identity Verification</span>
+                        <span class="font-semibold text-kyc-black text-sm mt-3">Personal Details</span>
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 text-slate-500 mt-2">Locked</span>
                     </div>
 
-                    <!-- Step 3: Pharmacy/Business Details -->
+                    <!-- Step 3: Documents -->
                     <div class="flex flex-col items-center text-center group">
                         <!-- Step Circle -->
                         <div class="w-16 h-16 rounded-full border-2 border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center font-bold text-lg transition-all duration-300 relative z-10">
                             <span class="material-symbols-outlined medium-icon">lock</span>
                             <!-- Badge Number -->
                             <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-slate-200 text-slate-500 font-extrabold text-xs flex items-center justify-center">3</span>
-                        </div>
-                        <span class="font-semibold text-kyc-black text-sm mt-3">
-                            Hospital Details
-                        </span>
-                        <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 text-slate-500 mt-2">Locked</span>
-                    </div>
-
-                    <!-- Step 4: Documents -->
-                    <div class="flex flex-col items-center text-center group">
-                        <!-- Step Circle -->
-                        <div class="w-16 h-16 rounded-full border-2 border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center font-bold text-lg transition-all duration-300 relative z-10">
-                            <span class="material-symbols-outlined medium-icon">lock</span>
-                            <!-- Badge Number -->
-                            <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-slate-200 text-slate-500 font-extrabold text-xs flex items-center justify-center">4</span>
                         </div>
                         <span class="font-semibold text-kyc-black text-sm mt-3">Documents</span>
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 text-slate-500 mt-2">Locked</span>
@@ -115,7 +105,7 @@
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined medium-icon text-kyc-icon shrink-0">info</span>
                     <p class="text-sm font-semibold text-slate-700">
-                        Complete <span class="text-kyc-icon font-bold">Personal Details</span> to begin verification.
+                        Complete <span class="text-kyc-icon font-bold">{% if user.user_type == 'pharmacy' %}Pharmacy Details{% elif user.user_type == 'doctor' %}Doctor Details{% elif user.user_type == 'lab' %}Lab Details{% elif user.user_type == 'hospital' %}Hospital Details{% else %}Business Details{% endif %}</span> to begin verification.
                     </p>
                 </div>
                 

@@ -1,7 +1,7 @@
 {% extends 'dashboard/layout.html' %}
 {% load static %}
 
-{% block title %}Profile Completion Center{% endblock %}
+{% block title %}Pharmacy Profile Verification{% endblock %}
 
 {% block header %}
 <!-- Custom Simplified KYC Navbar -->
@@ -69,6 +69,7 @@
 
 {% block extra_css %}
 <style>
+
     /* Stepper transition animations */
     .step-fade-enter {
         opacity: 0;
@@ -95,7 +96,7 @@
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div>
-            <h1 class="text-xl md:text-2xl font-extrabold text-blue-charcoal tracking-tight">Profile Completion Center</h1>
+            <h1 class="text-xl md:text-2xl font-extrabold text-blue-charcoal tracking-tight">Pharmacy Profile Verification</h1>
             <p class="text-kyc-light-gray text-xs font-normal mt-1">Complete your account setup to unlock features.</p>
         </div>
         
@@ -125,11 +126,11 @@
                 <!-- Circle indicator -->
                 <div class="step-kyc-circle w-12 h-12 rounded-full border-2 border-kyc-icon bg-kyc-blue text-kyc-icon flex items-center justify-center font-bold text-lg shadow-sm transition-all duration-300 relative">
                     <span class="step-kyc-icon material-symbols-outlined">
-                        {% if user.user_type == 'hospital' %}local_hospital{% elif user.user_type == 'pharmacy' %}local_pharmacy{% else %}storefront{% endif %}
+                        {% if user.user_type == 'hospital' %}local_pharmacy{% elif user.user_type == 'pharmacy' %}local_pharmacy{% else %}storefront{% endif %}
                     </span>
                 </div>
                 <span class="step-label font-bold text-blue-charcoal text-sm mt-3 transition-colors">
-                   Hospital Details
+                   Pharmacy Details
                 </span>
             </div>
 
@@ -157,169 +158,164 @@
     <div class="bg-white p-2">
         <form id="profile-verification-form" method="POST" enctype="multipart/form-data">
             
-            <!-- STEP 1 PANEL -->
+            <!-- STEP 1 PANEL (Pharmacy Details) -->
             <div id="step-panel-1" class="step-panel flex flex-col gap-6">
                 <div>
                     <span class="text-xs font-bold text-kyc-icon uppercase tracking-wider">Step 1 of 3</span>
-                    <h3 class="text-lg font-bold text-blue-charcoal mt-2">
-                        Hospital Details
-                    </h3>
-                    <p class="text-kyc-light-gray text-xs mt-0.5">Tell us more about your business to help us serve you better.</p>
+                    <h3 class="text-lg font-bold text-blue-charcoal mt-2">Pharmacy Details</h3>
+                    <p class="text-kyc-light-gray text-xs mt-0.5">Provide your pharmacy company credentials and operational details.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Business/Hospital Name -->
+                    <!-- Company Name -->
                     <div>
-                        <input type="text" id="facility_name" name="facility_name" value="{{ user_display_name }}" 
+                        <input type="text" id="company_name" name="company_name" 
                                class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
-                               placeholder="{% if user.user_type == 'pharmacy' %}Pharmacy Name{% elif user.user_type == 'doctor' %}Clinic Name{% elif user.user_type == 'lab' %}Lab Name{% elif user.user_type == 'hospital' %}Hospital Name{% else %}Company/Business Name{% endif %}">
+                               placeholder="Company/Pharmacy Name" required>
                     </div>
 
-                    <!-- Email Address -->
-                    <div>
-                        <input type="email" id="facility_email" name="facility_email" value="{{ user.email }}" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Email Address">
-                    </div>
-
-                    <!-- Country Code & Phone Number -->
-                    <div>
-                        <div class="flex gap-3">
-                            <!-- Custom Dropdown -->
-                            <div class="relative shrink-0 w-24">
-                                <button type="button" id="facility-country-dropdown-btn" class="w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-3 text-slate-700 text-sm focus:outline-none transition-all">
-                                    <span id="facility-selected-code">+91</span>
-                                    <span class="material-symbols-outlined text-lg">expand_more</span>
-                                </button>
-                                <input type="hidden" id="facility_phone_country_code" name="facility_phone_country_code" value="+91">
-                                <!-- Dropdown List -->
-                                <div id="facility-country-dropdown-list" class="hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
-                                    <button type="button" class="facility-country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-code="+91">+91 (IN)</button>
-                                    <button type="button" class="facility-country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-code="+1">+1 (US)</button>
-                                    <button type="button" class="facility-country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-code="+44">+44 (UK)</button>
-                                    <button type="button" class="facility-country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-code="+61">+61 (AU)</button>
-                                    <button type="button" class="facility-country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800" data-code="+86">+86 (CN)</button>
-                                </div>
-                            </div>
-                            <!-- Phone Input -->
-                            <input type="tel" id="facility_phone" name="facility_phone" value="{{ user.phone_number|default:'' }}" 
-                                   class="flex-1 h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Phone no.">
+                    <!-- Pharmacy Type Custom Dropdown -->
+                    <div class="relative custom-dropdown-container">
+                        <button type="button" class="custom-dropdown-btn w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-4 text-kyc-light-gray text-sm focus:outline-none transition-all">
+                            <span class="selected-value-text">Pharmacy Type</span>
+                            <span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-200">expand_more</span>
+                        </button>
+                        <input type="hidden" name="pharmacy_types" class="custom-dropdown-input" required>
+                        <!-- Dropdown List -->
+                        <div class="custom-dropdown-list hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Retail Pharmacy">Retail Pharmacy</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Hospital Pharmacy">Hospital Pharmacy</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Online Pharmacy">Online/E-Pharmacy</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800" data-value="Clinical Pharmacy">Clinical Pharmacy</button>
                         </div>
                     </div>
 
-                    <!-- OTP verification -->
-                    <div class="flex flex-col gap-1.5 justify-end">
-                        <div class="flex gap-3">
-                            <button type="button" class="h-12 px-6 rounded-md bg-kyc-blue hover:bg-blue-200 text-white font-semibold text-sm transition-all focus:outline-none shrink-0" style="background-color: var(--color-primary-color-opacity); color: var(--color-primary-color);">
-                                Send Phone OTP
-                            </button>
-                            <div class="flex-1 relative flex items-center">
-                                <input type="text" id="facility_otp" name="facility_otp" value="435423" 
-                                       class="w-full h-12 rounded-md border border-dark-gray pl-4 pr-24 focus:outline-none transition-all text-sm tracking-wide text-blue-charcoal placeholder:text-kyc-light-gray font-semibold" placeholder="Enter OTP">
-                                <div class="absolute right-3 flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md border border-green-200">
-                                    <span class="material-symbols-outlined text-sm font-black">check</span>
-                                    <span>Verified</span>
-                                </div>
-                            </div>
+                    <!-- Services Custom Dropdown -->
+                    <div class="relative custom-dropdown-container">
+                        <button type="button" class="custom-dropdown-btn w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-4 text-kyc-light-gray text-sm focus:outline-none transition-all">
+                            <span class="selected-value-text">Services</span>
+                            <span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-200">expand_more</span>
+                        </button>
+                        <input type="hidden" name="services" class="custom-dropdown-input" required>
+                        <!-- Dropdown List -->
+                        <div class="custom-dropdown-list hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Prescription Fulfillment">Prescription Fulfillment</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Home Delivery">Home Delivery Services</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Vaccinations">Vaccinations & Immunizations</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800" data-value="Health Consultations">Health Consultations</button>
                         </div>
-                        <span class="text-xs text-slate-400 mt-1 pl-1">Didn't get the code? <a href="#" class="text-{{ border }} hover:underline">Resend</a></span>
                     </div>
 
-                    <!-- Type of Hospital -->
-                    <div class="relative">
-                        <select id="facility_type" name="facility_type" 
-                                class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm appearance-none bg-white pr-10">
-                            <option value="" disabled selected>Type of Hospital</option>
-                            <option value="general">General Medicine</option>
-                            <option value="cardio">Cardiology</option>
-                            <option value="ortho">Orthopedics</option>
-                            <option value="pediatric">Pediatrics</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-3 pointer-events-none text-slate-400">expand_more</span>
+                    <!-- Pharmacy Timing Custom Dropdown -->
+                    <div class="relative custom-dropdown-container">
+                        <button type="button" class="custom-dropdown-btn w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-4 text-kyc-light-gray text-sm focus:outline-none transition-all">
+                            <span class="selected-value-text">Pharmacy Timing</span>
+                            <span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-200">expand_more</span>
+                        </button>
+                        <input type="hidden" name="pharmacy_timing" class="custom-dropdown-input" required>
+                        <!-- Dropdown List -->
+                        <div class="custom-dropdown-list hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="09:00 AM - 09:00 PM">09:00 AM - 09:00 PM</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="08:00 AM - 10:00 PM">08:00 AM - 10:00 PM</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="09:00 AM - 11:00 PM">09:00 AM - 11:00 PM</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800" data-value="Open 24 Hours">Open 24 Hours</button>
+                        </div>
                     </div>
 
-                    <!-- Services -->
-                    <div class="relative">
-                        <select id="facility_services" name="facility_services" 
-                                class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm appearance-none bg-white pr-10">
-                            <option value="" disabled selected>Services</option>
-                            <option value="emergency">Emergency 24/7</option>
-                            <option value="icu">ICU</option>
-                            <option value="ot">Operation Theater</option>
-                            <option value="opd">OPD Consultation</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-3 pointer-events-none text-slate-400">expand_more</span>
-                    </div>
-
-                    <!-- Website URL (takes full width) -->
+                    <!-- Website -->
                     <div class="md:col-span-2">
-                        <input type="url" id="website_url" name="website_url" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Website URL">
+                        <input type="text" id="website" name="website" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Website URL (e.g. www.pharmacy.com)">
                     </div>
 
-                    <!-- Working Hours (takes full width) -->
-                    <div class="md:col-span-2 relative">
-                        <select id="working_hours" name="working_hours" 
-                                class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm appearance-none bg-white pr-10">
-                            <option value="" disabled selected>Working Hours</option>
-                            <option value="24">Open 24 Hours</option>
-                            <option value="12">9:00 AM - 9:00 PM</option>
-                            <option value="8">10:00 AM - 6:00 PM</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-3 pointer-events-none text-slate-400">expand_more</span>
-                    </div>
-
-                    <!-- Address (takes full width) -->
+                    <!-- Address -->
                     <div class="md:col-span-2">
-                        <input type="text" id="facility_address" name="facility_address" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Address">
+                        <input type="text" id="address" name="address" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Address" required>
                     </div>
 
-                    <!-- City / Town / District -->
+                    <!-- City -->
                     <div>
-                        <input type="text" id="facility_city" name="facility_city" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="City / Town / District">
+                        <input type="text" id="city" name="city" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="City" required>
                     </div>
 
                     <!-- State -->
                     <div>
-                        <input type="text" id="facility_state" name="facility_state" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="State">
+                        <input type="text" id="state" name="state" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="State" required>
                     </div>
 
                     <!-- Country -->
                     <div>
-                        <input type="text" id="facility_country" name="facility_country" value="India" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Country">
+                        <input type="text" id="country" name="country" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Country" required>
                     </div>
 
                     <!-- Pincode -->
                     <div>
-                        <input type="text" id="facility_pincode" name="facility_pincode" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Pincode">
+                        <input type="text" id="pincode" name="pincode" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Pincode" required>
                     </div>
                 </div>
-            </div>
-
-            <!-- STEP 2 PANEL -->
-            <div id="step-panel-2" class="step-panel hidden flex flex-col gap-6">
+            </div><div id="step-panel-2" class="step-panel hidden flex flex-col gap-6">
                 <div>
                     <span class="text-xs font-bold text-kyc-icon uppercase tracking-wider">Step 2 of 3</span>
                     <h3 class="text-lg font-bold text-blue-charcoal mt-2">Personal Details</h3>
-                    <p class="text-kyc-light-gray text-xs mt-0.5">Tell us more about your self to help us serve you better.</p>
+                    <p class="text-kyc-light-gray text-xs mt-0.5">Provide your basic pharmacist/profile details for validation.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Admin Name -->
+                    <!-- First Name -->
                     <div>
-                        <input type="text" placeholder="Admin Name" class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Enter admin name" required>
+                        <input type="text" id="first_name" name="first_name" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="First Name" required>
                     </div>
 
-                    <!-- Email Address -->
+                    <!-- Last Name -->
                     <div>
-                        <input type="email" placeholder="Email Address" class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm"required>
+                        <input type="text" id="last_name" name="last_name" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Last Name" required>
                     </div>
 
-                    <!-- Country Code & Phone Number -->
+                    <!-- Gender Custom Dropdown -->
+                    <div class="relative custom-dropdown-container">
+                        <button type="button" class="custom-dropdown-btn w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-4 text-kyc-light-gray text-sm focus:outline-none transition-all">
+                            <span class="selected-value-text">Select Gender</span>
+                            <span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-200">expand_more</span>
+                        </button>
+                        <input type="hidden" name="gender" class="custom-dropdown-input" required>
+                        <!-- Dropdown List -->
+                        <div class="custom-dropdown-list hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Male">Male</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Female">Female</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800" data-value="Other">Other</button>
+                        </div>
+                    </div>
+
+                    <!-- Age -->
+                    <div>
+                        <input type="number" id="age" name="age" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Age" required>
+                    </div>
+
+                    <!-- Personal Email -->
+                    <div>
+                        <input type="email" id="personal_email" name="personal_email" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Personal Email Address" required>
+                    </div>
+
+                    <!-- Personal Phone Number -->
                     <div>
                         <div class="flex gap-3">
                             <!-- Custom Dropdown -->
@@ -339,7 +335,9 @@
                                 </div>
                             </div>
                             <!-- Phone Input -->
-                            <input type="tel" id="phone" name="phone_number" class="flex-1 h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-slate-800 text-sm placeholder:text-kyc-light-gray" placeholder="Phone no." required>
+                            <input type="tel" id="phone" name="personal_phone_number" 
+                                   class="flex-1 h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-slate-800 text-sm placeholder:text-kyc-light-gray" 
+                                   placeholder="Personal Phone Number" required>
                         </div>
                     </div>
 
@@ -347,7 +345,7 @@
                     <div class="flex flex-col gap-1.5 justify-end">
                         <div class="flex gap-3">
                             <button type="button" class="h-12 px-6 rounded-md bg-kyc-blue hover:bg-blue-200 text-white font-semibold text-sm transition-all focus:outline-none shrink-0" style="background-color: var(--color-primary-color-opacity); color: var(--color-primary-color);">
-                                Send Phone OTP
+                                Send OTP
                             </button>
                             <div class="flex-1 relative flex items-center">
                                 <input type="text" id="otp" name="otp" 
@@ -358,194 +356,200 @@
                                 </div>
                             </div>
                         </div>
-                        <span class="text-xs text-primary-color mt-1 pl-1">Didn't get the code? <a href="#" class="text-blue-charcoal hover:underline">Resend</a></span>
                     </div>
 
-                    <!-- Role -->
+                    <!-- Personal PAN Number -->
                     <div>
-                        <input type="text" id="role" name="role"
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Role">
+                        <input type="text" id="personal_pan_number" name="personal_pan_number" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" 
+                               placeholder="Personal PAN Number" required>
                     </div>
 
                     <!-- Referral Code -->
-                    <div>
-                        <input type="text" id="referral" name="referral_code" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Referral Code">
-                    </div>
-
-                    <!-- City, Town, District -->
-                    <div>
-                        <input type="text" id="city" name="city" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Enter city or district" required>
-                    </div>
-
-                    <!-- State -->
-                    <div>
-                        <input type="text" id="state" name="state" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="State" required>
-                    </div>
-
-                    <!-- Country -->
-                    <div>
-                        <input type="text" id="country" name="country" value="India" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Country" required>
-                    </div>
-
-                    <!-- Pincode -->
-                    <div>
-                        <input type="text" id="pincode" name="pincode" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Country" required>
+                    <div class="md:col-span-2">
+                        <input type="text" id="referral_code" name="referral_code" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" 
+                               placeholder="Referral Code">
                     </div>
                 </div>
-            </div>
-
-            <!-- STEP 3 PANEL -->
-            <div id="step-panel-3" class="step-panel hidden flex flex-col gap-6">
+            </div><div id="step-panel-3" class="step-panel hidden flex flex-col gap-6">
                 <div>
                     <span class="text-xs font-bold text-kyc-icon uppercase tracking-wider">Step 3 of 3</span>
                     <h3 class="text-lg font-bold text-blue-charcoal mt-2">Upload verification Documents</h3>
-                    <p class="text-kyc-light-gray text-xs mt-0.5">Upload required business documents for faster approval and service access.</p>
+                    <p class="text-kyc-light-gray text-xs mt-0.5">Upload required credentials and registration documents for verification.</p>
                 </div>
 
-                <!-- Step 4 Main content (Document rows and rejection) -->
+                <!-- Step 3 Main content (Document rows and rejection) -->
                 <div id="step4-main-content" class="flex flex-col gap-6">
                     <!-- Document rows list -->
                     <div class="flex flex-col">
-                        <!-- Row 1: Hospital License -->
+                        <!-- Row 1: Certificate of Incorporation -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
-                            <div>
-                                <span class="text-sm font-bold text-black">Hospital License Number & Document</span>
-                                <p class="text-[11px] text-medium-gray mt-0.5">MH/C/2022/123456</p>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">Certificate of Incorporation</span>
+                                <input type="text" name="incorporation_number" placeholder="Enter Incorporation No." 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
                             </div>
                             <div class="flex items-center gap-3 self-end sm:self-auto">
-                                <!-- Verification Badge -->
                                 <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
                                     <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
                                     <span>Virus scan</span>
                                 </div>
-                                <!-- File Indicator Box -->
-                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-license">
-                                    Image.png
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-incorporation">
+                                    No file chosen
                                 </div>
-                                <!-- View Button -->
-                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='hospital_license']" data-title="Hospital License Number & Document">
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='incorporation_doc_path']" data-title="Certificate of Incorporation">
                                     <span class="material-symbols-outlined text-lg">visibility</span>
                                 </button>
-                                <!-- Upload Button Wrapper -->
                                 <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
                                     <span class="material-symbols-outlined text-lg">upload</span>
-                                    <input type="file" name="hospital_license" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-license">
+                                    <input type="file" name="incorporation_doc_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-incorporation">
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Row 2: Admin Identify Proof -->
+                        <!-- Row 2: Company PAN Card -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
-                            <div>
-                                <span class="text-sm font-bold text-black">Admin Identify Proof</span>
-                                <p class="text-[11px] text-medium-gray mt-0.5">MUMA12345B</p>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">Company PAN Card</span>
+                                <input type="text" name="pan_number" placeholder="Enter PAN Number" 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
                             </div>
                             <div class="flex items-center gap-3 self-end sm:self-auto">
-                                <!-- Verification Badge -->
                                 <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
                                     <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
                                     <span>Virus scan</span>
                                 </div>
-                                <!-- File Indicator Box -->
-                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-admin">
-                                    Image.png
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-pan">
+                                    No file chosen
                                 </div>
-                                <!-- View Button -->
-                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='admin_id_proof']" data-title="Admin Identify Proof">
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='pan_doc_path']" data-title="Company PAN Card">
                                     <span class="material-symbols-outlined text-lg">visibility</span>
                                 </button>
-                                <!-- Upload Button Wrapper -->
                                 <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
                                     <span class="material-symbols-outlined text-lg">upload</span>
-                                    <input type="file" name="admin_id_proof" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-admin">
+                                    <input type="file" name="pan_doc_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-pan">
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Row 3: GST Number -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4" id="gst-document-row">
-                            <div>
-                                <span class="text-sm font-bold text-black">GST Number & Document</span>
-                                <p class="text-[11px] text-medium-gray mt-0.5">27AABCM1234F125</p>
+                        <!-- Row 3: GST Registration Certificate -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">GST Registration Certificate</span>
+                                <input type="text" name="gst_number" placeholder="Enter GST Number" 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
                             </div>
                             <div class="flex items-center gap-3 self-end sm:self-auto">
-                                <!-- Verification Badge (Blurry) -->
                                 <div class="flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold" id="badge-gst">
                                     <span class="material-symbols-outlined mini-icon bg-red-600 text-white rounded-sm flex items-center justify-center font-bold">close</span>
                                     <span>Blurry, Unclear</span>
                                 </div>
-                                <!-- File Indicator Box -->
                                 <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-gst">
-                                    Image.png
+                                    No file chosen
                                 </div>
-                                <!-- View Button -->
-                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='gst_document']" data-title="GST Number & Document">
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='gst_doc_path']" data-title="GST Registration Certificate">
                                     <span class="material-symbols-outlined text-lg">visibility</span>
                                 </button>
-                                <!-- Upload Button Wrapper -->
                                 <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
                                     <span class="material-symbols-outlined text-lg">upload</span>
-                                    <input type="file" name="gst_document" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-gst" data-badge="#badge-gst">
+                                    <input type="file" name="gst_doc_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-gst" data-badge="#badge-gst">
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Row 4: PAN Number -->
+                        <!-- Row 4: TAN Document -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
-                            <div>
-                                <span class="text-sm font-bold text-black">PAN Number & Document</span>
-                                <p class="text-[11px] text-medium-gray mt-0.5">AABCM1234F</p>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">TAN Registration Document</span>
+                                <input type="text" name="tan_number" placeholder="Enter TAN Number" 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
                             </div>
                             <div class="flex items-center gap-3 self-end sm:self-auto">
-                                <!-- Verification Badge -->
                                 <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
                                     <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
                                     <span>Virus scan</span>
                                 </div>
-                                <!-- File Indicator Box -->
-                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-pan">
-                                    Image.png
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-tan">
+                                    No file chosen
                                 </div>
-                                <!-- View Button -->
-                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='pan_document']" data-title="PAN Number & Document">
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='tan_doc_path']" data-title="TAN Registration Document">
                                     <span class="material-symbols-outlined text-lg">visibility</span>
                                 </button>
-                                <!-- Upload Button Wrapper -->
                                 <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
                                     <span class="material-symbols-outlined text-lg">upload</span>
-                                    <input type="file" name="pan_document" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-pan">
+                                    <input type="file" name="tan_doc_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-tan">
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Row 5: Hospital Image -->
+                        <!-- Row 5: Drug / Medical License -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
-                            <div>
-                                <span class="text-sm font-bold text-black">Hospital Image</span>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">Drug / Medical License</span>
+                                <input type="text" name="medical_license_number" placeholder="Enter License No." 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
                             </div>
                             <div class="flex items-center gap-3 self-end sm:self-auto">
-                                <!-- Verification Badge -->
                                 <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
                                     <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
                                     <span>Virus scan</span>
                                 </div>
-                                <!-- File Indicator Box -->
-                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-hospital-img">
-                                    Image.png
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-license">
+                                    No file chosen
                                 </div>
-                                <!-- View Button -->
-                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='hospital_image']" data-title="Hospital Image">
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='medical_license_doc_path']" data-title="Drug / Medical License">
                                     <span class="material-symbols-outlined text-lg">visibility</span>
                                 </button>
-                                <!-- Upload Button Wrapper -->
                                 <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
                                     <span class="material-symbols-outlined text-lg">upload</span>
-                                    <input type="file" name="hospital_image" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-hospital-img">
+                                    <input type="file" name="medical_license_doc_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-license">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Row 6: Pharmacy Storefront Image -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
+                            <div>
+                                <span class="text-sm font-bold text-black">Pharmacy Storefront Image</span>
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto">
+                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
+                                    <span>Virus scan</span>
+                                </div>
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-storefront">
+                                    No file chosen
+                                </div>
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='storefront_image_path']" data-title="Pharmacy Storefront Image">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
+                                    <span class="material-symbols-outlined text-lg">upload</span>
+                                    <input type="file" name="storefront_image_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-storefront">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Row 7: Pharmacist Verification Selfie -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
+                            <div>
+                                <span class="text-sm font-bold text-black">Pharmacist Verification Selfie</span>
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto">
+                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
+                                    <span>Virus scan</span>
+                                </div>
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-selfie">
+                                    No file chosen
+                                </div>
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='selfie_path_for_applock']" data-title="Pharmacist Verification Selfie">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
+                                    <span class="material-symbols-outlined text-lg">upload</span>
+                                    <input type="file" name="selfie_path_for_applock" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-selfie">
                                 </button>
                             </div>
                         </div>
@@ -571,7 +575,7 @@
                     </div>
                 </div>
 
-                <!-- Step 4 Preview content (Separate Div, full-width, hidden by default) -->
+                <!-- Step 3 Preview content (Separate Div, full-width, hidden by default) -->
                 <div id="step4-preview-content" class="hidden flex flex-col bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden w-full max-w-4xl mx-auto">
                     <!-- Title Bar -->
                     <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-white">
@@ -601,7 +605,7 @@
                             <span class="text-[10px] text-slate-500">Image (JPG, PNG), Maximum file size: 5MB</span>
                             <div class="flex items-center gap-1.5 text-green-600 text-[10px] font-bold">
                                 <span>Virus scan</span>
-                                <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm w-3.5 h-3.5 flex items-center justify-center font-bold">check</span>
+                                <span class="material-symbols-outlined text-xs bg-green-600 text-white rounded-sm w-3.5 h-3.5 flex items-center justify-center font-bold">check</span>
                             </div>
                         </div>
                     </div>
@@ -620,8 +624,7 @@
                         </button>
                     </div>
                 </div>
-            </div>
-            <!-- Footer Buttons -->
+            </div><!-- Footer Buttons -->
             <div class="flex items-center justify-between border-t border-slate-100 pt-6 mt-8">
                 <!-- Back Button -->
                 <button type="button" id="prev-step-btn" class="h-12 px-6 rounded-md border-2 border-kyc-icon text-kyc-icon font-semibold text-sm transition-all cursor-pointer focus:outline-none flex items-center justify-center gap-2">
@@ -643,6 +646,43 @@
 {% block extra_js %}
 <script>
     $(document).ready(function() {
+        // Toggle custom dropdowns
+        $(document).on('click', '.custom-dropdown-btn', function(e) {
+            e.stopPropagation();
+            const container = $(this).closest('.custom-dropdown-container');
+            
+            // Close other open dropdowns
+            $('.custom-dropdown-container').not(container).find('.custom-dropdown-list').addClass('hidden');
+            $('.custom-dropdown-container').not(container).find('.material-symbols-outlined').removeClass('rotate-180');
+            
+            container.find('.custom-dropdown-list').toggleClass('hidden');
+            $(this).find('.material-symbols-outlined').toggleClass('rotate-180');
+        });
+
+        // Select option item
+        $(document).on('click', '.dropdown-option-item', function() {
+            const option = $(this);
+            const value = option.data('value');
+            const text = option.text();
+            const container = option.closest('.custom-dropdown-container');
+            const btn = container.find('.custom-dropdown-btn');
+            const input = container.find('.custom-dropdown-input');
+            
+            input.val(value);
+            btn.find('.selected-value-text').text(text);
+            btn.removeClass('text-kyc-light-gray').addClass('text-blue-charcoal font-medium');
+            
+            container.find('.custom-dropdown-list').addClass('hidden');
+            btn.find('.material-symbols-outlined').removeClass('rotate-180');
+        });
+
+        // Close dropdowns on clicking outside
+        $(document).on('click', function() {
+            $('.custom-dropdown-list').addClass('hidden');
+            $('.custom-dropdown-btn .material-symbols-outlined').removeClass('rotate-180');
+        });
+
+        
         let currentStep = 1;
         const totalSteps = 3;
 
@@ -806,22 +846,9 @@
 
         // Next button click handler (navigates steps or submits)
         $('#next-step-btn').on('click', function() {
-            // Basic form validation for the current visible panel
+            // Basic form validation for the current visible panel (Bypassed for now)
             const currentPanel = $(`#step-panel-${currentStep}`);
             let isValid = true;
-            
-            // Validate required inputs in current step
-            currentPanel.find('input[required]').each(function() {
-                if (!$(this).val()) {
-                    isValid = false;
-                    $(this).addClass('border-red-400 focus:border-red-400 focus:ring-red-400');
-                    toastr.warning('Please fill out all required fields.');
-                } else {
-                    $(this).removeClass('border-red-400 focus:border-red-400 focus:ring-red-400');
-                }
-            });
-
-            if (!isValid) return;
 
             if (currentStep < totalSteps) {
                 // Update current step tab indicator to COMPLETED state (green checkmark)
@@ -917,7 +944,7 @@
                 label.addClass('text-blue-charcoal font-bold');
                 
                 // Set appropriate icon
-                if (stepNum === 1) icon.text('{% if user.user_type == "hospital" %}local_hospital{% elif user.user_type == "pharmacy" %}local_pharmacy{% else %}storefront{% endif %}');
+                if (stepNum === 1) icon.text('{% if user.user_type == "hospital" %}local_pharmacy{% elif user.user_type == "pharmacy" %}local_pharmacy{% else %}storefront{% endif %}');
                 else if (stepNum === 2) icon.text('person');
                 else icon.text('description');
 

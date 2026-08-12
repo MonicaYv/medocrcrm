@@ -28,6 +28,9 @@ urlpatterns = [
     path("new-kyc/", views.new_kyc, name="new_kyc"),
     path("profile-verification/", views.profile_verification, name="profile_verification"),
     path("profile-review/", views.profile_review, name="profile_review"),
+    path("doctor-verification/", views.doctor_verification, name="doctor_verification"),
+    path("lab-verification/", views.lab_verification, name="lab_verification"),
+    path("pharmacy-verification/", views.pharmacy_verification, name="pharmacy_verification"),
     path('check-phone', views.check_phone, name='check_phone'),
     path('auth/verify-login-otp', views.verify_login_otp, name='verify_login_otp'),
 ]

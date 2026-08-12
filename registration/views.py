@@ -90,6 +90,15 @@ def profile_verification(request):
 def profile_review(request):
     return render(request, 'registration/profile_review.html')
 
+def doctor_verification(request):
+    return render(request, 'registration/doctor_verification.html')
+
+def lab_verification(request):
+    return render(request, 'registration/lab_verification.html')
+
+def pharmacy_verification(request):
+    return render(request, 'registration/pharmacy_verification.html')
+
 @require_POST
 def send_otp(request):
     email = request.POST.get("email", "").strip()
