@@ -5,18 +5,24 @@ from django.db import models
 
 class State(models.Model):
     name = models.CharField(max_length=128, unique=True)
+    country = models.ForeignKey(
+        "coupon.CountryOption",
+        on_delete=models.CASCADE,
+        db_column="country_id",
+        related_name="states"
+    )
 
+    is_active = models.BooleanField(default=True)
     class Meta:
         db_table = "state"
 
     def __str__(self):
         return self.name
 
-
 class City(models.Model):
     name = models.CharField(max_length=128)
     state = models.ForeignKey(State, on_delete=models.CASCADE, related_name="cities")
-
+    is_active = models.BooleanField(default=True)
     class Meta:
         db_table = "city"
         unique_together = ("name", "state")
@@ -208,6 +214,7 @@ class User(models.Model):
     is_active = models.BooleanField(default=True)
     last_login = models.DateTimeField(blank=True, null=True)
     last_login_ip = models.CharField(max_length=45, blank=True, null=True, default=None)
+    
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -514,6 +521,10 @@ class HospitalProfile(models.Model):
     verified_at = models.DateTimeField(null=True, blank=True)
     otp = models.CharField(max_length=64, null=True, blank=True)
     referral_code = models.CharField(max_length=64, null=True, blank=True)
+    
+    hospital_type = models.ForeignKey("HospitalType", on_delete=models.SET_NULL, null=True, blank=True, db_column="hospital_type_id")
+    hospital_service = models.ForeignKey("HospitalService", on_delete=models.SET_NULL, null=True, blank=True, db_column="hospital_service_id")
+    website_url = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "registration_hospitalprofile"
@@ -583,6 +594,11 @@ class ContactPerson(models.Model):
     otp = models.CharField(max_length=16, blank=True, null=True)
     referral_code = models.CharField(max_length=64, blank=True, null=True)
     email_otp = models.CharField(max_length=16, blank=True, null=True)
+    state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True)
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
+    pincode = models.CharField(max_length=20, null=True, blank=True)
+    country = models.CharField(max_length=128, blank=True, null=True, default='India')
+    email = models.CharField(max_length=255, null=True, blank=True )
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -596,3 +612,23 @@ class PasswordResetToken(models.Model):
     
     def is_valid(self):
         return (timezone.now() - self.created_at).total_seconds() < 1800
+    
+class HospitalType(models.Model):
+    name = models.CharField(max_length=255, null=True, blank=True)
+    status = models.SmallIntegerField(default=1)
+
+    class Meta:
+        db_table = "registration_hospital_types"
+        
+    def __str__(self):
+        return self.name or ""
+        
+class HospitalService(models.Model):
+    name = models.CharField(max_length=255, null=True, blank=True)
+    status = models.SmallIntegerField(default=1)
+
+    class Meta:
+        db_table = "registration_hospital_services"
+        
+    def __str__(self):
+        return self.name or ""

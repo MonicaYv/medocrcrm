@@ -1,0 +1,122 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Profile Verification{% endblock %}
+
+{% block content %}
+<style>
+    .kyc-dashboard-bg {
+        background-image: url("{% static 'images/dashboard-bg.png' %}");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 100vh !important;
+        width: 100vw !important;
+    }
+</style>
+
+<!-- Full Screen Wrapper with Static Dashboard Background Image -->
+<div class="h-screen w-full relative overflow-hidden flex items-center justify-center p-4 bg-slate-100 kyc-dashboard-bg">
+    
+    <!-- Blur/Dim Overlay to make the popup pop -->
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[3px] z-0"></div>
+
+    <!-- Profile Verification Overlay Modal (Always Shown) -->
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl border border-slate-100 overflow-hidden transform transition-all duration-300 z-10 relative">
+        <!-- Content Wrapper -->
+        <div class="p-6 md:p-8 flex flex-col gap-8">
+            <!-- Modal Header Row -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+                <div class="flex items-center gap-4">
+                    <!-- Shield circle -->
+                    <div class="w-14 h-14 rounded-full bg-{{ secondary_bg }} flex items-center justify-center text-kyc-icon shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined medium-icon font-semibold">verified_user</span>
+                    </div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-extrabold text-kyc-black tracking-tight">Profile Verification</h2>
+                        <p class="text-slate-500 text-sm mt-1">Complete your profile to unlock all features and start receiving orders.</p>
+                    </div>
+                </div>
+                
+                <!-- Progress display -->
+                <div class="flex flex-col items-start md:items-end shrink-0">
+                    <div class="flex items-baseline gap-3">
+                        <span class="text-2xl md:text-3xl font-black text-{{ border }}">0%</span>
+                        <span class="text-slate-700 font-bold text-sm">Complete</span>
+                    </div>
+                    <!-- Progress Bar Track -->
+                    <div class="w-48 bg-slate-100 h-2.5 rounded-full mt-2 relative overflow-hidden">
+                        <div class="absolute left-0 top-0 h-full bg-{{ border }} rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <span class="text-xs text-slate-400 mt-1">0 of 3 steps completed</span>
+                </div>
+            </div>
+
+            <!-- Steps Section -->
+            <div class="relative py-4">
+                <!-- Connecting Dashed Line (Desktop Only) -->
+                <div class="hidden md:block absolute top-[44px] left-[8%] right-[8%] h-0.5 border-t-2 border-dashed border-slate-200 -z-10"></div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-4 justify-between">
+                    <!-- Step 1: Personal Details -->
+                    <div class="flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 rounded-full border-2 border-kyc-icon bg-white text-kyc-icon flex items-center justify-center font-bold text-lg shadow-md transition-all duration-300 transform group-hover:scale-105 relative z-10">
+                            <span class="material-symbols-outlined medium-icon">person</span>
+                            <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-{{ border }} text-white font-extrabold text-xs flex items-center justify-center shadow-sm">1</span>
+                        </div>
+                        <span class="font-bold text-slate-800 text-sm mt-3">Hospital Details</span>
+                        <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-kyc-blue text-kyc-icon mt-2">Not Started</span>
+                    </div>
+
+                    <!-- Step 2: Identity Verification -->
+                    <!-- <div class="flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 rounded-full border-2 border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center font-bold text-lg transition-all duration-300 relative z-10">
+                            <span class="material-symbols-outlined medium-icon">lock</span>
+                            <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-slate-200 text-slate-500 font-extrabold text-xs flex items-center justify-center">2</span>
+                        </div>
+                        <span class="font-semibold text-kyc-black text-sm mt-3">Identity Verification</span>
+                        <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 text-slate-500 mt-2">Locked</span>
+                    </div> -->
+
+                    <!-- Step 2: Pharmacy/Business Details -->
+                    <div class="flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 rounded-full border-2 border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center font-bold text-lg transition-all duration-300 relative z-10">
+                            <span class="material-symbols-outlined medium-icon">lock</span>
+                            <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-slate-200 text-slate-500 font-extrabold text-xs flex items-center justify-center">2</span>
+                        </div>
+                        <span class="font-semibold text-kyc-black text-sm mt-3">
+                            Personal Details
+                        </span>
+                        <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 text-slate-500 mt-2">Locked</span>
+                    </div>
+
+                    <!-- Step 3: Documents -->
+                    <div class="flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 rounded-full border-2 border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center font-bold text-lg transition-all duration-300 relative z-10">
+                            <span class="material-symbols-outlined medium-icon">lock</span>
+                            <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-slate-200 text-slate-500 font-extrabold text-xs flex items-center justify-center">3</span>
+                        </div>
+                        <span class="font-semibold text-kyc-black text-sm mt-3">Documents</span>
+                        <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 text-slate-500 mt-2">Locked</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Action Alert Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-kyc-blue border border-kyc-border rounded-lg gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined medium-icon text-kyc-icon shrink-0">info</span>
+                    <p class="text-sm font-semibold text-slate-700">
+                        Complete <span class="text-kyc-icon font-bold">Personal Details</span> to begin verification.
+                    </p>
+                </div>
+                
+                <a href="{% url 'profile_verification_hospital' %}" class="w-full sm:w-auto bg-{{ border }} hover:opacity-90  font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all duration-200 group/btn">
+                    <span>Start Verification</span>
+                    <span class="material-symbols-outlined text-xl transition-transform duration-200 group-hover/btn:translate-x-1">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

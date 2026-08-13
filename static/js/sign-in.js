@@ -120,7 +120,7 @@ document.getElementById("doneBtn").addEventListener("click", function () {
             return;
         }
 
-        toastr.success("Login Successful");
+        toastr.success(data.message);
 
         setTimeout(() => {
             window.location.href = data.redirect;
