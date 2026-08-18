@@ -120,7 +120,7 @@ document.getElementById("doneBtn").addEventListener("click", function () {
             return;
         }
 
-        toastr.success("Login Successful");
+        toastr.success(data.message);
 
         setTimeout(() => {
             window.location.href = data.redirect;
@@ -209,3 +209,8 @@ document.getElementById("resendLink").addEventListener("click", (e) => {
 //     otpBoxes.find((b) => !b.value)?.focus();
 //   }
 // });
+
+
+document.getElementById("closeBtn").addEventListener("click", function () {
+  window.location.href = this.dataset.url;
+});

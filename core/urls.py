@@ -7,10 +7,8 @@ from dashboard import views as dashboard_views
 
 urlpatterns = [    
     path('', views.new_signin, name='login'),
-    path('old-login/', views.login_page, name='login'),
-    path('new-kyc/', views.new_kyc, name='new_kyc'),
-    path('profile-verification/', views.profile_verification, name='profile_verification'),
-    path('profile-review/', views.profile_review, name='profile_review'),
+    path('lab-verification/', views.lab_verification, name='lab_verification'),
+    path('pharmacy-verification/', views.pharmacy_verification, name='pharmacy_verification'),
     path('admin/', admin.site.urls),
     path('user/', include('registration.urls')),
     path('dashboard', dashboard_views.dashboard_home, name='dashboard'),

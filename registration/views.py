@@ -25,6 +25,8 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
+from coupon.models import CountryOption
+from django.views.decorators.http import require_GET
 
 ROLE_TO_TEMPLATE = {
     "login": "login/login.html",
@@ -47,48 +49,14 @@ def new_otp_verify(request):
 def new_signup(request):
     return render(request, 'registration/new_signup.html')
 
-def new_kyc(request):
-    from dashboard.utils import get_common_context
-    from registration.models import User
-    
-    user_id = request.session.get('user_id')
-    user = User.objects.filter(id=user_id).first() if user_id else None
-    
-    if user:
-        context = get_common_context(request, user)
-    else:
-        context = {
-            'border': 'dodger-blue',
-            'secondary_bg': 'light-dodger-blue',
-            'text': 'dodger-blue',
-            'logo': '/static/images/logo.svg',
-            'user_display_name': 'Guest User',
-        }
-    context['is_kyc'] = True
-    return render(request, 'registration/new_kyc.html', context)
+def doctor_verification(request):
+    return render(request, 'registration/doctor_verification.html')
 
-def profile_verification(request):
-    from dashboard.utils import get_common_context
-    from registration.models import User
-    
-    user_id = request.session.get('user_id')
-    user = User.objects.filter(id=user_id).first() if user_id else None
-    
-    if user:
-        context = get_common_context(request, user)
-    else:
-        context = {
-            'border': 'dodger-blue',
-            'secondary_bg': 'light-dodger-blue',
-            'text': 'dodger-blue',
-            'logo': '/static/images/logo.svg',
-            'user_display_name': 'Guest User',
-        }
-    context['is_kyc'] = True
-    return render(request, 'registration/profile_verification.html', context)
+def lab_verification(request):
+    return render(request, 'registration/lab_verification.html')
 
-def profile_review(request):
-    return render(request, 'registration/profile_review.html')
+def pharmacy_verification(request):
+    return render(request, 'registration/pharmacy_verification.html')
 
 @require_POST
 def send_otp(request):
@@ -310,103 +278,103 @@ def login_auth_OLD(request):
         errors["password"] = "Invalid email or password."
         return JsonResponse({"success": False, "errors": errors})
     
-@csrf_protect
-@require_POST
-def save_user_OLD(request):
-    data = request.POST
-    errors = {}
-    # Email
-    email = data.get("email")
-    if not email:
-        errors["email"] = "Email is required."
-    else:
-        try:
-            validate_email(email)
-        except ValidationError:
-            errors["email"] = "Enter a valid email address."
-        if User.objects.filter(email=email).exists():
-            errors["email"] = "This email is already registered."
+# @csrf_protect
+# @require_POST
+# def save_user(request):
+#     data = request.POST
+#     errors = {}
+#     # Email
+#     email = data.get("email")
+#     if not email:
+#         errors["email"] = "Email is required."
+#     else:
+#         try:
+#             validate_email(email)
+#         except ValidationError:
+#             errors["email"] = "Enter a valid email address."
+#         if User.objects.filter(email=email).exists():
+#             errors["email"] = "This email is already registered."
             
-    otp_token = data.get("otp_token")
-    if not otp_token:
-        errors["otp1"] = "Please refresh the page."
-    email_otp = data.get("otp1")  # from HTML field "otp1"
-    if not email_otp:
-        errors["otp1"] = "OTP is required."
-    otp_verification = verify_otp_token(email, email_otp, otp_token)
-    if not otp_verification["success"]:
-        errors["otp1"] = otp_verification["message"]
+#     otp_token = data.get("otp_token")
+#     if not otp_token:
+#         errors["otp1"] = "Please refresh the page."
+#     email_otp = data.get("otp1")  # from HTML field "otp1"
+#     if not email_otp:
+#         errors["otp1"] = "OTP is required."
+#     otp_verification = verify_otp_token(email, email_otp, otp_token)
+#     if not otp_verification["success"]:
+#         errors["otp1"] = otp_verification["message"]
 
-    # Password
-    password = data.get("password")
-    if not password or len(password) < 8:
-        errors["password"] = "Password is required (min 8 chars)."
+#     # Password
+#     password = data.get("password")
+#     if not password or len(password) < 8:
+#         errors["password"] = "Password is required (min 8 chars)."
 
-    # Phone
-    phone_number = data.get("phone_number")
-    if not phone_number or not re.match(r"^\d{10}$", phone_number):
-        errors["phone_number"] = "Enter a valid phone number (10 digits)."
+#     # Phone
+#     phone_number = data.get("phone_number")
+#     if not phone_number or not re.match(r"^\d{10}$", phone_number):
+#         errors["phone_number"] = "Enter a valid phone number (10 digits)."
 
-    # Name
-    name = data.get("name")
-    if not name:
-        errors["name"] = "Name is required."
+#     # Name
+#     name = data.get("name")
+#     if not name:
+#         errors["name"] = "Name is required."
 
-    # DOB (optional, but check format if provided)
-    dob = data.get("dob")
-    if dob and not re.match(r"^\d{4}-\d{2}-\d{2}$", dob):
-        errors["dob"] = "Enter a valid date (YYYY-MM-DD)."
+#     # DOB (optional, but check format if provided)
+#     dob = data.get("dob")
+#     if dob and not re.match(r"^\d{4}-\d{2}-\d{2}$", dob):
+#         errors["dob"] = "Enter a valid date (YYYY-MM-DD)."
 
-    # Gender (optional, but check if provided)
-    gender = data.get("gender")
-    if gender and gender not in ("male", "female", "other"):
-        errors["gender"] = "Select a valid gender."
+#     # Gender (optional, but check if provided)
+#     gender = data.get("gender")
+#     if gender and gender not in ("male", "female", "other"):
+#         errors["gender"] = "Select a valid gender."
 
-    address = data.get("address")
-    if not address:
-        errors["address"] = "Address is required."
-    city = data.get("city")
-    if not city:
-        errors["city"] = "City/District is required."
-    state = data.get("state")
-    if not state:
-        errors["state"] = "State is required."
-    pincode = data.get("pincode")
-    if not pincode or not re.match(r"^\d{4,10}$", pincode):
-        errors["pincode"] = "Enter a valid pincode."
-    country = data.get("country")
-    if not country:
-        errors["country"] = "Country is required."
+#     address = data.get("address")
+#     if not address:
+#         errors["address"] = "Address is required."
+#     city = data.get("city")
+#     if not city:
+#         errors["city"] = "City/District is required."
+#     state = data.get("state")
+#     if not state:
+#         errors["state"] = "State is required."
+#     pincode = data.get("pincode")
+#     if not pincode or not re.match(r"^\d{4,10}$", pincode):
+#         errors["pincode"] = "Enter a valid pincode."
+#     country = data.get("country")
+#     if not country:
+#         errors["country"] = "Country is required."
 
-    referral_code = data.get("referral_code")
-    phone_country_code = data.get("phone_country_code", "+91")
+#     referral_code = data.get("referral_code")
+#     phone_country_code = data.get("phone_country_code", "+91")
 
-    # If any errors, return as JSON
-    if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+#     # If any errors, return as JSON
+#     if errors:
+#         return JsonResponse({"success": False, "errors": errors}, status=400)
 
-    user = User.objects.create(
-        email=email,
-        phone_country_code=phone_country_code,
-        phone_number=phone_number,
-        password=make_password(password),
-        user_type="user"
-    )
+#     user = User.objects.create(
+#         email=email,
+#         phone_country_code=phone_country_code,
+#         phone_number=phone_number,
+#         password=make_password(password),
+#         user_type="user"
+#     )
 
-    UserProfile.objects.create(
-        user=user,
-        name=name,
-        dob=dob or None,
-        gender=gender,
-        address=address,
-        city=city,
-        state=state,
-        pincode=pincode,
-        country=country,
-        referral_code=referral_code,
-        otp=email_otp,
-    )
-    return JsonResponse({"success": True, "message": "User registered successfully."})
+#     UserProfile.objects.create(
+#         user=user,
+#         name=name,
+#         dob=dob or None,
+#         gender=gender,
+#         address=address,
+#         city=city,
+#         state=state,
+#         pincode=pincode,
+#         country=country,
+#         referral_code=referral_code,
+#         otp=email_otp,
+#     )
+#     return JsonResponse({"success": True, "message": "User registered successfully."})
 
 @csrf_protect
 @require_POST
@@ -2081,7 +2049,36 @@ def verify_contact_person_otp(email, otp, token):
 
     return result
 
+# new login code by laxmi --------------------------------------- 
+@csrf_protect
+@require_POST
+def save_user(request):
+    
+    data = request.POST
+    errors = {}         
+    
+    user_type = data.get("user_type")
+    phone_country_code = data.get("phone_country_code")
+    phone_number = data.get("phone_number")
+    
+    # Validate phone number
+    if not phone_number or not re.match(r"^\d{10}$", phone_number):
+        errors["phone_number"] = "Enter a valid phone number (10 digits)."   
+    
+    # Check if phone number already exists
+    if User.objects.filter(phone_number=phone_number).exists():
+        errors["phone_number"] = "This phone number is already registered." 
 
+    # If any errors, return as JSON
+    if errors:
+        return JsonResponse({"success": False, "errors": errors}, status=400)
+
+    user = User.objects.create(
+        phone_country_code=phone_country_code,
+        phone_number = phone_number,
+        user_type = user_type
+    )    
+    return JsonResponse({"success": True, "message": "User registered successfully."})
 
 @csrf_protect
 @require_POST
@@ -2132,6 +2129,131 @@ def login_auth(request):
         "redirect": reverse("dashboard")
     })
     
+# @csrf_protect
+# @require_POST
+# def verify_login_otp(request):
+
+#     phone_number = request.POST.get("phone_number")
+#     otp = request.POST.get("otp")
+
+#     if otp != "123456":
+#         return JsonResponse({
+#             "success": False,
+#             "message": "Invalid OTP."
+#         })
+
+#     try:
+#         user = User.objects.get(
+#             phone_number=phone_number
+#         )
+
+#         allowed_user_types = [
+#             "user",
+#             "pharmacy",
+#             "lab",
+#             "doctor",
+#             "hospital"
+#         ]
+
+#         if user.user_type not in allowed_user_types:
+#             return JsonResponse({
+#                 "success": False,
+#                 "message": "This account type is not allowed."
+#             })
+
+#         if not user.is_active:
+#             return JsonResponse({
+#                 "success": False,
+#                 "message": "Your account is inactive."
+#             })
+
+#         # Save session
+#         request.session["user_id"] = user.id
+
+#         user.last_login = timezone.now()
+#         user.save(update_fields=["last_login"])
+
+#         # Get user ID and type
+#         user_id = user.id
+#         user_type = user.user_type
+
+#         # HOSPITAL
+#         if user_type == "hospital":
+            
+#             try:
+#                 hospital_profile = HospitalProfile.objects.get(
+#                     user_id=user_id
+#                 )
+#             except HospitalProfile.DoesNotExist:
+
+#                 return JsonResponse({
+#                     "success": True,
+#                     "kyc_required": True,
+#                     "kyc_step": 1,
+#                     "message": "Please complete hospital profile.",
+#                     "redirect": reverse("hospital_kyc")
+#                 })
+
+#             contact_exists = ContactPerson.objects.filter(
+#                 profile_id=user_id,
+#                 profile_type="hospital"
+#             ).exists()
+
+#             if not contact_exists:
+
+#                 return JsonResponse({
+#                     "success": True,
+#                     "kyc_required": True,
+#                     "kyc_step": 2,
+#                     "message": "Please complete contact person details.",
+#                     "redirect": reverse("hospital_kyc")
+#                 })
+
+#             step3_complete = all([
+#                 hospital_profile.registration_no,
+#                 hospital_profile.registration_certificate_path,
+
+#                 hospital_profile.aadhar_card_no,
+#                 hospital_profile.aadhar_doc_path,
+
+#                 hospital_profile.pan_card_no,
+#                 hospital_profile.pan_doc_path,
+
+#                 hospital_profile.hospital_logo_path,
+#                 hospital_profile.hospital_photo_path,
+#             ])
+
+#             if not step3_complete:
+
+#                 return JsonResponse({
+#                     "success": True,
+#                     "kyc_required": True,
+#                     "kyc_step": 3,
+#                     "message": "Please complete hospital document KYC.",
+#                     "redirect": reverse("hospital_kyc")
+#                 })
+
+#             return JsonResponse({
+#                 "success": True,
+#                 "kyc_required": False,
+#                 "message": "Login Successful",
+#                 "redirect": reverse("dashboard")
+#             })
+
+#         return JsonResponse({
+#             "success": True,
+#             "kyc_required": False,
+#             "message": "Login Successful",
+#             "redirect": reverse("dashboard")
+#         })
+
+#     except User.DoesNotExist:
+
+#         return JsonResponse({
+#             "success": False,
+#             "message": "User not found."
+#         })
+
 @csrf_protect
 @require_POST
 def verify_login_otp(request):
@@ -2146,45 +2268,191 @@ def verify_login_otp(request):
         })
 
     try:
-        user = User.objects.get(phone_number=phone_number)
-
-        allowed_user_types = [
-            "user",
-            "pharmacy",
-            "lab",
-            "doctor",
-            "hospital"
-        ]
-
-        if user.user_type not in allowed_user_types:
-            return JsonResponse({
-                "success": False,
-                "message": "This account type is not allowed."
-            })
-
-        if not user.is_active:
-            return JsonResponse({
-                "success": False,
-                "message": "Your account is inactive."
-            })
-
-        request.session["user_id"] = user.id
-
-        user.last_login = timezone.now()
-        user.save(update_fields=["last_login"])
-
-        return JsonResponse({
-            "success": True,
-            "redirect": reverse("dashboard")
-        })
+        user = User.objects.get(
+            phone_number=phone_number
+        )
 
     except User.DoesNotExist:
+
         return JsonResponse({
             "success": False,
             "message": "User not found."
         })
-		
-		
+
+    allowed_user_types = [
+        "user",
+        "pharmacy",
+        "lab",
+        "doctor",
+        "hospital"
+    ]
+
+    if user.user_type not in allowed_user_types:
+
+        return JsonResponse({
+            "success": False,
+            "message": "This account type is not allowed."
+        })
+
+    if not user.is_active:
+
+        return JsonResponse({
+            "success": False,
+            "message": "Your account is inactive."
+        })
+
+    request.session["user_id"] = user.id
+
+    user.last_login = timezone.now()
+    user.save(update_fields=["last_login"])
+
+    user_id = user.id
+    user_type = user.user_type
+
+    if user_type == "hospital":
+
+        kyc_result = check_hospital_kyc(user_id)
+
+        return JsonResponse({
+            "success": True,
+            **kyc_result
+        })
+
+    if user_type == "doctor":
+
+        kyc_result = check_doctor_kyc(user_id)
+
+        return JsonResponse({
+            "success": True,
+            **kyc_result
+        })
+
+    return JsonResponse({
+        "success": True,
+        "kyc_required": False,
+        "message": "Login Successful",
+        "redirect": reverse("dashboard")
+    })
+
+def check_hospital_kyc(user_id):
+    
+    try:
+        hospital_profile = HospitalProfile.objects.get(
+            user_id=user_id
+        )
+    except HospitalProfile.DoesNotExist:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 1,
+            "message": "Please complete hospital profile.",
+            "redirect": reverse("hospital_kyc")
+        }
+
+    contact_exists = ContactPerson.objects.filter(
+        profile_id=user_id,
+        profile_type="hospital"
+    ).exists()
+
+    if not contact_exists:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 2,
+            "message": "Please complete contact person details.",
+            "redirect": reverse("hospital_kyc")
+        }
+
+    step3_complete = all([
+        hospital_profile.registration_no,
+        hospital_profile.registration_certificate_path,
+
+        hospital_profile.aadhar_card_no,
+        hospital_profile.aadhar_doc_path,
+
+        hospital_profile.pan_card_no,
+        hospital_profile.pan_doc_path,
+
+        hospital_profile.hospital_logo_path,
+        hospital_profile.hospital_photo_path,
+    ])
+
+    if not step3_complete:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 3,
+            "message": "Please complete hospital document KYC.",
+            "redirect": reverse("hospital_kyc")
+        }
+
+    return {
+        "kyc_required": False,
+        "kyc_step": 0,
+        "message": "Login Successful",
+        "redirect": reverse("dashboard")
+    }
+
+def check_doctor_kyc(user_id):
+
+    try:
+        doctor_profile = DoctorProfile.objects.get(
+            user_id=user_id
+        )
+    except DoctorProfile.DoesNotExist:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 1,
+            "message": "Please complete doctor profile.",
+            "redirect": reverse("doctor_kyc")
+        }
+
+    contact_exists = ContactPerson.objects.filter(
+        profile_id=user_id,
+        profile_type="doctor"
+    ).exists()
+
+    if not contact_exists:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 2,
+            "message": "Please complete contact person details.",
+            "redirect": reverse("doctor_kyc")
+        }
+
+    step3_complete = all([
+        doctor_profile.registration_number,
+        doctor_profile.registration_certificate_path,
+
+        doctor_profile.aadhar_number,
+        doctor_profile.aadhar_doc_path,
+
+        doctor_profile.pan_number,
+        doctor_profile.pan_doc_path,
+
+        doctor_profile.clinic_logo_path,
+        doctor_profile.clinic_photo_path,
+    ])
+    
+    if not step3_complete:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 3,
+            "message": "Please complete document KYC.",
+            "redirect": reverse("doctor_kyc")
+        }
+
+    return {
+        "kyc_required": False,
+        "kyc_step": 0,
+        "message": "Login Successful",
+        "redirect": reverse("dashboard")
+    }
+    
+    				
 @csrf_protect
 @require_POST
 def check_phone(request):
@@ -2205,33 +2473,1137 @@ def check_phone(request):
     return JsonResponse({
         "success": True
     })
-	
+
+# state, city section 
+def get_states(request):
+    country_id = request.GET.get("country_id")
+
+    if not country_id:
+        return JsonResponse({
+            "success": False,
+            "states": []
+        })
+
+    states = State.objects.filter(
+        country_id=country_id
+    ).order_by("name")
+
+    state_list = [
+        {
+            "id": state.id,
+            "name": state.name
+        }
+        for state in states
+    ]
+
+    return JsonResponse({
+        "success": True,
+        "states": state_list
+    })
+    
+def get_cities(request):
+    state_id = request.GET.get("state_id")
+
+    if not state_id:
+        return JsonResponse({
+            "success": False,
+            "message": "State ID is required."
+        }, status=400)
+
+    cities = City.objects.filter(
+        state_id=state_id,
+        is_active=True
+    ).order_by("name")
+
+    city_list = [
+        {
+            "id": city.id,
+            "name": city.name
+        }
+        for city in cities
+    ]
+
+    return JsonResponse({
+        "success": True,
+        "cities": city_list
+    })    
+ 
+# hospital section    	
+def hospital_kyc(request):
+    return render(request, 'registration/kyc_hospital.html')
+
+def hospital_profile_verification(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return redirect("login")
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    phone_number = user.phone_number
+    phone_country_code = user.phone_country_code
+    
+    hospital_times = HospitalTiming.objects.filter(
+        is_active=1
+    ).order_by("name")
+    
+    hospital_types = HospitalType.objects.filter(
+        status=1
+    ).order_by("name")
+    
+    hospital_services = HospitalService.objects.filter(
+        status=1
+    ).order_by("name")
+    
+    countries = CountryOption.objects.filter(
+        is_active=1
+    ).order_by("name")
+    
+    hospital_profile = HospitalProfile.objects.filter(
+        user_id=user.id
+    ).first()
+    
+    contact_person = ContactPerson.objects.filter(
+        profile_id=user.id
+    ).first()
+    
+    return render(
+        request, 
+        'registration/kyc_hospital_profile.html', 
+        {
+            "hospital_types": hospital_types,
+            "hospital_times": hospital_times,
+            "hospital_services": hospital_services,
+            "phone_number": phone_number,
+            "phone_country_code": phone_country_code,
+            "countries": countries,
+            "hospital_profile": hospital_profile,
+            "contact_person": contact_person,
+        }
+    )
+
+def hospital_profile_review(request):
+    return render(request, 'registration/kyc_hospital_profile_review.html')
+           
 @csrf_protect
 @require_POST
-def save_user(request):
-    
-    data = request.POST
-    errors = {}         
-    
-    user_type = data.get("user_type")
-    phone_country_code = data.get("phone_country_code")
-    phone_number = data.get("phone_number")
-    
-    # Validate phone number
-    if not phone_number or not re.match(r"^\d{10}$", phone_number):
-        errors["phone_number"] = "Enter a valid phone number (10 digits)."   
-    
-    # Check if phone number already exists
-    if User.objects.filter(phone_number=phone_number).exists():
-        errors["phone_number"] = "This phone number is already registered." 
+def save_hospital_profile(request):
 
-    # If any errors, return as JSON
-    if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+    step = request.POST.get("step")
 
-    user = User.objects.create(
-        phone_country_code=phone_country_code,
-        phone_number = phone_number,
-        user_type = user_type
-    )    
-    return JsonResponse({"success": True, "message": "User registered successfully."})
+    if not step:
+        return JsonResponse({
+            "success": False,
+            "message": "Step is required."
+        }, status=400)
+
+    if step == "1":
+        return save_hospital_step_1(request)
+
+    elif step == "2":
+        return save_hospital_step_2(request)
+
+    elif step == "3":
+        return save_hospital_step_3(request)
+
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid step."
+    }, status=400)
+    
+def save_hospital_step_1(request):
+
+    user_id = request.session.get("user_id")
+    
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+        
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+    
+    email = request.POST.get("hos_email")
+    hospital_name = request.POST.get("hos_name")
+    owner_name = request.POST.get("hos_owner_name")
+    country_code = request.POST.get("hos_country_code_val")
+    phone_number = request.POST.get("hos_phn")
+    otp_verified = request.POST.get("phone_otp_verified")
+
+    hospital_type = request.POST.get("hos_type")
+    services = request.POST.get("hos_services")
+    website_url = request.POST.get("hos_website_url")
+    working_hours = request.POST.get("hos_working_hours")
+
+    address = request.POST.get("hos_address")
+    country = request.POST.get("hos_country")
+    state_id = request.POST.get("hos_state")
+    city_id = request.POST.get("hos_city")
+    pincode = request.POST.get("hos_pincode")
+    alternate_contact_no = request.POST.get("hos_alt_phn")
+    
+    if not hospital_name:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital name is required."
+        }, status=400)
+
+    if not email:
+        return JsonResponse({
+            "success": False,
+            "message": "Email is required."
+        }, status=400)
+        
+    user.email = email
+    user.phone_country_code = country_code
+    user.phone_number = phone_number
+
+    user.save(update_fields=[
+        "email",
+        "updated_at"
+    ])
+    
+    state = None
+
+    if state_id:
+        try:
+            state = State.objects.get(id=state_id)
+        except State.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected state not found."
+            }, status=400)
+    
+    city = None
+
+    if city_id:
+        try:
+            city = City.objects.get(id=city_id)
+        except City.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected city not found."
+            }, status=400)
+            
+    hospital_timing = None
+
+    if working_hours:
+        try:
+            hospital_timing = HospitalTiming.objects.get(
+                id=working_hours
+            )
+        except HospitalTiming.DoesNotExist:
+            hospital_timing = None
+            
+    hospital_profile, created = HospitalProfile.objects.update_or_create(
+        user=user,
+        defaults={
+            "user_id": user_id,
+            "hospital_name": hospital_name,
+            "owner_name": owner_name,
+            "contact_no": phone_number,
+            "address": address,
+            "state": state,
+            "city": city,
+            "pincode": pincode,
+            "alternate_contact_no": alternate_contact_no,
+            "country": country,
+            "hospital_timing": hospital_timing,
+        }
+    )
+    
+    if created:
+        message = "Hospital profile created successfully."
+    else:
+        message = "Hospital profile updated successfully."
+        
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "profile_id": hospital_profile.id,
+        "created": created
+    })
+
+def save_hospital_step_2(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    # ============================
+    # Get Hospital Profile
+    # ============================
+
+    try:
+        hospital_profile = HospitalProfile.objects.get(
+            user_id=user.id
+        )
+    except HospitalProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    # ============================
+    # Get Step 2 data
+    # ============================
+
+    name = request.POST.get("hos_adm_name")
+    email = request.POST.get("hos_adm_email")
+    phone_country_code = request.POST.get("hos_phone_country_code")
+    phone_number = request.POST.get("hos_phone")
+    otp = request.POST.get("hos_personal_otp")
+    otp_verified = request.POST.get("hos_personal_otp_verified")
+    role = request.POST.get("hos_personal_role")
+    referral_code = request.POST.get("hos_personal_referral")
+
+    country_id = request.POST.get("hos_personal_country")
+    state_id = request.POST.get("hos_personal_state")
+    city_id = request.POST.get("hos_personal_city")
+    pincode = request.POST.get("hos_personal_pincode")
+
+    # ============================
+    # Validation
+    # ============================
+
+    if not name:
+        return JsonResponse({
+            "success": False,
+            "message": "Admin name is required."
+        }, status=400)
+
+    if not email:
+        return JsonResponse({
+            "success": False,
+            "message": "Email is required."
+        }, status=400)
+
+    if not phone_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number is required."
+        }, status=400)
+
+    # ============================
+    # Get State
+    # ============================
+
+    state = None
+
+    if state_id:
+        try:
+            state = State.objects.get(id=state_id)
+        except State.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected state not found."
+            }, status=400)
+
+    # ============================
+    # Get City
+    # ============================
+
+    city = None
+
+    if city_id:
+        try:
+            city = City.objects.get(id=city_id)
+        except City.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected city not found."
+            }, status=400)
+
+    # ============================
+    # Get Country
+    # ============================
+
+    country = "India"
+
+    if country_id:
+        try:
+            country_obj = CountryOption.objects.get(id=country_id)
+            country = country_obj.name
+        except CountryOption.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected country not found."
+            }, status=400)
+
+    # ============================
+    # Profile Type
+    # ============================
+
+    profile_type = user.user_type
+
+    # ============================
+    # Save / Update Contact Person
+    # ============================
+
+    contact_person, created = ContactPerson.objects.update_or_create(
+        profile=user,
+        profile_type=profile_type,
+        defaults={
+            "name": name,
+            "email": email,
+            "phone_country_code": phone_country_code,
+            "phone_number": phone_number,
+            "role": role,
+            "otp": otp,
+            "referral_code": referral_code,
+            "state": state,
+            "city": city,
+            "pincode": pincode,
+            "country": country,
+        }
+    )
+
+    # ============================
+    # Response
+    # ============================
+
+    if created:
+        message = "Personal details saved successfully."
+    else:
+        message = "Personal details updated successfully."
+
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "contact_person_id": contact_person.id,
+        "created": created
+    })
+    
+def save_hospital_step_3(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    try:
+        hospital_profile = HospitalProfile.objects.get(
+            user_id=user.id
+        )
+    except HospitalProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    registration_no = request.POST.get("registration_no")
+    aadhar_card_no = request.POST.get("aadhar_card_no")
+    pan_card_no = request.POST.get("pan_card_no") 
+    
+    registration_file = request.FILES.get("registration_certificate")
+    aadhar_file = request.FILES.get("aadhar_document")
+    pan_file = request.FILES.get("pan_document")
+    logo_file = request.FILES.get("hospital_logo")
+    hospital_photo_file = request.FILES.get("hospital_photo")
+
+    if not registration_no:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital license number is required."
+        }, status=400)
+
+    if not aadhar_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar number is required."
+        }, status=400)
+
+    if not pan_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN number is required."
+        }, status=400)
+
+    if not registration_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital license document is required."
+        }, status=400)
+
+    if not aadhar_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar document is required."
+        }, status=400)
+
+    if not pan_file:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN document is required."
+        }, status=400)
+
+    if not logo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital logo is required."
+        }, status=400)
+
+    if not hospital_photo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital image is required."
+        }, status=400)
+
+    allowed_types = [
+        "image/jpeg",
+        "image/png",
+        "application/pdf"
+    ]
+
+    max_size = 5 * 1024 * 1024  # 5 MB
+
+    files = {
+        "Hospital License": registration_file,
+        "Aadhar Document": aadhar_file,
+        "PAN Document": pan_file,
+        "Hospital Logo": logo_file,
+        "Hospital Image": hospital_photo_file,
+    }
+
+    for field_name, file in files.items():
+
+        if file.content_type not in allowed_types:
+            return JsonResponse({
+                "success": False,
+                "message": f"{field_name}: Only JPG, JPEG, PNG and PDF files are allowed."
+            }, status=400)
+
+        if file.size > max_size:
+            return JsonResponse({
+                "success": False,
+                "message": f"{field_name}: File size must not exceed 5 MB."
+            }, status=400)
+
+    upload_dir = f"hospital_documents/{user.id}"
+
+    registration_path = default_storage.save(
+        f"{upload_dir}/registration/{registration_file.name}",
+        registration_file
+    )
+
+    aadhar_path = default_storage.save(
+        f"{upload_dir}/aadhar/{aadhar_file.name}",
+        aadhar_file
+    )
+
+    pan_path = default_storage.save(
+        f"{upload_dir}/pan/{pan_file.name}",
+        pan_file
+    )
+
+    logo_path = default_storage.save(
+        f"{upload_dir}/logo/{logo_file.name}",
+        logo_file
+    )
+
+    hospital_photo_path = default_storage.save(
+        f"{upload_dir}/hospital_photo/{hospital_photo_file.name}",
+        hospital_photo_file
+    )
+
+    hospital_profile.registration_no = registration_no
+    hospital_profile.registration_certificate_path = registration_path
+    hospital_profile.registration_doc_virus_scanned = True
+
+    hospital_profile.aadhar_card_no = aadhar_card_no
+    hospital_profile.aadhar_doc_path = aadhar_path
+    hospital_profile.aadhar_doc_virus_scanned = True
+
+    hospital_profile.pan_card_no = pan_card_no
+    hospital_profile.pan_doc_path = pan_path
+    hospital_profile.pan_doc_virus_scanned = True
+
+    hospital_profile.hospital_logo_path = logo_path
+    hospital_profile.hospital_logo_virus_scanned = True
+
+    hospital_profile.hospital_photo_path = hospital_photo_path
+    hospital_profile.hospital_photo_virus_scanned = True
+
+    hospital_profile.save()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Hospital documents saved successfully.",
+        "profile_id": hospital_profile.id,
+        "redirect_url": reverse("dashboard")
+    })
+    
+# doctor section 
+def doctor_kyc(request):
+    return render(request, 'registration/kyc_doctor.html')
+
+def doctor_profile_verification(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return redirect("login")
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    phone_number = user.phone_number
+    phone_country_code = user.phone_country_code    
+    
+    countries = CountryOption.objects.filter(
+        is_active=1
+    ).order_by("name")
+    
+    profile = DoctorProfile.objects.filter(
+        user_id=user.id
+    ).first()
+    
+    contact_person = ContactPerson.objects.filter(
+        profile_id=user.id
+    ).first()
+    
+    specialties = DoctorSpeciality.objects.filter(
+        is_active=1
+    ).order_by("name")
+    
+    educations = DoctorEducation.objects.filter(
+        is_active=1
+    ).order_by("name")
+    
+    experiences = DoctorExperience.objects.filter(
+        is_active=1
+    ).order_by("years")
+    
+    return render(
+        request, 
+        'registration/kyc_doctor_profile.html', 
+        {
+            "phone_number": phone_number,
+            "phone_country_code": phone_country_code,
+            "countries": countries,
+            "profile": profile,
+            "contact_person": contact_person,
+            "specialties": specialties,
+            "educations": educations,
+            "experiences": experiences,
+        }
+    )
+
+@csrf_protect
+@require_POST
+def save_doctor_profile(request):
+
+    step = request.POST.get("step")
+
+    if not step:
+        return JsonResponse({
+            "success": False,
+            "message": "Step is required."
+        }, status=400)
+
+    if step == "1":
+        return save_doctor_step_1(request)
+
+    elif step == "2":
+        return save_doctor_step_2(request)
+
+    elif step == "3":
+        return save_doctor_step_3(request)
+
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid step."
+    }, status=400)
+    
+def save_doctor_step_1(request):
+
+    user_id = request.session.get("user_id")
+    
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+        
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+    
+    email = request.POST.get("doc_email")
+    full_name = request.POST.get("doc_name")
+    gender = request.POST.get("doc_gender_value")
+    age = request.POST.get("doc_age")
+    specialty = request.POST.get("doc_speciality_value")
+    education = request.POST.get("doc_education_value")
+    experience = request.POST.get("doc_experience_value")
+    clinic_name = request.POST.get("doc_clinic")
+    owner_name = request.POST.get("doc_owner_name")
+    contact_number = request.POST.get("doc_phn")
+    alt_contact_number = request.POST.get("doc_alt_phn")
+    full_address = request.POST.get("doc_address")
+    country = request.POST.get("doc_country")
+    state_id = request.POST.get("doc_state")
+    city_id = request.POST.get("doc_city")
+    pincode = request.POST.get("doc_pincode")
+    clinic_timing_from = request.POST.get("clinic_timing_from")
+    clinic_timing_to = request.POST.get("clinic_timing_to")
+    home_visit_available = request.POST.get("doc_home_visit_value")
+    otp = request.POST.get("doc_otp")
+    referral_code = request.POST.get("doc_referral_code")
+    country_code = request.POST.get("doc_country_code_val")
+    
+    if not full_name:
+        return JsonResponse({
+            "success": False,
+            "message": "Doctor name is required."
+        }, status=400)
+
+    if not email:
+        return JsonResponse({
+            "success": False,
+            "message": "Email is required."
+        }, status=400)
+        
+    user.email = email
+    user.phone_country_code = country_code
+    user.phone_number = contact_number
+
+    user.save(update_fields=[
+        "email",
+        "updated_at"
+    ])
+    
+    state = None
+
+    if state_id:
+        try:
+            state = State.objects.get(id=state_id)
+        except State.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected state not found."
+            }, status=400)
+    
+    city = None
+
+    if city_id:
+        try:
+            city = City.objects.get(id=city_id)
+        except City.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected city not found."
+            }, status=400)
+                     
+    doctor_profile, created = DoctorProfile.objects.update_or_create(
+        user=user,
+        defaults={
+            "user_id": user_id,
+            "full_name": full_name,
+            "gender": gender,
+            "age": age,
+            "specialty_id": specialty,
+            "education_id": education,
+            "experience_id": experience,
+            "clinic_name": clinic_name,
+            "owner_name": owner_name,
+            "contact_number": contact_number,
+            "alt_contact_number": alt_contact_number,
+            "full_address": full_address,
+            "state_id": state_id,
+            "city_id": city_id,
+            "pincode": pincode,
+            "country": country,
+            "clinic_timing_from": clinic_timing_from,
+            "clinic_timing_to": clinic_timing_to,
+            "home_visit_available": home_visit_available,
+            "otp": otp,
+            "referral_code": referral_code,
+            
+        }
+    )
+    
+    if created:
+        message = "Doctor profile created successfully."
+    else:
+        message = "Doctor profile updated successfully."
+        
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "profile_id": doctor_profile.id,
+        "created": created
+    })
+
+def save_doctor_step_2(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    try:
+        doctor_profile = DoctorProfile.objects.get(
+            user_id=user.id
+        )
+    except DoctorProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    name = request.POST.get("doc_adm_name")
+    email = request.POST.get("doc_adm_email")
+    phone_country_code = request.POST.get("doc_phone_country_code")
+    phone_number = request.POST.get("doc_phone")
+    otp = request.POST.get("doc_personal_otp")
+    otp_verified = request.POST.get("doc_personal_otp_verified")
+    role = request.POST.get("doc_personal_role")
+    referral_code = request.POST.get("doc_personal_referral")
+
+    country_id = request.POST.get("doc_personal_country")
+    state_id = request.POST.get("doc_personal_state")
+    city_id = request.POST.get("doc_personal_city")
+    pincode = request.POST.get("doc_personal_pincode")
+
+    if not name:
+        return JsonResponse({
+            "success": False,
+            "message": "Admin name is required."
+        }, status=400)
+
+    if not email:
+        return JsonResponse({
+            "success": False,
+            "message": "Email is required."
+        }, status=400)
+
+    if not phone_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number is required."
+        }, status=400)
+
+    state = None
+
+    if state_id:
+        try:
+            state = State.objects.get(id=state_id)
+        except State.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected state not found."
+            }, status=400)
+
+    city = None
+
+    if city_id:
+        try:
+            city = City.objects.get(id=city_id)
+        except City.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected city not found."
+            }, status=400)
+
+    country = "India"
+
+    if country_id:
+        try:
+            country_obj = CountryOption.objects.get(id=country_id)
+            country = country_obj.name
+        except CountryOption.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected country not found."
+            }, status=400)
+
+    profile_type = user.user_type
+
+    contact_person, created = ContactPerson.objects.update_or_create(
+        profile=user,
+        profile_type=profile_type,
+        defaults={
+            "name": name,
+            "email": email,
+            "phone_country_code": phone_country_code,
+            "phone_number": phone_number,
+            "role": role,
+            "otp": otp,
+            "referral_code": referral_code,
+            "state": state,
+            "city": city,
+            "pincode": pincode,
+            "country": country,
+        }
+    )
+
+    # ============================
+    # Response
+    # ============================
+
+    if created:
+        message = "Personal details saved successfully."
+    else:
+        message = "Personal details updated successfully."
+
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "contact_person_id": contact_person.id,
+        "created": created
+    })
+    
+def save_doctor_step_3(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    try:
+        doctor_profile = DoctorProfile.objects.get(user_id=user.id)
+    except DoctorProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Doctor profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    # Get POST values
+    registration_no = request.POST.get("registration_no", "").strip()
+    aadhar_card_no = request.POST.get("aadhar_card_no", "").strip()
+    pan_card_no = request.POST.get("pan_card_no", "").strip()
+
+    # Get uploaded files
+    registration_file = request.FILES.get("registration_certificate")
+    aadhar_file = request.FILES.get("aadhar_document")
+    pan_file = request.FILES.get("pan_document")
+    logo_file = request.FILES.get("logo")
+    photo_file = request.FILES.get("photo")
+
+    # Validate document numbers
+    if not registration_no:
+        return JsonResponse({
+            "success": False,
+            "message": "License number is required."
+        }, status=400)
+
+    if not aadhar_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar number is required."
+        }, status=400)
+
+    if not pan_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN number is required."
+        }, status=400)
+
+    # Validate files
+    if not registration_file:
+        return JsonResponse({
+            "success": False,
+            "message": "License document is required."
+        }, status=400)
+
+    if not aadhar_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar document is required."
+        }, status=400)
+
+    if not pan_file:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN document is required."
+        }, status=400)
+
+    if not logo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Logo is required."
+        }, status=400)
+
+    if not photo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Image is required."
+        }, status=400)
+
+    # File validation
+    allowed_types = [
+        "image/jpeg",
+        "image/png",
+        "application/pdf"
+    ]
+
+    max_size = 5 * 1024 * 1024  # 5 MB
+
+    files = {
+        "License": registration_file,
+        "Aadhar Document": aadhar_file,
+        "PAN Document": pan_file,
+        "Logo": logo_file,
+        "Image": photo_file,
+    }
+
+    for field_name, file in files.items():
+
+        if file.content_type not in allowed_types:
+            return JsonResponse({
+                "success": False,
+                "message": (
+                    f"{field_name}: Only JPG, JPEG, PNG "
+                    "and PDF files are allowed."
+                )
+            }, status=400)
+
+        if file.size > max_size:
+            return JsonResponse({
+                "success": False,
+                "message": f"{field_name}: File size must not exceed 5 MB."
+            }, status=400)
+
+    # Upload directory
+    upload_dir = f"doctor_documents/{user.id}"
+
+    registration_path = default_storage.save(
+        f"{upload_dir}/registration/{registration_file.name}",
+        registration_file
+    )
+
+    aadhar_path = default_storage.save(
+        f"{upload_dir}/aadhar/{aadhar_file.name}",
+        aadhar_file
+    )
+
+    pan_path = default_storage.save(
+        f"{upload_dir}/pan/{pan_file.name}",
+        pan_file
+    )
+
+    logo_path = default_storage.save(
+        f"{upload_dir}/logo/{logo_file.name}",
+        logo_file
+    )
+
+    photo_path = default_storage.save(
+        f"{upload_dir}/clinic_photo/{photo_file.name}",
+        photo_file
+    )
+
+
+    doctor_profile.registration_number = registration_no
+    doctor_profile.registration_certificate_path = registration_path
+    doctor_profile.registration_certificate_virus_scanned = True
+
+    doctor_profile.aadhar_number = aadhar_card_no
+    doctor_profile.aadhar_doc_path = aadhar_path
+    doctor_profile.aadhar_doc_virus_scanned = True
+
+    doctor_profile.pan_number = pan_card_no
+    doctor_profile.pan_doc_path = pan_path
+    doctor_profile.pan_doc_virus_scanned = True
+
+    doctor_profile.clinic_logo_path = logo_path
+    doctor_profile.clinic_logo_virus_scanned = True
+
+    doctor_profile.clinic_photo_path = photo_path
+    doctor_profile.clinic_photo_virus_scanned = True
+
+    doctor_profile.save()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Doctor documents saved successfully.",
+        "profile_id": doctor_profile.id,
+        "redirect_url": reverse("dashboard")
+    })
+  
+def doctor_profile_review(request):
+    return render(request, 'registration/kyc_doctor_profile_review.html')
+
+
+
+
+
+
+def lab_kyc(request):
+    return render(request, 'registration/new_kyc_lab.html')
+
+def lab_profile_verification(request):
+    return render(request, 'registration/kyc_lab_profile.html')
+
+def lab_profile_review(request):
+    return render(request, 'registration/kyc_lab_profile_review.html')
+
+
+
+def pharmacy_kyc(request):
+    return render(request, 'registration/new_kyc_pharmacy.html')
+
+def pharmacy_profile_verification(request):
+    return render(request, 'registration/kyc_pharmacy_profile.html')
+
+def pharmacy_profile_review(request):
+    return render(request, 'registration/kyc_pharmacy_profile_review.html')

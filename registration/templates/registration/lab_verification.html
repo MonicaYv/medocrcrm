@@ -1,0 +1,911 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+
+{% block title %}Lab Profile Verification{% endblock %}
+
+{% block header %}
+<!-- Custom Simplified KYC Navbar -->
+<div class="sticky top-0 h-[72px] w-full flex items-center justify-between p-2 md:p-6 md:shadow-lg bg-white border-b border-slate-100 z-50">
+  <!-- Logo -->
+  <div class="w-16">
+    <img src="{{ logo|default:'/static/images/logo.svg' }}" alt="Logo" loading="lazy" class="w-10"/>
+  </div>
+
+  <!-- Right Actions (Notifications & Profile Only) -->
+  <div class="flex items-center gap-4">
+      <!-- Notification Icon -->
+      <div class="relative">
+        <img src="{% static 'images/bell.svg' %}" alt="bell" class="cursor-pointer has-tooltip w-6 h-6" id="bell-icon" />
+        <div class="absolute py-1 px-1.5 text-start text-xs tooltip -bottom-7 right-1 z-10 bg-white border rounded-md border-{{ border }} font-normal">
+          Notifications
+        </div>
+        <!-- Notification Dropdown -->
+        <div id="notificationDropdown" class="notificationDropdown hidden absolute right-1 top-8 mt-2 bg-white shadow-lg rounded-md z-50 w-130 border border-violet-sky">
+          <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative">
+            <button onclick="closeNotificationModal()" class="absolute top-2 right-2 text-gray-500 hover:text-black">&times;</button>
+            <div id="postDetailContent">
+              <h2 id="modalNgoName" class="text-2xl font-bold mb-2"></h2>
+              <h3 id="modalHeader" class="text-xl font-semibold mb-2"></h3>
+              <p id="modalDescription" class="mb-4">Notification </p>
+              <a id="modalWebsite" href="#" target="_blank" class="text-blue-600 underline mb-4 block"></a>            
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile Dropdown -->
+      <div class="relative inline-block">
+        <button class="profile-btn has-tooltip focus:outline-none">
+          <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8"/>
+        </button>
+        <div class="absolute py-1 px-1.5 text-start text-xs tooltip -bottom-6 right-3 z-10 bg-white border rounded-md border-{{ border }} font-normal">
+          Profile
+        </div>
+        <!-- Dropdown menu content -->
+        <div class="profile-dropdown border border-{{ border }}">
+          <a href="/settings/">
+            <div class="px-4 py-3 flex items-center space-x-3 cursor-pointer">
+              <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8 rounded-full" />
+              <div>
+                <p class="text-sm font-normal">
+                  {{ user_display_name|default:"User Name" }}
+                </p>
+              </div>
+            </div>
+          </a>
+          <div>
+            <a href="{% url 'logout' %}" class="px-4 py-3 text-sm hover:bg-violet-sky-opacity flex items-center space-x-2">
+              <span class="material-symbols-outlined"> logout </span>
+              <span>Sign out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    /* Stepper transition animations */
+    .step-fade-enter {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    .step-fade-active {
+        transition: all 0.3s ease-out;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    /* Hide scrollbar for dropdown menus */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 pt-6 pb-20">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <div>
+            <h1 class="text-xl md:text-2xl font-extrabold text-blue-charcoal tracking-tight">Lab Profile Verification</h1>
+            <p class="text-kyc-light-gray text-xs font-normal mt-1">Complete your account setup to unlock features.</p>
+        </div>
+        
+        <!-- Status Bar -->
+        <div class="flex flex-col w-full md:w-64 shrink-0">
+            <div class="flex justify-between items-baseline text-sm mb-1.5">
+                <span class="font-semibold text-blue-charcoal">Status</span>
+                <span id="status-percentage" class="font-extrabold text-blue-charcoal">33%</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2.5 rounded-full relative overflow-hidden">
+                <div id="status-bar-fill" class="absolute left-0 top-0 h-full bg-kyc-green rounded-full transition-all duration-500" style="width: 33.3%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stepper Navigation -->
+    <div class="bg-white rounded-2xl border border-kyc-medium-gray p-6 shadow-sm mb-8 relative">
+        <!-- Connecting Line Wrapper -->
+        <div class="hidden md:block absolute top-[44px] left-[16.6%] right-[16.6%] h-0.5 -z-10">
+            <div class="w-full h-full bg-slate-100 rounded"></div>
+            <div id="stepper-connecting-line" class="absolute left-0 top-0 h-full bg-green-500 rounded transition-all duration-500" style="width: 0%"></div>
+        </div>
+        
+        <div class="grid grid-cols-3 md:grid-cols-3 gap-6 md:gap-4 justify-between relative z-10">
+            <!-- Step 1 Trigger: Hospital Details -->
+            <div id="step-tab-1" class="step-tab-item flex flex-col items-center text-center">
+                <!-- Circle indicator -->
+                <div class="step-kyc-circle w-12 h-12 rounded-full border-2 border-kyc-icon bg-kyc-blue text-kyc-icon flex items-center justify-center font-bold text-lg shadow-sm transition-all duration-300 relative">
+                    <span class="step-kyc-icon material-symbols-outlined">
+                        {% if user.user_type == 'hospital' %}biotech{% elif user.user_type == 'pharmacy' %}local_pharmacy{% else %}storefront{% endif %}
+                    </span>
+                </div>
+                <span class="step-label font-bold text-blue-charcoal text-sm mt-3 transition-colors">
+                   Lab Details
+                </span>
+            </div>
+
+            <!-- Step 2 Trigger: Personal Details -->
+            <div id="step-tab-2" class="step-tab-item flex flex-col items-center text-center">
+                <!-- Circle indicator -->
+                <div class="step-kyc-circle w-12 h-12 rounded-full border-2 border-kyc-icon bg-kyc-blue text-kyc-icon flex items-center justify-center font-bold text-lg shadow-sm transition-all duration-300 relative">
+                    <span class="step-kyc-icon material-symbols-outlined">lock</span>
+                </div>
+                <span class="step-label font-semibold text-slate-400 text-sm mt-3 transition-colors">Personal Details</span>
+            </div>
+
+            <!-- Step 3 Trigger: Documents -->
+            <div id="step-tab-3" class="step-tab-item flex flex-col items-center text-center">
+                <!-- Circle indicator -->
+                <div class="step-kyc-circle w-12 h-12 rounded-full border-2 border-kyc-icon bg-kyc-blue text-kyc-icon flex items-center justify-center font-bold text-lg shadow-sm transition-all duration-300 relative">
+                    <span class="step-kyc-icon material-symbols-outlined">lock</span>
+                </div>
+                <span class="step-label font-semibold text-slate-400 text-sm mt-3 transition-colors">Documents</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="bg-white p-2">
+        <form id="profile-verification-form" method="POST" enctype="multipart/form-data">
+            
+            <!-- STEP 1 PANEL (Lab Details) -->
+            <div id="step-panel-1" class="step-panel flex flex-col gap-6">
+                <div>
+                    <span class="text-xs font-bold text-kyc-icon uppercase tracking-wider">Step 1 of 3</span>
+                    <h3 class="text-lg font-bold text-blue-charcoal mt-2">Lab Details</h3>
+                    <p class="text-kyc-light-gray text-xs mt-0.5">Provide your clinical laboratory credentials and operational details.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Lab Registration Number -->
+                    <div>
+                        <input type="text" id="lab_registration_number" name="lab_registration_number" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Lab Registration Number" required>
+                    </div>
+
+                    <!-- Lab Name -->
+                    <div>
+                        <input type="text" id="lab_name" name="lab_name" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Lab Name" required>
+                    </div>
+
+                    <!-- Owner Name -->
+                    <div>
+                        <input type="text" id="owner_name" name="owner_name" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Owner Name" required>
+                    </div>
+
+                    <!-- Lab Timing Custom Dropdown -->
+                    <div class="relative custom-dropdown-container">
+                        <button type="button" class="custom-dropdown-btn w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-4 text-kyc-light-gray text-sm focus:outline-none transition-all">
+                            <span class="selected-value-text">Lab Timing</span>
+                            <span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-200">expand_more</span>
+                        </button>
+                        <input type="hidden" name="lab_timing" class="custom-dropdown-input" required>
+                        <!-- Dropdown List -->
+                        <div class="custom-dropdown-list hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="08:00 AM - 08:00 PM">08:00 AM - 08:00 PM</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="09:00 AM - 06:00 PM">09:00 AM - 06:00 PM</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="10:00 AM - 08:00 PM">10:00 AM - 08:00 PM</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800" data-value="Open 24 Hours">Open 24 Hours</button>
+                        </div>
+                    </div>
+
+                    <!-- Services Custom Dropdown -->
+                    <div class="relative custom-dropdown-container">
+                        <button type="button" class="custom-dropdown-btn w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-4 text-kyc-light-gray text-sm focus:outline-none transition-all">
+                            <span class="selected-value-text">Services</span>
+                            <span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-200">expand_more</span>
+                        </button>
+                        <input type="hidden" name="services" class="custom-dropdown-input" required>
+                        <!-- Dropdown List -->
+                        <div class="custom-dropdown-list hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Pathology">Pathology Tests</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Radiology">Radiology & Imaging</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Hematology">Hematology Tests</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800" data-value="Biochemistry">Biochemistry Analysis</button>
+                        </div>
+                    </div>
+
+                    <!-- Facilities Custom Dropdown -->
+                    <div class="relative custom-dropdown-container">
+                        <button type="button" class="custom-dropdown-btn w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-4 text-kyc-light-gray text-sm focus:outline-none transition-all">
+                            <span class="selected-value-text">Facilities</span>
+                            <span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-200">expand_more</span>
+                        </button>
+                        <input type="hidden" name="facilities" class="custom-dropdown-input" required>
+                        <!-- Dropdown List -->
+                        <div class="custom-dropdown-list hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Home Sample Collection">Home Sample Collection</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Wheelchair Access">Wheelchair Access</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="AC Waiting Lounge">AC Waiting Lounge</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800" data-value="Ample Parking">Ample Parking Available</button>
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="md:col-span-2">
+                        <input type="text" id="address" name="address" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Address" required>
+                    </div>
+
+                    <!-- City -->
+                    <div>
+                        <input type="text" id="city" name="city" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="City" required>
+                    </div>
+
+                    <!-- State -->
+                    <div>
+                        <input type="text" id="state" name="state" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="State" required>
+                    </div>
+
+                    <!-- Country -->
+                    <div>
+                        <input type="text" id="country" name="country" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Country" required>
+                    </div>
+
+                    <!-- Pincode -->
+                    <div>
+                        <input type="text" id="pincode" name="pincode" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Pincode" required>
+                    </div>
+                </div>
+            </div><div id="step-panel-2" class="step-panel hidden flex flex-col gap-6">
+                <div>
+                    <span class="text-xs font-bold text-kyc-icon uppercase tracking-wider">Step 2 of 3</span>
+                    <h3 class="text-lg font-bold text-blue-charcoal mt-2">Personal Details</h3>
+                    <p class="text-kyc-light-gray text-xs mt-0.5">Provide your basic profile details for validation.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Owner Full Name -->
+                    <div>
+                        <input type="text" id="full_name" name="full_name" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Owner Full Name" required>
+                    </div>
+
+                    <!-- Gender Custom Dropdown -->
+                    <div class="relative custom-dropdown-container">
+                        <button type="button" class="custom-dropdown-btn w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-4 text-kyc-light-gray text-sm focus:outline-none transition-all">
+                            <span class="selected-value-text">Select Gender</span>
+                            <span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-200">expand_more</span>
+                        </button>
+                        <input type="hidden" name="gender" class="custom-dropdown-input" required>
+                        <!-- Dropdown List -->
+                        <div class="custom-dropdown-list hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Male">Male</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-value="Female">Female</button>
+                            <button type="button" class="dropdown-option-item w-full py-2.5 px-4 text-left hover:bg-slate-50 text-sm text-slate-800" data-value="Other">Other</button>
+                        </div>
+                    </div>
+
+                    <!-- Age -->
+                    <div>
+                        <input type="number" id="age" name="age" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
+                               placeholder="Age" required>
+                    </div>
+
+                    <!-- Contact Number -->
+                    <div>
+                        <div class="flex gap-3">
+                            <!-- Custom Dropdown -->
+                            <div class="relative shrink-0 w-24">
+                                <button type="button" id="country-dropdown-btn" class="w-full h-12 rounded-md border border-dark-gray bg-white flex items-center justify-between px-3 text-slate-700 text-sm focus:outline-none transition-all">
+                                    <span id="selected-code">+91</span>
+                                    <span class="material-symbols-outlined text-lg">expand_more</span>
+                                </button>
+                                <input type="hidden" id="phone_country_code" name="phone_country_code" value="+91">
+                                <!-- Dropdown List -->
+                                <div id="country-dropdown-list" class="hidden absolute left-0 right-0 mt-1 bg-white border border-dark-gray rounded-md shadow-lg z-30 max-h-48 overflow-y-auto no-scrollbar">
+                                    <button type="button" class="country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-code="+91">+91 (IN)</button>
+                                    <button type="button" class="country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-code="+1">+1 (US)</button>
+                                    <button type="button" class="country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-code="+44">+44 (UK)</button>
+                                    <button type="button" class="country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800 border-b border-slate-100" data-code="+61">+61 (AU)</button>
+                                    <button type="button" class="country-option w-full py-2.5 px-3 text-left hover:bg-slate-50 text-sm text-slate-800" data-code="+86">+86 (CN)</button>
+                                </div>
+                            </div>
+                            <!-- Phone Input -->
+                            <input type="tel" id="phone" name="contact_number" 
+                                   class="flex-1 h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-slate-800 text-sm placeholder:text-kyc-light-gray" 
+                                   placeholder="Contact Number" required>
+                        </div>
+                    </div>
+
+                    <!-- OTP verification -->
+                    <div class="flex flex-col gap-1.5 justify-end">
+                        <div class="flex gap-3">
+                            <button type="button" class="h-12 px-6 rounded-md bg-kyc-blue hover:bg-blue-200 text-white font-semibold text-sm transition-all focus:outline-none shrink-0" style="background-color: var(--color-primary-color-opacity); color: var(--color-primary-color);">
+                                Send OTP
+                            </button>
+                            <div class="flex-1 relative flex items-center">
+                                <input type="text" id="otp" name="otp" 
+                                       class="w-full h-12 rounded-md border border-dark-gray pl-4 pr-24 focus:outline-none transition-all text-sm tracking-wide placeholder:text-kyc-light-gray" placeholder="Enter OTP">
+                                <div class="absolute right-3 flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md border border-green-200">
+                                    <span class="material-symbols-outlined text-sm font-black">check</span>
+                                    <span>Verified</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alternate Contact Number -->
+                    <div>
+                        <input type="tel" id="alt_contact_number" name="alt_contact_number" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" 
+                               placeholder="Alt Contact Number">
+                    </div>
+
+                    <!-- Referral Code -->
+                    <div>
+                        <input type="text" id="referral_code" name="referral_code" 
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" 
+                               placeholder="Referral Code">
+                    </div>
+                </div>
+            </div><div id="step-panel-3" class="step-panel hidden flex flex-col gap-6">
+                <div>
+                    <span class="text-xs font-bold text-kyc-icon uppercase tracking-wider">Step 3 of 3</span>
+                    <h3 class="text-lg font-bold text-blue-charcoal mt-2">Upload verification Documents</h3>
+                    <p class="text-kyc-light-gray text-xs mt-0.5">Upload required credentials and registration documents for verification.</p>
+                </div>
+
+                <!-- Step 3 Main content (Document rows and rejection) -->
+                <div id="step4-main-content" class="flex flex-col gap-6">
+                    <!-- Document rows list -->
+                    <div class="flex flex-col">
+                        <!-- Row 1: Lab Registration Certificate -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">Lab Registration Certificate</span>
+                                <input type="text" name="lab_certificate_number" placeholder="Enter Certificate No." 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto">
+                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
+                                    <span>Virus scan</span>
+                                </div>
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-certificate">
+                                    No file chosen
+                                </div>
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='lab_certificate_path']" data-title="Lab Registration Certificate">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
+                                    <span class="material-symbols-outlined text-lg">upload</span>
+                                    <input type="file" name="lab_certificate_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-certificate">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Aadhaar Card -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">Aadhaar Card (Identity Proof)</span>
+                                <input type="text" name="identity_proof_aadhar_number" placeholder="Enter Aadhaar Number" 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto">
+                                <div class="flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded text-[10px] font-bold" id="badge-aadhar">
+                                    <span class="material-symbols-outlined mini-icon bg-red-600 text-white rounded-sm flex items-center justify-center font-bold">close</span>
+                                    <span>Blurry, Unclear</span>
+                                </div>
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-aadhar">
+                                    No file chosen
+                                </div>
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='identity_proof_aadhar_path']" data-title="Aadhaar Card Document">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
+                                    <span class="material-symbols-outlined text-lg">upload</span>
+                                    <input type="file" name="identity_proof_aadhar_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-aadhar" data-badge="#badge-aadhar">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: PAN Card -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">PAN Card (Identity Proof)</span>
+                                <input type="text" name="identity_proof_pan_number" placeholder="Enter PAN Number" 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto">
+                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
+                                    <span>Virus scan</span>
+                                </div>
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-pan">
+                                    No file chosen
+                                </div>
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='identity_proof_pan_path']" data-title="PAN Card Document">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
+                                    <span class="material-symbols-outlined text-lg">upload</span>
+                                    <input type="file" name="identity_proof_pan_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-pan">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Government License -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-black">Government Operating License</span>
+                                <input type="text" name="gov_license_number" placeholder="Enter License No." 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto">
+                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
+                                    <span>Virus scan</span>
+                                </div>
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-gov">
+                                    No file chosen
+                                </div>
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='gov_license_path']" data-title="Government License">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
+                                    <span class="material-symbols-outlined text-lg">upload</span>
+                                    <input type="file" name="gov_license_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-gov">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Row 5: Lab Facility Photo -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
+                            <div>
+                                <span class="text-sm font-bold text-black">Lab Facility Photo</span>
+                            </div>
+                            <div class="flex items-center gap-3 self-end sm:self-auto">
+                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">check</span>
+                                    <span>Virus scan</span>
+                                </div>
+                                <div class="border border-dashed border-blue-400 rounded-md px-3 py-1 bg-blue-50/10 text-xs font-semibold text-blue-500 cursor-pointer min-w-[90px] text-center" id="file-name-photo">
+                                    No file chosen
+                                </div>
+                                <button type="button" class="step4-view-btn w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800" data-input="input[name='lab_photo_path']" data-title="Lab Facility Photo">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button type="button" class="w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all text-slate-500 hover:text-slate-800 relative overflow-hidden">
+                                    <span class="material-symbols-outlined text-lg">upload</span>
+                                    <input type="file" name="lab_photo_path" class="absolute inset-0 opacity-0 cursor-pointer step4-file-input" data-target="#file-name-photo">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rejection Explanation Alert Panel -->
+                    <div class="p-6 bg-blue-50/30 border border-blue-100/50 rounded-2xl flex flex-col gap-4 mt-4">
+                        <h4 class="text-sm font-bold text-blue-600">Rejection explanation:</h4>
+                        <ul class="flex flex-col gap-3 text-xs text-slate-600 leading-normal list-none pl-0">
+                            <li>
+                                <strong class="text-slate-800 font-semibold">Blurry or Unreadable Document</strong> - The uploaded file is not clear. Please ensure the text and details are fully visible.
+                            </li>
+                            <li>
+                                <strong class="text-slate-800 font-semibold">Expired or Outdated Document</strong> - The document has passed its validity date. Please upload a current version.
+                            </li>
+                            <li>
+                                <strong class="text-slate-800 font-semibold">Wrong File Format or Incomplete Upload</strong> - Only PDF, JPG, or PNG files are accepted. Ensure the full document is uploaded.
+                            </li>
+                            <li>
+                                <strong class="text-slate-800 font-semibold">Incorrect or Mismatched Information</strong> - The document does not match your profile details (e.g., name, ID, registration info).
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 3 Preview content (Separate Div, full-width, hidden by default) -->
+                <div id="step4-preview-content" class="hidden flex flex-col bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden w-full max-w-4xl mx-auto">
+                    <!-- Title Bar -->
+                    <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-white">
+                        <div class="flex items-center gap-2 text-slate-800 font-bold text-sm">
+                            <span class="material-symbols-outlined text-lg text-kyc-icon">document_scanner</span>
+                            <span id="preview-modal-title" class="text-slate-700">Select a Document to View</span>
+                        </div>
+                        <button type="button" id="close-preview-btn" class="text-slate-400 hover:text-slate-700 flex items-center justify-center focus:outline-none">
+                            <span class="material-symbols-outlined text-xl">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="flex-1 bg-[#d9d9d9] p-6 flex flex-col items-center justify-center min-h-[350px] relative">
+                        <!-- Image Card Container -->
+                        <div class="bg-white rounded-lg shadow-md p-4 w-full max-w-md aspect-[3/4] flex items-center justify-center overflow-hidden">
+                            <img id="preview-image-element" src="" alt="Document Preview" class="w-full h-full object-contain hidden">
+                            <!-- Placeholder when no file uploaded -->
+                            <div id="preview-placeholder" class="flex flex-col items-center gap-3 text-slate-400 text-center">
+                                <span class="material-symbols-outlined text-4xl">description</span>
+                                <span class="text-xs font-semibold">Click the eye icon next to a document to view</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Metadata Row -->
+                        <div class="w-full max-w-md flex justify-between items-center mt-3 px-1">
+                            <span class="text-[10px] text-slate-500">Image (JPG, PNG), Maximum file size: 5MB</span>
+                            <div class="flex items-center gap-1.5 text-green-600 text-[10px] font-bold">
+                                <span>Virus scan</span>
+                                <span class="material-symbols-outlined text-xs bg-green-600 text-white rounded-sm w-3.5 h-3.5 flex items-center justify-center font-bold">check</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-white">
+                        <!-- Replace Button -->
+                        <button type="button" id="preview-replace-btn" class="h-9 px-4 rounded border border-kyc-icon text-kyc-icon hover:bg-slate-50 font-semibold text-xs transition-all focus:outline-none flex items-center justify-center gap-1.5">
+                            <span class="material-symbols-outlined text-base">upload</span>
+                            <span>Replace</span>
+                        </button>
+
+                        <!-- Save Button -->
+                        <button type="button" id="preview-save-btn" class="h-9 px-6 rounded bg-kyc-icon text-white font-bold text-xs shadow hover:opacity-95 transition-all focus:outline-none flex items-center justify-center">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div><!-- Footer Buttons -->
+            <div class="flex items-center justify-between border-t border-slate-100 pt-6 mt-8">
+                <!-- Back Button -->
+                <button type="button" id="prev-step-btn" class="h-12 px-6 rounded-md border-2 border-kyc-icon text-kyc-icon font-semibold text-sm transition-all cursor-pointer focus:outline-none flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">arrow_back</span>
+                    <span>Back</span>
+                </button>
+
+                <!-- Save & Continue Button -->
+                <button type="button" id="next-step-btn" class="w-full sm:w-auto h-12 px-8 rounded-md bg-kyc-icon text-white font-bold text-sm shadow-md hover:opacity-95 transition-all focus:outline-none flex items-center justify-center gap-2 group/btn cursor-pointer">
+                    <span id="next-btn-text">Save & Continue</span>
+                    <span class="material-symbols-outlined text-lg transition-transform duration-200 group-hover/btn:translate-x-1">arrow_forward</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Toggle custom dropdowns
+        $(document).on('click', '.custom-dropdown-btn', function(e) {
+            e.stopPropagation();
+            const container = $(this).closest('.custom-dropdown-container');
+            
+            // Close other open dropdowns
+            $('.custom-dropdown-container').not(container).find('.custom-dropdown-list').addClass('hidden');
+            $('.custom-dropdown-container').not(container).find('.material-symbols-outlined').removeClass('rotate-180');
+            
+            container.find('.custom-dropdown-list').toggleClass('hidden');
+            $(this).find('.material-symbols-outlined').toggleClass('rotate-180');
+        });
+
+        // Select option item
+        $(document).on('click', '.dropdown-option-item', function() {
+            const option = $(this);
+            const value = option.data('value');
+            const text = option.text();
+            const container = option.closest('.custom-dropdown-container');
+            const btn = container.find('.custom-dropdown-btn');
+            const input = container.find('.custom-dropdown-input');
+            
+            input.val(value);
+            btn.find('.selected-value-text').text(text);
+            btn.removeClass('text-kyc-light-gray').addClass('text-blue-charcoal font-medium');
+            
+            container.find('.custom-dropdown-list').addClass('hidden');
+            btn.find('.material-symbols-outlined').removeClass('rotate-180');
+        });
+
+        // Close dropdowns on clicking outside
+        $(document).on('click', function() {
+            $('.custom-dropdown-list').addClass('hidden');
+            $('.custom-dropdown-btn .material-symbols-outlined').removeClass('rotate-180');
+        });
+
+        
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        // Initialize stepper styling on load
+        updateStepTab(1, 'active');
+        updateStepTab(2, 'locked');
+        updateStepTab(3, 'locked');
+
+        // Custom Country Code Dropdown toggle
+        $('#country-dropdown-btn').on('click', function(e) {
+            e.stopPropagation();
+            $('#country-dropdown-list').toggleClass('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        $(document).on('click', function() {
+            $('#country-dropdown-list').addClass('hidden');
+        });
+
+        // Select country option
+        $('.country-option').on('click', function() {
+            const code = $(this).data('code');
+            $('#selected-code').text(code);
+            $('#phone_country_code').val(code);
+            $('#country-dropdown-list').addClass('hidden');
+        });
+
+        // Numeric constraint for phone input field
+        $('#phone').on('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Custom Country Code Dropdown toggle for Facility (Step 3)
+        $('#facility-country-dropdown-btn').on('click', function(e) {
+            e.stopPropagation();
+            $('#facility-country-dropdown-list').toggleClass('hidden');
+        });
+
+        // Select country option for Facility
+        $('.facility-country-option').on('click', function() {
+            const code = $(this).data('code');
+            $('#facility-selected-code').text(code);
+            $('#facility_phone_country_code').val(code);
+            $('#facility-country-dropdown-list').addClass('hidden');
+        });
+
+        // Numeric constraint for Facility phone input field
+        $('#facility_phone').on('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+
+
+        // File Upload feedback animation
+        $('input[type="file"]').on('change', function() {
+            const input = $(this);
+            const parent = input.parent();
+            const fileName = this.files.length > 0 ? this.files[0].name : '';
+            
+            if (fileName) {
+                // Change style to selected state
+                parent.removeClass('border-dashed border-slate-200 border-blue-400')
+                      .addClass('border-solid border-green-500 bg-green-50/10');
+                parent.find('.material-symbols-outlined')
+                      .text('task')
+                      .removeClass('text-slate-400 text-{{ border }}')
+                      .addClass('text-green-600');
+                parent.find('.text-slate-700, .font-bold')
+                      .text('File selected successfully!')
+                      .removeClass('text-slate-700')
+                      .addClass('text-green-800');
+                parent.find('.text-slate-400, .text-[10px]')
+                      .text(fileName)
+                      .removeClass('text-slate-400')
+                      .addClass('text-green-600 font-semibold');
+            }
+        });
+
+        // Step 4 File Upload Handlers & Modal Preview Integration
+        let activeFileInput = null;
+
+        $('.step4-file-input').on('change', function() {
+            const input = $(this);
+            const targetBox = $(input.data('target'));
+            const badgeSelector = input.data('badge');
+            const fileName = this.files.length > 0 ? this.files[0].name : '';
+
+            if (fileName) {
+                // Update file indicator box text
+                targetBox.text(fileName);
+                targetBox.removeClass('border-blue-400 text-blue-500').addClass('border-green-500 text-green-600 bg-green-50/10');
+                
+                // If there was a Blurry badge, turn it into a green Virus Scan badge!
+                if (badgeSelector) {
+                    const badge = $(badgeSelector);
+                    badge.removeClass('bg-red-50 text-red-600 border-red-200')
+                         .addClass('bg-green-50 text-green-600 border-green-200');
+                    badge.find('.material-symbols-outlined').text('check');
+                    badge.find('span:last-child').text('Virus scan');
+                }
+
+                // If the modal is open for this active input, update its preview image live
+                if (activeFileInput === this && this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview-image-element').attr('src', e.target.result).removeClass('hidden');
+                        $('#preview-placeholder').addClass('hidden');
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            }
+        });
+
+        // Step 4 Eye Icon Click handler (Inline preview display)
+        $('.step4-view-btn').on('click', function() {
+            const btn = $(this);
+            const docTitle = btn.data('title');
+            const selector = btn.data('input');
+            const fileInput = $(selector)[0];
+            
+            activeFileInput = fileInput; // Cache input element reference
+
+            $('#preview-modal-title').text(docTitle);
+
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview-image-element').attr('src', e.target.result).removeClass('hidden');
+                    $('#preview-placeholder').addClass('hidden');
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                // If no file uploaded, show placeholder warning view
+                $('#preview-image-element').addClass('hidden').attr('src', '');
+                $('#preview-placeholder').removeClass('hidden');
+            }
+
+            // Hide Step 4 list & rejection explanation, show preview div
+            $('#step4-main-content').addClass('hidden');
+            $('#step4-preview-content').removeClass('hidden');
+        });
+
+        // Close preview panel resets preview elements and shows Step 4 list back
+        $('#close-preview-btn, #preview-save-btn').on('click', function() {
+            activeFileInput = null;
+            $('#preview-modal-title').text('Select a Document to View');
+            $('#preview-image-element').addClass('hidden').attr('src', '');
+            $('#preview-placeholder').removeClass('hidden');
+
+            // Hide preview, show Step 4 list & rejection explanation
+            $('#step4-preview-content').addClass('hidden');
+            $('#step4-main-content').removeClass('hidden');
+        });
+
+        // Replace button click triggers corresponding file input click
+        $('#preview-replace-btn').on('click', function() {
+            if (activeFileInput) {
+                $(activeFileInput).click();
+            }
+        });
+
+        // Next button click handler (navigates steps or submits)
+        $('#next-step-btn').on('click', function() {
+            // Basic form validation for the current visible panel (Bypassed for now)
+            const currentPanel = $(`#step-panel-${currentStep}`);
+            let isValid = true;
+
+            if (currentStep < totalSteps) {
+                // Update current step tab indicator to COMPLETED state (green checkmark)
+                updateStepTab(currentStep, 'completed');
+                
+                // Hide current panel and show next panel with entry animation
+                $(`#step-panel-${currentStep}`).addClass('hidden');
+                currentStep++;
+                $(`#step-panel-${currentStep}`)
+                    .removeClass('hidden')
+                    .addClass('step-fade-enter');
+                
+                setTimeout(() => {
+                    $(`#step-panel-${currentStep}`)
+                        .removeClass('step-fade-enter')
+                        .addClass('step-fade-active');
+                }, 50);
+
+                // Update tab indicator to ACTIVE state
+                updateStepTab(currentStep, 'active');
+
+                // Update progress percentage
+                updateProgress(currentStep);
+
+                if (currentStep === totalSteps) {
+                    $('#next-btn-text').text('Submit Verification');
+                }
+            } else {
+                // final submit - redirect to profile review page
+                window.location.href = "{% url 'profile_review' %}";
+            }
+        });
+
+        // Previous button click handler
+        $('#prev-step-btn').on('click', function() {
+            if (currentStep > 1) {
+                // Revert current step tab back to LOCKED/INACTIVE state
+                updateStepTab(currentStep, 'locked');
+                
+                $(`#step-panel-${currentStep}`).addClass('hidden');
+                currentStep--;
+                
+                $(`#step-panel-${currentStep}`)
+                    .removeClass('hidden')
+                    .addClass('step-fade-enter');
+                
+                setTimeout(() => {
+                    $(`#step-panel-${currentStep}`)
+                        .removeClass('step-fade-enter')
+                        .addClass('step-fade-active');
+                }, 50);
+
+                // Revert active tab to ACTIVE state
+                updateStepTab(currentStep, 'active');
+
+                // Update progress
+                updateProgress(currentStep);
+
+                $('#next-btn-text').text('Save & Continue');
+            } else {
+                // Redirect back to new_kyc page when clicking Back on Step 1
+                window.location.href = "{% url 'new_kyc' %}";
+            }
+        });
+
+        // Helper to update progress status display
+        function updateProgress(step) {
+            let percentage = Math.round(100 / totalSteps * step);
+            if (step === totalSteps) percentage = 95; // Leave room for submission
+            
+            $('#status-percentage').text(percentage + '%');
+            $('#status-bar-fill').css('width', percentage + '%');
+            
+            // Stepper connecting line width
+            let lineWidth = 50 * (step - 1);
+            $('#stepper-connecting-line').css('width', lineWidth + '%');
+        }
+
+        // Helper to toggle stepper icon and circle borders/colors dynamically
+        function updateStepTab(stepNum, state) {
+            const tab = $(`#step-tab-${stepNum}`);
+            const circle = tab.find('.step-kyc-circle');
+            const label = tab.find('.step-label');
+            const icon = tab.find('.step-kyc-icon');
+
+            // Clear all state classes first to prevent style conflicts
+            circle.removeClass('border-kyc-icon bg-kyc-blue text-kyc-icon bg-kyc-green text-white font-bold border-slate-200 bg-slate-50 text-slate-400 font-semibold');
+            label.removeClass('text-slate-400 text-green-600 text-slate-800 text-blue-charcoal font-semibold font-bold');
+
+            if (state === 'active') {
+                // Active Brand Theme Border & Icon
+                circle.addClass('border-kyc-icon bg-kyc-blue text-kyc-icon');
+                label.addClass('text-blue-charcoal font-bold');
+                
+                // Set appropriate icon
+                if (stepNum === 1) icon.text('{% if user.user_type == "hospital" %}biotech{% elif user.user_type == "pharmacy" %}local_pharmacy{% else %}storefront{% endif %}');
+                else if (stepNum === 2) icon.text('person');
+                else icon.text('description');
+
+            } else if (state === 'completed') {
+                // Completed Green Checkmark
+                circle.addClass('bg-kyc-green text-white font-bold');
+                label.addClass('text-green-600 font-bold');
+                icon.text('check');
+
+            } else if (state === 'locked') {
+                // Locked Gray Style
+                circle.addClass('border-slate-200 bg-slate-50 text-slate-400 font-semibold');
+                label.addClass('text-slate-400 font-semibold');
+                icon.text('lock');
+            }
+        }
+    });
+</script>
+{% endblock %}
