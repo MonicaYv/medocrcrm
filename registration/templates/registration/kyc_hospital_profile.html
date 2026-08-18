@@ -119,7 +119,7 @@
             <div id="stepper-connecting-line" class="absolute left-0 top-0 h-full bg-green-500 rounded transition-all duration-500" style="width: 0%"></div>
         </div>
         
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 justify-between relative z-10">
+        <div class="grid grid-cols-3 md:grid-cols-3 gap-6 md:gap-4 justify-between relative z-10">
             <!-- Step 1 Trigger -->
             <div id="step-tab-1" class="step-tab-item flex flex-col items-center text-center">
                 <!-- Circle indicator -->
@@ -525,9 +525,8 @@
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
                             <div>
                                 <span class="text-sm font-bold text-black">Hospital License Number & Document</span>
-                                <p class="text-[11px] text-medium-gray mt-0.5">
-                                    <input type="text" placeholder="MH/C/2022/123456" id="hos_registration_no" name="hos_registration_no">
-                                </p>
+                                <input type="text" id="hos_registration_no" name="hos_registration_no" placeholder="Enter Hospital License Number" 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
                             </div>
                             <div class="flex items-center gap-3 self-end sm:self-auto">
                                 <!-- Verification Badge -->
@@ -555,9 +554,8 @@
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
                             <div>
                                 <span class="text-sm font-bold text-black">Admin Aadhar Proof</span>
-                                <p class="text-[11px] text-medium-gray mt-0.5">
-                                    <input type="text" placeholder="MUMA12345B" id="hos_aadhar_no" name="hos_aadhar_no">
-                                </p>
+                                <input type="text" id="hos_aadhar_no" name="hos_aadhar_no" placeholder="Enter Aadhar Number" 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">                                
                             </div>
                             <div class="flex items-center gap-3 self-end sm:self-auto">
                                 <!-- Verification Badge -->
@@ -585,9 +583,8 @@
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-slate-100 gap-4">
                             <div>
                                 <span class="text-sm font-bold text-black">PAN Number & Document</span>
-                                <p class="text-[11px] text-medium-gray mt-0.5">
-                                    <input type="text" placeholder="AABCM1234F" id="hos_pan_no" name="hos_pan_no">
-                                </p>
+                                <input type="text" id="hos_pan_no" name="hos_pan_no" placeholder="Enter PAN Number" 
+                                       class="w-full max-w-[200px] h-8 rounded border border-dark-gray px-2.5 text-xs text-blue-charcoal placeholder:text-kyc-light-gray focus:outline-none focus:border-kyc-icon transition-all">
                             </div>
                             <div class="flex items-center gap-3 self-end sm:self-auto">
                                 <!-- Verification Badge -->

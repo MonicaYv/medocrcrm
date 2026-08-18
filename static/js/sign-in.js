@@ -209,3 +209,8 @@ document.getElementById("resendLink").addEventListener("click", (e) => {
 //     otpBoxes.find((b) => !b.value)?.focus();
 //   }
 // });
+
+
+document.getElementById("closeBtn").addEventListener("click", function () {
+  window.location.href = this.dataset.url;
+});

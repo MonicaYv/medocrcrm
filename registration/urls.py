@@ -10,6 +10,7 @@ urlpatterns = [
     path('login', views.login_page, name='login_page'),
     path('auth/login', views.login_auth, name='login_auth'),
     path('auth/login-old', views.login_auth_OLD, name='login_auth_old'),
+    
     path('save/advertiser', views.save_advertiser, name='save_advertiser'),
     path('save/client', views.save_client, name='save_client'),
     path('save/medical_pharmacy', views.save_medical_pharmacy, name='save_pharmacy'),        
@@ -17,35 +18,50 @@ urlpatterns = [
     path("otp/verify", views.verify_otp, name="verify_otp"),
     path('forgot-password', views.forgot_password, name='forgot_password'),
     path("reset-password/<str:token>/", views.reset_password, name="reset_password"),
+    
     path("save/lab", views.save_lab, name="save_lab"),
     path("save/doctor", views.save_doctor, name="save_doctor"),
-    path("save/hospital", views.save_hospital, name="save_hospital"),
     path('file-scan/',views.file_scan_api,name='file_scan'),
     path("send-contact-person-otp/",views.send_contact_person_otp,name="send_contact_person_otp",),
+    
     path("new-signin/", views.new_signin, name="new_signin"),
     path("new-otp-verify/", views.new_otp_verify, name="new_otp_verify"),
     path("new-signup/", views.new_signup, name="new_signup"),
-    # path("new-kyc/", views.new_kyc, name="new_kyc"),
-    # path("profile-verification/", views.profile_verification, name="profile_verification"),
-    # path("profile-review/", views.profile_review, name="profile_review"),
-    path("doctor-verification/", views.doctor_verification, name="doctor_verification"),
+    
+    # path("doctor-verification/", views.doctor_verification, name="doctor_verification"),
     path("lab-verification/", views.lab_verification, name="lab_verification"),
     path("pharmacy-verification/", views.pharmacy_verification, name="pharmacy_verification"),
     path('check-phone', views.check_phone, name='check_phone'),
     path('auth/verify-login-otp', views.verify_login_otp, name='verify_login_otp'),
-    path("hospital-kyc/", views.hospital_kyc, name="hospital_kyc"),
     path("lab-kyc/", views.lab_kyc, name="lab_kyc"),
-    path("doctor-kyc/", views.doctor_kyc, name="doctor_kyc"),
+    # path("doctor-kyc/", views.doctor_kyc, name="doctor_kyc"),
     path("pharmacy-kyc/", views.pharmacy_kyc, name="pharmacy_kyc"),
-    path("hospital-profile-verification/", views.hospital_profile_verification, name="profile_verification_hospital"),
     path("lab-profile-verification/", views.lab_profile_verification, name="profile_verification_lab"),
     path("pharmacy-profile-verification/", views.pharmacy_profile_verification, name="profile_verification_pharmacy"),
-    path("doctor-profile-verification/", views.doctor_profile_verification, name="profile_verification_doctor"),
-    path("hospital-profile-review/", views.hospital_profile_review, name="hospital_profile_review"),
+    # path("doctor-profile-verification/", views.doctor_profile_verification, name="profile_verification_doctor"),
     path("lab-profile-review/", views.lab_profile_review, name="lab_profile_review"),
-    path("doctor-profile-review/", views.doctor_profile_review, name="doctor_profile_review"),
+    # path("doctor-profile-review/", views.doctor_profile_review, name="doctor_profile_review"),
     path("pharmacy-profile-review/", views.pharmacy_profile_review, name="pharmacy_profile_review"),
+    path("save/hospital", views.save_hospital, name="save_hospital"), 
+    
+    
+    # hospitals routes  
+    path("hospital-kyc/", views.hospital_kyc, name="hospital_kyc"),
+    path("hospital-profile-verification/", views.hospital_profile_verification, name="profile_verification_hospital"),
     path("hospital-profile-verification/get-states/", views.get_states, name="get_states"),
     path("hospital-profile-verification/get-cities/", views.get_cities, name="get_cities"),
     path("hospital-profile-verification/save/", views.save_hospital_profile, name="save_hospital_profile"),
+    path("hospital-profile-review/", views.hospital_profile_review, name="hospital_profile_review"),
+    
+    # doctors routes 
+    path("doctor-kyc/", views.doctor_kyc, name="doctor_kyc"),
+    path("doctor-profile-verification/", views.doctor_profile_verification, name="doctor_profile_verification"),
+    path("doctor-profile-verification/get-states/", views.get_states, name="get_states"),
+    path("doctor-profile-verification/get-cities/", views.get_cities, name="get_cities"),
+    path("doctor-profile-verification/save/", views.save_doctor_profile, name="save_doctor_profile"),
+    
+    
+    
+       
+    
 ]

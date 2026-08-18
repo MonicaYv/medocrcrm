@@ -4,12 +4,12 @@ const totalSteps = 3;
 
 //page load
 $(document).ready(function () {
-  const countryId = $("#hos_country").val();
+  const countryId = $("#doc_country").val();
   if (countryId) {
     loadStates(countryId, "Maharashtra");
   }
 
-  const countryIdAdmin = $("#hos_personal_country").val();
+  const countryIdAdmin = $("#doc_personal_country").val();
   if (countryIdAdmin) {
     loadStatesAdmin(countryIdAdmin, "Maharashtra");
   }
@@ -20,41 +20,41 @@ $(document).ready(function () {
   updateStepTab(3, "locked");
 
   // Custom Country Code Dropdown toggle
-  $("#hos-country-dropdown-btn").on("click", function (e) {
+  $("#doc-country-dropdown-btn").on("click", function (e) {
     e.stopPropagation();
-    $("#hos_country_dropdown_list").toggleClass("hidden");
+    $("#doc_country_dropdown_list").toggleClass("hidden");
   });
 
   // Close dropdown when clicking outside
   $(document).on("click", function () {
-    $("#hos_country_dropdown_list").addClass("hidden");
+    $("#doc_country_dropdown_list").addClass("hidden");
   });
 
   // Select country option
-  $(".hos_country_option").on("click", function () {
+  $(".doc_country_option").on("click", function () {
     const code = $(this).data("code");
     $("#selected-code").text(code);
-    $("#hos_phone_country_code").val(code);
-    $("#hos_country_dropdown_list").addClass("hidden");
+    $("#doc_phone_country_code").val(code);
+    $("#doc_country_dropdown_list").addClass("hidden");
   });
 
   // Numeric constraint for phone input field
-  $("#hos_phone").on("input", function () {
+  $("#doc_phone").on("input", function () {
     this.value = this.value.replace(/[^0-9]/g, "");
   });
 
   // Custom Country Code Dropdown toggle for Facility (Step 3)
-  $("#hos_country_code").on("click", function (e) {
+  $("#doc_country_code").on("click", function (e) {
     e.stopPropagation();
-    $("#hos_country_code_list").toggleClass("hidden");
+    $("#doc_country_code_list").toggleClass("hidden");
   });
 
   // Select country option for Facility
-  $(".hos_country_option").on("click", function () {
+  $(".doc_country_option").on("click", function () {
     const code = $(this).data("code");
     $("#facility-selected-code").text(code);
-    $("#hos_country_code_val").val(code);
-    $("#hos_country_code_list").addClass("hidden");
+    $("#doc_country_code_val").val(code);
+    $("#doc_country_code_list").addClass("hidden");
   });
 
   // Numeric constraint for Facility phone input field
@@ -62,6 +62,51 @@ $(document).ready(function () {
     this.value = this.value.replace(/[^0-9]/g, "");
   });
 
+  // Toggle custom dropdowns
+  $(document).on("click", ".custom-dropdown-btn", function (e) {
+    e.stopPropagation();
+    const container = $(this).closest(".custom-dropdown-container");
+
+    // Close other open dropdowns
+    $(".custom-dropdown-container")
+      .not(container)
+      .find(".custom-dropdown-list")
+      .addClass("hidden");
+    $(".custom-dropdown-container")
+      .not(container)
+      .find(".material-symbols-outlined")
+      .removeClass("rotate-180");
+
+    container.find(".custom-dropdown-list").toggleClass("hidden");
+    $(this).find(".material-symbols-outlined").toggleClass("rotate-180");
+  });
+
+  // Select option item
+  $(document).on("click", ".dropdown-option-item", function () {
+    const option = $(this);
+    const value = option.data("value");
+    const text = option.text();
+    const container = option.closest(".custom-dropdown-container");
+    const btn = container.find(".custom-dropdown-btn");
+    const input = container.find(".custom-dropdown-input");
+
+    input.val(value);
+    btn.find(".selected-value-text").text(text);
+    btn
+      .removeClass("text-kyc-light-gray")
+      .addClass("text-blue-charcoal font-medium");
+
+    container.find(".custom-dropdown-list").addClass("hidden");
+    btn.find(".material-symbols-outlined").removeClass("rotate-180");
+  });
+
+  // Close dropdowns on clicking outside
+  $(document).on("click", function () {
+    $(".custom-dropdown-list").addClass("hidden");
+    $(".custom-dropdown-btn .material-symbols-outlined").removeClass(
+      "rotate-180",
+    );
+  });
   // Document Type Selection Handler for Step 2
   $(".doc-selector-card").on("click", function () {
     const card = $(this);
@@ -247,11 +292,11 @@ $(document).ready(function () {
 
   // File Upload Handler
   $(
-    ".hos_lic_upload, " +
-      ".hos_aadhar_upload, " +
-      ".hos_pan_upload, " +
-      ".hos_logo_upload, " +
-      ".hos_image_upload",
+    ".doc_lic_upload, " +
+      ".doc_aadhar_upload, " +
+      ".doc_pan_upload, " +
+      ".doc_logo_upload, " +
+      ".doc_image_upload",
   ).on("change", function () {
     const input = $(this);
 
@@ -339,11 +384,11 @@ $(document).ready(function () {
 
   // Eye / View Button
   $(
-    ".hos_lic_view, " +
-      ".hos_aadhar_view, " +
-      ".hos_pan_view, " +
-      ".hos_logo_view, " +
-      ".hos_image_view",
+    ".doc_lic_view, " +
+      ".doc_aadhar_view, " +
+      ".doc_pan_view, " +
+      ".doc_logo_view, " +
+      ".doc_image_view",
   ).on("click", function () {
     const btn = $(this);
 
@@ -367,7 +412,7 @@ $(document).ready(function () {
     activeFileInput = fileInput;
 
     // Set preview title
-    $("#hos-preview-modal-title").text(docTitle || "Document Preview");
+    $("#doc-preview-modal-title").text(docTitle || "Document Preview");
 
     // Check File
     if (fileInput.files && fileInput.files.length > 0) {
@@ -398,7 +443,7 @@ $(document).ready(function () {
     }
 
     // Reset title
-    $("#hos-preview-modal-title").text("Select a Document to View");
+    $("#doc-preview-modal-title").text("Select a Document to View");
 
     // Reset image
     $("#preview-image-element").addClass("hidden").attr("src", "");
@@ -428,7 +473,7 @@ $(document).ready(function () {
   });
 
   // Next button click handler (navigates steps or submits)
-  $("#hos-next-step-btn").on("click", function () {
+  $("#doc-next-step-btn").on("click", function () {
     const currentPanel = $(`#step-panel-${currentStep}`);
 
     let isValid = true;
@@ -455,25 +500,25 @@ $(document).ready(function () {
 
     // STEP 1
     if (currentStep === 1) {
-      saveHospitalStep1();
+      saveDataStep1();
       return;
     }
 
     // STEP 2
     if (currentStep === 2) {
-      saveHospitalStep2();
+      saveDataStep2();
       return;
     }
 
     // STEP 3 - FINAL SUBMIT
     if (currentStep === 3) {
-      saveHospitalStep3();
+      saveDataStep3();
       return;
     }
   });
 
   // Previous button click handler
-  $("#hos_prev_step_btn").on("click", function () {
+  $("#doc_prev_step_btn").on("click", function () {
     if (currentStep > 1) {
       // Revert current step tab back to LOCKED/INACTIVE state
       updateStepTab(currentStep, "locked");
@@ -497,7 +542,7 @@ $(document).ready(function () {
       // Update progress
       updateProgress(currentStep);
 
-      $("#hos-next-btn-text").text("Save & Continue");
+      $("#doc-next-btn-text").text("Save & Continue");
     } else {
       // Redirect back to new_kyc page when clicking Back on Step 1
       window.history.back();
@@ -562,101 +607,15 @@ function updateStepTab(stepNum, state) {
 
 //step 1 ---------------------------------------------
 // get state on click country
-function loadStates_old(countryId) {
-  if (!countryId) {
-    $("#hos_state").html("");
-    $("#hos_city").html("");
-    return;
-  }
-
-  $.ajax({
-    url: "/user/hospital-profile-verification/get-states/",
-    type: "GET",
-    data: {
-      country_id: countryId,
-    },
-
-    success: function (response) {
-      let options = "";
-
-      if (response.success && response.states.length > 0) {
-        $.each(response.states, function (index, state) {
-          options += `
-                        <option value="${state.id}">
-                            ${state.name}
-                        </option>
-                    `;
-        });
-
-        // Load states
-        $("#hos_state").html(options);
-
-        // Get first state
-        const firstStateId = response.states[0].id;
-
-        // Automatically load cities of first state
-        loadCities(firstStateId);
-      } else {
-        $("#hos_state").html("");
-        $("#hos_city").html("");
-      }
-    },
-
-    error: function (xhr) {
-      console.log("State AJAX Error:", xhr.responseText);
-
-      $("#hos_state").html("");
-      $("#hos_city").html("");
-    },
-  });
-}
-
-function loadCities_old(stateId) {
-  if (!stateId) {
-    $("#hos_city").html("");
-    return;
-  }
-
-  $.ajax({
-    url: "/user/hospital-profile-verification/get-cities/",
-    type: "GET",
-    data: {
-      state_id: stateId,
-    },
-
-    success: function (response) {
-      let options = "";
-
-      if (response.success && response.cities.length > 0) {
-        $.each(response.cities, function (index, city) {
-          options += `
-                        <option value="${city.id}">
-                            ${city.name}
-                        </option>
-                    `;
-        });
-      }
-
-      $("#hos_city").html(options);
-    },
-
-    error: function (xhr) {
-      console.log("City AJAX Error:", xhr.responseText);
-
-      $("#hos_city").html("");
-    },
-  });
-}
-
 // Country changed
-$("#hos_country").on("change", function () {
+$("#doc_country").on("change", function () {
   const countryId = $(this).val();
 
   loadStates(countryId);
 });
 
 // State changed
-$("#hos_state").on("change", function () {
+$("#doc_state").on("change", function () {
   const stateId = $(this).val();
 
   loadCities(stateId);
@@ -664,13 +623,13 @@ $("#hos_state").on("change", function () {
 
 function loadStates(countryId, preferredStateName = "Maharashtra") {
   if (!countryId) {
-    $("#hos_state").html("");
-    $("#hos_city").html("");
+    $("#doc_state").html("");
+    $("#doc_city").html("");
     return;
   }
 
   $.ajax({
-    url: "/user/hospital-profile-verification/get-states/",
+    url: "/user/doctor-profile-verification/get-states/",
     type: "GET",
     data: {
       country_id: countryId,
@@ -701,7 +660,7 @@ function loadStates(countryId, preferredStateName = "Maharashtra") {
                     `;
         });
 
-        $("#hos_state").html(options);
+        $("#doc_state").html(options);
 
         // Automatically load cities of selected state
         if (selectedStateId) {
@@ -709,35 +668,35 @@ function loadStates(countryId, preferredStateName = "Maharashtra") {
         } else {
           // If Maharashtra not found,
           // load cities for the first state
-          const firstStateId = $("#hos_state option:first").val();
+          const firstStateId = $("#doc_state option:first").val();
 
           if (firstStateId) {
             loadCities(firstStateId);
           }
         }
       } else {
-        $("#hos_state").html("");
-        $("#hos_city").html("");
+        $("#doc_state").html("");
+        $("#doc_city").html("");
       }
     },
 
     error: function (xhr) {
       console.log("State AJAX Error:", xhr.responseText);
 
-      $("#hos_state").html("");
-      $("#hos_city").html("");
+      $("#doc_state").html("");
+      $("#doc_city").html("");
     },
   });
 }
 
 function loadCities(stateId, preferredCityName = null) {
   if (!stateId) {
-    $("#hos_city").html("");
+    $("#doc_city").html("");
     return;
   }
 
   $.ajax({
-    url: "/user/hospital-profile-verification/get-cities/",
+    url: "/user/doctor-profile-verification/get-cities/",
     type: "GET",
     data: {
       state_id: stateId,
@@ -768,19 +727,19 @@ function loadCities(stateId, preferredCityName = null) {
         });
       }
 
-      $("#hos_city").html(options);
+      $("#doc_city").html(options);
     },
 
     error: function (xhr) {
       console.log("City AJAX Error:", xhr.responseText);
 
-      $("#hos_city").html("");
+      $("#doc_city").html("");
     },
   });
 }
 
 //verify otp
-$("#hos_otp").on("input", function () {
+$("#doc_otp").on("input", function () {
   let otp = $(this).val().replace(/\D/g, "");
 
   // Allow only 6 digits
@@ -789,9 +748,9 @@ $("#hos_otp").on("input", function () {
   $(this).val(otp);
 
   // Always hide both first
-  $("#hos_verified").addClass("hidden").removeClass("flex");
+  $("#doc_verified").addClass("hidden").removeClass("flex");
 
-  $("#hos_not_verified").addClass("hidden").removeClass("flex");
+  $("#doc_not_verified").addClass("hidden").removeClass("flex");
 
   // Reset verification
   $("#phone_otp_verified").val("0");
@@ -803,145 +762,146 @@ $("#hos_otp").on("input", function () {
 
   // Correct OTP
   if (otp === "123456") {
-    $("#hos_verified").removeClass("hidden").addClass("flex");
+    $("#doc_verified").removeClass("hidden").addClass("flex");
 
     $("#phone_otp_verified").val("1");
   }
   // Any other entered OTP
   else {
-    $("#hos_not_verified").removeClass("hidden").addClass("flex");
+    $("#doc_not_verified").removeClass("hidden").addClass("flex");
 
     $("#phone_otp_verified").val("0");
   }
 });
 
 //resend
-$(".hos_resend_otp").on("click", function (e) {
+$(".doc_resend_otp").on("click", function (e) {
   e.preventDefault();
 
   // Reset OTP verification
-  $("#hos_otp").val("");
+  $("#doc_otp").val("");
   $("#phone_otp_verified").val("0");
 
-  $("#hos_verified").addClass("hidden").removeClass("flex");
+  $("#doc_verified").addClass("hidden").removeClass("flex");
 
-  $("#hos_not_verified").addClass("hidden").removeClass("flex");
+  $("#doc_not_verified").addClass("hidden").removeClass("flex");
 
   // Show toast
   toastr.success("OTP sent successfully");
 });
 
 //alternative phn
-$("#hos_alt_phn").on("input", function () {
+$("#doc_alt_phn").on("input", function () {
   this.value = this.value.replace(/\D/g, "").substring(0, 10);
 });
 
 //pincode
-$("#hos_pincode").on("input", function () {
+$("#doc_pincode").on("input", function () {
   this.value = this.value.replace(/\D/g, "").substring(0, 6);
 });
 
 //name
-$("#hos_name").on("input", function () {
+$("#doc_name").on("input", function () {
   this.value = this.value.replace(/[^A-Za-z ]/g, "");
 });
 
-//hos_owner_name
-$("#hos_owner_name").on("input", function () {
+//doc_owner_name
+$("#doc_owner_name").on("input", function () {
   this.value = this.value.replace(/[^A-Za-z ]/g, "");
 });
 
 //save step-1
-function saveHospitalStep1() {
-  const hospitalName = $("#hos_name").val().trim();
-  const ownerName = $("#hos_owner_name").val().trim();
-  const email = $("#hos_email").val().trim();
-  const address = $("#hos_address").val().trim();
-  const pincode = $("#hos_pincode").val().trim();
-  const alt_no = $("#hos_alt_phn").val().trim();
+function saveDataStep1() {
+  const doctorName = $("#doc_name").val().trim();
+  const ownerName = $("#doc_owner_name").val().trim();
+  const clinicName = $("#doc_clinic").val().trim();
+  const email = $("#doc_email").val().trim();
+  const address = $("#doc_address").val().trim();
+  const pincode = $("#doc_pincode").val().trim();
+  const alt_no = $("#doc_alt_phn").val().trim();
 
   $(
-    "#hos_name, #hos_owner_name, #hos_email, #hos_address, #hos_pincode, #hos_alt_phn",
+    "#doc_name, #doc_owner_name, #doc_clinic, #doc_email, #doc_address, #doc_pincode, #doc_alt_phn",
   ).removeClass("border-red-400 focus:border-red-400 focus:ring-red-400");
 
   // validations
-  if (!hospitalName) {
-    $("#hos_name").addClass("border-red-400");
+  if (!doctorName) {
+    $("#doc_name").addClass("border-red-400");
     toastr.warning("Hospital name is required.");
-    $("#hos_name").focus();
+    $("#doc_name").focus();
     return;
   }
 
   if (!ownerName) {
-    $("#hos_owner_name").addClass("border-red-400");
+    $("#doc_owner_name").addClass("border-red-400");
     toastr.warning("Owner name is required.");
-    $("#hos_owner_name").focus();
+    $("#doc_owner_name").focus();
     return;
   }
 
-  const hospitalNameRegex = /^[A-Za-z ]+$/;
+  const doctorNameRegex = /^[A-Za-z ]+$/;
 
-  if (!hospitalNameRegex.test(hospitalName)) {
-    $("#hos_name").addClass("border-red-400");
+  if (!doctorNameRegex.test(doctorName)) {
+    $("#doc_name").addClass("border-red-400");
     toastr.warning("Hospital name should contain alphabets only.");
-    $("#hos_name").focus();
+    $("#doc_name").focus();
     return;
   }
 
   const ownerNameRegex = /^[A-Za-z ]+$/;
 
   if (!ownerNameRegex.test(ownerName)) {
-    $("#hos_owner_name").addClass("border-red-400");
+    $("#doc_owner_name").addClass("border-red-400");
     toastr.warning("Owner name should contain alphabets only.");
-    $("#hos_owner_name").focus();
+    $("#doc_owner_name").focus();
     return;
   }
 
   if (!email) {
-    $("#hos_email").addClass("border-red-400");
+    $("#doc_email").addClass("border-red-400");
     toastr.warning("Email address is required.");
-    $("#hos_email").focus();
+    $("#doc_email").focus();
     return;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailRegex.test(email)) {
-    $("#hos_email").addClass("border-red-400");
+    $("#doc_email").addClass("border-red-400");
     toastr.warning("Please enter a valid email address.");
-    $("#hos_email").focus();
+    $("#doc_email").focus();
     return;
   }
 
   if (!address) {
-    $("#hos_address").addClass("border-red-400");
+    $("#doc_address").addClass("border-red-400");
     toastr.warning("Address is required.");
-    $("#hos_address").focus();
+    $("#doc_address").focus();
     return;
   }
 
   if (!pincode) {
-    $("#hos_pincode").addClass("border-red-400");
+    $("#doc_pincode").addClass("border-red-400");
     toastr.warning("Pincode is required.");
-    $("#hos_pincode").focus();
+    $("#doc_pincode").focus();
     return;
   }
 
   const pincodeRegex = /^\d{6}$/;
 
   if (!pincodeRegex.test(pincode)) {
-    $("#hos_pincode").addClass("border-red-400");
+    $("#doc_pincode").addClass("border-red-400");
     toastr.warning("Pincode must be exactly 6 digits.");
-    $("#hos_pincode").focus();
+    $("#doc_pincode").focus();
     return;
   }
 
   const altPhonRegex = /^\d{10}$/;
 
   if (!altPhonRegex.test(alt_no)) {
-    $("#hos_alt_phn").addClass("border-red-400");
+    $("#doc_alt_phn").addClass("border-red-400");
     toastr.warning("Contact no must be exactly 10 digits.");
-    $("#hos_alt_phn").focus();
+    $("#doc_alt_phn").focus();
     return;
   }
 
@@ -950,41 +910,45 @@ function saveHospitalStep1() {
 
   formData.append("step", "1");
 
-  formData.append("hos_name", hospitalName);
-  formData.append("hos_owner_name", ownerName);
-  formData.append("hos_email", email);
-  formData.append("hos_country_code_val", $("#hos_country_code_val").val());
-  formData.append("hos_phn", $("#hos_phn").val());
-  formData.append("phone_otp_verified", $("#phone_otp_verified").val());
-
-  formData.append("hos_type", $("#hos_type").val());
-  formData.append("hos_services", $("#hos_services").val());
-  formData.append("hos_website_url", $("#hos_website_url").val());
-  formData.append("hos_working_hours", $("#hos_working_hours").val());
-
-  formData.append("hos_address", address);
-  formData.append("hos_country", $("#hos_country").val());
-  formData.append("hos_state", $("#hos_state").val());
-  formData.append("hos_city", $("#hos_city").val());
-  formData.append("hos_pincode", pincode);
-  formData.append("hos_alt_phn", alt_no);
+  formData.append("doc_name", doctorName);
+  formData.append("doc_owner_name", ownerName);
+  formData.append("doc_email", email);
+  formData.append("doc_country_code_val", $("#doc_country_code_val").val());
+  formData.append("doc_phn", $("#doc_phn").val());
+  formData.append("doc_address", address);
+  formData.append("doc_country", $("#doc_country").val());
+  formData.append("doc_state", $("#doc_state").val());
+  formData.append("doc_city", $("#doc_city").val());
+  formData.append("doc_pincode", pincode);
+  formData.append("doc_alt_phn", alt_no);
+  formData.append("doc_gender_value", $("#doc_gender_value").val());
+  formData.append("doc_clinic", $("#doc_clinic").val());
+  formData.append("doc_age", $("#doc_age").val());
+  formData.append("doc_speciality_value", $("#doc_speciality_value").val());
+  formData.append("doc_education_value", $("#doc_education_value").val());
+  formData.append("doc_experience_value", $("#doc_experience_value").val());
+  formData.append("doc_home_visit_value", $("#doc_home_visit_value").val());
+  formData.append("doc_referral_code", $("#doc_referral_code").val());
+  formData.append("clinic_timing_from", $("#clinic_timing_from").val());
+  formData.append("clinic_timing_to", $("#clinic_timing_to").val());
+  formData.append("doc_otp", $("#doc_otp").val());
 
   // CSRF
   formData.append(
     "csrfmiddlewaretoken",
     $("input[name='csrfmiddlewaretoken']").val(),
   );
-  
+
   // AJAX
   $.ajax({
-    url: "/user/hospital-profile-verification/save/",
+    url: "/user/doctor-profile-verification/save/",
     type: "POST",
     data: formData,
     processData: false,
     contentType: false,
 
     beforeSend: function () {
-      $("#hos-next-step-btn").prop("disabled", true);
+      $("#doc-next-step-btn").prop("disabled", true);
     },
 
     success: function (response) {
@@ -1014,7 +978,7 @@ function saveHospitalStep1() {
         updateStepTab(2, "active");
         updateProgress(2);
 
-        $("#hos-next-btn-text").text("Save & Continue");
+        $("#doc-next-btn-text").text("Save & Continue");
 
         console.log("Step 2 loaded");
       } else {
@@ -1035,23 +999,23 @@ function saveHospitalStep1() {
     },
 
     complete: function () {
-      $("#hos-next-step-btn").prop("disabled", false);
+      $("#doc-next-step-btn").prop("disabled", false);
 
       if (currentStep !== totalSteps) {
-        $("#hos-next-btn-text").text("Save & Continue");
+        $("#doc-next-btn-text").text("Save & Continue");
       }
     },
   });
 }
 
 //step - 2 -------------------------------------------
-$("#hos_personal_country").on("change", function () {
+$("#doc_personal_country").on("change", function () {
   const countryIdAdmin = $(this).val();
 
   loadStatesAdmin(countryIdAdmin);
 });
 
-$("#hos_personal_state").on("change", function () {
+$("#doc_personal_state").on("change", function () {
   const stateId = $(this).val();
 
   loadCitiesAdmin(stateId);
@@ -1059,13 +1023,13 @@ $("#hos_personal_state").on("change", function () {
 
 function loadStatesAdmin(countryIdAdmin, preferredStateName = "Maharashtra") {
   if (!countryIdAdmin) {
-    $("#hos_personal_state").html("");
-    $("#hos_personal_city").html("");
+    $("#doc_personal_state").html("");
+    $("#doc_personal_city").html("");
     return;
   }
 
   $.ajax({
-    url: "/user/hospital-profile-verification/get-states/",
+    url: "/user/doctor-profile-verification/get-states/",
     type: "GET",
     data: {
       country_id: countryIdAdmin,
@@ -1096,7 +1060,7 @@ function loadStatesAdmin(countryIdAdmin, preferredStateName = "Maharashtra") {
                     `;
         });
 
-        $("#hos_personal_state").html(options);
+        $("#doc_personal_state").html(options);
 
         // Automatically load cities of selected state
         if (selectedStateId) {
@@ -1104,35 +1068,35 @@ function loadStatesAdmin(countryIdAdmin, preferredStateName = "Maharashtra") {
         } else {
           // If Maharashtra not found,
           // load cities for the first state
-          const firstStateId = $("#hos_personal_state option:first").val();
+          const firstStateId = $("#doc_personal_state option:first").val();
 
           if (firstStateId) {
             loadCitiesAdmin(firstStateId);
           }
         }
       } else {
-        $("#hos_personal_state").html("");
-        $("#hos_personal_city").html("");
+        $("#doc_personal_state").html("");
+        $("#doc_personal_city").html("");
       }
     },
 
     error: function (xhr) {
       console.log("State AJAX Error:", xhr.responseText);
 
-      $("#hos_personal_state").html("");
-      $("#hos_personal_city").html("");
+      $("#doc_personal_state").html("");
+      $("#doc_personal_city").html("");
     },
   });
 }
 
 function loadCitiesAdmin(stateId, preferredCityName = null) {
   if (!stateId) {
-    $("#hos_personal_city").html("");
+    $("#doc_personal_city").html("");
     return;
   }
 
   $.ajax({
-    url: "/user/hospital-profile-verification/get-cities/",
+    url: "/user/doctor-profile-verification/get-cities/",
     type: "GET",
     data: {
       state_id: stateId,
@@ -1163,72 +1127,72 @@ function loadCitiesAdmin(stateId, preferredCityName = null) {
         });
       }
 
-      $("#hos_personal_city").html(options);
+      $("#doc_personal_city").html(options);
     },
 
     error: function (xhr) {
       console.log("City AJAX Error:", xhr.responseText);
 
-      $("#hos_personal_city").html("");
+      $("#doc_personal_city").html("");
     },
   });
 }
 
 //verify otp personal
-$("#hos_personal_otp").on("input", function () {
+$("#doc_personal_otp").on("input", function () {
   let otp = $(this).val().replace(/\D/g, "");
 
   otp = otp.substring(0, 6);
 
   $(this).val(otp);
 
-  $("#hos_personal_verified").addClass("hidden").removeClass("flex");
+  $("#doc_personal_verified").addClass("hidden").removeClass("flex");
 
-  $("#hos_personal_not_verified").addClass("hidden").removeClass("flex");
+  $("#doc_personal_not_verified").addClass("hidden").removeClass("flex");
 
-  $("#hos_personal_otp_verified").val("0");
+  $("#doc_personal_otp_verified").val("0");
 
   if (otp.length === 0) {
     return;
   }
 
   if (otp === "123456") {
-    $("#hos_personal_verified").removeClass("hidden").addClass("flex");
+    $("#doc_personal_verified").removeClass("hidden").addClass("flex");
 
-    $("#hos_personal_otp_verified").val("1");
+    $("#doc_personal_otp_verified").val("1");
   } else {
-    $("#hos_personal_not_verified").removeClass("hidden").addClass("flex");
+    $("#doc_personal_not_verified").removeClass("hidden").addClass("flex");
 
-    $("#hos_personal_otp_verified").val("0");
+    $("#doc_personal_otp_verified").val("0");
   }
 });
 
 //resend personal
-$(".hos_personal_resend_otp").on("click", function (e) {
+$(".doc_personal_resend_otp").on("click", function (e) {
   e.preventDefault();
 
-  $("#hos_personal_otp").val("");
-  $("#hos_personal_otp_verified").val("0");
+  $("#doc_personal_otp").val("");
+  $("#doc_personal_otp_verified").val("0");
 
-  $("#hos_personal_verified").addClass("hidden").removeClass("flex");
+  $("#doc_personal_verified").addClass("hidden").removeClass("flex");
 
-  $("#hos_personal_not_verified").addClass("hidden").removeClass("flex");
+  $("#doc_personal_not_verified").addClass("hidden").removeClass("flex");
 
   toastr.success("OTP sent successfully");
 });
 
 //personal phn
-$("#hos_phone").on("input", function () {
+$("#doc_phone").on("input", function () {
   this.value = this.value.replace(/\D/g, "").substring(0, 10);
 });
 
-//hos_personal_pincode
-$("#hos_personal_pincode").on("input", function () {
+//doc_personal_pincode
+$("#doc_personal_pincode").on("input", function () {
   this.value = this.value.replace(/\D/g, "").substring(0, 6);
 });
 
 //admin name
-$("#hos_adm_name").on("input", function () {
+$("#doc_adm_name").on("input", function () {
   this.value = this.value.replace(/[^A-Za-z ]/g, "");
 });
 
@@ -1246,73 +1210,72 @@ $("#contact_state").on("change", function () {
   loadCities(stateId);
 });
 
-//saveHospitalStep2
-function saveHospitalStep2() {
-
-  const adminName = $("#hos_adm_name").val().trim();
-  const email = $("#hos_adm_email").val().trim();
-  const pincode = $("#hos_personal_pincode").val().trim();
-  const alt_no = $("#hos_phone").val().trim();
+//saveDataStep2
+function saveDataStep2() {
+  const adminName = $("#doc_adm_name").val().trim();
+  const email = $("#doc_adm_email").val().trim();
+  const pincode = $("#doc_personal_pincode").val().trim();
+  const alt_no = $("#doc_phone").val().trim();
 
   $(
-    "#hos_adm_name, #hos_adm_email, #hos_personal_pincode, #hos_phone",
+    "#doc_adm_name, #doc_adm_email, #doc_personal_pincode, #doc_phone",
   ).removeClass("border-red-400 focus:border-red-400 focus:ring-red-400");
 
   // validations
   if (!adminName) {
-    $("#hos_adm_name").addClass("border-red-400");
+    $("#doc_adm_name").addClass("border-red-400");
     toastr.warning("Admin name is required.");
-    $("#hos_adm_name").focus();
+    $("#doc_adm_name").focus();
     return;
   }
-  
+
   const adminNameRegex = /^[A-Za-z ]+$/;
 
   if (!adminNameRegex.test(adminName)) {
-    $("#hos_adm_name").addClass("border-red-400");
+    $("#doc_adm_name").addClass("border-red-400");
     toastr.warning("Admin name should contain alphabets only.");
-    $("#hos_adm_name").focus();
+    $("#doc_adm_name").focus();
     return;
   }
 
   if (!email) {
-    $("#hos_adm_email").addClass("border-red-400");
+    $("#doc_adm_email").addClass("border-red-400");
     toastr.warning("Email address is required.");
-    $("#hos_adm_email").focus();
+    $("#doc_adm_email").focus();
     return;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailRegex.test(email)) {
-    $("#hos_adm_email").addClass("border-red-400");
+    $("#doc_adm_email").addClass("border-red-400");
     toastr.warning("Please enter a valid email address.");
-    $("#hos_adm_email").focus();
+    $("#doc_adm_email").focus();
     return;
   }
 
   if (!pincode) {
-    $("#hos_personal_pincode").addClass("border-red-400");
+    $("#doc_personal_pincode").addClass("border-red-400");
     toastr.warning("Pincode is required.");
-    $("#hos_personal_pincode").focus();
+    $("#doc_personal_pincode").focus();
     return;
   }
 
   const pincodeRegex = /^\d{6}$/;
 
   if (!pincodeRegex.test(pincode)) {
-    $("#hos_personal_pincode").addClass("border-red-400");
+    $("#doc_personal_pincode").addClass("border-red-400");
     toastr.warning("Pincode must be exactly 6 digits.");
-    $("#hos_personal_pincode").focus();
+    $("#doc_personal_pincode").focus();
     return;
   }
 
   const altPhonRegex = /^\d{10}$/;
 
   if (!altPhonRegex.test(alt_no)) {
-    $("#hos_phone").addClass("border-red-400");
+    $("#doc_phone").addClass("border-red-400");
     toastr.warning("Contact no must be exactly 10 digits.");
-    $("#hos_phone").focus();
+    $("#doc_phone").focus();
     return;
   }
 
@@ -1321,22 +1284,22 @@ function saveHospitalStep2() {
 
   formData.append("step", "2");
 
-  formData.append("hos_adm_name", adminName);
-  formData.append("hos_adm_email", email);
-  formData.append("hos_phone_country_code", $("#hos_phone_country_code").val());
-  formData.append("hos_phone", alt_no);
-  formData.append("hos_personal_otp", $("#hos_personal_otp").val());
+  formData.append("doc_adm_name", adminName);
+  formData.append("doc_adm_email", email);
+  formData.append("doc_phone_country_code", $("#doc_phone_country_code").val());
+  formData.append("doc_phone", alt_no);
+  formData.append("doc_personal_otp", $("#doc_personal_otp").val());
   formData.append(
-    "hos_personal_otp_verified",
-    $("#hos_personal_otp_verified").val(),
+    "doc_personal_otp_verified",
+    $("#doc_personal_otp_verified").val(),
   );
-  formData.append("hos_personal_role", $("#hos_personal_role").val());
-  formData.append("hos_personal_referral", $("#hos_personal_referral").val());
+  formData.append("doc_personal_role", $("#doc_personal_role").val());
+  formData.append("doc_personal_referral", $("#doc_personal_referral").val());
 
-  formData.append("hos_personal_country", $("#hos_personal_country").val());
-  formData.append("hos_personal_state", $("#hos_personal_state").val());
-  formData.append("hos_personal_city", $("#hos_personal_city").val());
-  formData.append("hos_personal_pincode", pincode);
+  formData.append("doc_personal_country", $("#doc_personal_country").val());
+  formData.append("doc_personal_state", $("#doc_personal_state").val());
+  formData.append("doc_personal_city", $("#doc_personal_city").val());
+  formData.append("doc_personal_pincode", pincode);
 
   formData.append(
     "csrfmiddlewaretoken",
@@ -1344,14 +1307,14 @@ function saveHospitalStep2() {
   );
 
   $.ajax({
-    url: "/user/hospital-profile-verification/save/",
+    url: "/user/doctor-profile-verification/save/",
     type: "POST",
     data: formData,
     processData: false,
     contentType: false,
 
     beforeSend: function () {
-      $("#hos-next-step-btn").prop("disabled", true);
+      $("#doc-next-step-btn").prop("disabled", true);
     },
 
     success: function (response) {
@@ -1384,7 +1347,7 @@ function saveHospitalStep2() {
 
         updateProgress(3);
 
-        $("#hos-next-btn-text").text("Submit Verification");
+        $("#doc-next-btn-text").text("Submit Verification");
       } else {
         toastr.error(response.message || "Unable to save personal details.");
       }
@@ -1403,257 +1366,190 @@ function saveHospitalStep2() {
     },
 
     complete: function () {
-      $("#hos-next-step-btn").prop("disabled", false);
+      $("#doc-next-step-btn").prop("disabled", false);
     },
   });
 }
 
-//saveHospitalStep3 -------------------------
-function saveHospitalStep3() {
-    // ============================================
-    // Get file inputs
-    // ============================================
+//saveDataStep3
+function saveDataStep3() {
+  // ============================================
+  // Get file inputs
+  // ============================================
 
-    const registrationFile =
-        $(".hos_lic_upload")[0]?.files[0] || null;
+  const registrationFile = $(".doc_lic_upload")[0]?.files[0] || null;
 
-    const aadharFile =
-        $(".hos_aadhar_upload")[0]?.files[0] || null;
+  const aadharFile = $(".doc_aadhar_upload")[0]?.files[0] || null;
 
-    const panFile =
-        $(".hos_pan_upload")[0]?.files[0] || null;
+  const panFile = $(".doc_pan_upload")[0]?.files[0] || null;
 
-    const logoFile =
-        $(".hos_logo_upload")[0]?.files[0] || null;
+  const logoFile = $(".doc_logo_upload")[0]?.files[0] || null;
 
-    const hospitalPhotoFile =
-        $(".hos_image_upload")[0]?.files[0] || null;
+  const photoFile = $(".doc_image_upload")[0]?.files[0] || null;
 
+  // ============================================
+  // Get document numbers
+  // ============================================
 
-    // ============================================
-    // Get document numbers
-    // ============================================
+  const registrationNo = $("#doc_registration_no").val()?.trim() || "";
 
-    const registrationNo =
-        $("#hos_registration_no").val()?.trim() || "";
+  const aadharNo = $("#doc_aadhar_no").val()?.trim() || "";
 
-    const aadharNo =
-        $("#hos_aadhar_no").val()?.trim() || "";
+  const panNo = $("#doc_pan_no").val()?.trim() || "";
 
-    const panNo =
-        $("#hos_pan_no").val()?.trim() || "";
+  // ============================================
+  // Validation
+  // ============================================
 
+  if (!registrationFile) {
+    toastr.warning("Please upload the registration certificate.");
+    return;
+  }
 
-    // ============================================
-    // Validation
-    // ============================================
+  if (!aadharFile) {
+    toastr.warning("Please upload the Aadhaar card.");
+    return;
+  }
 
-    if (!registrationFile) {
-        toastr.warning("Please upload the registration certificate.");
-        return;
+  if (!panFile) {
+    toastr.warning("Please upload the PAN card.");
+    return;
+  }
+
+  if (!logoFile) {
+    toastr.warning("Please upload the hospital logo.");
+    return;
+  }
+
+  if (!photoFile) {
+    toastr.warning("Please upload the hospital photo.");
+    return;
+  }
+
+  // ============================================
+  // Create FormData
+  // ============================================
+
+  const formData = new FormData();
+
+  formData.append("step", "3");
+
+  // ============================================
+  // Document numbers
+  // ============================================
+
+  formData.append("registration_no", registrationNo);
+  formData.append("aadhar_card_no", aadharNo);
+  formData.append("pan_card_no", panNo);
+
+  // ============================================
+  // Documents
+  // ============================================
+
+  formData.append("registration_certificate", registrationFile);
+
+  formData.append("aadhar_document", aadharFile);
+
+  formData.append("pan_document", panFile);
+
+  formData.append("logo", logoFile);
+
+  formData.append("photo", photoFile);
+
+  // ============================================
+  // CSRF
+  // ============================================
+
+  formData.append(
+    "csrfmiddlewaretoken",
+    $("input[name='csrfmiddlewaretoken']").val(),
+  );
+
+  // ============================================
+  // Debug - check what is being sent
+  // ============================================
+
+  console.log("========== STEP 3 DATA ==========");
+
+  for (const [key, value] of formData.entries()) {
+    if (value instanceof File) {
+      console.log(key, "=>", value.name, value.type, value.size);
+    } else {
+      console.log(key, "=>", value);
     }
+  }
 
-    if (!aadharFile) {
-        toastr.warning("Please upload the Aadhaar card.");
-        return;
-    }
+  // ============================================
+  // AJAX
+  // ============================================
 
-    if (!panFile) {
-        toastr.warning("Please upload the PAN card.");
-        return;
-    }
+  $.ajax({
+    url: "/user/doctor-profile-verification/save/",
+    type: "POST",
+    data: formData,
+    processData: false,
+    contentType: false,
 
-    if (!logoFile) {
-        toastr.warning("Please upload the hospital logo.");
-        return;
-    }
+    beforeSend: function () {
+      $("#doc-next-step-btn").prop("disabled", true);
+      $("#doc-next-btn-text").text("Saving...");
+    },
 
-    if (!hospitalPhotoFile) {
-        toastr.warning("Please upload the hospital photo.");
-        return;
-    }
+    success: function (response) {
+      console.log("Step 3 response:", response);
 
+      if (response.success === true) {
+        toastr.success(
+          response.message || "Hospital documents saved successfully.",
+        );
 
-    // ============================================
-    // Create FormData
-    // ============================================
+        // ========================================
+        // Step 3 completed
+        // ========================================
 
-    const formData = new FormData();
+        updateStepTab(3, "completed");
+        updateProgress(3);
 
-    formData.append("step", "3");
+        $("#doc-next-step-btn").prop("disabled", true);
 
+        $("#doc-next-btn-text").text("Verification Submitted");
 
-    // ============================================
-    // Document numbers
-    // ============================================
+        // ========================================
+        // Redirect
+        // ========================================
 
-    formData.append("registration_no", registrationNo);
-    formData.append("aadhar_card_no", aadharNo);
-    formData.append("pan_card_no", panNo);
-
-
-    // ============================================
-    // Documents
-    // ============================================
-
-    formData.append(
-        "registration_certificate",
-        registrationFile
-    );
-
-    formData.append(
-        "aadhar_document",
-        aadharFile
-    );
-
-    formData.append(
-        "pan_document",
-        panFile
-    );
-
-    formData.append(
-        "hospital_logo",
-        logoFile
-    );
-
-    formData.append(
-        "hospital_photo",
-        hospitalPhotoFile
-    );
-
-
-    // ============================================
-    // CSRF
-    // ============================================
-
-    formData.append(
-        "csrfmiddlewaretoken",
-        $("input[name='csrfmiddlewaretoken']").val()
-    );
-
-
-    // ============================================
-    // Debug - check what is being sent
-    // ============================================
-
-    console.log("========== STEP 3 DATA ==========");
-
-    for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-            console.log(
-                key,
-                "=>",
-                value.name,
-                value.type,
-                value.size
-            );
-        } else {
-            console.log(key, "=>", value);
+        if (response.redirect_url) {
+          setTimeout(function () {
+            window.location.href = response.redirect_url;
+          }, 1000);
         }
-    }
+      } else {
+        toastr.error(response.message || "Unable to save hospital documents.");
+      }
+    },
 
+    error: function (xhr) {
+      console.log("Save Step 3 Error:", xhr.responseText);
 
-    // ============================================
-    // AJAX
-    // ============================================
+      let message = "Something went wrong while saving hospital documents.";
 
-    $.ajax({
-        url: "/user/hospital-profile-verification/save/",
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false,
+      if (xhr.responseJSON && xhr.responseJSON.message) {
+        message = xhr.responseJSON.message;
+      }
 
-        beforeSend: function () {
-            $("#hos-next-step-btn").prop("disabled", true);
-            $("#hos-next-btn-text").text("Saving...");
-        },
+      toastr.error(message);
+    },
 
-        success: function (response) {
+    complete: function () {
+      if (currentStep === totalSteps) {
+        $("#doc-next-btn-text").text("Submit Verification");
+      }
 
-            console.log("Step 3 response:", response);
-
-            if (response.success === true) {
-
-                toastr.success(
-                    response.message ||
-                    "Hospital documents saved successfully."
-                );
-
-                // ========================================
-                // Step 3 completed
-                // ========================================
-
-                updateStepTab(3, "completed");
-                updateProgress(3);
-
-                $("#hos-next-step-btn").prop(
-                    "disabled",
-                    true
-                );
-
-                $("#hos-next-btn-text").text(
-                    "Verification Submitted"
-                );
-
-
-                // ========================================
-                // Redirect
-                // ========================================
-
-                if (response.redirect_url) {
-
-                    setTimeout(function () {
-                        window.location.href =
-                            response.redirect_url;
-                    }, 1000);
-                }
-
-            } else {
-
-                toastr.error(
-                    response.message ||
-                    "Unable to save hospital documents."
-                );
-            }
-        },
-
-        error: function (xhr) {
-
-            console.log(
-                "Save Step 3 Error:",
-                xhr.responseText
-            );
-
-            let message =
-                "Something went wrong while saving hospital documents.";
-
-            if (
-                xhr.responseJSON &&
-                xhr.responseJSON.message
-            ) {
-                message = xhr.responseJSON.message;
-            }
-
-            toastr.error(message);
-        },
-
-        complete: function () {
-
-            if (currentStep === totalSteps) {
-                $("#hos-next-btn-text").text(
-                    "Submit Verification"
-                );
-            }
-
-            // Don't enable it again if successfully submitted
-            // and redirect is going to happen.
-            if (!$("#hos-next-step-btn").data("submitted")) {
-                $("#hos-next-step-btn").prop(
-                    "disabled",
-                    false
-                );
-            }
-        }
-    });
+      // Don't enable it again if successfully submitted
+      // and redirect is going to happen.
+      if (!$("#doc-next-step-btn").data("submitted")) {
+        $("#doc-next-step-btn").prop("disabled", false);
+      }
+    },
+  });
 }

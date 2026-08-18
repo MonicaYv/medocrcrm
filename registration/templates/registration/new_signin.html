@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
-{% block title %}Register as Pharmacy{% endblock %}
+{% block title %}Sign in{% endblock %}
 
 {% block content %}
 
@@ -32,7 +32,7 @@
 
     <!-- ============ FORM PANEL ============ -->
     <div class="form-panel">
-      <button class="close-btn" aria-label="Close">
+      <button class="close-btn" aria-label="Close" id="closeBtn" data-url="{% url 'login' %}">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
 
