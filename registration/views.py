@@ -278,720 +278,6 @@ def login_auth_OLD(request):
         errors["password"] = "Invalid email or password."
         return JsonResponse({"success": False, "errors": errors})
     
-# @csrf_protect
-# @require_POST
-# def save_user(request):
-#     data = request.POST
-#     errors = {}
-#     # Email
-#     email = data.get("email")
-#     if not email:
-#         errors["email"] = "Email is required."
-#     else:
-#         try:
-#             validate_email(email)
-#         except ValidationError:
-#             errors["email"] = "Enter a valid email address."
-#         if User.objects.filter(email=email).exists():
-#             errors["email"] = "This email is already registered."
-            
-#     otp_token = data.get("otp_token")
-#     if not otp_token:
-#         errors["otp1"] = "Please refresh the page."
-#     email_otp = data.get("otp1")  # from HTML field "otp1"
-#     if not email_otp:
-#         errors["otp1"] = "OTP is required."
-#     otp_verification = verify_otp_token(email, email_otp, otp_token)
-#     if not otp_verification["success"]:
-#         errors["otp1"] = otp_verification["message"]
-
-#     # Password
-#     password = data.get("password")
-#     if not password or len(password) < 8:
-#         errors["password"] = "Password is required (min 8 chars)."
-
-#     # Phone
-#     phone_number = data.get("phone_number")
-#     if not phone_number or not re.match(r"^\d{10}$", phone_number):
-#         errors["phone_number"] = "Enter a valid phone number (10 digits)."
-
-#     # Name
-#     name = data.get("name")
-#     if not name:
-#         errors["name"] = "Name is required."
-
-#     # DOB (optional, but check format if provided)
-#     dob = data.get("dob")
-#     if dob and not re.match(r"^\d{4}-\d{2}-\d{2}$", dob):
-#         errors["dob"] = "Enter a valid date (YYYY-MM-DD)."
-
-#     # Gender (optional, but check if provided)
-#     gender = data.get("gender")
-#     if gender and gender not in ("male", "female", "other"):
-#         errors["gender"] = "Select a valid gender."
-
-#     address = data.get("address")
-#     if not address:
-#         errors["address"] = "Address is required."
-#     city = data.get("city")
-#     if not city:
-#         errors["city"] = "City/District is required."
-#     state = data.get("state")
-#     if not state:
-#         errors["state"] = "State is required."
-#     pincode = data.get("pincode")
-#     if not pincode or not re.match(r"^\d{4,10}$", pincode):
-#         errors["pincode"] = "Enter a valid pincode."
-#     country = data.get("country")
-#     if not country:
-#         errors["country"] = "Country is required."
-
-#     referral_code = data.get("referral_code")
-#     phone_country_code = data.get("phone_country_code", "+91")
-
-#     # If any errors, return as JSON
-#     if errors:
-#         return JsonResponse({"success": False, "errors": errors}, status=400)
-
-#     user = User.objects.create(
-#         email=email,
-#         phone_country_code=phone_country_code,
-#         phone_number=phone_number,
-#         password=make_password(password),
-#         user_type="user"
-#     )
-
-#     UserProfile.objects.create(
-#         user=user,
-#         name=name,
-#         dob=dob or None,
-#         gender=gender,
-#         address=address,
-#         city=city,
-#         state=state,
-#         pincode=pincode,
-#         country=country,
-#         referral_code=referral_code,
-#         otp=email_otp,
-#     )
-#     return JsonResponse({"success": True, "message": "User registered successfully."})
-
-@csrf_protect
-@require_POST
-def save_ngo(request):
-    data = request.POST
-    files = request.FILES
-    errors = {}
-
-    # --- Validation ---
-    email = data.get("email")
-    if not email:
-        errors["email"] = "Email is required."
-    else:
-        try:
-            validate_email(email)
-        except ValidationError:
-            errors["email"] = "Enter a valid email address."
-        if User.objects.filter(email=email).exists():
-            errors["email"] = "This email is already registered."
-
-    password = data.get("password")
-    confirm_password = data.get("confirm_password")
-    if not password or len(password) < 8:
-        errors["password"] = "Password is required (min 8 chars)."
-    elif password != confirm_password:
-        errors["confirm_password"] = "Passwords do not match."
-        
-    otp_token = data.get("otp_token")
-    email_otp = data.get("otp1")
-    # if not email_otp:
-    #     errors["otp1"] = "OTP is required."
-    # otp_verification = verify_otp(email, email_otp, otp_token)
-    # if not otp_verification["success"]:
-    #     errors["otp1"] = otp_verification["message"]
-    
-    # Phone and country code
-    phone_country_code = "+91"  # default; 
-    phone_number = data.get("phone_number1")
-    if not phone_number or not re.match(r"^\d{10}$", phone_number):
-        errors["phone_number1"] = "Enter a valid phone number (10 digits)."
-
-    ngo_name = data.get("ngo_name")
-    if not ngo_name:
-        errors["ngo_name"] = "NGO Name is required."
-
-    website_url = data.get("website_url")
-    ngo_service_id = data.get("ngo_service")
-    ngo_service = None
-    if ngo_service_id:
-        try:
-            ngo_service = NGOService.objects.get(name=ngo_service_id)
-        except Exception as e:
-            errors["ngo_service"] = "Invalid NGO service selected."
-
-    address = data.get("address")
-    if not address:
-        errors["address"] = "Address is required."
-    city = data.get("dist")
-    if not city:
-        errors["dist"] = "City/District is required."
-    state = data.get("state")
-    if not state:
-        errors["state"] = "State is required."
-    pincode = data.get("pincode")
-    if not pincode or not re.match(r"^\d{4,10}$", pincode):
-        errors["pincode"] = "Enter a valid pincode."
-    country = data.get("country")
-    if not country:
-        errors["country"] = "Country is required."
-
-    ngo_registration_number = data.get("ngo_registration_number")
-    if not ngo_registration_number:
-        errors["ngo_registration_number"] = "Registration number is required."
-    ngo_registration_doc_path, err = validate_and_save_file(
-        files.get("ngo_registration_doc"), "registration", "Registration Document", user_type="ngo")
-    if not ngo_registration_doc_path:
-        errors["ngo_registration_doc"] = "Registration document is required if registration number is provided."
-    if err:
-        errors["ngo_registration_doc"] = err
-
-    pan_number = data.get("pan_number")
-    if not pan_number:
-        errors["pan_number"] = "PAN number is required."
-    pan_doc_path, err = validate_and_save_file(
-        files.get("pan_doc"), "pan", "PAN Document",user_type="ngo")
-    if not pan_doc_path:
-        errors["pan_doc"] = "PAN document is required if PAN number is provided."
-    if err:
-        errors["pan_doc"] = err
-
-    gst_number = data.get("gst_number")
-    if not gst_number:
-        errors["gst_number"] = "GST number is required."
-    gst_doc_path, err = validate_and_save_file(
-        files.get("gst_doc"), "gst", "GST Document", user_type="ngo")
-    if not gst_doc_path:
-        errors["gst_doc"] = "GST document is required if GST number is provided."
-    if err:
-        errors["gst_doc"] = err
-
-    tan_number = data.get("tan_number")
-    if not tan_number:
-        errors["tan_number"] = "TAN number is required."
-    tan_doc_path, err = validate_and_save_file(
-        files.get("tan_doc"), "tan", "TAN Document", user_type="ngo")
-    if not tan_doc_path:
-        errors["tan_doc"] = "TAN document is required if TAN number is provided."
-    if err:
-        errors["tan_doc"] = err
-
-    section8_number = data.get("section8_number")
-    if not section8_number:
-        errors["section8_number"] = "Section 8 number is required."
-    section8_doc_path, err = validate_and_save_file(
-        files.get("section8_doc"), "section8", "Section 8 Document", user_type="ngo")
-    if not section8_doc_path:
-        errors["section8_doc"] = "Section 8 document is required if number is provided."
-    if err:
-        errors["section8_doc"] = err
-
-    doc_12a_number = data.get("doc_12a_number")
-    if not doc_12a_number:
-        errors["doc_12a_number"] = "12A number is required."
-    doc_12a_path, err = validate_and_save_file(
-        files.get("doc_12a"), "doc_12a", "12A Document", user_type="ngo")
-    if not doc_12a_path:
-        errors["doc_12a"] = "12A document is required if number is provided."
-    if err:
-        errors["doc_12a"] = err
-
-    brand_image_path, err = validate_and_save_file(
-        files.get("brand_image"), "brand_image", "Brand Image", user_type="ngo")
-    if not brand_image_path:
-        errors["brand_image"] = "Brand image is required if selected."
-    if brand_image_path and err:
-        errors["brand_image"] = err
-
-    brand_description = data.get("brand_description")
-    referral_code = data.get("referral_code")
-    contact_person_name = data.get("contact_person_name")
-    contact_person_phone = data.get("contact_person_phone")
-    contact_person_role = data.get("contact_person_role")
-    contact_person_otp = data.get("otp2")
-    
-    if not contact_person_name:
-        errors["contact_person_name"] = "Contact person name is required."
-    if not contact_person_phone:
-        errors["contact_person_phone"] = "Contact person phone is required."
-    if not contact_person_role:
-        errors["contact_person_role"] = "Contact person role is required."
-
-    if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
-
-    # --- Save User & NGOProfile ---
-    user = User.objects.create(
-        email=email,
-        phone_country_code=phone_country_code,
-        phone_number=phone_number,
-        password=make_password(password),
-        user_type="ngo"
-    )
-
-    ngo_profile = NGOProfile.objects.create(
-        user=user,
-        ngo_name=ngo_name,
-        ngo_services=ngo_service,
-        website_url=website_url,
-        address=address,
-        city=city,
-        state=state,
-        pincode=pincode,
-        country=country,
-        ngo_registration_number=ngo_registration_number,
-        ngo_registration_doc_path=ngo_registration_doc_path,
-        ngo_registration_doc_virus_scanned=True if ngo_registration_doc_path else False,
-        pan_number=pan_number,
-        pan_doc_path=pan_doc_path,
-        pan_doc_virus_scanned=True if pan_doc_path else False,
-        gst_number=gst_number,
-        gst_doc_path=gst_doc_path,
-        gst_doc_virus_scanned=True if gst_doc_path else False,
-        tan_number=tan_number,
-        tan_doc_path=tan_doc_path,
-        tan_doc_virus_scanned=True if tan_doc_path else False,
-        section8_number=section8_number,
-        section8_doc_path=section8_doc_path,
-        section8_doc_virus_scanned=True if section8_doc_path else False,
-        doc_12a_number=doc_12a_number,
-        doc_12a_path=doc_12a_path,
-        doc_12a_virus_scanned=True if doc_12a_path else False,
-        brand_image_path=brand_image_path,
-        brand_image_virus_scanned=True if brand_image_path else False,
-        brand_description=brand_description,
-        email_otp=email_otp,
-        referral_code=referral_code,
-    )
-
-    # Save Contact Person
-    if contact_person_name and contact_person_phone:
-        from .models import ContactPerson
-        ContactPerson.objects.create(
-            profile_type='ngo',
-            profile=user,
-            name=contact_person_name,
-            phone_country_code=phone_country_code,
-            phone_number=contact_person_phone,
-            role=contact_person_role,
-            otp=contact_person_otp,
-            referral_code=referral_code,
-            email_otp=email_otp
-        )
-
-    return JsonResponse({"success": True, "message": "NGO registered successfully."})
-
-@csrf_protect
-@require_POST
-def save_advertiser(request):
-    data = request.POST
-    files = request.FILES
-    errors = {}
-    
-
-    # Email
-    email = data.get("email")
-    if not email:
-        errors["email"] = "Email is required."
-    else:
-        try:
-            validate_email(email)
-        except ValidationError:
-            errors["email"] = "Enter a valid email address."
-        if User.objects.filter(email=email).exists():
-            errors["email"] = "This email is already registered."
-
-    # Password
-    password = data.get("password")
-    confirm_password = data.get("confirm_password")
-    if not password or len(password) < 8:
-        errors["password"] = "Password must be at least 8 characters."
-    elif password != confirm_password:
-        errors["confirm_password"] = "Passwords do not match."
-        
-    email_otp = data.get("otp1")
-
-    # Phone
-    phone_country_code = "+91"
-    phone_number = data.get("phone")
-    if not phone_number or not re.match(r"^\d{10}$", phone_number):
-        errors["phone"] = "Enter a valid phone number."
-
-    # Company Info
-    company_name = data.get("company_name")
-    if not company_name:
-        errors["company_name"] = "Company name is required."
-
-    advertiser_type_id = data.get("advertiser_type")
-    ad_services_id = data.get("ad_service_req")
-    advertiser_type = None
-    ad_services = None
-    if advertiser_type_id:
-        try:
-            advertiser_type = AdvertiserType.objects.get(name=advertiser_type_id)
-        except Exception as e:
-            errors["advertiser_type"] = "Invalid advertiser type selected."
-    if ad_services_id:
-        try:
-            ad_services = AdServiceReq.objects.get(name=ad_services_id)
-        except Exception as e:
-            errors["ad_service_req"] = "Invalid ad services selected."
-    
-    website = data.get("website")
-
-    address = data.get("address")
-    city = data.get("city")
-    state = data.get("state")
-    pincode = data.get("pincode")
-    country = data.get("country")
-    if not address:
-        errors["address"] = "Address is required."
-    if not city:
-        errors["city"] = "City is required."
-    if not state:
-        errors["state"] = "State is required."
-    if not country:
-        errors["country"] = "Country is required."
-    if not pincode or not re.match(r"^\d{4,10}$", pincode):
-        errors["pincode"] = "Enter a valid pincode."
-
-    # Incorporation Doc
-    incorporation_number = data.get("incorporation_number")
-    if not incorporation_number:
-        errors["incorporation_number"] = "Incorporation number is required."
-    incorporation_doc_path, err = validate_and_save_file(files.get("incorporation_doc"), "incorporation", "Incorporation Document",user_type="advertiser")
-    if not incorporation_doc_path:
-        errors["incorporation_doc"] = "Upload incorporation document."
-    if err:
-        errors["incorporation_doc"] = err
-
-    # GST
-    gst_number = data.get("gst_number")
-    if not gst_number:
-        errors["gst_number"] = "GST number is required."
-    gst_doc_path, err = validate_and_save_file(files.get("gst_doc"), "gst", "GST Document",user_type="advertiser")
-    if not gst_doc_path:
-        errors["gst_doc"] = "Upload GST document."
-    if err:
-        errors["gst_doc"] = err
-
-    # PAN
-    pan_number = data.get("pan_number")
-    if not pan_number:
-        errors["pan_number"] = "PAN number is required."
-    pan_doc_path, err = validate_and_save_file(files.get("pan_doc"), "pan", "PAN Document",user_type="advertiser")
-    if not pan_doc_path:
-        errors["pan_doc"] = "Upload PAN document."
-    if err:
-        errors["pan_doc"] = err
-
-    # TAN
-    tan_number = data.get("tan_number")
-    if not tan_number:
-        errors["tan_number"] = "TAN number is required."
-    tan_doc_path, err = validate_and_save_file(files.get("tan_doc"), "tan", "TAN Document",user_type="advertiser")
-    if not tan_doc_path:
-        errors["tan_doc"] = "Upload TAN document."
-    if err:
-        errors["tan_doc"] = err
-
-    # Brand Image
-    brand_image_path, err = validate_and_save_file(files.get("brand_image"), "brand_image", "Brand Image",user_type="advertiser")
-    if not brand_image_path:
-        errors["brand_image"] = "Upload Image"
-    if err:
-        errors["brand_image"] = err
-
-    # Description and OTP
-    brand_description = data.get("brand_description")
-    referral_code = data.get("referral_code")
-
-    # Contact Person
-    contact_name = data.get("contact_person_name")
-    contact_phone = data.get("contact_person_phone")
-    contact_role = data.get("contact_person_role")
-    ref_otp = data.get("otp2")
-    if not contact_name:
-        errors["contact_person_name"] = "Contact person name is required."
-    if not contact_phone:
-        errors["contact_person_phone"] = "Contact person phone is required."
-    if not contact_role:
-        errors["contact_person_role"] = "Contact person role is required."
-
-    selfie_path, err = validate_and_save_file(files.get("selfie"), "selfie", "Selfie Upload", user_type="client")
-    if err:
-        errors["selfie"] = err
-    elif not selfie_path:
-        errors["selfie"] = "Selfie is required."
-    # Return errors if any
-    if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
-
-    # Create User
-    user = User.objects.create(
-        email=email,
-        phone_country_code=phone_country_code,
-        phone_number=phone_number,
-        password=make_password(password),
-        user_type="advertiser"
-    )
-
-    # Create AdvertiserProfile
-    advertiser = AdvertiserProfile.objects.create(
-        user=user,
-        company_name=company_name,
-        advertiser_type=advertiser_type,
-        ad_services_required=ad_services,
-        website_url=website,
-        address=address,
-        city=city,
-        state=state,
-        country=country,
-        pincode=pincode,
-        incorporation_number=incorporation_number,
-        incorporation_doc_path=incorporation_doc_path,
-        incorporation_doc_virus_scanned=bool(incorporation_doc_path),
-        gst_number=gst_number,
-        gst_doc_path=gst_doc_path,
-        gst_doc_virus_scanned=bool(gst_doc_path),
-        pan_number=pan_number,
-        pan_doc_path=pan_doc_path,
-        pan_doc_virus_scanned=bool(pan_doc_path),
-        tan_number=tan_number,
-        tan_doc_path=tan_doc_path,
-        tan_doc_virus_scanned=bool(tan_doc_path),
-        brand_image_path=brand_image_path,
-        brand_image_virus_scanned=bool(brand_image_path),
-        brand_description=brand_description,
-        email_otp=email_otp,
-        referral_code=referral_code,
-    )
-
-    # Create ContactPerson if present
-    if contact_name and contact_phone:
-        ContactPerson.objects.create(
-            profile_type='advertiser',
-            profile=user,
-            name=contact_name,
-            phone_country_code=phone_country_code,
-            phone_number=contact_phone,
-            role=contact_role,
-            otp=ref_otp,
-            referral_code=referral_code,
-            email_otp=email_otp
-        )
-        
-
-    return JsonResponse({"success": True, "message": "Advertiser registered successfully."})
-
-@csrf_protect
-@require_POST
-def save_client(request):
-    data = request.POST
-    files = request.FILES
-    errors = {}
-
-    # === BASIC VALIDATION ===
-    email = data.get("email").strip()
-    password = data.get("password").strip()
-    confirm_password = data.get("confirm_password").strip()
-
-    # Email
-    if not email:
-        errors["email"] = "Email is required."
-    else:
-        try:
-            validate_email(email)
-        except ValidationError:
-            errors["email"] = "Enter a valid email address."
-        if User.objects.filter(email=email).exists():
-            errors["email"] = "This email is already registered."
-            
-    otp_token = data.get("otp_token")
-    # if not otp_token:
-    #     errors["otp1"] = "Please refresh the page."
-    email_otp = data.get("otp1")  # from HTML field "otp1"
-    # if not email_otp:
-    #     errors["otp1"] = "OTP is required."
-    # otp_verification = verify_otp(email, email_otp, otp_token)
-    # if not otp_verification["success"]:
-    #     errors["otp1"] = otp_verification["message"]
-
-    # Password
-    if not password or len(password) < 8:
-        errors["password"] = "Password must be at least 8 characters."
-    elif password != confirm_password:
-        errors["confirm_password"] = "Passwords do not match."
-
-    # Phone
-    phone_country_code = "+91"  # default
-    phone_number = data.get("phone")
-    if not phone_number or not re.match(r"^\d{10}$", phone_number):
-        errors["phone"] = "Enter a valid phone number."
-
-    # Company Info
-    company_name = data.get("company_name")
-    if not company_name:
-        errors["company_name"] = "Company name is required."
-
-    company_type_id = data.get("company_type")
-    company_service_id = data.get("company_service")
-    company_type = None
-    company_service = None
-
-    if company_type_id:
-        try:
-            company_type = ClientType.objects.get(name=company_type_id)
-        except Exception as e:
-            errors["company_type"] = "Invalid company type."
-
-    if company_service_id:
-        try:
-            company_service = ClientService.objects.get(name=company_service_id)
-        except Exception as e:
-            errors["company_service"] = "Invalid company service."
-
-    website = data.get("website")
-    address = data.get("address")
-    city = data.get("city")
-    state = data.get("state")
-    country = data.get("country")
-    pincode = data.get("pincode")
-
-    if not address:
-        errors["address"] = "Address is required."
-    if not city:
-        errors["city"] = "City is required."
-    if not state:
-        errors["state"] = "State is required."
-    if not country:
-        errors["country"] = "Country is required."
-    if not pincode or not re.match(r"^\d{4,10}$", pincode):
-        errors["pincode"] = "Enter a valid pincode."
-
-    # === DOCUMENTS VALIDATION ===
-    incorporation_number = data.get("incorporation")
-    if not incorporation_number:
-        errors["incorporation"] = "Incorporation number is required."
-    incorporation_doc_path, err = validate_and_save_file(files.get("incorporation_doc"), "incorporation", "Incorporation Document", user_type="client")
-    if not incorporation_doc_path:
-        errors["incorporation_doc"] = "Upload incorporation document."
-    if err:
-        errors["incorporation_doc"] = err
-
-    gst_number = data.get("gst")
-    if not gst_number:
-        errors["gst"] = "GST number is required."
-    gst_doc_path, err = validate_and_save_file(files.get("gst_doc"), "gst", "GST Document", user_type="client")
-    if not gst_doc_path:
-        errors["gst_doc"] = "Upload GST document."
-    if err:
-        errors["gst_doc"] = err
-
-    pan_number = data.get("pan")
-    if not pan_number:
-        errors["pan"] = "PAN number is required."
-    pan_doc_path, err = validate_and_save_file(files.get("pan_doc"), "pan", "PAN Document", user_type="client")
-    if not pan_doc_path:
-        errors["pan_doc"] = "Upload PAN document."
-    if err:
-        errors["pan_doc"] = err
-
-    tan_number = data.get("tan")
-    if not tan_number:
-        errors["tan"] = "TAN number is required."
-    tan_doc_path, err = validate_and_save_file(files.get("tan_doc"), "tan", "TAN Document", user_type="client")
-    if not tan_doc_path:
-        errors["tan_doc"] = "Upload TAN document."
-    if err:
-        errors["tan_doc"] = err
-
-    # Selfie Upload
-    selfie_path, err = validate_and_save_file(files.get("selfie"), "selfie", "Selfie Upload", user_type="client")
-    if err:
-        errors["selfie"] = err
-    elif not selfie_path:
-        errors["selfie"] = "Selfie is required."
-
-    # OTP & Referral
-    referral_code = data.get("referral_code")
-    
-    # Contact Person
-    contact_name = data.get("contact_name")
-    contact_phone = data.get("contact_phone")
-    contact_role = data.get("contact_role")
-    ref_otp = data.get("ref_otp")
-    if not contact_name:
-        errors["contact_name"] = "Contact person name is required."
-    if not contact_phone:
-        errors["contact_phone"] = "Contact person phone number is required."
-    if not contact_role:
-        errors["contact_role"] = "Contact person role is required."
-
-    # === RETURN IF ERRORS ===
-    if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
-
-    # === CREATE USER ===
-    user = User.objects.create(
-        email=email,
-        phone_country_code=phone_country_code,
-        phone_number=phone_number,
-        password=make_password(password),
-        user_type="client"
-    )
-
-    # === CREATE CLIENT PROFILE ===
-    client = ClientProfile.objects.create(
-    user=user,
-    company_name=company_name,
-    website_url=website,
-    address=address,
-    city=city,
-    state=state,
-    country=country,
-    pincode=pincode,
-    company_type=company_type,
-    services_interested=company_service,
-    incorporation_number=incorporation_number,
-    incorporation_doc_path=incorporation_doc_path,
-    incorporation_doc_virus_scanned=bool(incorporation_doc_path),
-    gst_number=gst_number,
-    gst_doc_path=gst_doc_path,
-    gst_doc_virus_scanned=bool(gst_doc_path),
-    pan_number=pan_number,
-    pan_doc_path=pan_doc_path,
-    pan_doc_virus_scanned=bool(pan_doc_path),
-    tan_number=tan_number,
-    tan_doc_path=tan_doc_path,
-    tan_doc_virus_scanned=bool(tan_doc_path),
-    email_otp=email_otp,
-    referral_code=referral_code,
-)
-
-    # === CREATE CONTACT PERSON ===
-    if contact_name and contact_phone:
-        ContactPerson.objects.create(
-            profile_type='client',
-            profile=user,
-            name=contact_name,
-            phone_country_code=phone_country_code,
-            phone_number=contact_phone,
-            role=contact_role,
-            otp=ref_otp,
-            referral_code=referral_code,
-            email_otp=email_otp
-        )
-    return JsonResponse({"success": True, "message": "Client registered successfully."})
 
 @csrf_protect
 @require_POST
@@ -2327,6 +1613,15 @@ def verify_login_otp(request):
             **kyc_result
         })
 
+    if user_type == "lab":
+
+        kyc_result = check_lab_kyc(user_id)
+
+        return JsonResponse({
+            "success": True,
+            **kyc_result
+        })
+
     return JsonResponse({
         "success": True,
         "kyc_required": False,
@@ -2452,7 +1747,75 @@ def check_doctor_kyc(user_id):
         "redirect": reverse("dashboard")
     }
     
-    				
+def check_lab_kyc(user_id):
+
+    try:
+        lab_profile = LabProfile.objects.get(
+            user_id=user_id
+        )
+    except LabProfile.DoesNotExist:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 1,
+            "message": "Please complete lab profile.",
+            "redirect": reverse("lab_kyc")
+        }
+
+    # --------------------------------------------------------
+    # Contact Person
+    # --------------------------------------------------------
+
+    contact_exists = ContactPerson.objects.filter(
+        profile_id=user_id,
+        profile_type="lab"
+    ).exists()
+
+    if not contact_exists:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 2,
+            "message": "Please complete contact person details.",
+            "redirect": reverse("lab_kyc")
+        }
+
+    # --------------------------------------------------------
+    # Documents
+    # --------------------------------------------------------
+
+    step3_complete = all([
+        lab_profile.lab_certificate_number,
+        lab_profile.lab_certificate_path,
+
+        lab_profile.identity_proof_aadhar_number,
+        lab_profile.identity_proof_aadhar_path,
+
+        lab_profile.identity_proof_pan_number,
+        lab_profile.identity_proof_pan_path,
+
+        lab_profile.gov_license_number,
+        lab_profile.gov_license_path,
+
+        lab_profile.lab_photo_path,
+    ])
+
+    if not step3_complete:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 3,
+            "message": "Please complete lab document KYC.",
+            "redirect": reverse("lab_kyc")
+        }
+
+    return {
+        "kyc_required": False,
+        "kyc_step": 0,
+        "message": "Login Successful",
+        "redirect": reverse("dashboard")
+    }
+   				
 @csrf_protect
 @require_POST
 def check_phone(request):
@@ -3591,13 +2954,570 @@ def doctor_profile_review(request):
 def lab_kyc(request):
     return render(request, 'registration/new_kyc_lab.html')
 
+# def lab_profile_verification(request):
+#     return render(request, 'registration/kyc_lab_profile.html')
+
+# def lab_profile_review(request):
+#     return render(request, 'registration/kyc_lab_profile_review.html')
+
+# ============================================================
+# LAB KYC
+# ============================================================
+
+def lab_kyc(request):
+    return render(request, "registration/kyc_lab.html")
+
+
 def lab_profile_verification(request):
-    return render(request, 'registration/kyc_lab_profile.html')
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return redirect("login")
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    phone_number = user.phone_number
+    phone_country_code = user.phone_country_code
+
+    countries = CountryOption.objects.filter(
+        is_active=1
+    ).order_by("name")
+
+    lab_times = LabTiming.objects.filter(
+        is_active=True
+    ).order_by("open_time")
+
+    lab_services = LabService.objects.filter(
+        is_active=1
+    ).order_by("name")
+
+    lab_facilities = LabFacility.objects.filter(
+        is_active=1
+    ).order_by("name")
+
+    lab_profile = LabProfile.objects.filter(
+        user_id=user.id
+    ).first()
+
+    contact_person = ContactPerson.objects.filter(
+        profile_id=user.id,
+        profile_type="lab"
+    ).first()
+
+    return render(
+        request,
+        "registration/kyc_lab_profile.html",
+        {
+            "phone_number": phone_number,
+            "phone_country_code": phone_country_code,
+            "countries": countries,
+            "lab_times": lab_times,
+            "lab_services": lab_services,
+            "lab_facilities": lab_facilities,
+            "lab_profile": lab_profile,
+            "contact_person": contact_person,
+        }
+    )
+
 
 def lab_profile_review(request):
-    return render(request, 'registration/kyc_lab_profile_review.html')
+    return render(
+        request,
+        "registration/kyc_lab_profile_review.html"
+    )
+
+def save_lab_step_1(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    email = request.POST.get("lab_email")
+    lab_name = request.POST.get("lab_name")
+    owner_name = request.POST.get("owner_name")
+
+    country_code = request.POST.get(
+        "lab_country_code",
+        user.phone_country_code or "+91"
+    )
+
+    phone_number = request.POST.get(
+        "lab_phone",
+        user.phone_number
+    )
+
+    alt_phone = request.POST.get("alt_phone")
+
+    address = request.POST.get("lab_address")
+    country = request.POST.get("lab_country")
+
+    state_id = request.POST.get("lab_state")
+    city_id = request.POST.get("lab_city")
+
+    pincode = request.POST.get("lab_pincode")
+
+    lab_timing_id = request.POST.get("lab_timing")
+
+    referral_code = request.POST.get("referral_code")
+
+    if not lab_name:
+        return JsonResponse({
+            "success": False,
+            "message": "Lab name is required."
+        }, status=400)
+
+    if not email:
+        return JsonResponse({
+            "success": False,
+            "message": "Email is required."
+        }, status=400)
+
+    if not phone_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number is required."
+        }, status=400)
+
+    if not address:
+        return JsonResponse({
+            "success": False,
+            "message": "Address is required."
+        }, status=400)
+
+    # --------------------------------------------------------
+    # State
+    # --------------------------------------------------------
+
+    state = None
+
+    if state_id:
+        try:
+            state = State.objects.get(id=state_id)
+        except State.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected state not found."
+            }, status=400)
+
+    # --------------------------------------------------------
+    # City
+    # --------------------------------------------------------
+
+    city = None
+
+    if city_id:
+        try:
+            city = City.objects.get(id=city_id)
+        except City.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected city not found."
+            }, status=400)
+
+    # --------------------------------------------------------
+    # Timing
+    # --------------------------------------------------------
+
+    lab_timing = None
+
+    if lab_timing_id:
+        try:
+            lab_timing = LabTiming.objects.get(
+                id=lab_timing_id
+            )
+        except LabTiming.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected lab timing not found."
+            }, status=400)
+
+    # --------------------------------------------------------
+    # Update User
+    # --------------------------------------------------------
+
+    user.email = email
+    user.phone_country_code = country_code
+    user.phone_number = phone_number
+
+    user.save(
+        update_fields=[
+            "email",
+            "phone_country_code",
+            "phone_number",
+            "updated_at"
+        ]
+    )
+
+    # --------------------------------------------------------
+    # Create or Update Lab Profile
+    # --------------------------------------------------------
+
+    defaults = {
+        "user_id": user_id,
+        "lab_name": lab_name,
+        "owner_name": owner_name,
+        "contact_number": phone_number,
+        "alt_contact_number": alt_phone,
+        "address": address,
+        "country": country,
+        "state": state,
+        "city": city,
+        "pincode": pincode,
+        "lab_timing": lab_timing,
+    }
+
+    if referral_code:
+        defaults["referral_code"] = referral_code
+
+    lab_profile, created = LabProfile.objects.update_or_create(
+        user=user,
+        defaults=defaults
+    )
+
+    if created:
+        message = "Lab profile created successfully."
+    else:
+        message = "Lab profile updated successfully."
+
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "profile_id": lab_profile.id,
+        "created": created
+    })
+
+def save_lab_step_2(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    name = request.POST.get("contact_name")
+    email = request.POST.get("contact_email")
+    phone_country_code = request.POST.get(
+        "contact_country_code",
+        "+91"
+    )
+    phone_number = request.POST.get("contact_phone")
+    role = request.POST.get("contact_role")
+    otp = request.POST.get("contact_otp")
+    referral_code = request.POST.get("referral_code")
+
+    if not name:
+        return JsonResponse({
+            "success": False,
+            "message": "Contact person name is required."
+        }, status=400)
+
+    if not phone_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Contact person phone is required."
+        }, status=400)
+
+    if not role:
+        return JsonResponse({
+            "success": False,
+            "message": "Contact person role is required."
+        }, status=400)
+
+    contact_person, created = ContactPerson.objects.update_or_create(
+        profile=user,
+        profile_type="lab",
+        defaults={
+            "name": name,
+            "email": email,
+            "phone_country_code": phone_country_code,
+            "phone_number": phone_number,
+            "role": role,
+            "otp": otp,
+            "referral_code": referral_code,
+        }
+    )
+
+    return JsonResponse({
+        "success": True,
+        "message": (
+            "Contact person saved successfully."
+            if created
+            else "Contact person updated successfully."
+        ),
+        "contact_person_id": contact_person.id
+    })
+
+def save_lab_step_3(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    try:
+        lab_profile = LabProfile.objects.get(
+            user_id=user.id
+        )
+    except LabProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Lab profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    lab_certificate_number = request.POST.get(
+        "lab_certificate_number"
+    )
+
+    aadhaar_number = request.POST.get(
+        "aadhaar_number"
+    )
+
+    pan_number = request.POST.get(
+        "pan_number"
+    )
+
+    gov_license_number = request.POST.get(
+        "gov_license_number"
+    )
+
+    lab_certificate_file = request.FILES.get(
+        "lab_certificate"
+    )
+
+    aadhaar_file = request.FILES.get(
+        "aadhar_doc"
+    )
+
+    pan_file = request.FILES.get(
+        "pan_doc"
+    )
+
+    gov_license_file = request.FILES.get(
+        "gov_license"
+    )
+
+    lab_photo_file = request.FILES.get(
+        "lab_photo"
+    )
+
+    # --------------------------------------------------------
+    # Required numbers
+    # --------------------------------------------------------
+
+    if not lab_certificate_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Lab certificate number is required."
+        }, status=400)
+
+    if not aadhaar_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhaar number is required."
+        }, status=400)
+
+    if not pan_number:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN number is required."
+        }, status=400)
+
+    if not gov_license_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Government license number is required."
+        }, status=400)
+
+    # --------------------------------------------------------
+    # Files
+    # --------------------------------------------------------
+
+    if not lab_certificate_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Lab certificate document is required."
+        }, status=400)
+
+    if not aadhaar_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhaar document is required."
+        }, status=400)
+
+    if not pan_file:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN document is required."
+        }, status=400)
+
+    if not gov_license_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Government license document is required."
+        }, status=400)
+
+    if not lab_photo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Lab photo is required."
+        }, status=400)
+
+    # --------------------------------------------------------
+    # Save files
+    # --------------------------------------------------------
+
+    lab_certificate_path, err = validate_and_save_file(
+        lab_certificate_file,
+        "lab_certificate",
+        "Lab Certificate",
+        "lab"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    aadhaar_path, err = validate_and_save_file(
+        aadhaar_file,
+        "aadhaar",
+        "Aadhaar Document",
+        "lab"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    pan_path, err = validate_and_save_file(
+        pan_file,
+        "pan",
+        "PAN Document",
+        "lab"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    gov_license_path, err = validate_and_save_file(
+        gov_license_file,
+        "license",
+        "Government License",
+        "lab"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    lab_photo_path, err = validate_and_save_file(
+        lab_photo_file,
+        "lab_photo",
+        "Lab Photo",
+        "lab"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    # --------------------------------------------------------
+    # Update profile
+    # --------------------------------------------------------
+
+    lab_profile.lab_certificate_number = lab_certificate_number
+    lab_profile.identity_proof_aadhar_number = aadhaar_number
+    lab_profile.identity_proof_pan_number = pan_number
+    lab_profile.gov_license_number = gov_license_number
+
+    lab_profile.lab_certificate_path = lab_certificate_path
+    lab_profile.identity_proof_aadhar_path = aadhaar_path
+    lab_profile.identity_proof_pan_path = pan_path
+    lab_profile.gov_license_path = gov_license_path
+    lab_profile.lab_photo_path = lab_photo_path
+
+    lab_profile.save()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Lab documents saved successfully.",
+        "profile_id": lab_profile.id,
+        "redirect_url": reverse("lab_profile_review")
+    })
 
 
+@csrf_protect
+@require_POST
+def save_lab_profile(request):
+
+    step = request.POST.get("step")
+
+    if not step:
+        return JsonResponse({
+            "success": False,
+            "message": "Step is required."
+        }, status=400)
+
+    if step == "1":
+        return save_lab_step_1(request)
+
+    elif step == "2":
+        return save_lab_step_2(request)
+
+    elif step == "3":
+        return save_lab_step_3(request)
+
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid step."
+    }, status=400)
 
 def pharmacy_kyc(request):
     return render(request, 'registration/new_kyc_pharmacy.html')

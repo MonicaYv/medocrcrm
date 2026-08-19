@@ -1,0 +1,2091 @@
+// ============================================================
+// LAB KYC - EXACTLY 3 STEPS
+// ============================================================
+
+let currentStep = 1;
+const totalSteps = 3;
+
+const LAB_SAVE_URL = "/user/lab-profile-verification/save/";
+const LAB_KYC_URL = "/user/lab-kyc/";
+const LAB_REVIEW_URL = "/user/lab-profile-review/";
+
+
+// ============================================================
+// DOCUMENT READY
+// ============================================================
+
+$(document).ready(function () {
+
+    console.log("=================================");
+    console.log("LAB KYC JS INITIALIZED");
+    console.log("3 STEP FLOW");
+    console.log("=================================");
+
+    // --------------------------------------------------------
+    // INITIAL STEPPER
+    // --------------------------------------------------------
+
+    showStep(1);
+
+    updateStepTab(1, "active");
+    updateStepTab(2, "locked");
+    updateStepTab(3, "locked");
+
+    updateProgress(1);
+
+    // --------------------------------------------------------
+    // LOAD LAB DROPDOWNS
+    // --------------------------------------------------------
+
+    initializeLabDropdowns();
+
+    // --------------------------------------------------------
+    // LOCATION
+    // --------------------------------------------------------
+
+    initializeLabLocation();
+
+    // Country changed
+    $(document).on(
+        "change",
+        '[name="lab_country"]',
+        function () {
+
+            const countryId = $(this).val();
+
+            loadLabStates(countryId);
+        }
+    );
+
+    // State changed
+    $(document).on(
+        "change",
+        '[name="lab_state"]',
+        function () {
+
+            const stateId = $(this).val();
+
+            loadLabCities(stateId);
+        }
+    );
+
+    // --------------------------------------------------------
+    // PHONE
+    // --------------------------------------------------------
+
+    $(document).on(
+        "input",
+        '[name="lab_phone"]',
+        function () {
+
+            this.value = this.value
+                .replace(/\D/g, "")
+                .substring(0, 10);
+        }
+    );
+
+    $(document).on(
+        "input",
+        '[name="alt_phone"]',
+        function () {
+
+            this.value = this.value
+                .replace(/\D/g, "")
+                .substring(0, 10);
+        }
+    );
+
+    // --------------------------------------------------------
+    // PINCODE
+    // --------------------------------------------------------
+
+    $(document).on(
+        "input",
+        '[name="lab_pincode"]',
+        function () {
+
+            this.value = this.value
+                .replace(/\D/g, "")
+                .substring(0, 6);
+        }
+    );
+
+    // --------------------------------------------------------
+    // NAME VALIDATION
+    // --------------------------------------------------------
+
+    $(document).on(
+        "input",
+        '[name="lab_name"]',
+        function () {
+
+            this.value = this.value
+                .replace(/[^A-Za-z0-9 .&()'-]/g, "");
+        }
+    );
+
+    $(document).on(
+        "input",
+        '[name="owner_name"], [name="contact_name"]',
+        function () {
+
+            this.value = this.value
+                .replace(/[^A-Za-z .'-]/g, "");
+        }
+    );
+
+    // --------------------------------------------------------
+    // STEP 2 OTP
+    // --------------------------------------------------------
+
+    $(document).on(
+        "input",
+        '[name="contact_otp"]',
+        function () {
+
+            let otp = $(this)
+                .val()
+                .replace(/\D/g, "")
+                .substring(0, 6);
+
+            $(this).val(otp);
+
+            $("#contact_verified")
+                .addClass("hidden")
+                .removeClass("flex");
+
+            $("#contact_not_verified")
+                .addClass("hidden")
+                .removeClass("flex");
+
+            $("#contact_otp_verified").val("0");
+
+            if (!otp) {
+                return;
+            }
+
+            // Existing development OTP
+            if (otp === "123456") {
+
+                $("#contact_verified")
+                    .removeClass("hidden")
+                    .addClass("flex");
+
+                $("#contact_otp_verified").val("1");
+
+            } else {
+
+                $("#contact_not_verified")
+                    .removeClass("hidden")
+                    .addClass("flex");
+            }
+        }
+    );
+
+    // --------------------------------------------------------
+    // RESEND CONTACT OTP
+    // --------------------------------------------------------
+
+    $(document).on(
+        "click",
+        ".contact_resend_otp",
+        function (e) {
+
+            e.preventDefault();
+
+            $('[name="contact_otp"]').val("");
+
+            $("#contact_otp_verified").val("0");
+
+            $("#contact_verified")
+                .addClass("hidden")
+                .removeClass("flex");
+
+            $("#contact_not_verified")
+                .addClass("hidden")
+                .removeClass("flex");
+
+            showSuccess("OTP sent successfully");
+        }
+    );
+
+    // ========================================================
+    // NEXT BUTTON
+    // ========================================================
+
+    $(document).on(
+        "click",
+        "#next-step-btn",
+        function (e) {
+
+            e.preventDefault();
+
+            if ($(this).prop("disabled")) {
+                return;
+            }
+
+            console.log(
+                "NEXT CLICKED - CURRENT STEP:",
+                currentStep
+            );
+
+            // ------------------------------------------------
+            // STEP 1
+            // ------------------------------------------------
+
+            if (currentStep === 1) {
+
+                saveLabStep1();
+
+                return;
+            }
+
+            // ------------------------------------------------
+            // STEP 2
+            // ------------------------------------------------
+
+            if (currentStep === 2) {
+
+                saveLabStep2();
+
+                return;
+            }
+
+            // ------------------------------------------------
+            // STEP 3
+            // ------------------------------------------------
+
+            if (currentStep === 3) {
+
+                saveLabStep3();
+
+                return;
+            }
+        }
+    );
+
+    // ========================================================
+    // PREVIOUS BUTTON
+    // ========================================================
+
+    $(document).on(
+        "click",
+        "#prev-step-btn",
+        function (e) {
+
+            e.preventDefault();
+
+            if (currentStep > 1) {
+
+                const oldStep = currentStep;
+
+                updateStepTab(
+                    oldStep,
+                    "locked"
+                );
+
+                $(`#step-panel-${oldStep}`)
+                    .addClass("hidden");
+
+                currentStep--;
+
+                $(`#step-panel-${currentStep}`)
+                    .removeClass("hidden")
+                    .addClass("step-fade-enter");
+
+                setTimeout(function () {
+
+                    $(`#step-panel-${currentStep}`)
+                        .removeClass("step-fade-enter")
+                        .addClass("step-fade-active");
+
+                }, 50);
+
+                updateStepTab(
+                    currentStep,
+                    "active"
+                );
+
+                updateProgress(
+                    currentStep
+                );
+
+                setNextButtonText();
+
+            } else {
+
+                window.location.href =
+                    LAB_KYC_URL;
+            }
+        }
+    );
+
+});
+
+
+// ============================================================
+// LAB DROPDOWNS
+// ============================================================
+
+function initializeLabDropdowns() {
+
+    console.log("Initializing lab dropdowns...");
+
+    /*
+     * These dropdowns MUST be rendered from:
+     *
+     * LabService
+     * LabFacility
+     * LabTiming
+     *
+     * The Django view already sends:
+     *
+     * lab_services
+     * lab_facilities
+     * lab_times
+     *
+     * to kyc_lab_profile.html.
+     *
+     * JS does not create hospital values.
+     */
+
+    initializeDropdown(
+        '[name="lab_service"]',
+        "Lab Service"
+    );
+
+    initializeDropdown(
+        '[name="lab_facility"]',
+        "Lab Facility"
+    );
+
+    initializeDropdown(
+        '[name="lab_timing"]',
+        "Working Hours"
+    );
+}
+
+
+// ============================================================
+// GENERIC DROPDOWN CHECK
+// ============================================================
+
+function initializeDropdown(
+    selector,
+    label
+) {
+
+    const dropdown = $(selector);
+
+    if (!dropdown.length) {
+
+        console.warn(
+            `${label} dropdown not found:`,
+            selector
+        );
+
+        return;
+    }
+
+    console.log(
+        `${label} dropdown found:`,
+        dropdown.find("option").length,
+        "options"
+    );
+
+    /*
+     * Remove accidental hospital options if they exist.
+     *
+     * We intentionally DO NOT add hardcoded hospital values.
+     */
+
+    dropdown.find("option").each(function () {
+
+        const text =
+            $(this)
+                .text()
+                .trim()
+                .toLowerCase();
+
+        if (
+            text === "general medicine" ||
+            text === "cardiology" ||
+            text === "orthopedics" ||
+            text === "pediatrics" ||
+            text === "emergency 24/7" ||
+            text === "icu" ||
+            text === "operation theater" ||
+            text === "opd consultation"
+        ) {
+
+            console.warn(
+                `Removing hospital option from ${label}:`,
+                $(this).text()
+            );
+
+            $(this).remove();
+        }
+    });
+}
+
+
+// ============================================================
+// LOCATION INITIALIZATION
+// ============================================================
+
+function initializeLabLocation() {
+
+    const country =
+        $('[name="lab_country"]');
+
+    const state =
+        $('[name="lab_state"]');
+
+    const city =
+        $('[name="lab_city"]');
+
+    if (!country.length) {
+        return;
+    }
+
+    const countryId =
+        country.val();
+
+    if (!countryId) {
+        return;
+    }
+
+    const existingStateId =
+        state.val();
+
+    const existingCityId =
+        city.val();
+
+    loadLabStates(
+        countryId,
+        existingStateId,
+        existingCityId
+    );
+}
+
+
+// ============================================================
+// LOAD STATES
+// ============================================================
+
+function loadLabStates(
+    countryId,
+    preferredStateId = null,
+    preferredCityId = null
+) {
+
+    const state =
+        $('[name="lab_state"]');
+
+    const city =
+        $('[name="lab_city"]');
+
+    if (!state.length) {
+        return;
+    }
+
+    if (!countryId) {
+
+        state.html(
+            '<option value="">Select State</option>'
+        );
+
+        city.html(
+            '<option value="">Select City</option>'
+        );
+
+        return;
+    }
+
+    $.ajax({
+
+        url:
+            "/user/lab-profile-verification/get-states/",
+
+        type: "GET",
+
+        data: {
+            country_id: countryId
+        },
+
+        success: function (response) {
+
+            state.empty();
+
+            city.empty();
+
+            state.append(
+                '<option value="">Select State</option>'
+            );
+
+            city.append(
+                '<option value="">Select City</option>'
+            );
+
+            if (
+                !response.success ||
+                !Array.isArray(response.states)
+            ) {
+
+                console.error(
+                    "No lab states returned:",
+                    response
+                );
+
+                return;
+            }
+
+            $.each(
+                response.states,
+                function (index, item) {
+
+                    const selected =
+                        String(item.id) ===
+                        String(preferredStateId)
+                            ? "selected"
+                            : "";
+
+                    state.append(`
+                        <option
+                            value="${item.id}"
+                            ${selected}
+                        >
+                            ${escapeHtml(item.name)}
+                        </option>
+                    `);
+                }
+            );
+
+            const finalStateId =
+                state.val();
+
+            if (finalStateId) {
+
+                loadLabCities(
+                    finalStateId,
+                    preferredCityId
+                );
+            }
+        },
+
+        error: function (xhr) {
+
+            console.error(
+                "Lab states error:",
+                xhr.responseText
+            );
+
+            state.html(
+                '<option value="">Select State</option>'
+            );
+
+            city.html(
+                '<option value="">Select City</option>'
+            );
+        }
+    });
+}
+
+
+// ============================================================
+// LOAD CITIES
+// ============================================================
+
+function loadLabCities(
+    stateId,
+    preferredCityId = null
+) {
+
+    const city =
+        $('[name="lab_city"]');
+
+    if (!city.length) {
+        return;
+    }
+
+    if (!stateId) {
+
+        city.html(
+            '<option value="">Select City</option>'
+        );
+
+        return;
+    }
+
+    $.ajax({
+
+        url:
+            "/user/lab-profile-verification/get-cities/",
+
+        type: "GET",
+
+        data: {
+            state_id: stateId
+        },
+
+        success: function (response) {
+
+            city.empty();
+
+            city.append(
+                '<option value="">Select City</option>'
+            );
+
+            if (
+                !response.success ||
+                !Array.isArray(response.cities)
+            ) {
+
+                console.error(
+                    "No lab cities returned:",
+                    response
+                );
+
+                return;
+            }
+
+            $.each(
+                response.cities,
+                function (index, item) {
+
+                    const selected =
+                        String(item.id) ===
+                        String(preferredCityId)
+                            ? "selected"
+                            : "";
+
+                    city.append(`
+                        <option
+                            value="${item.id}"
+                            ${selected}
+                        >
+                            ${escapeHtml(item.name)}
+                        </option>
+                    `);
+                }
+            );
+        },
+
+        error: function (xhr) {
+
+            console.error(
+                "Lab cities error:",
+                xhr.responseText
+            );
+
+            city.html(
+                '<option value="">Select City</option>'
+            );
+        }
+    });
+}
+
+
+// ============================================================
+// STEP 1 - SAVE LAB DETAILS
+// ============================================================
+
+function saveLabStep1() {
+
+    clearLabErrors();
+
+    // --------------------------------------------------------
+    // READ VALUES
+    // --------------------------------------------------------
+
+    const labName =
+        getValue(
+            '[name="lab_name"], #lab_name'
+        );
+
+    const email =
+        getValue(
+            '[name="lab_email"], #lab_email'
+        );
+
+    const phone =
+        getValue(
+            '[name="lab_phone"], #lab_phone'
+        );
+
+    const address =
+        getValue(
+            '[name="lab_address"], #lab_address'
+        );
+
+    const country =
+        getValue(
+            '[name="lab_country"], #lab_country'
+        );
+
+    const state =
+        getValue(
+            '[name="lab_state"], #lab_state'
+        );
+
+    const city =
+        getValue(
+            '[name="lab_city"], #lab_city'
+        );
+
+    const pincode =
+        getValue(
+            '[name="lab_pincode"], #lab_pincode'
+        );
+
+    const timing =
+        getValue(
+            '[name="lab_timing"], #lab_timing'
+        );
+
+    const altPhone =
+        getValue(
+            '[name="alt_phone"], #alt_phone'
+        );
+
+    const ownerName =
+        getValue(
+            '[name="owner_name"], #owner_name'
+        );
+
+    const referral =
+        getValue(
+            '[name="referral_code"], #referral_code'
+        );
+
+    const countryCode =
+        getValue(
+            '[name="lab_country_code"], #lab_country_code'
+        ) || "+91";
+
+
+    // --------------------------------------------------------
+    // VALIDATION
+    // --------------------------------------------------------
+
+    if (!labName) {
+
+        showLabError(
+            '[name="lab_name"], #lab_name',
+            "Lab name is required."
+        );
+
+        return;
+    }
+
+
+    if (!email) {
+
+        showLabError(
+            '[name="lab_email"], #lab_email',
+            "Email address is required."
+        );
+
+        return;
+    }
+
+
+    if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+
+        showLabError(
+            '[name="lab_email"], #lab_email',
+            "Please enter a valid email address."
+        );
+
+        return;
+    }
+
+
+    if (!phone) {
+
+        showLabError(
+            '[name="lab_phone"], #lab_phone',
+            "Phone number is required."
+        );
+
+        return;
+    }
+
+
+    if (!/^\d{10}$/.test(phone)) {
+
+        showLabError(
+            '[name="lab_phone"], #lab_phone',
+            "Phone number must be exactly 10 digits."
+        );
+
+        return;
+    }
+
+
+    if (!address) {
+
+        showLabError(
+            '[name="lab_address"], #lab_address',
+            "Address is required."
+        );
+
+        return;
+    }
+
+
+    if (!pincode) {
+
+        showLabError(
+            '[name="lab_pincode"], #lab_pincode',
+            "Pincode is required."
+        );
+
+        return;
+    }
+
+
+    if (!/^\d{6}$/.test(pincode)) {
+
+        showLabError(
+            '[name="lab_pincode"], #lab_pincode',
+            "Pincode must be exactly 6 digits."
+        );
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // FORM DATA
+    // --------------------------------------------------------
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "step",
+        "1"
+    );
+
+    formData.append(
+        "lab_name",
+        labName
+    );
+
+    formData.append(
+        "owner_name",
+        ownerName
+    );
+
+    formData.append(
+        "lab_email",
+        email
+    );
+
+    formData.append(
+        "lab_country_code",
+        countryCode
+    );
+
+    formData.append(
+        "lab_phone",
+        phone
+    );
+
+    formData.append(
+        "alt_phone",
+        altPhone
+    );
+
+    formData.append(
+        "lab_address",
+        address
+    );
+
+    formData.append(
+        "lab_country",
+        country
+    );
+
+    formData.append(
+        "lab_state",
+        state
+    );
+
+    formData.append(
+        "lab_city",
+        city
+    );
+
+    formData.append(
+        "lab_pincode",
+        pincode
+    );
+
+    formData.append(
+        "lab_timing",
+        timing
+    );
+
+    formData.append(
+        "referral_code",
+        referral
+    );
+
+    formData.append(
+        "csrfmiddlewaretoken",
+        $("input[name='csrfmiddlewaretoken']").val()
+    );
+
+
+    // --------------------------------------------------------
+    // DEBUG
+    // --------------------------------------------------------
+
+    console.log(
+        "========== LAB STEP 1 =========="
+    );
+
+    for (
+        const [key, value]
+        of formData.entries()
+    ) {
+
+        console.log(
+            key,
+            "=>",
+            value
+        );
+    }
+
+
+    // --------------------------------------------------------
+    // AJAX
+    // --------------------------------------------------------
+
+    $.ajax({
+
+        url: LAB_SAVE_URL,
+
+        type: "POST",
+
+        data: formData,
+
+        processData: false,
+
+        contentType: false,
+
+        beforeSend: function () {
+
+            setNextButtonState(
+                true,
+                "Saving..."
+            );
+        },
+
+        success: function (response) {
+
+            console.log(
+                "LAB STEP 1 RESPONSE:",
+                response
+            );
+
+            if (
+                response &&
+                response.success === true
+            ) {
+
+                showSuccess(
+                    response.message ||
+                    "Lab details saved successfully."
+                );
+
+                goToStep(2);
+
+            } else {
+
+                showError(
+                    response.message ||
+                    "Unable to save lab details."
+                );
+            }
+        },
+
+        error: function (xhr) {
+
+            console.error(
+                "LAB STEP 1 ERROR:",
+                xhr.responseText
+            );
+
+            showAjaxError(
+                xhr,
+                "Something went wrong while saving lab details."
+            );
+        },
+
+        complete: function () {
+
+            setNextButtonState(
+                false,
+                currentStep === totalSteps
+                    ? "Submit Verification"
+                    : "Save & Continue"
+            );
+        }
+    });
+}
+
+
+// ============================================================
+// STEP 2 - PERSONAL DETAILS
+// ============================================================
+
+function saveLabStep2() {
+
+    clearLabErrors();
+
+    const name =
+        getValue(
+            '[name="contact_name"]'
+        );
+
+    const email =
+        getValue(
+            '[name="contact_email"]'
+        );
+
+    const phone =
+        getValue(
+            '[name="contact_phone"]'
+        );
+
+    const role =
+        getValue(
+            '[name="contact_role"]'
+        );
+
+    const otp =
+        getValue(
+            '[name="contact_otp"]'
+        );
+
+    const country =
+        getValue(
+            '[name="contact_country"]'
+        );
+
+    const state =
+        getValue(
+            '[name="contact_state"]'
+        );
+
+    const city =
+        getValue(
+            '[name="contact_city"]'
+        );
+
+    const pincode =
+        getValue(
+            '[name="contact_pincode"]'
+        );
+
+    const referral =
+        getValue(
+            '[name="referral_code"]'
+        );
+
+
+    // --------------------------------------------------------
+    // VALIDATION
+    // --------------------------------------------------------
+
+    if (!name) {
+
+        showLabError(
+            '[name="contact_name"]',
+            "Contact person name is required."
+        );
+
+        return;
+    }
+
+
+    if (!email) {
+
+        showLabError(
+            '[name="contact_email"]',
+            "Email address is required."
+        );
+
+        return;
+    }
+
+
+    if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+
+        showLabError(
+            '[name="contact_email"]',
+            "Please enter a valid email address."
+        );
+
+        return;
+    }
+
+
+    if (!phone) {
+
+        showLabError(
+            '[name="contact_phone"]',
+            "Contact phone is required."
+        );
+
+        return;
+    }
+
+
+    if (!/^\d{10}$/.test(phone)) {
+
+        showLabError(
+            '[name="contact_phone"]',
+            "Contact phone must be exactly 10 digits."
+        );
+
+        return;
+    }
+
+
+    if (!role) {
+
+        showLabError(
+            '[name="contact_role"]',
+            "Role is required."
+        );
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // FORM DATA
+    // --------------------------------------------------------
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "step",
+        "2"
+    );
+
+    formData.append(
+        "contact_name",
+        name
+    );
+
+    formData.append(
+        "contact_email",
+        email
+    );
+
+    formData.append(
+        "contact_country_code",
+        getValue(
+            '[name="contact_country_code"]'
+        ) || "+91"
+    );
+
+    formData.append(
+        "contact_phone",
+        phone
+    );
+
+    formData.append(
+        "contact_role",
+        role
+    );
+
+    formData.append(
+        "contact_otp",
+        otp
+    );
+
+    formData.append(
+        "contact_country",
+        country
+    );
+
+    formData.append(
+        "contact_state",
+        state
+    );
+
+    formData.append(
+        "contact_city",
+        city
+    );
+
+    formData.append(
+        "contact_pincode",
+        pincode
+    );
+
+    formData.append(
+        "referral_code",
+        referral
+    );
+
+    formData.append(
+        "csrfmiddlewaretoken",
+        $("input[name='csrfmiddlewaretoken']").val()
+    );
+
+
+    // --------------------------------------------------------
+    // AJAX
+    // --------------------------------------------------------
+
+    $.ajax({
+
+        url: LAB_SAVE_URL,
+
+        type: "POST",
+
+        data: formData,
+
+        processData: false,
+
+        contentType: false,
+
+        beforeSend: function () {
+
+            setNextButtonState(
+                true,
+                "Saving..."
+            );
+        },
+
+        success: function (response) {
+
+            console.log(
+                "LAB STEP 2 RESPONSE:",
+                response
+            );
+
+            if (
+                response &&
+                response.success === true
+            ) {
+
+                showSuccess(
+                    response.message ||
+                    "Personal details saved successfully."
+                );
+
+                goToStep(3);
+
+            } else {
+
+                showError(
+                    response.message ||
+                    "Unable to save personal details."
+                );
+            }
+        },
+
+        error: function (xhr) {
+
+            console.error(
+                "LAB STEP 2 ERROR:",
+                xhr.responseText
+            );
+
+            showAjaxError(
+                xhr,
+                "Something went wrong while saving personal details."
+            );
+        },
+
+        complete: function () {
+
+            setNextButtonState(
+                false,
+                currentStep === totalSteps
+                    ? "Submit Verification"
+                    : "Save & Continue"
+            );
+        }
+    });
+}
+
+
+// ============================================================
+// STEP 3 - DOCUMENTS
+// ============================================================
+
+function saveLabStep3() {
+
+    // --------------------------------------------------------
+    // DOCUMENT NUMBERS
+    // --------------------------------------------------------
+
+    const labCertificateNumber =
+        getValue(
+            '[name="lab_certificate_number"]'
+        );
+
+    const aadhaarNumber =
+        getValue(
+            '[name="aadhaar_number"], [name="identity_proof_aadhar_number"]'
+        );
+
+    const panNumber =
+        getValue(
+            '[name="pan_number"], [name="identity_proof_pan_number"]'
+        );
+
+    const govLicenseNumber =
+        getValue(
+            '[name="gov_license_number"]'
+        );
+
+
+    // --------------------------------------------------------
+    // FILES
+    // --------------------------------------------------------
+
+    // Lab Certificate
+    const labCertificateFile =
+        $('[name="lab_certificate"]')[0]?.files[0] || null;
+
+    // Aadhaar
+    // HTML name = identity_proof_aadhar
+    const aadhaarFile =
+        $('[name="identity_proof_aadhar"]')[0]?.files[0] || null;
+
+    // PAN
+    // HTML name = identity_proof_pan
+    const panFile =
+        $('[name="identity_proof_pan"]')[0]?.files[0] || null;
+
+    // Government License
+    const govLicenseFile =
+        $('[name="gov_license"]')[0]?.files[0] || null;
+
+    // Lab Photo
+    const labPhotoFile =
+        $('[name="lab_photo"]')[0]?.files[0] || null;
+
+
+    // --------------------------------------------------------
+    // VALIDATION
+    // --------------------------------------------------------
+
+    if (!labCertificateFile) {
+        toastr.warning("Please upload the lab certificate.");
+        return;
+    }
+
+    if (!aadhaarFile) {
+        toastr.warning("Please upload the Aadhaar document.");
+        return;
+    }
+
+    if (!panFile) {
+        toastr.warning("Please upload the PAN document.");
+        return;
+    }
+
+    if (!govLicenseFile) {
+        toastr.warning("Please upload the government license.");
+        return;
+    }
+
+    if (!labPhotoFile) {
+        toastr.warning("Please upload the lab photo.");
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // FORM DATA
+    // --------------------------------------------------------
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "step",
+        "3"
+    );
+
+    formData.append(
+        "lab_certificate_number",
+        labCertificateNumber
+    );
+
+    formData.append(
+        "aadhaar_number",
+        aadhaarNumber
+    );
+
+    formData.append(
+        "pan_number",
+        panNumber
+    );
+
+    formData.append(
+        "gov_license_number",
+        govLicenseNumber
+    );
+
+    formData.append(
+        "lab_certificate",
+        labCertificateFile
+    );
+
+    formData.append(
+        "aadhar_doc",
+        aadhaarFile
+    );
+
+    formData.append(
+        "pan_doc",
+        panFile
+    );
+
+    formData.append(
+        "gov_license",
+        govLicenseFile
+    );
+
+    formData.append(
+        "lab_photo",
+        labPhotoFile
+    );
+
+    formData.append(
+        "csrfmiddlewaretoken",
+        $("input[name='csrfmiddlewaretoken']").val()
+    );
+
+
+    // --------------------------------------------------------
+    // AJAX
+    // --------------------------------------------------------
+
+    $.ajax({
+
+        url: LAB_SAVE_URL,
+
+        type: "POST",
+
+        data: formData,
+
+        processData: false,
+
+        contentType: false,
+
+        beforeSend: function () {
+
+            setNextButtonState(
+                true,
+                "Saving..."
+            );
+        },
+
+        success: function (response) {
+
+            console.log(
+                "LAB STEP 3 RESPONSE:",
+                response
+            );
+
+            if (
+                response &&
+                response.success === true
+            ) {
+
+                updateStepTab(
+                    3,
+                    "completed"
+                );
+
+                updateProgress(3);
+
+                $("#next-step-btn")
+                    .prop("disabled", true)
+                    .data("submitted", true);
+
+                $("#next-btn-text")
+                    .text("Verification Submitted");
+
+                showSuccess(
+                    response.message ||
+                    "Lab verification submitted successfully."
+                );
+
+                setTimeout(
+                    function () {
+
+                        if (
+                            response.redirect_url
+                        ) {
+
+                            window.location.href =
+                                response.redirect_url;
+
+                        } else {
+
+                            window.location.href =
+                                LAB_REVIEW_URL;
+                        }
+
+                    },
+                    1000
+                );
+
+            } else {
+
+                showError(
+                    response.message ||
+                    "Unable to save lab documents."
+                );
+            }
+        },
+
+        error: function (xhr) {
+
+            console.error(
+                "LAB STEP 3 ERROR:",
+                xhr.responseText
+            );
+
+            showAjaxError(
+                xhr,
+                "Something went wrong while saving lab documents."
+            );
+        },
+
+        complete: function () {
+
+            if (
+                !$("#next-step-btn")
+                    .data("submitted")
+            ) {
+
+                setNextButtonState(
+                    false,
+                    "Submit Verification"
+                );
+            }
+        }
+    });
+}
+
+
+// ============================================================
+// STEP NAVIGATION
+// ============================================================
+
+function showStep(step) {
+
+    $(".step-panel")
+        .addClass("hidden");
+
+    $(`#step-panel-${step}`)
+        .removeClass("hidden")
+        .addClass("step-fade-active");
+}
+
+
+// ============================================================
+// GO TO STEP
+// ============================================================
+
+function goToStep(nextStep) {
+
+    if (
+        nextStep < 1 ||
+        nextStep > totalSteps
+    ) {
+        return;
+    }
+
+    const oldStep =
+        currentStep;
+
+    if (oldStep !== nextStep) {
+
+        updateStepTab(
+            oldStep,
+            "completed"
+        );
+    }
+
+    $(`#step-panel-${oldStep}`)
+        .addClass("hidden");
+
+    currentStep =
+        nextStep;
+
+    $(`#step-panel-${currentStep}`)
+        .removeClass("hidden")
+        .addClass("step-fade-enter");
+
+    setTimeout(
+        function () {
+
+            $(`#step-panel-${currentStep}`)
+                .removeClass("step-fade-enter")
+                .addClass("step-fade-active");
+
+        },
+        50
+    );
+
+    updateStepTab(
+        currentStep,
+        "active"
+    );
+
+    updateProgress(
+        currentStep
+    );
+
+    setNextButtonText();
+}
+
+
+// ============================================================
+// BUTTON TEXT
+// ============================================================
+
+function setNextButtonText() {
+
+    if (currentStep === totalSteps) {
+
+        $("#next-btn-text")
+            .text("Submit Verification");
+
+    } else {
+
+        $("#next-btn-text")
+            .text("Save & Continue");
+    }
+}
+
+
+// ============================================================
+// PROGRESS
+// ============================================================
+
+function updateProgress(step) {
+
+    let percentage =
+        Math.round(
+            ((step - 1) /
+                (totalSteps - 1)) *
+            100
+        );
+
+    /*
+     * Step 1 = 0%
+     * Step 2 = 50%
+     * Step 3 = 95%
+     *
+     * 100% is only reached after final submission.
+     */
+
+    if (step === totalSteps) {
+        percentage = 95;
+    }
+
+    $("#status-percentage")
+        .text(
+            percentage + "%"
+        );
+
+    $("#status-bar-fill")
+        .css(
+            "width",
+            percentage + "%"
+        );
+
+    const lineWidth =
+        50 * (step - 1);
+
+    $("#stepper-connecting-line")
+        .css(
+            "width",
+            lineWidth + "%"
+        );
+}
+
+
+// ============================================================
+// STEPPER STATE
+// ============================================================
+
+function updateStepTab(
+    stepNum,
+    state
+) {
+
+    const tab =
+        $(`#step-tab-${stepNum}`);
+
+    if (!tab.length) {
+        return;
+    }
+
+    const circle =
+        tab.find(".step-kyc-circle");
+
+    const label =
+        tab.find(".step-label");
+
+    const icon =
+        tab.find(".step-kyc-icon");
+
+
+    // --------------------------------------------------------
+    // RESET
+    // --------------------------------------------------------
+
+    circle.removeClass(
+        "border-kyc-icon " +
+        "bg-kyc-blue " +
+        "text-kyc-icon " +
+        "bg-kyc-green " +
+        "text-white " +
+        "font-bold " +
+        "border-slate-200 " +
+        "bg-slate-50 " +
+        "text-slate-400 " +
+        "font-semibold"
+    );
+
+    label.removeClass(
+        "text-slate-400 " +
+        "text-green-600 " +
+        "text-slate-800 " +
+        "text-blue-charcoal " +
+        "font-semibold " +
+        "font-bold"
+    );
+
+
+    // --------------------------------------------------------
+    // ACTIVE
+    // --------------------------------------------------------
+
+    if (state === "active") {
+
+        circle.addClass(
+            "border-kyc-icon " +
+            "bg-kyc-blue " +
+            "text-kyc-icon"
+        );
+
+        label.addClass(
+            "text-blue-charcoal font-bold"
+        );
+
+        if (stepNum === 1) {
+
+            icon.text("science");
+
+        } else if (stepNum === 2) {
+
+            icon.text("person");
+
+        } else if (stepNum === 3) {
+
+            icon.text("description");
+        }
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // COMPLETED
+    // --------------------------------------------------------
+
+    if (state === "completed") {
+
+        circle.addClass(
+            "bg-kyc-green " +
+            "text-white " +
+            "font-bold"
+        );
+
+        label.addClass(
+            "text-green-600 font-bold"
+        );
+
+        icon.text("check");
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // LOCKED
+    // --------------------------------------------------------
+
+    if (state === "locked") {
+
+        circle.addClass(
+            "border-slate-200 " +
+            "bg-slate-50 " +
+            "text-slate-400 " +
+            "font-semibold"
+        );
+
+        label.addClass(
+            "text-slate-400 font-semibold"
+        );
+
+        icon.text("lock");
+    }
+}
+
+
+// ============================================================
+// CLEAR ERRORS
+// ============================================================
+
+function clearLabErrors() {
+
+    $(
+        "#step-panel-1 input, " +
+        "#step-panel-1 select, " +
+        "#step-panel-2 input, " +
+        "#step-panel-2 select, " +
+        "#step-panel-3 input"
+    ).removeClass(
+        "border-red-400 " +
+        "focus:border-red-400 " +
+        "focus:ring-red-400"
+    );
+}
+
+
+// ============================================================
+// SHOW FIELD ERROR
+// ============================================================
+
+function showLabError(
+    selector,
+    message
+) {
+
+    const field =
+        $(selector).first();
+
+    field.addClass(
+        "border-red-400 " +
+        "focus:border-red-400 " +
+        "focus:ring-red-400"
+    );
+
+    field.focus();
+
+    showWarning(message);
+}
+
+
+// ============================================================
+// BUTTON STATE
+// ============================================================
+
+function setNextButtonState(
+    disabled,
+    text
+) {
+
+    $("#next-step-btn")
+        .prop(
+            "disabled",
+            disabled
+        );
+
+    $("#next-btn-text")
+        .text(text);
+}
+
+
+// ============================================================
+// SAFE VALUE
+// ============================================================
+
+function getValue(selector) {
+
+    const field =
+        $(selector).first();
+
+    if (!field.length) {
+        return "";
+    }
+
+    const value =
+        field.val();
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
+
+    return String(value).trim();
+}
+
+
+// ============================================================
+// FILE
+// ============================================================
+
+function getFile(selector) {
+
+    const input =
+        $(selector).first()[0];
+
+    if (
+        !input ||
+        !input.files ||
+        !input.files.length
+    ) {
+        return null;
+    }
+
+    return input.files[0];
+}
+
+
+// ============================================================
+// AJAX ERROR
+// ============================================================
+
+function showAjaxError(
+    xhr,
+    fallbackMessage
+) {
+
+    let message =
+        fallbackMessage;
+
+    if (
+        xhr.responseJSON &&
+        xhr.responseJSON.message
+    ) {
+
+        message =
+            xhr.responseJSON.message;
+    }
+
+    if (
+        xhr.responseJSON &&
+        xhr.responseJSON.errors
+    ) {
+
+        const errors =
+            xhr.responseJSON.errors;
+
+        const firstError =
+            Object.values(errors)[0];
+
+        if (firstError) {
+
+            if (Array.isArray(firstError)) {
+
+                message =
+                    firstError[0];
+
+            } else {
+
+                message =
+                    firstError;
+            }
+        }
+    }
+
+    showError(message);
+}
+
+
+// ============================================================
+// TOAST HELPERS
+// ============================================================
+
+function showSuccess(message) {
+
+    if (
+        typeof toastr !== "undefined"
+    ) {
+
+        toastr.success(message);
+    } else {
+
+        console.log(
+            "SUCCESS:",
+            message
+        );
+    }
+}
+
+
+function showError(message) {
+
+    if (
+        typeof toastr !== "undefined"
+    ) {
+
+        toastr.error(message);
+    } else {
+
+        console.error(
+            "ERROR:",
+            message
+        );
+    }
+}
+
+
+function showWarning(message) {
+
+    if (
+        typeof toastr !== "undefined"
+    ) {
+
+        toastr.warning(message);
+    } else {
+
+        console.warn(
+            "WARNING:",
+            message
+        );
+    }
+}
+
+
+// ============================================================
+// HTML ESCAPE
+// ============================================================
+
+function escapeHtml(value) {
+
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}

@@ -6,20 +6,17 @@ urlpatterns = [
     path('new-welcome', views.new_welcome, name='new_welcome'),
     path('register/<str:role>', views.register_by_role, name='register_by_role'),
     path('save/customer', views.save_user, name='save_user'),
-    path('save/ngo', views.save_ngo, name='save_ngo'),
     path('login', views.login_page, name='login_page'),
     path('auth/login', views.login_auth, name='login_auth'),
     path('auth/login-old', views.login_auth_OLD, name='login_auth_old'),
-    
-    path('save/advertiser', views.save_advertiser, name='save_advertiser'),
-    path('save/client', views.save_client, name='save_client'),
+
     path('save/medical_pharmacy', views.save_medical_pharmacy, name='save_pharmacy'),        
     path("otp/send", views.send_otp, name="send_otp"),
     path("otp/verify", views.verify_otp, name="verify_otp"),
     path('forgot-password', views.forgot_password, name='forgot_password'),
     path("reset-password/<str:token>/", views.reset_password, name="reset_password"),
     
-    path("save/lab", views.save_lab, name="save_lab"),
+    # path("save/lab", views.save_lab, name="save_lab"),
     path("save/doctor", views.save_doctor, name="save_doctor"),
     path('file-scan/',views.file_scan_api,name='file_scan'),
     path("send-contact-person-otp/",views.send_contact_person_otp,name="send_contact_person_otp",),
@@ -33,13 +30,13 @@ urlpatterns = [
     path("pharmacy-verification/", views.pharmacy_verification, name="pharmacy_verification"),
     path('check-phone', views.check_phone, name='check_phone'),
     path('auth/verify-login-otp', views.verify_login_otp, name='verify_login_otp'),
-    path("lab-kyc/", views.lab_kyc, name="lab_kyc"),
+    # path("lab-kyc/", views.lab_kyc, name="lab_kyc"),
     # path("doctor-kyc/", views.doctor_kyc, name="doctor_kyc"),
     path("pharmacy-kyc/", views.pharmacy_kyc, name="pharmacy_kyc"),
-    path("lab-profile-verification/", views.lab_profile_verification, name="profile_verification_lab"),
+    # path("lab-profile-verification/", views.lab_profile_verification, name="profile_verification_lab"),
     path("pharmacy-profile-verification/", views.pharmacy_profile_verification, name="profile_verification_pharmacy"),
     # path("doctor-profile-verification/", views.doctor_profile_verification, name="profile_verification_doctor"),
-    path("lab-profile-review/", views.lab_profile_review, name="lab_profile_review"),
+    # path("lab-profile-review/", views.lab_profile_review, name="lab_profile_review"),
     # path("doctor-profile-review/", views.doctor_profile_review, name="doctor_profile_review"),
     path("pharmacy-profile-review/", views.pharmacy_profile_review, name="pharmacy_profile_review"),
     path("save/hospital", views.save_hospital, name="save_hospital"), 
@@ -60,8 +57,11 @@ urlpatterns = [
     path("doctor-profile-verification/get-cities/", views.get_cities, name="get_cities"),
     path("doctor-profile-verification/save/", views.save_doctor_profile, name="save_doctor_profile"),
     
-    
-    
-       
-    
+    # labs routes
+    path("lab-kyc/", views.lab_kyc, name="lab_kyc"),
+    path("lab-profile-verification/",views.lab_profile_verification,name="profile_verification_lab"),
+    path("lab-profile-verification/get-states/",views.get_states,name="lab_get_states"),
+    path("lab-profile-verification/get-cities/",views.get_cities,name="lab_get_cities"),
+    path("lab-profile-verification/save/",views.save_lab_profile,name="save_lab_profile"),
+    path("lab-profile-review/",views.lab_profile_review,name="lab_profile_review"),
 ]

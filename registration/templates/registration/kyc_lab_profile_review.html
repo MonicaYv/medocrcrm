@@ -1,0 +1,69 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+
+{% block title %}Profile Under Review{% endblock %}
+
+{% block header %}
+<!-- Custom Simplified KYC Navbar -->
+<div class="sticky top-0 h-[72px] w-full flex items-center justify-between p-2 md:p-6 md:shadow-lg bg-white border-b border-slate-100 z-50">
+  <!-- Logo -->
+  <div class="w-16">
+    <img src="{{ logo|default:'/static/images/logo.svg' }}" alt="Logo" loading="lazy" class="w-10"/>
+  </div>
+
+  <!-- Right Actions (Notifications & Profile Only) -->
+  <div class="flex items-center gap-4">
+      <!-- Notification Icon -->
+      <div class="relative">
+        <img src="{% static 'images/bell.svg' %}" alt="bell" class="cursor-pointer has-tooltip w-6 h-6" id="bell-icon" />
+        <div class="absolute py-1 px-1.5 text-start text-xs tooltip -bottom-7 right-1 z-10 bg-white border rounded-md border-{{ border }} font-normal">
+          Notifications
+        </div>
+      </div>
+
+      <!-- User Profile Dropdown -->
+      <div class="relative inline-block">
+        <button class="profile-btn focus:outline-none">
+          <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8"/>
+        </button>
+      </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-2 flex flex-col items-center text-center">
+    <!-- Header Section -->
+    <h1 class="text-2xl md:text-3xl font-extrabold text-blue-charcoal tracking-tight mt-2">Profile Under Review</h1>
+    <p class="text-kyc-light-gray text-sm font-normal mt-2 max-w-lg">
+        Thank you for registering with us. We have received your details and documents.
+    </p>
+
+    <!-- Review Illustration -->
+    <div class="my-8 w-full max-w-md flex justify-center">
+        <img src="{% static 'images/profile-review.png' %}" alt="Profile Under Review" class="w-full h-auto object-contain max-h-[300px]"/>
+    </div>
+
+    <!-- What Happen Next Alert Box -->
+    <div class="w-full max-w-2xl bg-blue-50/40 border border-blue-100/50 rounded-2xl p-6 mb-6">
+        <h4 class="text-blue-600 font-bold text-sm mb-2">What Happen Next?</h4>
+        <p class="text-slate-600 text-xs md:text-sm leading-relaxed">
+            Our team will review your Profile and documents. You will be Notify via SMS and Email Once Your account is verified
+        </p>
+    </div>
+
+    <!-- Confirmation email sending notification -->
+    <div class="flex items-center justify-center gap-2 text-slate-500 text-xs md:text-sm mb-8">
+        <span class="material-symbols-outlined text-lg">mail</span>
+        <span>We've send a confirmation to <span class="text-kyc-icon font-semibold">{{ user.email|default:"admin@hospital.com" }}</span></span>
+    </div>
+
+    <!-- Back Button -->
+    <a href="{% url 'profile_verification_lab' %}" class="h-10 px-8 rounded bg-kyc-icon hover:bg-blue-600 text-white font-bold text-sm shadow transition-all flex items-center justify-center gap-2 w-auto focus:outline-none">
+        <span class="material-symbols-outlined text-lg">arrow_back</span>
+        <span>Back</span>
+    </a>
+</div>
+{% endblock %}
