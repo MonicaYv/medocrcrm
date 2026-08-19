@@ -322,6 +322,48 @@ $(document).ready(function () {
 
 });
 
+// ============================================================
+// FILE INPUT - SHOW SELECTED FILE NAME
+// ============================================================
+
+$(document).on(
+    "change",
+    ".step4-file-input",
+    function () {
+
+        const input = this;
+        const targetSelector = $(input).data("target");
+        const fileNameElement = $(targetSelector);
+
+        if (!fileNameElement.length) {
+            console.warn(
+                "File name target not found:",
+                targetSelector
+            );
+            return;
+        }
+
+        // No file selected
+        if (!input.files || !input.files.length) {
+            fileNameElement.text("No file");
+            fileNameElement.attr("title", "");
+            return;
+        }
+
+        const file = input.files[0];
+
+        // Show actual file name
+        fileNameElement.text(file.name);
+        fileNameElement.attr("title", file.name);
+
+        console.log(
+            "File selected:",
+            input.name,
+            "=>",
+            file.name
+        );
+    }
+);
 
 // ============================================================
 // LAB DROPDOWNS
@@ -707,7 +749,16 @@ function saveLabStep1() {
         getValue(
             '[name="lab_email"], #lab_email'
         );
+    
+    // const ownerName =
+    //     getValue(
+    //         '[name="owner_name"], #owner_name'
+    // )
 
+    const labRegistrationNumber =
+        getValue(
+            '[name="lab_registration_number"], #lab_registration_number'
+    )
     const phone =
         getValue(
             '[name="lab_phone"], #lab_phone'
@@ -883,6 +934,11 @@ function saveLabStep1() {
     formData.append(
         "lab_email",
         email
+    );
+
+    formData.append(
+        "lab_registration_number",
+        labRegistrationNumber
     );
 
     formData.append(
@@ -1361,25 +1417,19 @@ function saveLabStep3() {
 
     // Lab Certificate
     const labCertificateFile =
-        $('[name="lab_certificate"]')[0]?.files[0] || null;
+        $('[name="lab_certificate"]')[0]?.files?.[0] || null;
 
-    // Aadhaar
-    // HTML name = identity_proof_aadhar
     const aadhaarFile =
-        $('[name="identity_proof_aadhar"]')[0]?.files[0] || null;
+        $('[name="identity_proof_aadhar"]')[0]?.files?.[0] || null;
 
-    // PAN
-    // HTML name = identity_proof_pan
     const panFile =
-        $('[name="identity_proof_pan"]')[0]?.files[0] || null;
+        $('[name="identity_proof_pan"]')[0]?.files?.[0] || null;
 
-    // Government License
     const govLicenseFile =
-        $('[name="gov_license"]')[0]?.files[0] || null;
+        $('[name="gov_license"]')[0]?.files?.[0] || null;
 
-    // Lab Photo
     const labPhotoFile =
-        $('[name="lab_photo"]')[0]?.files[0] || null;
+        $('[name="lab_photo"]')[0]?.files?.[0] || null;
 
 
     // --------------------------------------------------------
@@ -1587,7 +1637,88 @@ function saveLabStep3() {
         }
     });
 }
+        // Step 4 File Upload Handlers & Modal Preview Integration
+        let activeFileInput = null;
 
+        $('.step4-file-input').on('change', function() {
+            const input = $(this);
+            const targetBox = $(input.data('target'));
+            const badgeSelector = input.data('badge');
+            const fileName = this.files.length > 0 ? this.files[0].name : '';
+
+            if (fileName) {
+                // Update file indicator box text
+                targetBox.text(fileName);
+                targetBox.removeClass('border-blue-400 text-blue-500').addClass('border-green-500 text-green-600 bg-green-50/10');
+                
+                // If there was a Blurry badge, turn it into a green Virus Scan badge!
+                if (badgeSelector) {
+                    const badge = $(badgeSelector);
+                    badge.removeClass('bg-red-50 text-red-600 border-red-200')
+                         .addClass('bg-green-50 text-green-600 border-green-200');
+                    badge.find('.material-symbols-outlined').text('check');
+                    badge.find('span:last-child').text('Virus scan');
+                }
+
+                // If the modal is open for this active input, update its preview image live
+                if (activeFileInput === this && this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview-image-element').attr('src', e.target.result).removeClass('hidden');
+                        $('#preview-placeholder').addClass('hidden');
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            }
+        });
+
+        // Step 4 Eye Icon Click handler (Inline preview display)
+        $('.step4-view-btn').on('click', function() {
+            const btn = $(this);
+            const docTitle = btn.data('title');
+            const selector = btn.data('input');
+            const fileInput = $(selector)[0];
+            
+            activeFileInput = fileInput; // Cache input element reference
+
+            $('#preview-modal-title').text(docTitle);
+
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview-image-element').attr('src', e.target.result).removeClass('hidden');
+                    $('#preview-placeholder').addClass('hidden');
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                // If no file uploaded, show placeholder warning view
+                $('#preview-image-element').addClass('hidden').attr('src', '');
+                $('#preview-placeholder').removeClass('hidden');
+            }
+
+            // Hide Step 4 list & rejection explanation, show preview div
+            $('#step4-main-content').addClass('hidden');
+            $('#step4-preview-content').removeClass('hidden');
+        });
+
+        // Close preview panel resets preview elements and shows Step 4 list back
+        $('#close-preview-btn, #preview-save-btn').on('click', function() {
+            activeFileInput = null;
+            $('#preview-modal-title').text('Select a Document to View');
+            $('#preview-image-element').addClass('hidden').attr('src', '');
+            $('#preview-placeholder').removeClass('hidden');
+
+            // Hide preview, show Step 4 list & rejection explanation
+            $('#step4-preview-content').addClass('hidden');
+            $('#step4-main-content').removeClass('hidden');
+        });
+        
+        // Replace button click triggers corresponding file input click
+        $('#preview-replace-btn').on('click', function() {
+            if (activeFileInput) {
+                $(activeFileInput).click();
+            }
+        });
 
 // ============================================================
 // STEP NAVIGATION

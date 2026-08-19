@@ -3048,9 +3048,16 @@ def save_lab_step_1(request):
             "message": "User not found."
         }, status=404)
 
-    email = request.POST.get("lab_email")
-    lab_name = request.POST.get("lab_name")
-    owner_name = request.POST.get("owner_name")
+    # ========================================================
+    # BASIC DETAILS
+    # ========================================================
+
+    email = request.POST.get("lab_email", "").strip()
+    lab_name = request.POST.get("lab_name", "").strip()
+    owner_name = request.POST.get("owner_name", "").strip()
+    lab_registration_number = request.POST.get(
+        "lab_registration_number", ""
+    ).strip()
 
     country_code = request.POST.get(
         "lab_country_code",
@@ -3062,24 +3069,52 @@ def save_lab_step_1(request):
         user.phone_number
     )
 
-    alt_phone = request.POST.get("alt_phone")
+    alt_phone = request.POST.get("alt_phone", "").strip()
 
-    address = request.POST.get("lab_address")
-    country = request.POST.get("lab_country")
+    # ========================================================
+    # ADDRESS
+    # ========================================================
+
+    address = request.POST.get("lab_address", "").strip()
+    country = request.POST.get("lab_country", "").strip()
 
     state_id = request.POST.get("lab_state")
     city_id = request.POST.get("lab_city")
 
-    pincode = request.POST.get("lab_pincode")
+    pincode = request.POST.get("lab_pincode", "").strip()
+
+    # ========================================================
+    # LAB TIMING
+    # ========================================================
 
     lab_timing_id = request.POST.get("lab_timing")
 
-    referral_code = request.POST.get("referral_code")
+    # ========================================================
+    # REFERRAL
+    # ========================================================
+
+    referral_code = request.POST.get("referral_code", "").strip()
+
+    # ========================================================
+    # VALIDATION
+    # ========================================================
 
     if not lab_name:
         return JsonResponse({
             "success": False,
             "message": "Lab name is required."
+        }, status=400)
+
+    if not owner_name:
+        return JsonResponse({
+            "success": False,
+            "message": "Owner name is required."
+        }, status=400)
+
+    if not lab_registration_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Lab registration number is required."
         }, status=400)
 
     if not email:
@@ -3100,9 +3135,9 @@ def save_lab_step_1(request):
             "message": "Address is required."
         }, status=400)
 
-    # --------------------------------------------------------
-    # State
-    # --------------------------------------------------------
+    # ========================================================
+    # STATE
+    # ========================================================
 
     state = None
 
@@ -3115,9 +3150,9 @@ def save_lab_step_1(request):
                 "message": "Selected state not found."
             }, status=400)
 
-    # --------------------------------------------------------
-    # City
-    # --------------------------------------------------------
+    # ========================================================
+    # CITY
+    # ========================================================
 
     city = None
 
@@ -3130,9 +3165,9 @@ def save_lab_step_1(request):
                 "message": "Selected city not found."
             }, status=400)
 
-    # --------------------------------------------------------
-    # Timing
-    # --------------------------------------------------------
+    # ========================================================
+    # LAB TIMING
+    # ========================================================
 
     lab_timing = None
 
@@ -3147,9 +3182,9 @@ def save_lab_step_1(request):
                 "message": "Selected lab timing not found."
             }, status=400)
 
-    # --------------------------------------------------------
-    # Update User
-    # --------------------------------------------------------
+    # ========================================================
+    # UPDATE USER
+    # ========================================================
 
     user.email = email
     user.phone_country_code = country_code
@@ -3164,21 +3199,25 @@ def save_lab_step_1(request):
         ]
     )
 
-    # --------------------------------------------------------
-    # Create or Update Lab Profile
-    # --------------------------------------------------------
+    # ========================================================
+    # LAB PROFILE
+    # ========================================================
 
     defaults = {
-        "user_id": user_id,
         "lab_name": lab_name,
         "owner_name": owner_name,
+        "lab_registration_number": lab_registration_number,
+
         "contact_number": phone_number,
         "alt_contact_number": alt_phone,
+
         "address": address,
         "country": country,
+
         "state": state,
         "city": city,
         "pincode": pincode,
+
         "lab_timing": lab_timing,
     }
 
@@ -3189,6 +3228,10 @@ def save_lab_step_1(request):
         user=user,
         defaults=defaults
     )
+
+    # ========================================================
+    # RESPONSE
+    # ========================================================
 
     if created:
         message = "Lab profile created successfully."

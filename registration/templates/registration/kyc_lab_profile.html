@@ -179,6 +179,31 @@
                                class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Email Address">
                     </div>
 
+                    <!-- Owner Name -->
+                    <div>
+                        <input
+                            type="text"
+                            id="owner_name"
+                            name="owner_name"
+                            value="{{ lab_profile.owner_name|default:'' }}"
+                            required
+                            class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm"
+                            placeholder="Owner Name"
+                        >
+                    </div>
+
+                    <!-- Lab Registration Number -->
+                    <div>
+                        <input
+                            type="text"
+                            id="lab_registration_number"
+                            name="lab_registration_number"
+                            value="{{ lab_profile.lab_registration_number|default:'' }}"
+                            required
+                            class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm"
+                            placeholder="Lab Registration Number"
+                        >
+                    </div>
                     <!-- Country Code & Phone Number -->
                     <!-- Phone Number - Registered User Number -->
                     <div>
@@ -905,8 +930,59 @@
                     </div>
 
                 </div>
+                
+                <!-- Step 4 Preview content (Separate Div, full-width, hidden by default) -->
+                <div id="step4-preview-content" class="hidden flex flex-col bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden w-full max-w-4xl mx-auto">
+                    <!-- Title Bar -->
+                    <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-white">
+                        <div class="flex items-center gap-2 text-slate-800 font-bold text-sm">
+                            <span class="material-symbols-outlined text-lg text-kyc-icon">document_scanner</span>
+                            <span id="preview-modal-title" class="text-slate-700">Select a Document to View</span>
+                        </div>
+                        <button type="button" id="close-preview-btn" class="text-slate-400 hover:text-slate-700 flex items-center justify-center focus:outline-none">
+                            <span class="material-symbols-outlined text-xl">close</span>
+                        </button>
+                    </div>
 
+                    <!-- Body -->
+                    <div class="flex-1 bg-[#d9d9d9] p-6 flex flex-col items-center justify-center min-h-[350px] relative">
+                        <!-- Image Card Container -->
+                        <div class="bg-white rounded-lg shadow-md p-4 w-full max-w-md aspect-[3/4] flex items-center justify-center overflow-hidden">
+                            <img id="preview-image-element" src="" alt="Document Preview" class="w-full h-full object-contain hidden">
+                            <!-- Placeholder when no file uploaded -->
+                            <div id="preview-placeholder" class="flex flex-col items-center gap-3 text-slate-400 text-center">
+                                <span class="material-symbols-outlined text-4xl">description</span>
+                                <span class="text-xs font-semibold">Click the eye icon next to a document to view</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Metadata Row -->
+                        <div class="w-full max-w-md flex justify-between items-center mt-3 px-1">
+                            <span class="text-[10px] text-slate-500">Image (JPG, PNG), Maximum file size: 5MB</span>
+                            <div class="flex items-center gap-1.5 text-green-600 text-[10px] font-bold">
+                                <span>Virus scan</span>
+                                <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm w-3.5 h-3.5 flex items-center justify-center font-bold">check</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-white">
+                        <!-- Replace Button -->
+                        <button type="button" id="preview-replace-btn" class="h-9 px-4 rounded border border-kyc-icon text-kyc-icon hover:bg-slate-50 font-semibold text-xs transition-all focus:outline-none flex items-center justify-center gap-1.5">
+                            <span class="material-symbols-outlined text-base">upload</span>
+                            <span>Replace</span>
+                        </button>
+
+                        <!-- Save Button -->
+                        <button type="button" id="preview-save-btn" class="h-9 px-6 rounded bg-kyc-icon text-white font-bold text-xs shadow hover:opacity-95 transition-all focus:outline-none flex items-center justify-center">
+                            Save
+                        </button>
+                    </div>
+                </div>
             </div>
+
+
             <!-- Footer Buttons -->
             <div class="flex items-center justify-between border-t border-slate-100 pt-6 mt-8">
                 <!-- Back Button -->
