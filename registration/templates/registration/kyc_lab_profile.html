@@ -531,14 +531,14 @@
                             <div class="flex items-center gap-3 self-end sm:self-auto">
 
                                 <!-- Virus Scan Badge -->
-                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
-
-                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">
-                                        check
+                                <div
+                                    id="scan-status-lab-certificate"
+                                    class="flex items-center gap-1.5 bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-bold"
+                                >
+                                    <span class="material-symbols-outlined mini-icon bg-slate-400 text-white rounded-sm flex items-center justify-center font-bold">
+                                        shield
                                     </span>
-
-                                    <span>Virus scan</span>
-
+                                    <span class="scan-status-text">Virus scan pending</span>
                                 </div>
 
 
@@ -578,6 +578,7 @@
                                         name="lab_certificate"
                                         class="absolute inset-0 opacity-0 cursor-pointer step4-file-input"
                                         data-target="#file-name-lab-certificate"
+                                        data-scan-status="#scan-status-lab-certificate"
                                     >
                                 </button>
 
@@ -610,14 +611,14 @@
 
                             <div class="flex items-center gap-3 self-end sm:self-auto">
 
-                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
-
-                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">
-                                        check
+                                <div
+                                    id="scan-status-aadhar"
+                                    class="flex items-center gap-1.5 bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-bold"
+                                >
+                                    <span class="material-symbols-outlined mini-icon bg-slate-400 text-white rounded-sm flex items-center justify-center font-bold">
+                                        shield
                                     </span>
-
-                                    <span>Virus scan</span>
-
+                                    <span class="scan-status-text">Virus scan pending</span>
                                 </div>
 
 
@@ -654,6 +655,7 @@
                                         name="identity_proof_aadhar"
                                         class="absolute inset-0 opacity-0 cursor-pointer step4-file-input"
                                         data-target="#file-name-aadhar"
+                                        data-scan-status="#scan-status-aadhar"
                                     >
                                 </button>
 
@@ -686,14 +688,14 @@
 
                             <div class="flex items-center gap-3 self-end sm:self-auto">
 
-                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
-
-                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">
-                                        check
+                                <div
+                                    id="scan-status-pan"
+                                    class="flex items-center gap-1.5 bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-bold"
+                                >
+                                    <span class="material-symbols-outlined mini-icon bg-slate-400 text-white rounded-sm flex items-center justify-center font-bold">
+                                        shield
                                     </span>
-
-                                    <span>Virus scan</span>
-
+                                    <span class="scan-status-text">Virus scan pending</span>
                                 </div>
 
 
@@ -730,6 +732,7 @@
                                         name="identity_proof_pan"
                                         class="absolute inset-0 opacity-0 cursor-pointer step4-file-input"
                                         data-target="#file-name-pan"
+                                        data-scan-status="#scan-status-pan"
                                     >
                                 </button>
 
@@ -762,14 +765,14 @@
 
                             <div class="flex items-center gap-3 self-end sm:self-auto">
 
-                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
-
-                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">
-                                        check
+                                <div
+                                    id="scan-status-gov-license"
+                                    class="flex items-center gap-1.5 bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-bold"
+                                >
+                                    <span class="material-symbols-outlined mini-icon bg-slate-400 text-white rounded-sm flex items-center justify-center font-bold">
+                                        shield
                                     </span>
-
-                                    <span>Virus scan</span>
-
+                                    <span class="scan-status-text">Virus scan pending</span>
                                 </div>
 
 
@@ -806,6 +809,7 @@
                                         name="gov_license"
                                         class="absolute inset-0 opacity-0 cursor-pointer step4-file-input"
                                         data-target="#file-name-gov-license"
+                                        data-scan-status="#scan-status-gov-license"
                                     >
                                 </button>
 
@@ -833,14 +837,14 @@
 
                             <div class="flex items-center gap-3 self-end sm:self-auto">
 
-                                <div class="flex items-center gap-1.5 bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
-
-                                    <span class="material-symbols-outlined mini-icon bg-green-600 text-white rounded-sm flex items-center justify-center font-bold">
-                                        check
+                                <div
+                                    id="scan-status-lab-photo"
+                                    class="flex items-center gap-1.5 bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-bold"
+                                >
+                                    <span class="material-symbols-outlined mini-icon bg-slate-400 text-white rounded-sm flex items-center justify-center font-bold">
+                                        shield
                                     </span>
-
-                                    <span>Virus scan</span>
-
+                                    <span class="scan-status-text">Virus scan pending</span>
                                 </div>
 
 
@@ -878,6 +882,7 @@
                                         accept=".jpg,.jpeg,.png,.pdf"
                                         class="absolute inset-0 opacity-0 cursor-pointer step4-file-input"
                                         data-target="#file-name-lab-photo"
+                                        data-scan-status="#scan-status-lab-photo"
                                     >
                                 </button>
 

@@ -326,45 +326,507 @@ $(document).ready(function () {
 // FILE INPUT - SHOW SELECTED FILE NAME
 // ============================================================
 
+// ============================================================
+// LAB KYC DOCUMENT UPLOAD + VIRUS SCAN
+// ============================================================
+
 $(document).on(
     "change",
     ".step4-file-input",
     function () {
 
         const input = this;
-        const targetSelector = $(input).data("target");
-        const fileNameElement = $(targetSelector);
+        const $input = $(input);
 
-        if (!fileNameElement.length) {
-            console.warn(
-                "File name target not found:",
-                targetSelector
-            );
-            return;
-        }
+        const fileNameSelector =
+            $input.data("target");
 
-        // No file selected
+        const scanStatusSelector =
+            $input.data("scan-status");
+
+        const $fileName =
+            $(fileNameSelector);
+
+        const $scanStatus =
+            $(scanStatusSelector);
+
+        // --------------------------------------------------------
+        // NO FILE
+        // --------------------------------------------------------
+
         if (!input.files || !input.files.length) {
-            fileNameElement.text("No file");
-            fileNameElement.attr("title", "");
+
+            $fileName
+                .text("No file")
+                .attr("title", "");
+
+            setScanStatus(
+                $scanStatus,
+                "pending"
+            );
+
             return;
         }
 
-        const file = input.files[0];
+        const file =
+            input.files[0];
 
-        // Show actual file name
-        fileNameElement.text(file.name);
-        fileNameElement.attr("title", file.name);
+        // --------------------------------------------------------
+        // FILE SIZE
+        // --------------------------------------------------------
+
+        const MAX_FILE_SIZE =
+            5 * 1024 * 1024;
+
+        if (file.size > MAX_FILE_SIZE) {
+
+            toastr.error(
+                "File must be under 5MB."
+            );
+
+            input.value = "";
+
+            $fileName
+                .text("No file")
+                .attr("title", "");
+
+            setScanStatus(
+                $scanStatus,
+                "error",
+                "File too large"
+            );
+
+            return;
+        }
+
+        // --------------------------------------------------------
+        // FILE TYPE
+        // --------------------------------------------------------
+
+        const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/jpg",
+            "image/png"
+        ];
+
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+        const allowedExtensions = [
+            "pdf",
+            "jpg",
+            "jpeg",
+            "png"
+        ];
+
+        if (
+            !allowedTypes.includes(file.type) &&
+            !allowedExtensions.includes(extension)
+        ) {
+
+            toastr.error(
+                "Only PDF, JPG, JPEG or PNG files are allowed."
+            );
+
+            input.value = "";
+
+            $fileName
+                .text("No file")
+                .attr("title", "");
+
+            setScanStatus(
+                $scanStatus,
+                "error",
+                "Invalid file type"
+            );
+
+            return;
+        }
+
+        // --------------------------------------------------------
+        // SHOW FILE NAME
+        // --------------------------------------------------------
+
+        $fileName
+            .text(file.name)
+            .attr("title", file.name)
+            .removeClass(
+                "border-blue-400 text-blue-500 bg-blue-50/10"
+            )
+            .addClass(
+                "border-green-500 text-green-600 bg-green-50"
+            );
+
+        // --------------------------------------------------------
+        // SCANNING STATE
+        // --------------------------------------------------------
+
+        setScanStatus(
+            $scanStatus,
+            "scanning"
+        );
 
         console.log(
-            "File selected:",
+            "Virus scanning:",
             input.name,
-            "=>",
             file.name
         );
+
+        // --------------------------------------------------------
+        // SEND FILE TO VIRUS SCANNER
+        // --------------------------------------------------------
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            "file",
+            file
+        );
+
+        formData.append(
+            "csrfmiddlewaretoken",
+            $("input[name='csrfmiddlewaretoken']").val()
+        );
+
+        $.ajax({
+
+            url: "/user/file-scan/",
+
+            type: "POST",
+
+            data: formData,
+
+            processData: false,
+
+            contentType: false,
+
+            success: function (response) {
+
+                console.log(
+                    "Virus scan response:",
+                    response
+                );
+
+                if (
+                    response &&
+                    response.safe === true
+                ) {
+                    $(input).data(
+                        "virus-scanned",
+                        true
+                    );
+                    // ------------------------------------------------
+                    // SAFE
+                    // ------------------------------------------------
+
+                    setScanStatus(
+                        $scanStatus,
+                        "safe",
+                        response.message ||
+                        "Virus scan passed"
+                    );
+
+                    toastr.success(
+                        file.name +
+                        " passed virus scan."
+                    );
+
+                    console.log(
+                        "FILE SAFE:",
+                        file.name
+                    );
+
+                } else {
+
+                    // ------------------------------------------------
+                    // INFECTED / UNSAFE
+                    // ------------------------------------------------
+
+                    console.error(
+                        "FILE REJECTED:",
+                        file.name,
+                        response
+                    );
+
+                    input.value = "";
+
+                    $fileName
+                        .text("No file")
+                        .attr("title", "")
+                        .removeClass(
+                            "border-green-500 text-green-600 bg-green-50"
+                        )
+                        .addClass(
+                            "border-blue-400 text-blue-500 bg-blue-50/10"
+                        );
+
+                    setScanStatus(
+                        $scanStatus,
+                        "infected",
+                        response.message ||
+                        "File failed virus scan"
+                    );
+
+                    toastr.error(
+                        response.message ||
+                        "File failed virus scan."
+                    );
+                }
+            },
+
+            error: function (xhr) {
+
+                console.error(
+                    "Virus scan request failed:",
+                    xhr.responseText
+                );
+
+                // IMPORTANT:
+                // Scanner unavailable = file rejected.
+
+                input.value = "";
+
+                $fileName
+                    .text("No file")
+                    .attr("title", "")
+                    .removeClass(
+                        "border-green-500 text-green-600 bg-green-50"
+                    )
+                    .addClass(
+                        "border-blue-400 text-blue-500 bg-blue-50/10"
+                    );
+
+                let message =
+                    "Virus scanner unavailable. Please try again.";
+
+                if (
+                    xhr.responseJSON &&
+                    xhr.responseJSON.message
+                ) {
+                    message =
+                        xhr.responseJSON.message;
+                }
+
+                setScanStatus(
+                    $scanStatus,
+                    "error",
+                    "Scan failed"
+                );
+
+                toastr.error(message);
+            }
+        });
     }
 );
 
+// ============================================================
+// VIRUS SCAN STATUS UI
+// ============================================================
+
+function setScanStatus(
+    $status,
+    state,
+    message = ""
+) {
+
+    if (!$status || !$status.length) {
+        return;
+    }
+
+    const $icon =
+        $status.find(
+            ".material-symbols-outlined"
+        );
+
+    const $text =
+        $status.find(
+            ".scan-status-text"
+        );
+
+    // Remove all previous states
+    $status.removeClass(
+        [
+            "bg-slate-50",
+            "text-slate-500",
+            "border-slate-200",
+
+            "bg-blue-50",
+            "text-blue-600",
+            "border-blue-200",
+
+            "bg-green-50",
+            "text-green-600",
+            "border-green-200",
+
+            "bg-red-50",
+            "text-red-600",
+            "border-red-200"
+        ].join(" ")
+    );
+
+    $icon.removeClass(
+        [
+            "bg-slate-400",
+            "bg-blue-500",
+            "bg-green-600",
+            "bg-red-600"
+        ].join(" ")
+    );
+
+    // --------------------------------------------------------
+    // PENDING
+    // --------------------------------------------------------
+
+    if (state === "pending") {
+
+        $status.addClass(
+            "bg-slate-50 text-slate-500 border-slate-200"
+        );
+
+        $icon
+            .addClass("bg-slate-400")
+            .text("shield");
+
+        $text.text(
+            message || "Virus scan pending"
+        );
+
+        return;
+    }
+
+    // --------------------------------------------------------
+    // SCANNING
+    // --------------------------------------------------------
+
+    if (state === "scanning") {
+
+        $status.addClass(
+            "bg-blue-50 text-blue-600 border-blue-200"
+        );
+
+        $icon
+            .addClass("bg-blue-500")
+            .text("progress_activity");
+
+        $text.text(
+            "Scanning..."
+        );
+
+        return;
+    }
+
+    // --------------------------------------------------------
+    // SAFE
+    // --------------------------------------------------------
+
+    if (state === "safe") {
+
+        $status.addClass(
+            "bg-green-50 text-green-600 border-green-200"
+        );
+
+        $icon
+            .addClass("bg-green-600")
+            .text("check");
+
+        $text.text(
+            message || "Virus scan passed"
+        );
+
+        return;
+    }
+
+    // --------------------------------------------------------
+    // INFECTED
+    // --------------------------------------------------------
+
+    if (state === "infected") {
+
+        $status.addClass(
+            "bg-red-50 text-red-600 border-red-200"
+        );
+
+        $icon
+            .addClass("bg-red-600")
+            .text("dangerous");
+
+        $text.text(
+            message || "Virus detected"
+        );
+
+        return;
+    }
+
+    // --------------------------------------------------------
+    // ERROR
+    // --------------------------------------------------------
+
+    if (state === "error") {
+
+        $status.addClass(
+            "bg-red-50 text-red-600 border-red-200"
+        );
+
+        $icon
+            .addClass("bg-red-600")
+            .text("error");
+
+        $text.text(
+            message || "Scan failed"
+        );
+    }
+}
+// ============================================================
+// CHECK ALL LAB DOCUMENTS HAVE PASSED VIRUS SCAN
+// ============================================================
+
+function allLabDocumentsScanned() {
+
+    const requiredDocuments = [
+        "lab_certificate",
+        "identity_proof_aadhar",
+        "identity_proof_pan",
+        "gov_license",
+        "lab_photo"
+    ];
+
+    for (const name of requiredDocuments) {
+
+        const input =
+            $(`[name="${name}"]`)[0];
+
+        if (
+            !input ||
+            !input.files ||
+            !input.files.length
+        ) {
+            return false;
+        }
+
+        const scanSelector =
+            $(input).data("scan-status");
+
+        const status =
+            $(scanSelector)
+                .find(".scan-status-text")
+                .text()
+                .trim();
+
+        if (
+            status !== "Virus scan passed" &&
+            status !== "File scanned successfully."
+        ) {
+            return false;
+        }
+    }
+
+    return true;
+}
 // ============================================================
 // LAB DROPDOWNS
 // ============================================================
@@ -1461,7 +1923,18 @@ function saveLabStep3() {
         return;
     }
 
+    // --------------------------------------------------------
+    // VIRUS SCAN VALIDATION
+    // --------------------------------------------------------
 
+    if (!allLabDocumentsScanned()) {
+
+        toastr.warning(
+            "Please wait for all documents to pass the virus scan."
+        );
+
+        return;
+    }
     // --------------------------------------------------------
     // FORM DATA
     // --------------------------------------------------------

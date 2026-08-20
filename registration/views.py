@@ -27,7 +27,11 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from coupon.models import CountryOption
 from django.views.decorators.http import require_GET
+import requests
+import logging
+logger = logging.getLogger(__name__)
 
+VIRUS_SCAN_URL = "http://192.168.1.99:8090/scan"
 ROLE_TO_TEMPLATE = {
     "login": "login/login.html",
     "customer": "registration/register_user.html",
@@ -1196,26 +1200,109 @@ def reset_password(request, token):
 
 #     except Exception as e:
 #         return False, str(e)
+
+
+
 def file_scan(file_obj):
-    return True, "Virus scan skipped"
-    
-# @require_POST
-# def file_scan_api(request):
+    """
+    Scan uploaded file using the virus scanning service.
 
-#     uploaded_file = request.FILES.get("file")
+    Returns:
+        (True, message)  -> file is safe
+        (False, message) -> file is unsafe OR scanner unavailable
 
-#     if not uploaded_file:
-#         return JsonResponse({
-#             "safe": False,
-#             "message": "No file uploaded"
-#         })
+    IMPORTANT:
+    We fail closed. If the scanner is unavailable,
+    the file must NOT be accepted.
+    """
 
-#     status, message = file_scan(uploaded_file)
+    try:
+        file_obj.seek(0)
 
-#     return JsonResponse({
-#         "safe": status,
-#         "message": message
-#     })
+        file_content = file_obj.read()
+
+        if not file_content:
+            return False, "The uploaded file is empty."
+
+        files = {
+            "file": (
+                file_obj.name,
+                file_content,
+                getattr(file_obj, "content_type", None)
+                or "application/octet-stream",
+            )
+        }
+
+        response = requests.post(
+            VIRUS_SCAN_URL,
+            files=files,
+            timeout=30,
+        )
+
+        # Scanner did not respond successfully
+        if response.status_code != 200:
+            logger.error(
+                "Virus scanner returned HTTP %s: %s",
+                response.status_code,
+                response.text[:500],
+            )
+
+            return False, "Virus scanner unavailable. Please try again."
+
+        try:
+            result = response.json()
+        except ValueError:
+            logger.error(
+                "Virus scanner returned invalid JSON: %s",
+                response.text[:500],
+            )
+
+            return False, "Invalid response from virus scanner."
+
+        safe = result.get("safe")
+
+        message = result.get(
+            "message",
+            "File scanned successfully."
+        )
+
+        # IMPORTANT:
+        # Do NOT default safe to True.
+        if safe is True:
+            return True, message
+
+        if safe is False:
+            return False, message or "Virus detected in uploaded file."
+
+        # Missing/invalid "safe" field
+        logger.error(
+            "Invalid virus scanner response: %s",
+            result,
+        )
+
+        return False, "Invalid virus scanner response."
+
+    except requests.Timeout:
+        logger.exception("Virus scanner timeout")
+
+        return False, "Virus scanner timed out. Please try again."
+
+    except requests.RequestException:
+        logger.exception("Virus scanner connection error")
+
+        return False, "Unable to connect to virus scanner."
+
+    except Exception:
+        logger.exception("Unexpected virus scanning error")
+
+        return False, "Virus scan failed. Please try again."
+
+    finally:
+        try:
+            file_obj.seek(0)
+        except Exception:
+            pass
+
 
 @require_POST
 def file_scan_api(request):
@@ -1223,20 +1310,33 @@ def file_scan_api(request):
     uploaded_file = request.FILES.get("file")
 
     if not uploaded_file:
+        return JsonResponse(
+            {
+                "safe": False,
+                "message": "No file uploaded."
+            },
+            status=400
+        )
+
+    safe, message = file_scan(uploaded_file)
+
+    print("FILE SCAN STATUS =", safe)
+    print("FILE SCAN MESSAGE =", message)
+
+    if safe:
         return JsonResponse({
-            "safe": False,
-            "message": "No file uploaded"
+            "safe": True,
+            "message": message or "Virus scan passed."
         })
 
-    status, message = file_scan(uploaded_file)
+    return JsonResponse(
+        {
+            "safe": False,
+            "message": message or "File rejected."
+        },
+        status=400
+    )
 
-    print("STATUS =", status)
-    print("MESSAGE =", message)
-
-    return JsonResponse({
-        "safe": status,
-        "message": message
-    })
 @csrf_protect
 @require_POST
 def send_contact_person_otp(request):
