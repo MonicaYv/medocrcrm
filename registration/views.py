@@ -1721,6 +1721,15 @@ def verify_login_otp(request):
             "success": True,
             **kyc_result
         })
+        
+    if user_type == "pharmacy":
+
+        kyc_result = check_pharmacy_kyc(user_id)
+
+        return JsonResponse({
+            "success": True,
+            **kyc_result
+        })
 
     return JsonResponse({
         "success": True,
@@ -1916,6 +1925,68 @@ def check_lab_kyc(user_id):
         "redirect": reverse("dashboard")
     }
    				
+def check_pharmacy_kyc(user_id):
+
+    try:
+        pharmacy_profile = PharmacyProfile.objects.get(
+            user_id=user_id
+        )
+    except PharmacyProfile.DoesNotExist:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 1,
+            "message": "Please complete pharmacy profile.",
+            "redirect": reverse("pharmacy_kyc")
+        }
+
+    contact_exists = ContactPerson.objects.filter(
+        profile_id=user_id,
+        profile_type="pharmacy"
+    ).exists()
+
+    if not contact_exists:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 2,
+            "message": "Please complete contact person details.",
+            "redirect": reverse("doctor_kyc")
+        }
+
+    step3_complete = all([
+        pharmacy_profile.pharmacy_registration_number,
+        pharmacy_profile.incorporation_doc_path,
+
+        pharmacy_profile.pan_number,
+        pharmacy_profile.pan_doc_path,
+        
+        pharmacy_profile.tan_number,
+        pharmacy_profile.tan_doc_path,
+        
+        pharmacy_profile.gst_number,
+        pharmacy_profile.gst_doc_path,
+
+        pharmacy_profile.storefront_image_path,
+    ])
+    
+    if not step3_complete:
+
+        return {
+            "kyc_required": True,
+            "kyc_step": 3,
+            "message": "Please complete document KYC.",
+            "redirect": reverse("doctor_kyc")
+        }
+
+    return {
+        "kyc_required": False,
+        "kyc_step": 0,
+        "message": "Login Successful",
+        "redirect": reverse("dashboard")
+    }
+    
+
 @csrf_protect
 @require_POST
 def check_phone(request):
@@ -3662,11 +3733,594 @@ def save_lab_profile(request):
         "message": "Invalid step."
     }, status=400)
 
+
+
+# pharmacy section 
 def pharmacy_kyc(request):
-    return render(request, 'registration/new_kyc_pharmacy.html')
+    return render(request, 'registration/kyc_pharmacy.html')
 
 def pharmacy_profile_verification(request):
-    return render(request, 'registration/kyc_pharmacy_profile.html')
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return redirect("login")
 
-def pharmacy_profile_review(request):
-    return render(request, 'registration/kyc_pharmacy_profile_review.html')
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    phone_number = user.phone_number
+    phone_country_code = user.phone_country_code    
+    
+    countries = CountryOption.objects.filter(
+        is_active=1
+    ).order_by("name")
+    
+    profile = PharmacyProfile.objects.filter(
+        user_id=user.id
+    ).first()
+    
+    contact_person = ContactPerson.objects.filter(
+        profile_id=user.id
+    ).first()
+    
+    types = PharmacyType.objects.filter(
+        is_active=1
+    ).order_by("name")
+    
+    services = PharmacyServices.objects.filter(
+        is_active=1
+    ).order_by("name")
+    
+    timings = PharmacyTiming.objects.filter(
+        is_active=1
+    ).order_by("id")
+    
+    return render(
+        request, 
+        'registration/kyc_pharmacy_profile.html', 
+        {
+            "phone_number": phone_number,
+            "phone_country_code": phone_country_code,
+            "countries": countries,
+            "profile": profile,
+            "contact_person": contact_person,
+            "types": types,
+            "services": services,
+            "timings": timings,
+        }
+    )
+
+@csrf_protect
+@require_POST
+def save_pharmacy_profile(request):
+
+    step = request.POST.get("step")
+
+    if not step:
+        return JsonResponse({
+            "success": False,
+            "message": "Step is required."
+        }, status=400)
+
+    if step == "1":
+        return save_pharmacy_step_1(request)
+
+    elif step == "2":
+        return save_pharmacy_step_2(request)
+
+    elif step == "3":
+        return save_pharmacy_step_3(request)
+
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid step."
+    }, status=400)
+    
+def save_pharmacy_step_1(request):
+
+    user_id = request.session.get("user_id")
+    
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+        
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+    
+    personal_email = request.POST.get("pha_email")
+    first_name = request.POST.get("pha_first_name")
+    last_name = request.POST.get("pha_last_name")
+    company_name = request.POST.get("pha_comp_name")
+    gender = request.POST.get("pha_gender_value")
+    age = request.POST.get("pha_age")
+    pharmacy_timing = request.POST.get("pha_timing")
+    contact_number = request.POST.get("pha_phn")
+    personal_phone_number = request.POST.get("pha_alt_phn")
+    personal_pan_number = request.POST.get("pha_alt_phn")
+    address = request.POST.get("pha_address")
+    country = request.POST.get("pha_country")
+    state_id = request.POST.get("pha_state")
+    city_id = request.POST.get("pha_city")
+    website = request.POST.get("pha_website") 
+    pincode = request.POST.get("pha_pincode")
+    otp = request.POST.get("pha_otp")
+    referral_code = request.POST.get("pha_referral_code")
+    country_code = request.POST.get("pha_country_code_val")
+    
+    if not first_name:
+        return JsonResponse({
+            "success": False,
+            "message": "First name is required."
+        }, status=400)
+        
+    if not last_name:
+        return JsonResponse({
+            "success": False,
+            "message": "Last name is required."
+        }, status=400)
+
+    if not personal_email:
+        return JsonResponse({
+            "success": False,
+            "message": "Email is required."
+        }, status=400)
+        
+    user.email = personal_email
+    user.phone_country_code = country_code
+    user.phone_number = contact_number
+
+    user.save(update_fields=[
+        "email",
+        "updated_at"
+    ])
+    
+    state = None
+
+    if state_id:
+        try:
+            state = State.objects.get(id=state_id)
+        except State.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected state not found."
+            }, status=400)
+    
+    city = None
+
+    if city_id:
+        try:
+            city = City.objects.get(id=city_id)
+        except City.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected city not found."
+            }, status=400)
+                     
+    pharmacy_profile, created = PharmacyProfile.objects.update_or_create(
+        user=user,
+        defaults={
+            "user_id": user_id,
+            "first_name": first_name,
+            "last_name": last_name,
+            "gender": gender,
+            "age": age,
+            "personal_email": personal_email,
+            "personal_pan_number": personal_pan_number,
+            "company_name": company_name,
+            "personal_phone_number": personal_phone_number,
+            "address": address,
+            "state_id": state_id,
+            "city_id": city_id,
+            "pincode": pincode,
+            "country": country,
+            "website": website,
+            "pharmacy_timing_id": pharmacy_timing,
+            "otp": otp,
+            "referral_code": referral_code,
+            
+        }
+    )
+    
+    if created:
+        message = "Pharmacy profile created successfully."
+    else:
+        message = "Pharmacy profile updated successfully."
+        
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "profile_id": pharmacy_profile.id,
+        "created": created
+    })
+
+def save_pharmacy_step_2(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    try:
+        pharmacy_profile = PharmacyProfile.objects.get(
+            user_id=user.id
+        )
+    except PharmacyProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Pharmacy profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    name = request.POST.get("pha_adm_name")
+    email = request.POST.get("pha_adm_email")
+    phone_country_code = request.POST.get("pha_phone_country_code")
+    phone_number = request.POST.get("pha_phone")
+    otp = request.POST.get("pha_personal_otp")
+    otp_verified = request.POST.get("pha_personal_otp_verified")
+    role = request.POST.get("pha_personal_role")
+    referral_code = request.POST.get("pha_personal_referral")
+
+    country_id = request.POST.get("pha_personal_country")
+    state_id = request.POST.get("pha_personal_state")
+    city_id = request.POST.get("pha_personal_city")
+    pincode = request.POST.get("pha_personal_pincode")
+
+    if not name:
+        return JsonResponse({
+            "success": False,
+            "message": "Admin name is required."
+        }, status=400)
+
+    if not email:
+        return JsonResponse({
+            "success": False,
+            "message": "Email is required."
+        }, status=400)
+
+    if not phone_number:
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number is required."
+        }, status=400)
+
+    state = None
+
+    if state_id:
+        try:
+            state = State.objects.get(id=state_id)
+        except State.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected state not found."
+            }, status=400)
+
+    city = None
+
+    if city_id:
+        try:
+            city = City.objects.get(id=city_id)
+        except City.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected city not found."
+            }, status=400)
+
+    country = "India"
+
+    if country_id:
+        try:
+            country_obj = CountryOption.objects.get(id=country_id)
+            country = country_obj.name
+        except CountryOption.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Selected country not found."
+            }, status=400)
+
+    profile_type = user.user_type
+
+    contact_person, created = ContactPerson.objects.update_or_create(
+        profile=user,
+        profile_type=profile_type,
+        defaults={
+            "name": name,
+            "email": email,
+            "phone_country_code": phone_country_code,
+            "phone_number": phone_number,
+            "role": role,
+            "otp": otp,
+            "referral_code": referral_code,
+            "state": state,
+            "city": city,
+            "pincode": pincode,
+            "country": country,
+        }
+    )
+
+    # ============================
+    # Response
+    # ============================
+
+    if created:
+        message = "Personal details saved successfully."
+    else:
+        message = "Personal details updated successfully."
+
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "contact_person_id": contact_person.id,
+        "created": created
+    })
+    
+def save_pharmacy_step_3(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    try:
+        pharmacy_profile = PharmacyProfile.objects.get(user_id=user.id)
+    except PharmacyProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Pharmacy profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    # Get POST values
+    registration_no = request.POST.get("registration_no", "").strip()
+    med_lic_no = request.POST.get("med_lic_no", "").strip()
+    aadhar_card_no = request.POST.get("aadhar_card_no", "").strip()
+    gst_number = request.POST.get("gst_no", "").strip()
+    tan_number = request.POST.get("tan_no", "").strip()
+    pan_card_no = request.POST.get("pan_card_no", "").strip()
+
+    # Get uploaded files
+    registration_file = request.FILES.get("registration_certificate")
+    medLicense_file = request.FILES.get("medLicense_certificate")
+    aadhar_file = request.FILES.get("aadhar_document")
+    pan_file = request.FILES.get("pan_document")
+    tan_file = request.FILES.get("tan_document")
+    gst_file = request.FILES.get("gst_document")
+    # logo_file = request.FILES.get("logo")
+    photo_file = request.FILES.get("photo")
+
+    # Validate document numbers
+    if not registration_no:
+        return JsonResponse({
+            "success": False,
+            "message": "License number is required."
+        }, status=400)
+        
+    if not med_lic_no:
+        return JsonResponse({
+            "success": False,
+            "message": "Medical license number is required."
+        }, status=400)
+
+    if not aadhar_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar number is required."
+        }, status=400)
+
+    if not pan_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN number is required."
+        }, status=400)
+        
+    if not gst_number:
+        return JsonResponse({
+            "success": False,
+            "message": "GST number is required."
+        }, status=400)
+        
+    if not tan_number:
+        return JsonResponse({
+            "success": False,
+            "message": "TAN number is required."
+        }, status=400)
+
+    # Validate files
+    if not registration_file:
+        return JsonResponse({
+            "success": False,
+            "message": "License document is required."
+        }, status=400)
+        
+    if not medLicense_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Medical license document is required."
+        }, status=400)
+
+    if not aadhar_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar document is required."
+        }, status=400)
+        
+    if not tan_file:
+        return JsonResponse({
+            "success": False,
+            "message": "TAN document is required."
+        }, status=400)
+        
+    if not gst_file:
+        return JsonResponse({
+            "success": False,
+            "message": "GST document is required."
+        }, status=400)        
+
+    if not pan_file:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN document is required."
+        }, status=400)
+
+    # if not logo_file:
+    #     return JsonResponse({
+    #         "success": False,
+    #         "message": "Logo is required."
+    #     }, status=400)
+
+    if not photo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Image is required."
+        }, status=400)
+
+    # File validation
+    allowed_types = [
+        "image/jpeg",
+        "image/png",
+        "application/pdf"
+    ]
+
+    max_size = 5 * 1024 * 1024  # 5 MB
+
+    files = {
+        "License": registration_file,
+        "medLicense": medLicense_file,
+        "Aadhar Document": aadhar_file,
+        "PAN Document": pan_file,
+        "TAN Document": tan_file,
+        "GST Document": gst_file,
+        # "Logo": logo_file,
+        "Image": photo_file,
+    }
+
+    for field_name, file in files.items():
+
+        if file.content_type not in allowed_types:
+            return JsonResponse({
+                "success": False,
+                "message": (
+                    f"{field_name}: Only JPG, JPEG, PNG "
+                    "and PDF files are allowed."
+                )
+            }, status=400)
+
+        if file.size > max_size:
+            return JsonResponse({
+                "success": False,
+                "message": f"{field_name}: File size must not exceed 5 MB."
+            }, status=400)
+
+    # Upload directory
+    upload_dir = f"pharmacy_documents/{user.id}"
+
+    registration_path = default_storage.save(
+        f"{upload_dir}/registration/{registration_file.name}",
+        registration_file
+    )
+    
+    med_license_path = default_storage.save(
+        f"{upload_dir}/registration/{medLicense_file.name}",
+        medLicense_file
+    )
+
+    aadhar_path = default_storage.save(
+        f"{upload_dir}/aadhar/{aadhar_file.name}",
+        aadhar_file
+    )
+
+    pan_path = default_storage.save(
+        f"{upload_dir}/pan/{pan_file.name}",
+        pan_file
+    )
+    
+    tan_path = default_storage.save(
+        f"{upload_dir}/pan/{tan_file.name}",
+        tan_file
+    )
+    
+    gst_path = default_storage.save(
+        f"{upload_dir}/pan/{gst_file.name}",
+        gst_file
+    )
+
+    # logo_path = default_storage.save(
+    #     f"{upload_dir}/logo/{logo_file.name}",
+    #     logo_file
+    # )
+
+    photo_path = default_storage.save(
+        f"{upload_dir}/clinic_photo/{photo_file.name}",
+        photo_file
+    )
+
+
+    pharmacy_profile.pharmacy_registration_number = registration_no
+    pharmacy_profile.incorporation_doc_path = registration_path
+    pharmacy_profile.incorporation_doc_virus_scanned = True
+    
+    pharmacy_profile.medical_license_number = med_lic_no
+    pharmacy_profile.medical_license_doc_path = med_license_path
+    pharmacy_profile.medical_license_doc_virus_scanned = True
+
+    pharmacy_profile.admin_identity_number = aadhar_card_no
+    pharmacy_profile.admin_identity_doc_path = aadhar_path
+    pharmacy_profile.admin_identity_doc_virus_scanned = True
+
+    pharmacy_profile.pan_number = pan_card_no
+    pharmacy_profile.pan_doc_path = pan_path
+    pharmacy_profile.pan_doc_virus_scanned = True
+    
+    pharmacy_profile.tan_number = tan_number
+    pharmacy_profile.tan_doc_path = tan_path
+    pharmacy_profile.tan_doc_virus_scanned = True
+    
+    pharmacy_profile.gst_number = gst_number
+    pharmacy_profile.gst_doc_path = gst_path
+    pharmacy_profile.gst_doc_virus_scanned = True
+
+    # pharmacy_profile.clinic_logo_path = logo_path
+    # pharmacy_profile.clinic_logo_virus_scanned = True
+
+    pharmacy_profile.storefront_image_path = photo_path
+    pharmacy_profile.storefront_image_virus_scanned = True
+
+    pharmacy_profile.save()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Pharmacy documents saved successfully.",
+        "profile_id": pharmacy_profile.id,
+        "redirect_url": reverse("dashboard")
+    })
+  
+# def pharmacy_profile_review(request):
+#     return render(request, 'registration/kyc_doctor_profile_review.html')
