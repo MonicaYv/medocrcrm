@@ -395,7 +395,7 @@ class PharmacyProfile(models.Model):
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
     pincode = models.CharField(max_length=20, blank=True, null=True)
     country = models.CharField(max_length=128, blank=True, null=True, default='India')
-    incorporation_number = models.CharField(max_length=128, blank=True, null=True)
+    pharmacy_registration_number = models.CharField(max_length=128, blank=True, null=True)
     incorporation_doc_path = models.CharField(max_length=255, blank=True, null=True)
     incorporation_doc_virus_scanned = models.BooleanField(default=False)
     pan_number = models.CharField(max_length=32, blank=True, null=True)

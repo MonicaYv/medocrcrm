@@ -25,20 +25,12 @@ urlpatterns = [
     path("new-otp-verify/", views.new_otp_verify, name="new_otp_verify"),
     path("new-signup/", views.new_signup, name="new_signup"),
     
-    # path("doctor-verification/", views.doctor_verification, name="doctor_verification"),
     path("lab-verification/", views.lab_verification, name="lab_verification"),
-    path("pharmacy-verification/", views.pharmacy_verification, name="pharmacy_verification"),
     path('check-phone', views.check_phone, name='check_phone'),
     path('auth/verify-login-otp', views.verify_login_otp, name='verify_login_otp'),
     # path("lab-kyc/", views.lab_kyc, name="lab_kyc"),
-    # path("doctor-kyc/", views.doctor_kyc, name="doctor_kyc"),
-    path("pharmacy-kyc/", views.pharmacy_kyc, name="pharmacy_kyc"),
     # path("lab-profile-verification/", views.lab_profile_verification, name="profile_verification_lab"),
-    path("pharmacy-profile-verification/", views.pharmacy_profile_verification, name="profile_verification_pharmacy"),
-    # path("doctor-profile-verification/", views.doctor_profile_verification, name="profile_verification_doctor"),
     # path("lab-profile-review/", views.lab_profile_review, name="lab_profile_review"),
-    # path("doctor-profile-review/", views.doctor_profile_review, name="doctor_profile_review"),
-    path("pharmacy-profile-review/", views.pharmacy_profile_review, name="pharmacy_profile_review"),
     path("save/hospital", views.save_hospital, name="save_hospital"), 
     
     
@@ -64,4 +56,11 @@ urlpatterns = [
     path("lab-profile-verification/get-cities/",views.get_cities,name="lab_get_cities"),
     path("lab-profile-verification/save/",views.save_lab_profile,name="save_lab_profile"),
     path("lab-profile-review/",views.lab_profile_review,name="lab_profile_review"),
+    
+    # pharmacy routes 
+    path("pharmacy-kyc/", views.pharmacy_kyc, name="pharmacy_kyc"),
+    path("pharmacy-profile-verification/", views.pharmacy_profile_verification, name="pharmacy_profile_verification"),
+    path("pharmacy-profile-verification/get-states/", views.get_states, name="get_states"),
+    path("pharmacy-profile-verification/get-cities/", views.get_cities, name="get_cities"),
+    path("pharmacy-profile-verification/save/", views.save_pharmacy_profile, name="save_pharmacy_profile"),
 ]
