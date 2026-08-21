@@ -228,7 +228,7 @@
                                 <input type="hidden" id="phone_otp_verified" name="phone_otp_verified" value="0">
 
                                 <input type="text" id="doc_otp" name="doc_otp"  value="{{ profile.otp }}"
-                                       class="w-full h-12 rounded-md border border-dark-gray pl-4 pr-24 focus:outline-none transition-all text-sm tracking-wide text-blue-charcoal placeholder:text-kyc-light-gray font-semibold" placeholder="Enter OTP">
+                                       class="w-full h-12 rounded-md border border-dark-gray pl-4 pr-24 focus:outline-none transition-all text-sm tracking-wide text-blue-charcoal placeholder:text-kyc-light-gray font-semibold" placeholder="Enter OTP" required>
                                 <div id="doc_verified" class="hidden  absolute right-3 flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md border border-green-200">
                                     <span class="material-symbols-outlined text-sm font-black">check</span>
                                     <span>Verified</span>
@@ -312,9 +312,9 @@
 
                     <!-- Age -->
                     <div>
-                        <input type="number" id="doc_age" name="doc_age" value="{{ profile.age }}" 
+                        <input type="number" id="doc_age" name="doc_age" value="{{ profile.age }}" min="1" max="99" oninput="this.value = this.value.slice(0, 2)"
                                class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" 
-                               placeholder="Age">
+                               placeholder="Age" required>
                     </div>
 
                     <!-- Speciality -->
@@ -611,13 +611,13 @@
                     <!-- Admin Name -->
                     <div>
                         <input type="text" id="doc_adm_name" name="doc_adm_name" value="{% if contact_person %}{{ contact_person.name }}{% endif %}"
-                        placeholder="Admin Name" class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Enter admin name">
+                        placeholder="Admin Name" class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Enter admin name" required>
                     </div>
 
                     <!-- Email Address -->
                     <div>
                         <input type="email" id="doc_adm_email" name="doc_adm_email" value="{% if contact_person %}{{ contact_person.email }}{% endif %}"
-                        placeholder="Email Address" class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm">
+                        placeholder="Email Address" class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" required>
                     </div>
 
                     <!-- Country Code & Phone Number -->
@@ -656,7 +656,7 @@
                                 <input type="hidden" id="doc_personal_otp_verified" name="doc_personal_otp_verified" value="{% if contact_person and contact_person.otp == '123456' %}1{% else %}0{% endif %}">
 
                                 <input type="text" id="doc_personal_otp" name="doc_personal_otp" value="{% if contact_person %}{{ contact_person.otp }}{% endif %}"
-                                       class="w-full h-12 rounded-md border border-dark-gray pl-4 pr-24 focus:outline-none transition-all text-sm tracking-wide placeholder:text-kyc-light-gray" placeholder="Enter OTP">
+                                       class="w-full h-12 rounded-md border border-dark-gray pl-4 pr-24 focus:outline-none transition-all text-sm tracking-wide placeholder:text-kyc-light-gray" placeholder="Enter OTP" required>
 
                                 <div id="doc_personal_verified" class="{% if contact_person and contact_person.otp == '123456' %}flex{% else %}hidden{% endif %} absolute right-3 flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md border border-green-200">
                                     <span class="material-symbols-outlined text-sm font-black">check</span>
@@ -680,7 +680,7 @@
                     <!-- Role -->
                     <div>
                         <input type="text" id="doc_personal_role" name="doc_personal_role" value="{% if contact_person %}{{ contact_person.role }}{% endif %}"
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Role">
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Role" required>
                     </div>
 
                     <!-- Referral Code -->
@@ -726,7 +726,7 @@
                     <!-- Pincode -->
                     <div>
                         <input type="text" id="doc_personal_pincode" name="doc_personal_pincode"  value="{% if contact_person %}{{ contact_person.pincode }}{% endif %}"
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Pincode">
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Pincode" required>
                     </div>
                 </div>
             </div>            

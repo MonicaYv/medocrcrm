@@ -745,39 +745,92 @@ function loadCities(stateId, preferredCityName = null) {
 }
 
 //verify otp
+// $("#pha_otp").on("input", function () {
+//   let otp = $(this).val().replace(/\D/g, "");
+
+//   // Allow only 6 digits
+//   otp = otp.substring(0, 6);
+
+//   $(this).val(otp);
+
+//   // Always hide both first
+//   $("#pha_verified").addClass("hidden").removeClass("flex");
+
+//   $("#pha_not_verified").addClass("hidden").removeClass("flex");
+
+//   // Reset verification
+//   $("#phone_otp_verified").val("0");
+
+//   // If empty, keep both hidden
+//   if (otp.length === 0) {
+//     return;
+//   }
+
+//   // Correct OTP
+//   if (otp === "123456") {
+//     $("#pha_verified").removeClass("hidden").addClass("flex");
+
+//     $("#phone_otp_verified").val("1");
+//   }
+//   // Any other entered OTP
+//   else {
+//     $("#pha_not_verified").removeClass("hidden").addClass("flex");
+
+//     $("#phone_otp_verified").val("0");
+//   }
+// });
+
+
+// Verify pharmacy OTP
 $("#pha_otp").on("input", function () {
-  let otp = $(this).val().replace(/\D/g, "");
 
-  // Allow only 6 digits
-  otp = otp.substring(0, 6);
+    let otp = $(this).val()
+        .replace(/\D/g, "")
+        .substring(0, 6);
 
-  $(this).val(otp);
+    $(this).val(otp);
 
-  // Always hide both first
-  $("#pha_verified").addClass("hidden").removeClass("flex");
-
-  $("#pha_not_verified").addClass("hidden").removeClass("flex");
-
-  // Reset verification
-  $("#phone_otp_verified").val("0");
-
-  // If empty, keep both hidden
-  if (otp.length === 0) {
-    return;
-  }
-
-  // Correct OTP
-  if (otp === "123456") {
-    $("#pha_verified").removeClass("hidden").addClass("flex");
-
-    $("#phone_otp_verified").val("1");
-  }
-  // Any other entered OTP
-  else {
-    $("#pha_not_verified").removeClass("hidden").addClass("flex");
-
+    // Reset verification state whenever OTP changes
     $("#phone_otp_verified").val("0");
-  }
+
+    $("#pha_otp")
+        .removeClass("border-red-400");
+
+    $("#pha_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    $("#pha_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    // Don't validate until 6 digits
+    if (otp.length < 6) {
+        return;
+    }
+
+    // Correct OTP
+    if (otp === "123456") {
+
+        $("#phone_otp_verified").val("1");
+
+        $("#pha_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+    } else {
+
+        $("#phone_otp_verified").val("0");
+
+        $("#pha_not_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+        toastr.error("Invalid OTP.");
+
+        // IMPORTANT:
+        // Do NOT clear OTP
+    }
 });
 
 //resend
@@ -795,6 +848,7 @@ $(".pha_resend_otp").on("click", function (e) {
   // Show toast
   toastr.success("OTP sent successfully");
 });
+
 
 //alternative phn
 $("#pha_alt_phn").on("input", function () {
@@ -825,6 +879,8 @@ function saveDataStep1() {
   const address = $("#pha_address").val().trim();
   const pincode = $("#pha_pincode").val().trim();
   const alt_no = $("#pha_alt_phn").val().trim();
+  const otp = $("#pha_otp").val().trim();
+  const otpVerified = $("#phone_otp_verified").val();
 
   $(
     "#pha_first_name, #pha_last_name, #pha_comp_name, #pha_email, #pha_address, #pha_pincode, #pha_alt_phn",
@@ -925,6 +981,31 @@ function saveDataStep1() {
     toastr.warning("Contact no must be exactly 10 digits.");
     $("#pha_alt_phn").focus();
     return;
+  }
+
+  if (!otp) {
+      $("#pha_otp").addClass("border-red-400");
+      toastr.warning("Please enter OTP.");
+      $("#pha_otp").focus();
+      return;
+  }
+
+  if (otp !== "123456") {
+      // $("#pha_otp").val("");
+      $("#phone_otp_verified").val("0");
+
+      $("#pha_verified")
+          .addClass("hidden")
+          .removeClass("flex");
+
+      $("#pha_not_verified")
+          .removeClass("hidden")
+          .addClass("flex");
+
+      toastr.error("Incorrect OTP.");
+      $("#pha_otp").focus();
+
+      return;
   }
 
   // FormData
@@ -1157,47 +1238,162 @@ function loadCitiesAdmin(stateId, preferredCityName = null) {
   });
 }
 
-//verify otp personal
+// //verify otp personal
+// $("#pha_personal_otp").on("input", function () {
+//   let otp = $(this).val().replace(/\D/g, "");
+
+//   otp = otp.substring(0, 6);
+
+//   $(this).val(otp);
+
+//   $("#pha_personal_verified").addClass("hidden").removeClass("flex");
+
+//   $("#pha_personal_not_verified").addClass("hidden").removeClass("flex");
+
+//   $("#pha_personal_otp_verified").val("0");
+
+//   if (otp.length === 0) {
+//     return;
+//   }
+
+//   if (otp === "123456") {
+//     $("#pha_personal_verified").removeClass("hidden").addClass("flex");
+
+//     $("#pha_personal_otp_verified").val("1");
+//   } else {
+//     $("#pha_personal_not_verified").removeClass("hidden").addClass("flex");
+
+//     $("#pha_personal_otp_verified").val("0");
+//   }
+// });
+
+// //resend personal 
+// $(".pha_personal_resend_otp").on("click", function (e) {
+//   e.preventDefault();
+
+//   $("#pha_personal_otp").val("");
+//   $("#pha_personal_otp_verified").val("0");
+
+//   $("#pha_personal_verified").addClass("hidden").removeClass("flex");
+
+//   $("#pha_personal_not_verified").addClass("hidden").removeClass("flex");
+
+//   toastr.success("OTP sent successfully");
+// });
+
+// Verify personal OTP
+// $("#pha_personal_otp").on("input", function () {
+//     let otp = $(this).val().replace(/\D/g, "").substring(0, 6);
+
+//     $(this).val(otp);
+
+//     // Reset verification state
+//     $("#pha_personal_otp_verified").val("0");
+
+//     $("#pha_personal_verified")
+//         .addClass("hidden")
+//         .removeClass("flex");
+
+//     $("#pha_personal_not_verified")
+//         .addClass("hidden")
+//         .removeClass("flex");
+
+//     // Don't validate until 6 digits are entered
+//     if (otp.length < 6) {
+//         return;
+//     }
+
+//     // Correct OTP
+//     if (otp === "123456") {
+
+//         $("#pha_personal_verified")
+//             .removeClass("hidden")
+//             .addClass("flex");
+
+//         $("#pha_personal_otp_verified").val("1");
+
+//     } else {
+
+//         $("#pha_personal_not_verified")
+//             .removeClass("hidden")
+//             .addClass("flex");
+
+//         $("#pha_personal_otp_verified").val("0");
+
+//         toastr.error("Invalid OTP.");
+
+//         // Do NOT clear the entered OTP
+//     }
+// });
+
+// Verify personal OTP
 $("#pha_personal_otp").on("input", function () {
-  let otp = $(this).val().replace(/\D/g, "");
 
-  otp = otp.substring(0, 6);
+    let otp = $(this).val()
+        .replace(/\D/g, "")
+        .substring(0, 6);
 
-  $(this).val(otp);
+    $(this).val(otp);
 
-  $("#pha_personal_verified").addClass("hidden").removeClass("flex");
-
-  $("#pha_personal_not_verified").addClass("hidden").removeClass("flex");
-
-  $("#pha_personal_otp_verified").val("0");
-
-  if (otp.length === 0) {
-    return;
-  }
-
-  if (otp === "123456") {
-    $("#pha_personal_verified").removeClass("hidden").addClass("flex");
-
-    $("#pha_personal_otp_verified").val("1");
-  } else {
-    $("#pha_personal_not_verified").removeClass("hidden").addClass("flex");
-
+    // Reset verification state
     $("#pha_personal_otp_verified").val("0");
-  }
+
+    $("#pha_personal_otp")
+        .removeClass("border-red-400");
+
+    $("#pha_personal_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    $("#pha_personal_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    // Don't validate until 6 digits
+    if (otp.length < 6) {
+        return;
+    }
+
+    // Correct OTP
+    if (otp === "123456") {
+
+        $("#pha_personal_otp_verified").val("1");
+
+        $("#pha_personal_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+    } else {
+
+        $("#pha_personal_otp_verified").val("0");
+
+        $("#pha_personal_not_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+        toastr.error("Invalid OTP.");
+
+        // IMPORTANT:
+        // Do NOT clear OTP
+    }
 });
 
-//resend personal
+// Resend personal OTP
 $(".pha_personal_resend_otp").on("click", function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  $("#pha_personal_otp").val("");
-  $("#pha_personal_otp_verified").val("0");
+    $("#pha_personal_otp").val("");
+    $("#pha_personal_otp_verified").val("0");
 
-  $("#pha_personal_verified").addClass("hidden").removeClass("flex");
+    $("#pha_personal_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  $("#pha_personal_not_verified").addClass("hidden").removeClass("flex");
+    $("#pha_personal_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  toastr.success("OTP sent successfully");
+    toastr.success("OTP sent successfully");
 });
 
 //personal phn
@@ -1235,6 +1431,8 @@ function saveDataStep2() {
   const email = $("#pha_adm_email").val().trim();
   const pincode = $("#pha_personal_pincode").val().trim();
   const alt_no = $("#pha_phone").val().trim();
+  const otp = $("#pha_personal_otp").val().trim();
+  const otpVerified = $("#pha_personal_otp_verified").val();
 
   $(
     "#pha_adm_name, #pha_adm_email, #pha_personal_pincode, #pha_phone",
@@ -1296,6 +1494,33 @@ function saveDataStep2() {
     toastr.warning("Contact no must be exactly 10 digits.");
     $("#pha_phone").focus();
     return;
+  }
+
+  if (!otp) {
+      $("#pha_personal_otp").addClass("border-red-400");
+      toastr.warning("Please enter OTP.");
+      $("#pha_personal_otp").focus();
+      return;
+  }
+
+  if (otp !== "123456") {
+
+      $("#pha_personal_otp_verified").val("0");
+
+      $("#pha_personal_verified")
+          .addClass("hidden")
+          .removeClass("flex");
+
+      $("#pha_personal_not_verified")
+          .removeClass("hidden")
+          .addClass("flex");
+
+      toastr.error("Incorrect OTP.");
+
+      // Keep entered OTP
+      $("#pha_personal_otp").focus();
+
+      return;
   }
 
   //form submition

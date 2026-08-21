@@ -738,56 +738,133 @@ function loadCities(stateId, preferredCityName = null) {
   });
 }
 
-//verify otp
+// //verify otp
+// $("#doc_otp").on("input", function () {
+//   let otp = $(this).val().replace(/\D/g, "");
+
+//   // Allow only 6 digits
+//   otp = otp.substring(0, 6);
+
+//   $(this).val(otp);
+
+//   // Always hide both first
+//   $("#doc_verified").addClass("hidden").removeClass("flex");
+
+//   $("#doc_not_verified").addClass("hidden").removeClass("flex");
+
+//   // Reset verification
+//   $("#phone_otp_verified").val("0");
+
+//   // If empty, keep both hidden
+//   if (otp.length === 0) {
+//     return;
+//   }
+
+//   // Correct OTP
+//   if (otp === "123456") {
+//     $("#doc_verified").removeClass("hidden").addClass("flex");
+
+//     $("#phone_otp_verified").val("1");
+//   }
+//   // Any other entered OTP
+//   else {
+//     $("#doc_not_verified").removeClass("hidden").addClass("flex");
+
+//     $("#phone_otp_verified").val("0");
+//   }
+// });
+
+// //resend
+// $(".doc_resend_otp").on("click", function (e) {
+//   e.preventDefault();
+
+//   // Reset OTP verification
+//   $("#doc_otp").val("");
+//   $("#phone_otp_verified").val("0");
+
+//   $("#doc_verified").addClass("hidden").removeClass("flex");
+
+//   $("#doc_not_verified").addClass("hidden").removeClass("flex");
+
+//   // Show toast
+//   toastr.success("OTP sent successfully");
+// });
+
+// Verify Doctor OTP
 $("#doc_otp").on("input", function () {
-  let otp = $(this).val().replace(/\D/g, "");
 
-  // Allow only 6 digits
-  otp = otp.substring(0, 6);
+    let otp = $(this).val()
+        .replace(/\D/g, "")
+        .substring(0, 6);
 
-  $(this).val(otp);
+    $(this).val(otp);
 
-  // Always hide both first
-  $("#doc_verified").addClass("hidden").removeClass("flex");
-
-  $("#doc_not_verified").addClass("hidden").removeClass("flex");
-
-  // Reset verification
-  $("#phone_otp_verified").val("0");
-
-  // If empty, keep both hidden
-  if (otp.length === 0) {
-    return;
-  }
-
-  // Correct OTP
-  if (otp === "123456") {
-    $("#doc_verified").removeClass("hidden").addClass("flex");
-
-    $("#phone_otp_verified").val("1");
-  }
-  // Any other entered OTP
-  else {
-    $("#doc_not_verified").removeClass("hidden").addClass("flex");
-
+    // Reset verification state whenever OTP changes
     $("#phone_otp_verified").val("0");
-  }
+
+    $("#doc_otp").removeClass("border-red-400");
+
+    // Hide verification messages
+    $("#doc_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    $("#doc_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    // Don't validate until 6 digits
+    if (otp.length < 6) {
+        return;
+    }
+
+    // Correct OTP
+    if (otp === "123456") {
+
+        $("#phone_otp_verified").val("1");
+
+        $("#doc_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+    } else {
+
+        $("#phone_otp_verified").val("0");
+
+        $("#doc_not_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+        toastr.error("Invalid OTP.");
+
+        // IMPORTANT:
+        // Do NOT clear OTP
+        // $("#doc_otp").val("");
+    }
 });
 
-//resend
+
+// Resend Doctor OTP
 $(".doc_resend_otp").on("click", function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Reset OTP verification
-  $("#doc_otp").val("");
-  $("#phone_otp_verified").val("0");
+    // Reset OTP
+    $("#doc_otp").val("");
+    $("#phone_otp_verified").val("0");
 
-  $("#doc_verified").addClass("hidden").removeClass("flex");
+    // Hide verification messages
+    $("#doc_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  $("#doc_not_verified").addClass("hidden").removeClass("flex");
+    $("#doc_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  // Show toast
-  toastr.success("OTP sent successfully");
+    // Remove error border
+    $("#doc_otp").removeClass("border-red-400");
+
+    toastr.success("OTP sent successfully");
 });
 
 //alternative phn
@@ -819,6 +896,8 @@ function saveDataStep1() {
   const address = $("#doc_address").val().trim();
   const pincode = $("#doc_pincode").val().trim();
   const alt_no = $("#doc_alt_phn").val().trim();
+  const otp = $("#doc_otp").val().trim();
+  const otpVerified = $("#phone_otp_verified").val();
 
   $(
     "#doc_name, #doc_owner_name, #doc_clinic, #doc_email, #doc_address, #doc_pincode, #doc_alt_phn",
@@ -903,6 +982,49 @@ function saveDataStep1() {
     toastr.warning("Contact no must be exactly 10 digits.");
     $("#doc_alt_phn").focus();
     return;
+  }
+
+  if (!otp) {
+      $("#doc_otp").addClass("border-red-400");
+
+      toastr.warning("Please enter OTP.");
+
+      $("#doc_otp").focus();
+
+      return;
+  }
+
+  if (otp.length !== 6) {
+      $("#doc_otp").addClass("border-red-400");
+
+      toastr.warning("Please enter a valid 6-digit OTP.");
+
+      $("#doc_otp").focus();
+
+      return;
+  }
+
+  if (otp !== "123456") {
+
+      $("#phone_otp_verified").val("0");
+
+      $("#doc_verified")
+          .addClass("hidden")
+          .removeClass("flex");
+
+      $("#doc_not_verified")
+          .removeClass("hidden")
+          .addClass("flex");
+
+      toastr.error("Incorrect OTP.");
+
+      // IMPORTANT:
+      // Keep the entered OTP
+      // Do NOT use $("#doc_otp").val("");
+
+      $("#doc_otp").focus();
+
+      return;
   }
 
   // FormData
@@ -1138,47 +1260,126 @@ function loadCitiesAdmin(stateId, preferredCityName = null) {
   });
 }
 
-//verify otp personal
+// //verify otp personal
+// $("#doc_personal_otp").on("input", function () {
+//   let otp = $(this).val().replace(/\D/g, "");
+
+//   otp = otp.substring(0, 6);
+
+//   $(this).val(otp);
+
+//   $("#doc_personal_verified").addClass("hidden").removeClass("flex");
+
+//   $("#doc_personal_not_verified").addClass("hidden").removeClass("flex");
+
+//   $("#doc_personal_otp_verified").val("0");
+
+//   if (otp.length === 0) {
+//     return;
+//   }
+
+//   if (otp === "123456") {
+//     $("#doc_personal_verified").removeClass("hidden").addClass("flex");
+
+//     $("#doc_personal_otp_verified").val("1");
+//   } else {
+//     $("#doc_personal_not_verified").removeClass("hidden").addClass("flex");
+
+//     $("#doc_personal_otp_verified").val("0");
+//   }
+// });
+
+// //resend personal
+// $(".doc_personal_resend_otp").on("click", function (e) {
+//   e.preventDefault();
+
+//   $("#doc_personal_otp").val("");
+//   $("#doc_personal_otp_verified").val("0");
+
+//   $("#doc_personal_verified").addClass("hidden").removeClass("flex");
+
+//   $("#doc_personal_not_verified").addClass("hidden").removeClass("flex");
+
+//   toastr.success("OTP sent successfully");
+// });
+
+// Verify Doctor Personal OTP
 $("#doc_personal_otp").on("input", function () {
-  let otp = $(this).val().replace(/\D/g, "");
 
-  otp = otp.substring(0, 6);
+    let otp = $(this).val()
+        .replace(/\D/g, "")
+        .substring(0, 6);
 
-  $(this).val(otp);
+    $(this).val(otp);
 
-  $("#doc_personal_verified").addClass("hidden").removeClass("flex");
-
-  $("#doc_personal_not_verified").addClass("hidden").removeClass("flex");
-
-  $("#doc_personal_otp_verified").val("0");
-
-  if (otp.length === 0) {
-    return;
-  }
-
-  if (otp === "123456") {
-    $("#doc_personal_verified").removeClass("hidden").addClass("flex");
-
-    $("#doc_personal_otp_verified").val("1");
-  } else {
-    $("#doc_personal_not_verified").removeClass("hidden").addClass("flex");
-
+    // Reset verification state whenever OTP changes
     $("#doc_personal_otp_verified").val("0");
-  }
+
+    // Remove error border
+    $("#doc_personal_otp").removeClass("border-red-400");
+
+    // Hide verification messages
+    $("#doc_personal_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    $("#doc_personal_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    // Don't validate until 6 digits
+    if (otp.length < 6) {
+        return;
+    }
+
+    // Correct OTP
+    if (otp === "123456") {
+
+        $("#doc_personal_otp_verified").val("1");
+
+        $("#doc_personal_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+    } else {
+
+        $("#doc_personal_otp_verified").val("0");
+
+        $("#doc_personal_not_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+        toastr.error("Invalid OTP.");
+
+        // IMPORTANT:
+        // Do NOT clear the entered OTP
+        // $("#doc_personal_otp").val("");
+    }
 });
 
-//resend personal
+
+// Resend Doctor Personal OTP
 $(".doc_personal_resend_otp").on("click", function (e) {
-  e.preventDefault();
 
-  $("#doc_personal_otp").val("");
-  $("#doc_personal_otp_verified").val("0");
+    e.preventDefault();
 
-  $("#doc_personal_verified").addClass("hidden").removeClass("flex");
+    // Reset OTP
+    $("#doc_personal_otp").val("");
+    $("#doc_personal_otp_verified").val("0");
 
-  $("#doc_personal_not_verified").addClass("hidden").removeClass("flex");
+    // Hide verification messages
+    $("#doc_personal_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  toastr.success("OTP sent successfully");
+    $("#doc_personal_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    // Remove error border
+    $("#doc_personal_otp").removeClass("border-red-400");
+
+    toastr.success("OTP sent successfully");
 });
 
 //personal phn
@@ -1216,6 +1417,8 @@ function saveDataStep2() {
   const email = $("#doc_adm_email").val().trim();
   const pincode = $("#doc_personal_pincode").val().trim();
   const alt_no = $("#doc_phone").val().trim();
+  const otp = $("#doc_personal_otp").val().trim();
+  const otpVerified = $("#doc_personal_otp_verified").val();
 
   $(
     "#doc_adm_name, #doc_adm_email, #doc_personal_pincode, #doc_phone",
@@ -1277,6 +1480,48 @@ function saveDataStep2() {
     toastr.warning("Contact no must be exactly 10 digits.");
     $("#doc_phone").focus();
     return;
+  }
+
+  if (!otp) {
+
+      $("#doc_personal_otp").addClass("border-red-400");
+
+      toastr.warning("Please enter OTP.");
+
+      $("#doc_personal_otp").focus();
+
+      return;
+  }
+
+  if (otp.length !== 6) {
+
+      $("#doc_personal_otp").addClass("border-red-400");
+
+      toastr.warning("Please enter a valid 6-digit OTP.");
+
+      $("#doc_personal_otp").focus();
+
+      return;
+  }
+
+  if (otp !== "123456") {
+
+      $("#doc_personal_otp_verified").val("0");
+
+      $("#doc_personal_verified")
+          .addClass("hidden")
+          .removeClass("flex");
+
+      $("#doc_personal_not_verified")
+          .removeClass("hidden")
+          .addClass("flex");
+
+      toastr.error("Incorrect OTP.");
+
+      // Do NOT clear OTP
+      $("#doc_personal_otp").focus();
+
+      return;
   }
 
   //form submition

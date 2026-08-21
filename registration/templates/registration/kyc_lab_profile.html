@@ -240,8 +240,8 @@
                         </p>
                     </div>
 
-                    <!-- OTP verification -->
-                    <div class="flex flex-col gap-1.5 justify-end">
+                    <!-- OTP verification --> 
+                    <!-- <div class="flex flex-col gap-1.5 justify-end">
                         <div class="flex gap-3">
                             <button type="button" class="h-12 px-6 rounded-md bg-kyc-blue hover:bg-blue-200 text-white font-semibold text-sm transition-all focus:outline-none shrink-0" style="background-color: var(--color-primary-color-opacity); color: var(--color-primary-color);">
                                 Send Phone OTP
@@ -256,6 +256,38 @@
                             </div>
                         </div>
                         <span class="text-xs text-slate-400 mt-1 pl-1">Didn't get the code? <a href="#" class="text-{{ border }} hover:underline">Resend</a></span>
+                    </div> -->
+
+
+                    <!-- OTP verification -->
+                    <div class="flex flex-col gap-1.5 justify-end">
+                        <div class="flex gap-3">
+                            <button type="button" class="h-12 px-6 rounded-md bg-kyc-blue hover:bg-blue-200 text-white font-semibold text-sm transition-all focus:outline-none shrink-0" style="background-color: var(--color-primary-color-opacity); color: var(--color-primary-color);">
+                               Send Phone OTP
+                            </button>
+                            <div class="flex-1 relative flex items-center">
+                                <input type="hidden" id="phone_otp_verified" name="phone_otp_verified" value="0">
+
+                                <input type="text" id="facility_otp" name="facility_otp" 
+                                       class="w-full h-12 rounded-md border border-dark-gray pl-4 pr-24 focus:outline-none transition-all text-sm tracking-wide text-blue-charcoal placeholder:text-kyc-light-gray font-semibold" placeholder="Enter OTP">
+                                <div id="lab_verified" class="hidden  absolute right-3 flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md border border-green-200">
+                                    <span class="material-symbols-outlined text-sm font-black">check</span>
+                                    <span>Verified</span>
+                                </div>
+                                <div
+                                    id="lab_not_verified"
+                                    class="hidden absolute right-3  items-center gap-1 text-red-600 text-xs font-bold bg-red-50 px-2 py-1 rounded-md border border-red-200">
+
+                                    <span class="material-symbols-outlined text-sm font-black">
+                                        close
+                                    </span>
+
+                                    <span>Not Verified</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <span class="text-xs text-slate-400 mt-1 pl-1">Didn't get the code? <a href="#" class="text-{{ border }} hover:underline lab_resend_otp">Resend</a></span>
                     </div>
 
                     <!-- Type of Hospital -->

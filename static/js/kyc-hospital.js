@@ -779,56 +779,134 @@ function loadCities(stateId, preferredCityName = null) {
   });
 }
 
-//verify otp
+// //verify otp
+// $("#hos_otp").on("input", function () {
+//   let otp = $(this).val().replace(/\D/g, "");
+
+//   // Allow only 6 digits
+//   otp = otp.substring(0, 6);
+
+//   $(this).val(otp);
+
+//   // Always hide both first
+//   $("#hos_verified").addClass("hidden").removeClass("flex");
+
+//   $("#hos_not_verified").addClass("hidden").removeClass("flex");
+
+//   // Reset verification
+//   $("#phone_otp_verified").val("0");
+
+//   // If empty, keep both hidden
+//   if (otp.length === 0) {
+//     return;
+//   }
+
+//   // Correct OTP
+//   if (otp === "123456") {
+//     $("#hos_verified").removeClass("hidden").addClass("flex");
+
+//     $("#phone_otp_verified").val("1");
+//   }
+//   // Any other entered OTP
+//   else {
+//     $("#hos_not_verified").removeClass("hidden").addClass("flex");
+
+//     $("#phone_otp_verified").val("0");
+//   }
+// });
+
+// //resend
+// $(".hos_resend_otp").on("click", function (e) {
+//   e.preventDefault();
+
+//   // Reset OTP verification
+//   $("#hos_otp").val("");
+//   $("#phone_otp_verified").val("0");
+
+//   $("#hos_verified").addClass("hidden").removeClass("flex");
+
+//   $("#hos_not_verified").addClass("hidden").removeClass("flex");
+
+//   // Show toast
+//   toastr.success("OTP sent successfully");
+// });
+
+
+// Verify Hospital OTP
 $("#hos_otp").on("input", function () {
-  let otp = $(this).val().replace(/\D/g, "");
 
-  // Allow only 6 digits
-  otp = otp.substring(0, 6);
+    let otp = $(this).val()
+        .replace(/\D/g, "")
+        .substring(0, 6);
 
-  $(this).val(otp);
+    $(this).val(otp);
 
-  // Always hide both first
-  $("#hos_verified").addClass("hidden").removeClass("flex");
-
-  $("#hos_not_verified").addClass("hidden").removeClass("flex");
-
-  // Reset verification
-  $("#phone_otp_verified").val("0");
-
-  // If empty, keep both hidden
-  if (otp.length === 0) {
-    return;
-  }
-
-  // Correct OTP
-  if (otp === "123456") {
-    $("#hos_verified").removeClass("hidden").addClass("flex");
-
-    $("#phone_otp_verified").val("1");
-  }
-  // Any other entered OTP
-  else {
-    $("#hos_not_verified").removeClass("hidden").addClass("flex");
-
+    // Reset verification state whenever OTP changes
     $("#phone_otp_verified").val("0");
-  }
+
+    $("#hos_otp").removeClass("border-red-400");
+
+    // Hide verification messages
+    $("#hos_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    $("#hos_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    // Don't validate until 6 digits
+    if (otp.length < 6) {
+        return;
+    }
+
+    // Correct OTP
+    if (otp === "123456") {
+
+        $("#phone_otp_verified").val("1");
+
+        $("#hos_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+    } else {
+
+        $("#phone_otp_verified").val("0");
+
+        $("#hos_not_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+        toastr.error("Invalid OTP.");
+
+        // IMPORTANT:
+        // Do NOT clear OTP
+        // $("#hos_otp").val("");
+    }
 });
 
-//resend
+
+// Resend Hospital OTP
 $(".hos_resend_otp").on("click", function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Reset OTP verification
-  $("#hos_otp").val("");
-  $("#phone_otp_verified").val("0");
+    // Reset OTP
+    $("#hos_otp").val("");
+    $("#phone_otp_verified").val("0");
 
-  $("#hos_verified").addClass("hidden").removeClass("flex");
+    // Hide verification messages
+    $("#hos_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  $("#hos_not_verified").addClass("hidden").removeClass("flex");
+    $("#hos_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  // Show toast
-  toastr.success("OTP sent successfully");
+    // Remove error border
+    $("#hos_otp").removeClass("border-red-400");
+
+    toastr.success("OTP sent successfully");
 });
 
 //alternative phn
@@ -859,6 +937,8 @@ function saveHospitalStep1() {
   const address = $("#hos_address").val().trim();
   const pincode = $("#hos_pincode").val().trim();
   const alt_no = $("#hos_alt_phn").val().trim();
+  const otp = $("#hos_otp").val().trim();
+  const otpVerified = $("#phone_otp_verified").val();
 
   $(
     "#hos_name, #hos_owner_name, #hos_email, #hos_address, #hos_pincode, #hos_alt_phn",
@@ -945,6 +1025,46 @@ function saveHospitalStep1() {
     return;
   }
 
+  if (!otp) {
+      $("#hos_otp").addClass("border-red-400");
+
+      toastr.warning("Please enter OTP.");
+
+      $("#hos_otp").focus();
+
+      return;
+  }
+
+  if (otp.length !== 6) {
+      $("#hos_otp").addClass("border-red-400");
+
+      toastr.warning("Please enter a valid 6-digit OTP.");
+
+      $("#hos_otp").focus();
+
+      return;
+  }
+
+  if (otp !== "123456") {
+
+      $("#phone_otp_verified").val("0");
+
+      $("#hos_verified")
+          .addClass("hidden")
+          .removeClass("flex");
+
+      $("#hos_not_verified")
+          .removeClass("hidden")
+          .addClass("flex");
+
+      toastr.error("Incorrect OTP.");
+
+      $("#hos_otp").focus();
+
+      return;
+  }
+
+
   // FormData
   const formData = new FormData();
 
@@ -968,6 +1088,8 @@ function saveHospitalStep1() {
   formData.append("hos_city", $("#hos_city").val());
   formData.append("hos_pincode", pincode);
   formData.append("hos_alt_phn", alt_no);
+  formData.append("hos_otp", $("#hos_otp").val());
+
 
   // CSRF
   formData.append(
@@ -1174,47 +1296,124 @@ function loadCitiesAdmin(stateId, preferredCityName = null) {
   });
 }
 
-//verify otp personal
+// //verify otp personal
+// $("#hos_personal_otp").on("input", function () {
+//   let otp = $(this).val().replace(/\D/g, "");
+
+//   otp = otp.substring(0, 6);
+
+//   $(this).val(otp);
+
+//   $("#hos_personal_verified").addClass("hidden").removeClass("flex");
+
+//   $("#hos_personal_not_verified").addClass("hidden").removeClass("flex");
+
+//   $("#hos_personal_otp_verified").val("0");
+
+//   if (otp.length === 0) {
+//     return;
+//   }
+
+//   if (otp === "123456") {
+//     $("#hos_personal_verified").removeClass("hidden").addClass("flex");
+
+//     $("#hos_personal_otp_verified").val("1");
+//   } else {
+//     $("#hos_personal_not_verified").removeClass("hidden").addClass("flex");
+
+//     $("#hos_personal_otp_verified").val("0");
+//   }
+// });
+
+// //resend personal
+// $(".hos_personal_resend_otp").on("click", function (e) {
+//   e.preventDefault();
+
+//   $("#hos_personal_otp").val("");
+//   $("#hos_personal_otp_verified").val("0");
+
+//   $("#hos_personal_verified").addClass("hidden").removeClass("flex");
+
+//   $("#hos_personal_not_verified").addClass("hidden").removeClass("flex");
+
+//   toastr.success("OTP sent successfully");
+// });
+
+// Verify Hospital Personal OTP
 $("#hos_personal_otp").on("input", function () {
-  let otp = $(this).val().replace(/\D/g, "");
 
-  otp = otp.substring(0, 6);
+    let otp = $(this).val()
+        .replace(/\D/g, "")
+        .substring(0, 6);
 
-  $(this).val(otp);
+    $(this).val(otp);
 
-  $("#hos_personal_verified").addClass("hidden").removeClass("flex");
-
-  $("#hos_personal_not_verified").addClass("hidden").removeClass("flex");
-
-  $("#hos_personal_otp_verified").val("0");
-
-  if (otp.length === 0) {
-    return;
-  }
-
-  if (otp === "123456") {
-    $("#hos_personal_verified").removeClass("hidden").addClass("flex");
-
-    $("#hos_personal_otp_verified").val("1");
-  } else {
-    $("#hos_personal_not_verified").removeClass("hidden").addClass("flex");
-
+    // Reset verification state whenever OTP changes
     $("#hos_personal_otp_verified").val("0");
-  }
+
+    $("#hos_personal_otp").removeClass("border-red-400");
+
+    // Hide verification messages
+    $("#hos_personal_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    $("#hos_personal_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    // Don't validate until 6 digits
+    if (otp.length < 6) {
+        return;
+    }
+
+    // Correct OTP
+    if (otp === "123456") {
+
+        $("#hos_personal_otp_verified").val("1");
+
+        $("#hos_personal_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+    } else {
+
+        $("#hos_personal_otp_verified").val("0");
+
+        $("#hos_personal_not_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+        toastr.error("Invalid OTP.");
+
+        // IMPORTANT:
+        // Do NOT clear OTP
+        // $("#hos_personal_otp").val("");
+    }
 });
 
-//resend personal
+
+// Resend Hospital Personal OTP
 $(".hos_personal_resend_otp").on("click", function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  $("#hos_personal_otp").val("");
-  $("#hos_personal_otp_verified").val("0");
+    // Reset OTP
+    $("#hos_personal_otp").val("");
+    $("#hos_personal_otp_verified").val("0");
 
-  $("#hos_personal_verified").addClass("hidden").removeClass("flex");
+    // Hide verification messages
+    $("#hos_personal_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  $("#hos_personal_not_verified").addClass("hidden").removeClass("flex");
+    $("#hos_personal_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
 
-  toastr.success("OTP sent successfully");
+    // Remove error border
+    $("#hos_personal_otp").removeClass("border-red-400");
+
+    toastr.success("OTP sent successfully");
 });
 
 //personal phn
@@ -1253,6 +1452,8 @@ function saveHospitalStep2() {
   const email = $("#hos_adm_email").val().trim();
   const pincode = $("#hos_personal_pincode").val().trim();
   const alt_no = $("#hos_phone").val().trim();
+  const otp = $("#hos_personal_otp").val().trim();
+  const otpVerified = $("#hos_personal_otp_verified").val();
 
   $(
     "#hos_adm_name, #hos_adm_email, #hos_personal_pincode, #hos_phone",
@@ -1315,6 +1516,49 @@ function saveHospitalStep2() {
     $("#hos_phone").focus();
     return;
   }
+
+  if (!otp) {
+
+      $("#hos_personal_otp").addClass("border-red-400");
+
+      toastr.warning("Please enter OTP.");
+
+      $("#hos_personal_otp").focus();
+
+      return;
+  }
+
+  if (otp.length !== 6) {
+
+      $("#hos_personal_otp").addClass("border-red-400");
+
+      toastr.warning("Please enter a valid 6-digit OTP.");
+
+      $("#hos_personal_otp").focus();
+
+      return;
+  }
+
+  if (otp !== "123456") {
+
+      $("#hos_personal_otp_verified").val("0");
+
+      $("#hos_personal_verified")
+          .addClass("hidden")
+          .removeClass("flex");
+
+      $("#hos_personal_not_verified")
+          .removeClass("hidden")
+          .addClass("flex");
+
+      toastr.error("Incorrect OTP.");
+
+      // Do NOT clear OTP
+      $("#hos_personal_otp").focus();
+
+      return;
+  }
+
 
   //form submition
   const formData = new FormData();
