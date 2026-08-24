@@ -320,6 +320,59 @@ $(document).ready(function () {
         }
     );
 
+
+    //verify otp 
+    $("#facility_otp").on("input", function () {
+    let otp = $(this).val().replace(/\D/g, "");
+
+    // Allow only 6 digits
+    otp = otp.substring(0, 6);
+
+    $(this).val(otp);
+
+    // Always hide both first
+    $("#lab_verified").addClass("hidden").removeClass("flex");
+
+    $("#lab_not_verified").addClass("hidden").removeClass("flex");
+
+    // Reset verification
+    $("#phone_otp_verified").val("0");
+
+    // If empty, keep both hidden
+    if (otp.length === 0) {
+        return;
+    }
+
+    // Correct OTP
+    if (otp === "123456") {
+        $("#lab_verified").removeClass("hidden").addClass("flex");
+
+        $("#phone_otp_verified").val("1");
+    }
+    // Any other entered OTP
+    else {
+        $("#lab_not_verified").removeClass("hidden").addClass("flex");
+
+        $("#phone_otp_verified").val("0");
+    }
+    });
+
+});
+
+//resend
+$(".lab_resend_otp").on("click", function (e) {
+  e.preventDefault();
+
+  // Reset OTP verification
+  $("#facility_otp").val("");
+  $("#phone_otp_verified").val("0");
+
+  $("#lab_verified").addClass("hidden").removeClass("flex");
+
+  $("#lab_not_verified").addClass("hidden").removeClass("flex");
+
+  // Show toast
+  toastr.success("OTP sent successfully");
 });
 
 // ============================================================

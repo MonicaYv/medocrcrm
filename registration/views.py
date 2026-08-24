@@ -2172,6 +2172,7 @@ def save_hospital_step_1(request):
     country_code = request.POST.get("hos_country_code_val")
     phone_number = request.POST.get("hos_phn")
     otp_verified = request.POST.get("phone_otp_verified")
+    otp = request.POST.get("hos_otp")
 
     hospital_type = request.POST.get("hos_type")
     services = request.POST.get("hos_services")
@@ -2245,6 +2246,7 @@ def save_hospital_step_1(request):
             "hospital_name": hospital_name,
             "owner_name": owner_name,
             "contact_no": phone_number,
+            "otp": otp,
             "address": address,
             "state": state,
             "city": city,
@@ -2428,8 +2430,227 @@ def save_hospital_step_2(request):
         "contact_person_id": contact_person.id,
         "created": created
     })
-    
+
 def save_hospital_step_3(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    try:
+        hospital_profile = HospitalProfile.objects.get(
+            user_id=user.id
+        )
+    except HospitalProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    # ============================================
+    # Get POST values
+    # ============================================
+
+    registration_no = request.POST.get(
+        "registration_no", ""
+    ).strip()
+
+    aadhar_card_no = request.POST.get(
+        "aadhar_card_no", ""
+    ).strip()
+
+    pan_card_no = request.POST.get(
+        "pan_card_no", ""
+    ).strip()
+
+    # ============================================
+    # Get uploaded files
+    # ============================================
+
+    registration_file = request.FILES.get(
+        "registration_certificate"
+    )
+
+    aadhar_file = request.FILES.get(
+        "aadhar_document"
+    )
+
+    pan_file = request.FILES.get(
+        "pan_document"
+    )
+
+    logo_file = request.FILES.get(
+        "hospital_logo"
+    )
+
+    hospital_photo_file = request.FILES.get(
+        "hospital_photo"
+    )
+
+    # ============================================
+    # Validate document numbers
+    # ============================================
+
+    if not registration_no:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital license number is required."
+        }, status=400)
+
+    if not aadhar_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar number is required."
+        }, status=400)
+
+    if not pan_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN number is required."
+        }, status=400)
+
+    # ============================================
+    # Validate files exist
+    # ============================================
+
+    if not registration_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital license document is required."
+        }, status=400)
+
+    if not aadhar_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar document is required."
+        }, status=400)
+
+    if not pan_file:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN document is required."
+        }, status=400)
+
+    if not logo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital logo is required."
+        }, status=400)
+
+    if not hospital_photo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Hospital image is required."
+        }, status=400)
+
+    # ============================================
+    # Virus scan + file validation + save
+    # ============================================
+
+    registration_path, err = validate_and_save_file(
+        registration_file,
+        "registration_certificate",
+        "Hospital License",
+        "hospital"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    aadhar_path, err = validate_and_save_file(
+        aadhar_file,
+        "aadhar_document",
+        "Aadhar Document",
+        "hospital"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    pan_path, err = validate_and_save_file(
+        pan_file,
+        "pan_document",
+        "PAN Document",
+        "hospital"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    logo_path, err = validate_and_save_file(
+        logo_file,
+        "hospital_logo",
+        "Hospital Logo",
+        "hospital"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    hospital_photo_path, err = validate_and_save_file(
+        hospital_photo_file,
+        "hospital_photo",
+        "Hospital Photo",
+        "hospital"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    # ============================================
+    # Save paths to HospitalProfile
+    # ============================================
+
+    hospital_profile.registration_no = registration_no
+    hospital_profile.registration_certificate_path = registration_path
+
+    hospital_profile.aadhar_card_no = aadhar_card_no
+    hospital_profile.aadhar_doc_path = aadhar_path
+
+    hospital_profile.pan_card_no = pan_card_no
+    hospital_profile.pan_doc_path = pan_path
+
+    hospital_profile.hospital_logo_path = logo_path
+
+    hospital_profile.hospital_photo_path = hospital_photo_path
+
+    hospital_profile.save()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Hospital documents saved successfully.",
+        "profile_id": hospital_profile.id,
+        "redirect_url": reverse("dashboard")
+    })
+       
+def save_hospital_step_3_old(request):
 
     user_id = request.session.get("user_id")
 
@@ -2935,8 +3156,225 @@ def save_doctor_step_2(request):
         "contact_person_id": contact_person.id,
         "created": created
     })
-    
+
 def save_doctor_step_3(request):
+
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return JsonResponse({
+            "success": False,
+            "message": "User session expired. Please login again."
+        }, status=401)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "User not found."
+        }, status=404)
+
+    try:
+        doctor_profile = DoctorProfile.objects.get(user_id=user.id)
+    except DoctorProfile.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Doctor profile not found. Please complete Step 1 first."
+        }, status=400)
+
+    # ============================================
+    # Get POST values
+    # ============================================
+
+    registration_no = request.POST.get(
+        "registration_no", ""
+    ).strip()
+
+    aadhar_card_no = request.POST.get(
+        "aadhar_card_no", ""
+    ).strip()
+
+    pan_card_no = request.POST.get(
+        "pan_card_no", ""
+    ).strip()
+
+    # ============================================
+    # Get uploaded files
+    # ============================================
+
+    registration_file = request.FILES.get(
+        "registration_certificate"
+    )
+
+    aadhar_file = request.FILES.get(
+        "aadhar_document"
+    )
+
+    pan_file = request.FILES.get(
+        "pan_document"
+    )
+
+    logo_file = request.FILES.get(
+        "logo"
+    )
+
+    photo_file = request.FILES.get(
+        "photo"
+    )
+
+    # ============================================
+    # Validate document numbers
+    # ============================================
+
+    if not registration_no:
+        return JsonResponse({
+            "success": False,
+            "message": "License number is required."
+        }, status=400)
+
+    if not aadhar_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar number is required."
+        }, status=400)
+
+    if not pan_card_no:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN number is required."
+        }, status=400)
+
+    # ============================================
+    # Validate files exist
+    # ============================================
+
+    if not registration_file:
+        return JsonResponse({
+            "success": False,
+            "message": "License document is required."
+        }, status=400)
+
+    if not aadhar_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Aadhar document is required."
+        }, status=400)
+
+    if not pan_file:
+        return JsonResponse({
+            "success": False,
+            "message": "PAN document is required."
+        }, status=400)
+
+    if not logo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Logo is required."
+        }, status=400)
+
+    if not photo_file:
+        return JsonResponse({
+            "success": False,
+            "message": "Image is required."
+        }, status=400)
+
+    # ============================================
+    # Virus scan + file validation + save
+    # ============================================
+
+    registration_path, err = validate_and_save_file(
+        registration_file,
+        "registration_certificate",
+        "Registration Certificate",
+        "doctor"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    aadhar_path, err = validate_and_save_file(
+        aadhar_file,
+        "aadhar_document",
+        "Aadhar Document",
+        "doctor"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    pan_path, err = validate_and_save_file(
+        pan_file,
+        "pan_document",
+        "PAN Document",
+        "doctor"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    logo_path, err = validate_and_save_file(
+        logo_file,
+        "logo",
+        "Doctor Logo",
+        "doctor"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    photo_path, err = validate_and_save_file(
+        photo_file,
+        "photo",
+        "Doctor Photo",
+        "doctor"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+
+    # ============================================
+    # Save paths to DoctorProfile
+    # ============================================
+
+    doctor_profile.registration_number = registration_no
+    doctor_profile.registration_certificate_path = registration_path
+
+    doctor_profile.aadhar_number = aadhar_card_no
+    doctor_profile.aadhar_doc_path = aadhar_path
+
+    doctor_profile.pan_number = pan_card_no
+    doctor_profile.pan_doc_path = pan_path
+
+    doctor_profile.clinic_logo_path = logo_path
+
+    doctor_profile.clinic_photo_path = photo_path
+
+    doctor_profile.save()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Doctor documents saved successfully.",
+        "profile_id": doctor_profile.id,
+        "redirect_url": reverse("dashboard")
+    })
+       
+def save_doctor_step_3_old(request):
 
     user_id = request.session.get("user_id")
 
@@ -3978,7 +4416,6 @@ def save_pharmacy_step_2(request):
     otp_verified = request.POST.get("pha_personal_otp_verified")
     role = request.POST.get("pha_personal_role")
     referral_code = request.POST.get("pha_personal_referral")
-
     country_id = request.POST.get("pha_personal_country")
     state_id = request.POST.get("pha_personal_state")
     city_id = request.POST.get("pha_personal_city")
@@ -4190,128 +4627,124 @@ def save_pharmacy_step_3(request):
             "message": "PAN document is required."
         }, status=400)
 
-    # if not logo_file:
-    #     return JsonResponse({
-    #         "success": False,
-    #         "message": "Logo is required."
-    #     }, status=400)
-
     if not photo_file:
         return JsonResponse({
             "success": False,
             "message": "Image is required."
         }, status=400)
 
-    # File validation
-    allowed_types = [
-        "image/jpeg",
-        "image/png",
-        "application/pdf"
-    ]
-
-    max_size = 5 * 1024 * 1024  # 5 MB
-
-    files = {
-        "License": registration_file,
-        "medLicense": medLicense_file,
-        "Aadhar Document": aadhar_file,
-        "PAN Document": pan_file,
-        "TAN Document": tan_file,
-        "GST Document": gst_file,
-        # "Logo": logo_file,
-        "Image": photo_file,
-    }
-
-    for field_name, file in files.items():
-
-        if file.content_type not in allowed_types:
-            return JsonResponse({
-                "success": False,
-                "message": (
-                    f"{field_name}: Only JPG, JPEG, PNG "
-                    "and PDF files are allowed."
-                )
-            }, status=400)
-
-        if file.size > max_size:
-            return JsonResponse({
-                "success": False,
-                "message": f"{field_name}: File size must not exceed 5 MB."
-            }, status=400)
-
-    # Upload directory
-    upload_dir = f"pharmacy_documents/{user.id}"
-
-    registration_path = default_storage.save(
-        f"{upload_dir}/registration/{registration_file.name}",
-        registration_file
+    registration_file_path, err = validate_and_save_file(
+        registration_file,
+        "registration_certificate",
+        "Registration Certificate",
+        "pharmacy"
     )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+        
+    medLicense_file_path, err = validate_and_save_file(
+        medLicense_file,
+        "medLicense_certificate",
+        "MedicalLicense Certificate",
+        "pharmacy"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+        
+    aadhar_file_path, err = validate_and_save_file(
+        aadhar_file,
+        "aadhar_document",
+        "Aadhar Document",
+        "pharmacy"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+        
+    pan_file_path, err = validate_and_save_file(
+        pan_file,
+        "pan_document",
+        "PAN Document",
+        "pharmacy"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+      
+    tan_file_path, err = validate_and_save_file(
+        tan_file,
+        "tan_document",
+        "TAN Document",
+        "pharmacy"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+      
+      
+    gst_file_path, err = validate_and_save_file(
+        gst_file,
+        "gst_document",
+        "GST Document",
+        "pharmacy"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+        
+    photo_file_path, err = validate_and_save_file(
+        photo_file,
+        "photo",
+        "Pharmacy Photo",
+        "pharmacy"
+    )
+
+    if err:
+        return JsonResponse({
+            "success": False,
+            "message": err
+        }, status=400)
+        
     
-    med_license_path = default_storage.save(
-        f"{upload_dir}/registration/{medLicense_file.name}",
-        medLicense_file
-    )
-
-    aadhar_path = default_storage.save(
-        f"{upload_dir}/aadhar/{aadhar_file.name}",
-        aadhar_file
-    )
-
-    pan_path = default_storage.save(
-        f"{upload_dir}/pan/{pan_file.name}",
-        pan_file
-    )
-    
-    tan_path = default_storage.save(
-        f"{upload_dir}/pan/{tan_file.name}",
-        tan_file
-    )
-    
-    gst_path = default_storage.save(
-        f"{upload_dir}/pan/{gst_file.name}",
-        gst_file
-    )
-
-    # logo_path = default_storage.save(
-    #     f"{upload_dir}/logo/{logo_file.name}",
-    #     logo_file
-    # )
-
-    photo_path = default_storage.save(
-        f"{upload_dir}/clinic_photo/{photo_file.name}",
-        photo_file
-    )
-
-
     pharmacy_profile.pharmacy_registration_number = registration_no
-    pharmacy_profile.incorporation_doc_path = registration_path
-    pharmacy_profile.incorporation_doc_virus_scanned = True
+    pharmacy_profile.incorporation_doc_path = registration_file_path
     
     pharmacy_profile.medical_license_number = med_lic_no
-    pharmacy_profile.medical_license_doc_path = med_license_path
-    pharmacy_profile.medical_license_doc_virus_scanned = True
+    pharmacy_profile.medical_license_doc_path = medLicense_file_path
 
     pharmacy_profile.admin_identity_number = aadhar_card_no
-    pharmacy_profile.admin_identity_doc_path = aadhar_path
-    pharmacy_profile.admin_identity_doc_virus_scanned = True
+    pharmacy_profile.admin_identity_doc_path = aadhar_file_path
 
     pharmacy_profile.pan_number = pan_card_no
-    pharmacy_profile.pan_doc_path = pan_path
-    pharmacy_profile.pan_doc_virus_scanned = True
+    pharmacy_profile.pan_doc_path = pan_file_path
     
     pharmacy_profile.tan_number = tan_number
-    pharmacy_profile.tan_doc_path = tan_path
-    pharmacy_profile.tan_doc_virus_scanned = True
+    pharmacy_profile.tan_doc_path = tan_file_path
     
     pharmacy_profile.gst_number = gst_number
-    pharmacy_profile.gst_doc_path = gst_path
-    pharmacy_profile.gst_doc_virus_scanned = True
+    pharmacy_profile.gst_doc_path = gst_file_path
 
-    # pharmacy_profile.clinic_logo_path = logo_path
-    # pharmacy_profile.clinic_logo_virus_scanned = True
-
-    pharmacy_profile.storefront_image_path = photo_path
-    pharmacy_profile.storefront_image_virus_scanned = True
+    pharmacy_profile.storefront_image_path = photo_file_path
 
     pharmacy_profile.save()
 
