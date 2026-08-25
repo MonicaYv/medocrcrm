@@ -271,6 +271,41 @@ def handle_pharmacy_profile(user):
     all_types = PharmacyType.objects.filter(is_active=True)
     all_services = PharmacyServices.objects.filter(is_active=True)
     all_workingdays = PharmacyTiming.objects.filter(is_active=True)
+
+    # A pharmacy user can reach Settings before a profile has been completed.
+    # Keep the page available in that state instead of dereferencing a missing
+    # profile and returning a server error.
+    if not profile:
+        data = {
+            'company_name': '',
+            'pharmacy_types': PharmacyType.objects.none(),
+            'all_types': all_types,
+            'services_offered': PharmacyServices.objects.none(),
+            'all_services': all_services,
+            'all_workingdays': all_workingdays,
+            'website_url': '',
+            'country': '',
+            'working_days': None,
+            'address': '',
+            'city': '',
+            'state': '',
+            'pincode': '',
+            'referral_code': '',
+            'incorporation_number': '',
+            'incorporation_doc_path': '',
+            'gst_number': '',
+            'gst_doc_path': '',
+            'medical_license_number': '',
+            'medical_license_doc_path': '',
+            'pan_number': '',
+            'pan_doc_path': '',
+            'storefront_image_path': '',
+            'tan_number': '',
+            'tan_doc_path': '',
+        }
+        data.update(handle_contact_person(user.user_type, user))
+        return data
+
     data = {
         'company_name': profile.company_name,
         'pharmacy_types': profile.pharmacy_types.all(),
@@ -288,7 +323,9 @@ def handle_pharmacy_profile(user):
         'state': profile.state.name if profile.state else "",
         'pincode': profile.pincode,
         'referral_code': profile.referral_code or '',
-        'incorporation_number': profile.incorporation_number,
+        # PharmacyProfile stores this value as pharmacy_registration_number;
+        # the settings template continues to use the shared context key.
+        'incorporation_number': profile.pharmacy_registration_number,
         'incorporation_doc_path': os.path.basename(profile.incorporation_doc_path) if profile.incorporation_doc_path else "",
         'gst_number': profile.gst_number,
         'gst_doc_path': os.path.basename(profile.gst_doc_path) if profile.gst_doc_path else "",

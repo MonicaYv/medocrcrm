@@ -273,14 +273,84 @@ $(document).on("click", "[data-tab='created-coupons']", function () {
 });
 
 $(document).on("click", ".copy-coupon", function () {
-    const code = $(this).data("code");
+    const code = String($(this).data("code") || "").trim();
 
-    navigator.clipboard.writeText(code).then(() => {
-        // Optional visual feedback
-        $(this).text("Redeemed!").append(` <span class="material-symbols-outlined">check_circle</span>`);
-        let btn = $(this);
-        setTimeout(() => {
-            btn.html(code + ` <span class="material-symbols-outlined">content_copy</span>`);
-        }, 1200);
+    const showCouponCopyStatus = (message, isSuccess) => {
+        let status = $("#coupon-copy-status");
+
+        // The same copy button is also used on the pharmacy dashboard, where
+        // the Coupons page's status element is not present.
+        if (!status.length) {
+            $("body").append(
+                '<p id="coupon-copy-status" class="fixed top-5 right-5 z-9999 hidden rounded-md bg-white px-4 py-3 text-sm font-medium shadow-lg" role="status" aria-live="polite"></p>'
+            );
+            status = $("#coupon-copy-status");
+        }
+
+        status
+            .text(message)
+            .removeClass("hidden text-strong-red text-bright-green")
+            .addClass(isSuccess ? "text-bright-green" : "text-strong-red");
+
+        clearTimeout(window.couponCopyStatusTimeout);
+        window.couponCopyStatusTimeout = setTimeout(() => status.addClass("hidden"), 3000);
+    };
+
+    if (!code) {
+        showCouponCopyStatus("Coupon code is unavailable.", false);
+        return;
+    }
+
+    const showCopySuccess = () => {
+        showCouponCopyStatus("Coupon code copied!", true);
+        if (typeof window.showToaster === "function") {
+            window.showToaster("success", "Coupon code copied!");
+        } else if (typeof window.toastr !== "undefined") {
+            window.toastr.success("Coupon code copied!");
+        }
+    };
+
+    const copyWithFallback = () => {
+        const textarea = document.createElement("textarea");
+        textarea.value = code;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        textarea.style.pointerEvents = "none";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+
+        const copied = document.execCommand("copy");
+        textarea.remove();
+
+        if (!copied) {
+            throw new Error("Unable to copy coupon code");
+        }
+    };
+
+    // document.execCommand must run during the click event. Deferring it to a
+    // Promise removes the browser's user-gesture permission and makes copying
+    // fail in Safari and on local HTTP environments.
+    let copyPromise;
+    if (window.navigator.clipboard && window.isSecureContext) {
+        copyPromise = window.navigator.clipboard.writeText(code);
+    } else {
+        try {
+            copyWithFallback();
+            copyPromise = Promise.resolve();
+        } catch (error) {
+            copyPromise = Promise.reject(error);
+        }
+    }
+
+    copyPromise.then(showCopySuccess).catch(() => {
+        showCouponCopyStatus("Unable to copy coupon code. Please try again.", false);
+        if (typeof window.showToaster === "function") {
+            window.showToaster("error", "Unable to copy coupon code.");
+        } else if (typeof window.toastr !== "undefined") {
+            window.toastr.error("Unable to copy coupon code.");
+        }
     });
 });
