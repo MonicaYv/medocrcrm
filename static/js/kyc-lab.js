@@ -1980,14 +1980,14 @@ function saveLabStep3() {
     // VIRUS SCAN VALIDATION
     // --------------------------------------------------------
 
-    if (!allLabDocumentsScanned()) {
+    // if (!allLabDocumentsScanned()) {
 
-        toastr.warning(
-            "Please wait for all documents to pass the virus scan."
-        );
+    //     toastr.warning(
+    //         "Please wait for all documents to pass the virus scan."
+    //     );
 
-        return;
-    }
+    //     return;
+    // }
     // --------------------------------------------------------
     // FORM DATA
     // --------------------------------------------------------
