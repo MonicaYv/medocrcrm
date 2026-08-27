@@ -8,11 +8,19 @@
       <h2 class="text-2xl font-bold text-dark-blue">Invoice</h2>
 
       <!-- Share/Download/Close -->
-      <div class="absolute right-0 flex gap-2">
-        <span class="material-symbols-outlined cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg">share</span>
-        <span class="material-symbols-outlined cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg">download</span>
-        <span class="material-symbols-outlined cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg close-popup-invoice">close</span>
-      </div>
+        <div class="absolute right-0 flex gap-2">
+            <span class="material-symbols-outlined cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg invoice-share-btn">
+                share
+            </span>
+
+            <span class="material-symbols-outlined cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg invoice-download-btn">
+                download
+            </span>
+
+            <span class="material-symbols-outlined cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg close-popup-invoice">
+                close
+            </span>
+        </div>
     </div>
 
     <!-- Centered Title -->
@@ -102,5 +110,124 @@
       <p class="font-semibold">Authorized Signatory,</p>
       <span id="signature_supplier_name">MediConnect Tech Pvt. Ltd.</span>
     </div>
+  </div>
+</div>
+<!-- Invoice Share Popup -->
+<div id="invoiceShareModal"
+  class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-[100]">
+
+  <div class="bg-white w-[90%] max-w-[520px] rounded-lg shadow-lg p-6 relative">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <p class="font-semibold text-xl">Share</p>
+
+      <span
+        class="material-symbols-outlined invoice-close-share-modal cursor-pointer">
+        close
+      </span>
+    </div>
+
+    <hr class="text-dark-blue mt-4" />
+
+    <!-- Share Apps -->
+    <div class="flex justify-between pt-4">
+
+      <!-- WhatsApp -->
+      <div
+        class="flex flex-col items-center gap-2 w-20 text-center invoice-share-app"
+        data-app="whatsapp">
+
+        <img
+          src="{% static 'images/whatsappicon.svg' %}"
+          alt="whatsapp logo"
+          class="w-10 h-10 cursor-pointer" />
+
+        <p class="font-normal text-base text-dark-gray">
+          Whatsapp
+        </p>
+      </div>
+
+      <!-- Telegram -->
+      <div
+        class="flex flex-col items-center gap-2 w-20 text-center invoice-share-app"
+        data-app="telegram">
+
+        <img
+          src="{% static 'images/telegramicon.svg' %}"
+          alt="telegram logo"
+          class="w-10 h-10 cursor-pointer" />
+
+        <p class="font-normal text-base text-dark-gray">
+          Telegram
+        </p>
+      </div>
+
+      <!-- Facebook -->
+      <div
+        class="flex flex-col items-center gap-2 w-20 text-center invoice-share-app"
+        data-app="facebook">
+
+        <img
+          src="{% static 'images/facebookicon.svg' %}"
+          alt="facebook logo"
+          class="w-10 h-10 cursor-pointer" />
+
+        <p class="font-normal text-base text-dark-gray">
+          Facebook
+        </p>
+      </div>
+
+      <!-- Message -->
+      <div
+        class="flex flex-col items-center gap-2 w-20 text-center invoice-share-app"
+        data-app="sms">
+
+        <img
+          src="{% static 'images/smsicon.svg' %}"
+          alt="sms logo"
+          class="w-10 h-10 cursor-pointer" />
+
+        <p class="font-normal text-base text-dark-gray">
+          Message
+        </p>
+      </div>
+
+      <!-- E-mail -->
+      <div
+        class="flex flex-col items-center gap-2 w-20 text-center invoice-share-app"
+        data-app="gmail">
+
+        <img
+          src="{% static 'images/gmailicon.svg' %}"
+          alt="gmail logo"
+          class="w-10 h-10 cursor-pointer" />
+
+        <p class="font-normal text-base text-dark-gray">
+          E-mail
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Share Link -->
+    <div class="pt-4 relative mt-6">
+
+      <input
+        type="text"
+        id="invoice-share-link"
+        value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci"
+        class="w-full rounded-md p-4 font-normal text-sm border"
+        disabled />
+
+      <button
+        type="button"
+        class="invoice-copy-btn absolute right-3 top-6 bg-dark-blue text-white rounded-md p-2 cursor-pointer"
+        data-target="#invoice-share-link">
+        Copy
+      </button>
+
+    </div>
+
   </div>
 </div>
