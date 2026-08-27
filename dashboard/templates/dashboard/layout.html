@@ -26,14 +26,14 @@
     {% include 'dashboard/header.html' %}
     {% endblock %}
     <!-- <div class="h-[calc(100vh-72px)] w-full flex"> -->
-    <div class=" w-full flex h-screen">
+    <div class="w-full flex h-screen pb-8">
         <!-- Sidebar -->
         {% block sidebar %}
         {% include 'dashboard/sidebar.html' %}
         {% endblock %}
         <!-- Main Content Area -->
         
-        <div class="flex-1 overflow-y-auto scroll px-4 py-2">
+        <div class="flex-1 overflow-y-auto scroll px-4 py-2 pb-8">
             {% block content %}
             {% endblock %}
         </div>

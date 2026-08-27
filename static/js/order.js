@@ -491,3 +491,201 @@ $(document).on("click", ".accept-order-submit", function () {
 $('#orderStatusFilter').on('change', function () {
     $('#orderFilterForm').submit();
 });
+
+// Invoice Download
+// =====================================
+// INVOICE DOWNLOAD
+// =====================================
+$(document).on("click", ".invoice-download-btn", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const invoice = document.querySelector(
+        ".subscriptionTaxPopupInvoice > div"
+    );
+
+    if (!invoice) {
+        console.error("Invoice element not found");
+        return;
+    }
+
+    if (typeof html2pdf === "undefined") {
+        console.error("html2pdf is not loaded");
+        return;
+    }
+
+    html2pdf()
+        .set({
+            margin: 0.5,
+            filename: "invoice.pdf",
+            image: {
+                type: "jpeg",
+                quality: 1
+            },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+
+                // Fix Tailwind oklch colors
+                onclone: function (clonedDoc) {
+                    const originalInvoice = document.querySelector(
+                        ".subscriptionTaxPopupInvoice > div"
+                    );
+
+                    const clonedInvoice = clonedDoc.querySelector(
+                        ".subscriptionTaxPopupInvoice > div"
+                    );
+
+                    if (!originalInvoice || !clonedInvoice) return;
+
+                    const originalElements = [
+                        originalInvoice,
+                        ...originalInvoice.querySelectorAll("*")
+                    ];
+
+                    const clonedElements = [
+                        clonedInvoice,
+                        ...clonedInvoice.querySelectorAll("*")
+                    ];
+
+                    originalElements.forEach(function (originalEl, index) {
+                        const clonedEl = clonedElements[index];
+
+                        if (!clonedEl) return;
+
+                        const computedStyle =
+                            window.getComputedStyle(originalEl);
+
+                        for (let i = 0; i < computedStyle.length; i++) {
+                            const property = computedStyle[i];
+                            const value = computedStyle.getPropertyValue(property);
+
+                            if (value && !value.includes("oklch")) {
+                                clonedEl.style.setProperty(
+                                    property,
+                                    value
+                                );
+                            }
+                        }
+                      });
+
+                      // Remove external stylesheets from cloned document.
+                      // This prevents html2canvas from parsing Tailwind's oklch().
+                      clonedDoc
+                          .querySelectorAll("link[rel='stylesheet'], style")
+                          .forEach(function (styleEl) {
+                              styleEl.remove();
+                          });
+                  }
+            },
+            jsPDF: {
+                unit: "in",
+                format: "a4",
+                orientation: "portrait"
+            }
+        })
+        .from(invoice)
+        .save()
+        .catch(function (error) {
+            console.error("Invoice download failed:", error);
+        });
+});
+
+// =====================================
+// INVOICE SHARE
+// =====================================
+
+$(document).on("click", ".invoice-share-btn", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    $("#invoiceShareModal")
+        .removeClass("hidden")
+        .addClass("flex");
+});
+
+$(document).on("click", ".invoice-close-share-modal", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    $("#invoiceShareModal")
+        .addClass("hidden")
+        .removeClass("flex");
+});
+
+// Invoice Share Apps
+$(document).on("click", ".invoice-share-app", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const app = $(this).data("app");
+    const link = $("#invoice-share-link").val();
+    let url = "";
+
+    switch (app) {
+        case "whatsapp":
+            url = `https://wa.me/?text=${encodeURIComponent(link)}`;
+            break;
+
+        case "telegram":
+            url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=Check this out!`;
+            break;
+
+        case "facebook":
+            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+            break;
+
+        case "sms":
+            url = `sms:?body=${encodeURIComponent(link)}`;
+            break;
+
+        case "gmail":
+            url = `mailto:?subject=Check this out&body=${encodeURIComponent(link)}`;
+            break;
+    }
+
+    if (url) {
+        window.open(url, "_blank");
+    }
+});
+
+// Invoice Copy
+$(document).on("click", ".invoice-copy-btn", async function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const targetSelector = $(this).data("target");
+    const $target = $(targetSelector);
+
+    if (!$target.length) {
+        console.error("Invoice share link not found");
+        return;
+    }
+
+    const textToCopy = $target.val();
+
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+        } else {
+            const $temp = $("<textarea>");
+            $("body").append($temp);
+            $temp.val(textToCopy).select();
+            document.execCommand("copy");
+            $temp.remove();
+        }
+
+        const $btn = $(this);
+        const originalText = $btn.text();
+
+        $btn.text("Copied");
+
+        setTimeout(() => {
+            $btn.text(originalText);
+        }, 2000);
+
+    } catch (err) {
+        console.error("Failed to copy invoice share link:", err);
+    }
+});
