@@ -1,103 +1,217 @@
 {% load static %}
-            <div
-                class="add-service popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden">
-            {% comment %} <div
-                class="services-section add-service popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden"> {% endcomment %}
-                <div
-                    class="popup-content bg-white rounded-[10px] max-w-[533px] h-[380px] p-5 w-full relative flex flex-col gap-4 shadow-17">
-                    <div class="flex items-center justify-between border-b border-dodger-blue pb-4">
-                        <h2 class="text-lg sm:text-[23.4px] font-bold text-desaturated-blue">Add Services</h2>
-                        <span class="material-symbols-outlined text-jet-black close-icon cursor-pointer">close</span>
+<div class="services-section popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden">
+    <div class="popup-content bg-white rounded-[10px] max-w-[700px] max-h-[90vh] p-5 w-full relative flex flex-col gap-4 shadow-17 overflow-y-auto">
+        <!-- HEADER -->
+        <div class="flex items-center justify-between border-b border-dodger-blue pb-4">
+            <h2 class="text-lg sm:text-[23.4px] font-bold text-desaturated-blue">
+                Add Services
+            </h2>
+            <span class="material-symbols-outlined text-jet-black close-icon cursor-pointer">
+                close
+            </span>
+        </div>
+        <!-- ================= STEP 1 ================= -->
+        <div id="step-1" class="step-content">
+
+            <div class="flex flex-col gap-4">
+
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-desaturated-blue">
+                        Services
+                    </h3>
+                </div>
+                <!-- DYNAMIC SERVICE CARDS -->
+                <div class="services-list flex flex-col gap-4">
+                </div>
+                <button type="button"
+                        class="hospital-add-service border border-dodger-blue text-dodger-blue rounded-lg h-[42px] font-semibold">
+                    + Add More Services
+                </button>
+            </div>
+            <div class="flex justify-between gap-3 mt-5">
+                <button type="button"
+                        id="cancel-steps"
+                        class="w-full h-[48px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold">
+                    Cancel
+                </button>
+                <button type="button"
+                        class="step-btn w-full h-[48px] bg-dodger-blue text-white rounded-lg font-semibold"
+                        data-target="2">
+                    Next
+                </button>
+            </div>
+        </div>
+        <!-- ================= STEP 2 ================= -->
+        <div id="step-2" class="step-content hidden">
+            <div class="flex flex-col gap-4">
+                <h3 class="text-lg font-bold text-desaturated-blue">
+                    Bed & Rooms
+                </h3>
+                <div class="bed-services-list flex flex-col gap-4">
+                </div>
+                <button type="button"
+                        class="add-service-bed border border-dodger-blue text-dodger-blue text-sm font-semibold rounded-lg w-full h-[42px]">
+                    + Add More Rooms
+                </button>
+            </div>
+            <div class="flex justify-between gap-3 mt-5">
+                <button type="button"
+                        class="step-btn w-full h-[48px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold"
+                        data-target="1">
+                    Back
+                </button>
+                <button type="button"
+                        class="step-btn w-full h-[48px] bg-dodger-blue text-white rounded-lg font-semibold"
+                        data-target="3">
+                    Next
+                </button>
+            </div>
+        </div>
+        <!-- ================= STEP 3 ================= -->
+        <div id="step-3" class="step-content hidden">
+            <h3 class="text-lg font-bold text-desaturated-blue mb-3">
+                Summary
+            </h3>
+            <div class="flex flex-col gap-5">
+                <div>
+                    <h4 class="font-semibold text-black mb-2">
+                        Services
+                    </h4>
+                    <div class="hospital-summary-services grid grid-cols-1 lg:grid-cols-2 gap-4">
                     </div>
-                    <!-- Category Dropdown -->
-                    <div class="mb-4 custom-dropdown relative">
-                        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Category</label>
-
-                        <div class="dropdown-trigger mt-2">
-                            <button type="button"
-                                class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                <span
-                                    class="selected-text text-sm sm:text-base font-normal text-dark-gray">Surgery</span>
-                                <span class="material-symbols-outlined">
-                                    keyboard_arrow_down
-                                </span>
-                            </button>
-
-                            <ul
-                                class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Surgery
-                                </li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
-                                    Diagnostics</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
-                                    Consultation</li>
-                                <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Donation
-                                </li>
-                            </ul>
-                        </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-black mb-2">
+                        Bed & Rooms
+                    </h4>
+                    <div class="hospital-summary-rooms grid grid-cols-1 lg:grid-cols-2 gap-4">
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4 items-end">
-                        <input type="hidden" class="category-id">
-                        <input type="hidden" class="service-id">
-                        <div class="custom-dropdown relative">
-                            <label class="text-base sm:text-lg text-jet-black font-semibold">Select Service</label>
-
-                            <div class="dropdown-trigger mt-2">
-                                <button type="button"
-                                    class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
-                                    <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Elective
-                                        Surgery</span>
-                                    <span class="material-symbols-outlined">
-                                        keyboard_arrow_down
-                                    </span>
-                                </button>
-
-                                <ul
-                                    class="dropdown-menu hidden absolute z-20 mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll">
-                                    <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
-                                        Elective Surgery</li>
-                                    <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
-                                        Emergency Surgery</li>
-                                    <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">Day
-                                        Care Surgery</li>
-                                    <li class="dropdown-item px-3 py-2 hover:bg-premium-light-blue cursor-pointer">
-                                        Notification log</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- Price -->
-                        <div>
-                            <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
-                            <!-- <input type="text"
-                                class="w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
-                                value="₹ 0.00"> -->
-                                <input
-                                    type="number"
-                                    class="price-input h-[48px] w-full border border-slate-gray rounded-md px-3 mt-2 focus:outline-none"
-                                    placeholder="Enter Price">
-                        </div>
-                    </div>
-
-                    <!-- <button
-                    type="button"
-                    class="w-full rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-xs sm:text-sm text-white font-semibold cursor-pointer">
-                        Save
-                    </button> -->
-                    <button
-                    type="button"
-                    class="save-services-btn w-full rounded-lg h-[48px] bg-dodger-blue flex items-center justify-center text-white font-semibold">
-                        Save
-                    </button>
                 </div>
             </div>
-            <template id="service-card-template">
-               <div class="service-card">
-                    <input type="hidden" class="category-id">
-                    <input type="hidden" class="service-id">
-                    <input type="number" class="price-input">
-                </div>
-            </template>
-
-            <div class="services-list hidden"></div>
+            <div class="flex justify-between gap-3 mt-5">
+                <button type="button"
+                        class="step-btn w-full h-[48px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold"
+                        data-target="2">
+                    Back
+                </button>
+                <button type="button"
+                        class="save-services-btn w-full h-[48px] bg-dodger-blue text-white rounded-lg font-semibold">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<template id="service-card-template">
+    <div class="service-card bg-white border border-slate-200 rounded-lg p-4 relative">
+        <div class="flex flex-col gap-3">
+            <input type="hidden" class="category-id">
+            <input type="hidden" class="service-id">
+            <div class="custom-dropdown relative">
+                <label class="text-base font-semibold text-jet-black">
+                    Select Category
+                </label>
+                <button type="button"
+                        class="category-dropdown-btn mt-2 w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                    <span class="selected-text text-sm sm:text-base text-dark-gray">
+                        Select Category
+                    </span>
+                    <span class="material-symbols-outlined">
+                        keyboard_arrow_down
+                    </span>
+                </button>
+                <ul class="dropdown-menu category-options hidden absolute z-[99999] mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm max-h-40 overflow-y-auto">
+                </ul>
+            </div>
+            <div class="custom-dropdown relative">
+                <label class="text-base font-semibold text-jet-black">
+                    Select Service
+                </label>
+                <button type="button"
+                        class="service-dropdown-btn mt-2 w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                    <span class="selected-text text-sm sm:text-base text-dark-gray">
+                        Select Service
+                    </span>
+                    <span class="material-symbols-outlined">
+                        keyboard_arrow_down
+                    </span>
+                </button>
+                <ul class="dropdown-menu service-options hidden absolute z-[99998] mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm max-h-40 overflow-y-auto">
+                </ul>
+            </div>
+            <div>
+                <label class="text-base font-semibold text-jet-black">
+                    Price
+                </label>
+                <input type="number"
+                       class="price-input h-[48px] w-full border border-slate-gray rounded-md px-3 mt-2 focus:outline-none"
+                       placeholder="Enter Price"
+                       min="0"
+                       step="0.01">
+            </div>
+            <button type="button"
+                    class="remove-service text-red-500 text-sm font-semibold text-left">
+                Remove
+            </button>
+        </div>
+    </div>
+</template>
+<template id="bed-room-card-template">
+    <div class="bed-service-card bg-white border border-slate-200 rounded-lg p-4 relative">
+        <input type="hidden" class="bed-room-id">
+        <div class="custom-dropdown relative">
+            <label class="text-base font-semibold text-jet-black">
+                Select Bed & Room
+            </label>
+            <button type="button"
+                    class="bed-room-dropdown-btn mt-2 w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                <span class="selected-text text-sm sm:text-base text-dark-gray">
+                    Select Bed & Room
+                </span>
+                <span class="material-symbols-outlined">
+                    keyboard_arrow_down
+                </span>
+            </button>
+            <ul class="dropdown-menu room-options hidden absolute z-[99997] mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm max-h-40 overflow-y-auto">
+            </ul>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+            <div>
+                <label class="text-base font-semibold block mb-2">
+                    Days
+                </label>
+                <input type="number"
+                       class="days-input w-full border border-slate-gray rounded-md px-3 py-3"
+                       value="1"
+                       min="1">
+            </div>
+            <div>
+                <label class="text-base font-semibold block mb-2">
+                    AC
+                </label>
+                <select class="ac-input w-full border border-slate-gray rounded-md px-3 py-3">
+                    <option value="false">
+                        Non AC
+                    </option>
+                    <option value="true">
+                        AC
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="mt-4">
+            <label class="text-base font-semibold">
+                Price
+            </label>
+            <input type="number"
+                   class="room-price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2"
+                   placeholder="Enter Price"
+                   min="0"
+                   step="0.01">
+        </div>
+        <button type="button"
+                class="remove-service-bed text-red-500 text-sm font-semibold mt-3">
+            Remove
+        </button>
+    </div>
+</template>
