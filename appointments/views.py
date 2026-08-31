@@ -5,6 +5,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db.models import Value
 from django.db.models.functions import Concat
+from django.utils import timezone
+from datetime import date, timedelta
 from registration.models import DoctorProfile, LabProfile
 from django.views.decorators.http import require_GET, require_POST
 from dashboard.models import SettingMenu
@@ -90,6 +92,8 @@ def ajax_appointments(request):
     status = request.GET.get("status", "all").strip().lower()
     page_number = request.GET.get("page", 1)
     search = request.GET.get("search", "").strip()
+    date_filter = request.GET.get("date_filter", "").strip().lower()
+    selected_date = request.GET.get("date", "").strip()
 
     if search:
        search = search.strip()
@@ -166,6 +170,20 @@ def ajax_appointments(request):
             qs = qs.none()
         else:
             qs = qs.filter(status__iexact=status)
+
+    if date_filter:
+        today = timezone.localdate()
+        if date_filter == "week":
+            qs = qs.filter(created_at__date__gte=today - timedelta(days=6), created_at__date__lte=today)
+        elif date_filter == "month":
+            qs = qs.filter(created_at__year=today.year, created_at__month=today.month)
+        elif date_filter == "year":
+            qs = qs.filter(created_at__year=today.year)
+        elif date_filter == "custom" and selected_date:
+            try:
+                qs = qs.filter(created_at__date=date.fromisoformat(selected_date))
+            except ValueError:
+                return JsonResponse({"error": "Invalid date filter."}, status=400)
     if search:
 
         if user_type == "lab":
