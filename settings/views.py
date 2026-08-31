@@ -164,6 +164,16 @@ def get_base_context(user):
     }
     return context
 
+
+def get_related_location_name(profile, field_name):
+    """Return a location name without failing on a stale foreign-key value."""
+    try:
+        location = getattr(profile, field_name)
+    except (City.DoesNotExist, State.DoesNotExist):
+        return ""
+
+    return location.name if location else ""
+
 def handle_contact_person(profile_type, profile):
     contact = ContactPerson.objects.filter(profile_type=profile_type, profile=profile).first()
     return {
@@ -185,8 +195,8 @@ def handle_advertiser_profile(user):
         'all_services': all_services,
         'website_url': profile.website_url,
         'address': profile.address,
-        'city': profile.city,
-        'state': profile.state,
+        'city': get_related_location_name(profile, 'city'),
+        'state': get_related_location_name(profile, 'state'),
         'country': profile.country,
         'pincode': profile.pincode,
         'brand_description': profile.brand_description,
@@ -217,8 +227,8 @@ def handle_client_profile(user):
         'all_services': all_services,
         'website_url': profile.website_url,
         'address': profile.address,
-        'city': profile.city,
-        'state': profile.state,
+        'city': get_related_location_name(profile, 'city'),
+        'state': get_related_location_name(profile, 'state'),
         'country': profile.country,
         'pincode': profile.pincode,
         'referral_code': profile.referral_code,
@@ -243,8 +253,8 @@ def handle_ngo_profile(user):
         'all_services': all_services,
         'website_url': profile.website_url,
         'address': profile.address,
-        'city': profile.city,
-        'state': profile.state,
+        'city': get_related_location_name(profile, 'city'),
+        'state': get_related_location_name(profile, 'state'),
         'country': profile.country,
         'pincode': profile.pincode,
         'ngo_registration_number': profile.ngo_registration_number,
@@ -319,8 +329,8 @@ def handle_pharmacy_profile(user):
         'address': profile.address,
         # 'city': profile.city,
         # 'state': profile.state,
-        'city': profile.city.name if profile.city else "",
-        'state': profile.state.name if profile.state else "",
+        'city': get_related_location_name(profile, 'city'),
+        'state': get_related_location_name(profile, 'state'),
         'pincode': profile.pincode,
         'referral_code': profile.referral_code or '',
         # PharmacyProfile stores this value as pharmacy_registration_number;
@@ -362,8 +372,8 @@ def handle_lab_profile(user):
             f"{profile.lab_timing.open_time} - {profile.lab_timing.close_time}"
             if profile.lab_timing else ""
         ),
-        'city': profile.city.name if profile.city else "",
-        'state': profile.state.name if profile.state else "",
+        'city': get_related_location_name(profile, 'city'),
+        'state': get_related_location_name(profile, 'state'),
         'country': profile.country,
         'pincode': profile.pincode,
         'all_timings': all_timings,
@@ -417,8 +427,8 @@ def handle_hospital_profile(user):
         # 'pincode': profile.pincode,
         # 'hospital_timing': profile.hospital_timing,
         'country': profile.country or "",
-        'city': profile.city.name if profile.city else "",
-        'state': profile.state.name if profile.state else "",
+        'city': get_related_location_name(profile, 'city'),
+        'state': get_related_location_name(profile, 'state'),
         'pincode': profile.pincode or "",
         'hospital_timing': profile.hospital_timing,
         'home_visit': profile.home_visit,
@@ -467,8 +477,8 @@ def handle_doctor_profile(user):
         'address': profile.full_address,
         # 'city': profile.city,
         # 'state': profile.state,
-        'city': profile.city.name if profile.city else "",
-        'state': profile.state.name if profile.state else "",
+        'city': get_related_location_name(profile, 'city'),
+        'state': get_related_location_name(profile, 'state'),
         'pincode': profile.pincode,
         'clinic_timing_from': profile.clinic_timing_from,
         'clinic_timing_to': profile.clinic_timing_to,

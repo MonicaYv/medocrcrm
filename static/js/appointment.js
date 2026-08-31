@@ -10,6 +10,8 @@
 
 let currentStatus = "all";
 let currentSearch = "";
+let currentDateFilter = "";
+let currentFilterDate = "";
 // function loadAppointments(status = "all", page = 1) {
 function loadAppointments(status = "all", page = 1, search = "") {
 
@@ -28,7 +30,9 @@ function loadAppointments(status = "all", page = 1, search = "") {
       data: {
           status,
           page,
-          search
+          search,
+          date_filter: currentDateFilter,
+          date: currentFilterDate
         },
 
       success: function (res) {
@@ -77,6 +81,41 @@ $(document).ready(function () {
 
 // loadAppointments("all", 1);
 loadAppointments("all", 1, "");
+
+  $(document).on("click", ".filterToggle", function (event) {
+    event.stopPropagation();
+    $(this).siblings(".filterDropdown").toggleClass("hidden");
+  });
+
+  $(document).on("click", "[data-date-filter]", function (event) {
+    event.stopPropagation();
+    const filter = $(this).data("date-filter");
+    const $dropdown = $(this).closest(".dropdown");
+    currentDateFilter = filter;
+    currentFilterDate = "";
+
+    if (filter === "custom") {
+      const $picker = $dropdown.find(".datepicker-container");
+      $picker.toggleClass("hidden");
+      $picker.find(".datepicker-inline").datepicker({
+        dateFormat: "yy-mm-dd",
+        onSelect: function (dateText) {
+          currentFilterDate = dateText;
+          $picker.addClass("hidden");
+          $dropdown.find(".filterDropdown").addClass("hidden");
+          loadAppointments(currentStatus, 1, currentSearch);
+        },
+      });
+      return;
+    }
+
+    $dropdown.find(".filterDropdown").addClass("hidden");
+    loadAppointments(currentStatus, 1, currentSearch);
+  });
+
+  $(document).on("click", function () {
+    $(".filterDropdown, .datepicker-container").addClass("hidden");
+  });
 
   /* ------------------------------
    * Tabs

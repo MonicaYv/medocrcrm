@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.shortcuts import render, redirect
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from django.core.validators import validate_email
 from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_protect
@@ -2947,7 +2948,7 @@ def save_doctor_step_1(request):
             "message": "User not found."
         }, status=404)
     
-    email = request.POST.get("doc_email")
+    email = request.POST.get("doc_email", "").strip().lower()
     full_name = request.POST.get("doc_name")
     gender = request.POST.get("doc_gender_value")
     age = request.POST.get("doc_age")
@@ -2956,7 +2957,7 @@ def save_doctor_step_1(request):
     experience = request.POST.get("doc_experience_value")
     clinic_name = request.POST.get("doc_clinic")
     owner_name = request.POST.get("doc_owner_name")
-    contact_number = request.POST.get("doc_phn")
+    contact_number = request.POST.get("doc_phn", "").strip()
     alt_contact_number = request.POST.get("doc_alt_phn")
     full_address = request.POST.get("doc_address")
     country = request.POST.get("doc_country")
@@ -2981,16 +2982,27 @@ def save_doctor_step_1(request):
             "success": False,
             "message": "Email is required."
         }, status=400)
-        
-    user.email = email
-    user.phone_country_code = country_code
-    user.phone_number = contact_number
 
-    user.save(update_fields=[
-        "email",
-        "updated_at"
-    ])
-    
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({
+            "success": False,
+            "message": "Please enter a valid email address."
+        }, status=400)
+
+    if User.objects.filter(email__iexact=email).exclude(id=user.id).exists():
+        return JsonResponse({
+            "success": False,
+            "message": "This email is already used by another account."
+        }, status=400)
+
+    if contact_number and User.objects.filter(phone_number=contact_number).exclude(id=user.id).exists():
+        return JsonResponse({
+            "success": False,
+            "message": "This phone number is already used by another account."
+        }, status=400)
+
     state = None
 
     if state_id:
@@ -3013,33 +3025,54 @@ def save_doctor_step_1(request):
                 "message": "Selected city not found."
             }, status=400)
                      
-    doctor_profile, created = DoctorProfile.objects.update_or_create(
-        user=user,
-        defaults={
-            "user_id": user_id,
-            "full_name": full_name,
-            "gender": gender,
-            "age": age,
-            "specialty_id": specialty,
-            "education_id": education,
-            "experience_id": experience,
-            "clinic_name": clinic_name,
-            "owner_name": owner_name,
-            "contact_number": contact_number,
-            "alt_contact_number": alt_contact_number,
-            "full_address": full_address,
-            "state_id": state_id,
-            "city_id": city_id,
-            "pincode": pincode,
-            "country": country,
-            "clinic_timing_from": clinic_timing_from,
-            "clinic_timing_to": clinic_timing_to,
-            "home_visit_available": home_visit_available,
-            "otp": otp,
-            "referral_code": referral_code,
-            
-        }
-    )
+    try:
+        with transaction.atomic():
+            user.email = email
+            user.phone_country_code = country_code
+            user.phone_number = contact_number
+            user.save(update_fields=[
+                "email",
+                "phone_country_code",
+                "phone_number",
+                "updated_at",
+            ])
+
+            doctor_profile, created = DoctorProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    "user_id": user_id,
+                    "full_name": full_name,
+                    "gender": gender,
+                    "age": age,
+                    "specialty_id": specialty,
+                    "education_id": education,
+                    "experience_id": experience,
+                    "clinic_name": clinic_name,
+                    "owner_name": owner_name,
+                    "contact_number": contact_number,
+                    "alt_contact_number": alt_contact_number,
+                    "full_address": full_address,
+                    "state_id": state_id,
+                    "city_id": city_id,
+                    "pincode": pincode,
+                    "country": country,
+                    "clinic_timing_from": clinic_timing_from,
+                    "clinic_timing_to": clinic_timing_to,
+                    "home_visit_available": home_visit_available,
+                    "otp": otp,
+                    "referral_code": referral_code,
+                }
+            )
+    except IntegrityError as exc:
+        # A concurrent request can still claim a value after the checks above.
+        error_text = str(exc).lower()
+        if "email" in error_text:
+            message = "This email is already used by another account."
+        elif "phone" in error_text:
+            message = "This phone number is already used by another account."
+        else:
+            message = "A value entered is already in use. Please use a different value."
+        return JsonResponse({"success": False, "message": message}, status=400)
     
     if created:
         message = "Doctor profile created successfully."
@@ -3687,7 +3720,7 @@ def save_lab_step_1(request):
     # BASIC DETAILS
     # ========================================================
 
-    email = request.POST.get("lab_email", "").strip()
+    email = request.POST.get("lab_email", "").strip().lower()
     lab_name = request.POST.get("lab_name", "").strip()
     owner_name = request.POST.get("owner_name", "").strip()
     lab_registration_number = request.POST.get(
@@ -3701,8 +3734,8 @@ def save_lab_step_1(request):
 
     phone_number = request.POST.get(
         "lab_phone",
-        user.phone_number
-    )
+        user.phone_number or ""
+    ).strip()
 
     alt_phone = request.POST.get("alt_phone", "").strip()
 
@@ -3758,10 +3791,30 @@ def save_lab_step_1(request):
             "message": "Email is required."
         }, status=400)
 
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({
+            "success": False,
+            "message": "Please enter a valid email address."
+        }, status=400)
+
+    if User.objects.filter(email__iexact=email).exclude(id=user.id).exists():
+        return JsonResponse({
+            "success": False,
+            "message": "This email is already used by another account."
+        }, status=400)
+
     if not phone_number:
         return JsonResponse({
             "success": False,
             "message": "Phone number is required."
+        }, status=400)
+
+    if User.objects.filter(phone_number=phone_number).exclude(id=user.id).exists():
+        return JsonResponse({
+            "success": False,
+            "message": "This phone number is already used by another account."
         }, status=400)
 
     if not address:
@@ -3821,19 +3874,6 @@ def save_lab_step_1(request):
     # UPDATE USER
     # ========================================================
 
-    user.email = email
-    user.phone_country_code = country_code
-    user.phone_number = phone_number
-
-    user.save(
-        update_fields=[
-            "email",
-            "phone_country_code",
-            "phone_number",
-            "updated_at"
-        ]
-    )
-
     # ========================================================
     # LAB PROFILE
     # ========================================================
@@ -3859,10 +3899,34 @@ def save_lab_step_1(request):
     if referral_code:
         defaults["referral_code"] = referral_code
 
-    lab_profile, created = LabProfile.objects.update_or_create(
-        user=user,
-        defaults=defaults
-    )
+    try:
+        with transaction.atomic():
+            user.email = email
+            user.phone_country_code = country_code
+            user.phone_number = phone_number
+            user.save(
+                update_fields=[
+                    "email",
+                    "phone_country_code",
+                    "phone_number",
+                    "updated_at"
+                ]
+            )
+
+            lab_profile, created = LabProfile.objects.update_or_create(
+                user=user,
+                defaults=defaults
+            )
+    except IntegrityError as exc:
+        # Protect against a concurrent request claiming the same unique value.
+        error_text = str(exc).lower()
+        if "email" in error_text:
+            message = "This email is already used by another account."
+        elif "phone" in error_text:
+            message = "This phone number is already used by another account."
+        else:
+            message = "A value entered is already in use. Please use a different value."
+        return JsonResponse({"success": False, "message": message}, status=400)
 
     # ========================================================
     # RESPONSE

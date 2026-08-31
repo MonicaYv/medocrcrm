@@ -55,6 +55,12 @@
                                       Today
                                 </div>
                                 <div
+                                    class="report-filter p-2 pl-4 hover:bg-pale-azure rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
+                                    data-type="all">
+                                    <span class="material-symbols-outlined !text-lg text-light-gray">check</span>
+                                    Reset
+                                </div>
+                                <div
                                     class=" report-filter p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
                                     data-type="week">
                                     <span class="material-symbols-outlined !text-lg text-light-gray">
@@ -84,7 +90,7 @@
                             </div>
                             <div
                                 class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
-                                <div class="datepicker-inline"></div>
+                                <div class="datepicker-inline report-date-picker"></div>
                             </div>
                         </div>
                     </div>
@@ -382,6 +388,8 @@
 {% endblock %}
 
 {% block extra_js %}
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   <script src="/static/js/tabs.js"></script>
   <script src="/static/js/hospital-reports.js"></script>
   <script src="/static/js/table-pagination.js"></script>

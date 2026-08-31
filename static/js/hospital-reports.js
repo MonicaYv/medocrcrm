@@ -204,22 +204,41 @@ $(document).ready(function () {
 
   // --------- 9. ASYNCHRONOUS TAB FILTER LISTENERS ----------
   $("#visitTypeFilter").on("change", function () {
-    let activeType = $(".report-filter.active").data("type") || "month";
+    let activeType = $(".report-filter.active").data("type") || "today";
     loadDashboardData(activeType);
   });
 
-  $(".report-filter").on("click", function () {
+  $(".report-filter").on("click", function (event) {
+    event.stopPropagation();
     $(".report-filter").removeClass("active");
     $(this).addClass("active");
 
     let type = $(this).data("type");
-    loadDashboardData(type);
 
     $(".report-filter span").removeClass("text-dodger-blue").addClass("text-light-gray");
     $(this).find("span").removeClass("text-light-gray").addClass("text-dodger-blue");
 
     if (type === "custom") {
-        $(".datepicker-container").removeClass("hidden");
+      $(this).closest(".dropdown").find(".datepicker-container").removeClass("hidden");
+      return;
+    }
+
+    window.hospitalReportStartDate = "";
+    window.hospitalReportEndDate = "";
+    $(this).closest(".dropdown").find(".filterDropdown").addClass("hidden");
+    loadDashboardData(type);
+  });
+
+  $(".report-date-picker").datepicker({
+    dateFormat: "yy-mm-dd",
+    onSelect: function (dateText) {
+      window.hospitalReportStartDate = dateText;
+      window.hospitalReportEndDate = dateText;
+      $(this).closest(".datepicker-container").addClass("hidden");
+      $(".filterDropdown").addClass("hidden");
+      $(".report-filter").removeClass("active");
+      $(".report-filter[data-type='custom']").addClass("active");
+      loadDashboardData("custom");
     }
   });
 
@@ -254,11 +273,13 @@ $(document).ready(function () {
 // =========================================================================
 function loadDashboardData(filterType) {
     $.ajax({
-        url: "hospital-report-data/", 
+        url: "/reports/hospital-report-data/",
         type: "GET",
         data: {
             filter: filterType,
-            visit_type: $("#visitTypeFilter").val()
+            visit_type: $("#visitTypeFilter").val(),
+            start_date: window.hospitalReportStartDate || "",
+            end_date: window.hospitalReportEndDate || ""
         },
         success: function(response) {
             console.log("LIVE PIPELINE RESPONSE RE-HYDRATED:", response);
@@ -361,8 +382,14 @@ function loadDashboardData(filterType) {
                 }
             }
         },
-        error: function(error) {
-            console.error("AJAX Error: UI synchronization failed:", error);
+        error: function(xhr) {
+            const message = xhr.responseJSON && xhr.responseJSON.error
+                ? xhr.responseJSON.error
+                : "Unable to load filtered report data.";
+            console.error("AJAX Error: UI synchronization failed:", xhr.responseText);
+            if (typeof toastr !== "undefined") {
+                toastr.error(message);
+            }
         }
     });
 }
