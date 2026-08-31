@@ -211,6 +211,36 @@ document.getElementById("resendLink").addEventListener("click", (e) => {
 // });
 
 
-document.getElementById("closeBtn").addEventListener("click", function () {
-  window.location.href = this.dataset.url;
-});
+// On close btn redirect for login if closebtn exists
+const closeBtn = document.getElementById("closeBtn");
+
+if (closeBtn) {
+    closeBtn.addEventListener("click", function () {
+        window.location.href = this.dataset.url;
+    });
+}
+
+
+// GAuth
+const googleSigninBtn = document.getElementById("googleSigninBtn");
+
+if (googleSigninBtn) {
+    googleSigninBtn.addEventListener("click", function () {
+        window.location.href =
+            "/user/google/login/?mode=signin";
+    });
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const googleError = urlParams.get("google_error");
+
+if (googleError) {
+    toastr.error(googleError);
+
+    // Remove the error from the URL
+    window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+    );
+}

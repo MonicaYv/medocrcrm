@@ -115,6 +115,12 @@ ALLOWED_EXTENSIONS = {'.pdf', '.jpg', '.jpeg', '.png'}
 MAX_FILE_SIZE = 5 * 1024 * 1024
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#GAuth
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
+
 LOGIN_URL = '/'
 
 MONGO_DATABASE_NAME = os.getenv('MONGO_DATABASE_NAME')

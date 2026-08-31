@@ -189,8 +189,17 @@
 
                     <!-- Email Address -->
                     <div>
-                        <input type="email" id="doc_email" name="doc_email" value="{{ profile.user.email }}"
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Email Address" required>
+                        <input
+                            type="email"
+                            id="doc_email"
+                            name="doc_email"
+                            value="{{ user.email|default:'' }}"
+                            {% if auth_method == "google" %}readonly{% endif %}
+                            class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm
+                            {% if auth_method == 'google' %}bg-slate-50 cursor-not-allowed{% endif %}"
+                            placeholder="Email Address"
+                            required
+                        >
                     </div>
 
                     <!-- Country Code & Phone Number -->
@@ -212,8 +221,17 @@
                                 </div>
                             </div>
                             <!-- Phone Input -->
-                            <input type="tel" id="doc_phn" name="doc_phn" value = "{{ phone_number }}"
-                                   class="flex-1 h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Phone no." disabled>
+                            <input
+                                type="tel"
+                                id="doc_phn"
+                                name="doc_phn"
+                                value="{{ phone_number|default:'' }}"
+                                {% if auth_method == "phone" %}readonly{% endif %}
+                                class="flex-1 h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm
+                                {% if auth_method == 'phone' %}bg-slate-50 cursor-not-allowed{% endif %}"
+                                placeholder="Phone no."
+                                required
+                            >
                         </div>
                     </div>
 
