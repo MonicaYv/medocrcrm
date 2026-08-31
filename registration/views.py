@@ -27,6 +27,8 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from coupon.models import CountryOption
 from django.views.decorators.http import require_GET
+from django.core.mail import send_mail
+from django.conf import settings
 import requests
 import logging
 logger = logging.getLogger(__name__)
@@ -1688,7 +1690,31 @@ def verify_login_otp(request):
         })
 
     request.session["user_id"] = user.id
+    try:
+        if user.email:
 
+            # Get user type
+            user_type = (user.user_type or "user").replace("_", " ").title()
+
+            send_mail(
+                subject="New Sign-In to MedOCR CRM",
+                message=(
+                    "Hello,\n\n"
+                    "Your MedOCR CRM account was successfully signed in \n"
+                    f"Account Type: {user_type}\n"
+                    f"Email: {user.email}\n"
+                    f"Phone Number: {user.phone_number}\n\n"
+                    "If this was not you, please contact support.\n\n"
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            print("Sign-in email sent to:", user.email)
+
+    except Exception as e:
+        print("Sign-in email error:", e)
     user.last_login = timezone.now()
     user.save(update_fields=["last_login"])
 
