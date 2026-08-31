@@ -215,3 +215,45 @@ function loadDoctorDashboardData(filterType) {
         }
     });
 }
+
+// =====================================
+// PDF DOWNLOAD
+// =====================================
+
+$(".download-btn").on("click", function (e) {
+    e.stopPropagation();
+
+    const targetId = $(this).data("target");
+    const target = document.getElementById(targetId);
+
+    if (!target) {
+        alert("Target not found");
+        return;
+    }
+
+    html2canvas(target, {
+        scale: 2,
+        useCORS: true
+    }).then((canvas) => {
+
+        const imageData = canvas.toDataURL("image/png");
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const pdfWidth = 190;
+        const pdfHeight =
+            (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.addImage(
+            imageData,
+            "PNG",
+            10,
+            10,
+            pdfWidth,
+            pdfHeight
+        );
+
+        pdf.save(targetId + ".pdf");
+    });
+});

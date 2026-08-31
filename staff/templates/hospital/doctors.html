@@ -478,19 +478,19 @@
                             <hr class="text-blue-haze">
                             <div class="bg-pale-azure p-4 flex items-center gap-6">
                                 <div class="flex flex-col items-center gap-4">
-                                    <img src="/static/images/rachel-kate1.jpg" alt="">
-                                    <p class="font-normal text-sm" id="doctor-name">Rachel Kate</p>
+                                    <img id="doctor-image" src="/static/images/coolen-Smith.jpg" alt="Doctor" class="w-24 h-24 rounded-full object-cover">
+                                    <p class="font-normal text-sm" id="doctor-name">-</p>
                                 </div>
                                 <div class="flex flex-col gap-4">
                                     <div class="flex items-start gap-2">
                                         <div
                                             class="w-6 h-6 border border-blue-haze rounded-lg flex items-center justify-center">
                                             <span
-                                                class="material-symbols-outlined text-dodger-blue !text-lg">female</span>
+                                                class="material-symbols-outlined text-dodger-blue !text-lg">person</span>
                                         </div>
                                         <div class="flex flex-col gap-2">
                                             <span class="font-normal text-xs text-spanish-gray">Gender</span>
-                                            <span class="font-normal text-sm" id="doctor-gender">Female</span>
+                                            <span class="font-normal text-sm" id="doctor-gender">-</span>
                                         </div>
                                     </div>
                                     <div class="flex items-start gap-2">
@@ -501,7 +501,7 @@
                                         </div>
                                         <div class="flex flex-col gap-2">
                                             <span class="font-normal text-xs text-spanish-gray">Age</span>
-                                            <span class="font-normal text-sm" id="doctor-age">25</span>
+                                            <span class="font-normal text-sm" id="doctor-age">-</span>
                                         </div>
                                     </div>
                                     <div class="flex items-start gap-2">
@@ -512,7 +512,7 @@
                                         </div>
                                         <div class="flex flex-col gap-2">
                                             <span class="font-normal text-xs text-spanish-gray">Specialty</span>
-                                            <span class="font-normal text-sm" id="doctor-speciality">Neurologist</span>
+                                            <span class="font-normal text-sm" id="doctor-speciality">-</span>
                                         </div>
                                     </div>
                                 </div>
@@ -525,7 +525,7 @@
                                         </div>
                                         <div class="flex flex-col gap-2">
                                             <span class="font-normal text-xs text-spanish-gray">Phone No.</span>
-                                            <span class="font-normal text-sm" id="doctor-phone">+91 7737533456</span>
+                                            <span class="font-normal text-sm" id="doctor-phone">-</span>
                                         </div>
                                     </div>
                                     <div class="flex items-start gap-2">
@@ -536,7 +536,7 @@
                                         </div>
                                         <div class="flex flex-col gap-2">
                                             <span class="font-normal text-xs text-spanish-gray">Education</span>
-                                            <span class="font-normal text-sm" id="doctor-education">MBBS, DM in neurology</span>
+                                            <span class="font-normal text-sm" id="doctor-education">-</span>
                                         </div>
                                     </div>
                                     <div class="flex items-start gap-2">
@@ -547,7 +547,7 @@
                                         </div>
                                         <div class="flex flex-col gap-2">
                                             <span class="font-normal text-xs text-spanish-gray">Experience</span>
-                                            <span class="font-normal text-sm" id="doctor-experience">10 Years</span>
+                                            <span class="font-normal text-sm" id="doctor-experience">-</span>
                                         </div>
                                     </div>
                                 </div>
@@ -592,27 +592,16 @@
                             </div>
                             <div class="flex items-center justify-between">
                                 <p class="font-normal text-sm">Home Visit <span
-                                        class="text-dodger-blue">&#8377;500</span></p>
+                                        class="text-dodger-blue" id="doctor-home-fee">₹500</span></p>
                                 <p class="font-normal text-sm">Hospital Visit <span
-                                        class="text-dodger-blue">&#8377;500</span></p>
+                                        class="text-dodger-blue" id="doctor-hospital-fee">₹500</span></p>
                             </div>
-                            <div class="border border-blue-haze p-4 flex flex-col gap-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-normal text-sm">Monday</span>
-                                    <span class="font-normal text-sm text-dodger-blue">9 AM to 1 PM</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="font-normal text-sm">Tuesday</span>
-                                    <span class="font-normal text-sm text-dodger-blue">9 AM to 1 PM</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="font-normal text-sm">Friday</span>
-                                    <span class="font-normal text-sm text-dodger-blue">9 AM to 1 PM</span>
-                                </div>
+                            <div id="doctor-availability" class="border border-blue-haze p-4 flex flex-col gap-4">
+                                <p class="text-sm text-spanish-gray"> Loading availability... </p>
                             </div>
                             <div class="flex items-center justify-between">
                                 <span class="font-normal text-sm">Doctor’s ID</span>
-                                <span class="font-normal text-sm text-blue-gray">#R32512</span>
+                                <span class="font-normal text-sm text-blue-gray" id="doctor-id">-</span>
                             </div>
                         </div>
                     </div>

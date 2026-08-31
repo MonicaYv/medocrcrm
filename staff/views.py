@@ -98,7 +98,7 @@ def save_hospital_doctor(request):
     )
 
     doctor = DoctorsProfile.objects.create(
-        user=doctor_user,
+        user=request.user_obj,
         first_name=first_name,
         last_name=last_name,
         gender=gender,
