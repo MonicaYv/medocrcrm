@@ -211,13 +211,31 @@ $(document).ready(function () {
   });
 
   function loadHospitalDoctors() {
-  $.getJSON("/staff/hospital/doctors/list/", function (res) {
-    if (res.success) {
-      allDoctors = res.doctors;
-      currentPage = 1;
+  $.ajax({
+    url: "/staff/hospital/doctors/list/",
+    type: "GET",
+    dataType: "json",
 
-      renderDoctors(currentPage);
-      renderPagination();
+    success: function (res) {
+      console.log("Doctors list response:", res);
+
+      if (res.success) {
+        allDoctors = Array.isArray(res.doctors) ? res.doctors : [];
+
+        console.log("Doctors loaded from database:", allDoctors);
+
+        currentPage = 1;
+        renderDoctors(currentPage);
+        renderPagination();
+      } else {
+        console.error("Failed to load doctors:", res.error);
+        toastr.error(res.error || "Failed to load doctors");
+      }
+    },
+
+    error: function (xhr) {
+      console.error("Doctor list API error:", xhr.status, xhr.responseText);
+      toastr.error("Unable to load doctors");
     }
   });
 }

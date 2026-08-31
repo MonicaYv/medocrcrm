@@ -56,14 +56,33 @@ function renderRoomOptions() {
     `).join("");
 }
 
+function renderCategoryOptions($card) {
+    const $menu = $card.find(".category-options");
+    if (!$menu.length) {
+        console.error("category-options not found inside service card");
+        return;
+    }
+    $menu.empty();
+    HOSPITAL_CATEGORIES.forEach((category) => {
+        $menu.append(`
+            <li
+                class="dropdown-item px-3 py-2 cursor-pointer hover:bg-premium-light-blue"
+                data-id="${category.id}">
+                ${category.name}
+            </li>
+        `);
+    });
+    console.log("CATEGORY OPTIONS RENDERED:", HOSPITAL_CATEGORIES);
+}
+
 function resetServiceCard($card) {
     $card.find(".category-id, .service-id").val("");
     $card.find(".category-dropdown-btn .selected-text").text("Select Category");
     $card.find(".service-dropdown-btn .selected-text").text("Select Service");
+    renderCategoryOptions($card)
     $card.find(".service-options").html(renderServiceOptions());
     $card.find(".price-input").val("");
 }
-
 function resetRoomCard($card) {
     $card.find(".bed-room-id").val("");
     $card.find(".bed-room-dropdown-btn .selected-text").text("Select Bed & Room");
@@ -273,41 +292,55 @@ $(document).ready(function () {
 // =========================================================================
 // --- DROPDOWN ENGINE: TOGGLE OPEN/CLOSE VISIBILITY FOR ALL CARDS ---
 // =========================================================================
-$(document).off("click", ".category-dropdown-btn, .service-dropdown-btn, .bed-room-dropdown-btn")
-           .on("click", ".category-dropdown-btn, .service-dropdown-btn, .bed-room-dropdown-btn", function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    // Target the specific menu sibling under this dropdown button container
-    const $currentMenu = $(this).next(".dropdown-menu");
-    
-    // Force populate data items array if cloner didn't catch it
-    if ($currentMenu.hasClass("category-options") && $currentMenu.children().length === 0) {
-        if (window.HOSPITAL_CATEGORIES && HOSPITAL_CATEGORIES.length) {
-            const listItems = HOSPITAL_CATEGORIES.map(cat => `
-                <li class="dropdown-item px-3 py-2 cursor-pointer hover:bg-premium-light-blue" data-id="${cat.id}">
-                    ${cat.name}
-                </li>
-            `).join("");
-            $currentMenu.html(listItems);
+$(document).on(
+    "click",
+    ".category-dropdown-btn, .service-dropdown-btn, .bed-room-dropdown-btn",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const $button = $(this);
+        // The dropdown menu directly after the button
+        const $menu = $button.next(".dropdown-menu");
+        if (!$menu.length) {
+            console.error("Dropdown menu not found:", $button);
+            return;
+        }
+        // Close all other dropdowns
+        $(".dropdown-menu")
+            .not($menu)
+            .addClass("hidden")
+            .css("display", "none");
+        // If category menu is empty, render categories
+        if ($menu.hasClass("category-options") && !$menu.children().length) {
+            renderCategoryOptions(
+                $button.closest(".service-card")
+            );
+        }
+        // If service menu is empty, render services
+        if ($menu.hasClass("service-options") && !$menu.children().length) {
+            $menu.html(renderServiceOptions());
+        }
+        // If room menu is empty, render rooms
+        if ($menu.hasClass("room-options") && !$menu.children().length) {
+            $menu.html(renderRoomOptions());
+        }
+        // Toggle
+        if ($menu.hasClass("hidden")) {
+            $menu
+                .removeClass("hidden")
+                .css({
+                    display: "block",
+                    visibility: "visible",
+                    opacity: "1"
+                });
+
+        } else {
+            $menu
+                .addClass("hidden")
+                .css("display", "none");
         }
     }
-
-    // Automatically dismiss any other open dropdowns on screen
-    $(".dropdown-menu").not($currentMenu).addClass("hidden").css("display", "none");
-    
-    // Toggle the targeted card dropdown visibility status safely
-    if ($currentMenu.hasClass("hidden")) {
-        $currentMenu.removeClass("hidden").css({
-            "display": "block",
-            "visibility": "visible",
-            "opacity": "1"
-        });
-    } else {
-        $currentMenu.addClass("hidden").css("display", "none");
-    }
-});
-
+);
 // =========================================================================
 // --- SELECTION HANDLERS: ASSIGN VALUES WHEN AN OPTION IS CLICKED ---
 // =========================================================================
@@ -350,13 +383,26 @@ $(document).on("click", function (e) {
 
 //     showStep(1);
 // });
-$(document).on("click", ".home-add-service", function () {
 
+$(document).on("click", ".add-services-home", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("ADD SERVICES CLICKED");
     $(".home-section").addClass("hidden");
-
-    $(".services-section").removeClass("hidden");
-
+    $(".services-section")
+        .removeClass("hidden")
+        .addClass("flex");
     showStep(1);
+});
+
+$(document).on("click", ".add-bed-room-home", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(".home-section").addClass("hidden");
+    $(".services-section")
+        .removeClass("hidden")
+        .addClass("flex");
+    showStep(2);
 });
 
 
@@ -365,9 +411,11 @@ $(document).on("click", "#cancel-steps", function () {
     $(".home-section").removeClass("hidden");
 });
 
-$(document).on("click", ".step-btn[data-target]", function () {
+$(document).on("click", ".step-btn[data-target]", function (e) {
+    e.preventDefault();
     const target = Number($(this).data("target"));
-    if (target === 2) {
+    const currentStep = $(".step-content:not(.hidden)").attr("id");
+    if (target === 2 && currentStep === "step-1") {
         const services = collectServices();
         if (!services.length) {
             alert("Please add at least one complete service.");
@@ -375,12 +423,16 @@ $(document).on("click", ".step-btn[data-target]", function () {
         }
     }
     if (target === 3) {
+        const services = collectServices();
+        const rooms = collectRooms();
+        if (!services.length && !rooms.length) {
+            alert("Please add at least one service or bed/room.");
+            return;
+        }
         renderSummary();
     }
     showStep(target);
 });
-
-
 $(document).on("click", ".add-service-bed", function () {
     console.log("ADD ROOM CLICKED");
     const template = document.getElementById("bed-room-card-template");
@@ -544,8 +596,18 @@ $(document).on("click", ".delete-hospital-room", function () {
     .catch((error) => alert(error.message));
 });
 
-$(document).on("click", ".close-icon", function () {
-    $(".add-service").addClass("hidden").removeClass("flex");
+$(document).on("click", ".close-icon", function (e) {
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    $(".services-section")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    $(".home-section").removeClass("hidden");
+
+    showStep(1);
 });
 
 function showToast(message) {

@@ -175,8 +175,17 @@
 
                     <!-- Email Address -->
                     <div>
-                        <input type="email" id="facility_email" name="lab_email" value="{{ user.email }}" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal placeholder:text-kyc-light-gray text-sm" placeholder="Email Address">
+                       <input
+                            type="email"
+                            id="facility_email"
+                            name="lab_email"
+                            value="{{ user.email|default:'' }}"
+                            {% if auth_method == "google" %}readonly{% endif %}
+                            class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal text-sm
+                            {% if auth_method == 'google' %}bg-slate-50 cursor-not-allowed{% endif %}"
+                            placeholder="Email Address"
+                            required
+                        >
                     </div>
 
                     <!-- Owner Name -->
@@ -228,15 +237,18 @@
                                     name="lab_phone"
                                     id="lab_phone"
                                     value="{{ phone_number|default:'' }}"
-                                    readonly
-                                    class="w-full h-12 rounded-md border border-dark-gray bg-slate-50 px-4 text-slate-600 text-sm cursor-not-allowed focus:outline-none"
+                                    {% if auth_method == "phone" %}readonly{% endif %}
+                                    class="w-full h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-blue-charcoal text-sm
+                                    {% if auth_method == 'phone' %}bg-slate-50 cursor-not-allowed{% endif %}"
+                                    placeholder="Phone Number"
+                                    required
                                 >
                             </div>
 
                         </div>
 
                         <p class="text-xs text-slate-400 mt-1.5">
-                            This is the phone number registered with your account and cannot be changed.
+                            Enter the phone number registered with your account.
                         </p>
                     </div>
 

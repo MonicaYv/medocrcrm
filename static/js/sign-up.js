@@ -360,7 +360,39 @@ document.getElementById("resendLink").addEventListener("click", (e) => {
 //   window.location.href = this.dataset.url;
 // });
 
-// On close btn redirect for login
-document.getElementById("closeBtn").addEventListener("click", function () {
-  window.location.href = this.dataset.url;
-});
+// On close btn redirect for login if closebtn exists
+const closeBtn = document.getElementById("closeBtn");
+
+if (closeBtn) {
+    closeBtn.addEventListener("click", function () {
+        window.location.href = this.dataset.url;
+    });
+}
+
+
+// GAuth
+const googleSignupBtn = document.getElementById("googleSignupBtn");
+
+if (googleSignupBtn) {
+    googleSignupBtn.addEventListener("click", function () {
+        const userType = document.getElementById("userType").value;
+
+        window.location.href =
+            `/user/google/login/?mode=signup&role=${encodeURIComponent(userType)}`;
+    });
+}
+
+// const googleSignupBtn = document.getElementById("googleSignupBtn");
+
+// if (googleSignupBtn) {
+//     googleSignupBtn.addEventListener("click", function () {
+//         console.log("Google signup button clicked!");
+
+//         const userType = document.getElementById("userType").value;
+
+//         console.log("Selected role:", userType);
+
+//         window.location.href =
+//             `/user/google/login/?mode=signup&role=${encodeURIComponent(userType)}`;
+//     });
+// }

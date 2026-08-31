@@ -11,6 +11,13 @@ from .email_otp import (
     verify_otp as verify_totp
 )
 
+#GAuth Imports
+import secrets
+from urllib.parse import urlencode
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+
 # from .email_otp import async_send_otp_email, send_forgot_password_email
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
@@ -19,6 +26,7 @@ from django.urls import reverse
 from django.shortcuts import render, redirect
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from django.core.validators import validate_email
 from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_protect
@@ -27,6 +35,8 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from coupon.models import CountryOption
 from django.views.decorators.http import require_GET
+from django.core.mail import send_mail
+from django.conf import settings
 import requests
 import logging
 logger = logging.getLogger(__name__)
@@ -61,6 +71,350 @@ def lab_verification(request):
 
 def pharmacy_verification(request):
     return render(request, 'registration/pharmacy_verification.html')
+
+
+#GAuth
+def google_login(request):
+    mode = request.GET.get("mode")
+
+    if mode not in ["signup", "signin"]:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid Google login mode."
+            },
+            status=400
+        )
+
+    state = secrets.token_urlsafe(32)
+
+    # Store OAuth state
+    request.session["google_oauth_state"] = state
+    print("GOOGLE LOGIN STATE:", state)
+    print("SESSION STATE AFTER SAVE:", request.session.get("google_oauth_state"))
+    print("SESSION KEY:", request.session.session_key)
+
+    # Store whether this came from signup or signin
+    request.session["google_auth_mode"] = mode
+
+    if mode == "signup":
+        role = request.GET.get("role")
+
+        allowed_roles = [
+            "hospital",
+            "doctor",
+            "lab",
+            "pharmacy",
+        ]
+
+        if role not in allowed_roles:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Invalid provider role."
+                },
+                status=400
+            )
+
+        # Remember the role selected by the user
+        request.session["google_signup_role"] = role
+
+    else:
+        # Make sure an old signup role isn't reused
+        request.session.pop("google_signup_role", None)
+
+    params = {
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "access_type": "online",
+        "prompt": "select_account",
+    }
+
+    google_auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth?"
+        + urlencode(params)
+    )
+
+    return redirect(google_auth_url)
+
+
+#GAuth Callback
+def google_callback(request):
+    # ============================================================
+    # 1. Get Google's authorization response
+    # ============================================================
+
+    code = request.GET.get("code")
+    state = request.GET.get("state")
+
+    if not code:
+        return JsonResponse({
+            "success": False,
+            "message": "Google authorization code is missing."
+        }, status=400)
+
+    # ============================================================
+    # 2. Verify OAuth state
+    # ============================================================
+
+    session_state = request.session.get("google_oauth_state")
+
+    if not state or state != session_state:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid OAuth state."
+        }, status=400)
+
+    # ============================================================
+    # 3. Exchange authorization code for Google tokens
+    # ============================================================
+
+    token_response = requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "code": code,
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "grant_type": "authorization_code",
+        },
+        timeout=10,
+    )
+
+    if token_response.status_code != 200:
+        return JsonResponse({
+            "success": False,
+            "message": "Failed to obtain Google tokens."
+        }, status=400)
+
+    token_data = token_response.json()
+
+    # ============================================================
+    # 4. Get Google's ID token
+    # ============================================================
+
+    google_id_token = token_data.get("id_token")
+
+    if not google_id_token:
+        return JsonResponse({
+            "success": False,
+            "message": "Google ID token was not received."
+        }, status=400)
+
+    # ============================================================
+    # 5. Verify the ID token
+    # ============================================================
+
+    try:
+        google_user = id_token.verify_oauth2_token(
+            google_id_token,
+            google_requests.Request(),
+            settings.GOOGLE_CLIENT_ID,
+        )
+    except ValueError:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid Google ID token."
+        }, status=400)
+
+    # ============================================================
+    # 6. Extract verified Google information
+    # ============================================================
+
+    email = google_user.get("email", "").strip().lower()
+    email_verified = google_user.get("email_verified", False)
+
+    first_name = google_user.get("given_name", "")
+    last_name = google_user.get("family_name", "")
+
+    if not email:
+        return JsonResponse({
+            "success": False,
+            "message": "Google account email was not received."
+        }, status=400)
+
+    if not email_verified:
+        return JsonResponse({
+            "success": False,
+            "message": "Google email is not verified."
+        }, status=400)
+
+    # ============================================================
+    # 7. Get authentication mode
+    # ============================================================
+
+    mode = request.session.get("google_auth_mode")
+
+    if mode not in ["signup", "signin"]:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid Google authentication session."
+        }, status=400)
+
+    # ============================================================
+    # 8. Find existing PostgreSQL user
+    # ============================================================
+
+    user = User.objects.filter(
+        email__iexact=email
+    ).first()
+
+    # ============================================================
+    # 9. GOOGLE SIGN IN
+    # ============================================================
+
+    if mode == "signin":
+
+        if not user:
+            # Google account is not registered yet
+            request.session.pop("google_oauth_state", None)
+            request.session.pop("google_auth_mode", None)
+
+            return redirect("/user/new-signup/")
+
+        if not user.is_active:
+            return JsonResponse({
+                "success": False,
+                "message": "Your account is inactive."
+            }, status=403)
+
+        # Existing user
+        request.session["user_id"] = user.id
+        request.session["auth_method"] = "google"
+        
+
+        # Update login information
+        user.last_login = timezone.now()
+        user.last_login_ip = request.META.get("REMOTE_ADDR")
+
+        user.save(
+            update_fields=[
+                "last_login",
+                "last_login_ip"
+            ]
+        )
+
+        # Clear temporary Google session values
+        request.session.pop("google_oauth_state", None)
+        request.session.pop("google_auth_mode", None)
+
+        # --------------------------------------------------------
+        # Existing user → check KYC
+        # --------------------------------------------------------
+
+        user_id = user.id
+        user_type = user.user_type
+
+        if user_type == "hospital":
+
+            kyc_result = check_hospital_kyc(user_id)
+            return redirect(kyc_result["redirect"])
+
+        elif user_type == "doctor":
+
+            kyc_result = check_doctor_kyc(user_id)
+            return redirect(kyc_result["redirect"])
+
+        elif user_type == "lab":
+
+            kyc_result = check_lab_kyc(user_id)
+            return redirect(kyc_result["redirect"])
+
+        elif user_type == "pharmacy":
+
+            kyc_result = check_pharmacy_kyc(user_id)
+            return redirect(kyc_result["redirect"])
+
+        return redirect("dashboard")
+
+    # ============================================================
+    # 10. GOOGLE SIGN UP
+    # ============================================================
+
+    role = request.session.get("google_signup_role")
+
+    allowed_roles = [
+        "hospital",
+        "doctor",
+        "lab",
+        "pharmacy",
+    ]
+
+    if role not in allowed_roles:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid or missing provider role."
+        }, status=400)
+
+    # ------------------------------------------------------------
+    # Existing email cannot register another role
+    # ------------------------------------------------------------
+
+    if user:
+        message = (
+            f"This Google account is already registered as "
+            f"{user.user_type}. Please sign in using Google."
+        )
+
+        query = urlencode({
+            "google_error": message
+        })
+
+        return redirect(f"{reverse('login')}?{query}")
+
+    # ============================================================
+    # 11. Create basic PostgreSQL User
+    # ============================================================
+
+    user = User.objects.create(
+        email=email,
+        user_type=role,
+        is_active=True,
+        kyc_completed=False,
+    )
+
+    # ============================================================
+    # 12. Create Django session
+    # ============================================================
+
+    request.session["user_id"] = user.id
+    request.session["auth_method"] = "google"
+
+    # Keep these temporarily if later KYC pages need them
+    request.session["google_signup_email"] = email
+    request.session["google_signup_first_name"] = first_name
+    request.session["google_signup_last_name"] = last_name
+
+    # ============================================================
+    # 13. Clear OAuth-only session data
+    # ============================================================
+
+    request.session.pop("google_oauth_state", None)
+    request.session.pop("google_auth_mode", None)
+
+    # Keep google_signup_role because it may be useful during KYC
+
+    # ============================================================
+    # 14. Send user to correct KYC flow
+    # ============================================================
+
+    if role == "hospital":
+        return redirect("hospital_kyc")
+
+    elif role == "doctor":
+        return redirect("doctor_kyc")
+
+    elif role == "lab":
+        return redirect("lab_kyc")
+
+    elif role == "pharmacy":
+        return redirect("pharmacy_kyc")
+
+    return redirect("dashboard")
+
 
 @require_POST
 def send_otp(request):
@@ -1464,6 +1818,8 @@ def save_user(request):
         phone_number = phone_number,
         user_type = user_type
     )    
+    request.session["auth_method"] = "phone"
+    request.session["user_id"] = user.id
     return JsonResponse({"success": True, "message": "User registered successfully."})
 
 @csrf_protect
@@ -1509,6 +1865,36 @@ def login_auth(request):
 
     # Store user id in session
     request.session["user_id"] = user.id
+
+    if user.kyc_completed:
+        return JsonResponse({
+            "success": True,
+            "redirect": reverse("dashboard")
+        })
+
+    if user.user_type == "hospital":
+        return JsonResponse({
+            "success": True,
+            "redirect": reverse("hospital_kyc")
+        })
+
+    elif user.user_type == "doctor":
+        return JsonResponse({
+            "success": True,
+            "redirect": reverse("doctor_kyc")
+        })
+
+    elif user.user_type == "lab":
+        return JsonResponse({
+            "success": True,
+            "redirect": reverse("lab_kyc")
+        })
+
+    elif user.user_type == "pharmacy":
+        return JsonResponse({
+            "success": True,
+            "redirect": reverse("pharmacy_kyc")
+        })
 
     return JsonResponse({
         "success": True,
@@ -1688,7 +2074,31 @@ def verify_login_otp(request):
         })
 
     request.session["user_id"] = user.id
+    try:
+        if user.email:
 
+            # Get user type
+            user_type = (user.user_type or "user").replace("_", " ").title()
+
+            send_mail(
+                subject="New Sign-In to MedOCR CRM",
+                message=(
+                    "Hello,\n\n"
+                    "Your MedOCR CRM account was successfully signed in \n"
+                    f"Account Type: {user_type}\n"
+                    f"Email: {user.email}\n"
+                    f"Phone Number: {user.phone_number}\n\n"
+                    "If this was not you, please contact support.\n\n"
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            print("Sign-in email sent to:", user.email)
+
+    except Exception as e:
+        print("Sign-in email error:", e)
     user.last_login = timezone.now()
     user.save(update_fields=["last_login"])
 
@@ -2103,21 +2513,25 @@ def hospital_profile_verification(request):
     contact_person = ContactPerson.objects.filter(
         profile_id=user.id
     ).first()
-    
+
+    auth_method = request.session.get("auth_method", "phone")
     return render(
         request, 
         'registration/kyc_hospital_profile.html', 
         {
+            "user": user,
             "hospital_types": hospital_types,
             "hospital_times": hospital_times,
             "hospital_services": hospital_services,
             "phone_number": phone_number,
             "phone_country_code": phone_country_code,
+            "auth_method": auth_method,
             "countries": countries,
             "hospital_profile": hospital_profile,
             "contact_person": contact_person,
         }
     )
+
 
 def hospital_profile_review(request):
     return render(request, 'registration/kyc_hospital_profile_review.html')
@@ -2165,12 +2579,31 @@ def save_hospital_step_1(request):
             "success": False,
             "message": "User not found."
         }, status=404)
+
+    auth_method = request.session.get("auth_method")
     
-    email = request.POST.get("hos_email")
+    if auth_method == "google":
+    # Google signup → registered Google email cannot change
+        email = user.email
+
+        # Phone can be entered/changed during KYC
+        phone_number = request.POST.get("hos_phn", "").strip()
+
+    elif auth_method == "phone":
+        # Phone signup → registered phone cannot change
+        phone_number = user.phone_number
+
+        # Email can be entered/changed during KYC
+        email = request.POST.get("hos_email", "").strip()
+
+    else:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid authentication method. Please login again."
+        }, status=400)
     hospital_name = request.POST.get("hos_name")
     owner_name = request.POST.get("hos_owner_name")
     country_code = request.POST.get("hos_country_code_val")
-    phone_number = request.POST.get("hos_phn")
     otp_verified = request.POST.get("phone_otp_verified")
     otp = request.POST.get("hos_otp")
 
@@ -2204,6 +2637,8 @@ def save_hospital_step_1(request):
 
     user.save(update_fields=[
         "email",
+        "phone_country_code",
+        "phone_number",
         "updated_at"
     ])
     
@@ -2861,13 +3296,16 @@ def doctor_profile_verification(request):
     experiences = DoctorExperience.objects.filter(
         is_active=1
     ).order_by("years")
-    
+
+    auth_method = request.session.get("auth_method", "phone")
     return render(
         request, 
         'registration/kyc_doctor_profile.html', 
         {
+            "user": user,
             "phone_number": phone_number,
             "phone_country_code": phone_country_code,
+            "auth_method": auth_method,
             "countries": countries,
             "profile": profile,
             "contact_person": contact_person,
@@ -2906,6 +3344,7 @@ def save_doctor_profile(request):
 def save_doctor_step_1(request):
 
     user_id = request.session.get("user_id")
+    auth_method = request.session.get("auth_method")
     
     if not user_id:
         return JsonResponse({
@@ -2920,8 +3359,28 @@ def save_doctor_step_1(request):
             "success": False,
             "message": "User not found."
         }, status=404)
+
     
-    email = request.POST.get("doc_email")
+    if auth_method == "google":
+    # Google signup → Google email cannot be changed
+        email = user.email
+
+        # Phone can be entered/changed during KYC
+        contact_number = request.POST.get("doc_phn", "").strip()
+
+    elif auth_method == "phone":
+        # Phone signup → registered phone cannot be changed
+        contact_number = user.phone_number
+
+        # Email can be entered/changed during KYC
+        email = request.POST.get("doc_email", "").strip()
+
+    else:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid authentication method. Please login again."
+        }, status=400)
+    
     full_name = request.POST.get("doc_name")
     gender = request.POST.get("doc_gender_value")
     age = request.POST.get("doc_age")
@@ -2930,7 +3389,6 @@ def save_doctor_step_1(request):
     experience = request.POST.get("doc_experience_value")
     clinic_name = request.POST.get("doc_clinic")
     owner_name = request.POST.get("doc_owner_name")
-    contact_number = request.POST.get("doc_phn")
     alt_contact_number = request.POST.get("doc_alt_phn")
     full_address = request.POST.get("doc_address")
     country = request.POST.get("doc_country")
@@ -2962,6 +3420,8 @@ def save_doctor_step_1(request):
 
     user.save(update_fields=[
         "email",
+        "phone_country_code",
+        "phone_number",
         "updated_at"
     ])
     
@@ -3569,9 +4029,9 @@ def lab_kyc(request):
 # def lab_profile_review(request):
 #     return render(request, 'registration/kyc_lab_profile_review.html')
 
-# ============================================================
+#==========
 # LAB KYC
-# ============================================================
+#==========
 
 def lab_kyc(request):
     return render(request, "registration/kyc_lab.html")
@@ -3617,12 +4077,16 @@ def lab_profile_verification(request):
         profile_type="lab"
     ).first()
 
+    auth_method = request.session.get("auth_method", "phone")
+
     return render(
         request,
         "registration/kyc_lab_profile.html",
         {
+            "user": user,
             "phone_number": phone_number,
             "phone_country_code": phone_country_code,
+            "auth_method": auth_method,
             "countries": countries,
             "lab_times": lab_times,
             "lab_services": lab_services,
@@ -3657,13 +4121,15 @@ def save_lab_step_1(request):
             "message": "User not found."
         }, status=404)
 
-    # ========================================================
+    #======
     # BASIC DETAILS
-    # ========================================================
+    #======
 
-    email = request.POST.get("lab_email", "").strip()
+    auth_method = request.session.get("auth_method")
+
     lab_name = request.POST.get("lab_name", "").strip()
     owner_name = request.POST.get("owner_name", "").strip()
+
     lab_registration_number = request.POST.get(
         "lab_registration_number", ""
     ).strip()
@@ -3673,16 +4139,37 @@ def save_lab_step_1(request):
         user.phone_country_code or "+91"
     )
 
-    phone_number = request.POST.get(
-        "lab_phone",
-        user.phone_number
-    )
+    # Google signup:
+    # Keep registered Google email, allow phone to be entered/changed.
+    if auth_method == "google":
+        email = user.email
+
+        phone_number = request.POST.get(
+            "lab_phone",
+            ""
+        ).strip()
+
+    # Phone signup:
+    # Keep registered phone, allow email to be entered/changed.
+    elif auth_method == "phone":
+        email = request.POST.get(
+            "lab_email",
+            ""
+        ).strip()
+
+        phone_number = user.phone_number
+
+    else:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid authentication method. Please login again."
+        }, status=400)
 
     alt_phone = request.POST.get("alt_phone", "").strip()
 
-    # ========================================================
+    #======
     # ADDRESS
-    # ========================================================
+    #======
 
     address = request.POST.get("lab_address", "").strip()
     country = request.POST.get("lab_country", "").strip()
@@ -3692,21 +4179,21 @@ def save_lab_step_1(request):
 
     pincode = request.POST.get("lab_pincode", "").strip()
 
-    # ========================================================
+    #======
     # LAB TIMING
-    # ========================================================
+    #======
 
     lab_timing_id = request.POST.get("lab_timing")
 
-    # ========================================================
+    #======
     # REFERRAL
-    # ========================================================
+    #======
 
     referral_code = request.POST.get("referral_code", "").strip()
 
-    # ========================================================
+    #======
     # VALIDATION
-    # ========================================================
+    #======
 
     if not lab_name:
         return JsonResponse({
@@ -3744,9 +4231,9 @@ def save_lab_step_1(request):
             "message": "Address is required."
         }, status=400)
 
-    # ========================================================
+    #======
     # STATE
-    # ========================================================
+    #======
 
     state = None
 
@@ -3759,9 +4246,9 @@ def save_lab_step_1(request):
                 "message": "Selected state not found."
             }, status=400)
 
-    # ========================================================
+    #======
     # CITY
-    # ========================================================
+    #======
 
     city = None
 
@@ -3774,9 +4261,9 @@ def save_lab_step_1(request):
                 "message": "Selected city not found."
             }, status=400)
 
-    # ========================================================
+    #======
     # LAB TIMING
-    # ========================================================
+    #======
 
     lab_timing = None
 
@@ -3791,9 +4278,9 @@ def save_lab_step_1(request):
                 "message": "Selected lab timing not found."
             }, status=400)
 
-    # ========================================================
+    #======
     # UPDATE USER
-    # ========================================================
+    #======
 
     user.email = email
     user.phone_country_code = country_code
@@ -3808,9 +4295,9 @@ def save_lab_step_1(request):
         ]
     )
 
-    # ========================================================
+    #======
     # LAB PROFILE
-    # ========================================================
+    #======
 
     defaults = {
         "lab_name": lab_name,
@@ -3838,9 +4325,9 @@ def save_lab_step_1(request):
         defaults=defaults
     )
 
-    # ========================================================
+    #======
     # RESPONSE
-    # ========================================================
+    #======
 
     if created:
         message = "Lab profile created successfully."
@@ -3989,9 +4476,9 @@ def save_lab_step_3(request):
         "lab_photo"
     )
 
-    # --------------------------------------------------------
+    #------
     # Required numbers
-    # --------------------------------------------------------
+    #------
 
     if not lab_certificate_number:
         return JsonResponse({
@@ -4017,9 +4504,9 @@ def save_lab_step_3(request):
             "message": "Government license number is required."
         }, status=400)
 
-    # --------------------------------------------------------
+    #------
     # Files
-    # --------------------------------------------------------
+    #------
 
     if not lab_certificate_file:
         return JsonResponse({
@@ -4051,9 +4538,9 @@ def save_lab_step_3(request):
             "message": "Lab photo is required."
         }, status=400)
 
-    # --------------------------------------------------------
+    #------
     # Save files
-    # --------------------------------------------------------
+    #------
 
     lab_certificate_path, err = validate_and_save_file(
         lab_certificate_file,
@@ -4120,9 +4607,9 @@ def save_lab_step_3(request):
             "message": err
         }, status=400)
 
-    # --------------------------------------------------------
+    #------
     # Update profile
-    # --------------------------------------------------------
+    #------
 
     lab_profile.lab_certificate_number = lab_certificate_number
     lab_profile.identity_proof_aadhar_number = aadhaar_number
@@ -4214,13 +4701,16 @@ def pharmacy_profile_verification(request):
     timings = PharmacyTiming.objects.filter(
         is_active=1
     ).order_by("id")
-    
+
+    auth_method = request.session.get("auth_method", "phone")
     return render(
         request, 
         'registration/kyc_pharmacy_profile.html', 
         {
+            "user": user,
             "phone_number": phone_number,
             "phone_country_code": phone_country_code,
+            "auth_method": auth_method,
             "countries": countries,
             "profile": profile,
             "contact_person": contact_person,
@@ -4273,15 +4763,35 @@ def save_pharmacy_step_1(request):
             "success": False,
             "message": "User not found."
         }, status=404)
+
+    auth_method = request.session.get("auth_method")
+
+    if auth_method == "google":
+    # Google signup → registered Google email cannot change
+        personal_email = user.email
+
+        # Phone can be entered/changed during KYC
+        contact_number = request.POST.get("pha_phn", "").strip()
+
+    elif auth_method == "phone":
+        # Phone signup → registered phone cannot change
+        contact_number = user.phone_number
+
+        # Email can be entered/changed during KYC
+        personal_email = request.POST.get("pha_email", "").strip()
+
+    else:
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid authentication method. Please login again."
+        }, status=400)
     
-    personal_email = request.POST.get("pha_email")
     first_name = request.POST.get("pha_first_name")
     last_name = request.POST.get("pha_last_name")
     company_name = request.POST.get("pha_comp_name")
     gender = request.POST.get("pha_gender_value")
     age = request.POST.get("pha_age")
     pharmacy_timing = request.POST.get("pha_timing")
-    contact_number = request.POST.get("pha_phn")
     personal_phone_number = request.POST.get("pha_alt_phn")
     personal_pan_number = request.POST.get("pha_alt_phn")
     address = request.POST.get("pha_address")
@@ -4318,6 +4828,8 @@ def save_pharmacy_step_1(request):
 
     user.save(update_fields=[
         "email",
+        "phone_country_code",
+        "phone_number",
         "updated_at"
     ])
     

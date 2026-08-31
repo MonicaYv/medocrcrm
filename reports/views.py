@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 import random
@@ -594,7 +594,7 @@ def reports(request):
 
             current_count = hospital_appointments.count()
             previous_count = max(current_count - 5, 1)
-            context["growth"] = f"+{round(((current_count - previous_count) / previous_count) * 100, 1)}%"
+            context["growth"] = f"{abs(round(((current_count - previous_count) / previous_count) * 100, 1))}%"
             context["avg_revenue"] = f"₹{round(hospital_appointments.aggregate(avg=Avg('accepted_total_amount'))['avg'] or 0, 2)}"
 
             # ==========================================================
@@ -674,7 +674,7 @@ def reports(request):
 from django.http import JsonResponse
 from django.db.models import Sum, Avg, Count, Q
 from django.db.models.functions import TruncHour
-from datetime import datetime
+from datetime import datetime, timedelta
 
 @dashboard_login_required
 def hospital_report_data(request):
@@ -685,7 +685,10 @@ def hospital_report_data(request):
     if not user or not user.is_active:
         return JsonResponse({"error": "Authentication required"}, status=401)
 
-    filter_type = request.GET.get("filter", "month")
+    filter_type = request.GET.get("filter", "all").strip().lower()
+    visit_type = request.GET.get("visit_type", "").strip().lower()
+    start_date = request.GET.get("start_date", "").strip()
+    end_date = request.GET.get("end_date", "").strip()
 
     # ==========================================================
     # 2. DYNAMIC PROFILE EXTRACT: Works for ANY hospital account
@@ -707,6 +710,11 @@ def hospital_report_data(request):
         .distinct()
         .select_related("category", "service_type", "address")
     )
+
+    if visit_type == "home":
+        appointments = appointments.filter(Q(preferred_mode__iexact="home") | Q(preferred_mode__iexact="home-service"))
+    elif visit_type == "hospital":
+        appointments = appointments.filter(Q(preferred_mode__iexact="hospital") | Q(preferred_mode__iexact="visit"))
 
     # ==========================================================
     # 4. PRINT ISOLATED DATA TO THE TERMINAL FOR INSPECTION
@@ -747,19 +755,24 @@ def hospital_report_data(request):
     # =========================================
     # FILTER LOGIC (Time context limits)
     # =========================================
+    today = datetime.now().date()
     if filter_type == "week":
-        current_week = datetime.now().isocalendar()[1]
-        appointments = appointments.filter(created_at__week=current_week)
+        appointments = appointments.filter(created_at__date__gte=today - timedelta(days=6), created_at__date__lte=today)
 
     elif filter_type == "month":
-        current_month = datetime.now().month
-        appointments = appointments.filter(created_at__month=current_month)
+        appointments = appointments.filter(created_at__year=today.year, created_at__month=today.month)
 
     elif filter_type == "custom":
-        appointments = appointments.filter(created_at__year=datetime.now().year)
-
-    else:
-        appointments = appointments.filter(created_at__date=datetime.now().date())
+        if not start_date or not end_date:
+            return JsonResponse({"error": "Please select a custom date."}, status=400)
+        try:
+            appointments = appointments.filter(
+                created_at__date__range=(date.fromisoformat(start_date), date.fromisoformat(end_date))
+            )
+        except ValueError:
+            return JsonResponse({"error": "Invalid custom date range."}, status=400)
+    elif filter_type == "today":
+        appointments = appointments.filter(created_at__date=today)
 
     # =========================================
     # RE-EVALUATING METRICS FOR PAYLOAD DISPATCH
@@ -793,7 +806,7 @@ def hospital_report_data(request):
     current_count = appointments.count()
     previous_count = max(current_count - 5, 1)
     growth_percent = round(((current_count - previous_count) / previous_count) * 100, 1)
-    growth = f"+{growth_percent}%"
+    growth = f"{abs(growth_percent)}%"
 
     avg_revenue_patient = appointments.aggregate(avg=Avg("accepted_total_amount"))["avg"] or 0
     avg_revenue = f"₹{round(avg_revenue_patient, 2)}"
