@@ -89,7 +89,7 @@ function resetRoomCard($card) {
     $card.find(".room-options").html(renderRoomOptions());
     $card.find(".days-input").val("1");
     $card.find(".room-price-input").val("");
-    $card.find(".ac-input").prop("checked", false);
+    $card.find(".ac-input").val("false");
 }
 
 // function collectServices() {
@@ -147,14 +147,7 @@ function collectRooms() {
         const bedRoomId = $card.find(".bed-room-id").val();
         const days = $card.find(".days-input").val();
         const price = $card.find(".room-price-input").val();
-        const ac = $card.find(".ac-input").is(":checked");
-
-        console.log(
-            "ROOM ID =", bedRoomId,
-            "DAYS =", days,
-            "PRICE =", price,
-            "AC =", ac
-        );
+        const ac = $card.find(".ac-input").val() === "true";
 
         if (bedRoomId && days && price) {
 
@@ -166,8 +159,6 @@ function collectRooms() {
             });
         }
     });
-
-    console.log("FINAL ROOMS =", rooms);
 
     return rooms;
 }
@@ -184,11 +175,6 @@ function collectServices() {
         const serviceId = $card.find(".service-id").val();
         const price = $card.find(".price-input").val().trim();
 
-        console.log(
-            "CATEGORY =", categoryId,
-            "SERVICE =", serviceId,
-            "PRICE =", price
-        );
 
         if (categoryId && serviceId && price) {
 
@@ -200,7 +186,6 @@ function collectServices() {
         }
     });
 
-    console.log("FINAL SERVICES =", services);
 
     return services;
 }

@@ -577,6 +577,151 @@ def validate_and_save_file(file_obj, subdir, field_label, user_type='common'):
     filename = default_storage.save(os.path.join(upload_dir, file_obj.name), file_obj)
     return filename, None 
 
+
+def identify_duplicate_kyc_field(error_text):
+    if not error_text:
+        return None
+
+    text = str(error_text).lower()
+    field_aliases = {
+        "email": ("email",),
+        "phone_number": ("phone_number",),
+        "registration_number": (
+            "registration_number",
+            "registration_no",
+            "lab_registration_number",
+            "pharmacy_registration_number",
+            "medical_license_number",
+            "gov_license_number",
+            "license_number",
+            "license_no",
+        ),
+        "aadhar_number": (
+            "aadhar_number",
+            "aadhaar_number",
+            "aadhar_card_no",
+            "identity_proof_aadhar_number",
+        ),
+        "pan_number": (
+            "pan_number",
+            "pan_card_no",
+            "identity_proof_pan_number",
+        ),
+        "gst_number": ("gst_number",),
+        "tan_number": ("tan_number",),
+    }
+
+    for field_name, aliases in field_aliases.items():
+        for alias in aliases:
+            if re.search(rf"\b{re.escape(alias)}\b", text):
+                return field_name
+
+    matches = re.findall(r"key\s*\(([^)]+)\)", text)
+    for raw_value in matches:
+        normalized = raw_value.strip().lower().replace('"', '').replace("'", "")
+        normalized = normalized.replace("-", "_").replace(" ", "_")
+
+        if normalized.endswith("_email") or normalized == "email":
+            return "email"
+        if normalized.endswith("_phone_number") or normalized == "phone_number":
+            return "phone_number"
+        if (
+            normalized.endswith("_registration_number")
+            or normalized.endswith("_registration_no")
+            or normalized.endswith("_lab_registration_number")
+            or normalized.endswith("_pharmacy_registration_number")
+            or normalized.endswith("_gov_license_number")
+            or normalized.endswith("_medical_license_number")
+            or normalized.endswith("_license_number")
+            or normalized.endswith("_license_no")
+        ):
+            return "registration_number"
+        if (
+            normalized.endswith("_aadhar_number")
+            or normalized.endswith("_aadhaar_number")
+            or normalized.endswith("_aadhar_card_no")
+            or normalized.endswith("_identity_proof_aadhar_number")
+        ):
+            return "aadhar_number"
+        if (
+            normalized.endswith("_pan_number")
+            or normalized.endswith("_pan_card_no")
+            or normalized.endswith("_identity_proof_pan_number")
+        ):
+            return "pan_number"
+        if normalized.endswith("_gst_number") or normalized == "gst_number":
+            return "gst_number"
+        if normalized.endswith("_tan_number") or normalized == "tan_number":
+            return "tan_number"
+
+    constraint_matches = re.findall(
+        r'constraint\s+"[^"]*?([a-z0-9_]+)_(?:key|unique)"',
+        text,
+    )
+    for value in constraint_matches:
+        normalized = value.strip().lower().replace('-', '_').replace(' ', '_')
+        if normalized.endswith("_email"):
+            return "email"
+        if normalized.endswith("_phone_number"):
+            return "phone_number"
+        if (
+            normalized.endswith("_registration_number")
+            or normalized.endswith("_registration_no")
+            or normalized.endswith("_lab_registration_number")
+            or normalized.endswith("_pharmacy_registration_number")
+            or normalized.endswith("_gov_license_number")
+            or normalized.endswith("_medical_license_number")
+            or normalized.endswith("_license_number")
+        ):
+            return "registration_number"
+        if normalized.endswith("_pan_number"):
+            return "pan_number"
+        if normalized.endswith("_gst_number"):
+            return "gst_number"
+        if normalized.endswith("_tan_number"):
+            return "tan_number"
+        if normalized.endswith("_aadhar_number") or normalized.endswith("_aadhaar_number"):
+            return "aadhar_number"
+
+    return None
+
+
+def duplicate_field_message(field_name):
+    labels = {
+        "email": "Email",
+        "phone_number": "Phone number",
+        "registration_number": "Registration number",
+        "aadhar_number": "Aadhaar number",
+        "pan_number": "PAN number",
+        "gst_number": "GST number",
+        "tan_number": "TAN number",
+    }
+    label = labels.get(field_name, field_name.replace("_", " ").title())
+    return f"{label} already exists."
+
+
+def handle_duplicate_kyc_error(exc, fallback_message):
+    field_name = identify_duplicate_kyc_field(str(exc))
+
+    if field_name:
+        logger.warning(
+            "Duplicate KYC field detected: %s. Details: %s",
+            field_name,
+            str(exc),
+        )
+        return JsonResponse({
+            "success": False,
+            "field": field_name,
+            "message": duplicate_field_message(field_name),
+        }, status=400)
+
+    logger.exception("Unexpected KYC database error: %s", fallback_message)
+    return JsonResponse({
+        "success": False,
+        "message": fallback_message,
+    }, status=400)
+
+
 def login_page(request):
     return render(request, 'login/login.html')
 
@@ -2635,12 +2780,15 @@ def save_hospital_step_1(request):
     user.phone_country_code = country_code
     user.phone_number = phone_number
 
-    user.save(update_fields=[
-        "email",
-        "phone_country_code",
-        "phone_number",
-        "updated_at"
-    ])
+    try:
+        user.save(update_fields=[
+            "email",
+            "phone_country_code",
+            "phone_number",
+            "updated_at"
+        ])
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving hospital details.")
     
     state = None
 
@@ -2674,23 +2822,26 @@ def save_hospital_step_1(request):
         except HospitalTiming.DoesNotExist:
             hospital_timing = None
             
-    hospital_profile, created = HospitalProfile.objects.update_or_create(
-        user=user,
-        defaults={
-            "user_id": user_id,
-            "hospital_name": hospital_name,
-            "owner_name": owner_name,
-            "contact_no": phone_number,
-            "otp": otp,
-            "address": address,
-            "state": state,
-            "city": city,
-            "pincode": pincode,
-            "alternate_contact_no": alternate_contact_no,
-            "country": country,
-            "hospital_timing": hospital_timing,
-        }
-    )
+    try:
+        hospital_profile, created = HospitalProfile.objects.update_or_create(
+            user=user,
+            defaults={
+                "user_id": user_id,
+                "hospital_name": hospital_name,
+                "owner_name": owner_name,
+                "contact_no": phone_number,
+                "otp": otp,
+                "address": address,
+                "state": state,
+                "city": city,
+                "pincode": pincode,
+                "alternate_contact_no": alternate_contact_no,
+                "country": country,
+                "hospital_timing": hospital_timing,
+            }
+        )
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving hospital details.")
     
     if created:
         message = "Hospital profile created successfully."
@@ -3418,12 +3569,15 @@ def save_doctor_step_1(request):
     user.phone_country_code = country_code
     user.phone_number = contact_number
 
-    user.save(update_fields=[
-        "email",
-        "phone_country_code",
-        "phone_number",
-        "updated_at"
-    ])
+    try:
+        user.save(update_fields=[
+            "email",
+            "phone_country_code",
+            "phone_number",
+            "updated_at"
+        ])
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving doctor details.")
     
     state = None
 
@@ -3447,33 +3601,36 @@ def save_doctor_step_1(request):
                 "message": "Selected city not found."
             }, status=400)
                      
-    doctor_profile, created = DoctorProfile.objects.update_or_create(
-        user=user,
-        defaults={
-            "user_id": user_id,
-            "full_name": full_name,
-            "gender": gender,
-            "age": age,
-            "specialty_id": specialty,
-            "education_id": education,
-            "experience_id": experience,
-            "clinic_name": clinic_name,
-            "owner_name": owner_name,
-            "contact_number": contact_number,
-            "alt_contact_number": alt_contact_number,
-            "full_address": full_address,
-            "state_id": state_id,
-            "city_id": city_id,
-            "pincode": pincode,
-            "country": country,
-            "clinic_timing_from": clinic_timing_from,
-            "clinic_timing_to": clinic_timing_to,
-            "home_visit_available": home_visit_available,
-            "otp": otp,
-            "referral_code": referral_code,
-            
-        }
-    )
+    try:
+        doctor_profile, created = DoctorProfile.objects.update_or_create(
+            user=user,
+            defaults={
+                "user_id": user_id,
+                "full_name": full_name,
+                "gender": gender,
+                "age": age,
+                "specialty_id": specialty,
+                "education_id": education,
+                "experience_id": experience,
+                "clinic_name": clinic_name,
+                "owner_name": owner_name,
+                "contact_number": contact_number,
+                "alt_contact_number": alt_contact_number,
+                "full_address": full_address,
+                "state_id": state_id,
+                "city_id": city_id,
+                "pincode": pincode,
+                "country": country,
+                "clinic_timing_from": clinic_timing_from,
+                "clinic_timing_to": clinic_timing_to,
+                "home_visit_available": home_visit_available,
+                "otp": otp,
+                "referral_code": referral_code,
+                
+            }
+        )
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving doctor details.")
     
     if created:
         message = "Doctor profile created successfully."
@@ -3825,7 +3982,10 @@ def save_doctor_step_3(request):
 
     doctor_profile.clinic_photo_path = photo_path
 
-    doctor_profile.save()
+    try:
+        doctor_profile.save()
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving doctor documents.")
 
     return JsonResponse({
         "success": True,
@@ -4286,14 +4446,17 @@ def save_lab_step_1(request):
     user.phone_country_code = country_code
     user.phone_number = phone_number
 
-    user.save(
-        update_fields=[
-            "email",
-            "phone_country_code",
-            "phone_number",
-            "updated_at"
-        ]
-    )
+    try:
+        user.save(
+            update_fields=[
+                "email",
+                "phone_country_code",
+                "phone_number",
+                "updated_at"
+            ]
+        )
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving lab details.")
 
     #======
     # LAB PROFILE
@@ -4320,10 +4483,13 @@ def save_lab_step_1(request):
     if referral_code:
         defaults["referral_code"] = referral_code
 
-    lab_profile, created = LabProfile.objects.update_or_create(
-        user=user,
-        defaults=defaults
-    )
+    try:
+        lab_profile, created = LabProfile.objects.update_or_create(
+            user=user,
+            defaults=defaults
+        )
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving lab details.")
 
     #======
     # RESPONSE
@@ -4622,7 +4788,10 @@ def save_lab_step_3(request):
     lab_profile.gov_license_path = gov_license_path
     lab_profile.lab_photo_path = lab_photo_path
 
-    lab_profile.save()
+    try:
+        lab_profile.save()
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving lab documents.")
 
     return JsonResponse({
         "success": True,
@@ -4826,12 +4995,15 @@ def save_pharmacy_step_1(request):
     user.phone_country_code = country_code
     user.phone_number = contact_number
 
-    user.save(update_fields=[
-        "email",
-        "phone_country_code",
-        "phone_number",
-        "updated_at"
-    ])
+    try:
+        user.save(update_fields=[
+            "email",
+            "phone_country_code",
+            "phone_number",
+            "updated_at"
+        ])
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving pharmacy details.")
     
     state = None
 
@@ -4855,30 +5027,33 @@ def save_pharmacy_step_1(request):
                 "message": "Selected city not found."
             }, status=400)
                      
-    pharmacy_profile, created = PharmacyProfile.objects.update_or_create(
-        user=user,
-        defaults={
-            "user_id": user_id,
-            "first_name": first_name,
-            "last_name": last_name,
-            "gender": gender,
-            "age": age,
-            "personal_email": personal_email,
-            "personal_pan_number": personal_pan_number,
-            "company_name": company_name,
-            "personal_phone_number": personal_phone_number,
-            "address": address,
-            "state_id": state_id,
-            "city_id": city_id,
-            "pincode": pincode,
-            "country": country,
-            "website": website,
-            "pharmacy_timing_id": pharmacy_timing,
-            "otp": otp,
-            "referral_code": referral_code,
-            
-        }
-    )
+    try:
+        pharmacy_profile, created = PharmacyProfile.objects.update_or_create(
+            user=user,
+            defaults={
+                "user_id": user_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "gender": gender,
+                "age": age,
+                "personal_email": personal_email,
+                "personal_pan_number": personal_pan_number,
+                "company_name": company_name,
+                "personal_phone_number": personal_phone_number,
+                "address": address,
+                "state_id": state_id,
+                "city_id": city_id,
+                "pincode": pincode,
+                "country": country,
+                "website": website,
+                "pharmacy_timing_id": pharmacy_timing,
+                "otp": otp,
+                "referral_code": referral_code,
+                
+            }
+        )
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving pharmacy details.")
     
     if created:
         message = "Pharmacy profile created successfully."
@@ -5258,7 +5433,10 @@ def save_pharmacy_step_3(request):
 
     pharmacy_profile.storefront_image_path = photo_file_path
 
-    pharmacy_profile.save()
+    try:
+        pharmacy_profile.save()
+    except IntegrityError as exc:
+        return handle_duplicate_kyc_error(exc, "Something went wrong while saving pharmacy documents.")
 
     return JsonResponse({
         "success": True,
