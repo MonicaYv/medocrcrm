@@ -2074,6 +2074,7 @@ def verify_login_otp(request):
         })
 
     request.session["user_id"] = user.id
+    request.session["auth_method"] = "phone"
     try:
         if user.email:
 
