@@ -560,6 +560,34 @@ $(".main-tab-pharmacy").on("click", function () {
     firstSubTab.trigger("click");
   }
 });
+
+// Seller settings main menu (Settings, Subscription, Rewards, Support, Donate).
+// Bind to the menu's data attribute rather than a theme-specific class so the
+// navigation works consistently for pharmacy, lab, doctor, and hospital users.
+$(document).on("click", ".tabs-menu [data-tab]", function (event) {
+  const $menuItem = $(this);
+  const mainTab = $menuItem.data("tab");
+  const $panel = $("#" + mainTab);
+
+  if (!$panel.length) {
+    return;
+  }
+
+  event.preventDefault();
+
+  $(".tabs-menu [data-tab]").removeClass("active-tab-main");
+  $menuItem.addClass("active-tab-main");
+
+  $(".mainTab-content").addClass("hidden");
+  $panel.removeClass("hidden");
+
+  // Open the first available sub-tab when returning to a section.
+  const $firstSubTab = $(`[data-parent="${mainTab}"]`).first();
+  if ($firstSubTab.length) {
+    $firstSubTab.trigger("click");
+  }
+});
+
 $('[data-tab="points"][data-parent="rewards"]').on('click', function () {
   setTimeout(() => {
     if (window.referralChart) {

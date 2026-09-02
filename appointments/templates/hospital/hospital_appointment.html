@@ -26,7 +26,7 @@
                             <!-- Search Input -->
                             <div class="flex items-center w-full lg:w-[300px] h-10 rounded-[6px] bg-light-white px-2">
                                 <span class="material-symbols-outlined text-dark-gray">search</span>
-                                <input type="text" placeholder="Search by name or categories"
+                                <input id="appointmentSearch" type="text" placeholder="Search by name or categories"
                                     class="w-full ml-1 border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-medium-gray" />
                             </div>
 
@@ -38,17 +38,17 @@
                                 </button>
                                 <div
                                     class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                                    <div
+                                    <div data-date-filter="custom"
                                         class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-dodger-blue hover:text-white rounded">
                                         Custom date<span class="material-symbols-outlined calendar-icon">calendar_today</span>
                                     </div>
-                                    <div class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                                    <div data-date-filter="week" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                                         1 Week
                                     </div>
-                                    <div class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                                    <div data-date-filter="month" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                                         1 Month
                                     </div>
-                                    <div class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                                    <div data-date-filter="year" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                                         1 Year
                                     </div>
                                 </div>

@@ -10,3 +10,5 @@ whitenoise
 pillow
 pyotp
 aiosmtplib
+google-auth
+google-auth-oauthlib

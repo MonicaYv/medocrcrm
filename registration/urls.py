@@ -10,6 +10,10 @@ urlpatterns = [
     path('auth/login', views.login_auth, name='login_auth'),
     path('auth/login-old', views.login_auth_OLD, name='login_auth_old'),
 
+    #GAuth
+    path("google/login/", views.google_login, name="google_login"),
+    path("google/callback/", views.google_callback, name="google_callback"),
+
     path('save/medical_pharmacy', views.save_medical_pharmacy, name='save_pharmacy'),        
     path("otp/send", views.send_otp, name="send_otp"),
     path("otp/verify", views.verify_otp, name="verify_otp"),

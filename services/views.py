@@ -177,11 +177,6 @@ def services(request):
 
 
         hospital_profile = user.hospital_profile
-        print("================================")
-        print("CURRENT HOSPITAL ID =", hospital_profile.id)
-        print("CURRENT HOSPITAL NAME =", hospital_profile.hospital_name)
-        print("================================")
-
         categories = HospitalCategory.objects.values("id", "name")
         services = HospitalServiceDescription.objects.values("id", "description")
         bed_rooms = HospitalBedRoom.objects.values("id", "name")
@@ -192,14 +187,12 @@ def services(request):
                 is_active=True
             ).select_related("category", "description").order_by("-updated_at", "-created_at")
         )
-        print("SERVICE COUNT =", len(service_cards))
         room_cards = list(
             HospitalRoomRateCard.objects.filter(
                 hospital=hospital_profile,
                 is_active=True
             ).select_related("bed_room").order_by("-updated_at", "-created_at")
         )
-        print("ROOM COUNT =", len(room_cards))
 
         sub = SellerSubscription.objects.filter(
             seller_type="hospital",
@@ -224,9 +217,6 @@ def services(request):
         })
 
         return render(request, 'hospital/services.html', context)
-
-
-
     
 @dashboard_login_required
 def save_lab_services(request):
@@ -751,15 +741,8 @@ def get_hospital_services(request):
 @dashboard_login_required
 @require_POST
 def save_hospital_services(request):
-
-    print("\n========== SAVE HOSPITAL SERVICES ==========")
-    print("RAW BODY =", request.body)
-
     try:
         data = json.loads(request.body)
-
-        print("PARSED DATA =", data)
-
     except json.JSONDecodeError:
         return JsonResponse(
             {"success": False, "error": "Invalid JSON"},
