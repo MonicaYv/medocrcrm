@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const virusCheck  = viewModal.querySelector("input[type=checkbox]");
     const replaceBtn  = document.getElementById("replaceBtn");
     // const saveBtn     = document.getElementById("saveBtn");
-    const saveBtns = document.querySelectorAll(".save-btn-doc");
+    const saveBtns = document.querySelectorAll("#saveBtn, .save-btn-doc");
     // const fileInput   = document.getElementById("replaceInput");
     // console.log(fileInput.files)
     let fileInput = null;
@@ -175,7 +175,7 @@ replaceBtn && replaceBtn.addEventListener("click", () => {
     );
 
     if(currentInput){
-
+        currentInput.value = "";
         currentInput.click();
 
         currentInput.onchange = (e) => {
@@ -305,22 +305,47 @@ replaceBtn && replaceBtn.addEventListener("click", () => {
     //     previewImage(newFile);
     // });
 const previewImage = (file) => {
+    [modalImg, modalEmbed].forEach(el => el.classList.add("hidden"));
+
+    if (file.type === "application/pdf") {
+        modalEmbed.src = URL.createObjectURL(file);
+        modalEmbed.classList.remove("hidden");
+        return;
+    }
 
     const reader = new FileReader();
-
     reader.onload = (e) => {
-
         modalImg.src = e.target.result;
-
         modalImg.classList.remove("hidden");
-
-        if(modalEmbed){
-            modalEmbed.classList.add("hidden");
-        }
     };
-
     reader.readAsDataURL(file);
 };
+
+    // The upload icons on the Documents tab use their adjacent hidden input.
+    // Keep this separate from the modal's Replace action so both entry points
+    // select the correct document type before the shared Save action uploads it.
+    document.querySelectorAll(".upload-trigger").forEach(trigger => {
+        trigger.addEventListener("click", () => {
+            const input = trigger.parentElement.querySelector(".file-input");
+            if (!input) return;
+
+            currentDocType = input.dataset.doc;
+            input.value = "";
+            input.click();
+        });
+    });
+
+    document.querySelectorAll(".file-input").forEach(input => {
+        input.addEventListener("change", event => {
+            const selectedFile = event.target.files[0];
+            if (!selectedFile) return;
+
+            currentDocType = input.dataset.doc;
+            newFile = selectedFile;
+            previewImage(newFile);
+            viewModal.classList.remove("hidden");
+        });
+    });
 
 saveBtns.forEach(saveBtn => {
 
