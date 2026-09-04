@@ -97,21 +97,29 @@ def save_hospital_doctor(request):
         }
     )
 
-    doctor = DoctorsProfile.objects.create(
-        user=request.user_obj,
-        first_name=first_name,
-        last_name=last_name,
-        gender=gender,
-        age=age or None,
-        phone_number=phone,
-        phone_country_code="+91",
-        specialties=specialty_name,
-        specialization=specialty,
-        education=education,
-        experience=experience,
-        profile_pic_path=photo_path,
-        created_by_hospital=True,
-    )
+    doctor_id = data.get("doctor_id")
+    if doctor_id:
+        doctor = DoctorsProfile.objects.filter(
+            id=doctor_id, user=request.user_obj, created_by_hospital=True, is_active=True
+        ).first()
+        if not doctor:
+            return JsonResponse({"success": False, "error": "Doctor not found"}, status=404)
+        doctor.first_name, doctor.last_name = first_name, last_name
+        doctor.gender, doctor.age, doctor.phone_number = gender, age or None, phone
+        doctor.specialties, doctor.specialization = specialty_name, specialty
+        doctor.education, doctor.experience = education, experience
+        if photo_path:
+            doctor.profile_pic_path = photo_path
+        doctor.save()
+        doctor.availability.all().delete()
+    else:
+        doctor = DoctorsProfile.objects.create(
+            user=request.user_obj, first_name=first_name, last_name=last_name,
+            gender=gender, age=age or None, phone_number=phone,
+            phone_country_code="+91", specialties=specialty_name,
+            specialization=specialty, education=education, experience=experience,
+            profile_pic_path=photo_path, created_by_hospital=True,
+        )
 
     for item in availability:
         DoctorAvailability.objects.create(
@@ -163,6 +171,7 @@ def get_hospital_doctors(request):
             "specialty": d["specialties"] or "",
             "rating": "0.0",
             "image": str(d["profile_pic_path"]) if d["profile_pic_path"] else "/static/images/coolen-Smith.jpg",
+            "created_at": d["created_at"].isoformat() if d["created_at"] else "",
         })
 
     return JsonResponse({
@@ -181,6 +190,8 @@ def doctor_details(request, doctor_id):
         "availability"
     ).filter(
         id=doctor_id,
+        user=request.user_obj,
+        created_by_hospital=True,
         is_active=True
     ).first()
 
@@ -207,7 +218,7 @@ def doctor_details(request, doctor_id):
             "gender": doctor.gender,
             "age": doctor.age,
             "phone": f"{doctor.phone_country_code or ''} {doctor.phone_number or ''}",
-            "speciality": doctor.specialization.name if doctor.specialization else "",
+            "specialty": doctor.specialization.name if doctor.specialization else "",
             "education": doctor.education.name if doctor.education else "",
             "experience": doctor.experience.years if doctor.experience else 0,
             "image": doctor.profile_pic_path or "/static/images/coolen-Smith.jpg",

@@ -17,9 +17,13 @@ function getCookie(name) {
   return cookieValue;
 }
 
+let selectedDoctor = null;
+
 $(document).ready(function () {
   // Define all doctors data
   let allDoctors = [];
+  let filteredDoctors = [];
+  let activeDateFilter = "";
 
   // 1. Toggle Main Dropdown
   $(".filterToggle").on("click", function (e) {
@@ -143,7 +147,7 @@ $(document).ready(function () {
   function renderDoctors(page) {
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const doctorsToShow = allDoctors.slice(startIndex, endIndex);
+    const doctorsToShow = filteredDoctors.slice(startIndex, endIndex);
 
     const doctorCards = doctorsToShow
       .map(
@@ -173,7 +177,7 @@ $(document).ready(function () {
   }
 
   function renderPagination() {
-    totalPages = Math.ceil(allDoctors.length / itemsPerPage) || 1;
+    totalPages = Math.ceil(filteredDoctors.length / itemsPerPage) || 1;
     let pageButtons = "";
     for (let i = 1; i <= totalPages; i++) {
       const activeClass =
@@ -221,6 +225,7 @@ $(document).ready(function () {
 
       if (res.success) {
         allDoctors = Array.isArray(res.doctors) ? res.doctors : [];
+        filteredDoctors = allDoctors.slice();
 
         console.log("Doctors loaded from database:", allDoctors);
 
@@ -242,6 +247,25 @@ $(document).ready(function () {
 
   // Initial render
   loadHospitalDoctors();
+
+  function applyDoctorFilters() {
+    const query = $('input[placeholder="Search by name or categories"]').val().trim().toLowerCase();
+    const cutoff = activeDateFilter ? new Date(Date.now() - activeDateFilter * 86400000) : null;
+    filteredDoctors = allDoctors.filter(doctor => {
+      const matchesQuery = !query || doctor.name.toLowerCase().includes(query) || (doctor.specialty || "").toLowerCase().includes(query);
+      const matchesDate = !cutoff || !doctor.created_at || new Date(doctor.created_at) >= cutoff;
+      return matchesQuery && matchesDate;
+    });
+    currentPage = 1;
+    renderDoctors(currentPage);
+    renderPagination();
+  }
+
+  $('input[placeholder="Search by name or categories"]').on('input', applyDoctorFilters);
+  $('#dateSubmenu > div').not('.trigger-custom').on('click', function () {
+    activeDateFilter = $(this).text().trim() === 'Week' ? 7 : 30;
+    applyDoctorFilters();
+  });
 
 
  $(".popup-btn").on("click", function () {
@@ -665,6 +689,8 @@ $(document).on("click", ".closeInfoPopup", function () {
     formData.append("education", education);
     formData.append("experience", experience);
     formData.append("availability", JSON.stringify(availability));
+    const doctorId = $popup.data("doctor-id");
+    if (doctorId) formData.append("doctor_id", doctorId);
 
     const photoFile = fileInput[0].files[0];
     if (photoFile) {
@@ -682,7 +708,7 @@ $(document).on("click", ".closeInfoPopup", function () {
       contentType: false,
       success: function (res) {
   if (res.success) {
-    toastr.success("Doctor registered successfully!");
+    toastr.success(doctorId ? "Doctor updated successfully!" : "Doctor registered successfully!");
 
     // 1. If backend gave us the single doctor data, append it to our local state array
     if (res.doctor) {
@@ -697,6 +723,7 @@ $(document).on("click", ".closeInfoPopup", function () {
       };
       
       allDoctors.unshift(newDoctor); // Adds the new doctor to the top/beginning of the array
+      filteredDoctors = allDoctors.slice();
       
       // 2. Re-render the grid and pagination instantly with the new data
       renderDoctors(currentPage);
@@ -738,6 +765,7 @@ $(document).on("click", ".doctorCard", function () {
       }
 
       const d = response.doctor;
+      selectedDoctor = d;
 
       $("#doctor-image").attr("src", d.image || "/static/images/coolen-Smith.jpg");
       $("#doctor-name").text(d.name);
@@ -745,6 +773,7 @@ $(document).on("click", ".doctorCard", function () {
       $("#doctor-age").text(d.age || "-");
       $("#doctor-phone").text(d.phone || "-");
       $("#doctor-specialty").text(d.specialty || "-");
+      $("#doctor-speciality").text(d.specialty || "-");
       $("#doctor-education").text(d.education || "-");
       $("#doctor-experience").text(`${d.experience || 0} Years`);
 
@@ -761,13 +790,42 @@ $(document).on("click", ".doctorCard", function () {
       });
 
       $("#doctor-availability").html(availabilityHtml || "<p>No availability configured</p>");
+      $("#doctor-id").text(d.id);
       $(".docInfoPopup").removeClass("hidden").addClass("flex");
     }
   });
 });
 
+$(document).on("click", ".share-doctor", async function () {
+  if (!selectedDoctor) return;
+  const d = selectedDoctor;
+  const text = `${d.name}\nSpecialty: ${d.specialty || '-'}\nPhone: ${d.phone || '-'}`;
+  try {
+    if (navigator.share) await navigator.share({ title: "Doctor Information", text });
+    else if (navigator.clipboard) { await navigator.clipboard.writeText(text); toastr.success("Doctor information copied to clipboard"); }
+    else window.prompt("Copy doctor information", text);
+  } catch (error) { if (error.name !== "AbortError") toastr.error("Unable to share doctor information"); }
+});
+
+$(document).on("click", ".edit-doctor", function () {
+  if (!selectedDoctor) return;
+  const d = selectedDoctor;
+  const $popup = $(".addDoctorPopup");
+  $popup.data("doctor-id", d.id);
+  $popup.find('input[type="text"]').eq(0).val((d.name || "").replace(/^Dr\.\s*/, ""));
+  $popup.find('input[type="number"]').eq(0).val((d.phone || "").replace(/\D/g, ""));
+  $popup.find('input[type="text"]').eq(1).val(d.gender || "");
+  $popup.find('input[type="number"]').eq(1).val(d.age || "");
+  $popup.find(".dropdown-text").eq(0).text(d.specialty || "Select");
+  $popup.find(".dropdown-text").eq(1).text(d.education || "Select");
+  $popup.find(".increaseBtn").siblings("span").text(d.experience || 0);
+  $popup.removeClass("hidden").addClass("flex");
+  $(".docInfoPopup").addClass("hidden").removeClass("flex");
+});
+
 function clearAddDoctorForm() {
   const $popup = $(".addDoctorPopup");
+  $popup.removeData("doctor-id");
   
   // Clear all text and number inputs
   $popup.find('input[type="text"], input[type="number"]').val('');
