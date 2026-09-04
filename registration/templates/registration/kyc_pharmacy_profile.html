@@ -43,16 +43,6 @@
         </div>
         <!-- Dropdown menu content -->
         <div class="profile-dropdown border border-{{ border }}">
-          <a href="/settings/">
-            <div class="px-4 py-3 flex items-center space-x-3 cursor-pointer">
-              <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8 rounded-full" />
-              <div>
-                <p class="text-sm font-normal">
-                  {{ user_display_name|default:"User Name" }}
-                </p>
-              </div>
-            </div>
-          </a>
           <div>
             <a href="{% url 'logout' %}" class="px-4 py-3 text-sm hover:bg-violet-sky-opacity flex items-center space-x-2">
               <span class="material-symbols-outlined"> logout </span>
