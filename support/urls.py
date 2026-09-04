@@ -12,6 +12,7 @@ urlpatterns = [
     path('get-issue-options/', views.get_issue_options, name='get-issue-options'),
     path('get-tickets-list/', views.get_ticket_lists, name='get-tickets-list'),
     path('get-tickets-details/', views.ticket_details, name='get-tickets-details'),
+    path('tickets/<int:ticket_id>/messages/', views.ticket_messages, name='ticket_messages'),
     path('get-tickets-filters/', views.filter_tickets, name='get-tickets-filters'),
     path('get-faq-lists/', views.faq_lists, name='get-faq-lists'),
     path('send-support-email/', views.send_support_email, name='send-support-email'),

@@ -193,7 +193,7 @@
         </div>
 
         <!-- Chat Messages Container -->
-        <div class="flex flex-col space-y-4 pt-3">
+        <div class="flex flex-col space-y-4 pt-3 support-ticket-messages">
           <!-- User Questions Block -->
           <div
             class="m:w-60 lg:w-1/2 p-2 rounded-2xl bg-white shadow border border-{{ border }}"
@@ -267,11 +267,12 @@
             </div>
           </div>
         </div>
+        <div class="support-live-message-list flex flex-col space-y-3 mt-4"></div>
         <!-- Message Input Row -->
         <div class="flex items-center gap-2 mt-8 w-full">
           <!-- Input with embedded icons -->
           <div class="relative w-full">
-            <input
+            <input id="support-ticket-message"
               type="text"
               class="w-full bg-white rounded-md px-4 pr-20 py-3 text-sm"
               placeholder="Message..."
@@ -279,18 +280,16 @@
             <!-- Gallery & Pin Icons inside input -->
             <div class="absolute inset-y-0 right-2 flex items-center gap-2">
               <!-- Gallery Icon (Black, Rounded) -->
-              <button
-                type="button"
-                class="w-8 h-8 flex items-center justify-center rounded-md bg-{{ secondary_bg }}"
+              <button type="button"
+                class="support-media-button w-8 h-8 flex items-center justify-center rounded-md bg-{{ secondary_bg }}"
               >
                 <span class="material-symbols-outlined text-black text-xl"
                   >photo_library</span
                 >
               </button>
               <!-- Pin Icon (Black, Rounded & Centered) -->
-              <button
-                type="button"
-                class="w-8 h-8 flex items-center justify-center rounded-md bg-{{ secondary_bg }}"
+              <button type="button"
+                class="support-attachment-button w-8 h-8 flex items-center justify-center rounded-md bg-{{ secondary_bg }}"
               >
                 <span class="material-symbols-outlined text-black text-xl"
                   >attach_file</span
@@ -299,9 +298,12 @@
             </div>
           </div>
 
+          <input id="support-ticket-media" type="file" accept="image/*" class="hidden">
+          <input id="support-ticket-attachment" type="file" class="hidden">
+
           <button
             type="button"
-            class="flex items-center justify-center w-10 h-10 rounded-full bg-{{ border }}"
+            class="support-send-message flex items-center justify-center w-10 h-10 rounded-full bg-{{ border }}"
           >
             <span class="material-symbols-outlined text-white text-xl"
               >send</span

@@ -2,9 +2,9 @@ import json
 from datetime import datetime
 from .utils import send_custom_email
 from dashboard.utils import dashboard_login_required, get_common_context
-from .models import IssueType, IssueOption, SupportTicket, FAQ, ChatOptionGroup
+from .models import IssueType, IssueOption, SupportTicket, FAQ, ChatOptionGroup, ChatSupport
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 from django.core.serializers.json import DjangoJSONEncoder
@@ -325,6 +325,43 @@ def ticket_details(request):
             return JsonResponse({"error": str(e)})
 
     return JsonResponse({"error": "Invalid request method"})
+
+@dashboard_login_required
+@require_http_methods(["GET", "POST"])
+def ticket_messages(request, ticket_id):
+    """Persist the existing ticket-chat controls, including media/attachments."""
+    user = request.user_obj
+    ticket = get_object_or_404(SupportTicket, id=ticket_id, user=user)
+    session_id = f"ticket-{ticket.id}"
+    if request.method == "POST":
+        message = request.POST.get("message", "").strip()
+        upload = request.FILES.get("attachment")
+        if not message and not upload:
+            return JsonResponse({"success": False, "message": "Enter a message or select a file."}, status=400)
+        attachment_url = ""
+        message_type = "text"
+        if upload:
+            attachment_url, error = validate_and_save_file(
+                upload, subdir="support_chat", field_label="Support attachment", user_type="user"
+            )
+            if error:
+                return JsonResponse({"success": False, "message": error}, status=400)
+            message_type = "media" if upload.content_type.startswith("image/") or upload.content_type.startswith("video/") else "attachment"
+        ChatSupport.objects.create(
+            chat_session_id=session_id, user=user, message=message or upload.name,
+            sender_type="user", sender_id=user.id, message_type=message_type,
+            attachment_url=attachment_url or None,
+        )
+    messages = ChatSupport.objects.filter(chat_session_id=session_id).order_by("created_at")
+    return JsonResponse({"success": True, "messages": [{
+        "message": item.message, "sender_type": item.sender_type,
+        "message_type": item.message_type,
+        "attachment_url": (
+            f"{settings.MEDIA_URL.rstrip('/')}/{item.attachment_url.lstrip('/')}"
+            if item.attachment_url else ""
+        ),
+        "created_at": item.created_at.strftime("%H:%M"),
+    } for item in messages]})
 
 @dashboard_login_required
 def filter_tickets(request):

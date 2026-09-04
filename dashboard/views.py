@@ -1468,7 +1468,8 @@ def get_advance_receipt(request, advance_id):
 
     advance = get_object_or_404(
         WalletTransaction.objects.select_related("user"),
-        id=advance_id
+        id=advance_id,
+        user=user,
     )
 
     profile = getattr(advance.user, "userprofile", None)
@@ -1498,6 +1499,9 @@ def get_advance_receipt(request, advance_id):
         "description": getattr(advance, "description", None) or "Advance Payment",
         "amount": float(advance.amount),
         "gst_percent": 18,
+        # WalletTransaction.amount is the amount actually received.  GST is
+        # shown only as receipt information and must not inflate the total.
+        "total_amount": float(advance.amount),
         "payment_mode": getattr(advance, "payment_mode", ""),
         "transaction_id": getattr(advance, "transaction_id", ""),
 
