@@ -1311,6 +1311,10 @@ function openModalProgress(ticketId) {
       document.querySelectorAll(".help-status").forEach((el) => {
         el.textContent = data.status;
       });
+
+
+
+
       document.querySelector(".help-updated-date-status").textContent =
         data.updated_at;
       const imgElement = document.querySelector(".help-img");
@@ -1325,6 +1329,9 @@ function openModalProgress(ticketId) {
       console.log("IMAGE URL:", data.img);
       console.log("Highlighting status:", data.status);
       highlightCurrentStatus(data.status);
+
+      window.currentSupportTicketDbId = Number(String(ticketId).replace("#", "")) - 10000000;
+      loadSupportTicketMessages();
       // highlightCurrentStatus(data.status);
     })
     .catch((error) => {
@@ -1332,6 +1339,55 @@ function openModalProgress(ticketId) {
       alert("Something went wrong while loading ticket details.");
     });
 }
+
+
+function escapeSupportMessage(value) {
+  return $("<div>").text(value || "").html();
+}
+
+function loadSupportTicketMessages() {
+  const ticketId = window.currentSupportTicketDbId;
+  if (!ticketId) return;
+  fetch(`/support/tickets/${ticketId}/messages/`)
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) return;
+      $(".support-live-message-list").html(data.messages.map(renderSupportMessage).join(""));
+    })
+    .catch(error => console.error("Support messages failed", error));
+}
+
+function renderSupportMessage(item) {
+  const own = item.sender_type === "user";
+  const attachment = item.attachment_url
+    ? `<a class="text-dodger-blue underline" target="_blank" href="${item.attachment_url}">${item.message_type === "media" ? "View media" : "Download attachment"}</a>` : "";
+  return `<div class="flex flex-col ${own ? "items-end" : "items-start"}"><div class="${own ? "bg-light-dodger-blue" : "bg-white"} text-black rounded-2xl p-3 max-w-xs shadow"><p class="text-sm">${escapeSupportMessage(item.message)}</p>${attachment}<div class="text-right"><span class="text-xs text-gray-400">${item.created_at}</span></div></div></div>`;
+}
+
+$(document).on("click", ".support-media-button", () => $("#support-ticket-media").trigger("click"));
+$(document).on("click", ".support-attachment-button", () => $("#support-ticket-attachment").trigger("click"));
+$(document).on("click", ".support-send-message", function () {
+  const ticketId = window.currentSupportTicketDbId;
+  if (!ticketId) return;
+  const media = $("#support-ticket-media")[0].files[0];
+  const attachment = $("#support-ticket-attachment")[0].files[0];
+  const formData = new FormData();
+  formData.append("message", $("#support-ticket-message").val().trim());
+  if (media || attachment) formData.append("attachment", media || attachment);
+  $(this).prop("disabled", true);
+  fetch(`/support/tickets/${ticketId}/messages/`, { method: "POST", headers: { "X-CSRFToken": getCookie("csrftoken") }, body: formData })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) throw new Error(data.message || "Unable to send message");
+      // The message is cleared only after the database confirms it was saved.
+      $("#support-ticket-message, #support-ticket-media, #support-ticket-attachment").val("");
+      $(".support-live-message-list").html(data.messages.map(renderSupportMessage).join(""));
+      const chatScroll = $(".support-live-message-list").closest(".overflow-y-auto")[0];
+      if (chatScroll) chatScroll.scrollTop = chatScroll.scrollHeight;
+    })
+    .catch(error => { console.error(error); toastr.error(error.message); })
+    .finally(() => $(this).prop("disabled", false));
+});
 
 //highlight status dots
 function highlightCurrentStatus(currentStatus) {
