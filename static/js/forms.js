@@ -521,8 +521,31 @@ function clearSavedData() {
   // toastr.success('Saved data cleared!');
   closePopup("savedDataPopup");
 }
+// The "edit account details" view replaces the normal account details with an
+// editable form. If the user navigates away to another main tab (Subscription,
+// Rewards, Support, Donate, ...) while it is open, we must close it so the
+// normal settings view is restored instead of the popup persisting on screen.
+function closeEditDetailsPopup() {
+  const $editDetails = $(".edit-details");
+  if (!$editDetails.length || $editDetails.hasClass("hidden")) {
+    return;
+  }
+
+  $editDetails.addClass("hidden");
+  $(".toggle-section").addClass("hidden");
+  $(".setting-header").show();
+  $(".account-detail").show();
+  $(".tabs").show();
+  $(".edit-toggle").show();
+  $(".tcBox").show();
+  $(".editIcon").show();
+}
+
 $(".main-tab").on("click", function () {
   const mainTab = $(this).data("tab");
+
+  // Close the edit popup when switching main tabs
+  closeEditDetailsPopup();
 
   // Activate main tab
   $(".main-tab").removeClass("active-tab-main");
@@ -574,6 +597,9 @@ $(document).on("click", ".tabs-menu [data-tab]", function (event) {
   }
 
   event.preventDefault();
+
+  // Close the edit popup when switching main tabs
+  closeEditDetailsPopup();
 
   $(".tabs-menu [data-tab]").removeClass("active-tab-main");
   $menuItem.addClass("active-tab-main");

@@ -1032,7 +1032,21 @@ form.addEventListener("submit", async function (e) {
 
     if (result.success) {
       toastr.success(result.message || "Ticket created successfully...", "Success");
-      location.reload();
+
+      // Reload the page but preserve the currently active main tab. Without
+      // this, refreshing a Settings page (where the Support form lives as a
+      // tab) would fall back to the default "Settings" section and navigate
+      // the user away from the Support tab they just submitted on.
+      const activeMainTab = document.querySelector(
+        ".tabs-menu [data-tab].active-tab-main"
+      );
+      if (activeMainTab && activeMainTab.dataset && activeMainTab.dataset.tab) {
+        const reloadUrl = new URL(window.location.href);
+        reloadUrl.searchParams.set("tab", activeMainTab.dataset.tab);
+        window.location.href = reloadUrl.toString();
+      } else {
+        location.reload();
+      }
 
       // reset file input styles
       submitBtn.disabled = true;
