@@ -23,8 +23,153 @@ $(document).ready(function () {
   });
 
   // Form submit for edit details
+
+  function validateHospitalForm() {
+
+    const $form = $("#editForm");
+    let hasError = false;
+
+    // Clear previous errors
+    $form.find(".error").text("").addClass("hidden");
+
+    function error(field, message) {
+        $form.find(`.${field}Error`)
+            .text(message)
+            .removeClass("hidden");
+
+        hasError = true;
+    }
+
+    // Get values
+    const email = $.trim($form.find('[name="email"]').val() || "");
+    const phone = $.trim($form.find('[name="phone"]').val() || "");
+    const hospitalName = $.trim($form.find('[name="hospital_name"]').val() || "");
+    const address = $.trim($form.find('[name="address"]').val() || "");
+    const city = $.trim($form.find('[name="city"]').val() || "");
+    const state = $.trim($form.find('[name="state"]').val() || "");
+    const country = $.trim($form.find('[name="country"]').val() || "");
+    const pincode = $.trim($form.find('[name="pincode"]').val() || "");
+    const ownerName = $.trim($form.find('[name="owner_name"]').val() || "");
+    const contactNumber = $.trim($form.find('[name="contact_number"]').val() || "");
+    const otp1 = $.trim($form.find('[name="otp1"]').val() || "");
+    const otp2 = $.trim($form.find('[name="otp2"]').val() || "");
+
+
+    // Email
+    if (!email) {
+        error("email", "Email is required.");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        error("email", "Enter a valid email address.");
+    }
+
+
+    // Phone
+    if (!phone) {
+        error("phone", "Phone is required.");
+    } else if (!/^\d+$/.test(phone)) {
+        error("phone", "Phone number must contain digits only.");
+    } else if (phone.length !== 10) {
+        error("phone", "Phone number must be exactly 10 digits.");
+    }
+
+
+    // Hospital Name
+    if (!hospitalName) {
+        error("hospital_name", "Hospital name is required.");
+    } else if (hospitalName.length > 100) {
+        error("hospital_name", "Hospital name cannot exceed 100 characters.");
+    }
+
+
+    // Address
+    if (!address) {
+        error("address", "Address is required.");
+    } else if (address.length > 250) {
+        error("address", "Address cannot exceed 250 characters.");
+    }
+
+
+    // City
+    if (!city) {
+        error("city", "City is required.");
+    } else if (city.length > 50) {
+        error("city", "City cannot exceed 50 characters.");
+    }
+
+
+    // State
+    if (!state) {
+        error("state", "State is required.");
+    } else if (state.length > 50) {
+        error("state", "State cannot exceed 50 characters.");
+    }
+
+
+    // Country
+    if (!country) {
+        error("country", "Country is required.");
+    } else if (country.length > 50) {
+        error("country", "Country cannot exceed 50 characters.");
+    }
+
+
+    // Pincode
+    if (!pincode) {
+        error("pincode", "Pincode is required.");
+    } else if (!/^\d+$/.test(pincode)) {
+        error("pincode", "Pincode must contain digits only.");
+    } else if (pincode.length !== 6) {
+        error("pincode", "Pincode must be exactly 6 digits.");
+    }
+
+
+    // Admin Name
+    if (!ownerName) {
+        error("owner_name", "Admin name is required.");
+    } else if (ownerName.length > 100) {
+        error("owner_name", "Admin name cannot exceed 100 characters.");
+    }
+
+
+    // Contact Number
+    if (!contactNumber) {
+        error("contact_number", "Contact number is required.");
+    } else if (!/^\d+$/.test(contactNumber)) {
+        error("contact_number", "Contact number must contain digits only.");
+    } else if (contactNumber.length !== 10) {
+        error("contact_number", "Contact number must be exactly 10 digits.");
+    }
+
+
+    // OTP 1
+    if (!otp1) {
+        error("otp1", "OTP is required.");
+    } else if (!/^\d{6}$/.test(otp1)) {
+        error("otp1", "OTP must be exactly 6 digits.");
+    } else if (otp1 !== "123456") {
+        error("otp1", "Not verified.");
+    }
+
+
+    // OTP 2
+    // if (!otp2) {
+    //     error("otp2", "OTP is required.");
+    // } else if (!/^\d{6}$/.test(otp2)) {
+    //     error("otp2", "OTP must be exactly 6 digits.");
+    // } else if (otp2 !== "123456") {
+    //     error("otp2", "Not verified.");
+    // }
+
+
+    return !hasError;
+}
+
 $("#editForm .save-btn").on("click", function (e) {
     e.preventDefault();
+
+    if (!validateHospitalForm()) {
+        return;
+    }
 
     const $form = $("#editForm");
     const actionUrl = $form.attr("action");
