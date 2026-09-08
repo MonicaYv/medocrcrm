@@ -1,8 +1,50 @@
 $(document).ready(function () {
   // Initialize the datepicker
+  let customStartDate = null;
+  let customEndDate = null;
+
   if ($.fn.datepicker) {
-    $('.datepicker-inline').datepicker();
+  $('.datepicker-inline').datepicker();
+
+  const $hospitalDatepicker = $('.filterDropdown [data-filter="custom"]')
+    .closest('.dropdown')
+    .find('.datepicker-inline');
+
+  if ($hospitalDatepicker.length) {
+    $hospitalDatepicker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+
+    $hospitalDatepicker.datepicker('option', 'onSelect', function (dateText) {
+
+      if (!customStartDate || customEndDate) {
+        customStartDate = dateText;
+        customEndDate = null;
+
+        console.log("Custom Start Date:", customStartDate);
+
+      } else {
+        customEndDate = dateText;
+
+        if (customStartDate > customEndDate) {
+          [customStartDate, customEndDate] = [
+            customEndDate,
+            customStartDate
+          ];
+        }
+
+        console.log("Custom Start Date:", customStartDate);
+        console.log("Custom End Date:", customEndDate);
+
+        const url = new URL(window.location.href);
+
+        url.searchParams.set("date_filter", "custom");
+        url.searchParams.set("start_date", customStartDate);
+        url.searchParams.set("end_date", customEndDate);
+
+        window.location.href = url.toString();
+      }
+    });
   }
+}
 
   // Toggle filter dropdown
   $('.filterToggle').click(function (e) {

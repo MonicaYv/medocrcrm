@@ -637,9 +637,35 @@ def dashboard_home(request):
             )[:3]
 
             today = timezone.now().date()
+
+            date_filter = request.GET.get("date_filter", "today")
+
+            if date_filter == "week":
+                start_date = today - timedelta(days=6)
+                end_date = today
+
+            elif date_filter == "month":
+                start_date = today - timedelta(days=29)
+                end_date = today
+
+            elif date_filter == "custom":
+                start = request.GET.get("start_date")
+                end = request.GET.get("end_date")
+
+                try:
+                    start_date = datetime.strptime(start, "%Y-%m-%d").date()
+                    end_date = datetime.strptime(end, "%Y-%m-%d").date()
+                except (ValueError, TypeError):
+                    start_date = today
+                    end_date = today
+
+            else:
+                start_date = today
+                end_date = today
+
             today_appointments = HospitalAppointments.objects.filter(
                 accepted_hospital=hospital_profile,
-                preferred_date_from__date=today
+                preferred_date_from__date__range=(start_date, end_date)
             )
             total_appointments_today = today_appointments.count()
             confirmed_count = today_appointments.filter(
@@ -672,6 +698,7 @@ def dashboard_home(request):
                 'logo': '/static/images/hospital-logo.svg',
                 'hospital_profile': hospital_profile,
                 'contact_person': contact_person,
+                'date_filter': date_filter,
                 'user_display_name': hospital_profile.hospital_name,
                 'quotes_given': HospitalBidding.objects.filter(hospital=hospital_profile).count(),
                 'active_bids': HospitalBidding.objects.filter(
