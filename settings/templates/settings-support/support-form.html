@@ -38,14 +38,21 @@
       <div
         class="w-full sm:w-1/2 h-[50px] rounded-[6px] border-2 border-dashed border-{{ border }} flex items-center justify-between px-3 relative"
       >
-        <input
+      <input
+          name="image"
+          id="ngo-issue-image"
+          type="file"
+          accept="image/*"          
+          class="ngo-issue-image hidden"
+        />
+        <!-- <input
           name="image"
           id="ngo-issue-image"
           type="file"
           accept="image/*"
           multiple
           class="ngo-issue-image hidden"
-        />
+        /> -->
 
         <!-- Label aligned to start -->
         <label
