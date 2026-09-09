@@ -3,8 +3,7 @@
                 <div class="bg-white rounded-lg p-2 max-w-[480px] w-full h-[80vh] overflow-y-auto scroll">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <span
-                                class="material-symbols-outlined cursor-pointer bg-dodger-blue text-white rounded-md p-1">share</span>
+                            <button type="button" class="material-symbols-outlined cursor-pointer bg-dodger-blue text-white rounded-md p-1 share-advance-receipt">share</button>
                             <span
                                 class="material-symbols-outlined cursor-pointer bg-dodger-blue text-white rounded-md p-1 download-btn">download</span>
                         </div>
@@ -26,11 +25,11 @@
                         <div class="flex items-center mb-2">
                             <div class="flex flex-col">
                                 <span class="font-semibold">Receipt No:</span>
-                                <span id="r_date" class="font-semibold">Date:</span>
+                                <span class="font-semibold">Date:</span>
                             </div>
                             <div class="flex flex-col ml-8 text-xs gap-0.5">
                                 <span id="r_receipt_no" class="">ADV/2025/0007</span>
-                                <span id="r_date" class="">17-May-2025</span>
+                                <span id="r_date" class=""></span>
                             </div>
                         </div>
                         <!-- Platform Details -->
@@ -87,14 +86,14 @@
                         <div class="mb-2 mt-4">
                             <div class="flex justify-between">
                                 <span class="font-semibold text-crimson-red">Add: GST @18%</span>
-                                <span class="text-crimson-red">₹18.00</span>
+                                <span id="r_gst_amount" class="text-crimson-red"></span>
                             </div>
                         </div>
                         <div class="dotted-line-red"></div>
                         <div class="mb-2">
                             <div class="flex justify-between font-semibold">
                                 <span class="text-crimson-red">Total Amount Received (INR):</span>
-                                <span class="text-crimson-red">₹118.00</span>
+                                <span id="r_total_amount" class="text-crimson-red"></span>
                             </div>
                         </div>
                         <div class="dotted-line-red"></div>

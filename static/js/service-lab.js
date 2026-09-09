@@ -17,6 +17,17 @@ function getCookie(name) {
   }
   return cookieValue;
 }
+
+// Price is submitted without the display-only currency symbol.
+$(document).on('focus', '.price-input', function () {
+  this.value = this.value.replace(/[₹,\s]/g, '');
+  this.select();
+});
+$(document).on('blur', '.price-input', function () {
+  const value = this.value.replace(/[^0-9.]/g, '');
+  this.value = `₹ ${value === '' ? '0.00' : value}`;
+});
+
 function populateDropdown(dropdown, items) {
   const menu = dropdown.find('.dropdown-menu');
   menu.html('');

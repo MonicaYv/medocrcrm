@@ -17,9 +17,13 @@ function getCookie(name) {
   return cookieValue;
 }
 
+let selectedDoctor = null;
+
 $(document).ready(function () {
   // Define all doctors data
   let allDoctors = [];
+  let filteredDoctors = [];
+  let activeDateFilter = "";
 
   // 1. Toggle Main Dropdown
   $(".filterToggle").on("click", function (e) {
@@ -143,20 +147,20 @@ $(document).ready(function () {
   function renderDoctors(page) {
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const doctorsToShow = allDoctors.slice(startIndex, endIndex);
+    const doctorsToShow = filteredDoctors.slice(startIndex, endIndex);
 
     const doctorCards = doctorsToShow
       .map(
         (doctor) => `
           <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments relative flex flex-col items-center gap-4 cursor-pointer doctorCard" data-id="${doctor.id}">
             <img 
-              src="${doctor.image || '/static/images/coolen-Smith.jpg'}"
+              src="${doctor.image || "/static/images/coolen-Smith.jpg"}"
               onerror="this.onerror=null; this.src='/static/images/coolen-Smith.jpg';"
               alt="Doctor Image"
               class="w-[104px] h-[104px] rounded-full object-cover shadow-doctor">
             <div class="flex flex-col">
               <span class="font-semibold text-sm">${doctor.name}</span>
-              <span class="font-normal text-sm text-spanish-gray">${doctor.phone || 'No phone number'}</span>
+              <span class="font-normal text-sm text-spanish-gray">${doctor.phone || "No phone number"}</span>
             </div>
             <span class="font-semibold text-sm text-primary-blue">${doctor.specialty}</span>
             
@@ -165,7 +169,7 @@ $(document).ready(function () {
               <span class="text-warm-apricot-orange font-semibold text-sm">${doctor.rating}</span>
             </div>
           </div>
-        `
+        `,
       )
       .join("");
 
@@ -173,7 +177,7 @@ $(document).ready(function () {
   }
 
   function renderPagination() {
-    totalPages = Math.ceil(allDoctors.length / itemsPerPage) || 1;
+    totalPages = Math.ceil(filteredDoctors.length / itemsPerPage) || 1;
     let pageButtons = "";
     for (let i = 1; i <= totalPages; i++) {
       const activeClass =
@@ -211,48 +215,79 @@ $(document).ready(function () {
   });
 
   function loadHospitalDoctors() {
-  $.ajax({
-    url: "/staff/hospital/doctors/list/",
-    type: "GET",
-    dataType: "json",
+    $.ajax({
+      url: "/staff/hospital/doctors/list/",
+      type: "GET",
+      dataType: "json",
 
-    success: function (res) {
-      console.log("Doctors list response:", res);
+      success: function (res) {
+        console.log("Doctors list response:", res);
 
-      if (res.success) {
-        allDoctors = Array.isArray(res.doctors) ? res.doctors : [];
+        if (res.success) {
+          allDoctors = Array.isArray(res.doctors) ? res.doctors : [];
+          filteredDoctors = allDoctors.slice();
 
-        console.log("Doctors loaded from database:", allDoctors);
+          console.log("Doctors loaded from database:", allDoctors);
 
-        currentPage = 1;
-        renderDoctors(currentPage);
-        renderPagination();
-      } else {
-        console.error("Failed to load doctors:", res.error);
-        toastr.error(res.error || "Failed to load doctors");
-      }
-    },
+          currentPage = 1;
+          renderDoctors(currentPage);
+          renderPagination();
+        } else {
+          console.error("Failed to load doctors:", res.error);
+          toastr.error(res.error || "Failed to load doctors");
+        }
+      },
 
-    error: function (xhr) {
-      console.error("Doctor list API error:", xhr.status, xhr.responseText);
-      toastr.error("Unable to load doctors");
-    }
-  });
-}
+      error: function (xhr) {
+        console.error("Doctor list API error:", xhr.status, xhr.responseText);
+        toastr.error("Unable to load doctors");
+      },
+    });
+  }
 
   // Initial render
   loadHospitalDoctors();
 
+  function applyDoctorFilters() {
+    const query = $('input[placeholder="Search by name or categories"]')
+      .val()
+      .trim()
+      .toLowerCase();
+    const cutoff = activeDateFilter
+      ? new Date(Date.now() - activeDateFilter * 86400000)
+      : null;
+    filteredDoctors = allDoctors.filter((doctor) => {
+      const matchesQuery =
+        !query ||
+        doctor.name.toLowerCase().includes(query) ||
+        (doctor.specialty || "").toLowerCase().includes(query);
+      const matchesDate =
+        !cutoff || !doctor.created_at || new Date(doctor.created_at) >= cutoff;
+      return matchesQuery && matchesDate;
+    });
+    currentPage = 1;
+    renderDoctors(currentPage);
+    renderPagination();
+  }
 
- $(".popup-btn").on("click", function () {
-  let popupId = $(this).data("popup");
+  $('input[placeholder="Search by name or categories"]').on(
+    "input",
+    applyDoctorFilters,
+  );
+  $("#dateSubmenu > div")
+    .not(".trigger-custom")
+    .on("click", function () {
+      activeDateFilter = $(this).text().trim() === "Week" ? 7 : 30;
+      applyDoctorFilters();
+    });
 
+  $(".popup-btn").on("click", function () {
+    let popupId = $(this).data("popup");
 
-
-  $("." + popupId)
-    .removeClass("hidden")
-    .addClass("flex");
-});
+    $("." + popupId)
+      .removeClass("hidden")
+      .addClass("flex");
+  });
 
   // Close popup
   $(".close-popup").on("click", function () {
@@ -263,21 +298,13 @@ $(document).ready(function () {
       .removeClass("flex");
   });
 
-$(document).on("click", ".doctorCard", function () {
+  $(document).on("click", ".doctorCard", function () {
+    $(".docInfoPopup").removeClass("hidden").addClass("flex");
+  });
 
-    $(".docInfoPopup")
-        .removeClass("hidden")
-        .addClass("flex");
-
-});
-
-$(document).on("click", ".closeInfoPopup", function () {
-
-    $(".docInfoPopup")
-        .addClass("hidden")
-        .removeClass("flex");
-
-});
+  $(document).on("click", ".closeInfoPopup", function () {
+    $(".docInfoPopup").addClass("hidden").removeClass("flex");
+  });
 
   $(".historyBtn").on("click", function () {
     $(".docInfoPopup").addClass("hidden");
@@ -508,7 +535,7 @@ $(document).on("click", ".closeInfoPopup", function () {
     const $checkIcon = $(this);
     const $row = $checkIcon.closest(".flex.items-center.justify-between");
     const $timerIcon = $row.find(
-      '.material-symbols-outlined:contains("timer")'
+      '.material-symbols-outlined:contains("timer")',
     );
     const $statusText = $row.find("span.font-normal.text-sm").last();
 
@@ -537,7 +564,7 @@ $(document).on("click", ".closeInfoPopup", function () {
     const $timerIcon = $(this);
     const $row = $timerIcon.closest(".flex.items-center.justify-between");
     const $checkIcon = $row.find(
-      '.material-symbols-outlined:contains("check")'
+      '.material-symbols-outlined:contains("check")',
     );
     const $statusText = $row.find("span.font-normal.text-sm").last();
 
@@ -617,17 +644,21 @@ $(document).on("click", ".closeInfoPopup", function () {
   $(document).on("click", function (e) {
     if (
       !$(e.target).closest(
-        '.time-selector, .material-symbols-outlined:contains("timer")'
+        '.time-selector, .material-symbols-outlined:contains("timer")',
       ).length
     ) {
       $(".time-selector").remove();
     }
   });
 
-// Handle Register button click with validation
+  // Handle Register button click with validation
   $(".registerDocBtn").on("click", function (e) {
     e.preventDefault();
-    // if (!validateAddDoctorForm()) return;
+
+    // Validate form before sending AJAX request
+    if (!validateAddDoctorForm()) {
+      return false;
+    }
 
     const $popup = $(".addDoctorPopup");
 
@@ -637,24 +668,32 @@ $(document).on("click", ".closeInfoPopup", function () {
     const age = $popup.find('input[type="number"]').eq(1).val().trim();
     const specialty = $popup.find(".dropdown-text").eq(0).text().trim();
     const education = $popup.find(".dropdown-text").eq(1).text().trim();
-    const experience = parseInt($popup.find(".increaseBtn").siblings("span").text()) || 0;
+    const experience =
+      parseInt($popup.find(".increaseBtn").siblings("span").text()) || 0;
 
     const availability = [];
 
-    $popup.find(".bg-white.border.border-blue-haze.p-4 > .flex.items-center.justify-between").each(function () {
-      const $row = $(this);
-      const day = $row.find("span.font-normal.text-sm").eq(0).text().trim();
-      const statusText = $row.find(".flex.items-center.gap-10 span.font-normal.text-sm").text().trim();
+    $popup
+      .find(
+        ".bg-white.border.border-blue-haze.p-4 > .flex.items-center.justify-between",
+      )
+      .each(function () {
+        const $row = $(this);
+        const day = $row.find("span.font-normal.text-sm").eq(0).text().trim();
+        const statusText = $row
+          .find(".flex.items-center.gap-10 span.font-normal.text-sm")
+          .text()
+          .trim();
 
-      if (statusText && statusText !== "Not Available") {
-        const parts = statusText.split(" - ");
-        availability.push({
-          day: day,
-          start_time: parts[0] || "",
-          end_time: parts[1] || ""
-        });
-      }
-    });
+        if (statusText && statusText !== "Not Available") {
+          const parts = statusText.split(" - ");
+          availability.push({
+            day: day,
+            start_time: parts[0] || "",
+            end_time: parts[1] || "",
+          });
+        }
+      });
 
     const formData = new FormData();
     formData.append("name", name);
@@ -665,6 +704,8 @@ $(document).on("click", ".closeInfoPopup", function () {
     formData.append("education", education);
     formData.append("experience", experience);
     formData.append("availability", JSON.stringify(availability));
+    const doctorId = $popup.data("doctor-id");
+    if (doctorId) formData.append("doctor_id", doctorId);
 
     const photoFile = fileInput[0].files[0];
     if (photoFile) {
@@ -675,53 +716,57 @@ $(document).on("click", ".closeInfoPopup", function () {
       url: "/staff/hospital/doctors/save/",
       method: "POST",
       headers: {
-        "X-CSRFToken": getCookie("csrftoken")
+        "X-CSRFToken": getCookie("csrftoken"),
       },
       data: formData,
       processData: false,
       contentType: false,
       success: function (res) {
-  if (res.success) {
-    toastr.success("Doctor registered successfully!");
+        if (res.success) {
+          toastr.success(
+            doctorId
+              ? "Doctor updated successfully!"
+              : "Doctor registered successfully!",
+          );
 
-    // 1. If backend gave us the single doctor data, append it to our local state array
-    if (res.doctor) {
-      // Create a unified schema matching exactly what renderDoctors needs
-      const newDoctor = {
-        id: res.doctor.id,
-        name: res.doctor.name,
-        phone: res.doctor.phone,
-        specialty: res.doctor.specialty, // Aligns perfectly with your map structure
-        rating: res.doctor.rating || "0.0",
-        image: res.doctor.image
-      };
-      
-      allDoctors.unshift(newDoctor); // Adds the new doctor to the top/beginning of the array
-      
-      // 2. Re-render the grid and pagination instantly with the new data
-      renderDoctors(currentPage);
-      renderPagination();
-    } else {
-      // Fallback to reloading if no doctor object was provided
-      loadHospitalDoctors();
-    }
+          // 1. If backend gave us the single doctor data, append it to our local state array
+          if (res.doctor) {
+            // Create a unified schema matching exactly what renderDoctors needs
+            const newDoctor = {
+              id: res.doctor.id,
+              name: res.doctor.name,
+              phone: res.doctor.phone,
+              specialty: res.doctor.specialty, // Aligns perfectly with your map structure
+              rating: res.doctor.rating || "0.0",
+              image: res.doctor.image,
+            };
 
-    $(".addDoctorPopup").addClass("hidden").removeClass("flex");
-    clearAddDoctorForm();
-  } else {
-    toastr.error(res.error || "Failed to register doctor");
-  }
-},
+            allDoctors.unshift(newDoctor); // Adds the new doctor to the top/beginning of the array
+            filteredDoctors = allDoctors.slice();
+
+            // 2. Re-render the grid and pagination instantly with the new data
+            renderDoctors(currentPage);
+            renderPagination();
+          } else {
+            // Fallback to reloading if no doctor object was provided
+            loadHospitalDoctors();
+          }
+
+          $(".addDoctorPopup").addClass("hidden").removeClass("flex");
+          clearAddDoctorForm();
+        } else {
+          toastr.error(res.error || "Failed to register doctor");
+        }
+      },
       error: function (xhr) {
         toastr.error(xhr.responseJSON?.error || "Something went wrong");
-      }
+      },
     });
   }); // Closes register button click cleanly
-  
 }); // THIS CLOSES THE MAIN $(document).ready(function () { CONTEXT CLEANLY
 
 // ==========================================
-// GLOBAL EVENT LISTENERS & HELPER FUNCTIONS 
+// GLOBAL EVENT LISTENERS & HELPER FUNCTIONS
 // (Keep these outside $(document).ready)
 // ==========================================
 
@@ -731,25 +776,30 @@ $(document).on("click", ".doctorCard", function () {
   $.ajax({
     url: `/staff/hospital/doctors/${doctorId}/`,
     type: "GET",
-    success: function(response) {
+    success: function (response) {
       if (!response.success) {
         toastr.error(response.message);
         return;
       }
 
       const d = response.doctor;
+      selectedDoctor = d;
 
-      $("#doctor-image").attr("src", d.image || "/static/images/coolen-Smith.jpg");
+      $("#doctor-image").attr(
+        "src",
+        d.image || "/static/images/coolen-Smith.jpg",
+      );
       $("#doctor-name").text(d.name);
       $("#doctor-gender").text(d.gender || "-");
       $("#doctor-age").text(d.age || "-");
       $("#doctor-phone").text(d.phone || "-");
       $("#doctor-specialty").text(d.specialty || "-");
+      $("#doctor-speciality").text(d.specialty || "-");
       $("#doctor-education").text(d.education || "-");
       $("#doctor-experience").text(`${d.experience || 0} Years`);
 
       let availabilityHtml = "";
-      d.availability.forEach(item => {
+      d.availability.forEach((item) => {
         availabilityHtml += `
           <div class="flex items-center justify-between">
               <span class="font-normal text-sm">${item.day}</span>
@@ -760,26 +810,291 @@ $(document).on("click", ".doctorCard", function () {
         `;
       });
 
-      $("#doctor-availability").html(availabilityHtml || "<p>No availability configured</p>");
+      $("#doctor-availability").html(
+        availabilityHtml || "<p>No availability configured</p>",
+      );
+      $("#doctor-id").text(d.id);
       $(".docInfoPopup").removeClass("hidden").addClass("flex");
-    }
+    },
   });
+});
+
+$(document).on("click", ".share-doctor", async function () {
+  if (!selectedDoctor) return;
+  const d = selectedDoctor;
+  const text = `${d.name}\nSpecialty: ${d.specialty || "-"}\nPhone: ${d.phone || "-"}`;
+  try {
+    if (navigator.share)
+      await navigator.share({ title: "Doctor Information", text });
+    else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      toastr.success("Doctor information copied to clipboard");
+    } else window.prompt("Copy doctor information", text);
+  } catch (error) {
+    if (error.name !== "AbortError")
+      toastr.error("Unable to share doctor information");
+  }
+});
+
+$(document).on("click", ".edit-doctor", function () {
+  if (!selectedDoctor) return;
+  const d = selectedDoctor;
+  const $popup = $(".addDoctorPopup");
+  $popup.data("doctor-id", d.id);
+  $popup
+    .find('input[type="text"]')
+    .eq(0)
+    .val((d.name || "").replace(/^Dr\.\s*/, ""));
+  $popup
+    .find('input[type="number"]')
+    .eq(0)
+    .val((d.phone || "").replace(/\D/g, ""));
+  $popup
+    .find('input[type="text"]')
+    .eq(1)
+    .val(d.gender || "");
+  $popup
+    .find('input[type="number"]')
+    .eq(1)
+    .val(d.age || "");
+  $popup
+    .find(".dropdown-text")
+    .eq(0)
+    .text(d.specialty || "Select");
+  $popup
+    .find(".dropdown-text")
+    .eq(1)
+    .text(d.education || "Select");
+  $popup
+    .find(".increaseBtn")
+    .siblings("span")
+    .text(d.experience || 0);
+  $popup.removeClass("hidden").addClass("flex");
+  $(".docInfoPopup").addClass("hidden").removeClass("flex");
 });
 
 function clearAddDoctorForm() {
   const $popup = $(".addDoctorPopup");
-  
+  $popup.removeData("doctor-id");
+
   // Clear all text and number inputs
-  $popup.find('input[type="text"], input[type="number"]').val('');
-  
+  $popup.find('input[type="text"], input[type="number"]').val("");
+
   // Reset drop-downs to a default placeholder text
-  $popup.find(".dropdown-text").text('Select...'); 
-  
+  $popup.find(".dropdown-text").text("Select...");
+
   // Reset experience counter text back to 0
-  $popup.find(".increaseBtn").siblings("span").text('0');
-  
+  $popup.find(".increaseBtn").siblings("span").text("0");
+
   // Reset file input preview if your custom framework relies on it
   if (typeof resetUploadDiv === "function") {
     resetUploadDiv();
   }
 }
+
+// ==========================================
+// ADD DOCTOR FORM VALIDATION
+// ==========================================
+function validateAddDoctorForm() {
+  const $popup = $(".addDoctorPopup");
+
+  // Get fields
+  const $name = $popup.find('input[type="text"]').eq(0);
+  const $phone = $popup.find('input[type="number"]').eq(0);
+  const $gender = $popup.find('input[type="text"]').eq(1);
+  const $age = $popup.find('input[type="number"]').eq(1);
+
+  const $dropdowns = $popup.find(".dropdown-text");
+  const $specialty = $dropdowns.eq(0);
+  const $education = $dropdowns.eq(1);
+
+  const $homeVisitFee = $popup.find('input[type="number"]').eq(2);
+  const $hospitalVisitFee = $popup.find('input[type="number"]').eq(3);
+
+  // Remove previous errors
+  $popup.find(".validation-error").remove();
+
+  // Remove previous error border
+  $popup.find(".validation-error-field").removeClass("validation-error-field");
+
+  // ==========================================
+  // Helper function
+  // ==========================================
+  function showError($field, message) {
+    $field.addClass("validation-error-field");
+
+    const $error = $('<span class="validation-error"></span>');
+    $error.text(message);
+
+    $field.after($error);
+  }
+
+  // ==========================================
+  // NAME
+  // Alphabets + spaces only
+  // ==========================================
+  const name = $name.val().trim();
+
+  if (name === "") {
+    showError($name, "Name is required.");
+    return false;
+  } else if (!/^[A-Za-z\s]+$/.test(name)) {
+    showError($name, "Name should contain alphabets only.");
+    return false;
+  } else if (name.length < 2) {
+    showError($name, "Name must contain at least 2 characters.");
+    return false;
+  }
+
+  // ==========================================
+  // PHONE
+  // Exactly 10 digits
+  // ==========================================
+  const phone = $phone.val().trim();
+
+  if (phone === "") {
+    showError($phone, "Phone number is required.");
+    return false;
+  } else if (!/^\d+$/.test(phone)) {
+    showError($phone, "Phone number should contain digits only.");
+    return false;
+  } else if (phone.length !== 10) {
+    showError($phone, "Phone number must contain exactly 10 digits.");
+    return false;
+  }
+
+  // ==========================================
+  // GENDER
+  // Alphabets + spaces only
+  // ==========================================
+  const gender = $gender.val().trim();
+
+  if (gender === "") {
+    showError($gender, "Gender is required.");
+    return false;
+  } else if (!/^[A-Za-z\s]+$/.test(gender)) {
+    showError($gender, "Gender should contain alphabets only.");
+    return false;
+  }
+
+  // ==========================================
+  // AGE
+  // Digits only
+  // Age between 18 and 100
+  // ==========================================
+  const age = $age.val().trim();
+
+  if (age === "") {
+    showError($age, "Age is required.");
+    return false;
+  } else if (!/^\d+$/.test(age)) {
+    showError($age, "Age should contain digits only.");
+    return false;
+  } else if (parseInt(age) < 18 || parseInt(age) > 100) {
+    showError($age, "Age must be between 18 and 100.");
+    return false;
+  }
+
+  // ==========================================
+  // SPECIALTY
+  // ==========================================
+  const specialty = $specialty.text().trim();
+
+  if (specialty === "" || specialty === "Select" || specialty === "Select...") {
+    showError($specialty, "Please select specialty.");
+    return false;
+  }
+
+  // ==========================================
+  // EDUCATION
+  // ==========================================
+  const education = $education.text().trim();
+
+  if (education === "" || education === "Select" || education === "Select...") {
+    showError($education, "Please select education.");
+    return false;
+  }
+
+  // ==========================================
+  // HOME VISIT FEE
+  // ==========================================
+  const homeFee = $homeVisitFee.val().trim();
+
+  if (homeFee !== "") {
+    if (!/^\d+(\.\d{1,2})?$/.test(homeFee)) {
+      showError($homeVisitFee, "Enter a valid fee.");
+      return false;
+    }
+  }
+
+  // ==========================================
+  // HOSPITAL VISIT FEE
+  // ==========================================
+  const hospitalFee = $hospitalVisitFee.val().trim();
+
+  if (hospitalFee !== "") {
+    if (!/^\d+(\.\d{1,2})?$/.test(hospitalFee)) {
+      showError($hospitalVisitFee, "Enter a valid fee.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// ==========================================
+// LIVE INPUT VALIDATION
+// ==========================================
+
+$(document).on("input", ".addDoctorPopup input[type='text']", function () {
+  const $input = $(this);
+
+  // Name and Gender - alphabets + spaces only
+  const index = $input.index(".addDoctorPopup input[type='text']");
+
+  if (index === 0 || index === 1) {
+    $input.val($input.val().replace(/[^A-Za-z\s]/g, ""));
+  }
+});
+
+// Phone - digits only, maximum 10
+$(document).on("input", ".addDoctorPopup input[type='number']", function () {
+  const $popup = $(".addDoctorPopup");
+  const $numberInputs = $popup.find('input[type="number"]');
+
+  const index = $numberInputs.index(this);
+
+  // Phone
+  if (index === 0) {
+    $(this).val($(this).val().replace(/\D/g, "").slice(0, 10));
+  }
+
+  // Age
+  else if (index === 1) {
+    $(this).val($(this).val().replace(/\D/g, "").slice(0, 3));
+  }
+
+  // Fees
+  else if (index === 2 || index === 3) {
+    let value = $(this).val();
+
+    // Only numbers and decimal
+    value = value.replace(/[^0-9.]/g, "");
+
+    // Only one decimal point
+    const parts = value.split(".");
+
+    if (parts.length > 2) {
+      value = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Maximum 2 decimal places
+    if (value.includes(".")) {
+      const decimalParts = value.split(".");
+
+      value = decimalParts[0] + "." + decimalParts[1].substring(0, 2);
+    }
+
+    $(this).val(value);
+  }
+});

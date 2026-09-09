@@ -4,6 +4,7 @@
 let currentPage = 1;
 let currentFilter = "";
 let currentSearch = "";
+let currentAdvanceReceipt = null;
 
 /* =========================================================
    DOCUMENT READY — SINGLE ENTRY POINT
@@ -458,19 +459,23 @@ function openAdvanceReceipt(advanceId) {
       document.getElementById("r_description").textContent = data.description;
 
       // calculation
-      const amount = data.amount;
-      const gst = (amount * data.gst_percent) / 100;
-      const total = amount + gst;
+      const amount = Number(data.amount) || 0;
+      const gst = 0;
+      const total = Number(data.total_amount);
 
       document.getElementById("r_amount").textContent = `₹${amount.toFixed(2)}`;
-      document.getElementById("r_gst").textContent = `₹${gst.toFixed(2)}`;
+      document.getElementById("r_gst").textContent = `${Number(data.gst_percent) || 0}%`;
       document.getElementById("r_total").textContent = `₹${total.toFixed(2)}`;
+      document.getElementById("r_gst_amount").textContent = `₹${gst.toFixed(2)}`;
+      document.getElementById("r_total_amount").textContent = `₹${total.toFixed(2)}`;
 
       document.getElementById("r_amount_words").textContent =
         numberToWords(total) + " Only";
 
       document.getElementById("r_payment_mode").textContent =
         `${data.payment_mode} (${data.transaction_id})`;
+
+      currentAdvanceReceipt = data;
 
       // show modal
       document.querySelector(".viewModal").classList.remove("hidden");
@@ -480,3 +485,21 @@ function openAdvanceReceipt(advanceId) {
       alert("Failed to load receipt");
     });
 }
+
+$(document).on("click", ".share-advance-receipt", async function () {
+  if (!currentAdvanceReceipt) return;
+  const receipt = currentAdvanceReceipt;
+  const text = `Advance receipt ${receipt.receipt_no}\nDate: ${receipt.payment_date}\nAmount: ₹${Number(receipt.total_amount).toFixed(2)}\nTransaction: ${receipt.transaction_id || "-"}`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: "Advance Receipt", text });
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      toastr.success("Receipt details copied to clipboard");
+    } else {
+      window.prompt("Copy receipt details", text);
+    }
+  } catch (error) {
+    if (error.name !== "AbortError") toastr.error("Unable to share receipt");
+  }
+});

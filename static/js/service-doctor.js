@@ -73,6 +73,16 @@ $(document).ready(function () {
   });
 });
 
+// Keep the currency marker visible while keeping the submitted value numeric.
+$(document).on('focus', '.doctor-price-input', function () {
+  this.value = this.value.replace(/[₹,\s]/g, '');
+  this.select();
+});
+$(document).on('blur', '.doctor-price-input', function () {
+  const value = this.value.replace(/[^0-9.]/g, '');
+  this.value = `₹ ${value === '' ? '0.00' : value}`;
+});
+
 $(document).on("click", ".more-btn", function (e) {
   e.stopPropagation();
 

@@ -817,6 +817,12 @@ def save_hospital_services(request):
             price=s.get("price") or 0,
             is_active=True
         )
+        saved_services.append({
+            "id": obj.id,
+            "category": category.name,
+            "service": service.description,
+            "price": str(obj.price),
+        })
     # Save rooms
     for r in rooms:
         try:

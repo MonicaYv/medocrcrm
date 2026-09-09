@@ -1145,9 +1145,11 @@
                     <span class="text-black">Resend</span></span>
             </div>
             <div class="flex-1">
-                <input name="otp1" type="text" class="border rounded px-2 py-2 w-full"
+                <input name="otp1" type="text"
+                   maxlength="6"
+                   inputmode="numeric" class="border rounded px-2 py-2 w-full"
                     placeholder="224584" />
-                <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                 <span class="error otp1Error text-red-500 text-sm mt-1 hidden"></span>
                 <div class="flex items-center gap-2 justify-end">
                     <span
                         class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1161,42 +1163,46 @@
         <!--Hospital Name-->
         <input name="hospital_name" type="text" class="w-full border rounded px-3 py-2"
             placeholder="Hospital Name" value="{{hospital_name}}"/>
+            <span class="error hospital_nameError text-red-500 text-sm mt-1 hidden"></span>
+
         <div class="relative issue-type-wrapper">
             <input name="hospital_timing" type="text" class="w-full border rounded px-3 py-2"
                 placeholder="Working Hours" value="{{working_days}}"/>
         </div>
         <!--Address-->
         <input type="text" name="address" class="w-full border rounded px-3 py-2" placeholder="Address" value="{{address}}"/>
+        <span class="error addressError text-red-500 text-sm mt-1 hidden"></span>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
             <!-- City,Town,District -->
             <div class="flex flex-col">
                 <input name="city" type="text" class="border rounded px-3 py-2"
                     placeholder="City,Town,District" value="{{city}}"/>
-                <span class="error adminNameError text-red-500 text-sm mt-1 hidden"></span>
+                <span class="error cityError text-red-500 text-sm mt-1 hidden"></span>
             </div>
             <!-- State -->
             <div class="flex flex-col">
                 <input name="state" type="text" class="border rounded px-3 py-2"
                     placeholder="State" value="{{state}}"/>
-                <span class="error genderError text-red-500 text-sm mt-1 hidden"></span>
+                <span class="error stateError text-red-500 text-sm mt-1 hidden"></span>
             </div>
             <!-- Country -->
             <div class="flex flex-col">
                 <input name="country" type="text" class="border rounded px-3 py-2"
                     placeholder="Country" value="{{country}}"/>
-                <span class="error addressError text-red-500 text-sm mt-1 hidden"></span>
+                <span class="error countryError text-red-500 text-sm mt-1 hidden"></span>
             </div>
             <!-- Pincode -->
             <div class="flex flex-col">
                 <input name="pincode" type="text" class="border rounded px-3 py-2"
                     placeholder="Pincode" value="{{pincode}}"/>
-                <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
+                 <span class="error pincodeError text-red-500 text-sm mt-1 hidden"></span>
             </div>
             <!-- Admin Name -->
             <div class="flex flex-col">
                 <input name="owner_name" type="text" class="border rounded px-3 py-2"
                     placeholder="Owner Name" value="{{owner_name}}"/>
-                <span class="error licenseError text-red-500 text-sm mt-1 hidden"></span>
+                 <span class="error owner_nameError text-red-500 text-sm mt-1 hidden"></span>
             </div>
             <!-- Country code + Phone -->
             <div class="flex flex-col lg:flex-row gap-4">
@@ -1215,13 +1221,13 @@
 
                 <!-- Phone -->
                 <div class="flex-1">
-                    <input name="contact_number" type="text" class="border rounded px-3 py-2 w-full"
+                    <input name="contact_number" type="text" maxlength="10" class="border rounded px-3 py-2 w-full"
                         placeholder="Phone No." value="{{contact_number}}"/>
-                    <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
+                     <span class="error contact_numberError text-red-500 text-sm mt-1 hidden"></span>
                 </div>
             </div>
             <!--Send OTP-->
-            <div class="flex flex-col lg:flex-row lg:items-center gap-2">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-2 hidden">
                 <div class="flex-1">
                     <button type="button"
                         class="bg-baby-blue text-white px-2 py-2.5 rounded w-full cursor-not-allowed send-otp-btn"
@@ -1233,16 +1239,31 @@
                         <span class="text-black">Resend</span></span>
                 </div>
                 <div class="flex-1">
-                    <input name="otp2" type="text" class="border rounded px-2 py-2 w-full"
+                    <input name="otp2" type="text" maxlength="6"
+                       inputmode="numeric" class="border rounded px-2 py-2 w-full"
                         placeholder="224584" />
-                    <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="flex items-center gap-2 justify-end">
+                    <span class="error otp2Error text-red-500 text-sm mt-1 hidden"></span>
+
+                     <!-- OTP 2 Status -->
+                        <div class="otp-status flex items-center gap-2 justify-end mt-1">
+
+                            <span class="material-symbols-outlined otp-icon text-red-500">
+                                cancel
+                            </span>
+
+                            <p class="font-normal text-xs otp-text text-red-500">
+                                Not verified
+                            </p>
+
+                        </div>
+                        
+                    <!-- <div class="flex items-center gap-2 justify-end">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">
                             Verified
                         </p>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <!-- Buttons -->

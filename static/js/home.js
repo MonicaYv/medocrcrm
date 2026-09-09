@@ -1810,7 +1810,7 @@ $(document).ready(function () {
   });
 
   // 5. Filter by day range (1 week, 1 month, etc.)  
-  $('[data-filter]').click(function () {
+  $('.ngo-filterDropdown [data-filter]').click(function () {
     const days = parseInt($(this).data('filter'));
     if (days === 0) {
       // ✅ RESET clicked
@@ -1842,6 +1842,25 @@ $(document).ready(function () {
     $('.ngo-filterDropdown').hide();
   });
 
+  $(".filterDropdown [data-filter]").on("click", function (e) {
+    e.stopPropagation();
+
+    const filter = $(this).data("filter");
+
+    if (filter === "custom") {
+        $('.filterDropdown').hide();
+        $('.datepicker-container').show();
+        return;
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("date_filter", filter);
+    url.searchParams.delete("start_date");
+    url.searchParams.delete("end_date");
+
+    window.location.href = url.toString();
+});
+
   // 6. Hide all dropdowns on outside click
   $(document).on('click', function (e) {
     const $target = $(e.target);
@@ -1851,6 +1870,7 @@ $(document).ready(function () {
     }
   });
 });
+
 $(document).ready(function () {
 
     // $(".view-appointment").click(function (e) {

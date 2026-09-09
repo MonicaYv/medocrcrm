@@ -844,6 +844,12 @@
   .z-\[10000\] {
     z-index: 10000;
   }
+  .z-\[99997\] {
+    z-index: 99997;
+  }
+  .z-\[99998\] {
+    z-index: 99998;
+  }
   .z-\[99999\] {
     z-index: 99999;
   }
@@ -1380,6 +1386,9 @@
   }
   .h-\[40rem\] {
     height: 40rem;
+  }
+  .h-\[42px\] {
+    height: 42px;
   }
   .h-\[48px\] {
     height: 48px;
@@ -2157,6 +2166,9 @@
   }
   .max-w-\[560px\] {
     max-width: 560px;
+  }
+  .max-w-\[700px\] {
+    max-width: 700px;
   }
   .max-w-\[800px\] {
     max-width: 800px;

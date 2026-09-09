@@ -132,7 +132,7 @@
                         <div
                             class="bg-white w-[680px] h-[700px] overflow-y-auto scroll rounded-lg p-4 border border-cool-slate-gray shadow-appointments flex flex-col gap-4">
                             <div class="flex items-center justify-between">
-                                <span class="font-semibold text-sm">Register as Doctor</span>
+                                <span class="font-semibold text-sm">Register as Doctor11</span>
                                 <span class="material-symbols-outlined cursor-pointer close-popup"
                                     data-popup="addDoctorPopup">close</span>
                             </div>
@@ -159,7 +159,7 @@
                                             <div class="flex flex-col gap-2">
                                                 <label for="name"
                                                     class="font-normal text-xs text-spanish-gray">Name</label>
-                                                <input type="text"
+                                                <input type="text" maxlength="30"
                                                     class="focus:ring-0 focus:outline-none font-normal text-sm placeholder:font-normal placeholder:text-sm placeholder:text-black"
                                                     placeholder="Type Here...">
                                             </div>
@@ -191,7 +191,7 @@
                                             <div class="flex flex-col gap-2">
                                                 <label for="gender"
                                                     class="font-normal text-xs text-spanish-gray">Gender</label>
-                                                <input type="text"
+                                                <input type="text" maxlength="20"
                                                     class="focus:ring-0 focus:outline-none font-normal text-sm placeholder:font-normal placeholder:text-sm placeholder:text-black"
                                                     placeholder="Type Here...">
                                             </div>
@@ -313,7 +313,10 @@
                                     <div class="flex items-center gap-1.5">
                                         <span
                                             class="material-symbols-outlined text-dodger-blue !text-lg">currency_rupee</span>
-                                        <input type="number"
+                                        <input type="text" inputmode="decimal" maxlength="15" oninput="this.value = this.value
+                                        .replace(/[^0-9.]/g, '')
+                                        .replace(/(\..*)\./g, '$1')
+                                        .replace(/^(\d{0,6})(\.\d{0,2})?.*$/, '$1$2');"
                                             class="focus:ring-0 focus:outline-none border-b border-blue-haze pb-1 placeholder:font-semibold placeholder:text-sm placeholder:text-dodger-blue font-semibold text-sm text-dodger-blue w-[37px]"
                                             placeholder="00.00">
                                     </div>
@@ -324,7 +327,10 @@
                                     <div class="flex items-center gap-1.5">
                                         <span
                                             class="material-symbols-outlined text-dodger-blue !text-lg">currency_rupee</span>
-                                        <input type="number"
+                                        <input type="text" inputmode="decimal" maxlength="15" oninput="this.value = this.value
+                                        .replace(/[^0-9.]/g, '')
+                                        .replace(/(\..*)\./g, '$1')
+                                        .replace(/^(\d{0,6})(\.\d{0,2})?.*$/, '$1$2');"
                                             class="focus:ring-0 focus:outline-none border-b border-blue-haze pb-1 placeholder:font-semibold placeholder:text-sm placeholder:text-dodger-blue font-semibold text-sm text-dodger-blue w-[37px]"
                                             placeholder="00.00">
                                     </div>
@@ -469,8 +475,8 @@
                             <div class="flex items-center justify-between">
                                 <p class="font-semibold text-sm">Doctor Information</p>
                                 <div class="flex items-center gap-4">
-                                    <span class="material-symbols-outlined cursor-pointer !text-lg">edit</span>
-                                    <span class="material-symbols-outlined cursor-pointer !text-lg">share</span>
+                                    <button type="button" class="material-symbols-outlined cursor-pointer !text-lg edit-doctor">edit</button>
+                                    <button type="button" class="material-symbols-outlined cursor-pointer !text-lg share-doctor">share</button>
                                     <span
                                         class="material-symbols-outlined cursor-pointer !text-lg closeInfoPopup">close</span>
                                 </div>
@@ -692,4 +698,3 @@
 {% block extra_js %}
 <script src="/static/js/doctors.js"></script>
 {% endblock %}
-
