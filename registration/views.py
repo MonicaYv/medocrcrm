@@ -262,18 +262,64 @@ def google_callback(request):
         email__iexact=email
     ).first()
 
+    allowed_user_types = [
+        "hospital",
+        "doctor",
+        "lab",
+        "pharmacy",
+    ]
+
     # ============================================================
     # 9. GOOGLE SIGN IN
     # ============================================================
 
     if mode == "signin":
 
+    # ============================================================
+    # GOOGLE ACCOUNT NOT REGISTERED
+    # ============================================================
+
         if not user:
-            # Google account is not registered yet
             request.session.pop("google_oauth_state", None)
             request.session.pop("google_auth_mode", None)
 
             return redirect("/user/new-signup/")
+
+
+        # ============================================================
+        # ONLY HOSPITAL / DOCTOR / LAB / PHARMACY
+        # ARE ALLOWED IN THIS PROJECT
+        # ============================================================
+
+        if user.user_type not in allowed_user_types:
+
+            account_type = (
+                user.get_user_type_display()
+                if hasattr(user, "get_user_type_display")
+                else user.user_type.replace("_", " ").title()
+            )
+
+            message = (
+                f"This Google account is already registered as a "
+                f"{account_type} account. "
+                f"Please use another Google account."
+            )
+
+            request.session.pop("google_oauth_state", None)
+            request.session.pop("google_auth_mode", None)
+
+            query = urlencode({
+                "google_error": message
+            })
+
+            return redirect(
+                f"{reverse('login')}?{query}"
+            )
+
+
+        # ============================================================
+        # ACCOUNT IS ALLOWED
+        # ============================================================
 
         if not user.is_active:
             return JsonResponse({
@@ -281,10 +327,10 @@ def google_callback(request):
                 "message": "Your account is inactive."
             }, status=403)
 
-        # Existing user
+
         request.session["user_id"] = user.id
         request.session["auth_method"] = "google"
-        
+
 
         # Update login information
         user.last_login = timezone.now()
@@ -297,13 +343,15 @@ def google_callback(request):
             ]
         )
 
+
         # Clear temporary Google session values
         request.session.pop("google_oauth_state", None)
         request.session.pop("google_auth_mode", None)
 
-        # --------------------------------------------------------
-        # Existing user → check KYC
-        # --------------------------------------------------------
+
+        # ============================================================
+        # EXISTING USER → CHECK KYC
+        # ============================================================
 
         user_id = user.id
         user_type = user.user_type
@@ -354,16 +402,29 @@ def google_callback(request):
     # ------------------------------------------------------------
 
     if user:
+
+        account_type = (
+            user.get_user_type_display()
+            if hasattr(user, "get_user_type_display")
+            else user.user_type.replace("_", " ").title()
+        )
+
         message = (
-            f"This Google account is already registered as "
-            f"{user.user_type}. Please sign in using Google."
+            f"This Google account is already registered as a "
+            f"{account_type} account. "
+            f"Please use another Google account."
         )
 
         query = urlencode({
             "google_error": message
         })
 
-        return redirect(f"{reverse('login')}?{query}")
+        request.session.pop("google_oauth_state", None)
+        request.session.pop("google_auth_mode", None)
+
+        return redirect(
+            f"{reverse('login')}?{query}"
+        )
 
     # ============================================================
     # 11. Create basic PostgreSQL User
@@ -1989,7 +2050,7 @@ def login_auth(request):
         }, status=404)
 
     allowed_user_types = [
-        "user",
+        # "user",
         "hospital",
         "doctor",
         "lab",
@@ -2010,6 +2071,7 @@ def login_auth(request):
 
     # Store user id in session
     request.session["user_id"] = user.id
+    request.session["auth_method"] = "phone"
 
     if user.kyc_completed:
         return JsonResponse({
@@ -2219,6 +2281,7 @@ def verify_login_otp(request):
         })
 
     request.session["user_id"] = user.id
+    request.session["auth_method"] = "phone"
     try:
         if user.email:
 
