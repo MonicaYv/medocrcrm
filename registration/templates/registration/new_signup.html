@@ -16,7 +16,7 @@
 
       <!-- SCENE 0: role selection — shopping cart + pill blister pack -->
       <div class="illus-scene" id="roleScene">
-        <img src="../../../static/images/healt-care.png" alt="logo">
+        <img src="../../../static/images/register-img.webp" alt="logo">
       </div>
 
       <!-- SCENE 1: sign up — shield/pills/heart (same family as sign-in) -->
@@ -26,7 +26,7 @@
 
       <!-- SCENE 2: OTP verify — doctor figure -->
       <div class="illus-scene" id="otpScene" style="display:none;">
-       <img src="../../../static/images/healt-care.png" alt="logo">
+       <img src="../../../static/images/register-img.webp" alt="logo">
       </div>
 
       <div class="dots">
@@ -137,7 +137,7 @@
 
 
           <div class="flex-1"></div>
-          <p class="footer-link mt-6">Already have an account? <a href="#" id="backToRoleBtn">Sign in instead</a></p>
+          <p class="footer-link mt-6">Already have an account? <a href="{% url 'login' %}">Sign in instead</a></p>
         </div>
       </form>
 
