@@ -120,7 +120,6 @@
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    --blur-xs: 4px;
     --blur-sm: 8px;
     --blur-2xl: 40px;
     --default-transition-duration: 150ms;
@@ -137,6 +136,7 @@
     --color-teal-veil: #3AAFA91A;
     --color-teal-shadow: #3AAFA94D;
     --color-teal-medium: #3AAFA912;
+    --color-baby-blue: #007BFF4D;
     --color-dodger-blue: #007BFF;
     --color-light-dodger-blue: #EEF6FF;
     --color-powder-cyan: #F7FFFF;
@@ -1002,6 +1002,9 @@
   }
   .mt-14 {
     margin-top: calc(var(--spacing) * 14);
+  }
+  .mt-15 {
+    margin-top: calc(var(--spacing) * 15);
   }
   .mt-19 {
     margin-top: calc(var(--spacing) * 19);
@@ -3109,6 +3112,9 @@
   }
   .bg-azure-radiance {
     background-color: var(--color-azure-radiance);
+  }
+  .bg-baby-blue {
+    background-color: var(--color-baby-blue);
   }
   .bg-black {
     background-color: var(--color-black);

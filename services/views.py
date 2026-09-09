@@ -762,117 +762,86 @@ def save_hospital_services(request):
     
     saved_services = []
     saved_rooms = []
-    
-    # Save services
-    for s in services:
-        try:
-            category = HospitalCategory.objects.get(id=s["category_id"])
-            service = HospitalServiceDescription.objects.get(id=s["service_id"])
-        except (HospitalCategory.DoesNotExist, HospitalServiceDescription.DoesNotExist):
-            continue
-        
-        # obj, created = HospitalServiceRateCard.objects.update_or_create(
-        #     hospital=hospital,
-        #     category=category,
-        #     description=service,
-        #     defaults={
-        #         "price": s.get("price") or 0,
-        #         "is_active": True
-        #     }
-        # )
-        # existing = HospitalServiceRateCard.objects.filter(
-        #     hospital=hospital,
-        #     category=category,
-        #     description=service,
-        #     is_active=True
-        # ).first()
 
-        # if existing:
+    try:
+        # Save services
+        for s in services:
+            try:
+                category = HospitalCategory.objects.get(id=s["category_id"])
+                service = HospitalServiceDescription.objects.get(id=s["service_id"])
+            except (HospitalCategory.DoesNotExist, HospitalServiceDescription.DoesNotExist):
+                continue
 
-        #     existing.price = s.get("price") or 0
-        #     existing.save()
+            existing = HospitalServiceRateCard.objects.filter(
+                hospital=hospital,
+                category=category,
+                description=service,
+                is_active=True
+            ).first()
 
-        #     obj = existing
+            if existing:
+                existing.price = s.get("price") or 0
+                existing.save()
+                obj = existing
+            else:
+                obj = HospitalServiceRateCard.objects.create(
+                    hospital=hospital,
+                    category=category,
+                    description=service,
+                    price=s.get("price") or 0,
+                    is_active=True
+                )
 
-        # else:
+            saved_services.append({
+                "id": obj.id,
+                "category": category.name,
+                "service": service.description,
+                "price": str(obj.price),
+            })
 
-        #     obj = HospitalServiceRateCard.objects.create(
-        #        hospital=hospital,
-        #        category=category,
-        #        description=service,
-        #        price=s.get("price") or 0,
-        #        is_active=True
-        #     )
-        
-        # saved_services.append({
-        #     "id": obj.id,
-        #     "category": category.name,
-        #     "service": service.description[:50],
-        #     "price": str(obj.price)
-        # })
-        obj = HospitalServiceRateCard.objects.create(
-            hospital=hospital,
-            category=category,
-            description=service,
-            price=s.get("price") or 0,
-            is_active=True
-        )
-        saved_services.append({
-            "id": obj.id,
-            "category": category.name,
-            "service": service.description,
-            "price": str(obj.price),
-        })
-    # Save rooms
-    for r in rooms:
-        try:
-            bed_room = HospitalBedRoom.objects.get(id=r["bed_room_id"])
-        except HospitalBedRoom.DoesNotExist:
-            continue
-        
-        # obj, created = HospitalRoomRateCard.objects.update_or_create(
-        #     hospital=hospital,
-        #     bed_room=bed_room,
-        #     ac=r.get("ac", False),
-        #     days=r.get("days") or 1,
-        #     defaults={
-        #         "price": r.get("price") or 0,
-        #         "is_active": True
-        #     }
-        # )
-        existing = HospitalRoomRateCard.objects.filter(
-            hospital=hospital,
-            bed_room=bed_room,
-            ac=r.get("ac", False),
-            days=r.get("days") or 1,
-            is_active=True
-        ).first()
+        # Save rooms
+        for r in rooms:
+            try:
+                bed_room = HospitalBedRoom.objects.get(id=r["bed_room_id"])
+            except HospitalBedRoom.DoesNotExist:
+                continue
 
-        if existing:
-
-            existing.price = r.get("price") or 0
-            existing.save()
-
-            obj = existing
-
-        else:
-
-           obj = HospitalRoomRateCard.objects.create(
+            existing = HospitalRoomRateCard.objects.filter(
                 hospital=hospital,
                 bed_room=bed_room,
                 ac=r.get("ac", False),
                 days=r.get("days") or 1,
-                price=r.get("price") or 0,
                 is_active=True
-            )
-        saved_rooms.append({
-            "id": obj.id,
-            "room": bed_room.name,
-            "ac": obj.ac,
-            "days": obj.days,
-            "price": str(obj.price)
-        })
-    
+            ).first()
+
+            if existing:
+                existing.price = r.get("price") or 0
+                existing.save()
+                obj = existing
+            else:
+                obj = HospitalRoomRateCard.objects.create(
+                    hospital=hospital,
+                    bed_room=bed_room,
+                    ac=r.get("ac", False),
+                    days=r.get("days") or 1,
+                    bed_no=r.get("bed_no") or 1,
+                    price=r.get("price") or 0,
+                    is_active=True
+                )
+
+            saved_rooms.append({
+                "id": obj.id,
+                "room": bed_room.name,
+                "ac": obj.ac,
+                "days": obj.days,
+                "price": str(obj.price)
+            })
+    except Exception as e:
+        return JsonResponse(
+            {"success": False, "error": f"Failed to save hospital services: {e}"},
+            status=500
+        )
+
     return JsonResponse({
         "success": True,
         "services": saved_services,

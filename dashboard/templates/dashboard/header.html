@@ -3,7 +3,9 @@
 <div class="h-[72px] w-full flex items-center justify-between p-2 md:p-6 md:shadow-lg">
   <!-- Logo div -->
   <div class="w-16">
-    <img src="{{ logo }}" alt="Logo" loading="lazy" class="w-10"/>
+    <a href="{% url 'dashboard' %}">
+      <img src="{{ logo }}" alt="Logo" loading="lazy" class="w-10"/>
+    </a>  
   </div>
 
   <!-- Desktop Navbar -->
