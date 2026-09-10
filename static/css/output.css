@@ -532,6 +532,9 @@
   .-top-0\.5 {
     top: calc(var(--spacing) * -0.5);
   }
+  .-top-1 {
+    top: calc(var(--spacing) * -1);
+  }
   .-top-1\.5 {
     top: calc(var(--spacing) * -1.5);
   }
@@ -645,6 +648,9 @@
   }
   .\!right-80 {
     right: calc(var(--spacing) * 80) !important;
+  }
+  .-right-1 {
+    right: calc(var(--spacing) * -1);
   }
   .-right-1\.5 {
     right: calc(var(--spacing) * -1.5);
@@ -768,6 +774,9 @@
   }
   .left-0 {
     left: calc(var(--spacing) * 0);
+  }
+  .left-1 {
+    left: calc(var(--spacing) * 1);
   }
   .left-1\/2 {
     left: calc(1 / 2 * 100%);
@@ -1195,6 +1204,9 @@
   .\!h-\[180px\] {
     height: 180px !important;
   }
+  .h-0 {
+    height: calc(var(--spacing) * 0);
+  }
   .h-0\.5 {
     height: calc(var(--spacing) * 0.5);
   }
@@ -1293,6 +1305,9 @@
   }
   .h-60 {
     height: calc(var(--spacing) * 60);
+  }
+  .h-74 {
+    height: calc(var(--spacing) * 74);
   }
   .h-74\.25 {
     height: calc(var(--spacing) * 74.25);
@@ -1780,6 +1795,9 @@
   .w-100 {
     width: calc(var(--spacing) * 100);
   }
+  .w-101 {
+    width: calc(var(--spacing) * 101);
+  }
   .w-101\.25 {
     width: calc(var(--spacing) * 101.25);
   }
@@ -2236,6 +2254,9 @@
   .flex-\[1_0_0\] {
     flex: 1 0 0;
   }
+  .flex-shrink {
+    flex-shrink: 1;
+  }
   .flex-shrink-0 {
     flex-shrink: 0;
   }
@@ -2251,6 +2272,10 @@
   .border-collapse {
     border-collapse: collapse;
   }
+  .-translate-x-1 {
+    --tw-translate-x: calc(var(--spacing) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
   .-translate-x-1\/2 {
     --tw-translate-x: calc(calc(1 / 2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -2261,6 +2286,10 @@
   }
   .translate-x-0 {
     --tw-translate-x: calc(var(--spacing) * 0);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .-translate-y-1 {
+    --tw-translate-y: calc(var(--spacing) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .-translate-y-1\/2 {
@@ -2875,6 +2904,9 @@
   }
   .border-black {
     border-color: var(--color-black);
+  }
+  .border-blue-100 {
+    border-color: var(--color-blue-100);
   }
   .border-blue-100\/50 {
     border-color: color-mix(in srgb, oklch(93.2% 0.032 255.585) 50%, transparent);
@@ -3685,6 +3717,9 @@
   .px-\[30px\] {
     padding-inline: 30px;
   }
+  .py-0 {
+    padding-block: calc(var(--spacing) * 0);
+  }
   .py-0\.5 {
     padding-block: calc(var(--spacing) * 0.5);
   }
@@ -3741,6 +3776,9 @@
   }
   .py-\[22\.5px\] {
     padding-block: 22.5px;
+  }
+  .pt-0 {
+    padding-top: calc(var(--spacing) * 0);
   }
   .pt-0\.5 {
     padding-top: calc(var(--spacing) * 0.5);
@@ -4638,11 +4676,18 @@
   .ring-slate-200 {
     --tw-ring-color: var(--color-slate-200);
   }
+  .ring-white {
+    --tw-ring-color: var(--color-white);
+  }
   .ring-white\/70 {
     --tw-ring-color: color-mix(in srgb, #FFFFFF 70%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       --tw-ring-color: color-mix(in oklab, var(--color-white) 70%, transparent);
     }
+  }
+  .outline {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
   }
   .blur {
     --tw-blur: blur(8px);
@@ -5835,6 +5880,11 @@
       width: calc(var(--spacing) * 80);
     }
   }
+  .sm\:w-86 {
+    @media (width >= 40rem) {
+      width: calc(var(--spacing) * 86);
+    }
+  }
   .sm\:w-\[12px\] {
     @media (width >= 40rem) {
       width: 12px;
@@ -6579,6 +6629,11 @@
       display: block;
     }
   }
+  .lg\:flex {
+    @media (width >= 64rem) {
+      display: flex;
+    }
+  }
   .lg\:hidden {
     @media (width >= 64rem) {
       display: none;
@@ -6959,6 +7014,11 @@
       font-size: 13px;
     }
   }
+  .xl\:w-86 {
+    @media (width >= 80rem) {
+      width: calc(var(--spacing) * 86);
+    }
+  }
   .xl\:w-auto {
     @media (width >= 80rem) {
       width: auto;
@@ -6967,6 +7027,16 @@
   .xl\:max-w-4xl {
     @media (width >= 80rem) {
       max-width: var(--container-4xl);
+    }
+  }
+  .xl\:max-w-86 {
+    @media (width >= 80rem) {
+      max-width: calc(var(--spacing) * 86);
+    }
+  }
+  .xl\:max-w-\[344px\] {
+    @media (width >= 80rem) {
+      max-width: 344px;
     }
   }
   .xl\:grid-cols-2 {
@@ -8505,6 +8575,11 @@ input[type="number"] {
   inherits: false;
   initial-value: 0 0 #0000;
 }
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
 @property --tw-blur {
   syntax: "*";
   inherits: false;
@@ -8668,6 +8743,7 @@ input[type="number"] {
       --tw-ring-offset-width: 0px;
       --tw-ring-offset-color: #fff;
       --tw-ring-offset-shadow: 0 0 #0000;
+      --tw-outline-style: solid;
       --tw-blur: initial;
       --tw-brightness: initial;
       --tw-contrast: initial;

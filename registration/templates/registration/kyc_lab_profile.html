@@ -455,7 +455,7 @@
                                 </div>
                             </div>
                             <!-- Phone Input -->
-                            <input type="tel" id="phone" name="contact_phone" class="flex-1 h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-slate-800 text-sm placeholder:text-kyc-light-gray" placeholder="Phone no." required>
+                            <input type="tel" maxlength="10" pattern="[0-9]{10}" id="phone" name="contact_phone" class="flex-1 h-12 rounded-md border border-dark-gray px-4 focus:outline-none transition-all text-slate-800 text-sm placeholder:text-kyc-light-gray" placeholder="Phone no." oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
                         </div>
                     </div>
 
@@ -510,7 +510,7 @@
                     <!-- Pincode -->
                     <div>
                         <input type="text" id="pincode" name="pincode" 
-                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Country" required>
+                               class="w-full h-12 rounded-md border border-dark-gray px-4 text-blue-charcoal font-medium focus:outline-none text-sm placeholder:text-kyc-light-gray" placeholder="Pincode" required>
                     </div>
                 </div>
             </div>
