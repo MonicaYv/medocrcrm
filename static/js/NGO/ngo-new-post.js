@@ -396,6 +396,16 @@ $(document).ready(function () {
             }
         });
 
+        // Validate pincode - must be exactly 6 digits when provided
+        let pinInput = form.find('input[name="pincode"]');
+        let pincode = $.trim(pinInput.val() || '');
+        if (pincode && !/^\d{6}$/.test(pincode)) {
+            isValid = false;
+            if (pinInput.next('.error-text').length === 0) {
+                pinInput.after(`<small class="error-text text-danger">Pincode must be exactly 6 digits.</small>`);
+            }
+        }
+
         // Check if creatives[] files are uploaded
         let creativeInput = form.find('input.upload-input')[0];
         if (creativeInput && creativeInput.files.length === 0) {

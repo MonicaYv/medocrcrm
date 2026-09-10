@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import re
 from datetime import datetime, date
 from .models import (
     NGOPost, 
@@ -164,6 +165,17 @@ def save_ngo_post(request):
     if missing_fields:
         return JsonResponse({'error': 'Missing required fields', 'missing_fields': missing_fields}, status=400)
 
+    # Validate pincode - must be exactly 6 digits (e.g. Indian PIN codes)
+    pincode = data.get('pincode', '').strip()
+    if not re.fullmatch(r'\d{6}', pincode):
+        return JsonResponse(
+            {
+                'error': 'Invalid pincode. Pincode must be exactly 6 digits.',
+                'missing_fields': ['pincode'],
+            },
+            status=400
+        )
+
     try:
         # Convert IDs to model instances
         post_type_instance = get_object_or_404(PostTypeOption, id=data['post_type'])
@@ -185,7 +197,7 @@ def save_ngo_post(request):
             country=country_instance,
             state=state_instance,
             city=city_instance,
-            pincode=data['pincode'],
+            pincode=pincode,
             age_group=age_instance,
             gender=gender_instance,
             spending_power=spending_power_instance,

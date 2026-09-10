@@ -11,7 +11,7 @@
             </span>
         </div>
         <!-- ================= STEP 1 ================= -->
-        <div id="step-1" class="step-content">
+        <div id="popup-step-1" class="popup-step-content">
 
             <div class="flex flex-col gap-4">
 
@@ -30,7 +30,7 @@
             </div>
             <div class="flex justify-between gap-3 mt-5">
                 <button type="button"
-                        id="cancel-steps"
+                        id="popup-cancel-steps"
                         class="w-full h-[48px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold">
                     Cancel
                 </button>
@@ -42,7 +42,7 @@
             </div>
         </div>
         <!-- ================= STEP 2 ================= -->
-        <div id="step-2" class="step-content hidden">
+        <div id="popup-step-2" class="popup-step-content hidden">
             <div class="flex flex-col gap-4">
                 <h3 class="text-lg font-bold text-desaturated-blue">
                     Bed & Rooms
@@ -68,7 +68,7 @@
             </div>
         </div>
         <!-- ================= STEP 3 ================= -->
-        <div id="step-3" class="step-content hidden">
+        <div id="popup-step-3" class="popup-step-content hidden">
             <h3 class="text-lg font-bold text-desaturated-blue mb-3">
                 Summary
             </h3>
@@ -102,7 +102,7 @@
         </div>
     </div>
 </div>
-<template id="service-card-template">
+<template id="popup-service-card-template">
     <div class="service-card bg-white border border-slate-200 rounded-lg p-4 relative">
         <div class="flex flex-col gap-3">
             <input type="hidden" class="category-id">
@@ -156,7 +156,7 @@
         </div>
     </div>
 </template>
-<template id="bed-room-card-template">
+<template id="popup-bed-room-card-template">
     <div class="bed-service-card bg-white border border-slate-200 rounded-lg p-4 relative">
         <input type="hidden" class="bed-room-id">
         <div class="custom-dropdown relative">
