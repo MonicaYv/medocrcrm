@@ -72,8 +72,15 @@ $(document).on('click', '.dropdown-item', function () {
     dropdown.find('.dropdown-menu').addClass('hidden');
 });
 
-// Close on outside click
-$(document).on('click', function () {
+// Close on outside click.
+// NOTE: clicks inside .custom-dropdown / .dropdown-trigger are ignored here so
+// that dropdowns managed by page-specific scripts (e.g. the hospital Add
+// Services popup cards) stay open while the user interacts with them. Those
+// scripts close their own menus on selection / outside click.
+$(document).on('click', function (e) {
+    if ($(e.target).closest('.custom-dropdown, .dropdown-trigger').length) {
+        return;
+    }
     $('.dropdown-menu').addClass('hidden');
 });
 

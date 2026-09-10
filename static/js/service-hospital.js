@@ -12,8 +12,8 @@ function getCookie(name) {
 }
 
 function showStep(step) {
-    $(".step-content").addClass("hidden");
-    $(`#step-${step}`).removeClass("hidden");
+    $(".popup-step-content").addClass("hidden");
+    $(`#popup-step-${step}`).removeClass("hidden");
 
     $(".step-circle").removeClass("active-step");
     $(".step-label").removeClass("active-heading");
@@ -140,7 +140,7 @@ function collectRooms() {
 
     const rooms = [];
 
-    $(".bed-services-list .bed-service-card").each(function () {
+    $(".popup-overlay .bed-services-list .bed-service-card").each(function () {
 
         const $card = $(this);
 
@@ -167,7 +167,7 @@ function collectServices() {
 
     const services = [];
 
-    $(".services-list .service-card").each(function () {
+    $(".popup-overlay .services-list .service-card").each(function () {
 
         const $card = $(this);
 
@@ -194,8 +194,8 @@ function renderSummary() {
     const rooms = collectRooms();
     
 
-    const $servicesGrid = $(".hospital-summary-services");
-    const $roomsGrid = $(".hospital-summary-rooms");
+    const $servicesGrid = $(".popup-overlay .hospital-summary-services");
+    const $roomsGrid = $(".popup-overlay .hospital-summary-rooms");
     $servicesGrid.empty();
     $roomsGrid.empty();
 
@@ -251,24 +251,20 @@ $(document).ready(function () {
         document.getElementById("hospital-bed-rooms-data").textContent
     );
 
-    $(".services-list .service-card").each(function () {
-        resetServiceCard($(this));
-    });
+    // Seed the popup with exactly one service card and one room card so the
+    // user can start adding a service immediately when the popup opens
+    const serviceTemplate = document.getElementById("popup-service-card-template");
+    if (serviceTemplate) {
+        const $serviceCard = $(serviceTemplate.content.firstElementChild.cloneNode(true));
+        resetServiceCard($serviceCard);
+        $(".popup-overlay .services-list").append($serviceCard);
+    }
 
-    $(".bed-services-list .bed-service-card").each(function () {
-        resetRoomCard($(this));
-    });
-
-  // --- INITIALIZATION ON PAGE LOAD ---
-    // Note: The loop for services is removed because 1 card is already provided by your HTML.
-    // This loop generates exactly 1 initial room card dynamically on startup.
-    for (let i = 0; i < 1; i++) {
-        const template = document.getElementById("bed-room-card-template");
-        if (template) {
-            const $card = $(template.content.firstElementChild.cloneNode(true));
-            resetRoomCard($card);
-            $(".bed-services-list").append($card);
-        }
+    const roomTemplate = document.getElementById("popup-bed-room-card-template");
+    if (roomTemplate) {
+        const $roomCard = $(roomTemplate.content.firstElementChild.cloneNode(true));
+        resetRoomCard($roomCard);
+        $(".popup-overlay .bed-services-list").append($roomCard);
     }
 
     showStep(1);
@@ -349,7 +345,7 @@ $(document).on("click", ".category-options .dropdown-item", function (e) {
 
 // Global Click Dismiss: Hide menus if a user clicks anywhere else on the screen
 $(document).on("click", function (e) {
-    if (!$(e.target).closest(".dropdown-trigger, .more-dropdown, .more-btn").length) {
+    if (!$(e.target).closest(".custom-dropdown, .dropdown-trigger, .more-dropdown, .more-btn").length) {
         $(".dropdown-menu").addClass("hidden").css("display", "none");
         $(".more-dropdown").addClass("hidden");
     }
@@ -369,12 +365,11 @@ $(document).on("click", function (e) {
 //     showStep(1);
 // });
 
-$(document).on("click", ".add-services-home", function (e) {
+$(document).on("click", ".add-services-home, .home-add-service", function (e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log("ADD SERVICES CLICKED");
     $(".home-section").addClass("hidden");
-    $(".services-section")
+    $(".services-section.popup-overlay")
         .removeClass("hidden")
         .addClass("flex");
     showStep(1);
@@ -384,23 +379,25 @@ $(document).on("click", ".add-bed-room-home", function (e) {
     e.preventDefault();
     e.stopPropagation();
     $(".home-section").addClass("hidden");
-    $(".services-section")
+    $(".services-section.popup-overlay")
         .removeClass("hidden")
         .addClass("flex");
     showStep(2);
 });
 
 
-$(document).on("click", "#cancel-steps", function () {
-    $(".services-section").addClass("hidden");
+$(document).on("click", "#popup-cancel-steps", function () {
+    $(".services-section.popup-overlay")
+        .addClass("hidden")
+        .removeClass("flex");
     $(".home-section").removeClass("hidden");
 });
 
 $(document).on("click", ".step-btn[data-target]", function (e) {
     e.preventDefault();
     const target = Number($(this).data("target"));
-    const currentStep = $(".step-content:not(.hidden)").attr("id");
-    if (target === 2 && currentStep === "step-1") {
+    const currentStep = $(".popup-step-content:not(.hidden)").attr("id");
+    if (target === 2 && currentStep === "popup-step-1") {
         const services = collectServices();
         if (!services.length) {
             alert("Please add at least one complete service.");
@@ -419,12 +416,14 @@ $(document).on("click", ".step-btn[data-target]", function (e) {
     showStep(target);
 });
 $(document).on("click", ".add-service-bed", function () {
-    console.log("ADD ROOM CLICKED");
-    const template = document.getElementById("bed-room-card-template");
+    const template = document.getElementById("popup-bed-room-card-template");
+    if (!template) {
+        console.error("popup-bed-room-card-template not found in DOM");
+        return;
+    }
     const $card = $(template.content.firstElementChild.cloneNode(true));
     resetRoomCard($card);
-    $(".bed-services-list").append($card);
-    console.log("APPENDED");
+    $(".popup-overlay .bed-services-list").append($card);
 });
 
 // --- FIXED REMOVE SERVICE HANDLER ---
@@ -439,28 +438,27 @@ $(document).on("click", ".remove-service-bed", function () {
     $(this).closest(".bed-service-card").remove();
 });
 
-// --- GUARANTEED ADD SERVICE TEMPLATE CLONER ---
-// Using document with a namespace to avoid conflicts with common-services.js
-$(document).on("click", ".hospital-add-service, .add-service", function (e) {
+// --- ADD SERVICE TEMPLATE CLONER (scoped to the Add Services popup) ---
+$(document).on("click", ".hospital-add-service", function (e) {
     e.preventDefault();
     // Only handle if we're on the hospital page (has hospital-specific elements)
     if ($("#hospital-categories-data").length === 0) return;
     
-    const template = document.getElementById("service-card-template");
+    const template = document.getElementById("popup-service-card-template");
     
     if (!template) {
-        console.error("service-card-template not found in DOM");
+        console.error("popup-service-card-template not found in DOM");
         return; 
     }
 
-    // Clone cleanly from the global abstract <template> fragment blueprint
+    // Clone cleanly from the popup's abstract <template> fragment blueprint
     const clone = template.content.cloneNode(true);
     
     // Convert fragment to a jQuery selector instance to reset its input bindings cleanly
     const $card = $(clone.firstElementChild || clone.querySelector(".service-card"));
     resetServiceCard($card);
     
-    $(".services-list").append($card);
+    $(".popup-overlay .services-list").append($card);
 });
 
 $(document).on("click", ".category-options .dropdown-item", function () {
@@ -586,7 +584,7 @@ $(document).on("click", ".close-icon", function (e) {
     e.preventDefault();
     e.stopPropagation();
 
-    $(".services-section")
+    $(".services-section.popup-overlay")
         .addClass("hidden")
         .removeClass("flex");
 
