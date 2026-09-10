@@ -165,6 +165,8 @@
                       <div class="relative dropdown-wrapper">
                         <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
                           <input type="text" readonly value="Select" required
+                            maxlength="6" inputmode="numeric" pattern="\d{6}"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"
                             class="dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
                           <span class="material-symbols-outlined dropdown-button">
                             keyboard_arrow_down
