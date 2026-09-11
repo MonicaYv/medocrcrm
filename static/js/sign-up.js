@@ -69,11 +69,11 @@ document.getElementById("roleContinueBtn").addEventListener("click", () => {
   );
 });
 
-//go back to role
-document.getElementById("backToRoleBtn").addEventListener("click", (e) => {
-  e.preventDefault();
-  showScreen({ screenEl: screenRole, illusEl: roleScene }, 0);
-});
+// //go back to role
+// document.getElementById("backToRoleBtn").addEventListener("click", (e) => {
+//   e.preventDefault();
+//   showScreen({ screenEl: screenRole, illusEl: roleScene }, 0);
+// });
 
 //sign up tiles
 document.querySelectorAll("#signupTiles .service-tile").forEach((tile) => {
