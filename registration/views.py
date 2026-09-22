@@ -4598,6 +4598,7 @@ def save_lab_step_2(request):
     role = request.POST.get("contact_role")
     otp = request.POST.get("contact_otp")
     referral_code = request.POST.get("referral_code")
+    pincode = request.POST.get("pincode", "").strip()
 
     if not name:
         return JsonResponse({
@@ -4617,6 +4618,18 @@ def save_lab_step_2(request):
             "message": "Contact person role is required."
         }, status=400)
 
+    if not pincode:
+        return JsonResponse({
+            "success": False,
+            "message": "Pincode is required."
+        }, status=400)
+
+    if not re.fullmatch(r"\d{6}", pincode):
+        return JsonResponse({
+            "success": False,
+            "message": "Pincode must be exactly 6 digits."
+        }, status=400)
+
     contact_person, created = ContactPerson.objects.update_or_create(
         profile=user,
         profile_type="lab",
@@ -4628,6 +4641,7 @@ def save_lab_step_2(request):
             "role": role,
             "otp": otp,
             "referral_code": referral_code,
+            "pincode": pincode,
         }
     )
 
