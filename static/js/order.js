@@ -454,9 +454,116 @@ document.querySelectorAll(".popup-overlay").forEach(popup => {
     });
 });
 $(document).on("click", ".view-invoice-btn", function () {
-    $(".subscriptionTaxPopupInvoice")
-        .removeClass("hidden")
-        .addClass("flex");
+    const orderId = $(this).data("order-id");
+    // The invoice popup is rendered right after the order details popup in the
+    // order card markup, so scope the lookup to the correct popup instance.
+    const $invoicePopup = $(this).closest(".popup-overlay").next(".subscriptionTaxPopupInvoice");
+
+    if (!orderId || !$invoicePopup.length) {
+        console.error("Invoice popup not found for order", orderId);
+        return;
+    }
+
+    const field = (sel) => $invoicePopup.find(sel);
+
+    // Reset stale data from a previously viewed order
+    field("#invoice_no").text("-");
+    field("#invoice_date").text("-");
+    field("#client_name").text("-");
+    field("#client_gstin").text("-");
+    field("#client_address").text("-");
+    field("#client_contact").text("-");
+    field("#client_email").text("-");
+    field("#invoice_items").empty();
+    field(".invoice-subtotal").text("-");
+    field(".invoice-gst").text("-");
+    field(".invoice-total").text("-");
+    field("#payment_mode").text("-");
+    field("#txn_id").text("-");
+    field("#amount_words").text("-");
+
+    $.get(`invoice/${orderId}/`, function (data) {
+        if (data.error) {
+            if (window.toastr) toastr.error(data.error);
+            return;
+        }
+
+        // Invoice context (this popup now shows an order invoice)
+        field("#invoice_subtitle").text("Medicine Order");
+        field("#invoice_no").text(data.invoice_no || "-");
+        field("#invoice_date").text(data.invoice_date || "-");
+
+        // Client details
+        field("#client_name").text(data.client.name || "-");
+        field("#client_gstin").text(data.client.gstin || "-");
+        field("#client_address").text(data.client.address || "-");
+        field("#client_contact").text(data.client.contact || "-");
+        field("#client_email").text(data.client.email || "-");
+
+        // Supplier details
+        field("#supplier_gstin").text(data.supplier.gstin || "-");
+        field("#supplier_name").text(data.supplier.name || "-");
+        field("#supplier_address").text(data.supplier.address || "-");
+        field("#supplier_contact").text(data.supplier.contact || "-");
+        field("#supplier_email").text(data.supplier.email || "-");
+        field("#signature_supplier_name").text(data.supplier.name || "-");
+
+        // Invoice items
+        field("#invoice_items").empty();
+        (data.items || []).forEach(function (item) {
+            field("#invoice_items").append(`
+                <tr>
+                    <td class="border border-gray-400 px-2 py-1">${item.description}</td>
+                    <td class="border border-gray-400 px-2 py-1">${item.hsn}</td>
+                    <td class="border border-gray-400 px-2 py-1">${item.quantity}</td>
+                    <td class="border border-gray-400 px-2 py-1">₹${Number(item.rate).toFixed(2)}</td>
+                    <td class="border border-gray-400 px-2 py-1">${item.gst_percent}%</td>
+                    <td class="border border-gray-400 px-2 py-1">₹${Number(item.amount).toFixed(2)}</td>
+                </tr>
+            `);
+        });
+
+        // Discount / delivery rows (only when applicable)
+        if (Number(data.discount) > 0) {
+            field("#invoice_discount_text").text(`₹${Number(data.discount).toFixed(2)}`);
+            field("#invoice_discount_row").removeClass("hidden");
+        } else {
+            field("#invoice_discount_row").addClass("hidden");
+        }
+        if (Number(data.delivery_fee) > 0) {
+            field("#invoice_delivery_text").text(`₹${Number(data.delivery_fee).toFixed(2)}`);
+            field("#invoice_delivery_row").removeClass("hidden");
+        } else {
+            field("#invoice_delivery_row").addClass("hidden");
+        }
+
+        // Amounts
+        field("#invoice_gst_label").text(`Add: GST (${data.gst_percent} %)`);
+        field(".invoice-subtotal").text(`₹${Number(data.subtotal).toFixed(2)}`);
+        field(".invoice-gst").text(`₹${Number(data.gst_amount).toFixed(2)}`);
+        field(".invoice-total").text(`₹${Number(data.total).toFixed(2)}`);
+
+        // Payment
+        field("#payment_mode").text(data.payment_method || "-");
+        field("#txn_id").text(data.txn_id || "-");
+
+        // Amount in words
+        field("#amount_words").text(
+            `INR ${amountToWords(parseFloat(data.total))} Only`
+        );
+
+        // Notes
+        field("#invoice_notes_list").html(
+            `<li>This is a tax invoice for medicine order #${data.order_id}.</li>` +
+            `<li>Medicines are subject to applicable GST as per law.</li>` +
+            `<li>For support: ${data.supplier.email || "support@aibuzz.net"}</li>`
+        );
+
+        // Show the popup
+        $invoicePopup.removeClass("hidden").addClass("flex");
+    }).fail(function () {
+        if (window.toastr) toastr.error("Failed to load invoice. Please try again.");
+    });
 });
 
 $(document).on("click", ".close-popup-invoice", function () {
@@ -501,7 +608,7 @@ $(document).on("click", ".invoice-download-btn", function (e) {
     e.stopPropagation();
 
     const invoice = document.querySelector(
-        ".subscriptionTaxPopupInvoice > div"
+        ".subscriptionTaxPopupInvoice:not(.hidden) > div"
     );
 
     if (!invoice) {
@@ -530,11 +637,11 @@ $(document).on("click", ".invoice-download-btn", function (e) {
                 // Fix Tailwind oklch colors
                 onclone: function (clonedDoc) {
                     const originalInvoice = document.querySelector(
-                        ".subscriptionTaxPopupInvoice > div"
+                        ".subscriptionTaxPopupInvoice:not(.hidden) > div"
                     );
 
                     const clonedInvoice = clonedDoc.querySelector(
-                        ".subscriptionTaxPopupInvoice > div"
+                        ".subscriptionTaxPopupInvoice:not(.hidden) > div"
                     );
 
                     if (!originalInvoice || !clonedInvoice) return;
@@ -591,6 +698,52 @@ $(document).on("click", ".invoice-download-btn", function (e) {
             console.error("Invoice download failed:", error);
         });
 });
+
+// =====================================
+// Amount in words (used by order invoice)
+// =====================================
+function amountToWords(amount) {
+    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+    const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+    const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+                   "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+
+    function getWords(num) {
+        let result = "";
+
+        const crore = Math.floor(num / 10000000);
+        num = num % 10000000;
+        const lakh = Math.floor(num / 100000);
+        num = num % 100000;
+        const thousand = Math.floor(num / 1000);
+        num = num % 1000;
+        const hundred = Math.floor(num / 100);
+        const rest = num % 100;
+
+        if (crore > 0) result += `${getTwoDigits(crore)} Crore `;
+        if (lakh > 0) result += `${getTwoDigits(lakh)} Lakh `;
+        if (thousand > 0) result += `${getTwoDigits(thousand)} Thousand `;
+        if (hundred > 0) result += `${ones[hundred]} Hundred `;
+        if (rest > 0) result += `and ${getTwoDigits(rest)} `;
+
+        return result.trim();
+    }
+
+    function getTwoDigits(num) {
+        if (num < 10) return ones[num];
+        else if (num >= 10 && num < 20) return teens[num - 10];
+        else return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
+    }
+
+    const parts = amount.toFixed(2).split('.');
+    const rupees = parseInt(parts[0]);
+    const paise = parseInt(parts[1]);
+
+    const rupeesWords = rupees === 0 ? "Zero Rupees" : getWords(rupees) + " Rupees";
+    const paiseWords = paise === 0 ? "" : ` and ${getTwoDigits(paise)} Paise`;
+
+    return rupeesWords + paiseWords;
+}
 
 // =====================================
 // INVOICE SHARE
