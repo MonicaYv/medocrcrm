@@ -1661,7 +1661,7 @@ function saveLabStep2() {
 
     const pincode =
         getValue(
-            '[name="contact_pincode"]'
+            '[name="pincode"]'
         );
 
     const referral =
@@ -1742,6 +1742,28 @@ function saveLabStep2() {
     }
 
 
+    if (!pincode) {
+
+        showLabError(
+            '[name="pincode"], #pincode',
+            "Pincode is required."
+        );
+
+        return;
+    }
+
+
+    if (!/^\d{6}$/.test(pincode)) {
+
+        showLabError(
+            '[name="pincode"], #pincode',
+            "Pincode must be exactly 6 digits."
+        );
+
+        return;
+    }
+
+
     // --------------------------------------------------------
     // FORM DATA
     // --------------------------------------------------------
@@ -1802,7 +1824,7 @@ function saveLabStep2() {
     );
 
     formData.append(
-        "contact_pincode",
+        "pincode",
         pincode
     );
 
