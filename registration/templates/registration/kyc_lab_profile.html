@@ -466,15 +466,30 @@
                                 Send Phone OTP
                             </button>
                             <div class="flex-1 relative flex items-center">
-                                <input type="text" id="otp" name="contact_otp" 
+
+                                <input type="hidden" id="lab_perso_otp_verified" name="lab_personal_otp_verified" value="0">
+
+                                <input type="text" id="lab_personal_otp" name="contact_otp" 
                                        class="w-full h-12 rounded-md border border-dark-gray pl-4 pr-24 focus:outline-none transition-all text-sm tracking-wide placeholder:text-kyc-light-gray" placeholder="Enter OTP">
-                                <div class="absolute right-3 flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md border border-green-200">
+                                
+                                <div id="lab_perso_verified" class="hidden  absolute right-3 flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-md border border-green-200">
                                     <span class="material-symbols-outlined text-sm font-black">check</span>
                                     <span>Verified</span>
                                 </div>
+                                <div
+                                    id="lab_perso_not_verified"
+                                    class="hidden absolute right-3  items-center gap-1 text-red-600 text-xs font-bold bg-red-50 px-2 py-1 rounded-md border border-red-200">
+
+                                    <span class="material-symbols-outlined text-sm font-black">
+                                        close
+                                    </span>
+
+                                    <span>Not Verified</span>
+                                </div>
+
                             </div>
                         </div>
-                        <span class="text-xs text-primary-color mt-1 pl-1">Didn't get the code? <a href="#" class="text-blue-charcoal hover:underline">Resend</a></span>
+                        <span class="text-xs text-primary-color mt-1 pl-1">Didn't get the code? <a href="#" class="text-blue-charcoal hover:underline lab_personal_resend_otp">Resend</a></span>
                     </div>
 
                     <!-- Role -->

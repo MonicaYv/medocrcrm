@@ -208,25 +208,25 @@
                             <div
                                 class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
                                 <div
-                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray filterOption"data-value="Today" >
                                 <span class="material-symbols-outlined !text-lg text-dodger-blue">
                                     check
                                 </span>Today
                                 </div>
                                 <div
-                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray filterOption" data-value="Week">
                                 <span class="material-symbols-outlined !text-lg text-light-gray">
                                     check
                                 </span>Week
                                 </div>
                                 <div
-                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
+                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray filterOption" data-value="Month">
                                 <span class="material-symbols-outlined !text-lg text-light-gray">
                                     check
                                 </span>Month
                                 </div>
                                 <div
-                                class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray">
+                                class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray filterOption" data-value="Custom">
                                 <div class="flex items-center gap-2">
                                     <span class="material-symbols-outlined !text-lg text-light-gray">
                                     check
@@ -779,5 +779,52 @@
                 skeleton.remove();
             }, 180);
         });
+
+
+        $(document).ready(function () {
+
+    $('.filterToggle').on('click', function (e) {
+        e.stopPropagation();
+
+        $(this).siblings('.filterDropdown').toggleClass('hidden');
+    });
+
+
+    $('.filterOption').on('click', function (e) {
+
+        e.stopPropagation();
+
+        // Remove blue from ALL ticks
+        $('.filterOption .material-symbols-outlined:first-child')
+            .removeClass('text-dodger-blue')
+            .addClass('text-light-gray');
+
+        // Make ONLY clicked option blue
+        $(this)
+            .find('.material-symbols-outlined:first-child')
+            .removeClass('text-light-gray')
+            .addClass('text-dodger-blue');
+
+        // Get selected value
+        let selectedValue = $(this).data('value');
+
+        // Update Today text
+        $('.filterToggle')
+            .closest('.flex.items-center.gap-2\\.5')
+            .find('> p')
+            .text(selectedValue);
+
+        // Close dropdown
+        $('.filterDropdown').addClass('hidden');
+
+    });
+
+
+    // Close when clicking outside
+    $(document).on('click', function () {
+        $('.filterDropdown').addClass('hidden');
+    });
+
+});
     </script>
 {% endblock %}

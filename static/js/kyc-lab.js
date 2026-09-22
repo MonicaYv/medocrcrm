@@ -375,6 +375,62 @@ $(".lab_resend_otp").on("click", function (e) {
   toastr.success("OTP sent successfully");
 });
 
+
+
+$("#lab_personal_otp").on("input", function () {
+
+    let otp = $(this).val()
+        .replace(/\D/g, "")
+        .substring(0, 6);
+
+    $(this).val(otp);
+
+    // Reset verification state whenever OTP changes
+    $("#lab_perso_otp_verified").val("0");
+
+    $("#lab_personal_otp").removeClass("border-red-400");
+
+    // Hide verification messages
+    $("#lab_perso_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    $("#lab_perso_not_verified")
+        .addClass("hidden")
+        .removeClass("flex");
+
+    // Don't validate until 6 digits
+    if (otp.length < 6) {
+        return;
+    }
+
+    // Correct OTP
+    if (otp === "123456") {
+
+        $("#lab_perso_otp_verified").val("1");
+
+        $("#lab_perso_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+    } else {
+
+        $("#lab_perso_otp_verified").val("0");
+
+        $("#lab_perso_not_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+        toastr.error("Invalid OTP.");
+
+        // IMPORTANT:
+        // Do NOT clear OTP
+        // $("#hos_personal_otp").val("");
+    }
+});
+
+
+
 // ============================================================
 // FILE INPUT - SHOW SELECTED FILE NAME
 // ============================================================
@@ -1763,6 +1819,48 @@ function saveLabStep2() {
         return;
     }
 
+    if (!otp) {
+
+        $("#lab_personal_otp").addClass("border-red-400");
+
+        toastr.warning("Please enter OTP.");
+
+        $("#lab_personal_otp").focus();
+
+        return;
+    }
+
+    if (otp.length !== 6) {
+
+        $("#lab_personal_otp").addClass("border-red-400");
+
+        toastr.warning("Please enter a valid 6-digit OTP.");
+
+        $("#lab_personal_otp").focus();
+
+        return;
+    }
+
+    if (otp !== "123456") {
+
+        $("#lab_perso_otp_verified").val("0");
+
+        $("#lab_perso_verified")
+            .addClass("hidden")
+            .removeClass("flex");
+
+        $("#lab_perso_not_verified")
+            .removeClass("hidden")
+            .addClass("flex");
+
+        toastr.error("Incorrect OTP.");
+
+        // Do NOT clear OTP
+        $("#lab_personal_otp").focus();
+
+        return;
+    }
+    
 
     // --------------------------------------------------------
     // FORM DATA
