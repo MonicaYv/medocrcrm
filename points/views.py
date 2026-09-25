@@ -1,7 +1,7 @@
 import json
 import datetime
 from django.shortcuts import render
-from dashboard.utils import dashboard_login_required, get_common_context
+from dashboard.utils import dashboard_login_required, get_common_context, build_points_action_query
 from .models import PointsHistory, PointsActionType, PointsBadge
 from coupon.models import Coupon, CouponClaimed
 from django.http import JsonResponse
@@ -48,13 +48,12 @@ def get_coupon_data(request, is_popular=False):
             coupons = coupons.filter(created_at__gte=now - datetime.timedelta(days=30))
         elif date_range == "1 year":
             coupons = coupons.filter(created_at__gte=now - datetime.timedelta(days=365))
-        elif start_date_str and end_date_str:
-            try:
-                start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-                end_date = datetime.strptime(end_date_str, "%Y-%m-%d") + datetime.timedelta(days=1)
-                coupons = coupons.filter(created_at__range=(start_date, end_date))
-            except ValueError:
+        elif start_date_str or end_date_str:
+            start_date = parse_date(start_date_str)
+            end_date = parse_date(end_date_str)
+            if not start_date or not end_date or end_date < start_date:
                 return JsonResponse({"html": "", "error": "Invalid date format."})
+            coupons = coupons.filter(created_at__date__range=(start_date, end_date))
 
         if is_popular:
             coupons = coupons.order_by('-redeemed_count')
@@ -109,6 +108,41 @@ def get_coupon_cards(request):
 @require_GET
 def get_popular_coupon_cards(request):
     return get_coupon_data(request, is_popular=True)
+
+
+@dashboard_login_required
+@require_GET
+def get_points_chart_data(request):
+    user = request.user_obj
+    date_filter = request.GET.get("date_filter", "last_week")
+    today = timezone.localdate()
+    start_date = parse_date(request.GET.get("start_date", ""))
+    end_date = parse_date(request.GET.get("end_date", ""))
+
+    if date_filter == "custom":
+        if not start_date or not end_date or end_date < start_date:
+            return JsonResponse({"error": "Select a valid date range."}, status=400)
+    else:
+        days = {"last_week": 7, "last_month": 30, "last_year": 365}.get(date_filter)
+        if not days:
+            return JsonResponse({"error": "Invalid date filter."}, status=400)
+        start_date, end_date = today - datetime.timedelta(days=days - 1), today
+
+    if (end_date - start_date).days > 3650:
+        return JsonResponse({"error": "Date range is too large."}, status=400)
+
+    dates = [start_date + datetime.timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+    chart_types = get_common_context(request, user).get("chart_action_types", [])
+    chart_data = {name: [0] * len(dates) for name in chart_types}
+    for name in chart_types:
+        action_ids = PointsActionType.objects.filter(build_points_action_query(name)).values_list("id", flat=True)
+        rows = (PointsHistory.objects.filter(user=user, action_type_id__in=action_ids,
+                    timestamp__date__range=(start_date, end_date))
+                .values("timestamp__date").annotate(total=Sum("points")))
+        totals = {row["timestamp__date"]: row["total"] or 0 for row in rows}
+        chart_data[name] = [totals.get(day, 0) for day in dates]
+
+    return JsonResponse({"labels": [day.strftime("%d/%m") for day in dates], "chart_data": chart_data})
 
 @require_GET
 def points_history_view(request):

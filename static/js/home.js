@@ -1842,7 +1842,7 @@ $(document).ready(function () {
     $('.ngo-filterDropdown').hide();
   });
 
-  $(".filterDropdown [data-filter]").on("click", function (e) {
+  $(".hospital-home-filter [data-filter]").on("click", function (e) {
     e.stopPropagation();
 
     const filter = $(this).data("filter");

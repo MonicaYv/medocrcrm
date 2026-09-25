@@ -7,6 +7,8 @@ $(document).ready(function () {
   $('.datepicker-inline').datepicker();
 
   const $hospitalDatepicker = $('.filterDropdown [data-filter="custom"]')
+    .not('.points-chart-custom')
+    .not('.help-filter-option')
     .closest('.dropdown')
     .find('.datepicker-inline');
 
@@ -23,6 +25,14 @@ $(document).ready(function () {
 
       } else {
         customEndDate = dateText;
+
+        // Rewards owns its date filtering through AJAX; don't reload the
+        // settings page with date query parameters from this shared handler.
+        if ($(this).closest('#rewards').length) {
+          customStartDate = null;
+          customEndDate = null;
+          return;
+        }
 
         if (customStartDate > customEndDate) {
           [customStartDate, customEndDate] = [

@@ -100,21 +100,7 @@ datasets.forEach((dataset, index) => {
 
 
 function applyDateFilter(filterType) {
-  const filterInput = document.getElementById('dateFilterInput');
-  filterInput.value = filterType;
-
-  if (filterType === 'custom') {
-    // Show date inputs
-    document.getElementById('startDateInput').classList.remove('hidden');
-    document.getElementById('endDateInput').classList.remove('hidden');
-  } else {
-    // Hide custom date inputs if not custom
-    document.getElementById('startDateInput').classList.add('hidden');
-    document.getElementById('endDateInput').classList.add('hidden');
-
-    // Submit form immediately for non-custom filters
-    document.getElementById('filterForm').submit();
-  }
+  if (window.loadPointsHistoryFilter) window.loadPointsHistoryFilter(filterType);
 }
 
 
@@ -141,13 +127,60 @@ document.querySelectorAll('.badge-description').forEach(function(descElem) {
 (function () {
   let currentPage = 1;
   const limit = 3;
+  let rewardsDateRange = '';
+  let rewardsStartDate = '';
+  let rewardsEndDate = '';
+  let claimedDateRange = '';
+  let claimedStartDate = '';
+  let claimedEndDate = '';
+  let chartCustomStart = '';
+
+function loadChartData(filter, startDate = '', endDate = '') {
+  $.getJSON('/points/chart-data/', { date_filter: filter, start_date: startDate, end_date: endDate })
+    .done(function (response) {
+      if (!window.referralChart) return;
+      window.referralChart.data.labels = response.labels;
+      window.referralChart.data.datasets = Object.entries(response.chart_data).map(([label, data], i) => ({
+        label, data, borderColor: colors[i] || '#000000', borderWidth: 2, tension: 0,
+        pointRadius: 3, pointBackgroundColor: '#FFFFFF', pointBorderColor: colors[i] || '#000000'
+      }));
+      window.referralChart.update();
+    }).fail(function () { toastr.error('Failed to filter points chart.'); });
+}
+
+$(document).on('click', '.pointsChartFilter', function () {
+  const filter = $(this).data('filter');
+  loadChartData(filter);
+  $('.points-chart-custom').closest('.dropdown').find('.filterDropdown, .datepicker-container').hide();
+});
+
+$(document).on('click', '.points-chart-custom', function () {
+  chartCustomStart = '';
+  const $picker = $(this).closest('.dropdown').find('.datepicker-inline');
+  if ($.fn.datepicker && $picker.length) {
+    $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+    $picker.datepicker('option', 'onSelect', function (dateText) {
+      if (!chartCustomStart) { chartCustomStart = dateText; return; }
+      let first = chartCustomStart, last = dateText;
+      if (first > last) [first, last] = [last, first];
+      loadChartData('custom', first, last);
+      $(this).closest('.datepicker-container').hide();
+      chartCustomStart = '';
+    });
+    $picker.closest('.datepicker-container').show();
+    $(this).closest('.filterDropdown').hide();
+  }
+});
 
 function allrewards(search = '', dateRange = '', page = 1) {
+  dateRange = dateRange || rewardsDateRange;
   $.ajax({
     url: '/points/get-cards/',
     data: {
       search: search,
       daterange: dateRange,
+      start_date: rewardsStartDate,
+      end_date: rewardsEndDate,
       page: page,
       limit: limit
     },
@@ -173,7 +206,7 @@ function setupPagination(totalPages, currentPage) {
   // }
   function pageBtn(i) {
     return `<button
-          class="coupons-page-btn px-3 py-2 rounded-lg cursor-pointer font-normal text-xs ${i === currentPage ? 'bg-dodger-blue text-white' : 'bg-pagination'}"
+          class="featured-page-btn px-3 py-2 rounded-lg cursor-pointer font-normal text-xs ${i === currentPage ? 'bg-dodger-blue text-white' : 'bg-pagination'}"
           data-page="${i}">
           ${i}
       </button>`;
@@ -219,7 +252,7 @@ function setupPagination(totalPages, currentPage) {
   $('#nextPage1').prop('disabled', currentPage === totalPages);
 }
 
-$(document).on('click', '.coupons-page-btn', function () {
+$(document).on('click', '.featured-page-btn', function () {
   const page = parseInt($(this).data('page'));
   currentPage = page;
   allrewards($('#allrewardssearch').val(), $('#dateRange').val(), page); // Adjust to your search/date filter inputs
@@ -272,11 +305,14 @@ function truncateDescriptions() {
   const popularLimit = 8;
 
   function popular_coupons(search = '', dateRange = '', page = 1) {
+    dateRange = dateRange || rewardsDateRange;
     $.ajax({
       url: '/points/get-popular-coupons/',
       data: {
         search: search,
         daterange: dateRange,
+        start_date: rewardsStartDate,
+        end_date: rewardsEndDate,
         page: page,
         limit: popularLimit
       },
@@ -309,7 +345,7 @@ function truncateDescriptions() {
     // }
     function pageBtn(i) {
       return `<button
-          class="coupons-page-btn px-3 py-2 rounded-lg cursor-pointer font-normal text-xs ${i === currentPage ? 'bg-dodger-blue text-white' : 'bg-pagination'}"
+          class="popular-page-btn px-3 py-2 rounded-lg cursor-pointer font-normal text-xs ${i === currentPage ? 'bg-dodger-blue text-white' : 'bg-pagination'}"
           data-page="${i}">
           ${i}
       </button>`;
@@ -385,14 +421,37 @@ function truncateDescriptions() {
   });  
   
   $(document).on("click", ".allRewardsCoupons .dateFilter", function() {
-    allrewards($('#allrewardssearch').val().trim() || '', $(this).data('range') || '');
-    popular_coupons($('#allrewardssearch').val().trim() || '', $(this).data('range') || '');
+    rewardsDateRange = $(this).data('range') || '';
+    rewardsStartDate = rewardsEndDate = '';
+    allrewards($('#allrewardssearch').val().trim() || '', rewardsDateRange, 1);
+    popular_coupons($('#allrewardssearch').val().trim() || '', rewardsDateRange, 1);
+  });
+
+  $(document).on('click', '.allRewardsCoupons .calendar-icon', function () {
+    const $picker = $(this).closest('.dropdown').find('.datepicker-inline');
+    let firstDate = '';
+    if ($.fn.datepicker && $picker.length) {
+      rewardsDateRange = '';
+      $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+      $picker.datepicker('option', 'onSelect', function (dateText) {
+        if (!firstDate) { firstDate = dateText; rewardsStartDate = dateText; return; }
+        rewardsEndDate = dateText;
+        if (rewardsEndDate < rewardsStartDate) [rewardsStartDate, rewardsEndDate] = [rewardsEndDate, rewardsStartDate];
+        allrewards($('#allrewardssearch').val().trim(), '', 1);
+        popular_coupons($('#allrewardssearch').val().trim(), '', 1);
+        $(this).closest('.datepicker-container').hide();
+        firstDate = '';
+      });
+      $picker.closest('.datepicker-container').show();
+      $(this).closest('.filterDropdown').hide();
+    }
   });
 
   function fetchFilteredData(page = 1) {
     const search = $("input[name='search']").val();
-    const startDate = $("#startDateInput").val();
-    const endDate = $("#endDateInput").val();
+      const startDate = $("#startDateInput").val();
+      const endDate = $("#endDateInput").val();
+      const dateFilter = $("#dateFilterInput").val();
 
       $.ajax({
         url: "/points/history/",
@@ -400,6 +459,7 @@ function truncateDescriptions() {
           search: search,
           start_date: startDate,
           end_date: endDate,
+          date_filter: dateFilter,
           page: page
         },
         success: function(data) {
@@ -418,6 +478,11 @@ function truncateDescriptions() {
   });
 
 function applyDateFilter(type) {
+  window.loadPointsHistoryFilter(type);
+}
+
+window.loadPointsHistoryFilter = function(type) {
+  $('#dateFilterInput').val(type);
   const today = new Date();
   let start = "", end = "";
 
@@ -438,8 +503,20 @@ function applyDateFilter(type) {
     end = new Date();
     $('[onclick="applyDateFilter(\'last_year\')"]').addClass('font-bold');
   } else if (type === "custom") {
-    $("#startDateInput").removeClass("hidden").show();
-    $("#endDateInput").removeClass("hidden").show();
+    const $picker = $('.points-history .datepicker-inline');
+    let firstDate = '';
+    $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+    $picker.datepicker('option', 'onSelect', function(dateText) {
+      if (!firstDate) { firstDate = dateText; return; }
+      let startDate = firstDate, endDate = dateText;
+      if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
+      $('#startDateInput').val(startDate);
+      $('#endDateInput').val(endDate);
+      fetchFilteredData(1);
+      $(this).closest('.datepicker-container').hide();
+      firstDate = '';
+    });
+    $picker.closest('.datepicker-container').show();
     $('[onclick="applyDateFilter(\'custom\')"]').addClass('font-bold');
     return;
   }
@@ -449,7 +526,7 @@ function applyDateFilter(type) {
     $("#endDateInput").val(end.toISOString().split('T')[0]);
     fetchFilteredData();
   }
-}
+};
   $('[data-tab="points-history"]').on('click', function () {
     fetchFilteredData();
   });
@@ -503,12 +580,8 @@ $(document).on("click", ".claim-btn", function () {
     rewardClaimed();
   });
 
-  const rewardClaimed = (search = '', startDate = '', endDate = '', page = 1, daterange = '') => {
-              'start_date:', startDate,
-              'end_date:', endDate,
-              'page:', page,
-              'date_range:', daterange;
-    daterange = (daterange || $('.rewardsClaimedActive').data('range')) || '';
+  const rewardClaimed = (search = '', startDate = claimedStartDate, endDate = claimedEndDate, page = 1, daterange = claimedDateRange) => {
+    daterange = daterange || '';
 
 
     $.ajax({
@@ -540,8 +613,7 @@ $(document).on("click", ".claim-btn", function () {
   // Trigger pagination click
   $(document).on("click", ".claimed-pagination-btn", function () {
     const page = $(this).data("page");
-    const dateRange = $('.rewardsClaimedActive').data('range');
-    rewardClaimed($('#rewards-claimed-search').val().trim(), $('#startDateInput').val().trim() || '', $('#endDateInput').val().trim() || '', page, dateRange);
+    rewardClaimed($('#rewards-claimed-search').val().trim(), claimedStartDate, claimedEndDate, page, claimedDateRange);
   });
 
 
@@ -549,11 +621,32 @@ $(document).on("click", ".claim-btn", function () {
   $(document).on("click", ".rewardsClaimed .dateFilter", function() {
     $(".rewardsClaimed .dateFilter").removeClass('rewardsClaimedActive font-bold');
     $(this).addClass('rewardsClaimedActive').addClass('font-bold');
-    rewardClaimed($('#rewards-claimed-search').val().trim() || '', '', '', 1, $(this).data('range').trim());
+    claimedDateRange = $(this).data('range').trim();
+    claimedStartDate = claimedEndDate = '';
+    rewardClaimed($('#rewards-claimed-search').val().trim() || '', '', '', 1, claimedDateRange);
+  });
+
+  $(document).on('click', '.rewardsClaimed .calendar-icon', function () {
+    const $picker = $(this).closest('.dropdown').find('.datepicker-inline');
+    let firstDate = '';
+    if ($.fn.datepicker && $picker.length) {
+      claimedDateRange = '';
+      $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+      $picker.datepicker('option', 'onSelect', function (dateText) {
+        if (!firstDate) { firstDate = dateText; claimedStartDate = dateText; return; }
+        claimedEndDate = dateText;
+        if (claimedEndDate < claimedStartDate) [claimedStartDate, claimedEndDate] = [claimedEndDate, claimedStartDate];
+        rewardClaimed($('#rewards-claimed-search').val().trim(), claimedStartDate, claimedEndDate, 1, '');
+        $(this).closest('.datepicker-container').hide();
+        firstDate = '';
+      });
+      $picker.closest('.datepicker-container').show();
+      $(this).closest('.filterDropdown').hide();
+    }
   });
 
   $(document).on('input change', '#rewards-claimed-search', function() {
-      rewardClaimed($(this).val().trim() || '', '', '', 1);
+      rewardClaimed($(this).val().trim() || '', claimedStartDate, claimedEndDate, 1, claimedDateRange);
   });  
  
 

@@ -11,6 +11,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from registration.views import validate_and_save_file
 from rest_framework import serializers
 from django.conf import settings
+from django.utils import timezone
 
 @dashboard_login_required
 @require_http_methods(["GET", "POST"])
@@ -249,7 +250,7 @@ def get_ticket_lists(request):
     for ticket in tickets:
         ticket_list.append({
             "ticket_id": ticket.ticket_id(),
-            "date_time": ticket.created_at.strftime("%d/%m/%Y, %H:%M"),
+            "date_time": timezone.localtime(ticket.created_at).strftime("%d/%m/%Y, %H:%M"),
             "issue_type": ticket.issue_option.issue_type.name if ticket.issue_option else "N/A",
             "status": ticket.get_status_display(),
             "status_class": get_status_class(str(ticket.status)),
@@ -366,7 +367,10 @@ def ticket_messages(request, ticket_id):
 @dashboard_login_required
 def filter_tickets(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse({"error": "Invalid request body"}, status=400)
         from_date_str = data.get("from_date")
         to_date_str = data.get("to_date")
 
@@ -377,22 +381,27 @@ def filter_tickets(request):
                 if to_date_str else None
             )
         except Exception:
-            return JsonResponse({"error": "Invalid date format"})
+            return JsonResponse({"error": "Invalid date format"}, status=400)
+
+        if to_date and to_date < from_date:
+            return JsonResponse({"error": "End date must be on or after start date"}, status=400)
+
+        tickets = SupportTicket.objects.filter(user=request.user_obj)
 
         if to_date:
-            tickets = SupportTicket.objects.filter(
+            tickets = tickets.filter(
                 created_at__date__gte=from_date,
                 created_at__date__lte=to_date
             ).order_by("-created_at")
         else:
-            tickets = SupportTicket.objects.filter(
+            tickets = tickets.filter(
                 created_at__date=from_date
             ).order_by("-created_at")
 
         results = [
             {
                 "ticket_id": ticket.ticket_id(),
-                "date_time": ticket.created_at.strftime("%d/%m/%Y, %H:%M"),
+                "date_time": timezone.localtime(ticket.created_at).strftime("%d/%m/%Y, %H:%M"),
                 "issue_type": ticket.issue_option.issue_type.name if ticket.issue_option else "N/A",
                 "status": ticket.get_status_display(),
                 "status_class": get_status_class(ticket.status),
