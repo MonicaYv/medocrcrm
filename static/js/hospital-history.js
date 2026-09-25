@@ -23,6 +23,7 @@
     data: { status: status, page: page },
     success: function (res) {
       $(container).html(res.html);
+      applyHistorySearchAndFilter();
     },
     error: function () {
       $(container).html(
@@ -285,7 +286,21 @@ $(document).on("click", ".view-attachment", function () {
     // If clicked on a dropdown item
     if ($(e.target).hasClass("dropdown-item")) {
       const $parent = $(e.target).closest(".relative");
-      $parent.find(".status-text").text($(e.target).text());
+      const selectedText = $(e.target).text().trim();
+      const $bedStatus = $parent.find(".bed-status-text");
+
+      if ($bedStatus.length) {
+        // Availability status dropdown
+        $bedStatus.text(selectedText);
+        $parent
+          .closest(".card-equipment")
+          .attr("data-bed-status", selectedText);
+        applyHistorySearchAndFilter();
+      } else {
+        // Assignment dropdown
+        $parent.find(".status-text").text(selectedText);
+      }
+
       $parent.find(".status-dropdown").addClass("hidden");
       return;
     }
@@ -313,6 +328,15 @@ $(document).on("click", ".view-attachment", function () {
   $(this)
     .addClass("active-tab-hospital font-semibold")
     .removeClass("font-medium");
+
+  // Rebuild status options only after the active tab class has changed.
+  // Reset search + status filter so a term typed on one tab does not hide
+  // every card on the next one.
+  historyStatusFilter = "";
+  historySearchTerm = "";
+  $("#historySearch").val("");
+  rebuildStatusSubmenu();
+  applyHistorySearchAndFilter();
 });
 
   // 1. Toggle Main Dropdown
@@ -395,8 +419,9 @@ $(document).on("click", ".view-attachment", function () {
     $(".filterDropdown, .submenu").addClass("hidden");
   });
 
-  // 6. Handle option selection in Status and Visit submenus
-  $("#statusSubmenu > div, #visitSubmenu > div").on("click", function (e) {
+  // 6. Handle option selection in the Visit submenu
+  // Bed status is handled by the delegated filter handler below.
+  $("#visitSubmenu > div").on("click", function (e) {
     e.stopPropagation();
 
     // Get the parent submenu
@@ -799,6 +824,183 @@ switch (status) {
 }
 });
 });
+
+/* =========================================================
+   HISTORY SEARCH + FILTER (appointment tabs & bed inventory)
+========================================================= */
+let historySearchTerm = "";
+let historyStatusFilter = "";
+
+function getHistoryActiveTab() {
+  const $activeButton = $(".tab-btn-hospital.active-tab-hospital");
+  if ($activeButton.length) {
+    return String($activeButton.data("tab") || "");
+  }
+
+  const $active = $(".tab-content").filter(":visible").first();
+  if (!$active.length) return "";
+  if ($active.hasClass("equipment")) return "equipment";
+  if ($active.hasClass("accepted")) return "accepted";
+  if ($active.hasClass("pending")) return "pending";
+  if ($active.hasClass("canceled") || $active.hasClass("cancelled")) return "canceled";
+  if ($active.hasClass("missed")) return "missed";
+  return "";
+}
+
+function updateHistorySearchContext() {
+  const isEquipment = getHistoryActiveTab() === "equipment";
+  $("#historySearch").attr(
+    "placeholder",
+    isEquipment ? "Search by bed name" : "Search by name or categories"
+  );
+  $(".trigger-date, .trigger-visit").toggleClass("hidden", isEquipment);
+}
+
+function getHistoryCards() {
+  // Collect cards from whichever tab content is currently visible so search
+  // never depends on hidden containers or on ID-seeded selector lookups.
+  const $visibleTabs = $(".tab-content").filter(":visible");
+  let $cards = $();
+
+  $visibleTabs.each(function () {
+    const $tab = $(this);
+
+    if ($tab.hasClass("equipment")) {
+      // Bed Inventory tab
+      $cards = $cards.add($tab.find(".card-equipment"));
+    } else {
+      // Appointment tabs - cards are injected via AJAX
+      $cards = $cards.add($tab.find("[class*='card-all-']"));
+    }
+  });
+
+  return $cards;
+}
+
+function applyHistorySearchAndFilter() {
+  const term = historySearchTerm.toLowerCase().trim();
+  const statusFilter = historyStatusFilter.toLowerCase();
+  const $active = $(".tab-content").filter(":visible").first();
+  const $cards = getHistoryCards();
+
+  let visibleCount = 0;
+
+  $cards.each(function () {
+    const $card = $(this);
+    const cardText = ($card.text() || "").toLowerCase();
+
+    let show = !term || cardText.indexOf(term) !== -1;
+
+    if ($card.closest(".equipment").length) {
+      // Bed cards expose dedicated fields so assignment controls cannot be
+      // mistaken for the bed's availability status.
+      const bedName =
+        String($card.attr("data-bed-name") || "").toLowerCase().trim() ||
+        cardText;
+      const bedNo = String($card.attr("data-bed-no") || "").toLowerCase().trim();
+      const bedStatus = String(
+        $card.attr("data-bed-status") ||
+        $card.find(".bed-status-text").first().text() ||
+        ""
+      ).toLowerCase().trim();
+      show =
+        !term ||
+        bedName.indexOf(term) !== -1 ||
+        (bedNo !== "" && bedNo.indexOf(term) !== -1);
+      if (show && statusFilter) {
+        show = bedStatus === statusFilter;
+      }
+    } else if (show && statusFilter) {
+      // Appointment cards embed the status word inside the card text.
+      show = cardText.indexOf(statusFilter) !== -1;
+    }
+
+    $card.toggle(show);
+    if (show) visibleCount += 1;
+  });
+
+  // Toggle a "no results" message for the active tab
+  if ($cards.length && $active.length) {
+    let $noResults = $active.find(".history-no-results");
+    if (!$noResults.length) {
+      $noResults = $(
+        '<p class="history-no-results text-center text-spanish-gray mt-10">No matching records found</p>'
+      );
+      $active.append($noResults);
+    }
+    $noResults.toggleClass("hidden", visibleCount !== 0);
+  }
+}
+
+// Rebuild the Status submenu options depending on the active tab
+function rebuildStatusSubmenu() {
+  if (!$("#statusSubmenu").length) return;
+
+  const isEquipment = getHistoryActiveTab() === "equipment";
+  updateHistorySearchContext();
+  const options = isEquipment
+    ? ["All", "Available", "Occupied"]
+    : ["All", "Accepted", "Rejected"];
+
+  let html = "";
+  options.forEach(function (opt) {
+    html +=
+      '<div class="p-2 pl-4 hover:bg-dodger-blue hover:text-white cursor-pointer flex items-center gap-2" ' +
+      'data-status-filter-value="' + opt + '">' +
+      '<span class="material-symbols-outlined text-light-gray !text-xl">check</span>' +
+      "<span>" + opt + "</span>" +
+      "</div>";
+  });
+  $("#statusSubmenu").empty().append(html);
+
+  // Bind directly on the freshly created options. A document-level delegated
+  // handler would never fire here: clicking inside .submenu stops bubbling at
+  // #statusSubmenu (see the "prevent menu from closing" handler below), so the
+  // event never reaches document.
+  $("#statusSubmenu > div")
+    .off("click.historyStatusFilter")
+    .on("click.historyStatusFilter", selectHistoryStatusFilter);
+}
+
+// Status filter selection
+function selectHistoryStatusFilter(e) {
+  e.stopPropagation();
+
+  // Highlight the selected option
+  $("#statusSubmenu .material-symbols-outlined")
+    .removeClass("!text-dodger-blue")
+    .addClass("text-light-gray");
+  $(this)
+    .find(".material-symbols-outlined")
+    .removeClass("text-light-gray")
+    .addClass("!text-dodger-blue");
+
+  const selected = String($(this).attr("data-status-filter-value") || "").trim();
+  historyStatusFilter = selected === "All" ? "" : selected;
+  applyHistorySearchAndFilter();
+
+  // Close the dropdowns
+  $(".filterDropdown, .submenu").addClass("hidden");
+}
+
+// Search input handler - filters the currently visible tab cards (incl. beds)
+function onHistorySearchInput() {
+  historySearchTerm = $(this).val();
+  applyHistorySearchAndFilter();
+}
+
+$(document).on(
+  "input",
+  "#historySearch, input[placeholder='Search by name or categories']",
+  onHistorySearchInput
+);
+
+// Direct binding as a fallback for the static search box
+$("#historySearch").off("input.historySearch").on("input.historySearch", onHistorySearchInput);
+
+// Initialise the status submenu and filter state on page load
+rebuildStatusSubmenu();
+applyHistorySearchAndFilter();
 
 $(document).on("click", ".patient-share-btn", function () {
     $("#patientSharePopup")

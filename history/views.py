@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from dashboard.utils import dashboard_login_required, get_common_context, get_theme_colors
 from orders.models import OrderStatusChoices, PurchaseMedicine, UserPurchase
 from django.views.decorators.http import require_POST
-from appointments.models import LabAppointments, AppointmentStatus, DoctorAppointment, LabAppointments, HospitalAppointments
+from appointments.models import LabAppointments, AppointmentStatus, DoctorAppointment, HospitalAppointments, HospitalAppointmentStatus
 from registration.models import LabProfile, HospitalProfile, DoctorProfile, PharmacyProfile
 from services.models import (
     HospitalBidStatus,
@@ -80,10 +80,20 @@ def history(request):
 
         bed_inventory = HospitalRoomRateCard.objects.filter(
             hospital=hospital,
-            is_active=True
+            is_active=True,
         ).select_related(
             "bed_room"
         )
+
+        occupied_bed_room_ids = set(
+            HospitalAppointments.objects.filter(
+                accepted_hospital=hospital,
+                status=HospitalAppointmentStatus.ACCEPTED,
+                bed_room__isnull=False,
+            ).values_list("bed_room_id", flat=True)
+        )
+        for bed in bed_inventory:
+            bed.is_occupied = bed.bed_room_id in occupied_bed_room_ids
 
         context.update({
             "bed_inventory": bed_inventory
