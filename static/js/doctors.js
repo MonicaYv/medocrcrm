@@ -24,13 +24,16 @@ $(document).ready(function () {
   let allDoctors = [];
   let filteredDoctors = [];
   let activeDateFilter = "";
+  let activeCustomDate = null;
 
   // 1. Toggle Main Dropdown
-  $(".filterToggle").on("click", function (e) {
+  $(".doctorFilterToggle").on("click", function (e) {
     e.stopPropagation();
-    const isHidden = $(".filterDropdown").hasClass("hidden");
-    $(".filterDropdown, .submenu").addClass("hidden"); // Reset all
-    if (isHidden) $(".filterDropdown").removeClass("hidden");
+    const $menu = $(this).closest(".dropdown").children(".filterDropdown");
+    const shouldOpen = $menu.hasClass("hidden");
+
+    $(".filterDropdown, .submenu").addClass("hidden");
+    if (shouldOpen) $menu.removeClass("hidden");
   });
 
   // 2. Open Date Submenu (Keep main open)
@@ -44,7 +47,9 @@ $(document).ready(function () {
   // Initialize the jQuery UI Datepicker inline
   $(".datepicker-inline").datepicker({
     onSelect: function (dateText) {
-      console.log("Selected date: " + dateText);
+      activeCustomDate = $(this).datepicker("getDate");
+      activeDateFilter = "";
+      applyDoctorFilters();
 
       // Mark Custom option as selected
       $("#dateSubmenu .trigger-custom .material-symbols-outlined")
@@ -261,8 +266,13 @@ $(document).ready(function () {
         !query ||
         doctor.name.toLowerCase().includes(query) ||
         (doctor.specialty || "").toLowerCase().includes(query);
-      const matchesDate =
-        !cutoff || !doctor.created_at || new Date(doctor.created_at) >= cutoff;
+      const createdAt = doctor.created_at ? new Date(doctor.created_at) : null;
+      const matchesDate = activeCustomDate
+        ? createdAt &&
+          createdAt.getFullYear() === activeCustomDate.getFullYear() &&
+          createdAt.getMonth() === activeCustomDate.getMonth() &&
+          createdAt.getDate() === activeCustomDate.getDate()
+        : !cutoff || !createdAt || createdAt >= cutoff;
       return matchesQuery && matchesDate;
     });
     currentPage = 1;
@@ -277,6 +287,7 @@ $(document).ready(function () {
   $("#dateSubmenu > div")
     .not(".trigger-custom")
     .on("click", function () {
+      activeCustomDate = null;
       activeDateFilter = $(this).text().trim() === "Week" ? 7 : 30;
       applyDoctorFilters();
     });
@@ -287,6 +298,12 @@ $(document).ready(function () {
     $("." + popupId)
       .removeClass("hidden")
       .addClass("flex");
+  });
+
+  // Cancel the add/edit form and discard any unsaved changes.
+  $(document).on("click", ".cancelBtn", function () {
+    $(".addDoctorPopup").addClass("hidden").removeClass("flex");
+    clearAddDoctorForm();
   });
 
   // Close popup
@@ -908,8 +925,10 @@ function validateAddDoctorForm() {
   const $specialty = $dropdowns.eq(0);
   const $education = $dropdowns.eq(1);
 
-  const $homeVisitFee = $popup.find('input[type="number"]').eq(2);
-  const $hospitalVisitFee = $popup.find('input[type="number"]').eq(3);
+  // Fees are text inputs with decimal input mode in the template.
+  const $fees = $popup.find('input[inputmode="decimal"]');
+  const $homeVisitFee = $fees.eq(0);
+  const $hospitalVisitFee = $fees.eq(1);
 
   // Remove previous errors
   $popup.find(".validation-error").remove();
@@ -1018,7 +1037,7 @@ function validateAddDoctorForm() {
   // ==========================================
   // HOME VISIT FEE
   // ==========================================
-  const homeFee = $homeVisitFee.val().trim();
+  const homeFee = ($homeVisitFee.val() || "").trim();
 
   if (homeFee !== "") {
     if (!/^\d+(\.\d{1,2})?$/.test(homeFee)) {
@@ -1030,7 +1049,7 @@ function validateAddDoctorForm() {
   // ==========================================
   // HOSPITAL VISIT FEE
   // ==========================================
-  const hospitalFee = $hospitalVisitFee.val().trim();
+  const hospitalFee = ($hospitalVisitFee.val() || "").trim();
 
   if (hospitalFee !== "") {
     if (!/^\d+(\.\d{1,2})?$/.test(hospitalFee)) {
