@@ -341,7 +341,10 @@
                         {% for bed in bed_inventory %}
 
                         <div
-                            class="card-equipment bg-white mt-4 p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                            class="card-equipment bg-white mt-4 p-4 rounded-lg shadow-md hover:shadow-lg transition"
+                            data-bed-name="{{ bed.bed_room.name|default:'' }}"
+                            data-bed-no="{{ bed.bed_no|default:'' }}"
+                            data-bed-status="{% if bed.is_occupied %}Occupied{% else %}Available{% endif %}">
 
                             <div class="flex lg:justify-between items-center flex-col lg:flex-row gap-4">
 
@@ -366,7 +369,7 @@
                                 <!-- Bed Number -->
                                 <div class="flex flex-col justify-center">
                                     <p class="font-normal text-sm">
-                                        {{ bed.id }}
+                                        {{ bed.bed_no }}
                                     </p>
                                 </div>
 
@@ -392,11 +395,24 @@
                                 <!-- Status -->
                                 <div class="relative flex flex-col justify-center">
 
-                                    {% if bed.is_active %}
+                                    {% if bed.is_occupied %}
+                                    <button
+                                        class="status-btn flex items-center justify-between text-error bg-rosewater text-sm font-semibold p-2 rounded-md w-[128px]">
+
+                                        <span class="status-text bed-status-text">
+                                            Occupied
+                                        </span>
+
+                                        <span class="material-symbols-outlined">
+                                            keyboard_arrow_down
+                                        </span>
+
+                                    </button>
+                                    {% else %}
                                     <button
                                         class="status-btn flex items-center justify-between text-dodger-blue bg-light-dodger-blue text-sm font-semibold p-2 rounded-md w-[128px]">
 
-                                        <span class="status-text">
+                                        <span class="status-text bed-status-text">
                                             Available
                                         </span>
 
@@ -414,19 +430,6 @@
                                             class="dropdown-item px-3 py-2 text-sm font-semibold text-dodger-blue hover:bg-light-dodger-blue cursor-pointer">
                                             Occupied</p>
                                     </div>
-                                    {% else %}
-                                    <button
-                                        class="status-btn flex items-center justify-between text-error bg-rosewater text-sm font-semibold p-2 rounded-md w-[128px]">
-
-                                        <span class="status-text">
-                                            Occupied
-                                        </span>
-
-                                        <span class="material-symbols-outlined">
-                                            keyboard_arrow_down
-                                        </span>
-
-                                    </button>
                                     {% endif %}
 
                                 </div>

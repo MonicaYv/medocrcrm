@@ -699,6 +699,8 @@ def dashboard_home(request):
                 'hospital_profile': hospital_profile,
                 'contact_person': contact_person,
                 'date_filter': date_filter,
+                'start_date': start_date,
+                'end_date': end_date,
                 'user_display_name': hospital_profile.hospital_name,
                 'quotes_given': HospitalBidding.objects.filter(hospital=hospital_profile).count(),
                 'active_bids': HospitalBidding.objects.filter(
@@ -1401,12 +1403,9 @@ def ajax_advance_history(request):
 
     qs = WalletTransaction.objects.filter(user=user).order_by("-created_at")
 
-    # 🔍 SEARCH
+    # 🔍 SEARCH by transaction ID
     if search:
-        qs = qs.filter(
-            Q(tranx_id__icontains=search) |
-            Q(transaction_type__icontains=search)
-        )
+        qs = qs.filter(tranx_id__icontains=search)
 
     # 🗂️ FILTER
     now = timezone.now()
@@ -1499,7 +1498,46 @@ def get_advance_receipt(request, advance_id):
         user=user,
     )
 
-    profile = getattr(advance.user, "userprofile", None)
+    # ── Resolve the "Received From" profile for the logged-in user ──
+    # Hospitals / pharmacies / labs / doctors store their details in a
+    # user-type specific profile.  Fall back to UserProfile for the rest.
+    customer_name = ""
+    customer_email = advance.user.email or ""
+    customer_address = ""
+
+    if user.user_type == "hospital":
+        hp = HospitalProfile.objects.filter(user=user).first()
+        if hp:
+            customer_name = (hp.hospital_name or "").strip()
+            customer_address = (hp.address or "").strip()
+            if not customer_email:
+                customer_email = hp.contact_no or ""
+    elif user.user_type == "pharmacy":
+        pp = PharmacyProfile.objects.filter(user=user).first()
+        if pp:
+            customer_name = (pp.company_name or "").strip()
+            customer_address = getattr(pp, "address", "") or ""
+    elif user.user_type == "doctor":
+        dp = DoctorProfile.objects.filter(user=user).first()
+        if dp:
+            customer_name = (dp.clinic_name or "").strip()
+            customer_address = getattr(dp, "full_address", "") or ""
+    elif user.user_type == "lab":
+        lp = LabProfile.objects.filter(user=user).first()
+        if lp:
+            customer_name = (lp.lab_name or "").strip()
+            customer_address = getattr(lp, "address", "") or ""
+
+    # Fallback to the shared user profile when no type-specific row exists
+    if not customer_name:
+        try:
+            profile = advance.user.userprofile
+        except Exception:
+            profile = None
+        if profile:
+            customer_name = f"{profile.first_name or ''} {profile.last_name or ''}".strip()
+            if not customer_address:
+                customer_address = getattr(profile, "address", "") or ""
 
     response_data = {
         "receipt_no": f"ADV/{advance.created_at.year}/{advance.id:04d}",
@@ -1512,25 +1550,24 @@ def get_advance_receipt(request, advance_id):
         "platform_contact": settings.COMPANY_CONTACT,
 
         # received from
-        "customer_name": (
-            f"{profile.first_name} {profile.last_name}".strip()
-            if profile else ""
-        ),
-        "customer_email": advance.user.email or "",
-        "customer_address": (
-            profile.address if hasattr(profile, "address") else ""
-        ),
+        "customer_name": customer_name,
+        "customer_email": customer_email,
+        "customer_address": customer_address,
 
         # transaction
-        "purpose": getattr(advance, "purpose", None) or "Advance for services",
-        "description": getattr(advance, "description", None) or "Advance Payment",
+        "purpose": "Advance for services",
+        "description": (
+            f"{advance.transaction_type.title()} | {advance.order_id}"
+            if advance.order_id
+            else f"{advance.transaction_type.title()} advance"
+        ),
         "amount": float(advance.amount),
         "gst_percent": 18,
         # WalletTransaction.amount is the amount actually received.  GST is
         # shown only as receipt information and must not inflate the total.
         "total_amount": float(advance.amount),
-        "payment_mode": getattr(advance, "payment_mode", ""),
-        "transaction_id": getattr(advance, "transaction_id", ""),
+        "payment_mode": getattr(advance, "payment_mode", "") or "Wallet",
+        "transaction_id": advance.tranx_id or "",
 
         "created_by": "Authorized Signatory",
     }

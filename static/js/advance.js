@@ -6,6 +6,17 @@ let currentFilter = "";
 let currentSearch = "";
 let currentAdvanceReceipt = null;
 
+/* Toast helper - toastr is loaded on the dashboard layout, alert as fallback. */
+function showToast(type, message) {
+  if (typeof toastr !== "undefined" && toastr[type]) {
+    toastr[type](message);
+  } else if (type === "error") {
+    alert(message);
+  } else {
+    console.info(message);
+  }
+}
+
 /* =========================================================
    DOCUMENT READY — SINGLE ENTRY POINT
 ========================================================= */
@@ -26,9 +37,9 @@ $(document).ready(function () {
   }
 
   /* ================================
-     SEARCH
+     SEARCH (by transaction ID)
   ================================ */
-  $(document).on("keyup", "input[placeholder*='Search']", function () {
+  $(document).on("input", "#advanceHistorySearch", function () {
     currentSearch = $(this).val();
     loadAdvanceHistory(1);
   });
@@ -48,40 +59,58 @@ $(document).ready(function () {
   });
 
   $(document).on('click', '.download-btn', function (event) {
+    event.preventDefault();
     event.stopPropagation();
-    // Find the next sibling with class 'download-container'
-    const $container = $(this).closest('.viewModal').find('.download-container');
 
-    if ($container.length === 0) {
-        console.error('[ERROR] download-container not found');
-        return;
+    // The html2pdf library is served from a CDN; guard against it failing to load.
+    if (typeof html2pdf === 'undefined') {
+      showToast('error', 'PDF library could not be loaded. Check your internet connection and refresh the page.');
+      return;
     }
 
-    // Clone the element properly
+    // Prefer a download container inside the modal that owns the button,
+    // otherwise fall back to the advance receipt container.
+    const $modal = $(this).closest('.viewModal, .fileModal, .platformBill');
+    let $container = $modal.find('.download-container').first();
+
+    if ($container.length === 0) {
+      $container = $('.viewModal .download-container').first();
+    }
+
+    if ($container.length === 0) {
+      showToast('error', 'Nothing to download.');
+      return;
+    }
+
+    // Clone the element so the live modal is untouched while html2canvas renders.
     const clone = $container[0].cloneNode(true);
     clone.style.position = 'static';
     clone.style.visibility = 'visible';
     clone.style.display = 'block';
-    clone.style.zIndex = '1';
+    clone.style.height = 'auto';
+    clone.style.maxHeight = 'none';
+    clone.style.overflow = 'visible';
     clone.id = 'download-container-clone';
     document.body.appendChild(clone);
 
     const opt = {
-        margin:       0,
-        filename:     'advance-receipt.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      margin:       0,
+      filename:     'advance-receipt.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
     html2pdf().set(opt).from(clone).save()
-        .then(() => {
-            document.body.removeChild(clone);
-        })
-        .catch(err => {
-            console.error('[ERROR] PDF generation failed:', err);
-            document.body.removeChild(clone);
-        });
+      .then(() => {
+        if (clone.parentNode) document.body.removeChild(clone);
+        showToast('success', 'Receipt downloaded successfully.');
+      })
+      .catch(err => {
+        console.error('[ERROR] PDF generation failed:', err);
+        if (clone.parentNode) document.body.removeChild(clone);
+        showToast('error', 'PDF generation failed. Please try again.');
+      });
 });
   /* ================================
      PAGINATION CLICK
@@ -96,10 +125,10 @@ $(document).ready(function () {
   ================================ */
 $(document).on("click", ".view-receipt", function () {
   const id = $(this).data("id");
-  console.log("FULL ELEMENT:", this);
-  console.log("DATASET:", this.dataset);
-  console.log("ATTR:", $(this).attr("data-id"));
-
+  if (!id) {
+    showToast("error", "Invalid advance record.");
+    return;
+  }
   openAdvanceReceipt(id);
 });
 
@@ -436,70 +465,109 @@ function numberToWords(num) {
 }
 
 function openAdvanceReceipt(advanceId) {
+  if (!advanceId) {
+    showToast("error", "Invalid advance record.");
+    return;
+  }
+
   fetch(`/dashboard/advance/receipt/${advanceId}/`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      return res.json();
+    })
     .then(data => {
+      if (data.error) throw new Error(data.error);
+
+      const setText = function (id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value == null ? "" : value;
+      };
+
       // header
-      document.getElementById("r_receipt_no").textContent = data.receipt_no;
-      document.getElementById("r_date").textContent = data.payment_date;
+      setText("r_receipt_no", data.receipt_no);
+      setText("r_date", data.payment_date);
 
       // platform
-      document.getElementById("r_platform_name").textContent = data.platform_name;
-      document.getElementById("r_gstin").textContent = data.gstin;
-      document.getElementById("r_platform_address").textContent = data.platform_address;
-      document.getElementById("r_platform_contact").textContent = data.platform_contact;
+      setText("r_platform_name", data.platform_name);
+      setText("r_gstin", data.gstin);
+      setText("r_platform_address", data.platform_address);
+      setText("r_platform_contact", data.platform_contact);
 
       // customer
-      document.getElementById("r_customer_name").textContent = data.customer_name;
-      document.getElementById("r_customer_address").textContent = data.customer_address;
-      document.getElementById("r_customer_email").textContent = data.customer_email;
+      setText("r_customer_name", data.customer_name);
+      setText("r_customer_address", data.customer_address);
+      setText("r_customer_email", data.customer_email);
 
       // purpose
-      document.getElementById("r_purpose").textContent = data.purpose;
-      document.getElementById("r_description").textContent = data.description;
+      setText("r_purpose", data.purpose);
+      setText("r_description", data.description);
 
       // calculation
       const amount = Number(data.amount) || 0;
-      const gst = 0;
-      const total = Number(data.total_amount);
+      const gstPercent = Number(data.gst_percent) || 0;
+      const gstAmount = gstPercent ? (amount * gstPercent) / 100 : 0;
+      const total = data.total_amount != null ? Number(data.total_amount) : amount;
 
-      document.getElementById("r_amount").textContent = `₹${amount.toFixed(2)}`;
-      document.getElementById("r_gst").textContent = `${Number(data.gst_percent) || 0}%`;
-      document.getElementById("r_total").textContent = `₹${total.toFixed(2)}`;
-      document.getElementById("r_gst_amount").textContent = `₹${gst.toFixed(2)}`;
-      document.getElementById("r_total_amount").textContent = `₹${total.toFixed(2)}`;
-
-      document.getElementById("r_amount_words").textContent =
-        numberToWords(total) + " Only";
-
-      document.getElementById("r_payment_mode").textContent =
-        `${data.payment_mode} (${data.transaction_id})`;
+      setText("r_amount", `₹${amount.toFixed(2)}`);
+      setText("r_gst", `${gstPercent}%`);
+      setText("r_total", `₹${total.toFixed(2)}`);
+      setText("r_gst_amount", `₹${gstAmount.toFixed(2)}`);
+      setText("r_total_amount", `₹${total.toFixed(2)}`);
+      setText("r_amount_words", `${numberToWords(total)} Only`);
+      setText(
+        "r_payment_mode",
+        `${data.payment_mode || ""}${data.transaction_id ? ` (${data.transaction_id})` : ""}`
+      );
 
       currentAdvanceReceipt = data;
 
-      // show modal
-      document.querySelector(".viewModal").classList.remove("hidden");
+      // show the receipt modal
+      $(".viewModal").removeClass("hidden");
     })
     .catch(err => {
       console.error("Receipt load failed:", err);
-      alert("Failed to load receipt");
+      showToast("error", "Failed to load receipt. Please try again.");
     });
 }
 
-$(document).on("click", ".share-advance-receipt", async function () {
-  if (!currentAdvanceReceipt) return;
+$(document).on("click", ".share-advance-receipt", async function (event) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!currentAdvanceReceipt) {
+    showToast("error", "Please open an advance receipt first.");
+    return;
+  }
+
   const receipt = currentAdvanceReceipt;
-  const text = `Advance receipt ${receipt.receipt_no}\nDate: ${receipt.payment_date}\nAmount: ₹${Number(receipt.total_amount).toFixed(2)}\nTransaction: ${receipt.transaction_id || "-"}`;
-  try {
-    if (navigator.share) {
+  const text =
+    `Advance receipt ${receipt.receipt_no || ""}\n` +
+    `Date: ${receipt.payment_date || ""}\n` +
+    `Amount: ₹${Number(receipt.total_amount || 0).toFixed(2)}\n` +
+    `Transaction: ${receipt.transaction_id || "-"}`;
+
+  // 1) Native Web Share API (available in secure contexts on mobile/desktop)
+  if (navigator.share && window.isSecureContext !== false) {
+    try {
       await navigator.share({ title: "Advance Receipt", text });
-    } else if (navigator.clipboard) {
+      return;
+    } catch (error) {
+      if (error && error.name === "AbortError") return; // user cancelled
+      console.warn("[Share] Web Share API failed:", error);
+    }
+  }
+
+  // 2) Copy the details to the clipboard
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
-      toastr.success("Receipt details copied to clipboard");
-    } else {
-      window.prompt("Copy receipt details", text);
+      showToast("success", "Receipt details copied to clipboard");
+      return;
     }
   } catch (error) {
-    if (error.name !== "AbortError") toastr.error("Unable to share receipt");
+    console.warn("[Share] Clipboard failed:", error);
   }
+
+  // 3) Final fallback - let the user copy manually
+  window.prompt("Copy receipt details", text);
 });

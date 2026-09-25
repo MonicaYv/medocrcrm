@@ -165,7 +165,12 @@
             <div class="flex flex-col lg:flex-row lg:justify-between gap-4 pt-4">
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center lg:w-[362px] h-[120px]">
                 <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">Total Appointments Today</p>
+                  <p class="font-normal text-sm">
+                    {% if date_filter == "week" %}Total Appointments This Week
+                    {% elif date_filter == "month" %}Total Appointments This Month
+                    {% elif date_filter == "custom" %}Total Appointments{% if start_date and end_date %} ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}){% else %} (Custom Range){% endif %}
+                    {% else %}Total Appointments Today{% endif %}
+                  </p>
                   <p class="font-semibold text-2xl">{{ total_appointments_today|default:0 }}</p>
                   <p class="text-green font-normal text-xs">{{ confirmed_count }} Confirmed, {{ pending_count }} Pending</p>
                 </div>

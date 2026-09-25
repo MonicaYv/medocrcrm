@@ -474,24 +474,27 @@ $(document).on("click", ".category-options .dropdown-item", function () {
 $(document).on("click", ".service-options .dropdown-item", function () {
     const $item = $(this);
     const $card = $item.closest(".service-card");
+    const $menu = $item.closest(".service-options");
     $card.find(".service-id").val($item.data("id"));
     $card.find(".service-dropdown-btn .selected-text").text($item.text().trim());
-    $item.closest(".dropdown-menu").addClass("hidden");
+    $menu.addClass("hidden").css("display","none");
 });
 
 $(document).on("click", ".room-options .dropdown-item", function () {
     const $item = $(this);
     const $card = $item.closest(".bed-service-card");
+    const $menu = $item.closest(".room-options");
     $card.find(".bed-room-id").val($item.data("id"));
     $card.find(".bed-room-dropdown-btn .selected-text").text($item.text().trim());
-    $item.closest(".dropdown-menu").addClass("hidden");
+    $menu.addClass("hidden").css("display","none");
 });
 
+
 $(document).on("click", ".more-btn", function (e) {
-    e.stopPropagation();
-    const $dropdown = $(this).siblings(".more-dropdown");
-    $(".more-dropdown").not($dropdown).addClass("hidden");
-    $dropdown.toggleClass("hidden");
+    const $dropdown = $(this).closest(".hospital-service-card,.hospital-room-card").find(".more-dropdown").first();
+    const isOpen=!$dropdown.hasClass("hidden");
+    $(".more-dropdown").addClass("hidden").css("display","none");
+    if(!isOpen){$dropdown.removeClass("hidden").css("display","block")}
 });
 
 $(document).on("click", ".save-services-btn", function () {
@@ -565,18 +568,34 @@ $(document).on("click", ".delete-hospital-service", function () {
 });
 
 $(document).on("click", ".delete-hospital-room", function () {
-    const rateId = $(this).data("rate-id");
+    const $btn = $(this);
+    const rateId = $btn.data("rate-id");
     fetch(`/services/hospital/rooms/${rateId}/delete/`, {
         method: "POST",
         headers: {
             "X-CSRFToken": getCookie("csrftoken")
         }
     })
-    .then((response) => response.json())
-    .then((data) => {
-        if (!data.success) throw new Error(data.error || "Unable to delete room");
+    .then(async response => {
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            throw new Error("Server returned HTML instead of JSON");
+        }
     })
-    .catch((error) => alert(error.message));
+    .then(data => {
+        if (data.success) {
+            showToast("Room deleted successfully");
+            $btn.closest(".hospital-room-card").remove();
+        } else {
+            alert(data.error || "Room delete failed");
+        }
+    })
+    .catch(error => {
+        alert(error.message);
+    });
+
 });
 
 $(document).on("click", ".close-icon", function (e) {

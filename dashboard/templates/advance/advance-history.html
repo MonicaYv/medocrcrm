@@ -144,7 +144,8 @@
               </span>
               <input
                 type="text"
-                placeholder="Search by  name or categories"
+                id="advanceHistorySearch"
+                placeholder="Search by transaction ID"
                 class="w-full py-2.5 focus:!outline-none focus:ring-0 placeholder:text-medium-gray border-none bg-transparent"
               />
             </div>
@@ -198,11 +199,11 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span
-                  class="material-symbols-outlined cursor-pointer bg-{{ primary_bg }} text-white rounded-md p-1"
+                  class="material-symbols-outlined cursor-pointer bg-{{ primary_bg }} text-white rounded-md p-1 share-advance-receipt"
                   >share</span
                 >
                 <span
-                  class="material-symbols-outlined cursor-pointer bg-{{ primary_bg }} text-white rounded-md p-1"
+                  class="material-symbols-outlined cursor-pointer bg-{{ primary_bg }} text-white rounded-md p-1 download-btn"
                   >download</span
                 >
               </div>
@@ -216,11 +217,13 @@
               </button>
             </div>
 
-            <img
-              src="/static/images/platformbill-receipt.svg"
-              alt="advance reciept"
-              class="w-full rounded"
-            />
+            <div class="download-container w-full">
+              <img
+                src="/static/images/platformbill-receipt.svg"
+                alt="advance reciept"
+                class="w-full rounded"
+              />
+            </div>
           </div>
         </div>
         <!--View button popup-->
