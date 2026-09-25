@@ -265,6 +265,117 @@ $(document).ready(function () {
     });
   }
 
+$(document).ready(function () {
+    let selectedFilter = "today", selectedVisitType = "", startDate = "", endDate = "", selectingStartDate = true, reportRequest = null;
+    const $dropdown = $(".filterDropdown"), $calendar = $(".datepicker-container"), $datePicker = $(".report-date-picker");
+    const $dateLabel = $(".filterToggle").closest(".dropdown").parent().find("p.text-dodger-blue").first();
+    $(".filterToggle").on("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        $dropdown.toggleClass("hidden");
+        if ($dropdown.hasClass("hidden")) $calendar.addClass("hidden");
+    });
+    $dropdown.add($calendar).on("click", function (e) { e.stopPropagation(); });
+    $(document).on("click", function (e) {
+        if (!$(e.target).closest(".dropdown, .datepicker-container, .ui-datepicker").length) {
+            $dropdown.addClass("hidden"); $calendar.addClass("hidden");
+        }
+    });
+    $datePicker.datepicker("destroy").datepicker({
+        dateFormat: "yy-mm-dd", changeMonth: true, changeYear: true, maxDate: 0, numberOfMonths: 1,
+        onSelect: function (dateText) {
+            if (selectingStartDate) {
+                startDate = dateText; endDate = ""; selectingStartDate = false; selectedFilter = "custom";
+                updateActiveFilter("custom");
+                $dateLabel.text("Start date: " + startDate + " - Select end date");
+            } else {
+                endDate = dateText;
+                if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
+                selectingStartDate = true;
+                $dateLabel.text("Data shown: " + formatDate(startDate) + " – " + formatDate(endDate));
+                $calendar.addClass("hidden"); loadDashboardData();
+            }
+        }
+    });
+    $(".calendar-icon").on("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        selectedFilter = "custom"; startDate = ""; endDate = ""; selectingStartDate = true;
+        updateActiveFilter("custom"); $dropdown.removeClass("hidden"); $calendar.removeClass("hidden");
+        $datePicker.datepicker("refresh");
+    });
+    $(".report-filter").on("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        const type = $(this).data("type");
+        selectedFilter = type; updateActiveFilter(type);
+        if (type === "custom") {
+            startDate = ""; endDate = ""; selectingStartDate = true;
+            $calendar.removeClass("hidden"); $dateLabel.text("Select start date");
+            return;
+        }
+        startDate = ""; endDate = ""; selectingStartDate = true;
+        $calendar.addClass("hidden");
+        $dateLabel.text({
+            today: "Data shown: Today",
+            week: "Data shown: This week",
+            month: "Data shown: This month",
+            all: "Data shown: All dates"
+        }[type] || "Data shown: --");
+        loadDashboardData();
+    });
+    $("#visitTypeFilter").on("change", function () {
+        selectedVisitType = $(this).val(); loadDashboardData();
+    });
+    function updateActiveFilter(type) {
+        $(".report-filter").each(function () {
+            const $icon = $(this).find(".material-symbols-outlined").first();
+            $icon.toggleClass("text-dodger-blue", $(this).data("type") === type)
+                 .toggleClass("text-light-gray", $(this).data("type") !== type);
+        });
+    }
+    function formatDate(value) {
+        const [y, m, d] = value.split("-").map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString("en-IN", {
+            day: "numeric", month: "short", year: "numeric"
+        });
+    }
+    function loadDashboardData() {
+        if (selectedFilter === "custom" && (!startDate || !endDate)) return;
+        if (reportRequest) reportRequest.abort();
+        reportRequest = $.ajax({
+            url: "/reports/hospital-report-data/", type: "GET",
+            data: { filter: selectedFilter, visit_type: selectedVisitType, start_date: startDate, end_date: endDate },
+            success: function (response) {
+                console.log("Filtered data:", response);
+                const stats = response.stats || {};
+                $("#totalRevenue").text(stats.revenue || "₹0");
+                $("#highestRevenue").text(stats.highest_revenue || "₹0");
+                $("#growth").text(stats.growth || "0%");
+                $("#avgRevenue").text(stats.avg_revenue || "₹0");
+                $("#totalAppointments").text(stats.total_appointments ?? 0);
+                if (typeof barChart !== "undefined" && barChart) {
+                    barChart.data.labels = response.most_requested_test.labels;
+                    barChart.data.datasets[0].data = response.most_requested_test.data;
+                    barChart.update();
+                }
+                if (typeof pieChart !== "undefined" && pieChart) {
+                    pieChart.data.labels = response.revenue_by_test.labels;
+                    pieChart.data.datasets[0].data = response.revenue_by_test.data;
+                    pieChart.update();
+                }
+                if (typeof lineChart !== "undefined" && lineChart) {
+                    lineChart.data.labels = response.bid_trend.labels;
+                    lineChart.data.datasets[0].data = response.bid_trend.cbc;
+                    lineChart.update();
+                }
+                if (typeof updateHospitalHeatmap === "function") updateHospitalHeatmap(response.heatmap);
+            },
+            error: function (xhr, status) {
+                if (status !== "abort") console.error("Filter request failed:", xhr.status, xhr.responseText);
+            }
+        });
+    }
+    updateActiveFilter("today"); loadDashboardData();
+});
+
   // FIXED: Removed automated loadDashboardData("month") from here to protect Django initial values!
 });
 

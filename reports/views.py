@@ -871,7 +871,7 @@ def hospital_report_data(request):
     for item in state_queryset:
         city = item["address__city"]
         if city:
-            cleaned_city = city.strip().lower()
+            cleaned_city = str(city or "").strip().lower()
             if cleaned_city in city_state_map:
                 heatmap_labels.append(city_state_map[cleaned_city])
                 heatmap_values.append(item["total"])
