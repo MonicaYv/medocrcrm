@@ -473,45 +473,21 @@ def dashboard_home(request):
 
             today = timezone.now().date()
 
-            date_filter = request.GET.get("date_filter", "today")
-
-            if date_filter == "week":
-                start_date = today - timedelta(days=6)
-                end_date = today
-
-            elif date_filter == "month":
-                start_date = today - timedelta(days=29)
-                end_date = today
-
-            elif date_filter == "custom":
-                start = request.GET.get("start_date")
-                end = request.GET.get("end_date")
-
-                try:
-                    start_date = datetime.strptime(start, "%Y-%m-%d").date()
-                    end_date = datetime.strptime(end, "%Y-%m-%d").date()
-                except (ValueError, TypeError):
-                    start_date = today
-                    end_date = today
-
-            else:
-                date_filter = "today"
-                start_date = today
-                end_date = today
-
-            overview_appointments = DoctorAppointment.objects.filter(
+            total_appointments_today = DoctorAppointment.objects.filter(
                 doctor=doctor_profile,
-                preferred_date_time__date__range=(start_date, end_date)
-            )
-
-            total_appointments_today = overview_appointments.count()
-
-            confirmed_count = overview_appointments.filter(
-                status="Accepted",
+                preferred_date_time__date=today
             ).count()
 
-            pending_count = overview_appointments.filter(
-                status="Pending",
+            confirmed_count = DoctorAppointment.objects.filter(
+                doctor=doctor_profile,
+                status="Accepted",
+                 preferred_date_time__date=today
+            ).count()
+
+            pending_count = DoctorAppointment.objects.filter(
+               doctor=doctor_profile,
+               status="Pending",
+               preferred_date_time__date=today
             ).count()
 
             pending_requests_count = DoctorAppointment.objects.filter(
@@ -603,9 +579,6 @@ def dashboard_home(request):
             context.update({
                 'doctor_profile': doctor_profile,
                 'contact_person': contact_person,
-                'date_filter': date_filter,
-                'start_date': start_date,
-                'end_date': end_date,
                 'total_appointments_today': total_appointments_today,
                 'confirmed_count': confirmed_count,
                 'pending_count': pending_count,
@@ -1423,32 +1396,74 @@ def add_advance_amount(request):
 @dashboard_login_required
 def ajax_advance_history(request):
     user = request.user_obj
-
-    search = request.GET.get("search", "")
-    filter_by = request.GET.get("filter", "")
-    page = int(request.GET.get("page", 1))
-
-    qs = WalletTransaction.objects.filter(user=user).order_by("-created_at")
-
-    # 🔍 SEARCH by transaction ID
+    search = request.GET.get("search", "").strip()
+    filter_by = request.GET.get("filter", "week")
+    page = request.GET.get("page", 1)
+    # Current local date
+    today = timezone.localdate()
+    # Base queryset
+    qs = WalletTransaction.objects.filter(
+        user=user
+    ).order_by("-created_at")
+    # Search by transaction ID
     if search:
         qs = qs.filter(tranx_id__icontains=search)
-
-    # 🗂️ FILTER
-    now = timezone.now()
-    if filter_by == "week":
-        qs = qs.filter(created_at__gte=now - timedelta(days=7))
+    # Date filters
+    if filter_by == "custom":
+        start_date = request.GET.get("start_date")
+        end_date = request.GET.get("end_date")
+        if start_date and end_date:
+            try:
+                start_date = datetime.strptime(
+                    start_date, "%Y-%m-%d"
+                ).date()
+                end_date = datetime.strptime(
+                    end_date, "%Y-%m-%d"
+                ).date()
+                if start_date > end_date:
+                    start_date, end_date = end_date, start_date
+                qs = qs.filter(
+                    created_at__date__range=(
+                        start_date,
+                        end_date
+                    )
+                )
+            except (ValueError, TypeError):
+                return JsonResponse({
+                    "success": False,
+                    "message": "Invalid date format."
+                }, status=400)
+        else:
+            # Don't return unfiltered records when custom dates are missing
+            qs = qs.none()
+    elif filter_by in ["week", "1week", "2week", "3week"]:
+        days = {
+            "week": 7,
+            "1week": 7,
+            "2week": 14,
+            "3week": 21,
+        }
+        start_date = today - timedelta(
+            days=days[filter_by] - 1
+        )
+        qs = qs.filter(
+            created_at__date__range=(start_date, today)
+        )
     elif filter_by == "month":
-        qs = qs.filter(created_at__gte=now - timedelta(days=30))
+        start_date = today - timedelta(days=29)
+        qs = qs.filter(
+            created_at__date__range=(start_date, today)
+        )
     elif filter_by == "year":
-        qs = qs.filter(created_at__gte=now - timedelta(days=365))
-
-    # 📄 PAGINATION
+        start_date = today - timedelta(days=364)
+        qs = qs.filter(
+            created_at__date__range=(start_date, today)
+        )
+    # Pagination
     paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(page)
-
     data = [{
-        "id": tx.id, 
+        "id": tx.id,
         "date": tx.created_at.strftime("%d %b %Y, %I:%M %p"),
         "tranx_id": tx.tranx_id,
         "type": tx.transaction_type.title(),
@@ -1477,33 +1492,99 @@ def ajax_advance_summary(request):
     user = request.user_obj
     filter_by = request.GET.get("filter", "week")
 
-    end_date = timezone.now()
+    today = timezone.localdate()
 
-    if filter_by == "month":
-        start_date = end_date - timedelta(days=30)
+    # Default date range
+    if filter_by == "custom":
+        start_date = request.GET.get("start_date")
+        end_date = request.GET.get("end_date")
+
+        if not start_date or not end_date:
+            return JsonResponse({
+                "success": False,
+                "message": "Please select both start and end dates."
+            }, status=400)
+
+        try:
+            start_date = datetime.strptime(
+                start_date, "%Y-%m-%d"
+            ).date()
+
+            end_date = datetime.strptime(
+                end_date, "%Y-%m-%d"
+            ).date()
+
+            if start_date > end_date:
+                start_date, end_date = end_date, start_date
+
+        except (ValueError, TypeError):
+            return JsonResponse({
+                "success": False,
+                "message": "Invalid date format."
+            }, status=400)
+
+        label = "Custom Date"
+
+    elif filter_by == "month":
+        start_date = today - timedelta(days=29)
+        end_date = today
         label = "Last 30 days"
+
     elif filter_by == "year":
-        start_date = end_date - timedelta(days=365)
+        start_date = today - timedelta(days=364)
+        end_date = today
         label = "Last 1 year"
+
+    elif filter_by in ["week", "1week", "2week", "3week"]:
+        days = {
+            "week": 7,
+            "1week": 7,
+            "2week": 14,
+            "3week": 21,
+        }
+        selected_days = days[filter_by]
+
+        start_date = today - timedelta(days=selected_days - 1)
+        end_date = today
+        label = f"Last {selected_days} days"
+
     else:
-        start_date = end_date - timedelta(days=7)
+        start_date = today - timedelta(days=6)
+        end_date = today
         label = "Last 7 days"
 
+    # Transactions within selected date range
     qs = WalletTransaction.objects.filter(
         user=user,
-        created_at__range=(start_date, end_date)
+        created_at__date__range=(
+            start_date,
+            end_date
+        )
     )
 
-    credit_total = qs.filter(transaction_type="CREDIT").aggregate(
+    # Total credit
+    credit_total = qs.filter(
+        transaction_type__iexact="CREDIT"
+    ).aggregate(
         total=Sum("amount")
     )["total"] or 0
 
-    debit_total = qs.filter(transaction_type="DEBIT").aggregate(
+    # Total debit
+    debit_total = qs.filter(
+        transaction_type__iexact="DEBIT"
+    ).aggregate(
         total=Sum("amount")
     )["total"] or 0
+    
+    # Current balance: latest transaction across all dates
+    latest_tx = WalletTransaction.objects.filter(
+        user=user
+    ).order_by("-created_at").first()
 
-    latest_tx = qs.order_by("-created_at").first()
-    current_balance = latest_tx.current_balance if latest_tx else 0
+    current_balance = (
+        latest_tx.current_balance
+        if latest_tx else 0
+    )
 
     return JsonResponse({
         "success": True,

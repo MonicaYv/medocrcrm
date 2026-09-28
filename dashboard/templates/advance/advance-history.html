@@ -23,36 +23,39 @@
           >
         </div>
         <!--Date dropdown-->
-        <div class="dropdown relative flex justify-end pt-4">
-         <button class="filterToggle  flex items-center border border-slate-gray rounded-md p-1 w-8 h-8  cursor-pointer">
-            <span class="material-symbols-outlined flex justify-center items-center">tune</span>
-          </button>
-          <div
-            class="filterDropdown mt-2 absolute right-0 top-full bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-1000"
-          >
-            <div class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ border }} hover:text-white rounded">
-              Custom date<span class="material-symbols-outlined calendar-icon">calendar_today</span>
+        <div class="dropdown advance-date-filter relative flex justify-end pt-4">
+            <button class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
+                <span class="material-symbols-outlined flex justify-center items-center">
+                    tune
+                </span>
+            </button>
+            <div class="filterDropdown mt-2 absolute right-0 top-full bg-white text-dark-gray shadow-md hidden rounded-md w-44 z-50">
+                <div data-filter="custom"
+                    class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ border }} hover:text-white rounded">
+                    Custom date
+                    <span class="material-symbols-outlined calendar-icon">
+                        calendar_today
+                    </span>
+                </div>
+                <div data-filter="week"
+                    class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded">
+                    1 Week
+                </div>
+                <div data-filter="month"
+                    class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded">
+                    1 Month
+                </div>
+                <div data-filter="year"
+                    class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded">
+                    1 Year
+                </div>
             </div>
-            <div
-              class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded"
-            >
-              1 Week
+            <div class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
+                <p id="advanceDateStatus" class="text-sm p-2">
+                    Select start date
+                </p>
+                <div class="datepicker-inline"></div>
             </div>
-            <div
-              class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded"
-            >
-              1 Month
-            </div>
-            <div
-              class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded"
-            >
-              1 Year
-            </div>
-            
-          </div>
-          <div class="datepicker-container hidden px-4 pb-3 absolute top-full right-45 z-50 bg-white shadow-md rounded">
-                      <div class="datepicker-inline"></div>
-                    </div>
         </div>
         <div
           class="flex justify-between lg:items-center pt-2 flex-col lg:flex-row gap-4"
@@ -71,7 +74,6 @@
                   <span class="material-symbols-outlined">currency_rupee</span>
                 </div>
               </div>
-
               <p id="summaryCurrentBalance" class="font-semibold text-2xl text-jet-black">0</p>
               <div class="flex items-center gap-2">
                 <p class="font-normal text-sm text-dark-gray summary-label">Last 7 days</p>
@@ -150,35 +152,37 @@
               />
             </div>
             <div class="flex gap-2">
-             <div class="dropdown relative">
-                <button
-                  class="filterToggle activity-buttons w-full max-w-[114px] p-2 h-[40px] border border-{{ border }} rounded-[10px] text-jet-black font-semibold flex items-center justify-center gap-1 cursor-pointer group hover:bg-{{ primary_bg }} hover:text-white">
-                  <span class="material-symbols-outlined text-jet-black group-hover:text-white">
-                    keyboard_arrow_down
-                  </span>
-                  <span class="">Filter</span>
-
-                </button>
-                <div
-                  class="filterDropdown absolute right-0 top-12 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-1000">
-
-                  <div class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded">
-                    1 Week
-                  </div>
-                  <div class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded">
-                    2 Week
-                  </div>
-                  <div class="p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded">
-                    3 Week
-                  </div>
-                </div>
-              </div>
              
+              <div class="dropdown relative">
+                  <button
+                      type="button"
+                      class="filterToggle activity-buttons w-full max-w-[114px] p-2 h-[40px] border border-{{ border }} rounded-[10px] text-{{ text }} flex items-center justify-center gap-1 cursor-pointer group hover:bg-{{ primary_bg }} hover:text-white">
+                      <span class="material-symbols-outlined text-{{ text }} group-hover:text-white">
+                          keyboard_arrow_down
+                      </span>
+                      <span>Filter</span>
+                  </button>
+                  <div
+                      class="filterDropdown absolute right-0 top-12 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-[1000]">
+                      <div class="filter-option p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded"
+                          data-days="7">
+                          1 Week
+                      </div>
+                      <div class="filter-option p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded"
+                          data-days="14">
+                          2 Week
+                      </div>
+                      <div class="filter-option p-2 pl-4 cursor-pointer hover:bg-{{ border }} hover:text-white rounded"
+                          data-days="21">
+                          3 Week
+                      </div>
+                  </div>
+              </div>
               <button
-                class="view-file activity-buttons w-full max-w-[90px] p-2 h-[40px] border border-{{ border }} rounded-[10px] text-jet-black font-semibold flex items-center justify-center gap-1 cursor-pointer group hover:bg-{{ primary_bg }} hover:text-white"
+                class="view-file activity-buttons w-full max-w-[90px] p-2 h-[40px] border border-{{ border }} rounded-[10px] text-{{ text }} flex items-center justify-center gap-1 cursor-pointer group hover:bg-{{ primary_bg }} hover:text-white"
               >
                 <span
-                  class="material-symbols-outlined text-jet-black group-hover:text-white"
+                  class="material-symbols-outlined text-{{ text }} group-hover:text-white"
                 >
                   file_export
                 </span>
