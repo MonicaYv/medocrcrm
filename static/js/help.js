@@ -1420,7 +1420,7 @@ function highlightCurrentStatus(currentStatus) {
 //filter date and custome date wise
 document.querySelectorAll(".help-filter-option").forEach((el) => {
   el.addEventListener("click", function () {
-    const filter = this.getAttribute("data-filter");
+    const filter = this.getAttribute("data-support-filter");
 
     if (filter === "custom") {
       document
@@ -1444,35 +1444,40 @@ document.querySelectorAll(".help-filter-option").forEach((el) => {
         break;
     }
 
-    const formattedFromDate = fromDate.toISOString().split("T")[0]; // "2024-07-14"
-    const formattedToDate = today.toISOString().split("T")[0]; // "2025-07-14"
+    const formatLocalDate = (date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const formattedFromDate = formatLocalDate(fromDate);
+    const formattedToDate = formatLocalDate(today);
 
     filterTickets(formattedFromDate, formattedToDate);
   });
 });
 
-//date picker
-document.addEventListener("DOMContentLoaded", function () {
-  const datepickerElement = document.querySelector("[inline-datepicker]");
+// The shared datepicker is jQuery UI, so handle its onSelect callback here.
+$(function () {
+  const $datepicker = $("[inline-datepicker]");
+  if (!$datepicker.length || !$.fn.datepicker) return;
 
-  if (datepickerElement) {
-    datepickerElement.addEventListener("changeDate", function (e) {
-      // If using a timestamp directly:
-      const timestamp = e.detail.date; // e.g. 1749234600000
-      const selectedDate = new Date(timestamp); // Convert to Date object
+  let customStartDate = null;
+  let customEndDate = null;
+  $datepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+  $datepicker.datepicker("option", "onSelect", function (dateText) {
+    if (!customStartDate || customEndDate) {
+      customStartDate = dateText;
+      customEndDate = null;
+      return;
+    }
 
-      // const formattedDate = selectedDate.toISOString().split("T")[0]; // "YYYY-MM-DD"
-      const formattedDate =
-        selectedDate.getFullYear() +
-        "-" +
-        String(selectedDate.getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(selectedDate.getDate()).padStart(2, "0");
+    customEndDate = dateText;
+    if (customStartDate > customEndDate) {
+      [customStartDate, customEndDate] = [customEndDate, customStartDate];
+    }
 
-      // console.log("Selected Date:", formattedDate); // Debug log
-      filterTickets(formattedDate, formattedDate); // Filter by selected date only
-    });
-  }
+    filterTickets(customStartDate, customEndDate);
+    customStartDate = null;
+    customEndDate = null;
+    $(".datepicker-container").addClass("hidden");
+  });
 });
 
 function filterTickets(fromDate, toDate) {
@@ -1489,7 +1494,7 @@ function filterTickets(fromDate, toDate) {
       allTickets = data.tickets; // Update the global variable
       currentPage = 1; // Reset to page 1
       renderTickets(allTickets); // Render from filtered data
-      renderSupportPagination(allTickets.length);
+      renderSupportPagination();
       // renderTickets(data.tickets); // Use your existing renderTickets()
     })
     .catch((err) => {

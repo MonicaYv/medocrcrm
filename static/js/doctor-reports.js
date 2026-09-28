@@ -98,9 +98,20 @@ $(document).ready(function () {
   // --------- 3. ASYNCHRONOUS SUBMENU TABS ACTION EVENTS ----------
   $(document).on("click", "#filterDropdown .option", function (e) {
     e.stopPropagation();
-    const value = $(this).data("value");
+    const kind = String($(this).data("type") || "date").toLowerCase();
+    const value = String($(this).data("value") || "").toLowerCase();
     $("#filterDropdown").addClass("hidden");
-    loadDoctorDashboardData(value.toLowerCase());
+    if (kind === "visit") {
+      // Visit submenu: Home / Clinic - keep the active date filter intact.
+      window.doctorReportVisitType = value;
+      $("#visitMenu .option").removeClass("active");
+      $(this).addClass("active");
+      loadDoctorDashboardData(currentDoctorReportFilter());
+    } else {
+      $("#dateMenu .option").removeClass("active");
+      $(this).addClass("active");
+      loadDoctorDashboardData(value);
+    }
   });
 
   // Sync secondary action listeners
@@ -118,14 +129,40 @@ $(document).ready(function () {
   }
 });
 
+function currentDoctorReportFilter() {
+    const $active = $("#filterDropdown .option.active");
+    if ($active.length) {
+        return String($active.data("value") || "month").toLowerCase();
+    }
+    return window.doctorReportFilter || "month";
+}
+
+function currentDoctorVisitType() {
+    const fromDropdown = $("#visitMenu .option.active").data("value");
+    if (fromDropdown) {
+        return String(fromDropdown).toLowerCase();
+    }
+    return window.doctorReportVisitType || "";
+}
+
 // =========================================================================
 // CENTRAL WORKFLOW ENGINE: DISPATCH AJAX AND INJECT INTO DOM ELEMENTS
 // =========================================================================
+let doctorReportRequest = null;
+let doctorReportSearchTimer = null;
 function loadDoctorDashboardData(filterType) {
-    $.ajax({
+    if (filterType) {
+        window.doctorReportFilter = String(filterType).toLowerCase();
+    }
+    const activeFilter = window.doctorReportFilter || filterType || "month";
+    const searchValue = ($("#reportSearch").val() || "").trim();
+    if (doctorReportRequest) {
+        doctorReportRequest.abort();
+    }
+    doctorReportRequest = $.ajax({
         url: "/reports/doctor-report-data/", // Update to point to your routing path url configuration
         type: "GET",
-        data: { filter: filterType },
+        data: { filter: activeFilter, visit_type: currentDoctorVisitType(), search: searchValue },
         success: function (response) {
             console.log("DOCTOR LIVE PIPELINE DISPATCH MATRIX RECIEVED:", response);
 
@@ -139,9 +176,9 @@ function loadDoctorDashboardData(filterType) {
             let chartContainer = $("#bidChartContainer");
             if (chartContainer.length) {
                 chartContainer.empty();
-                response.bid_trend.labels.forEach((day, index) => {
-                    let wonVal = response.bid_trend.won[index] || 0;
-                    let lostVal = response.bid_trend.lost[index] || 0;
+                response.bid_chart.forEach((row) => {
+                    let wonVal = row.won || 0;
+                    let lostVal = row.lost || 0;
                     
                     chartContainer.append(`
                         <div class="flex flex-col items-center flex-1 group">
@@ -149,7 +186,7 @@ function loadDoctorDashboardData(filterType) {
                             <div class="w-3 sm:w-4 bg-mint-emerald rounded-t" style="height: ${wonVal}%;" title="Won: ${wonVal}%"></div>
                             <div class="w-3 sm:w-4 bg-bright-red rounded-t" style="height: ${lostVal}%;" title="Lost: ${lostVal}%"></div>
                           </div>
-                          <span class="text-[10px] text-gray-500 mt-2">${day}</span>
+                          <span class="text-[10px] text-gray-500 mt-2">${row.day}</span>
                         </div>
                     `);
                 });
@@ -182,7 +219,7 @@ function loadDoctorDashboardData(filterType) {
 
                 // Add cumulative total summarizing calculation row inside footer block boundary
                 tableBody.append(`
-                    <tr class="bg-gray-50/50 font-semibold">
+                    <tr class="bg-gray-50/50 font-semibold" data-total-row="1">
                       <td class="px-4 py-3 text-sm font-bold text-jungle-navy">Total</td>
                       <td class="text-right px-4 py-3 text-sm text-deep-blue font-bold">${cumAppts}</td>
                       <td class="text-right px-4 py-3 text-sm text-gray-400 font-normal">-</td>
@@ -192,26 +229,20 @@ function loadDoctorDashboardData(filterType) {
             }
 
             // 4. Hydrate Vector Maps Matrix Shading Values
-            if (response.heatmap && window.polygonSeries) {
-                const stateMap = {
-                    "Maharashtra": "IN-MH", "Delhi": "IN-DL", "Karnataka": "IN-KA",
-                    "Tamil Nadu": "IN-TN", "Gujarat": "IN-GJ", "Rajasthan": "IN-RJ",
-                    "Uttar Pradesh": "IN-UP", "Madhya Pradesh": "IN-MP", "West Bengal": "IN-WB"
-                };
-
-                let mapData = [];
-                response.heatmap.labels.forEach((state, idx) => {
-                    let mId = stateMap[state.trim()];
-                    if (mId) mapData.push({ id: mId, value: parseInt(response.heatmap.data[idx]) || 0 });
-                });
-
-                window.polygonSeries.data = mapData.length ? mapData : [{ id: "IN-MH", value: 0 }];
-                window.polygonSeries.invalidateRawData();
-                if (window.heatmapChart) window.heatmapChart.validateData();
+            if (polygonSeries && response.heatmap_data) {
+                polygonSeries.data = response.heatmap_data.length
+                    ? response.heatmap_data
+                    : [{ id: "IN-MH", value: 0 }];
+                polygonSeries.invalidateRawData();
+                if (heatmapChart) heatmapChart.validateData();
             }
+
+            // 5. Keep any in-progress name search applied to freshly rendered rows.
+            // Backend already filtered by `search`; this is a display-level pass only.
+            applyDoctorReportSearch($("#reportSearch").val(), true);
         },
         error: function (err) {
-            print("[ERROR]: Interface failed to parse dynamic doctor metrics dataset stream:", err);
+            console.log("[ERROR]: Interface failed to parse dynamic doctor metrics dataset stream:", err);
         }
     });
 }
@@ -256,4 +287,62 @@ $(".download-btn").on("click", function (e) {
 
         pdf.save(targetId + ".pdf");
     });
+});
+
+// =========================================================================
+// REPORT SEARCH (name / category)
+//
+// Backend (`doctor_report_data`) filters by `search` across patient first /
+// last name, consultation type, service type and status. This is a
+// display-level pass over the freshly rendered rows/cards only — it must
+// never hide an entire card, otherwise typing any patient name blanks the
+// whole Reports page (the reported bug).
+// =========================================================================
+function applyDoctorReportSearch(query, skipReload) {
+    const value = (query || "").trim().toLowerCase();
+    const hasQuery = value.length > 0;
+
+    // Day-wise rows of the "Consultation fee and appointments" table. Only
+    // narrow them when the query actually matches at least one row, so a
+    // search targeting another section doesn't blank out the table.
+    // Skip the Total row (data-total-row) so aggregates stay visible.
+    const $rows = $(".consultation-table-body tr").not("[data-total-row]");
+    const $totalRow = $(".consultation-table-body tr[data-total-row]");
+    const $matchingRows = $rows.filter(function () {
+        return $(this).text().toLowerCase().indexOf(value) > -1;
+    });
+
+    if (!hasQuery || !$matchingRows.length) {
+        $rows.add($totalRow).show().removeClass("hidden");
+    } else {
+        $rows.hide().addClass("hidden");
+        $matchingRows.show().removeClass("hidden");
+        $totalRow.show().removeClass("hidden");
+    }
+
+    if (!skipReload && hasQuery) {
+        // Debounced backend reload so stats/charts/table reflect the name.
+        clearTimeout(doctorReportSearchTimer);
+        doctorReportSearchTimer = setTimeout(function () {
+            loadDoctorDashboardData(currentDoctorReportFilter());
+        }, 350);
+    }
+}
+
+$(document).on("keyup", "#reportSearch", function () {
+    clearTimeout(doctorReportSearchTimer);
+    const value = $(this).val();
+    if (!(value || "").trim()) {
+        // Cleared: reload unfiltered data, then reset display filtering.
+        loadDoctorDashboardData(currentDoctorReportFilter());
+        return;
+    }
+    applyDoctorReportSearch(value);
+});
+
+$(document).on("search", "#reportSearch", function () {
+    // Native clear (x) button in some browsers.
+    if (!($(this).val() || "").trim()) {
+        loadDoctorDashboardData(currentDoctorReportFilter());
+    }
 });

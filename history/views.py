@@ -279,6 +279,8 @@ def ajax_lab_history(request):
 
         qs = qs.filter(
             lab_bids__lab=lab,
+            lab_bids__bid_status=LabBidStatus.PENDING,
+            lab_bids__is_active=True,
             status=AppointmentStatus.PENDING,
             accepted_bid__isnull=True,
             accepted_lab__isnull=True,
@@ -301,9 +303,9 @@ def ajax_lab_history(request):
     elif status == "cancelled":
 
         qs = qs.filter(
-            accepted_lab=lab,
-            status=AppointmentStatus.CANCELLED
-        )
+            lab_bids__lab=lab,
+            lab_bids__bid_status=LabBidStatus.CANCELLED,
+        ).distinct()
 
     elif status == "all":
 
@@ -390,6 +392,8 @@ def ajax_hospital_history(request):
 
         qs = qs.filter(
             bids__hospital=hospital,
+            bids__bid_status=HospitalBidStatus.PENDING,
+            bids__is_active=True,
             accepted_bid__isnull=True,
             accepted_hospital__isnull=True,
             status="Pending"
@@ -412,9 +416,9 @@ def ajax_hospital_history(request):
     elif status == "cancelled":
 
         qs = qs.filter(
-            accepted_hospital=hospital,
-            status="Cancelled"
-        )
+            bids__hospital=hospital,
+            bids__bid_status=HospitalBidStatus.CANCELLED,
+        ).distinct()
 
     elif status == "all":
 
@@ -431,11 +435,18 @@ def ajax_hospital_history(request):
     paginator = Paginator(qs, 5)
     page_obj = paginator.get_page(page_number)
     for appointment in page_obj:
-        appointment.current_bid = HospitalBidding.objects.filter(
+        bid_qs = HospitalBidding.objects.filter(
             appointment=appointment,
             hospital=hospital,
-            is_active=True
-        ).first()
+        )
+        if status == "cancelled":
+            appointment.current_bid = bid_qs.filter(
+                bid_status=HospitalBidStatus.CANCELLED,
+            ).first()
+        else:
+            appointment.current_bid = bid_qs.filter(
+                is_active=True,
+            ).first()
     html = render_to_string(
         "history/hospital/hospital_history_cards.html",
         {
@@ -685,5 +696,3 @@ def no_show_appointment(request):
         return JsonResponse({"success": True, "message": "Appointment marked as no-show"})
 
     return JsonResponse({"success": False, "message": "Invalid user type"})
-
-

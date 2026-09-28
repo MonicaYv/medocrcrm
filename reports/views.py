@@ -14,7 +14,7 @@ from django.db.models import (
     Sum,
     Value,
 )
-from django.db.models.functions import Coalesce, ExtractWeekDay, TruncDate, TruncHour
+from django.db.models.functions import Coalesce, Concat, ExtractWeekDay, TruncDate, TruncHour
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -1383,7 +1383,10 @@ def doctor_report_data(request):
     filter_type = request.GET.get(
         "filter",
         "month"
-    )
+    ).strip().lower()
+
+    visit_type = request.GET.get("visit_type", "").strip().lower()
+    search = (request.GET.get("search", "") or request.GET.get("q", "")).strip()
 
     user = request.user_obj
     doctor_profile = getattr(user, "doctor_profile", None)
@@ -1420,6 +1423,29 @@ def doctor_report_data(request):
         )
     else:
         appointments = appointments.all()
+
+    if visit_type in ("clinic_visit", "clinic", "home_visit", "home"):
+        normalized_visit = "home_visit" if "home" in visit_type else "clinic_visit"
+        appointments = appointments.filter(consultation_type__iexact=normalized_visit)
+
+    if search:
+        # .alias() (not .annotate()) so the helper expression is usable for
+        # filtering but is NOT added to GROUP BY in the day/heatmap
+        # aggregations below.
+        appointments = appointments.alias(
+            patient_full_name=Concat(
+                Coalesce("user__userprofile__first_name", Value("")),
+                Value(" "),
+                Coalesce("user__userprofile__last_name", Value("")),
+            )
+        ).filter(
+            Q(patient_full_name__icontains=search)
+            | Q(user__userprofile__first_name__icontains=search)
+            | Q(user__userprofile__last_name__icontains=search)
+            | Q(consultation_type__icontains=search)
+            | Q(service_type__icontains=search)
+            | Q(status__icontains=search)
+        )
 
     total_patients = appointments.count()
     birds_received = appointments.filter(

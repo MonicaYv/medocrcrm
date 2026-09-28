@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 from django.template.loader import render_to_string
 from dashboard.utils import dashboard_login_required, get_common_context, get_theme_colors, seller_verified_required
 from registration.views import validate_and_save_file
@@ -242,15 +242,13 @@ def get_donation_history(request):
     elif date_range == "1 year":
         filters &= Q(created_at__gte=now - timedelta(days=365))
     elif date_range == "custom":
-
         start = request.GET.get('start_date')
         end = request.GET.get('end_date')
-        try:
-            start_date = datetime.strptime(start, "%Y-%m-%d")
-            end_date = datetime.strptime(end, "%Y-%m-%d")
-            filters &= Q(created_at__range=(start_date, end_date))
-        except Exception:
-            pass  
+        start_date = parse_date(start or "")
+        end_date = parse_date(end or "")
+        if not start_date or not end_date or end_date < start_date:
+            return JsonResponse({"error": "Select a valid date range."}, status=400)
+        filters &= Q(created_at__date__range=(start_date, end_date))
 
     donations = Donation.objects.filter(filters).order_by('-created_at')
     paginator = Paginator(donations, limit)

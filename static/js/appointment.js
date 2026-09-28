@@ -96,25 +96,31 @@ loadAppointments("all", 1, "");
 
     if (filter === "custom") {
       const $picker = $dropdown.find(".datepicker-container");
-      $picker.toggleClass("hidden");
+
+      // dropdown.js hides this picker with an inline style; clear it so the
+      // class-based toggle below really shows / hides it
+      const pickerHidden =
+        $picker.hasClass("hidden") || $picker.css("display") === "none";
+      $picker.css("display", "");
+      $picker.toggleClass("hidden", !pickerHidden);
       $picker.find(".datepicker-inline").datepicker({
         dateFormat: "yy-mm-dd",
         onSelect: function (dateText) {
           currentFilterDate = dateText;
           $picker.addClass("hidden");
-          $dropdown.find(".filterDropdown").addClass("hidden");
+          $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
           loadAppointments(currentStatus, 1, currentSearch);
         },
       });
       return;
     }
 
-    $dropdown.find(".filterDropdown").addClass("hidden");
+    $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
     loadAppointments(currentStatus, 1, currentSearch);
   });
 
   $(document).on("click", function () {
-    $(".filterDropdown, .datepicker-container").addClass("hidden");
+    $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
   });
 
   /* ------------------------------
