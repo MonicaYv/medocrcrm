@@ -1842,14 +1842,15 @@ $(document).ready(function () {
     $('.ngo-filterDropdown').hide();
   });
 
-  $(".hospital-home-filter [data-filter]").on("click", function (e) {
+  $(".hospital-home-filter [data-filter], .doctor-home-filter [data-filter]").on("click", function (e) {
     e.stopPropagation();
 
     const filter = $(this).data("filter");
 
     if (filter === "custom") {
-        $('.filterDropdown').hide();
-        $('.datepicker-container').show();
+        const $dropdownRoot = $(this).closest(".dropdown");
+        $dropdownRoot.find('.filterDropdown').hide();
+        $dropdownRoot.find('.datepicker-container').show();
         return;
     }
 

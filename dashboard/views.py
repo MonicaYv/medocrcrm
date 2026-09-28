@@ -473,21 +473,45 @@ def dashboard_home(request):
 
             today = timezone.now().date()
 
-            total_appointments_today = DoctorAppointment.objects.filter(
-                doctor=doctor_profile,
-                preferred_date_time__date=today
-            ).count()
+            date_filter = request.GET.get("date_filter", "today")
 
-            confirmed_count = DoctorAppointment.objects.filter(
+            if date_filter == "week":
+                start_date = today - timedelta(days=6)
+                end_date = today
+
+            elif date_filter == "month":
+                start_date = today - timedelta(days=29)
+                end_date = today
+
+            elif date_filter == "custom":
+                start = request.GET.get("start_date")
+                end = request.GET.get("end_date")
+
+                try:
+                    start_date = datetime.strptime(start, "%Y-%m-%d").date()
+                    end_date = datetime.strptime(end, "%Y-%m-%d").date()
+                except (ValueError, TypeError):
+                    start_date = today
+                    end_date = today
+
+            else:
+                date_filter = "today"
+                start_date = today
+                end_date = today
+
+            overview_appointments = DoctorAppointment.objects.filter(
                 doctor=doctor_profile,
+                preferred_date_time__date__range=(start_date, end_date)
+            )
+
+            total_appointments_today = overview_appointments.count()
+
+            confirmed_count = overview_appointments.filter(
                 status="Accepted",
-                 preferred_date_time__date=today
             ).count()
 
-            pending_count = DoctorAppointment.objects.filter(
-               doctor=doctor_profile,
-               status="Pending",
-               preferred_date_time__date=today
+            pending_count = overview_appointments.filter(
+                status="Pending",
             ).count()
 
             pending_requests_count = DoctorAppointment.objects.filter(
@@ -579,6 +603,9 @@ def dashboard_home(request):
             context.update({
                 'doctor_profile': doctor_profile,
                 'contact_person': contact_person,
+                'date_filter': date_filter,
+                'start_date': start_date,
+                'end_date': end_date,
                 'total_appointments_today': total_appointments_today,
                 'confirmed_count': confirmed_count,
                 'pending_count': pending_count,
