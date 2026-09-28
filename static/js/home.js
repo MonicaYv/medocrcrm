@@ -2197,6 +2197,43 @@ $(document).on("click", ".pharmacy-close-share", function () {
       .removeClass("flex");
   });
 
+// =============================
+// ATTACHMENT PREVIEW POPUP (Doctor / Lab home)
+// =============================
+if ($(".attachmentPopup").length) {
+
+    $(document).on("click", ".view-attachment", function () {
+
+        $(".attachmentPopup")
+            .removeClass("hidden")
+            .addClass("flex");
+
+    });
+
+    $(document).on("click", ".close-attachment", function () {
+
+        $(".attachmentPopup")
+            .addClass("hidden")
+            .removeClass("flex");
+
+    });
+
+    // Close on backdrop click
+    $(document).on("click", ".attachmentPopup", function (e) {
+
+        if ($(e.target).is(".attachmentPopup")) {
+
+            $(this)
+                .addClass("hidden")
+                .removeClass("flex");
+
+        }
+
+    });
+
+}
+
+
 $(document).on("click", ".place-bid-btn", function () {
 
     const appointmentId = $(this).data("id");
