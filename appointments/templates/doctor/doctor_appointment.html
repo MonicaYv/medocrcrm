@@ -65,17 +65,18 @@
                 </button>
                 <div
                   class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                  <div
+                  <!-- .calendar-icon omitted on purpose: appointment.js handles the custom date toggle -->
+                  <div data-date-filter="custom"
                     class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-dodger-blue hover:text-white rounded">
-                    Custom date<span class="material-symbols-outlined calendar-icon">calendar_today</span>
+                    Custom date<span class="material-symbols-outlined">calendar_today</span>
                   </div>
-                  <div class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                  <div data-date-filter="week" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                     1 Week
                   </div>
-                  <div class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                  <div data-date-filter="month" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                     1 Month
                   </div>
-                  <div class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                  <div data-date-filter="year" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                     1 Year
                   </div>
                 </div>
