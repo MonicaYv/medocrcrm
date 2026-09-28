@@ -302,9 +302,10 @@ function truncateDescriptions() {
   });
 
   let currentPopularPage = 1;
+  let totalPopularPages = 1;
   const popularLimit = 8;
 
-  function popular_coupons(search = '', dateRange = '', page = 1) {
+  function popular_coupons(search = '', dateRange = '', page = 1, append = false) {
     dateRange = dateRange || rewardsDateRange;
     $.ajax({
       url: '/points/get-popular-coupons/',
@@ -318,17 +319,23 @@ function truncateDescriptions() {
       },
       method: 'GET',
       success: function(response) {
-        $('#popular-coupons').html(response.html);
+        if (append) {
+          $('#popular-coupons').append(response.html);
+        } else {
+          $('#popular-coupons').html(response.html);
+        }
         truncateDescriptions();
-        console.log("Truncated descriptions");
         currentPopularPage = page;
-        console.log(response, response.pagination);
         if (response.pagination) {
+          totalPopularPages = response.pagination.num_pages;
           setupPopularPagination(response.pagination.num_pages, response.pagination.page);
         }
       },
       error: function() {
-        $('#popular-coupons').html('<p>Error loading coupons.</p>');
+        if (!append) $('#popular-coupons').html('<p>Error loading coupons.</p>');
+      },
+      complete: function () {
+        $('.view-more-popular-coupons').prop('disabled', false).removeClass('opacity-50');
       }
     });
   }
@@ -425,6 +432,25 @@ function truncateDescriptions() {
     rewardsStartDate = rewardsEndDate = '';
     allrewards($('#allrewardssearch').val().trim() || '', rewardsDateRange, 1);
     popular_coupons($('#allrewardssearch').val().trim() || '', rewardsDateRange, 1);
+  });
+
+  $(document).on('click', '.view-more-popular-coupons', function (event) {
+    event.preventDefault();
+    if (currentPopularPage < totalPopularPages) {
+      $(this).prop('disabled', true).addClass('opacity-50');
+      popular_coupons(
+        $('#allrewardssearch').val().trim(),
+        rewardsDateRange,
+        currentPopularPage + 1,
+        true
+      );
+    } else {
+      // The current page already contains every matching coupon; keep it intact.
+      document.getElementById('popular-coupons')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   });
 
   $(document).on('click', '.allRewardsCoupons .calendar-icon', function () {
