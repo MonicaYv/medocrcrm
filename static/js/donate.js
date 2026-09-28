@@ -286,7 +286,8 @@ function loadDonationHistory(page = 1, $container = $("#donationHistory")) {
       $container.find("tbody.donate-history").html(response.html);
       renderPagination(response.current_page, response.total_pages, $container);
     },
-    error: function () {
+    error: function (xhr, status, error) {
+      console.error("Donation history request failed:", status, error, xhr.responseText);
       toastr.error("Failed to load donation history.");
     },
   });
@@ -294,11 +295,14 @@ function loadDonationHistory(page = 1, $container = $("#donationHistory")) {
 
 function renderPagination(current, total, $container) {
   let html = "";
+  const pageHandler = $container.attr("id") === "donationHistory"
+    ? "changeDonationHistoryPage"
+    : "changePage";
   const activeColor = getPaginationThemeColor(); // 🔥 dynamic color
 
   html += `
       <button
-        onclick="changePage(${current - 1})"
+        onclick="${pageHandler}(${current - 1})"
         class="bg-white px-3 py-1 rounded text-light-gray1 text-sm"
         ${current === 1 ? "disabled" : ""}
       >
@@ -312,7 +316,7 @@ function renderPagination(current, total, $container) {
 
     return `
         <button
-          onclick="changePage(${i})"
+          onclick="${pageHandler}(${i})"
           class="px-3 py-1.5 rounded-lg text-sm ${btnClass}"
         >
           ${i}
@@ -344,7 +348,7 @@ function renderPagination(current, total, $container) {
 
   html += `
       <button
-        onclick="changePage(${current + 1})"
+        onclick="${pageHandler}(${current + 1})"
         class="bg-white px-3 py-1 rounded text-light-gray1 text-sm"
         ${current === total ? "disabled" : ""}
       >
@@ -353,6 +357,38 @@ function renderPagination(current, total, $container) {
     `;
 
   $container.find("#pagination-container").html(html);
+}
+
+function changeDonationHistoryPage(page) {
+  loadDonationHistory(page, $("#donationHistory"));
+}
+
+function openDonationHistoryDatepicker($container) {
+  const $datepicker = $container.find(".datepicker-inline");
+  if (!$.fn.datepicker || !$datepicker.length) return;
+
+  let firstDate = "";
+  $datepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+  $datepicker.datepicker("option", "onSelect", function (dateText) {
+    if (!firstDate) {
+      firstDate = dateText;
+      return;
+    }
+
+    let startDate = firstDate;
+    let endDate = dateText;
+    if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
+
+    $container.data("start-date", startDate);
+    $container.data("end-date", endDate);
+    $container.data("range-label", "custom");
+    loadDonationHistory(1, $container);
+    $datepicker.closest(".datepicker-container").hide();
+    firstDate = "";
+  });
+
+  $container.find(".filterDropdown").hide();
+  $datepicker.closest(".datepicker-container").show();
 }
 
 // Initial tab click to load data
@@ -369,6 +405,30 @@ $('[data-tab="donation-history"]').on("click", function () {
 $(document).on("input", 'input[name="donation_history_query"]', function () {
   const $container = $(this).closest(".postDiv");
   loadDonationHistory(1, $container);
+});
+
+// Date presets and custom range for Donation History.
+$(document).on("click", ".donation-history .donationdaterange", function () {
+  const $container = $(this).closest("#donationHistory");
+  const range = String($(this).data("range") || "");
+  if (range.toLowerCase() === "custom") {
+    openDonationHistoryDatepicker($container);
+    return;
+  }
+
+  $container.data("start-date", "");
+  $container.data("end-date", "");
+  $container.data("range-label", range);
+  $container.find(".datepicker-container").hide();
+  $container.find(".filterDropdown").hide();
+  loadDonationHistory(1, $container);
+});
+
+// The shared dropdown handler stops propagation at the calendar icon, so bind
+// directly to this icon to make the custom range available from either click target.
+$(".donation-history .calendar-icon").on("click", function (event) {
+  event.stopImmediatePropagation();
+  openDonationHistoryDatepicker($(this).closest("#donationHistory"));
 });
 
 // Pagination click
@@ -611,7 +671,8 @@ function loadOrganizations(page = 1, $container = $("#organizationSectionId")) {
       renderOrganizationPagination(response.current_page, response.total_pages);
       setupCardListeners();
     },
-    error: function () {
+    error: function (xhr, status, error) {
+      console.error("Organizations request failed:", status, error, xhr.responseText);
       toastr.error("Failed to load organizations.");
     },
   });

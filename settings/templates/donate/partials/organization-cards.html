@@ -1,7 +1,11 @@
 <div class="card-container grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
   {% for post in ngo_posts %}
     <div class="donation-card shadow-lg p-4 rounded-lg m-4 w-full bg-white transition-all duration-300 flex flex-col">
-      <img src="{{ post.creative1.url }}" alt="Donation Banner" class="children-banner w-full rounded-md" />
+      {% if post.creative1 %}
+        <img src="{{ post.creative1.url }}" alt="Donation Banner" class="children-banner w-full rounded-md" />
+      {% else %}
+        <img src="/static/images/ngo.svg" alt="NGO" class="children-banner w-full rounded-md" />
+      {% endif %}
       <div class="top-section flex justify-between items-start mt-2">
         <div class="heading-area w-full">
             <p class="default-heading text-base font-bold cursor-pointer toggle-expand"
