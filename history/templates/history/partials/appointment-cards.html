@@ -24,7 +24,7 @@
   data-id="{{ appointment.id }}"
   data-bid-id="{% if appointment.current_bid %}{{ appointment.current_bid.id }}{% endif %}"
   data-order-id="R{{ appointment.id }}"
-  data-status="{% if appointment.current_bid %}{{ appointment.current_bid.bid_status }}{% endif %}"
+  data-status="{% if appointment.current_bid %}{{ appointment.current_bid.bid_status }}{% else %}{{ appointment.status|lower }}{% endif %}"
   data-cancelled-by="{{ appointment.cancelled_by|default:'Doctor' }}"
   data-distance="{{ appointment.distance|default:'6 km' }}"
   data-time="{{ appointment.eta|default:'20 mins away' }}"
@@ -91,7 +91,11 @@
         <p>Current Tab: {{ current_tab }}</p>
     </div> {% endcomment %}
     <div class="flex flex-col justify-center">
-      {% with status=appointment.current_bid.bid_status|lower %}
+      {% comment %}
+        Prefer the bid status; fall back to the appointment status so pending
+        appointments this doctor has not bid on yet still show a label.
+      {% endcomment %}
+      {% with status=appointment.current_bid.bid_status|default:appointment.status|lower %}
           {% if status == "completed" %}
               <p class="font-semibold text-sm text-green">Completed</p>
 
@@ -101,8 +105,11 @@
           {% elif status == "pending" %}
               <p class="font-semibold text-sm text-dodger-blue">Pending</p>
 
-          {% elif status == "cancelled" %}
+          {% elif status == "cancelled" or status == "canceled" %}
               <p class="font-semibold text-sm text-red-500">Cancelled</p>
+
+          {% elif status == "no_show" or status == "missed" %}
+              <p class="font-semibold text-sm text-red-500">Missed</p>
 
           {% endif %}
       {% endwith %}

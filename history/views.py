@@ -158,12 +158,25 @@ def ajax_doctor_history(request):
 
     if status == "pending":
 
+        # Pending must mirror the Appointments page: appointments still
+        # awaiting a decision that this doctor is involved with. That means
+        # either they have not bid yet (what the Appointments page lists) or
+        # their own bid is still pending. Requiring an existing pending bid
+        # here made this tab permanently empty for doctors who have not bid,
+        # and the two sections could never show the same appointment.
         qs = qs.filter(
-        bids__doctor=doctor,
-        bids__is_active=True,
-        bids__bid_status=DoctorBidStatus.PENDING,
-        status="Pending",
-    ).distinct()
+            status=AppointmentStatus.PENDING,
+        ).exclude(
+            # Skip appointments this doctor has already resolved (accepted /
+            # rejected / cancelled / expired) - those belong to another tab.
+            bids__doctor=doctor,
+            bids__bid_status__in=[
+                DoctorBidStatus.ACCEPTED,
+                DoctorBidStatus.REJECTED,
+                DoctorBidStatus.CANCELLED,
+                DoctorBidStatus.EXPIRED,
+            ],
+        ).distinct()
 
     elif status == "accepted":
 
@@ -216,12 +229,18 @@ def ajax_doctor_history(request):
     for appointment in page_obj:
 
         if status == "pending":
+            # Prefer this doctor's live pending bid; fall back to their most
+            # recent bid so a not-yet-bid appointment still renders a card
+            # (the template reads the status from `current_bid`).
             appointment.current_bid = DoctorBidding.objects.filter(
                 appointment=appointment,
                 doctor=doctor,
                 bid_status=DoctorBidStatus.PENDING,
                 is_active=True,
-            ).first()
+            ).first() or DoctorBidding.objects.filter(
+                appointment=appointment,
+                doctor=doctor,
+            ).order_by("-id").first()
 
         elif status == "accepted":
             appointment.current_bid = DoctorBidding.objects.filter(
