@@ -119,8 +119,16 @@ $(document).ready(function () {
   // Hide all dropdowns when clicking outside 
   $(document).on('click', function (e) {
     const $target = $(e.target);
+    const eventPath = e.originalEvent?.composedPath?.() || [];
+    const clickedMonthNavigation = eventPath.some((node) =>
+      node instanceof Element && node.matches('.ui-datepicker-prev, .ui-datepicker-next')
+    );
 
-    if (!$target.closest('.dropdown, .datepicker-container, .statusDropdown').length) {
+    // jQuery UI redraws the clicked arrow before this document handler runs,
+    // detaching it from the picker. Use the original click path to keep it open.
+    if (clickedMonthNavigation) return;
+
+    if (!$target.closest('.dropdown, .datepicker-container, .ui-datepicker, .statusDropdown').length) {
       // Appointment pages use class-based visibility; don't inject inline
       // display:none that appointment.js can't clear.
       $('.filterDropdown').not('.appointment-page .filterDropdown').hide();
