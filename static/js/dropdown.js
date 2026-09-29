@@ -3,7 +3,13 @@ $(document).ready(function () {
   let customStartDate = null;
   let customEndDate = null;
 
-  if ($.fn.datepicker) {
+  // Appointment pages own their date picker/filter through appointment.js
+  // (AJAX + inline calendar). Skip the global/shared initialisation there so
+  // the two handlers don't fight over .datepicker-container visibility and
+  // onSelect behaviour.
+  const isAppointmentPage = $('.appointment-page').length > 0;
+
+  if ($.fn.datepicker && !isAppointmentPage) {
   $('.datepicker-inline').datepicker();
 
   const $hospitalDatepicker = $('.filterDropdown [data-filter="custom"]')
@@ -54,10 +60,14 @@ $(document).ready(function () {
       }
     });
   }
-}
+  }
 
   // Toggle filter dropdown
   $('.filterToggle').click(function (e) {
+    // Appointment pages manage their own filter dropdown visibility in
+    // appointment.js (class-based). Skip the shared show/hide here so inline
+    // styles don't permanently hide the picker.
+    if ($(this).closest('.appointment-page').length) return;
     e.stopPropagation();
     const $container = $(this).closest('.dropdown');
     const $dropdown = $container.find('.filterDropdown');
@@ -70,6 +80,8 @@ $(document).ready(function () {
 
   // Toggle datepicker (calendar icon click) – this MUST come BEFORE document click!
   $('.calendar-icon').click(function (e) {
+    // Appointment pages manage their own picker in appointment.js.
+    if ($(this).closest('.appointment-page').length) return;
     e.stopPropagation();
     const $container = $(this).closest('.dropdown');
     const $datepicker = $container.find('.datepicker-container');
@@ -109,10 +121,13 @@ $(document).ready(function () {
     const $target = $(e.target);
 
     if (!$target.closest('.dropdown, .datepicker-container, .statusDropdown').length) {
-      $('.filterDropdown').hide();
+      // Appointment pages use class-based visibility; don't inject inline
+      // display:none that appointment.js can't clear.
+      $('.filterDropdown').not('.appointment-page .filterDropdown').hide();
       $('.filterDropdown .absolute').hide();
-      $('.datepicker-container').hide();
+      $('.datepicker-container').not('.appointment-page .datepicker-container').hide();
       $('.statusOptions').hide();
+      $('.appointment-page .filterDropdown, .appointment-page .datepicker-container').addClass('hidden');
     }
   });
 // $('td[data-handler="selectDay"]').off('click').on('click', function() {

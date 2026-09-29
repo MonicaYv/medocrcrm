@@ -1,5 +1,21 @@
   let currentStatus = "accepted";
 
+// Date filter state, mirroring appointment.js so both pages send the same
+// GET contract (date_filter / start_date / end_date) to the backend.
+  let historyDateFilter = "";
+  let historySelectedDate = "";
+  let historyStartDate = "";
+  let historyEndDate = "";
+
+  function getHistoryDateFilterParams() {
+    const params = {};
+    if (historyDateFilter) params.date_filter = historyDateFilter;
+    if (historySelectedDate) params.date = historySelectedDate;
+    if (historyStartDate) params.start_date = historyStartDate;
+    if (historyEndDate) params.end_date = historyEndDate;
+    return params;
+  }
+
   function loadHospitalHistory(status = "accepted", page = 1) {
   const isDoctorPage = $("#doctor-cards-container").length > 0;
 
@@ -20,7 +36,10 @@
   $.ajax({
     url: ajaxUrl,
     type: "GET",
-    data: { status: status, page: page },
+    data: Object.assign(
+      { status: status, page: page },
+      getHistoryDateFilterParams()
+    ),
     success: function (res) {
       $(container).html(res.html);
       applyHistorySearchAndFilter();
@@ -417,6 +436,152 @@ $(document).on("click", ".view-attachment", function () {
 
     // Close all dropdowns
     $(".filterDropdown, .submenu").addClass("hidden");
+  });
+
+  /* ------------------------------------------------------------------
+   * DATE FILTER (data-date-filter driven)
+   *
+   * The doctor history page renders its date options as `[data-date-filter]`
+   * rows inside `.filterDropdown`, matching the markup used by the
+   * appointments page. This block is intentionally scoped to those
+   * attributes so the hospital page - which uses the older `.trigger-date` /
+   * `#dateSubmenu` flow handled above - is unaffected.
+   * ---------------------------------------------------------------- */
+
+  // The first calendar click of a custom range. Deliberately NOT sent to the
+  // API until the end date is picked, so a half-finished selection can never
+  // narrow the history list.
+  let historyPendingStart = "";
+
+  // Highlights the active date option and clears the others.
+  function markActiveHistoryDateFilter(filter) {
+    $("[data-date-filter]").each(function () {
+      const isActive = ($(this).data("date-filter") || "") === filter;
+      $(this).toggleClass("!bg-premium-light-blue", isActive);
+    });
+  }
+
+  function setHistoryDateStatus($dropdown, text) {
+    $dropdown.find(".history-date-status").text(text);
+  }
+
+  // Rebuilds the inline calendar so a previous instance (initialised by the
+  // generic `.datepicker-inline` handler above) can't keep the old onSelect.
+  function resetHistoryDatepicker($picker) {
+    const $inline = $picker.find(".datepicker-inline");
+    try {
+      if ($inline.hasClass("hasDatepicker")) $inline.datepicker("destroy");
+    } catch (e) {}
+    $inline.removeClass("hasDatepicker").empty();
+    return $inline;
+  }
+
+  // Open / close the inline calendar for a given filter dropdown.
+  function openHistoryDatepicker($dropdown) {
+    const $picker = $dropdown.find(".datepicker-container");
+    // dropdown.js may hide the picker with an inline style; clear it so the
+    // class-based toggle below stays authoritative.
+    const pickerHidden =
+      $picker.hasClass("hidden") || $picker.css("display") === "none";
+
+    if (!pickerHidden) {
+      $picker.addClass("hidden").css("display", "");
+      return;
+    }
+
+    historyDateFilter = "custom";
+    historySelectedDate = "";
+    // Every time the calendar opens a fresh start -> end selection begins.
+    historyPendingStart = "";
+
+    $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
+    $picker.removeClass("hidden").css("display", "");
+    setHistoryDateStatus($dropdown, "Select start date");
+    markActiveHistoryDateFilter("custom");
+
+    const $inline = resetHistoryDatepicker($picker);
+
+    $inline.datepicker({
+      dateFormat: "yy-mm-dd",
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "2000:2035",
+      onSelect: function (dateText) {
+        // FIRST PICK: START DATE - keep the calendar open for the end date.
+        if (!historyPendingStart) {
+          historyPendingStart = dateText;
+          // An end date can only fall on/after the selected start date.
+          $inline.datepicker("option", "minDate", dateText);
+          setHistoryDateStatus(
+            $dropdown,
+            "Start: " + historyPendingStart + " - Select end date"
+          );
+          return;
+        }
+
+        // SECOND PICK: END DATE - apply the start -> end range.
+        let rangeStart = historyPendingStart;
+        let rangeEnd = dateText;
+        if (rangeStart > rangeEnd) {
+          const swap = rangeStart;
+          rangeStart = rangeEnd;
+          rangeEnd = swap;
+        }
+
+        historyStartDate = rangeStart;
+        historyEndDate = rangeEnd;
+        historyPendingStart = "";
+
+        setHistoryDateStatus($dropdown, rangeStart + " to " + rangeEnd);
+
+        $inline.datepicker("option", "minDate", null);
+        $picker.addClass("hidden").css("display", "");
+
+        loadHospitalHistory(currentStatus, 1);
+      },
+    });
+  }
+
+  // Calendar icon toggles the picker without selecting a preset yet.
+  $(document).on("click", "[data-date-filter] .calendar-icon", function (e) {
+    e.stopPropagation();
+    openHistoryDatepicker($(this).closest(".dropdown"));
+  });
+
+  $(document).on("click", "[data-date-filter]", function (e) {
+    // Ignore the icon click - it is handled by the toggle above.
+    if ($(e.target).closest(".calendar-icon").length) return;
+    // Never treat the inline datepicker itself as a filter option.
+    if ($(this).closest(".datepicker-container").length) return;
+
+    e.stopPropagation();
+
+    const filter = ($(this).data("date-filter") || "").toString().toLowerCase();
+    if (!filter) return;
+
+    const $dropdown = $(this).closest(".dropdown");
+
+    if (filter === "custom") {
+      // Keep any already-applied custom range so it isn't dropped by a stray
+      // click; only the calendar visibility toggles here.
+      openHistoryDatepicker($dropdown);
+      return;
+    }
+
+    historyDateFilter = filter;
+    historySelectedDate = "";
+    historyStartDate = "";
+    historyEndDate = "";
+    historyPendingStart = "";
+
+    markActiveHistoryDateFilter(filter);
+    setHistoryDateStatus($dropdown, "");
+    $dropdown
+      .find(".filterDropdown, .datepicker-container")
+      .addClass("hidden")
+      .css("display", "");
+
+    loadHospitalHistory(currentStatus, 1);
   });
 
   // 6. Handle option selection in the Visit submenu

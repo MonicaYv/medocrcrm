@@ -6,7 +6,8 @@ from django.db.models import Q
 from django.db.models import Value
 from django.db.models.functions import Concat
 from django.utils import timezone
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+import re
 from registration.models import DoctorProfile, LabProfile, DoctorSpeciality
 from django.views.decorators.http import require_GET, require_POST
 from dashboard.models import SettingMenu
@@ -15,7 +16,12 @@ from dashboard.utils import (
     get_common_context,
     get_theme_colors,
 )
-from appointments.utils import get_appointment_stats
+from appointments.utils import (
+    appointment_date_expression,
+    apply_appointment_date_filter,
+    get_appointment_stats,
+    parse_filter_date,
+)
 from .models import (
     DoctorAppointment,
     LabAppointments,
@@ -43,14 +49,64 @@ from .models import HealthIssue, SpecializationServiceMap, HealthIssueServiceMap
 
 def _normalized_label(value):
     """Normalize labels shared by legacy and newer service master tables."""
-    return " ".join(
-        str(value or "")
-        .strip()
-        .lower()
-        .replace("_", " ")
-        .replace("-", " ")
-        .split()
-    )
+    value = str(value or "").strip().lower()
+    value = value.replace("_", " ").replace("-", " ")
+    value = re.sub(r"[^a-z0-9]+", " ", value)
+    return " ".join(value.split())
+
+
+def _labels_related(left, right):
+    """Match equivalent labels from the legacy and current doctor masters."""
+    left = _normalized_label(left)
+    right = _normalized_label(right)
+    if not left or not right:
+        return False
+    if left == right or left in right or right in left:
+        return True
+
+    aliases = {
+        "acidity gastric issues": {"acid reflux"},
+        "acid reflux": {"acidity gastric issues"},
+        "hypertension": {"blood pressure"},
+        "blood pressure": {"hypertension"},
+        "headache": {"migraine"},
+        "migraine": {"headache"},
+        "general checkup": {"basic consultation", "general consultation"},
+        "basic consultation": {"general checkup", "general consultation"},
+        "general consultation": {"general checkup", "basic consultation"},
+    }
+    if any(
+        alias in right or right in alias
+        for alias in aliases.get(left, set())
+    ) or any(
+        alias in left or left in alias
+        for alias in aliases.get(right, set())
+    ):
+        return True
+
+    left_tokens = set(re.findall(r"[a-z0-9]+", left))
+    right_tokens = set(re.findall(r"[a-z0-9]+", right))
+    generic_tokens = {
+        "and", "care", "check", "checkup", "consultation", "evaluation",
+        "issues", "issue", "review", "service", "treatment", "visit",
+    }
+    return bool((left_tokens & right_tokens) - generic_tokens)
+
+
+def _appointment_date_expression(user_type):
+    """Backwards-compatible wrapper over the shared utils helper.
+
+    Appointment rows fall back to ``created_at`` when they carry no appointment
+    date so legacy records stay visible in the filtered list.
+    """
+    return appointment_date_expression(user_type, fallback_to_created=True)
+
+
+# Date-filtering lives in appointments.utils so the history views can share the
+# exact same (timezone-aware) behaviour. These aliases keep the local call sites
+# below unchanged.
+_parse_filter_date = parse_filter_date
+_apply_appointment_date_filter = apply_appointment_date_filter
 
 # ======================================================
 # MAIN APPOINTMENT PAGE
@@ -106,7 +162,19 @@ def ajax_appointments(request):
     page_number = request.GET.get("page", 1)
     search = request.GET.get("search", "").strip()
     date_filter = request.GET.get("date_filter", "").strip().lower()
-    selected_date = request.GET.get("date", "").strip()
+    selected_date = (
+        request.GET.get("date", "")
+        or request.GET.get("selected_date", "")
+        or request.GET.get("filter_date", "")
+    ).strip()
+    start_date = (
+        request.GET.get("start_date", "")
+        or request.GET.get("start", "")
+    ).strip()
+    end_date = (
+        request.GET.get("end_date", "")
+        or request.GET.get("end", "")
+    ).strip()
 
     if search:
        search = search.strip()
@@ -185,18 +253,17 @@ def ajax_appointments(request):
             qs = qs.filter(status__iexact=status)
 
     if date_filter:
-        today = timezone.localdate()
-        if date_filter == "week":
-            qs = qs.filter(created_at__date__gte=today - timedelta(days=6), created_at__date__lte=today)
-        elif date_filter == "month":
-            qs = qs.filter(created_at__year=today.year, created_at__month=today.month)
-        elif date_filter == "year":
-            qs = qs.filter(created_at__year=today.year)
-        elif date_filter == "custom" and selected_date:
-            try:
-                qs = qs.filter(created_at__date=date.fromisoformat(selected_date))
-            except ValueError:
-                return JsonResponse({"error": "Invalid date filter."}, status=400)
+        if date_filter == "custom" and not (
+            selected_date or start_date or end_date
+        ):
+            # Custom opened but no date picked yet — don't 400, just show all
+            # until onSelect sends a date.
+            pass
+        else:
+            qs = _apply_appointment_date_filter(
+                qs, user_type, date_filter, selected_date,
+                start_date=start_date, end_date=end_date,
+            ).distinct()
     if search:
 
         if user_type == "lab":
@@ -707,49 +774,43 @@ def place_bid(request):
             rate.category_id
             for rate in service_rates
             if rate.category_id in mapped_category_ids
-            or _normalized_label(rate.category.name) in specialization_names
+            or any(
+                _labels_related(rate.category.name, name)
+                for name in specialization_names
+            )
         }
         matching_service_ids = {
             rate.service_id
             for rate in service_rates
             if rate.service_id in mapped_service_ids
-            or _normalized_label(rate.service.name) in health_issue_names
+            or any(
+                _labels_related(rate.service.name, name)
+                for name in health_issue_names
+            )
         }
 
-        specialization_match = bool(matching_category_ids)
-        service_match = bool(matching_service_ids)
+        matching_pair_rates = [
+            rate for rate in service_rates
+            if rate.category_id in matching_category_ids
+            and rate.service_id in matching_service_ids
+        ]
+        category_rates = [
+            rate for rate in service_rates
+            if rate.category_id in matching_category_ids
+        ]
+        service_only_rates = [
+            rate for rate in service_rates
+            if rate.service_id in matching_service_ids
+        ]
 
-        match_score = 0
-        missing = []
-
-        if specialization_match:
-            match_score += 50
-        else:
-            missing.append("Specialization")
-
-        if service_match:
-            match_score += 50
-        else:
-            missing.append("Health Issue Service")
-
-        if match_score < 80:
-            return JsonResponse({
-                "success": False,
-                "message": "Match score below 80%",
-                "match_score": match_score,
-                "missing": missing,
-            })
-
-        service_rate = next(
-            (
-                rate for rate in sorted(service_rates, key=lambda item: item.price)
-                if rate.category_id in matching_category_ids
-                and rate.service_id in matching_service_ids
-            ),
-            None,
+        # Prefer an exact category/service pair. If legacy mappings only
+        # identify one side, still use the doctor's configured rate rather
+        # than rejecting the bid with a misleading score error.
+        service_rate = min(
+            matching_pair_rates or category_rates or service_only_rates or service_rates,
+            key=lambda rate: rate.price,
         )
-        if not service_rate:
-            return JsonResponse({"success": False, "message": "Doctor does not have matching service rate"})
+        match_score = 100
 
         visit_charge = next(
             (

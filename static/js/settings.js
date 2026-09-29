@@ -530,26 +530,80 @@ document.querySelectorAll('[data-field]').forEach(input => {
     });
 });
 
-// Toggle dropdowns
-$(
-  ".issue-type-wrapper .issue-type-input, .issue-type-wrapper .material-symbols-outlined"
-).on("click", function () {
-    console.log("clicked");
-  $(".issue-type-dropdown").toggleClass("hidden");
-});
-$(
-  ".select-issue-wrapper .select-issue-input, .select-issue-wrapper .material-symbols-outlined"
-).on("click", function () {
-  $(".select-issue-dropdown").toggleClass("hidden");
-});
-// Close dropdowns when clicking outside
+$(document).on(
+    "click",
+    ".issue-type-wrapper .issue-type-input, .issue-type-wrapper > .material-symbols-outlined",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const $wrapper = $(this).closest(".issue-type-wrapper");
+        const $dropdown = $wrapper.find(
+            ".dropdown-menu, .issue-type-dropdown"
+        ).first();
+        if (!$dropdown.length) return;
+        const isOpen = !$dropdown.hasClass("hidden") &&
+                       $dropdown.is(":visible");
+        $(".issue-type-wrapper")
+            .not($wrapper)
+            .find(".dropdown-menu, .issue-type-dropdown")
+            .addClass("hidden")
+            .hide();
+        if (isOpen) {
+            $dropdown.addClass("hidden").hide();
+        } else {
+            $dropdown.removeClass("hidden").show();
+        }
+    }
+);
+$(document).on(
+    "change",
+    ".issue-type-wrapper .dropdown-menu input[type='checkbox']",
+    function (e) {
+        e.stopPropagation();
+        const $wrapper = $(this).closest(".issue-type-wrapper");
+        const $input = $wrapper.find(".issue-type-input");
+        const selectedValues = $wrapper
+            .find(".dropdown-menu input[type='checkbox']:checked")
+            .map(function () {
+                return $(this).closest("li").find("span").first().text().trim();
+            })
+            .get();
+        if (selectedValues.length > 0) {
+            $input.val(selectedValues.join(", "));
+        } else {
+            $input.val("");
+        }
+    }
+);
+$(document).on(
+    "change",
+    ".issue-type-wrapper .issue-type-dropdown input[type='radio']",
+    function (e) {
+        e.stopPropagation();
+        const $wrapper = $(this).closest(".issue-type-wrapper");
+        const $input = $wrapper.find(".issue-type-input");
+        const selected = $(this)
+            .closest("li")
+            .find("span.text-base")
+            .first()
+            .text()
+            .trim();
+        $input.val(selected);
+        $wrapper
+            .find(".issue-type-dropdown")
+            .addClass("hidden")
+            .hide();
+    }
+);
 $(document).on("click", function (e) {
-  if (!$(e.target).closest(".issue-type-wrapper").length) {
-    $(".issue-type-dropdown").addClass("hidden");
-  }
-  if (!$(e.target).closest(".select-issue-wrapper").length) {
-    $(".select-issue-dropdown").addClass("hidden");
-  }
+
+    if (!$(e.target).closest(".issue-type-wrapper").length) {
+
+        $(".issue-type-wrapper")
+            .find(".dropdown-menu, .issue-type-dropdown")
+            .addClass("hidden")
+            .hide();
+    }
 });
 
 function clearSavedData() {
@@ -630,42 +684,60 @@ $(document).on("click", function () {
     $(".issue-type-dropdown").hide();
 });
 
-// Handle profile update form submission
-$(document).on("submit", ".submit-form", function(e) {
-    e.preventDefault();
-    
-    const form = $(this);
-    const formData = new FormData(this);
-    const csrftoken = getCookie("csrftoken");
-    const submitBtn = form.find('.save-btn');
-    const originalText = submitBtn.text();
-    
-    // Disable button and show loading state
-    submitBtn.prop('disabled', true).text('Saving...');
-    
-    fetch(form.attr('action'), {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrftoken
-        },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            toastr.success(data.message || 'Profile updated successfully');
-            // Reload page after short delay to show updated data
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            toastr.error(data.message || data.errors || 'Failed to update profile');
-            submitBtn.prop('disabled', false).text(originalText);
+$(document).ready(function () {
+    $(document).on(
+        "click",
+        "#editForm .save-btn, .save-btn[form='editForm']",
+        function (e) {
+            e.preventDefault();
+            const form = document.getElementById("editForm");
+            if (!form) {
+                toastr.error("Lab profile form not found");
+                return;
+            }
+            const formData = new FormData(form);
+            const csrfInput = form.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            );
+            const csrfToken = csrfInput
+                ? csrfInput.value
+                : getCookie("csrftoken");
+            const submitBtn = $(this);
+            const originalText = submitBtn.text();
+            submitBtn.prop("disabled", true).text("Saving...");
+            fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message ||
+                        JSON.stringify(data.errors) ||
+                        "Failed to update profile"
+                    );
+                }
+                return data;
+            })
+            .then(data => {
+                toastr.success(
+                    data.message || "Lab profile updated successfully"
+                );
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            })
+            .catch(error => {
+                toastr.error(error.message);
+                submitBtn.prop("disabled", false).text(originalText);
+            });
         }
-    })
-    .catch(err => {
-        console.error('Profile update error:', err);
-        toastr.error('Failed to update profile. Please try again.');
-        submitBtn.prop('disabled', false).text(originalText);
-    });
+    );
 });
 
 // City autocomplete functionality

@@ -25,7 +25,11 @@ $(document).ready(function () {
   });
 
   // Global closure scripts for clicking outside dropdowns
-  $(document).on("click", function () {
+  $(document).on("click", function (e) {
+    // Clicks inside the custom date picker must not dismiss the dropdown - this
+    // handler is bound before the picker handlers, so it has to opt out here.
+    if ($(e.target).closest("#doctorReportDatepicker").length) return;
+
     $("#filterDropdown").addClass("hidden");
     $(".datepicker-container").addClass("hidden");
     $(".dropdown-menu").addClass("hidden");
@@ -98,29 +102,157 @@ $(document).ready(function () {
   // --------- 3. ASYNCHRONOUS SUBMENU TABS ACTION EVENTS ----------
   $(document).on("click", "#filterDropdown .option", function (e) {
     e.stopPropagation();
-    const kind = String($(this).data("type") || "date").toLowerCase();
-    const value = String($(this).data("value") || "").toLowerCase();
-    $("#filterDropdown").addClass("hidden");
+    const $option = $(this);
+    const kind = String($option.data("type") || "date").toLowerCase();
+    const value = String($option.data("value") || "").toLowerCase();
+
     if (kind === "visit") {
-      // Visit submenu: Home / Clinic - keep the active date filter intact.
+      // Visit submenu: Home / Clinic / All - keep the active date filter
+      // intact. Only this menu's options are toggled, so picking a visit type
+      // can never overwrite the date filter (or vice versa).
       window.doctorReportVisitType = value;
       $("#visitMenu .option").removeClass("active");
-      $(this).addClass("active");
+      $option.addClass("active");
+      $("#filterDropdown").addClass("hidden");
       loadDoctorDashboardData(currentDoctorReportFilter());
-    } else {
-      $("#dateMenu .option").removeClass("active");
-      $(this).addClass("active");
-      loadDoctorDashboardData(value);
+      return;
     }
+
+    // Date submenu.
+    $("#dateMenu .option").removeClass("active");
+    $option.addClass("active");
+    window.doctorReportFilter = value;
+
+    if (value === "custom") {
+      // A preset is no longer in force, so drop any previously applied range
+      // before the calendar asks for a new one.
+      window.doctorReportStartDate = "";
+      window.doctorReportEndDate = "";
+      openDoctorReportDatepicker();
+      return;
+    }
+
+    // Presets ignore any custom range.
+    window.doctorReportStartDate = "";
+    window.doctorReportEndDate = "";
+    $("#filterDropdown").addClass("hidden");
+    setDoctorReportDateStatus("");
+    loadDoctorDashboardData(value);
+  });
+
+  // "Custom" opens the inline calendar; the first day picked is the start and
+  // the second the end, matching the appointments page behaviour. The range is
+  // only sent once BOTH dates exist, so a half-finished selection can never
+  // narrow the report.
+  let doctorReportPendingStart = "";
+
+  function setDoctorReportDateStatus(text) {
+    $("#doctorReportDateStatus").text(text || "");
+  }
+
+  function resetDoctorReportDatepicker() {
+    const $inline = $("#doctorReportDatepicker .datepicker-inline");
+    try {
+      if ($inline.hasClass("hasDatepicker")) $inline.datepicker("destroy");
+    } catch (e) {}
+    $inline.removeClass("hasDatepicker").empty();
+    return $inline;
+  }
+
+  function openDoctorReportDatepicker() {
+    const $picker = $("#doctorReportDatepicker");
+    const hidden = $picker.hasClass("hidden") || $picker.css("display") === "none";
+
+    if (!hidden) {
+      $picker.addClass("hidden").css("display", "");
+      return;
+    }
+
+    // Swap the submenu for the calendar, keeping the dropdown itself open.
+    $("#mainMenu, #dateMenu, #visitMenu").addClass("hidden");
+    $picker.removeClass("hidden").css("display", "");
+    setDoctorReportDateStatus("Select start date");
+    doctorReportPendingStart = "";
+
+    const $inline = resetDoctorReportDatepicker();
+
+    $inline.datepicker({
+      dateFormat: "yy-mm-dd",
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "2000:2035",
+      onSelect: function (dateText) {
+        // FIRST PICK: START DATE - keep the calendar open for the end date.
+        if (!doctorReportPendingStart) {
+          doctorReportPendingStart = dateText;
+          $inline.datepicker("option", "minDate", dateText);
+          setDoctorReportDateStatus(
+            "Start: " + doctorReportPendingStart + " - Select end date"
+          );
+          return;
+        }
+
+        // SECOND PICK: END DATE - apply the range.
+        let rangeStart = doctorReportPendingStart;
+        let rangeEnd = dateText;
+        if (rangeStart > rangeEnd) {
+          const swap = rangeStart;
+          rangeStart = rangeEnd;
+          rangeEnd = swap;
+        }
+
+        window.doctorReportStartDate = rangeStart;
+        window.doctorReportEndDate = rangeEnd;
+        doctorReportPendingStart = "";
+
+        $inline.datepicker("option", "minDate", null);
+        $picker.addClass("hidden").css("display", "");
+        $("#filterDropdown").addClass("hidden");
+        setDoctorReportDateStatus("");
+
+        loadDoctorDashboardData("custom");
+      },
+    });
+  }
+
+  // The calendar icon on the "Custom" row toggles the picker directly.
+  $(document).on(
+    "click",
+    "#filterDropdown [data-value='custom'] .material-symbols-outlined",
+    function (e) {
+      e.stopPropagation();
+      openDoctorReportDatepicker();
+    }
+  );
+
+  // Keep the calendar usable: clicks inside it must not dismiss the dropdown,
+  // and there is always a way back to the menus.
+  $(document).on("click", "#doctorReportDatepicker", function (e) {
+    e.stopPropagation();
+  });
+
+  $(document).on("click", "#doctorReportDatepickerBack", function (e) {
+    e.stopPropagation();
+    $("#doctorReportDatepicker").addClass("hidden").css("display", "");
+    $("#mainMenu").removeClass("hidden");
   });
 
   // Sync secondary action listeners
   $(document).on("click", ".calendar-option, .heatmap-cal-option, .consolidation-cal-option", function (e) {
     e.stopPropagation();
-    const value = $(this).data("value");
+    const value = String($(this).data("value") || "").toLowerCase();
     $(this).parent().addClass("hidden");
     $(this).closest(".relative").find(".calendar-date-text").text($(this).text().trim().replace("check", ""));
-    loadDoctorDashboardData(value.toLowerCase());
+    if (value === "custom") {
+      // Route through the shared picker so a card-level "Custom" asks for a
+      // real range instead of silently loading an unfiltered report.
+      $("#dateMenu .option").removeClass("active");
+      $("#dateMenu .option[data-value='Custom']").addClass("active");
+      window.doctorReportFilter = "custom";
+      openDoctorReportDatepicker();
+      return;
+    }
+    loadDoctorDashboardData(value);
   });
 
   // Default fallback load invocation if map engine is bypassed
@@ -130,7 +262,12 @@ $(document).ready(function () {
 });
 
 function currentDoctorReportFilter() {
-    const $active = $("#filterDropdown .option.active");
+    // Only the DATE menu marks an active option. Reading
+    // `#filterDropdown .option.active` (the previous behaviour) picked up the
+    // visit-type option too, because #dateMenu precedes #visitMenu in the DOM -
+    // so choosing a visit type before a date overwrote the date filter with
+    // "home"/"clinic", which the backend treats as "no filter".
+    const $active = $("#dateMenu .option.active");
     if ($active.length) {
         return String($active.data("value") || "month").toLowerCase();
     }
@@ -138,11 +275,19 @@ function currentDoctorReportFilter() {
 }
 
 function currentDoctorVisitType() {
-    const fromDropdown = $("#visitMenu .option.active").data("value");
-    if (fromDropdown) {
-        return String(fromDropdown).toLowerCase();
+    // Mirrors currentDoctorReportFilter: scoped to the visit menu only.
+    const $active = $("#visitMenu .option.active");
+    if ($active.length) {
+        return String($active.data("value") || "").toLowerCase();
     }
     return window.doctorReportVisitType || "";
+}
+
+function currentDoctorReportRange() {
+    return {
+        startDate: window.doctorReportStartDate || "",
+        endDate: window.doctorReportEndDate || "",
+    };
 }
 
 // =========================================================================
@@ -156,13 +301,20 @@ function loadDoctorDashboardData(filterType) {
     }
     const activeFilter = window.doctorReportFilter || filterType || "month";
     const searchValue = ($("#reportSearch").val() || "").trim();
+    const range = currentDoctorReportRange();
     if (doctorReportRequest) {
         doctorReportRequest.abort();
     }
     doctorReportRequest = $.ajax({
         url: "/reports/doctor-report-data/", // Update to point to your routing path url configuration
         type: "GET",
-        data: { filter: activeFilter, visit_type: currentDoctorVisitType(), search: searchValue },
+        data: {
+            filter: activeFilter,
+            visit_type: currentDoctorVisitType(),
+            search: searchValue,
+            start_date: range.startDate,
+            end_date: range.endDate,
+        },
         success: function (response) {
             console.log("DOCTOR LIVE PIPELINE DISPATCH MATRIX RECIEVED:", response);
 

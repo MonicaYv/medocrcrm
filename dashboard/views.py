@@ -18,6 +18,7 @@ from django.template.loader import render_to_string
 from subscription.models import SubscriptionHistory
 from django.views.decorators.http import require_GET, require_POST
 from .utils import dashboard_login_required, get_common_context, get_theme_colors
+from appointments.utils import filter_appointments_between_dates
 from .models import SettingMenu, CouponPerformance,  CalendarEvent, TrendingCoupon
 from django.db.models import Sum, Count, Q, Max, F, ExpressionWrapper, DurationField
 from registration.models import (
@@ -282,12 +283,16 @@ def dashboard_home(request):
 
         # ================= LAB =================
         elif user_type == 'lab':
-            lab_profile = LabProfile.objects.get(user=user)
-            today = timezone.now().date()
+            lab_profile = LabProfile.objects.filter(user=user).first()
+            if not lab_profile:
+                return render(request, "dashboard/not_found.html")
+            today = timezone.localdate()
 
-            today_appointments = LabAppointments.objects.filter(
-                accepted_lab=lab_profile,
-                preferred_date_time__date=today
+            today_appointments = filter_appointments_between_dates(
+                LabAppointments.objects.filter(accepted_lab=lab_profile),
+                "lab",
+                today,
+                today,
             )
 
             confirmed_count = today_appointments.filter(
@@ -471,24 +476,23 @@ def dashboard_home(request):
             if not doctor_profile:
                 return render(request, "dashboard/not_found.html")
 
-            today = timezone.now().date()
+            today = timezone.localdate()
 
-            total_appointments_today = DoctorAppointment.objects.filter(
-                doctor=doctor_profile,
-                preferred_date_time__date=today
+            doctor_appointments = DoctorAppointment.objects.filter(
+                doctor=doctor_profile
+            )
+
+            total_appointments_today = filter_appointments_between_dates(
+                doctor_appointments, "doctor", today, today
             ).count()
 
-            confirmed_count = DoctorAppointment.objects.filter(
-                doctor=doctor_profile,
-                status="Accepted",
-                 preferred_date_time__date=today
-            ).count()
+            confirmed_count = filter_appointments_between_dates(
+                doctor_appointments, "doctor", today, today
+            ).filter(status="Accepted").count()
 
-            pending_count = DoctorAppointment.objects.filter(
-               doctor=doctor_profile,
-               status="Pending",
-               preferred_date_time__date=today
-            ).count()
+            pending_count = filter_appointments_between_dates(
+                doctor_appointments, "doctor", today, today
+            ).filter(status="Pending").count()
 
             pending_requests_count = DoctorAppointment.objects.filter(
                status="Pending"
@@ -636,7 +640,7 @@ def dashboard_home(request):
                 "preferred_date_from"
             )[:3]
 
-            today = timezone.now().date()
+            today = timezone.localdate()
 
             date_filter = request.GET.get("date_filter", "today")
 
@@ -663,9 +667,13 @@ def dashboard_home(request):
                 start_date = today
                 end_date = today
 
-            today_appointments = HospitalAppointments.objects.filter(
-                accepted_hospital=hospital_profile,
-                preferred_date_from__date__range=(start_date, end_date)
+            today_appointments = filter_appointments_between_dates(
+                HospitalAppointments.objects.filter(
+                    accepted_hospital=hospital_profile
+                ),
+                "hospital",
+                start_date,
+                end_date,
             )
             total_appointments_today = today_appointments.count()
             confirmed_count = today_appointments.filter(

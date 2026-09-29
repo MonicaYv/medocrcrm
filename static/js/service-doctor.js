@@ -97,6 +97,81 @@ $(document).on("click", function () {
   $(".more-dropdown").addClass("hidden");
 });
 /* =========================================================
+   CARD TEMPLATES
+   ========================================================= */
+const serviceCardTemplate = () => `
+  <div class="service-card rounded-lg px-4 py-6 relative bg-[#F9FAFB]">
+    <button class="remove-service absolute top-3 right-3 text-ebony hover:text-red-500">✕</button>
+
+    <!-- Category Dropdown -->
+    <div class="mb-4 custom-dropdown">
+      <label class="text-base sm:text-lg text-jet-black font-semibold">Select Category</label>
+
+      <div class="dropdown-trigger mt-2">
+        <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+          <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Category</span>
+          <span class="material-symbols-outlined">keyboard_arrow_down</span>
+        </button>
+
+        <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="custom-dropdown">
+        <label class="text-base sm:text-lg text-jet-black font-semibold">Select Service</label>
+
+        <div class="dropdown-trigger mt-2">
+          <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+            <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Service</span>
+            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+          </button>
+
+          <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div>
+        <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
+        <input type="text"
+          class="doctor-price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
+          value="₹ 0.00">
+      </div>
+    </div>
+  </div>
+`;
+
+const visitServiceCardTemplate = () => `
+  <div class="service-card rounded-lg px-4 py-3 relative bg-[#F9FAFB]">
+    <button class="remove-service-visit absolute top-3 right-3 text-ebony hover:text-red-500">✕</button>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="custom-dropdown">
+        <label class="text-base sm:text-lg text-jet-black font-semibold">Visit Type</label>
+
+        <div class="dropdown-trigger mt-2">
+          <button type="button" class="w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+            <span class="selected-text text-sm sm:text-base font-normal text-dark-gray">Select Visit Type</span>
+            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+          </button>
+
+          <ul class="dropdown-menu hidden absolute z-20 mt-1 w-1/2 bg-white border border-dodger-blue rounded shadow text-sm sm:text-base text-dark-gray font-normal h-40 overflow-y-auto scroll"></ul>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div>
+        <label class="text-base sm:text-lg text-jet-black font-semibold">Price</label>
+        <input type="text"
+          class="doctor-price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2 focus:outline-none"
+          value="₹ 0.00">
+      </div>
+    </div>
+  </div>
+`;
+
+/* =========================================================
    ADD / REMOVE CARDS
 ========================================================= */
 $(document).on('click', '.add-service', function () {
@@ -175,7 +250,7 @@ $(document).on('change', '.file-input', function () {
   wrapper.find('.submit-btn')
     .prop('disabled', false)
     .removeClass('bg-light-gray cursor-not-allowed')
-    .addClass('bg-primary-blue text-white');
+    .addClass('bg-dodger-blue text-white');
 });
 
 $(document).on('click', '.remove-file', function (e) {
@@ -188,8 +263,199 @@ $(document).on('click', '.remove-file', function (e) {
 
   wrapper.find('.submit-btn')
     .prop('disabled', true)
-    .removeClass('bg-primary-blue text-white')
+    .removeClass('bg-dodger-blue text-white')
     .addClass('bg-light-gray cursor-not-allowed');
+});
+
+/* =========================================================
+   CSV UPLOAD (SERVICES + VISIT CHARGES)
+   ========================================================= */
+function doctorNormaliseHeader(header) {
+  return String(header || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+// `fallbackHeaders` defines the column order assumed when the CSV has no
+// header row, so service and visit uploads can differ.
+function doctorParseCsv(csvText, fallbackHeaders) {
+  const rows = [];
+  let headers = null;
+
+  String(csvText || '')
+    .split(/\r?\n/)
+    .forEach((line) => {
+      if (!line.trim()) return;
+
+      const values = parseCsvLine(line).map((value) => value.trim());
+
+      if (!headers) {
+        const candidate = values.map(doctorNormaliseHeader);
+
+        // A header row is detected when it names known columns and holds no
+        // numeric price values.
+        const looksLikeHeader = candidate.some((key) =>
+          ['category', 'service', 'service_name', 'price', 'amount',
+            'visit_type', 'visit', 'charge'].includes(key)
+        ) && !values.some((value) => /^\d+(\.\d+)?$/.test(value));
+
+        headers = looksLikeHeader ? candidate : fallbackHeaders.slice();
+        if (looksLikeHeader) return;
+      }
+
+      rows.push(headers.reduce((row, header, index) => {
+        row[header] = values[index] || '';
+        return row;
+      }, {}));
+    });
+
+  return rows;
+}
+
+// Maps a CSV row onto the matching category/service pair from DOCTOR_DATA.
+function parseDoctorServiceCsv(csvText) {
+  return doctorParseCsv(csvText, ['category', 'service', 'price']).map((row) => {
+    const categoryName = row.category || row.category_name || '';
+    const serviceName = row.service || row.service_name || row.service_description || '';
+    const price = String(row.price || row.amount || row.charge || '').replace(/[^0-9.]/g, '');
+
+    const category = (window.DOCTOR_DATA.categories || []).find(
+      (item) => item.name.trim().toLowerCase() === categoryName.trim().toLowerCase()
+    );
+
+    const service = (window.DOCTOR_DATA.services || []).find((item) => {
+      if (item.name.trim().toLowerCase() !== serviceName.trim().toLowerCase()) return false;
+      return category ? String(item.category_id) === String(category.id) : true;
+    });
+
+    if (!category || !service || !price) return null;
+
+    return { category, service, price };
+  }).filter(Boolean);
+}
+
+function parseDoctorVisitCsv(csvText) {
+  return doctorParseCsv(csvText, ['visit_type', 'price']).map((row) => {
+    const visitName = row.visit_type || row.visit || row.type || row.name || '';
+    const price = String(row.price || row.amount || row.charge || '').replace(/[^0-9.]/g, '');
+
+    const visitType = (window.DOCTOR_DATA.visit_types || []).find(
+      (item) => item.name.trim().toLowerCase() === visitName.trim().toLowerCase()
+    );
+
+    if (!visitType || !price) return null;
+
+    return { visitType, price };
+  }).filter(Boolean);
+}
+
+function populateDoctorServiceCards(rows) {
+  const $list = $('.services-section #step-1 .services-list');
+  if (!$list.length) return;
+
+  $list.empty();
+
+  rows.forEach((row) => {
+    const $card = $(serviceCardTemplate());
+    initDoctorServiceCard($card);
+
+    const $category = $card.find('.custom-dropdown').eq(0);
+    $category.find('.selected-text')
+      .text(row.category.name)
+      .attr('data-id', row.category.id);
+
+    const $service = $card.find('.custom-dropdown').eq(1);
+    populateDropdown(
+      $service,
+      (window.DOCTOR_DATA.services || []).filter(
+        (item) => String(item.category_id) === String(row.category.id)
+      )
+    );
+    $service.find('.selected-text')
+      .text(row.service.name)
+      .attr('data-id', row.service.id);
+
+    $card.find('.doctor-price-input').val(`₹ ${row.price}`);
+
+    $list.append($card);
+  });
+}
+
+function populateDoctorVisitCards(rows) {
+  const $list = $('.services-section #step-2 .visit-services-list');
+  if (!$list.length) return;
+
+  $list.empty();
+
+  rows.forEach((row) => {
+    const $card = $(visitServiceCardTemplate());
+    initDoctorVisitCard($card);
+
+    $card.find('.custom-dropdown').eq(0).find('.selected-text')
+      .text(row.visitType.name)
+      .attr('data-id', row.visitType.id);
+
+    $card.find('.doctor-price-input').val(`₹ ${row.price}`);
+
+    $list.append($card);
+  });
+}
+
+$(document).on('click', '.submit-btn', function () {
+  const $wrapper = $(this).closest('.file-upload-wrapper');
+  const csvType = $wrapper.data('csvType');
+
+  // Not a doctor CSV upload - let the page specific handler take over.
+  if (!csvType) return;
+
+  const file = $wrapper.find('.file-input')[0]?.files?.[0];
+
+  if (!file) {
+    toastr.error('Please select a CSV file first.');
+    return;
+  }
+
+  if (!file.name.toLowerCase().endsWith('.csv')) {
+    toastr.error('Please upload a CSV file.');
+    $wrapper.find('.file-input').val('');
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function (event) {
+    const csvText = event.target.result || '';
+    const isVisit = csvType === 'visit';
+
+    const rows = isVisit ? parseDoctorVisitCsv(csvText) : parseDoctorServiceCsv(csvText);
+
+    if (!rows.length) {
+      toastr.error(
+        isVisit
+          ? 'No valid visit rows found. CSV format: Visit Type, Price'
+          : 'No valid service rows found. CSV format: Category, Service, Price'
+      );
+      return;
+    }
+
+    if (isVisit) {
+      populateDoctorVisitCards(rows);
+    } else {
+      populateDoctorServiceCards(rows);
+    }
+
+    toastr.success(
+      `${rows.length} ${isVisit ? 'visit charge' : 'service'}${rows.length > 1 ? 's' : ''} imported successfully.`
+    );
+  };
+
+  reader.onerror = function () {
+    toastr.error('Unable to read the selected file.');
+  };
+
+  reader.readAsText(file);
 });
 
 /* =========================================================

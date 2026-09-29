@@ -848,7 +848,7 @@
         </div>
     </form>
 {% elif user.user_type == 'lab' %}
-    <form id="editForm" method="POST" action="{% url 'update_lab_profile' %}" class="grid grid-cols-1 gap-x-6 md:gap-x-12 gap-y-6  pt-6 text-sm">
+    <form id="editForm" method="POST" action="{% url 'update_lab_profile' %}" class="submit-form grid grid-cols-1 gap-x-6 md:gap-x-12 gap-y-6 pt-6 text-sm">
         {% csrf_token %}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
             <!-- Email + Phone -->
@@ -923,84 +923,79 @@
                 <span class="error genderError text-red-500 text-sm mt-1 hidden"></span>
             </div>
             <!-- Available Facilities-->
-            <div
-                class="issue-type-wrapper w-full  rounded-[6px] text-dark-gray border pl-0.5 text-sm flex items-center justify-between relative">
-
-                <input type="text" placeholder="Available Facilities"
-                    class="issue-type-input w-full focus:outline-none focus:ring-0  rounded px-3 py-2 cursor-pointer"
+           <div class="issue-type-wrapper w-full rounded-[6px] text-dark-gray border pl-0.5 text-sm relative">
+                <input type="text"
+                    placeholder="Available Facilities"
+                    class="issue-type-input w-full rounded px-3 py-2 cursor-pointer"
                     readonly>
-                <span
-                    class="material-symbols-outlined cursor-pointer">keyboard_arrow_down</span>
-
-                <!-- Dropdown options -->
-
-                <ul class="dropdown-menu hidden border rounded bg-white mt-1 shadow-md">
-                {% for f in all_facilities %}
-                <li class="flex justify-between px-3 py-2 hover:bg-blue-100 cursor-pointer">
-                    <span>{{ f.name }}</span>
-                    <input type="checkbox" name="facilities[]" value="{{ f.id }}"
-                           {% if f.id in selected_facilities %}checked{% endif %}>
-                </li>
-                {% endfor %}
-            </ul>
-
+                <span class="material-symbols-outlined absolute right-2 top-2 cursor-pointer">
+                    keyboard_arrow_down
+                </span>
+                <ul class="dropdown-menu hidden absolute left-0 top-full w-full z-50 border rounded bg-white mt-1 shadow-md max-h-60 overflow-y-auto">
+                    {% for f in all_facilities %}
+                    <li class="flex justify-between items-center px-3 py-2 hover:bg-blue-100 cursor-pointer">
+                        <span>{{ f.name }}</span>
+                        <input type="checkbox"
+                            name="facilities[]"
+                            value="{{ f.id }}"
+                            {% if f.id in selected_facilities %}checked{% endif %}>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
             <!--Services-->
-            <div
-                class="issue-type-wrapper w-full  rounded-[6px] text-dark-gray border  pl-0.5 text-sm flex items-center justify-between relative">
-
-                <input type="text" placeholder="Services"
-                    class="issue-type-input w-full focus:outline-none focus:ring-0 rounded px-3 py-2 cursor-pointer"
+            <div class="issue-type-wrapper w-full rounded-[6px] text-dark-gray border pl-0.5 text-sm relative">
+                <input type="text"
+                    placeholder="Services"
+                    class="issue-type-input w-full rounded px-3 py-2 cursor-pointer"
                     readonly>
-                <span
-                    class="material-symbols-outlined cursor-pointer">keyboard_arrow_down</span>
-
-                <!-- Dropdown options -->
-
-            <ul class="dropdown-menu hidden border rounded bg-white mt-1 shadow-md">
-                {% for s in all_services %}
-                <li class="flex justify-between px-3 py-2 hover:bg-blue-100 cursor-pointer">
-                    <span>{{ s.name }}</span>
-                    <input type="checkbox" name="services[]" value="{{ s.id }}"
-                           {% if s.id in selected_services %}checked{% endif %}>
-                </li>
-                {% endfor %}
-            </ul>
-
+                <span class="material-symbols-outlined absolute right-2 top-2 cursor-pointer">
+                    keyboard_arrow_down
+                </span>
+                <ul class="dropdown-menu hidden absolute left-0 top-full w-full z-50 border rounded bg-white mt-1 shadow-md max-h-60 overflow-y-auto">
+                    {% for s in all_services %}
+                    <li class="flex justify-between items-center px-3 py-2 hover:bg-blue-100 cursor-pointer">
+                        <span>{{ s.name }}</span>
+                        <input type="checkbox"
+                            name="services[]"
+                            value="{{ s.id }}"
+                            {% if s.id in selected_services %}checked{% endif %}>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-        </div>
-        <!--WOrking Hours-->
-        <div class="relative issue-type-wrapper">
-            <input type="text" class="border rounded px-3 py-2 w-full issue-type-input"
-                placeholder="Working Hours" readonly />
-            <span class="material-symbols-outlined absolute right-2 top-2  cursor-pointer">
-                keyboard_arrow_down
-            </span>
-
-            <!-- Dropdown -->
-            <ul class="issue-type-dropdown hidden bg-white rounded shadow-md p-1 mt-1 border">
-                {% for timing in all_timings %}
-                <li class="flex justify-between items-center p-2 hover:bg-dodger-blue hover:text-white cursor-pointer">
-                    <div class="flex items-center gap-4">
-
-                        <input type="radio"
-                            name="lab_timing_id"
-                            value="{{ timing.id }}"
-                            class="issue-checkbox w-5 h-5 text-dodger-blue rounded-sm"
-                            {% if lab_timing and lab_timing.id == timing.id %}checked{% endif %} />
-
-                        <span class="text-base">{{ timing.name }}</span>
                     </div>
-
-                    <div>
-                        <span>Opens at {{ timing.opens_at }}</span> &nbsp;
-                        <span>Closes at {{ timing.closes_at }}</span>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-
+            <!-- Working Hours -->
+            <div class="relative issue-type-wrapper">
+                <input type="text"
+                    class="border rounded px-3 py-2 w-full issue-type-input"
+                    placeholder="Working Hours"
+                    readonly />
+                <span class="material-symbols-outlined absolute right-2 top-2 cursor-pointer">
+                    keyboard_arrow_down
+                </span>
+                <ul class="issue-type-dropdown hidden bg-white rounded shadow-md p-1 mt-1 border">
+                    {% for timing in all_timings %}
+                    <li class="flex justify-between items-center p-2 hover:bg-dodger-blue hover:text-white cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <input type="radio"
+                                name="lab_timing_id"
+                                value="{{ timing.id }}"
+                                class="issue-checkbox w-5 h-5"
+                                {% if lab_timing and lab_timing.id == timing.id %}checked{% endif %} />
+                            <span class="text-base">
+                                {{ timing.open_time|time:"h:i A" }} - {{ timing.close_time|time:"h:i A" }}
+                            </span>
+                        </div>
+                        <div class="text-sm">
+                            Opens at {{ timing.open_time|time:"h:i A" }}
+                            &nbsp; | &nbsp;
+                            Closes at {{ timing.close_time|time:"h:i A" }}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         <!--Address-->
         <input type="text" name="address" class="w-full border rounded px-3 py-2" placeholder="Address" value="{{address}}"/>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-12 gap-y-6 text-sm">
@@ -1087,7 +1082,7 @@
                     class="px-4 py-2 rounded-md border text-dodger-blue font-normal text-lg border-dodger-blue cancel-btn">
                     Cancel
                 </button>
-                <button type="submit"
+                <button type="submit" form="editForm"
                     class="bg-dodger-blue text-white px-6 py-2 rounded-lg font-normal text-lg cursor-pointer save-btn">
                     Save Changes
                 </button>

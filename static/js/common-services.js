@@ -361,8 +361,15 @@ $(document).on('click', '.remove-file', function (e) {
         .addClass('bg-light-gray cursor-not-allowed');
 });
 
+// NOTE: this handler belongs to the PHARMACY medicine CSV only (it parses
+// category/name/type/quantity/price rows). Other pages - doctor, lab and
+// hospital - own their own submit handling, so they opt out with
+// `data-csv-type` on the wrapper.
 $(document).on('click', '.submit-btn', function () {
     const wrapper = $(this).closest('.file-upload-wrapper');
+
+    if (wrapper.data('csvType')) return;
+
     const file = wrapper.find('.file-input')[0]?.files?.[0];
     clearPharmacyValidation();
 
