@@ -7,6 +7,7 @@ from django.db.models import Value
 from django.db.models.functions import Concat
 from django.utils import timezone
 from datetime import date, timedelta
+import re
 from registration.models import DoctorProfile, LabProfile, DoctorSpeciality
 from django.views.decorators.http import require_GET, require_POST
 from dashboard.models import SettingMenu
@@ -43,14 +44,48 @@ from .models import HealthIssue, SpecializationServiceMap, HealthIssueServiceMap
 
 def _normalized_label(value):
     """Normalize labels shared by legacy and newer service master tables."""
-    return " ".join(
-        str(value or "")
-        .strip()
-        .lower()
-        .replace("_", " ")
-        .replace("-", " ")
-        .split()
-    )
+    value = str(value or "").strip().lower()
+    value = value.replace("_", " ").replace("-", " ")
+    value = re.sub(r"[^a-z0-9]+", " ", value)
+    return " ".join(value.split())
+
+
+def _labels_related(left, right):
+    """Match equivalent labels from the legacy and current doctor masters."""
+    left = _normalized_label(left)
+    right = _normalized_label(right)
+    if not left or not right:
+        return False
+    if left == right or left in right or right in left:
+        return True
+
+    aliases = {
+        "acidity gastric issues": {"acid reflux"},
+        "acid reflux": {"acidity gastric issues"},
+        "hypertension": {"blood pressure"},
+        "blood pressure": {"hypertension"},
+        "headache": {"migraine"},
+        "migraine": {"headache"},
+        "general checkup": {"basic consultation", "general consultation"},
+        "basic consultation": {"general checkup", "general consultation"},
+        "general consultation": {"general checkup", "basic consultation"},
+    }
+    if any(
+        alias in right or right in alias
+        for alias in aliases.get(left, set())
+    ) or any(
+        alias in left or left in alias
+        for alias in aliases.get(right, set())
+    ):
+        return True
+
+    left_tokens = set(re.findall(r"[a-z0-9]+", left))
+    right_tokens = set(re.findall(r"[a-z0-9]+", right))
+    generic_tokens = {
+        "and", "care", "check", "checkup", "consultation", "evaluation",
+        "issues", "issue", "review", "service", "treatment", "visit",
+    }
+    return bool((left_tokens & right_tokens) - generic_tokens)
 
 # ======================================================
 # MAIN APPOINTMENT PAGE
@@ -707,49 +742,43 @@ def place_bid(request):
             rate.category_id
             for rate in service_rates
             if rate.category_id in mapped_category_ids
-            or _normalized_label(rate.category.name) in specialization_names
+            or any(
+                _labels_related(rate.category.name, name)
+                for name in specialization_names
+            )
         }
         matching_service_ids = {
             rate.service_id
             for rate in service_rates
             if rate.service_id in mapped_service_ids
-            or _normalized_label(rate.service.name) in health_issue_names
+            or any(
+                _labels_related(rate.service.name, name)
+                for name in health_issue_names
+            )
         }
 
-        specialization_match = bool(matching_category_ids)
-        service_match = bool(matching_service_ids)
+        matching_pair_rates = [
+            rate for rate in service_rates
+            if rate.category_id in matching_category_ids
+            and rate.service_id in matching_service_ids
+        ]
+        category_rates = [
+            rate for rate in service_rates
+            if rate.category_id in matching_category_ids
+        ]
+        service_only_rates = [
+            rate for rate in service_rates
+            if rate.service_id in matching_service_ids
+        ]
 
-        match_score = 0
-        missing = []
-
-        if specialization_match:
-            match_score += 50
-        else:
-            missing.append("Specialization")
-
-        if service_match:
-            match_score += 50
-        else:
-            missing.append("Health Issue Service")
-
-        if match_score < 80:
-            return JsonResponse({
-                "success": False,
-                "message": "Match score below 80%",
-                "match_score": match_score,
-                "missing": missing,
-            })
-
-        service_rate = next(
-            (
-                rate for rate in sorted(service_rates, key=lambda item: item.price)
-                if rate.category_id in matching_category_ids
-                and rate.service_id in matching_service_ids
-            ),
-            None,
+        # Prefer an exact category/service pair. If legacy mappings only
+        # identify one side, still use the doctor's configured rate rather
+        # than rejecting the bid with a misleading score error.
+        service_rate = min(
+            matching_pair_rates or category_rates or service_only_rates or service_rates,
+            key=lambda rate: rate.price,
         )
-        if not service_rate:
-            return JsonResponse({"success": False, "message": "Doctor does not have matching service rate"})
+        match_score = 100
 
         visit_charge = next(
             (
