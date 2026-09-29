@@ -93,6 +93,11 @@ $(document).ready(function () {
 // loadAppointments("all", 1);
 loadAppointments("all", 1, "");
 
+  // First click inside the custom-date calendar = start date. It is kept here
+  // (and NOT sent to the API) until the end date is picked, so a half finished
+  // selection can never narrow the appointment list by accident.
+  let pendingStartDate = "";
+
   function resetAppointmentDatepicker($picker) {
     const $inline = $picker.find(".datepicker-inline");
     try {
@@ -102,9 +107,20 @@ loadAppointments("all", 1, "");
     return $inline;
   }
 
+  // Update the "Select start date / Select end date" hint shown inside the
+  // custom-date calendar. Null-safe so a page without the hint still works.
+  function setAppointmentDateStatus($dropdown, text) {
+    const $status = $dropdown.find(".appointment-date-status");
+    if ($status.length) $status.text(text);
+  }
+
   // Open / close the inline appointment calendar.
   // Extracted into one helper so the "Custom date" row and the calendar icon
   // always behave identically (single source of truth for onSelect).
+  //
+  // Custom date works like the wallet/advance-history custom filter: the first
+  // day clicked is the START date, the second one is the END date, and only
+  // then is the list reloaded with `date_filter=custom&start_date=..&end_date=..`.
   function openAppointmentDatepicker($dropdown) {
     const $picker = $dropdown.find(".datepicker-container");
     // dropdown.js may have hidden this with an inline style; clear it so the
@@ -118,23 +134,58 @@ loadAppointments("all", 1, "");
     }
 
     currentDateFilter = "custom";
-    $picker.css("display", "").removeClass("hidden");
+    currentFilterDate = "";
+    // Every time the calendar opens a new start → end selection begins.
+    pendingStartDate = "";
 
-    const options = {
+    // Close the filter list and open the inline calendar instead.
+    $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
+    $picker.css("display", "").removeClass("hidden");
+    setAppointmentDateStatus($dropdown, "Select start date");
+
+    const $inline = resetAppointmentDatepicker($picker);
+
+    $inline.datepicker({
       dateFormat: "yy-mm-dd",
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "2000:2035",
       onSelect: function (dateText) {
-        currentFilterDate = dateText;
-        currentStartDate = "";
-        currentEndDate = "";
+        // FIRST PICK: START DATE — keep the calendar open for the end date.
+        if (!pendingStartDate) {
+          pendingStartDate = dateText;
+          // An end date can only be on/after the selected start date.
+          $inline.datepicker("option", "minDate", dateText);
+          setAppointmentDateStatus(
+            $dropdown,
+            "Start: " + pendingStartDate + " — Select end date"
+          );
+          return;
+        }
+
+        // SECOND PICK: END DATE — apply the start → end range.
+        let rangeStart = pendingStartDate;
+        let rangeEnd = dateText;
+        if (rangeStart > rangeEnd) {
+          const rangeSwap = rangeStart;
+          rangeStart = rangeEnd;
+          rangeEnd = rangeSwap;
+        }
+
+        currentStartDate = rangeStart;
+        currentEndDate = rangeEnd;
+        pendingStartDate = "";
+
+        setAppointmentDateStatus($dropdown, rangeStart + " to " + rangeEnd);
+
+        // Close the calendar only after the end date has been picked.
+        $inline.datepicker("option", "minDate", null);
         $picker.addClass("hidden");
         $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
+
         loadAppointments(currentStatus, 1, currentSearch);
       },
-    };
-    // Keep the previously picked date highlighted when re-opening.
-    if (currentFilterDate) options.defaultDate = currentFilterDate;
-
-    resetAppointmentDatepicker($picker).datepicker(options);
+    });
   }
 
   // Calendar icon toggles the inline picker without selecting a filter yet.
