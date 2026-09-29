@@ -1129,8 +1129,7 @@ def update_lab_profile(request):
 
              city_name = post_data.get("city", "").split(",")[0].strip()
 
-             if state:
-              city = City.objects.filter(
+             city = City.objects.filter(
                 name__iexact=city_name,
                 state=state
             ).first()
