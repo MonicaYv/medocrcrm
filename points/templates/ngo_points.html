@@ -444,7 +444,8 @@
                     </form>
                   </div>
                   <div class="dropdown filter-dropdown relative z-10">
-                    <button class="filter-dropdown-btn dropdown-btn flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
+                    <button type="button" class="filter-dropdown-btn dropdown-btn flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer"
+                      onclick="event.preventDefault(); event.stopPropagation(); this.closest('.dropdown').querySelector('.filter-dropdown-option').classList.toggle('hidden');">
                         <span class="material-symbols-outlined">tune</span>
                     </button>
                     <form id="filterForm" method="GET" class="relative">
@@ -488,4 +489,3 @@
   <script src="{% static 'js/table-pagination.js' %}"></script>
   <script src="{% static 'js/ngopoints.js' %}"></script>
 {% endblock %}
-

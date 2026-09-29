@@ -15,6 +15,7 @@ $(document).ready(function () {
   const $hospitalDatepicker = $('.filterDropdown [data-filter="custom"]')
     .not('.points-chart-custom')
     .not('.help-filter-option')
+    .not('[data-support-filter]')
     .closest('.dropdown')
     .find('.datepicker-inline');
 

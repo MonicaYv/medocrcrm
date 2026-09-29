@@ -288,7 +288,8 @@ $(document).ready(function () {
     .not(".trigger-custom")
     .on("click", function () {
       activeCustomDate = null;
-      activeDateFilter = $(this).text().trim() === "Week" ? 7 : 30;
+      const selectedFilter = $(this).text().trim();
+      activeDateFilter = selectedFilter === "Week" ? 7 : selectedFilter === "Month" ? 30 : 365;
       applyDoctorFilters();
     });
 

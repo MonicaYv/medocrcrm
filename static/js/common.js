@@ -82,7 +82,8 @@ $(document).ready(function () {
       e.preventDefault();
 
       const targetSelector = $(this).data("target");
-      const $target = $(targetSelector);
+      const $scope = $(this).closest(".sharePopup, #shareModal");
+      const $target = ($scope.length ? $scope.find(targetSelector) : $(targetSelector)).first();
 
       if ($target.length === 0) {
         console.log("Target not found!");
@@ -124,7 +125,8 @@ $(document).ready(function () {
 
     $(".share-app").click(function () {
       const app = $(this).data("app");
-      const link = $("#share-link").val();
+      const $scope = $(this).closest(".sharePopup, #shareModal");
+      const link = ($scope.length ? $scope.find("input[id$='share-link']") : $("#share-link")).first().val();
       let url = "";
 
       switch (app) {

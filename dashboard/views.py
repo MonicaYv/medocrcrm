@@ -287,12 +287,35 @@ def dashboard_home(request):
             if not lab_profile:
                 return render(request, "dashboard/not_found.html")
             today = timezone.localdate()
+            date_filter = request.GET.get("date_filter", "today")
+
+            if date_filter == "week":
+                start_date = today - timedelta(days=6)
+                end_date = today
+            elif date_filter == "month":
+                start_date = today - timedelta(days=29)
+                end_date = today
+            elif date_filter == "custom":
+                try:
+                    start_date = datetime.strptime(
+                        request.GET.get("start_date", ""), "%Y-%m-%d"
+                    ).date()
+                    end_date = datetime.strptime(
+                        request.GET.get("end_date", ""), "%Y-%m-%d"
+                    ).date()
+                    if start_date > end_date:
+                        start_date, end_date = end_date, start_date
+                except (TypeError, ValueError):
+                    start_date = end_date = today
+            else:
+                date_filter = "today"
+                start_date = end_date = today
 
             today_appointments = filter_appointments_between_dates(
                 LabAppointments.objects.filter(accepted_lab=lab_profile),
                 "lab",
-                today,
-                today,
+                start_date,
+                end_date,
             )
 
             confirmed_count = today_appointments.filter(
@@ -414,6 +437,9 @@ def dashboard_home(request):
             context.update({
                 'lab_profile': lab_profile,
                 'today_appointments': total_appointments,
+                'date_filter': date_filter,
+                'start_date': start_date,
+                'end_date': end_date,
                 'confirmed_count': confirmed_count,
                 'pending_count': pending_count,
                 'contact_person': contact_person,

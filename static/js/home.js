@@ -953,7 +953,7 @@ $(document).ready(function () {
   }
 
   //Select Patient Dropdown on End Customers Home Page
-  $(".dropdown-btn").on("click", function () {
+  $(".dropdown-btn").not(".points-history .dropdown-btn").on("click", function () {
     $(this).siblings(".dropdown-option").toggleClass("hidden");
   });
   $(".dropdown-option .option-item").on("click", function () {
@@ -1842,7 +1842,7 @@ $(document).ready(function () {
     $('.ngo-filterDropdown').hide();
   });
 
-  $(".hospital-home-filter [data-filter], .doctor-home-filter [data-filter]").on("click", function (e) {
+  $(".hospital-home-filter [data-filter], .doctor-home-filter [data-filter], .lab-home-filter [data-filter]").on("click", function (e) {
     e.stopPropagation();
 
     const filter = $(this).data("filter");
@@ -2182,20 +2182,48 @@ $(document).on("click", ".pharmacy-close-share", function () {
         .removeClass("flex");
 });
 
-  $(".popup-btn").on("click", function () {
+  $(document).on("click", ".popup-btn", function (e) {
+    e.preventDefault();
     let popupId = $(this).data("popup");
-    $("." + popupId)
+    const $scope = $(this).closest(".appointmentRequestDetail");
+    const $popup = $scope.length ? $scope.find("." + popupId) : $("." + popupId);
+    $popup
       .removeClass("hidden")
       .addClass("flex");
   });
 
-  // Close popup
-  $(".close-popup").on("click", function () {
+// Close popup
+  $(document).on("click", ".close-popup", function (e) {
+    e.preventDefault();
     let popupId = $(this).data("popup");
     $(this)
       .closest("." + popupId)
       .addClass("hidden")
       .removeClass("flex");
+  });
+
+  // The lab home request popup uses a direct share action rather than the
+  // larger share-app menu used by doctor/hospital popups.
+  $(document).on("click", ".lab-appointment-share", async function (e) {
+    e.preventDefault();
+    const $modal = $(this).closest(".appointmentRequestDetail");
+    const shareText = [
+      "Appointment Details",
+      `Patient: ${$modal.find("#popup-name, #popup-patient-name").first().text()}`,
+      `Phone: ${$modal.find("#popup-phone").text()}`,
+      `Date: ${$modal.find("#popup-date").text()}`,
+    ].join("\n");
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Appointment Details", text: shareText });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareText);
+        toastr.success("Appointment details copied");
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") toastr.error("Unable to share appointment details");
+    }
   });
 
 // =============================
@@ -2390,7 +2418,7 @@ $(document).on("click", ".appointment-detail-btn", function () {
 
             const a = response.appointment;
 
-            $("#popup-patient-name").text(a.patient_name);
+            $("#popup-name, #popup-patient-name").text(a.patient_name);
             $("#popup-gender").text(a.gender || "-");
             $("#popup-age").text(a.age || "-");
             $("#popup-phone").text(a.phone || "-");

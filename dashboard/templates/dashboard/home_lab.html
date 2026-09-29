@@ -102,33 +102,38 @@
             <div class="flex justify-between items-center">
               <p class="font-semibold text-lg">Overview</p>
               <div class="flex items-center gap-2.5">
-                <p class="font-normal text-sm">Today</p>
+                <p class="font-normal text-sm">
+                    {% if date_filter == "week" %}Week
+                    {% elif date_filter == "month" %}Month
+                    {% elif date_filter == "custom" %}Custom
+                    {% else %}Today{% endif %}
+                </p>
                 <div class="relative dropdown">
                   <button
                     class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
                     <span class="material-symbols-outlined flex justify-center items-center">tune</span>
                   </button>
                   <div
-                    class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                    <div
+                    class="filterDropdown lab-home-filter absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
+                    <div data-filter="today"
                       class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
                       <span class="material-symbols-outlined !text-lg text-dodger-blue">
                         check
                       </span>Today
                     </div>
-                    <div
+                    <div data-filter="week"
                       class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
                       <span class="material-symbols-outlined !text-lg text-light-gray">
                         check
                       </span>Week
                     </div>
-                    <div
+                    <div data-filter="month"
                       class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
                       <span class="material-symbols-outlined !text-lg text-light-gray">
                         check
                       </span>Month
                     </div>
-                    <div
+                    <div data-filter="custom"
                       class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray">
                       <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined !text-lg text-light-gray">
@@ -148,7 +153,12 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-4">
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                 <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">Total Appointments Today</p>
+                  <p class="font-normal text-sm">
+                    {% if date_filter == "week" %}Total Appointments This Week
+                    {% elif date_filter == "month" %}Total Appointments This Month
+                    {% elif date_filter == "custom" %}Total Appointments{% if start_date and end_date %} ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}){% endif %}
+                    {% else %}Total Appointments Today{% endif %}
+                  </p>
                   <!-- <p class="font-semibold text-2xl">12</p> -->
                   <p class="font-semibold text-2xl">
                       {{ today_appointments }}
@@ -447,7 +457,7 @@
                       <!-- Actions -->
                       <div class="col-span-2 flex justify-end items-center gap-3">
 
-                          <button
+                          <button type="button"
                               class="appointment-detail-btn"
                               data-id="{{ appointment.id }}">
 
@@ -495,7 +505,7 @@
               <div class="flex items-center justify-between">
                 <p class="font-semibold text-sm">Appointment Details</p>
                 <div class="flex items-center gap-4">
-                  <button class="cursor-pointer">
+                  <button type="button" class="cursor-pointer lab-appointment-share">
                     <span class="material-symbols-outlined !text-xl">share</span>
                   </button>
                   <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail">

@@ -1419,13 +1419,19 @@ function highlightCurrentStatus(currentStatus) {
 
 //filter date and custome date wise
 document.querySelectorAll(".help-filter-option").forEach((el) => {
-  el.addEventListener("click", function () {
-    const filter = this.getAttribute("data-support-filter");
+  el.addEventListener("click", function (event) {
+    const filter =
+      this.getAttribute("data-support-filter") ||
+      this.getAttribute("data-filter");
+
+    // Keep support filtering inside the current settings/support tab. The
+    // global dropdown handler must not turn this into a page navigation.
+    event.stopPropagation();
 
     if (filter === "custom") {
-      document
-        .querySelector(".datepicker-container")
-        .classList.remove("hidden");
+      const dropdown = this.closest(".dropdown");
+      dropdown.querySelector(".filterDropdown").classList.add("hidden");
+      dropdown.querySelector(".datepicker-container").classList.remove("hidden");
       return; // Stop further processing
     }
 
@@ -1455,7 +1461,7 @@ document.querySelectorAll(".help-filter-option").forEach((el) => {
 
 // The shared datepicker is jQuery UI, so handle its onSelect callback here.
 $(function () {
-  const $datepicker = $("[inline-datepicker]");
+  const $datepicker = $(".help-filter-datepicker[inline-datepicker]");
   if (!$datepicker.length || !$.fn.datepicker) return;
 
   let customStartDate = null;
