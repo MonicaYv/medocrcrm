@@ -282,7 +282,9 @@ def dashboard_home(request):
 
         # ================= LAB =================
         elif user_type == 'lab':
-            lab_profile = LabProfile.objects.get(user=user)
+            lab_profile = LabProfile.objects.filter(user=user).first()
+            if not lab_profile:
+                return render(request, "dashboard/not_found.html")
             today = timezone.now().date()
 
             today_appointments = LabAppointments.objects.filter(
