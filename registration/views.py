@@ -622,7 +622,7 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 def is_file_clean(file_obj):
     return True
 
-def validate_and_save_file(file_obj, subdir, field_label, user_type='common'):
+def validate_and_save_file(file_obj, subdir, field_label, user_type='common',user=None):
     if not file_obj:
         return '', f"{field_label} is required. (Validation failed)"
     ext = os.path.splitext(file_obj.name)[1].lower()
@@ -635,7 +635,15 @@ def validate_and_save_file(file_obj, subdir, field_label, user_type='common'):
 
     upload_dir = os.path.join(f"{user_type}_docs", subdir)
     os.makedirs(os.path.join(settings.MEDIA_ROOT, upload_dir), exist_ok=True)
-    filename = default_storage.save(os.path.join(upload_dir, file_obj.name), file_obj)
+    filename = os.path.join(upload_dir, file_obj.name)
+    file_path = os.path.join(settings.MEDIA_ROOT, filename)
+
+    with open(file_path, 'wb+') as destination:
+        for chunk in file_obj.chunks():
+            destination.write(chunk)
+    if user:
+        user.updated_at = timezone.now()
+        user.save(update_fields=['updated_at'])
     return filename, None 
 
 

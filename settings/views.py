@@ -148,7 +148,10 @@ def get_base_context(user):
         'phone_no': user.phone_number,
         'user_type': user.user_type,
         'created_at': user.created_at,
-        'updated_at': user.updated_at,
+        'updated_at': (
+            timezone.localtime(user.updated_at).strftime("%b. %d, %Y, %I:%M %p")
+            if user.updated_at else ""
+        ),
         'inapp_notifications': user.inapp_notifications,
         'email_notifications': user.email_notifications,
         'push_notifications': user.push_notifications,
@@ -382,22 +385,34 @@ def handle_lab_profile(user):
         'all_services': all_services,
         'facilities_selected': profile.facilities.all(),
         'all_facilities': all_facilities,
-        'lab_certificate_number': profile.lab_certificate_number,
-        # 'lab_certificate_path': os.path.basename(profile.lab_certificate_path) if profile.lab_certificate_path else "",
-        'lab_certificate_path': profile.lab_certificate_path if profile.lab_certificate_path else "",
+        'lab_certificate_path': profile.lab_certificate_path or '',
+        'lab_certificate_filename': (
+            os.path.basename(str(profile.lab_certificate_path).replace("\\", "/"))
+            if profile.lab_certificate_path else ""
+        ),
         'identity_proof_aadhar_number': profile.identity_proof_aadhar_number,
-        # 'identity_proof_aadhar_path': os.path.basename(profile.identity_proof_aadhar_path) if profile.identity_proof_aadhar_path else "",
-        'identity_proof_aadhar_path': profile.identity_proof_aadhar_path if profile.identity_proof_aadhar_path else "",
+        'identity_proof_aadhar_path': profile.identity_proof_aadhar_path or '',
+        'identity_proof_aadhar_filename': (
+            os.path.basename(str(profile.identity_proof_aadhar_path).replace("\\", "/"))
+            if profile.identity_proof_aadhar_path else ""
+        ),
         'identity_proof_pan_number': profile.identity_proof_pan_number,
-        # 'identity_proof_pan_path': os.path.basename(profile.identity_proof_pan_path) if profile.identity_proof_pan_path else "",
-        'identity_proof_pan_path': profile.identity_proof_pan_path if profile.identity_proof_pan_path else "",
+        'identity_proof_pan_path': profile.identity_proof_pan_path or '',
+        'identity_proof_pan_filename': (
+            os.path.basename(str(profile.identity_proof_pan_path).replace("\\", "/"))
+            if profile.identity_proof_pan_path else ""
+        ),
         'gov_license_number': profile.gov_license_number,
-        # 'gov_license_path': os.path.basename(profile.gov_license_path) if profile.gov_license_path else "",
-        'gov_license_path': profile.gov_license_path if profile.gov_license_path else "",
-        # 'lab_photo_path': os.path.basename(profile.lab_photo_path) if profile.lab_photo_path else "",
-        # 'is_verified': profile.is_verified,
-    
-        'lab_photo_path': os.path.basename(profile.lab_photo_path) if profile.lab_photo_path else "",
+        'gov_license_path': profile.gov_license_path or '',
+        'gov_license_filename': (
+            os.path.basename(str(profile.gov_license_path).replace("\\", "/"))
+            if profile.gov_license_path else ""
+        ),
+        'lab_photo_path': profile.lab_photo_path or '',
+        'lab_photo_filename': (
+            os.path.basename(str(profile.lab_photo_path).replace("\\", "/"))
+            if profile.lab_photo_path else ""
+        ),
         'is_verified': profile.is_verified,
         'verification_status': profile.verification_status,
         'rejection_reason': profile.rejection_reason,
@@ -691,7 +706,7 @@ def update_user_document(request):
         print("--- [DEBUG TAN END] ---\n")
         return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
 
-    file_path, error = validate_and_save_file(file, upload_subdir, doc_type.replace('_', ' ').title(), user_type=user_type)
+    file_path, error = validate_and_save_file(file, upload_subdir, doc_type.replace('_', ' ').title(), user_type=user_type,user=user)
     print(f"VALIDATE & SAVE RESULT - Path: '{file_path}', Error: '{error}'")
     
     if error:
@@ -1152,7 +1167,7 @@ def update_lab_profile(request):
              print("Timing =", lab_profile.lab_timing)
 
              lab_profile.save()
-
+     
              return JsonResponse({
                  'success': True,
                  'message': 'Lab profile updated successfully'
