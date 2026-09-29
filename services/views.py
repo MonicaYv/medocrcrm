@@ -772,14 +772,25 @@ def save_hospital_services(request):
             except (HospitalCategory.DoesNotExist, HospitalServiceDescription.DoesNotExist):
                 continue
 
-            existing = HospitalServiceRateCard.objects.filter(
-                hospital=hospital,
-                category=category,
-                description=service,
-                is_active=True
-            ).first()
+            rate_id = s.get("rate_id")
+
+            if rate_id:
+                existing = HospitalServiceRateCard.objects.filter(
+                    id=rate_id,
+                    hospital=hospital,
+                    is_active=True
+                ).first()
+            else:
+                existing = HospitalServiceRateCard.objects.filter(
+                    hospital=hospital,
+                    category=category,
+                    description=service,
+                    is_active=True
+                ).first()
 
             if existing:
+                existing.category = category
+                existing.description = service
                 existing.price = s.get("price") or 0
                 existing.save()
                 obj = existing
@@ -806,15 +817,27 @@ def save_hospital_services(request):
             except HospitalBedRoom.DoesNotExist:
                 continue
 
-            existing = HospitalRoomRateCard.objects.filter(
-                hospital=hospital,
-                bed_room=bed_room,
-                ac=r.get("ac", False),
-                days=r.get("days") or 1,
-                is_active=True
-            ).first()
+            rate_id = r.get("rate_id")
+
+            if rate_id:
+                existing = HospitalRoomRateCard.objects.filter(
+                    id=rate_id,
+                    hospital=hospital,
+                    is_active=True
+                ).first()
+            else:
+                existing = HospitalRoomRateCard.objects.filter(
+                    hospital=hospital,
+                    bed_room=bed_room,
+                    ac=r.get("ac", False),
+                    days=r.get("days") or 1,
+                    is_active=True
+                ).first()
 
             if existing:
+                existing.bed_room = bed_room
+                existing.days = r.get("days") or 1
+                existing.ac = r.get("ac", False)
                 existing.price = r.get("price") or 0
                 existing.save()
                 obj = existing

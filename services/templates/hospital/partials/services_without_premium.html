@@ -129,6 +129,15 @@
                                                     </div>
                                                     <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
                                                     <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
+                                                        <button type="button"
+                                                                class="edit-hospital-service w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
+                                                                data-rate-id="{{ card.id }}"
+                                                                data-category-id="{{ card.category_id }}"
+                                                                data-service-id="{{ card.description_id }}"
+                                                                data-price="{{ card.price }}">
+                                                            <span class="material-symbols-outlined">edit</span>
+                                                            Edit
+                                                        </button>
                                                         <button class="delete-hospital-service w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
                                                                 data-rate-id="{{ card.id }}">
                                                             <img src="{% static 'images/delete-icon.svg' %}" alt="delete">
@@ -173,6 +182,16 @@
                                                     <h3 class="text-sm sm:text-base font-semibold text-black truncate">{{ card.bed_room.name }}</h3>
                                                     <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
                                                     <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
+                                                         <button type="button"
+                                                                class="edit-hospital-room w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
+                                                                data-rate-id="{{ card.id }}"
+                                                                data-bed-room-id="{{ card.bed_room_id }}"
+                                                                data-days="{{ card.days }}"
+                                                                data-ac="{{ card.ac|yesno:'true,false' }}"
+                                                                data-price="{{ card.price }}">
+                                                            <span class="material-symbols-outlined">edit</span>
+                                                            Edit
+                                                        </button>
                                                         <button class="delete-hospital-room w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
                                                                 data-rate-id="{{ card.id }}">
                                                             <img src="{% static 'images/delete-icon.svg' %}" alt="delete">
