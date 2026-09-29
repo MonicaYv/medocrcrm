@@ -1008,9 +1008,9 @@
                     <p class="font-normal text-xs text-bright-green">Approved</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <input type="text"
+                    <input type="text" value="{{ lab_certificate_filename }}"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="{{lab_registration_doc_path.name}}"readonly />
+                       value="{{lab_certificate_path}}" readonly />
                     <div class="flex items-center gap-2   text-nowrap">
 
                         <span
@@ -1064,9 +1064,9 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <input type="text"
+                    <input type="text" 
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="{{identity_proof_aadhar_path.name}}" readonly />
+                        value="{{identity_proof_aadhar_filename}}" readonly />
                     <div class="flex items-center gap-2 text-nowrap">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1120,7 +1120,7 @@
                 <div class="flex items-center gap-2">
                     <input type="text"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="{{identity_proof_pan_path.name}}" readonly />
+                        value="{{identity_proof_pan_filename}}" readonly />
                     <div class="flex items-center gap-2 text-nowrap">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1172,7 +1172,7 @@
                 <div class="flex items-center gap-2">
                     <input type="text"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="{{lab_photo_path.name}}" readonly />
+                        value="{{gov_license_filename}}" readonly />
                     <div class="flex items-center gap-2 text-nowrap">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
@@ -1204,7 +1204,7 @@
                 </p>
                 <div class="flex items-center gap-2 doc-container">
                     <p class="font-normal text-base text-medium-gray doc-info">
-                        {{lab_photo_path}}
+                        {{lab_photo_filename}}
                     </p>
                     <div class="flex items-center gap-2 hidden buttons-container">
                         <button
@@ -1225,7 +1225,7 @@
                 <div class="flex items-center gap-2">
                     <input type="text"
                         class="border border-dashed border-dodger-blue p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-                        value="{{lab_photo_path}}" readonly />
+                        value="{{lab_photo_filename}}" readonly />
                     <div class="flex items-center gap-2 text-nowrap">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
