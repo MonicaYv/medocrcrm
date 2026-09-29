@@ -11,7 +11,7 @@
             arrow_forward_ios
           </span>
         </div>
-        <div class="bg-white shadow-(--box-shadow-5) rounded-[10px] p-5 max-w-full">
+        <div class="bg-white shadow-(--box-shadow-5) rounded-[10px] p-5 max-w-full appointment-page">
           <div class="setting-header">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined"> clarify </span>
@@ -65,10 +65,9 @@
                 </button>
                 <div
                   class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                  <!-- .calendar-icon omitted on purpose: appointment.js handles the custom date toggle -->
                   <div data-date-filter="custom"
                     class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-dodger-blue hover:text-white rounded">
-                    Custom date<span class="material-symbols-outlined">calendar_today</span>
+                    Custom date<span class="material-symbols-outlined calendar-icon">calendar_today</span>
                   </div>
                   <div data-date-filter="week" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                     1 Week
@@ -78,6 +77,9 @@
                   </div>
                   <div data-date-filter="year" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                     1 Year
+                  </div>
+                  <div data-date-filter="clear" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                    Clear filter
                   </div>
                 </div>
                 <div

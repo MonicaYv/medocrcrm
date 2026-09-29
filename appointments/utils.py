@@ -1,5 +1,8 @@
 # appointments/utils.py
 
+from django.db.models import DateField, F
+from django.db.models.functions import Cast, Coalesce
+
 from .models import (
     LabAppointments,
     DoctorAppointment,
@@ -7,6 +10,55 @@ from .models import (
     AppointmentStatus,
     HospitalAppointmentStatus,
 )
+
+# Hospital schedules appointments on `preferred_date_from`; doctor/lab on
+# `preferred_date_time`.
+APPOINTMENT_DATE_FIELDS = {
+    "hospital": "preferred_date_from",
+    "lab": "preferred_date_time",
+    "doctor": "preferred_date_time",
+}
+
+
+def appointment_date_field(user_type):
+    """Return the model field holding an appointment's scheduled date."""
+    return APPOINTMENT_DATE_FIELDS.get(user_type, "preferred_date_time")
+
+
+def appointment_date_expression(user_type, fallback_to_created=False):
+    """Return a *wall-clock date* expression for an appointment's own date.
+
+    ``doctor_appointments.preferred_date_time``, ``lab_appointments.
+    preferred_date_time`` and ``hospital_appointments.preferred_date_from`` are
+    PostgreSQL ``timestamp without time zone`` columns holding local (IST)
+    wall-clock values, while ``settings.USE_TZ`` is True.
+
+    Django's ``__date`` lookup therefore renders
+    ``col AT TIME ZONE 'Asia/Kolkata'::date``, which re-shifts the stored value
+    by the UTC offset — e.g. ``05/09/2026 03:30`` was compared as
+    ``04/09/2026``, so a date filter never matched a real appointment.
+
+    ``CAST(col AS date)`` simply truncates the stored wall-clock value, which is
+    exactly the date the UI displays.
+
+    When ``fallback_to_created`` is True rows without an appointment date fall
+    back to ``created_at`` (also a naive column) so legacy rows stay filterable;
+    otherwise those rows are simply not date-matched.
+    """
+    date_field = appointment_date_field(user_type)
+    if fallback_to_created:
+        return Cast(Coalesce(F(date_field), F("created_at")), DateField())
+    return Cast(F(date_field), DateField())
+
+
+def filter_appointments_between_dates(qs, user_type, start_date, end_date,
+                                      fallback_to_created=False):
+    """Filter ``qs`` to appointments scheduled between two dates (inclusive)."""
+    if start_date and end_date and start_date > end_date:
+        start_date, end_date = end_date, start_date
+    return qs.annotate(
+        _appt_date=appointment_date_expression(user_type, fallback_to_created)
+    ).filter(_appt_date__range=(start_date, end_date))
 
 def get_appointment_stats(user_type, user):
     stats = {

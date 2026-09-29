@@ -12,6 +12,16 @@ let currentStatus = "all";
 let currentSearch = "";
 let currentDateFilter = "";
 let currentFilterDate = "";
+let currentStartDate = "";
+let currentEndDate = "";
+function getAppointmentFilterParams() {
+  const params = {};
+  if (currentDateFilter) params.date_filter = currentDateFilter;
+  if (currentFilterDate) params.date = currentFilterDate;
+  if (currentStartDate) params.start_date = currentStartDate;
+  if (currentEndDate) params.end_date = currentEndDate;
+  return params;
+}
 // function loadAppointments(status = "all", page = 1) {
 function loadAppointments(status = "all", page = 1, search = "") {
 
@@ -27,13 +37,14 @@ function loadAppointments(status = "all", page = 1, search = "") {
       url: "/appointment/ajax/appointments/",
       type: "GET",
     //   data: { status, page },
-      data: {
+      data: Object.assign(
+        {
           status,
           page,
           search,
-          date_filter: currentDateFilter,
-          date: currentFilterDate
         },
+        getAppointmentFilterParams()
+      ),
 
       success: function (res) {
         $("#cards-container").html(res.html);
@@ -82,44 +93,104 @@ $(document).ready(function () {
 // loadAppointments("all", 1);
 loadAppointments("all", 1, "");
 
-  $(document).on("click", ".filterToggle", function (event) {
-    event.stopPropagation();
-    $(this).siblings(".filterDropdown").toggleClass("hidden");
-  });
+  function resetAppointmentDatepicker($picker) {
+    const $inline = $picker.find(".datepicker-inline");
+    try {
+      if ($inline.hasClass("hasDatepicker")) $inline.datepicker("destroy");
+    } catch (e) {}
+    $inline.removeClass("hasDatepicker").empty();
+    return $inline;
+  }
 
-  $(document).on("click", "[data-date-filter]", function (event) {
-    event.stopPropagation();
-    const filter = $(this).data("date-filter");
-    const $dropdown = $(this).closest(".dropdown");
-    currentDateFilter = filter;
-    currentFilterDate = "";
-
-    if (filter === "custom") {
-      const $picker = $dropdown.find(".datepicker-container");
-
-      // dropdown.js hides this picker with an inline style; clear it so the
-      // class-based toggle below really shows / hides it
-      const pickerHidden =
-        $picker.hasClass("hidden") || $picker.css("display") === "none";
-      $picker.css("display", "");
-      $picker.toggleClass("hidden", !pickerHidden);
-      $picker.find(".datepicker-inline").datepicker({
-        dateFormat: "yy-mm-dd",
-        onSelect: function (dateText) {
-          currentFilterDate = dateText;
-          $picker.addClass("hidden");
-          $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
-          loadAppointments(currentStatus, 1, currentSearch);
-        },
-      });
+  // Open / close the inline appointment calendar.
+  // Extracted into one helper so the "Custom date" row and the calendar icon
+  // always behave identically (single source of truth for onSelect).
+  function openAppointmentDatepicker($dropdown) {
+    const $picker = $dropdown.find(".datepicker-container");
+    // dropdown.js may have hidden this with an inline style; clear it so the
+    // class-based toggle below really shows / hides the picker.
+    const pickerHidden =
+      $picker.hasClass("hidden") || $picker.css("display") === "none";
+    if (!pickerHidden) {
+      // Second click on the icon / row closes the calendar again.
+      $picker.addClass("hidden");
       return;
     }
+
+    currentDateFilter = "custom";
+    $picker.css("display", "").removeClass("hidden");
+
+    const options = {
+      dateFormat: "yy-mm-dd",
+      onSelect: function (dateText) {
+        currentFilterDate = dateText;
+        currentStartDate = "";
+        currentEndDate = "";
+        $picker.addClass("hidden");
+        $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
+        loadAppointments(currentStatus, 1, currentSearch);
+      },
+    };
+    // Keep the previously picked date highlighted when re-opening.
+    if (currentFilterDate) options.defaultDate = currentFilterDate;
+
+    resetAppointmentDatepicker($picker).datepicker(options);
+  }
+
+  // Calendar icon toggles the inline picker without selecting a filter yet.
+  // This keeps dropdown.js (which only toggles visibility) from fighting
+  // appointment.js for `.datepicker-container`.
+  $(document).on("click", ".appointment-page .calendar-icon", function (event) {
+    event.stopPropagation();
+    openAppointmentDatepicker($(this).closest(".dropdown"));
+  });
+
+  $(document).on("click", ".filterToggle", function (event) {
+    event.stopPropagation();
+    $(this).siblings(".filterDropdown").toggleClass("hidden").css("display", "");
+  });
+
+  // Support both data-date-filter (doctor/hospital) and legacy lab items
+  // that only contain text ("1 Week" / "1 Month" / "1 Year").
+  $(document).on("click", "[data-date-filter], .filterDropdown > div", function (event) {
+    // Calendar icon clicks are handled by the picker toggle above; ignore
+    // them here so a single click doesn't also trigger a filter reload.
+    if ($(event.target).closest(".calendar-icon").length) return;
+    // Never treat the inline datepicker itself as a filter option.
+    if ($(this).closest(".datepicker-container").length) return;
+    if ($(this).find(".datepicker-inline").length) return;
+    event.stopPropagation();
+    let filter = $(this).data("date-filter");
+    if (!filter) {
+      const label = ($(this).text() || "").toLowerCase();
+      if (label.includes("custom")) filter = "custom";
+      else if (label.includes("week")) filter = "week";
+      else if (label.includes("month")) filter = "month";
+      else if (label.includes("year")) filter = "year";
+      else return;
+    }
+    const $dropdown = $(this).closest(".dropdown");
+    currentDateFilter = filter;
+
+    if (filter === "custom") {
+      // Keep the currently applied custom date (if any) so it stays
+      // highlighted in the calendar and isn't dropped by a stray click.
+      openAppointmentDatepicker($dropdown);
+      return;
+    }
+
+    currentFilterDate = "";
+    currentStartDate = "";
+    currentEndDate = "";
 
     $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
     loadAppointments(currentStatus, 1, currentSearch);
   });
 
-  $(document).on("click", function () {
+  $(document).on("click", function (event) {
+    // Keep the calendar open while the user browses months/years inside it;
+    // only a click *outside* should dismiss the filter UI.
+    if ($(event.target).closest(".datepicker-container").length) return;
     $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
   });
 

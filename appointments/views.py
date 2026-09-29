@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.db.models import Value
 from django.db.models.functions import Concat
 from django.utils import timezone
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import re
 from registration.models import DoctorProfile, LabProfile, DoctorSpeciality
 from django.views.decorators.http import require_GET, require_POST
@@ -16,7 +16,10 @@ from dashboard.utils import (
     get_common_context,
     get_theme_colors,
 )
-from appointments.utils import get_appointment_stats
+from appointments.utils import (
+    appointment_date_expression,
+    get_appointment_stats,
+)
 from .models import (
     DoctorAppointment,
     LabAppointments,
@@ -87,6 +90,85 @@ def _labels_related(left, right):
     }
     return bool((left_tokens & right_tokens) - generic_tokens)
 
+
+def _parse_filter_date(value):
+    """Parse a date coming from the appointment datepicker/filter UI.
+
+    The frontend sends ISO (yyyy-mm-dd) but be tolerant of common variants
+    so a custom date selection never silently fails.
+    """
+    value = str(value or "").strip()
+    if not value:
+        return None
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%Y/%m/%d"):
+        try:
+            return datetime.strptime(value, fmt).date()
+        except ValueError:
+            continue
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def _appointment_date_expression(user_type):
+    """Backwards-compatible wrapper over the shared utils helper.
+
+    Appointment rows fall back to ``created_at`` when they carry no appointment
+    date so legacy records stay visible in the filtered list.
+    """
+    return appointment_date_expression(user_type, fallback_to_created=True)
+
+
+def _apply_appointment_date_filter(qs, user_type, date_filter, selected_date,
+                                   start_date=None, end_date=None):
+    """Filter an appointment queryset by *appointment date*.
+
+    Lab/Doctor use ``preferred_date_time`` while Hospital uses
+    ``preferred_date_from``; see ``_appointment_date_expression`` for why the
+    comparison happens on a cast (wall-clock) date and not on ``__date``.
+    """
+    date_filter = str(date_filter or "").strip().lower()
+    if not date_filter or date_filter in {"", "all", "none", "clear"}:
+        return qs
+
+    today = timezone.localdate()
+    appt_date = _appointment_date_expression(user_type)
+
+    if date_filter == "today":
+        start = end = today
+    elif date_filter == "week":
+        start = today - timedelta(days=6)
+        end = today
+    elif date_filter == "month":
+        start = today.replace(day=1)
+        # First day of the next month minus one day = last day of this month.
+        end = (start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+    elif date_filter == "year":
+        start = today.replace(month=1, day=1)
+        end = today.replace(month=12, day=31)
+    elif date_filter == "custom":
+        parsed_start = _parse_filter_date(start_date) if start_date else None
+        parsed_end = _parse_filter_date(end_date) if end_date else None
+        parsed_single = _parse_filter_date(selected_date)
+        # Single-date selection (appointment.js sends `date=yyyy-mm-dd`).
+        start = parsed_start or parsed_single
+        end = parsed_end or parsed_single
+        if not start and not end:
+            # Custom opened but no date picked yet — show everything instead
+            # of an empty list until onSelect sends a date.
+            return qs
+        start = start or end
+        end = end or start
+        if start > end:
+            start, end = end, start
+    else:
+        return qs
+
+    return qs.annotate(_appt_date=appt_date).filter(
+        _appt_date__range=(start, end)
+    )
+
 # ======================================================
 # MAIN APPOINTMENT PAGE
 # ======================================================
@@ -141,7 +223,19 @@ def ajax_appointments(request):
     page_number = request.GET.get("page", 1)
     search = request.GET.get("search", "").strip()
     date_filter = request.GET.get("date_filter", "").strip().lower()
-    selected_date = request.GET.get("date", "").strip()
+    selected_date = (
+        request.GET.get("date", "")
+        or request.GET.get("selected_date", "")
+        or request.GET.get("filter_date", "")
+    ).strip()
+    start_date = (
+        request.GET.get("start_date", "")
+        or request.GET.get("start", "")
+    ).strip()
+    end_date = (
+        request.GET.get("end_date", "")
+        or request.GET.get("end", "")
+    ).strip()
 
     if search:
        search = search.strip()
@@ -220,18 +314,17 @@ def ajax_appointments(request):
             qs = qs.filter(status__iexact=status)
 
     if date_filter:
-        today = timezone.localdate()
-        if date_filter == "week":
-            qs = qs.filter(created_at__date__gte=today - timedelta(days=6), created_at__date__lte=today)
-        elif date_filter == "month":
-            qs = qs.filter(created_at__year=today.year, created_at__month=today.month)
-        elif date_filter == "year":
-            qs = qs.filter(created_at__year=today.year)
-        elif date_filter == "custom" and selected_date:
-            try:
-                qs = qs.filter(created_at__date=date.fromisoformat(selected_date))
-            except ValueError:
-                return JsonResponse({"error": "Invalid date filter."}, status=400)
+        if date_filter == "custom" and not (
+            selected_date or start_date or end_date
+        ):
+            # Custom opened but no date picked yet — don't 400, just show all
+            # until onSelect sends a date.
+            pass
+        else:
+            qs = _apply_appointment_date_filter(
+                qs, user_type, date_filter, selected_date,
+                start_date=start_date, end_date=end_date,
+            ).distinct()
     if search:
 
         if user_type == "lab":
