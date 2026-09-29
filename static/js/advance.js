@@ -3,8 +3,11 @@
 ========================================================= */
 let currentPage = 1;
 let currentFilter = "";
+let currentFilterDays = "";
 let currentSearch = "";
 let currentAdvanceReceipt = null;
+let currentStartDate = "";
+let currentEndDate = "";
 
 /* Toast helper - toastr is loaded on the dashboard layout, alert as fallback. */
 function showToast(type, message) {
@@ -21,6 +24,15 @@ function showToast(type, message) {
    DOCUMENT READY — SINGLE ENTRY POINT
 ========================================================= */
 $(document).ready(function () {
+  const params = new URLSearchParams(window.location.search);
+
+  currentFilter = params.get("filter") || params.get("date_filter") || "week";
+  currentStartDate = params.get("start_date") || "";
+  currentEndDate = params.get("end_date") || "";
+
+  if (currentFilter === "custom") {
+      currentFilterDays = "";
+  }
 
   /* ================================
      ADVANCE HISTORY INIT
@@ -47,16 +59,205 @@ $(document).ready(function () {
   /* ================================
      FILTER
   ================================ */
-  $(document).on("click", ".filterDropdown div", function () {
-    const text = $(this).text().toLowerCase();
+ $(document).on(
+    "click",
+    ".dropdown:not(.advance-date-filter) > .filterToggle",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-    currentFilter =
-      text.includes("week") ? "week" :
-      text.includes("month") ? "month" :
-      text.includes("year") ? "year" : "";
+        const $dropdown = $(this).siblings(".filterDropdown");
 
-    loadAdvanceHistory(1);
-  });
+        $(".dropdown .filterDropdown")
+            .not($dropdown)
+            .addClass("hidden");
+
+        $dropdown.toggleClass("hidden");
+    }
+);
+
+$(document).on(
+    "click",
+    ".advance-date-filter .filterDropdown div[data-filter='custom']",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        currentFilter = "custom";
+        currentFilterDays = "";
+
+        currentStartDate = "";
+        currentEndDate = "";
+
+        // Close dropdown and open calendar
+        $(".advance-date-filter .filterDropdown").addClass("hidden");
+        $(".advance-date-filter .datepicker-container").removeClass("hidden");
+
+        $("#advanceDateStatus").text("Select start date");
+
+        // Reset previous calendar selection
+        $(".advance-date-filter .datepicker-inline").datepicker("setDate", null);
+    }
+);
+
+/* ================================
+   ADVANCE CUSTOM DATEPICKER
+================================ */
+
+const $advanceCalendar = $(
+    ".advance-date-filter .datepicker-inline"
+);
+
+if ($advanceCalendar.length && !$advanceCalendar.hasClass("hasDatepicker")) {
+
+    $advanceCalendar.datepicker({
+        dateFormat: "yy-mm-dd",
+
+        // Month and year dropdowns
+        changeMonth: true,
+        changeYear: true,
+        yearRange: "2000:2035",
+
+        maxDate: 0,
+
+        onSelect: function (dateText) {
+
+            // FIRST DATE: START DATE
+            if (!currentStartDate || currentEndDate) {
+
+                currentStartDate = dateText;
+                currentEndDate = "";
+
+                // Allow end date from the selected start date onward
+                $advanceCalendar.datepicker(
+                    "option",
+                    "minDate",
+                    currentStartDate
+                );
+
+                $("#advanceDateStatus").text(
+                    "Start: " + currentStartDate +
+                    " — Select end date"
+                );
+
+                // Keep calendar open
+                return;
+            }
+
+            // SECOND DATE: END DATE
+            currentEndDate = dateText;
+
+            // Update status
+            $("#advanceDateStatus").text(
+                currentStartDate + " to " + currentEndDate
+            );
+
+            // Set custom filter
+            currentFilter = "custom";
+            currentFilterDays = "";
+
+            // Update URL
+            const url = new URL(window.location.href);
+
+            url.searchParams.set("date_filter", "custom");
+            url.searchParams.set("start_date", currentStartDate);
+            url.searchParams.set("end_date", currentEndDate);
+            url.searchParams.delete("page");
+
+            window.history.replaceState({}, "", url);
+
+            // Load filtered history and summary
+            loadAdvanceHistory(1);
+            loadAdvanceSummary();
+
+            // Close calendar only after END DATE
+            $(".advance-date-filter .datepicker-container")
+                .addClass("hidden");
+
+            // Reset minimum date for next selection
+            $advanceCalendar.datepicker("option", "minDate", null);
+        }
+    });
+}
+
+// Select 1 Week, 2 Week, or 3 Week
+$(document).on(
+    "click",
+    ".dropdown:not(.advance-date-filter) .filter-option",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        currentFilterDays = String($(this).data("days"));
+
+        // Backend supports week, 1week, 2week, 3week
+        currentFilter =
+            currentFilterDays === "7" ? "1week" :
+            currentFilterDays === "14" ? "2week" :
+            currentFilterDays === "21" ? "3week" : "week";
+
+        // Clear custom date selection
+        currentStartDate = "";
+        currentEndDate = "";
+
+        currentPage = 1;
+
+        // Update the Filter button label
+        const selectedText = $(this).text().trim();
+
+        $(this)
+            .closest(".dropdown")
+            .find(".filterToggle span:last")
+            .text(selectedText);
+
+        // Close only the history filter dropdown
+        $(this)
+            .closest(".dropdown")
+            .find(".filterDropdown")
+            .addClass("hidden");
+
+        // Reload history and summary
+        loadAdvanceHistory(1);
+        loadAdvanceSummary();
+    }
+);
+
+$(document).on(
+    "click",
+    ".advance-date-filter .filterDropdown div[data-filter]",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const selectedFilter = $(this).data("filter");
+
+        // Custom date has its own handler
+        if (selectedFilter === "custom") {
+            return;
+        }
+
+        currentFilter = selectedFilter;
+        currentFilterDays = "";
+
+        currentStartDate = "";
+        currentEndDate = "";
+
+        // Close dropdown and calendar
+        $(".advance-date-filter .filterDropdown").addClass("hidden");
+        $(".advance-date-filter .datepicker-container").addClass("hidden");
+
+        // Reload table and summary
+        loadAdvanceHistory(1);
+        loadAdvanceSummary();
+    }
+);
+
+// Close dropdown when clicking outside
+$(document).on("click", function (e) {
+    if (!$(e.target).closest(".dropdown").length) {
+        $(".dropdown .filterDropdown").addClass("hidden");
+    }
+});
 
   $(document).on('click', '.download-btn', function (event) {
     event.preventDefault();
@@ -236,7 +437,10 @@ function loadAdvanceHistory(page = 1) {
     data: {
       page: page,
       filter: currentFilter,
-      search: currentSearch
+      days: currentFilterDays,
+      search: currentSearch,
+      start_date: currentStartDate,
+      end_date: currentEndDate 
     },
 
     success: function (res) {
@@ -355,7 +559,11 @@ function renderPagination(p) {
 function loadAdvanceSummary() {
   $.ajax({
     url: "/dashboard/advance/summary/ajax/",
-    data: { filter: currentFilter || "week" },
+    data: { filter: currentFilter || "week" ,
+            days: currentFilterDays,
+            start_date: currentStartDate,
+            end_date: currentEndDate
+    },
 
     success: function (res) {
       if (!res.success) return;
@@ -368,10 +576,19 @@ function loadAdvanceSummary() {
       $(".summary-date-range").text(
         `(${res.from_date} to ${res.to_date})`
       );
+      $("#advanceSummaryDateRange").text(
+        `(${formatSummaryDate(res.from_date)} to ${formatSummaryDate(res.to_date)})`
+      );
     }
   });
 }
 
+function formatSummaryDate(dateStr) {
+    if (!dateStr) return "";
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) return dateStr;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
 
 /* =========================================================
    HELPERS
