@@ -455,7 +455,7 @@
                 <p class="font-semibold text-sm">Appointment Details</p>
                 <div class="flex items-center gap-4">
                   <div class="relative">
-                    <button class="cursor-pointer popup-btn" data-popup="sharePopup">
+                    <button type="button" class="cursor-pointer popup-btn" data-popup="sharePopup">
                       <span class="material-symbols-outlined !text-xl ">share</span>
                     </button>
                     <!--Share Popup-->
@@ -469,30 +469,30 @@
                         </div>
                         <hr class="text-dodger-blue mt-4" />
                         <div class="flex justify-between pt-4">
-                          <div class="flex flex-col items-center gap-2 w-20 text-center">
+                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="whatsapp">
                             <img src="/static/images/whatsappicon.svg" alt="whatsapp logo"
                               class="w-10 h-10 cursor-pointer" />
                             <p class="font-normal text-base text-dark-gray">Whatsapp</p>
                           </div>
 
-                          <div class="flex flex-col items-center gap-2 w-20 text-center">
+                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="telegram">
                             <img src="/static/images/telegramicon.svg" alt="telegram logo"
                               class="w-10 h-10 cursor-pointer" />
                             <p class="font-normal text-base text-dark-gray">Telegram</p>
                           </div>
 
-                          <div class="flex flex-col items-center gap-2 w-20 text-center">
+                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="facebook">
                             <img src="/static/images/facebookicon.svg" alt="facebook logo"
                               class="w-10 h-10 cursor-pointer" />
                             <p class="font-normal text-base text-dark-gray">Facebook</p>
                           </div>
 
-                          <div class="flex flex-col items-center gap-2 w-20 text-center">
+                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="sms">
                             <img src="/static/images/smsicon.svg" alt="sms logo" class="w-10 h-10 cursor-pointer" />
                             <p class="font-normal text-base text-dark-gray">Message</p>
                           </div>
 
-                          <div class="flex flex-col items-center gap-2 w-20 text-center">
+                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="gmail">
                             <img src="/static/images/gmailicon.svg" alt="gmail logo" class="w-10 h-10 cursor-pointer" />
                             <p class="font-normal text-base text-dark-gray">E-mail</p>
                           </div>

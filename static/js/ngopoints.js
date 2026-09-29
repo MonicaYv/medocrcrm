@@ -509,24 +509,25 @@ function applyDateFilter(type) {
 
 window.loadPointsHistoryFilter = function(type) {
   $('#dateFilterInput').val(type);
-  const today = new Date();
-  let start = "", end = "";
+  const rangeEnd = new Date();
+  const today = new Date(rangeEnd);
+  let start = "", end = new Date(rangeEnd);
 
   // Remove font-bold class from all filter options first
   $('.filter-dropdown-option div').removeClass('font-bold');
   
   if (type === "last_week") {
-    start = new Date(today.setDate(today.getDate() - 7));
-    end = new Date();
+    start = new Date(today);
+    start.setDate(start.getDate() - 7);
     // Add font-bold to the clicked option
     $('[onclick="applyDateFilter(\'last_week\')"]').addClass('font-bold');
   } else if (type === "last_month") {
-    start = new Date(today.setMonth(today.getMonth() - 1));
-    end = new Date();
+    start = new Date(today);
+    start.setMonth(start.getMonth() - 1);
     $('[onclick="applyDateFilter(\'last_month\')"]').addClass('font-bold');
   } else if (type === "last_year") {
-    start = new Date(today.setFullYear(today.getFullYear() - 1));
-    end = new Date();
+    start = new Date(today);
+    start.setFullYear(start.getFullYear() - 1);
     $('[onclick="applyDateFilter(\'last_year\')"]').addClass('font-bold');
   } else if (type === "custom") {
     const $picker = $('.points-history .datepicker-inline');
@@ -676,10 +677,12 @@ $(document).on("click", ".claim-btn", function () {
   });  
  
 
-  $('.dropdown-btn').on('click', function (e) {
+  $(document).on('click', '.points-history .dropdown-btn', function (e) {
       e.stopPropagation();
-      // $(this).siblings('.dropdown-option').toggle();
-      $(this).siblings('.dropdown-option').toggle('hidden');
+      e.preventDefault();
+      const $option = $(this).closest('.dropdown').find('.dropdown-option');
+      $('.points-history .dropdown-option').not($option).addClass('hidden');
+      $option.toggleClass('hidden');
   });
 
 // $(document).ready(function () {
