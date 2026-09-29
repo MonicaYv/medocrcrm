@@ -7,6 +7,7 @@ from dashboard.utils import dashboard_login_required, get_common_context, get_th
 from orders.models import OrderStatusChoices, PurchaseMedicine, UserPurchase
 from django.views.decorators.http import require_POST
 from appointments.models import LabAppointments, AppointmentStatus, DoctorAppointment, HospitalAppointments, HospitalAppointmentStatus
+from appointments.utils import apply_appointment_date_filter
 from registration.models import LabProfile, HospitalProfile, DoctorProfile, PharmacyProfile
 from services.models import (
     HospitalBidStatus,
@@ -127,6 +128,22 @@ def ajax_doctor_history(request):
     status = request.GET.get("status", "accepted").strip().lower()
     page_number = request.GET.get("page", 1)
 
+    # Date filter - mirrors the contract used by appointments.ajax_appointments.
+    date_filter = request.GET.get("date_filter", "").strip().lower()
+    selected_date = (
+        request.GET.get("date", "")
+        or request.GET.get("selected_date", "")
+        or request.GET.get("filter_date", "")
+    ).strip()
+    start_date = (
+        request.GET.get("start_date", "")
+        or request.GET.get("start", "")
+    ).strip()
+    end_date = (
+        request.GET.get("end_date", "")
+        or request.GET.get("end", "")
+    ).strip()
+
     doctor = DoctorProfile.objects.filter(
         user=user
     ).first()
@@ -178,6 +195,19 @@ def ajax_doctor_history(request):
 
     else:
         qs = qs.none()
+
+    if date_filter:
+        if date_filter == "custom" and not (
+            selected_date or start_date or end_date
+        ):
+            # Custom opened but no date picked yet — don't return an empty list,
+            # just show everything until onSelect sends a date.
+            pass
+        else:
+            qs = apply_appointment_date_filter(
+                qs, "doctor", date_filter, selected_date,
+                start_date=start_date, end_date=end_date,
+            ).distinct()
 
     qs = qs.order_by("-created_at")
 
