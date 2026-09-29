@@ -72,6 +72,11 @@
                   </div>
 
                   <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
+                    data-type="visit" data-value="All">
+                    All
+                  </div>
+
+                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
                     data-type="visit" data-value="Home">
                     Home
                   </div>
@@ -80,6 +85,18 @@
                     data-type="visit" data-value="Clinic">
                     Clinic
                   </div>
+                </div>
+
+                <!-- CUSTOM DATE PICKER (shown by the "Custom" date option) -->
+                <div id="doctorReportDatepicker"
+                  class="hidden px-3 pt-2 pb-3 bg-white">
+                  <div class="flex items-center justify-between mb-1">
+                    <p id="doctorReportDateStatus" class="text-xs text-dark-gray">Select start date</p>
+                    <span id="doctorReportDatepickerBack"
+                      class="material-symbols-outlined text-sm text-dark-gray cursor-pointer"
+                      title="Back">arrow_back</span>
+                  </div>
+                  <div class="datepicker-inline"></div>
                 </div>
 
               </div>

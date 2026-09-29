@@ -7,6 +7,7 @@ import subscription.models as subscription_models
 from django.db.models import (
     Avg,
     Count,
+    DateField,
     DecimalField,
     ExpressionWrapper,
     F,
@@ -14,12 +15,13 @@ from django.db.models import (
     Sum,
     Value,
 )
-from django.db.models.functions import Coalesce, Concat, ExtractWeekDay, TruncDate, TruncHour
+from django.db.models.functions import Cast, Coalesce, Concat, ExtractWeekDay, TruncDate, TruncHour
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
 from appointments.models import DoctorAppointment, HospitalAppointments, LabAppointments
+from appointments.utils import parse_filter_date
 from dashboard.utils import (
     dashboard_login_required,
     get_common_context,
@@ -1377,6 +1379,102 @@ def hospital_report_data(request):
 
 #     return JsonResponse(data)
 
+# ---------------------------------------------------------------------------
+# REPORT DATE / VISIT-TYPE FILTERS
+# ---------------------------------------------------------------------------
+#
+# The doctor report groups and charts every row by `created_at` (see the
+# `TruncDate("created_at")` day buckets below), so the date filter has to
+# match on that same column.
+#
+# `created_at` is a naive local (IST) column while `settings.USE_TZ` is True,
+# so the usual `created_at__date=` lookup renders
+# `col AT TIME ZONE 'Asia/Kolkata'::date`, re-shifting the stored value by the
+# UTC offset and comparing against the wrong day. `CAST(col AS date)` simply
+# truncates, which is exactly the day the report displays. See
+# appointments.utils.appointment_date_expression for the same reasoning.
+
+
+def report_created_date_expression():
+    """Wall-clock date expression for a report row's ``created_at``."""
+    return Cast("created_at", DateField())
+
+
+def apply_report_date_filter(qs, filter_type, start_date=None, end_date=None):
+    """Restrict a report queryset to the requested date window.
+
+    ``today`` / ``week`` / ``month`` are presets; ``custom`` uses the
+    ``start_date`` / ``end_date`` pair. An unknown or empty filter leaves the
+    queryset untouched so a bad request can never blank the whole report.
+    """
+    filter_type = str(filter_type or "").strip().lower()
+    if filter_type in {"", "all", "none", "clear"}:
+        return qs
+
+    today = timezone.localdate()
+
+    if filter_type == "today":
+        start = end = today
+    elif filter_type == "week":
+        # Rolling last 7 days including today.
+        start = today - timedelta(days=6)
+        end = today
+    elif filter_type == "month":
+        # Current calendar month up to today.
+        start = today.replace(day=1)
+        end = today
+    elif filter_type == "custom":
+        start = parse_filter_date(start_date) if start_date else None
+        end = parse_filter_date(end_date) if end_date else None
+        if not start and not end:
+            # Calendar opened but nothing picked yet - show everything rather
+            # than an empty report.
+            return qs
+        start = start or end
+        end = end or start
+        if start > end:
+            start, end = end, start
+    else:
+        return qs
+
+    return qs.annotate(
+        _report_date=report_created_date_expression()
+    ).filter(_report_date__range=(start, end))
+
+
+# The UI offers Home / Clinic, but `consultation_type` has been stored both as
+# a slug ("home_visit") and as the VisitType label ("Home Visit"), so match the
+# spellings we have actually seen in the column.
+VISIT_TYPE_FILTER_ALIASES = {
+    "home": ["home_visit", "home visit", "home", "home_service", "home service"],
+    "clinic": [
+        "clinic_visit",
+        "clinic visit",
+        "clinic",
+        "in_clinic_visit",
+        "in-clinic visit",
+        "in clinic visit",
+    ],
+}
+
+
+def apply_report_visit_type_filter(qs, visit_type):
+    """Restrict a report queryset to one visit type ("home" / "clinic")."""
+    visit_type = str(visit_type or "").strip().lower()
+    if not visit_type or visit_type in {"all", "none", "clear"}:
+        return qs
+
+    aliases = VISIT_TYPE_FILTER_ALIASES.get(visit_type)
+    if not aliases:
+        return qs
+
+    condition = Q()
+    for alias in aliases:
+        condition |= Q(consultation_type__iexact=alias)
+
+    return qs.filter(condition)
+
+
 @dashboard_login_required
 def doctor_report_data(request):
 
@@ -1402,31 +1500,16 @@ def doctor_report_data(request):
             user=user
         ).select_related("address")
 
-    today = timezone.now()
+    # Date filter (today / week / month / custom start..end).
+    appointments = apply_report_date_filter(
+        appointments,
+        filter_type,
+        start_date=request.GET.get("start_date", "").strip(),
+        end_date=request.GET.get("end_date", "").strip(),
+    )
 
-    if filter_type == "today":
-        appointments = appointments.filter(
-            created_at__date=today.date()
-        )
-    elif filter_type == "week":
-        appointments = appointments.filter(
-            created_at__gte=today - timedelta(days=7)
-        )
-    elif filter_type == "month":
-        appointments = appointments.filter(
-            created_at__year=today.year,
-            created_at__month=today.month
-        )
-    elif filter_type == "custom":
-        appointments = appointments.filter(
-            created_at__year=today.year
-        )
-    else:
-        appointments = appointments.all()
-
-    if visit_type in ("clinic_visit", "clinic", "home_visit", "home"):
-        normalized_visit = "home_visit" if "home" in visit_type else "clinic_visit"
-        appointments = appointments.filter(consultation_type__iexact=normalized_visit)
+    # Visit type filter (home / clinic); "all"/empty leaves the list untouched.
+    appointments = apply_report_visit_type_filter(appointments, visit_type)
 
     if search:
         # .alias() (not .annotate()) so the helper expression is usable for
