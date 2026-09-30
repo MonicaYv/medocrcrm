@@ -487,6 +487,33 @@ def handle_doctor_profile(user):
     all_speciality = DoctorSpeciality.objects.filter(is_active=True)
     all_education = DoctorEducation.objects.filter(is_active=True)
     all_experience = DoctorExperience.objects.filter(is_active=True)
+
+    # The Documents tab renders the stored file name, the virus-scan result and
+    # the review status for each document. `validate_and_save_file` stores the
+    # path as "<user_type>_docs/<subdir>/<file name>", so the display name is the
+    # last segment while the viewer needs the full relative path.
+    def doc_name(path):
+        if not path:
+            return ""
+        return str(path).replace("\\", "/").split("/")[-1]
+
+    # A rejected document keeps the reviewer's reason, so show it instead of a
+    # generic label. `verification_status` is one of pending/approved/rejected.
+    status_label = (profile.verification_status or "pending").strip().lower()
+    if status_label == "approved":
+        doc_status = "Approved"
+    elif status_label == "rejected":
+        doc_status = profile.rejection_reason or "Rejected"
+    else:
+        doc_status = "Pending"
+
+    # `validate_and_save_file` refreshes user.updated_on every upload, so it is
+    # the closest available "last edited" timestamp for the documents list.
+    last_edited = (
+        user.updated_at.strftime("%d %b %Y, %I:%M %p")
+        if user.updated_at else "Not yet uploaded"
+    )
+
     data = {
         'full_name': profile.full_name,
         'gender': profile.gender,
@@ -512,13 +539,26 @@ def handle_doctor_profile(user):
         'clinic_timing_to': profile.clinic_timing_to,
         'home_visit_available': profile.home_visit_available,
         'registration_number': profile.registration_number,
-        'registration_certificate_path': os.path.basename(profile.registration_certificate_path) if profile.registration_certificate_path else "",
+        'registration_certificate_path': profile.registration_certificate_path or "",
+        'registration_certificate_filename': doc_name(profile.registration_certificate_path),
+        'registration_certificate_virus_scanned': profile.registration_certificate_virus_scanned,
         'aadhar_number': profile.aadhar_number,
-        'aadhar_doc_path': os.path.basename(profile.aadhar_doc_path) if profile.aadhar_doc_path else "",
+        'aadhar_doc_path': profile.aadhar_doc_path or "",
+        'aadhar_doc_filename': doc_name(profile.aadhar_doc_path),
+        'aadhar_doc_virus_scanned': profile.aadhar_doc_virus_scanned,
         'pan_number': profile.pan_number,
-        'pan_doc_path': os.path.basename(profile.pan_doc_path) if profile.pan_doc_path else "",
-        'clinic_logo_path': os.path.basename(profile.clinic_logo_path) if profile.clinic_logo_path else "",
-        'clinic_photo_path': os.path.basename(profile.clinic_photo_path) if profile.clinic_photo_path else "",
+        'pan_doc_path': profile.pan_doc_path or "",
+        'pan_doc_filename': doc_name(profile.pan_doc_path),
+        'pan_doc_virus_scanned': profile.pan_doc_virus_scanned,
+        'clinic_logo_path': profile.clinic_logo_path or "",
+        'clinic_logo_filename': doc_name(profile.clinic_logo_path),
+        'clinic_logo_virus_scanned': profile.clinic_logo_virus_scanned,
+        'clinic_photo_path': profile.clinic_photo_path or "",
+        'clinic_photo_filename': doc_name(profile.clinic_photo_path),
+        'clinic_photo_virus_scanned': profile.clinic_photo_virus_scanned,
+        'doc_status': doc_status,
+        'doc_status_is_approved': status_label == "approved",
+        'doc_last_edited': last_edited,
         'is_verified': profile.is_verified,
         'verification_status': profile.verification_status,
         'rejection_reason': profile.rejection_reason,
