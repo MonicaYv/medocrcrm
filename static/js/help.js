@@ -90,13 +90,6 @@ function toggleChat() {
     popup.classList.toggle("hidden");
   });
 }
-
-function sendEmailSupport() {
-  // You can add form validation or sending logic here
-  toastr.success("Message sent!");
-  document.querySelector(".emailPopup").classList.add("hidden");
-}
-
 // const issueMap = {
 //   type1: [
 //     "Unable to log in or reset password",
@@ -1585,22 +1578,24 @@ $(document).on("click", ".toggle-subscription", function () {
   icon.toggleClass("rotate-180");
 });
 
-//mail code start--------------------------------------------
-//send email
 function sendEmailSupport() {
   const email = $("#email").val().trim();
   const description = $("#description").val().trim();
-
+  const $button = $(".emailPopup button[onclick='sendEmailSupport()']");
   if (!email || !description) {
     alert("Please fill out both fields.");
     return;
   }
-
+  const csrfToken = document.querySelector(
+    '[name=csrfmiddlewaretoken]'
+  )?.value;
+  $button.prop("disabled", true);
+  $button.text("Sending...");
   $.ajax({
     url: sendMail,
     method: "POST",
     headers: {
-      "X-CSRFToken": "{{ csrf_token }}",
+      "X-CSRFToken": csrfToken,
     },
     data: {
       email: email,
@@ -1610,9 +1605,14 @@ function sendEmailSupport() {
       alert("Message sent successfully!");
       $("#email").val("");
       $("#description").val("");
+      document.querySelector(".emailPopup").classList.add("hidden");
     },
     error: function (xhr) {
       alert("Failed to send message. Please try again.");
     },
+    complete: function () {
+      $button.prop("disabled", false);
+      $button.text("Send");
+    }
   });
 }

@@ -164,78 +164,86 @@ $(document).ready(function () {
     return !hasError;
 }
 
-$("#editForm .save-btn").on("click", function (e) {
-    e.preventDefault();
+  // Hospital-only save handler. `validateHospitalForm` checks hospital fields,
+  // so it must not run for the other profile types (doctor, lab, pharmacy,
+  // ngo, advertiser, client). Their save buttons are posted through the shared
+  // `#editForm .save-btn` handler in settings.js - previously this listener
+  // still hijacked those clicks, cancelled the native submit and then bailed
+  // out silently, which made Save Changes look like it did nothing.
+  if ($("#editForm").find('[name="hospital_name"]').length) {
+    $("#editForm .save-btn").on("click", function (e) {
+      e.preventDefault();
 
-    if (!validateHospitalForm()) {
+      if (!validateHospitalForm()) {
         return;
-    }
-
-    const $form = $("#editForm");
-    const actionUrl = $form.attr("action");
-    const method = $form.attr("method").toUpperCase();
-    const formData = $form.serialize();
-
-    // Clear previous errors
-    $(".error").text("").addClass("hidden");
-
-    // Basic client-side validation
-    let hasError = false;
-    const requiredFields = {
-      email: "Email is required.",
-      phone: "Phone is required.",
-      address: "Address is required.",
-      city: "City is required.",
-      state: "State is required.",
-      country: "Country is required.",
-      pincode: "Pincode is required."
-    };
-
-    for (let field in requiredFields) {
-      const value = $form.find(`[name="${field}"]`).val() || '';
-      if (!value) {
-        console.log(`.${field}Error`);
-        $(`.${field}Error`).text(requiredFields[field] || `${field} is required`).removeClass("hidden");
-        hasError = true;
       }
-    }
-      console.log(hasError);
-    if (hasError) return;
 
-    // AJAX submit
-    $.ajax({
-      url: actionUrl,
-      type: method,
-      data: formData,
-      beforeSend:function(){
-        $('.save-btn').text('Saving....').attr('disabled', true);
-      },
-      headers: {
-        "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
-      },
-      success: function (response) {
-        if(response.success == true){
-          toastr.success(response.message || "Updated successfully.");
-          location.reload();
-        } else {
-          toastr.success(response.message || "Error Occurs, Please Try Again.");
+      const $form = $("#editForm");
+      const actionUrl = $form.attr("action");
+      const method = $form.attr("method").toUpperCase();
+      const formData = $form.serialize();
+
+      // Clear previous errors
+      $(".error").text("").addClass("hidden");
+
+      // Basic client-side validation
+      let hasError = false;
+      const requiredFields = {
+        email: "Email is required.",
+        phone: "Phone is required.",
+        address: "Address is required.",
+        city: "City is required.",
+        state: "State is required.",
+        country: "Country is required.",
+        pincode: "Pincode is required."
+      };
+
+      for (let field in requiredFields) {
+        const value = $form.find(`[name="${field}"]`).val() || '';
+        if (!value) {
+          console.log(`.${field}Error`);
+          $(`.${field}Error`).text(requiredFields[field] || `${field} is required`).removeClass("hidden");
+          hasError = true;
         }
-        $('.save-btn').text('Saved').attr('disabled', false);
-      },
-      error: function (xhr) {
-        if (xhr.status === 422 || xhr.status === 400) {
-          const errors = xhr.responseJSON.errors;
-          console.log("errors", errors);
-          $.each(errors, function (field, messages) {
-            $(`.${field}Error`).text(messages).removeClass("hidden");
-          });
-        } else {
-          toastr.error("An unexpected error occurred.");
-        }
-        $('.save-btn').text('Save Changes').attr('disabled', false);
       }
+        console.log(hasError);
+      if (hasError) return;
+
+      // AJAX submit
+      $.ajax({
+        url: actionUrl,
+        type: method,
+        data: formData,
+        beforeSend:function(){
+          $('.save-btn').text('Saving....').attr('disabled', true);
+        },
+        headers: {
+          "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
+        },
+        success: function (response) {
+          if(response.success == true){
+            toastr.success(response.message || "Updated successfully.");
+            location.reload();
+          } else {
+            toastr.success(response.message || "Error Occurs, Please Try Again.");
+          }
+          $('.save-btn').text('Saved').attr('disabled', false);
+        },
+        error: function (xhr) {
+          if (xhr.status === 422 || xhr.status === 400) {
+            const errors = xhr.responseJSON.errors;
+            console.log("errors", errors);
+            $.each(errors, function (field, messages) {
+              $(`.${field}Error`).text(messages).removeClass("hidden");
+            });
+          } else {
+            toastr.error("An unexpected error occurred.");
+          }
+          $('.save-btn').text('Save Changes').attr('disabled', false);
+        }
+      });
     });
-  });
+  }
 
   // Input validation clearing for edit form
   $("#pharmacyName").on("input", function () {

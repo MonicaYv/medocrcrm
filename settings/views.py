@@ -1,7 +1,9 @@
 import os
 import re
 import json
+import uuid
 import traceback
+from decimal import Decimal
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -27,6 +29,7 @@ from dashboard.utils import (
     get_common_context,
 )
 from settings.models import SellerSubscription
+from appointments.models import WalletTransaction
 from registration.models import (
     User,
     NGOProfile,
@@ -69,7 +72,26 @@ def load_country_codes():
     json_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'countryCodes.json')
     with open(json_path, 'r', encoding='utf-8') as f:
         return json.load(f)
-    
+
+def normalize_dial_code(value):
+    """Return a dial code (e.g. "+91") for the posted country phone code.
+
+    `countryCodes.js` fills the selects with the ISO country code ("IN") while
+    the templates render the dial code ("+91") when JS is unavailable, so both
+    shapes can reach the server. Storing the ISO code as `phone_country_code`
+    corrupted the profile, so map it back to the dial code before saving.
+    """
+    if not value:
+        return value
+    value = str(value).strip()
+    if value.startswith("+"):
+        return value
+    for country in load_country_codes():
+        if str(country.get("code", "")).upper() == value.upper():
+            return country.get("dial_code") or value
+    return value
+
+
 def validate_email_phone(post_data, errors):
     email = post_data.get("email", "").strip()
     if not email:
@@ -123,6 +145,16 @@ def settings_page(request):
         context.update(handler_func(user))
 
     context['country_codes'] = load_country_codes()
+
+    # The Subscription tab settles the plan fee from the Advance (prepaid
+    # wallet), so render the live balance server-side. The status API refreshes
+    # it afterwards, but this avoids flashing a stale/hardcoded value.
+    context.update({
+        "advance_balance": get_advance_balance(user),
+        "subscription_price": SUBSCRIPTION_PRICE,
+        "subscription_gst": SUBSCRIPTION_GST,
+        "subscription_total": SUBSCRIPTION_TOTAL,
+    })
 
     template_map = {
         "pharmacy": "settings/seller_settings.html",
@@ -474,6 +506,66 @@ def handle_doctor_profile(user):
     all_speciality = DoctorSpeciality.objects.filter(is_active=True)
     all_education = DoctorEducation.objects.filter(is_active=True)
     all_experience = DoctorExperience.objects.filter(is_active=True)
+
+    # The Documents tab renders the stored file name, the virus-scan result and
+    # the review status for each document. `validate_and_save_file` stores the
+    # path as "<user_type>_docs/<subdir>/<file name>", so the display name is the
+    # last segment while the viewer needs the full relative path.
+    def doc_name(path):
+        if not path:
+            return ""
+        return str(path).replace("\\", "/").split("/")[-1]
+
+    # `validate_and_save_file` refreshes user.updated_on every upload, so it is
+    # the closest available "last edited" timestamp for the documents list.
+    last_edited = (
+        user.updated_at.strftime("%d %b %Y, %I:%M %p")
+        if user.updated_at else "Not yet uploaded"
+    )
+
+    # A doctor can reach Settings before the KYC profile has been created.
+    # Keep the page available in that state (like the pharmacy handler) instead
+    # of dereferencing a missing profile and returning a server error.
+    if not profile:
+        return {
+            'full_name': '', 'gender': '', 'age': None, 'specialty': None,
+            'all_speciality': all_speciality,
+            'education': None, 'all_education': all_education,
+            'experience': None, 'all_experience': all_experience,
+            'profile_photo_path': '',
+            'clinic_name': '', 'owner_name': '', 'contact_number': '',
+            'alt_contact_number': '', 'address': '', 'city': '', 'state': '',
+            'pincode': '', 'country': '',
+            'clinic_timing_from': '', 'clinic_timing_to': '',
+            'home_visit_available': False, 'registration_number': '',
+            'registration_certificate_path': '',
+            'registration_certificate_filename': '',
+            'registration_certificate_virus_scanned': False,
+            'aadhar_number': '', 'aadhar_doc_path': '',
+            'aadhar_doc_filename': '', 'aadhar_doc_virus_scanned': False,
+            'pan_number': '', 'pan_doc_path': '',
+            'pan_doc_filename': '', 'pan_doc_virus_scanned': False,
+            'clinic_logo_path': '', 'clinic_logo_filename': '',
+            'clinic_logo_virus_scanned': False,
+            'clinic_photo_path': '', 'clinic_photo_filename': '',
+            'clinic_photo_virus_scanned': False,
+            'doc_status': 'Pending', 'doc_status_is_approved': False,
+            'doc_last_edited': last_edited,
+            'is_verified': False, 'verification_status': 'pending',
+            'rejection_reason': None, 'verified_at': None,
+            'referral_code': '',
+        }
+
+    # A rejected document keeps the reviewer's reason, so show it instead of a
+    # generic label. `verification_status` is one of pending/approved/rejected.
+    status_label = (profile.verification_status or "pending").strip().lower()
+    if status_label == "approved":
+        doc_status = "Approved"
+    elif status_label == "rejected":
+        doc_status = profile.rejection_reason or "Rejected"
+    else:
+        doc_status = "Pending"
+
     data = {
         'full_name': profile.full_name,
         'gender': profile.gender,
@@ -495,17 +587,34 @@ def handle_doctor_profile(user):
         'city': get_related_location_name(profile, 'city'),
         'state': get_related_location_name(profile, 'state'),
         'pincode': profile.pincode,
+        # Older records stored "1" for India, so show the country name like the
+        # other profile handlers do. The edit form prefills this value so saving
+        # no longer wipes the stored country.
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else ''),
         'clinic_timing_from': profile.clinic_timing_from,
         'clinic_timing_to': profile.clinic_timing_to,
         'home_visit_available': profile.home_visit_available,
         'registration_number': profile.registration_number,
-        'registration_certificate_path': os.path.basename(profile.registration_certificate_path) if profile.registration_certificate_path else "",
+        'registration_certificate_path': profile.registration_certificate_path or "",
+        'registration_certificate_filename': doc_name(profile.registration_certificate_path),
+        'registration_certificate_virus_scanned': profile.registration_certificate_virus_scanned,
         'aadhar_number': profile.aadhar_number,
-        'aadhar_doc_path': os.path.basename(profile.aadhar_doc_path) if profile.aadhar_doc_path else "",
+        'aadhar_doc_path': profile.aadhar_doc_path or "",
+        'aadhar_doc_filename': doc_name(profile.aadhar_doc_path),
+        'aadhar_doc_virus_scanned': profile.aadhar_doc_virus_scanned,
         'pan_number': profile.pan_number,
-        'pan_doc_path': os.path.basename(profile.pan_doc_path) if profile.pan_doc_path else "",
-        'clinic_logo_path': os.path.basename(profile.clinic_logo_path) if profile.clinic_logo_path else "",
-        'clinic_photo_path': os.path.basename(profile.clinic_photo_path) if profile.clinic_photo_path else "",
+        'pan_doc_path': profile.pan_doc_path or "",
+        'pan_doc_filename': doc_name(profile.pan_doc_path),
+        'pan_doc_virus_scanned': profile.pan_doc_virus_scanned,
+        'clinic_logo_path': profile.clinic_logo_path or "",
+        'clinic_logo_filename': doc_name(profile.clinic_logo_path),
+        'clinic_logo_virus_scanned': profile.clinic_logo_virus_scanned,
+        'clinic_photo_path': profile.clinic_photo_path or "",
+        'clinic_photo_filename': doc_name(profile.clinic_photo_path),
+        'clinic_photo_virus_scanned': profile.clinic_photo_virus_scanned,
+        'doc_status': doc_status,
+        'doc_status_is_approved': status_label == "approved",
+        'doc_last_edited': last_edited,
         'is_verified': profile.is_verified,
         'verification_status': profile.verification_status,
         'rejection_reason': profile.rejection_reason,
@@ -1353,8 +1462,12 @@ def update_doctor_profile(request):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
     if errors:
+        # The edit form posts through fetch() and shows `message` in the error
+        # toast, so return a readable sentence next to the per-field errors
+        # (previously the toast displayed a raw JSON blob of `errors`).
         return JsonResponse({
             "success": False,
+            "message": " ".join(str(msg) for msg in errors.values()),
             "errors": errors
         }, status=400)
 
@@ -1364,7 +1477,7 @@ def update_doctor_profile(request):
 
             # USER UPDATE
             user.email = post_data.get('email')
-            user.phone_country_code = post_data.get("countryCodes")
+            user.phone_country_code = normalize_dial_code(post_data.get("countryCodes"))
             user.phone_number = post_data.get("phone")
             user.save()
 
@@ -1410,7 +1523,19 @@ def update_doctor_profile(request):
 
             # doctor_profile.state = post_data.get("state")
 
-            doctor_profile.country = post_data.get("country")
+            # The account details screen shows the profile contact numbers, so
+            # persist them here as well (only `user.phone_number` was saved
+            # before, which left the displayed numbers unchanged after saving).
+            doctor_profile.contact_number = post_data.get("phone")
+
+            doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
+
+            # Only overwrite the country when the form actually submits one.
+            # The input used to render empty, and saving wiped the stored value.
+            country = (post_data.get("country") or "").strip()
+
+            if country:
+                doctor_profile.country = country
 
             doctor_profile.pincode = post_data.get("pincode")
 
@@ -1662,6 +1787,31 @@ def get_seller_profile_id(user):
     profile = model.objects.filter(user=user).only("id").first()
     return profile.id if profile else None
 
+
+# Subscription pricing (kept in sync with the Payment Details popup in
+# settings/templates/subscription/subscription.html)
+SUBSCRIPTION_PRICE = Decimal("999.00")
+SUBSCRIPTION_GST = Decimal("180.00")
+SUBSCRIPTION_TOTAL = SUBSCRIPTION_PRICE + SUBSCRIPTION_GST
+SUBSCRIPTION_VALIDITY_DAYS = 30
+
+
+def get_advance_balance(user):
+    """Current Advance (prepaid wallet) balance for a user.
+
+    The wallet keeps a running ``current_balance`` on every transaction, so the
+    balance is the latest row's value. Mirrors the logic used by the Advance
+    screens in dashboard/views.py.
+    """
+    last_txn = (
+        WalletTransaction.objects
+        .filter(user=user)
+        .order_by("-created_at")
+        .first()
+    )
+    return last_txn.current_balance if last_txn else Decimal("0.00")
+
+
 @dashboard_login_required
 def seller_subscription_status(request):
     """
@@ -1679,10 +1829,18 @@ def seller_subscription_status(request):
         is_enabled=True
     ).first()
 
+    # The subscription is paid out of the Advance (prepaid wallet), so the
+    # section has to show the live balance alongside the plan state.
+    advance_balance = get_advance_balance(user)
+
     if not sub:
         return JsonResponse({
             "has_subscription": False,
             "plan": "Free",
+            "price": float(SUBSCRIPTION_PRICE),
+            "gst": float(SUBSCRIPTION_GST),
+            "total": float(SUBSCRIPTION_TOTAL),
+            "advance_balance": float(advance_balance),
         })
 
     days_left = None
@@ -1695,6 +1853,8 @@ def seller_subscription_status(request):
         "price": float(sub.price),
         "expiry_date": sub.expiry_date.strftime("%d/%m/%Y") if sub.expiry_date else None,
         "days_left": days_left,
+        "total": float(SUBSCRIPTION_TOTAL),
+        "advance_balance": float(advance_balance),
     })
 
 @require_POST
@@ -1704,26 +1864,68 @@ def subscribe_subscription(request):
 
     seller_profile_id = get_seller_profile_id(user)
     if not seller_profile_id:
-        return JsonResponse({"success": False}, status=400)
+        return JsonResponse({"success": False, "message": "Seller profile not found"}, status=400)
 
-    # deactivate old
-    SellerSubscription.objects.filter(
-        seller_type=user.user_type,
-        seller_profile_id=seller_profile_id,
-        is_active=True
-    ).update(is_active=False)
+    # The plan fee is settled from the Advance (prepaid wallet). Reject when the
+    # balance can't cover it instead of granting a subscription for free, and
+    # write the debit so the Advance balance actually updates.
+    with transaction.atomic():
+        last_txn = (
+            WalletTransaction.objects
+            .select_for_update()
+            .filter(user=user)
+            .order_by("-created_at")
+            .first()
+        )
+        current_balance = last_txn.current_balance if last_txn else Decimal("0.00")
 
-    # create new subscription
-    SellerSubscription.objects.create(
-        seller_type=user.user_type,
-        seller_profile_id=seller_profile_id,
-        plan_name="Premium",
-        price=999,
-        is_active=True,
-        expiry_date=timezone.now() + timedelta(days=30),
-    )
+        if current_balance < SUBSCRIPTION_TOTAL:
+            return JsonResponse({
+                "success": False,
+                "insufficient": True,
+                "required": float(SUBSCRIPTION_TOTAL),
+                "advance_balance": float(current_balance),
+                "message": "Insufficient advance balance",
+            }, status=400)
 
-    return JsonResponse({"success": True})
+        new_balance = current_balance - SUBSCRIPTION_TOTAL
+        WalletTransaction.objects.create(
+            user=user,
+            order_id=f"SUB-{uuid.uuid4().hex[:12].upper()}",
+            tranx_id=str(uuid.uuid4()),
+            amount=SUBSCRIPTION_TOTAL,
+            transaction_type="DEBIT",
+            points_earned=Decimal("0.00"),
+            current_balance=new_balance,
+            created_at=timezone.now(),
+        )
+
+        # deactivate old
+        SellerSubscription.objects.filter(
+            seller_type=user.user_type,
+            seller_profile_id=seller_profile_id,
+            is_active=True
+        ).update(is_active=False)
+
+        # create new subscription
+        SellerSubscription.objects.create(
+            seller_type=user.user_type,
+            seller_profile_id=seller_profile_id,
+            plan_name="Premium",
+            price=SUBSCRIPTION_PRICE,
+            is_active=True,
+            is_enabled=True,
+            expiry_date=timezone.now() + timedelta(days=SUBSCRIPTION_VALIDITY_DAYS),
+        )
+
+    return JsonResponse({
+        "success": True,
+        "charged": float(SUBSCRIPTION_TOTAL),
+        "advance_balance": float(new_balance),
+        # Spending the balance is a DEBIT, so no points are granted here
+        # (points are awarded on Advance recharge, see add_advance_amount).
+        "points_earned": 0,
+    })
 
 @dashboard_login_required
 @require_POST

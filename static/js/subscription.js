@@ -82,6 +82,29 @@ $(window).on('resize', function () {
 /* =========================
    SUBSCRIPTION STATUS
 ========================= */
+function formatINR(value) {
+    const num = Number(value);
+    if (!isFinite(num)) return "₹0";
+    return "₹" + num.toLocaleString("en-IN", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+}
+
+// Keep the Payment Details popup's balance in sync with the Advance wallet.
+function renderAdvanceBalance(value) {
+    $("#advance-balance").text(formatINR(value));
+}
+
+// The plan is paid from the Advance balance. Mark "Pay Now" as unaffordable
+// instead of natively disabling it, so a click can still explain why and offer
+// the "Submit Advance" shortcut.
+function updatePayNowAvailability(available) {
+    $(".pay-now-btn")
+        .toggleClass("opacity-50", !available)
+        .attr("data-can-pay", available ? "1" : "0");
+}
+
 $(document).ready(function () {
     setupInfoTooltip();
 
@@ -89,6 +112,13 @@ $(document).ready(function () {
         url: "/settings/subscription/status/",
         method: "GET",
         success: function (res) {
+            if (res.advance_balance !== undefined) {
+                renderAdvanceBalance(res.advance_balance);
+                updatePayNowAvailability(
+                    !res.has_subscription && Number(res.advance_balance) >= Number(res.total)
+                );
+            }
+
             if (!res.has_subscription) {
                 $(".free-plan-section").removeClass("hidden");
                 $(".premium-plan-section").addClass("hidden");
@@ -119,20 +149,56 @@ $(document).ready(function () {
    PAY NOW (SUBSCRIBE)
 ========================= */
 $(document).on("click", ".pay-now-btn", function () {
+    const $btn = $(this);
+
+    // Known up-front shortfall: explain and point at the Advance screen.
+    if ($btn.attr("data-can-pay") === "0") {
+        $(".paymentDetailsPopup").addClass("hidden");
+        $(".insufficientBalancePopup").removeClass("hidden");
+        return;
+    }
+
+    // Guard against double submits while the request is in flight.
+    if ($btn.data("inFlight")) return;
+    $btn.data("inFlight", true);
+
     $.ajax({
         url: "/settings/subscription/subscribe/",
         type: "POST",
         headers: {
             "X-CSRFToken": getCSRFToken()
         },
-        success: function () {
+        success: function (res) {
+            // Reflect the debited balance immediately so the section updates
+            // without a full page reload.
+            if (res.advance_balance !== undefined) {
+                renderAdvanceBalance(res.advance_balance);
+            }
+            updatePayNowAvailability(false);
+            if (res.points_earned !== undefined) {
+                $(".subscription-points-earned").text(res.points_earned);
+            }
             $(".paymentDetailsPopup").addClass("hidden");
-            $(".paymentSuccessPopup").removeClass("hidden");
             $(".free-plan-section").addClass("hidden");
             $(".premium-plan-section").removeClass("hidden");
-            location.reload();
+            $(".paymentSuccessPopup").removeClass("hidden");
         },
-        error: function () {
+        error: function (xhr) {
+            const res = xhr.responseJSON || {};
+            $btn.data("inFlight", false);
+
+            if (res.insufficient) {
+                $(".paymentDetailsPopup").addClass("hidden");
+                $(".insufficientBalancePopup").removeClass("hidden");
+                if (res.advance_balance !== undefined) {
+                    renderAdvanceBalance(res.advance_balance);
+                }
+                updatePayNowAvailability(false);
+                return;
+            }
+
+            // Genuine failure - allow a retry.
+            $btn.removeClass("opacity-50").attr("data-can-pay", "1");
             $(".paymentFailedPopup").removeClass("hidden");
         }
     });

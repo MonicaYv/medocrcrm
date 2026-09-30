@@ -432,9 +432,16 @@ $(".donation-history .calendar-icon").on("click", function (event) {
 });
 
 // Pagination click
+// .pagination-btn is also used by other panels on this page (e.g. the Rewards
+// points table), so only act when the clicked pager actually sits inside a
+// donation history table. Otherwise this handler fired a spurious
+// loadDonationHistory() for an unrelated panel.
 $(document).on("click", ".pagination-btn", function () {
-  const page = $(this).data("page");
   const $container = $(this).closest(".postDiv");
+  if (!$container.length || !$container.find("tbody.donate-history").length) {
+    return;
+  }
+  const page = $(this).data("page");
   loadDonationHistory(page, $container); // fixed typo
 });
 
@@ -751,7 +758,12 @@ function renderOrganizationPagination(current, total) {
     </button>
   `;
 
-  $("#pagination-container").html(html);
+  // Scope to the organization pagination container. A global $("#pagination-container")
+  // is ambiguous on the seller settings page: the Rewards points table and the
+  // Donation History table reuse the same id, so an unscoped write injected the
+  // organization pager (whose changePage() re-renders the donation banners)
+  // into another panel entirely.
+  $("#organization-pagination-container").html(html);
 }
 
 // Initial load

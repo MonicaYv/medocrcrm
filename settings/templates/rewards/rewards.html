@@ -291,12 +291,14 @@
                           <span class="material-symbols-outlined flex justify-center items-center">tune</span>
                         </button>
                         <div class="filterDropdown absolute hidden allRewardsCoupons right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026]  rounded-md w-44 z-10">
-                          <div class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-white rounded">
-                            Custom date<span class="material-symbols-outlined calendar-icon">calendar_today</span>
+                          <div data-filter="custom"
+                              class="customDateFilter p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-dark-gray rounded">
+                              <span class="customDateLabel">Custom date</span>
+                              <span class="material-symbols-outlined calendar-icon">calendar_today</span>
                           </div>
-                          <div data-range="1 Week" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded cursor-pointer" >1 Week</div>
-                          <div data-range="1 Month" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded cursor-pointer">1 Month</div>
-                          <div data-range="1 Year" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded cursor-pointer">1 Year</div>
+                          <div data-range="1 Week" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer" >1 Week</div>
+                          <div data-range="1 Month" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Month</div>
+                          <div data-range="1 Year" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Year</div>
                         </div>
                         <div class="datepicker-container hidden px-4 pb-3 absolute right-43 z-100">
                           <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
@@ -361,15 +363,15 @@
                         class="filterDropdown rewardsClaimed absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10"
                       >
                       
-                        <div class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-white rounded">
+                        <div class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-dark-gray rounded">
                           Custom date<span class="material-symbols-outlined calendar-icon"
                             >calendar_today</span
                           >
                           
                         </div>
-                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded dateFilter cursor-pointer" data-range="1 Week">1 Week</div>
-                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded dateFilter cursor-pointer" data-range="1 Month">1 Month</div>
-                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded dateFilter cursor-pointer" data-range="1 Year">1 Year</div>
+                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Week">1 Week</div>
+                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Month">1 Month</div>
+                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Year">1 Year</div>
 
                       </div>
                       <div class="datepicker-container hidden px-4 pb-3 absolute  right-43 z-100">
@@ -442,15 +444,15 @@
                       <input type="date" name="end_date" id="endDateInput" class="hidden" style="display: none;">
                     </form>
                     <div class="filter-dropdown-option dropdown-option absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44">
-                      <div onclick="applyDateFilter('custom')" class="p-2 pl-4 flex justify-between items-center hover:bg-{{ hover_bg }} hover:text-white rounded cursor-pointer">
+                      <div onclick="applyDateFilter('custom')" class="p-2 pl-4 flex justify-between items-center hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">
                         Custom date
                         <span class="material-symbols-outlined">calendar_today</span>
                       </div>
-                      <div onclick="applyDateFilter('last_week')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded cursor-pointer">1 Week</div>
+                      <div onclick="applyDateFilter('last_week')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Week</div>
 
-                      <div onclick="applyDateFilter('last_month')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded cursor-pointer">1 Month</div>
+                      <div onclick="applyDateFilter('last_month')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Month</div>
 
-                      <div onclick="applyDateFilter('last_year')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-white rounded cursor-pointer">1 Year</div>
+                      <div onclick="applyDateFilter('last_year')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Year</div>
                     </div>
                     <div class="datepicker-container hidden px-4 pb-3 absolute  right-43 z-100">
                       <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
@@ -465,3 +467,4 @@
           </div>
             </div>
         </div>
+        

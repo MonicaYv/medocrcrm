@@ -47,7 +47,7 @@
             <div class="flex flex-col gap-4 lg:w-[788px]">
                 <div class="flex items-center justify-between">
                     <p class="font-semibold text-base text-{{text}}">Subscription Details</p>
-                    <p class="font-bold text-base text-{{text}}">&#8377;999</p>
+                    <p class="font-bold text-base text-{{text}}">&#8377;{{ subscription_price|floatformat:0 }}</p>
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex flex-col gap-1">
@@ -119,7 +119,7 @@
             <div class="flex flex-col gap-4 lg:w-[788px]">
                 <div class="flex items-center justify-between">
                     <p class="font-semibold text-base text-{{text}}">Subscription Details</p>
-                    <p class="font-bold text-base text-{{text}}">&#8377;999</p>
+                    <p class="font-bold text-base text-{{text}}">&#8377;{{ subscription_price|floatformat:0 }}</p>
                 </div>
                 <div class="flex items-center justify-between border border-frost-white rounded-[10px] p-2.5">
                     <div class="flex flex-col gap-1">
@@ -165,16 +165,17 @@
             </div>
             <img src="/static/images/payment-details.svg" alt="Card-and-machine" class="w-[220px] h-[147px]">
             <div class="flex flex-col gap-2 items-center">
-                <p class="font-normal text-base text-dark-gray">Subscription fee : &#8377;999</p>
-                <p class="font-normal text-base text-dark-gray">GST : &#8377;180</p>
-                <p class="font-semibold text-base text-dark-gray">Total : &#8377;1,179</p>
+                <p class="font-normal text-base text-dark-gray">Subscription fee : &#8377;{{ subscription_price|floatformat:0 }}</p>
+                <p class="font-normal text-base text-dark-gray">GST : &#8377;{{ subscription_gst|floatformat:0 }}</p>
+                <p class="font-semibold text-base text-dark-gray">Total : &#8377;{{ subscription_total|floatformat:0 }}</p>
             </div>
             <button
                 class="bg-{{text}} flex items-center justify-center rounded-md w-[198px] h-12 cursor-pointer pay-now-btn">
                 <span class="font-semibold text-base text-white">Pay Now</span>
             </button>
             <div class="flex items-center flex-col gap-2">
-                <p class="font-normal text-base text-dark-gray">Current balance : &#8377;12,500</p>
+                <p class="font-normal text-base text-dark-gray">Current balance : <span
+                        id="advance-balance">&#8377;{{ advance_balance|floatformat:0 }}</span></p>
                 <a href="{% url 'advance' %}" class="text-{{text}} text-base font-semibold underline">Advance</a>
             </div>
         </div>
@@ -189,8 +190,8 @@
             <img src="/static/images/trophy-pharmacy-successfull.svg" alt="Trophy-image" class="w-[220px] h-[147px]">
             <p class="font-semibold text-[28px] text-jet-black">Payment Successfull!</p>
             <p class="font-normal text-base text-dark-gray">Congratulations! You have earned <span
-                    class="font-bold text-lg text-{{text}}">2.8</span> Points on the Platform
-                Usage</p>
+                    class="font-bold text-lg text-{{text}} subscription-points-earned">0</span> Points on the
+                Platform Usage</p>
             <a href="{% url 'advance-history' %}"
                 class="bg-{{text}} flex items-center justify-center rounded-md w-[198px] h-12 cursor-pointer">
                 <span class="font-semibold text-base text-white">Advance History</span>

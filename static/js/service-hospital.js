@@ -497,19 +497,177 @@ $(document).on("click", ".more-btn", function (e) {
     if(!isOpen){$dropdown.removeClass("hidden").css("display","block")}
 });
 
+$(document).on("click", function (e) {
+    if (
+        !$(e.target).closest(".more-btn").length &&
+        !$(e.target).closest(".more-dropdown").length
+    ) {
+        $(".more-dropdown").hide();
+    }
+});
+
+// ==========================================
+// EDIT EXISTING HOSPITAL SERVICE
+// ==========================================
+$(document).on("click", ".edit-hospital-service", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const $btn = $(this);
+
+    HOSPITAL_EDIT_ID = $btn.data("rate-id");
+    HOSPITAL_EDIT_TYPE = "service";
+
+    const categoryId = String($btn.attr("data-category-id"));
+    const serviceId = String($btn.attr("data-service-id"));
+    const price = $btn.attr("data-price");
+
+    // Open popup
+    $(".home-section").addClass("hidden");
+
+    $(".services-section.popup-overlay")
+        .removeClass("hidden")
+        .addClass("flex");
+
+    // Clear previous service cards
+    $(".popup-overlay .services-list").empty();
+
+    const template = document.getElementById(
+        "popup-service-card-template"
+    );
+
+    const $card = $(
+        template.content.firstElementChild.cloneNode(true)
+    );
+
+    resetServiceCard($card);
+
+    const category = HOSPITAL_CATEGORIES.find(
+        item => String(item.id) === categoryId
+    );
+
+    const service = HOSPITAL_SERVICES.find(
+        item => String(item.id) === serviceId
+    );
+
+    // Populate existing values
+    $card.find(".category-id").val(categoryId);
+    $card.find(".service-id").val(serviceId);
+    $card.find(".price-input").val(price);
+
+    $card.find(".category-dropdown-btn .selected-text")
+        .text(category ? category.name : "Select Category");
+
+    $card.find(".service-dropdown-btn .selected-text")
+        .text(service ? service.description : "Select Service");
+
+    $(".popup-overlay .services-list").append($card);
+
+    showStep(1);
+});
+
+
+// ==========================================
+// EDIT EXISTING HOSPITAL ROOM
+// ==========================================
+$(document).on("click", ".edit-hospital-room", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const $btn = $(this);
+
+    HOSPITAL_EDIT_ID = $btn.data("rate-id");
+    HOSPITAL_EDIT_TYPE = "room";
+
+    const roomId = String($btn.attr("data-bed-room-id"));
+    const days = $btn.attr("data-days");
+    const ac = $btn.attr("data-ac");
+    const price = $btn.attr("data-price");
+
+    // Open popup
+    $(".home-section").addClass("hidden");
+
+    $(".services-section.popup-overlay")
+        .removeClass("hidden")
+        .addClass("flex");
+
+    // Clear previous room cards
+    $(".popup-overlay .bed-services-list").empty();
+
+    const template = document.getElementById(
+        "popup-bed-room-card-template"
+    );
+
+    const $card = $(
+        template.content.firstElementChild.cloneNode(true)
+    );
+
+    resetRoomCard($card);
+
+    const room = HOSPITAL_BED_ROOMS.find(
+        item => String(item.id) === roomId
+    );
+
+    // Populate existing values
+    $card.find(".bed-room-id").val(roomId);
+    $card.find(".days-input").val(days);
+    $card.find(".ac-input").val(ac);
+    $card.find(".room-price-input").val(price);
+
+    $card.find(".bed-room-dropdown-btn .selected-text")
+        .text(room ? room.name : "Select Bed & Room");
+
+    $(".popup-overlay .bed-services-list").append($card);
+
+    showStep(2);
+});
+
 $(document).on("click", ".save-services-btn", function () {
-    console.log("SAVE BUTTON CLICKED");
+
+    const $btn = $(this);
+
     const services = collectServices();
     const rooms = collectRooms();
 
-    if (!services.length && !rooms.length) {
+    // ==========================================
+    // ADD OR EDIT SERVICE
+    // ==========================================
+    if (HOSPITAL_EDIT_TYPE === "service" && HOSPITAL_EDIT_ID) {
+
+        if (!services.length) {
+            alert("Please select a service and enter price.");
+            return;
+        }
+
+        services[0].rate_id = HOSPITAL_EDIT_ID;
+    }
+
+    // ==========================================
+    // ADD OR EDIT ROOM
+    // ==========================================
+    if (HOSPITAL_EDIT_TYPE === "room" && HOSPITAL_EDIT_ID) {
+
+        if (!rooms.length) {
+            alert("Please select a room and enter price.");
+            return;
+        }
+
+        rooms[0].rate_id = HOSPITAL_EDIT_ID;
+    }
+
+    // ==========================================
+    // VALIDATE ADD
+    // ==========================================
+    if (!HOSPITAL_EDIT_ID && !services.length && !rooms.length) {
         alert("Please add at least one service or room.");
         return;
     }
 
-    const $btn = $(this);
+    // ==========================================
+    // SEND TO EXISTING SAVE VIEW
+    // ==========================================
     $btn.prop("disabled", true);
-    $btn.text("Saving...");
+    $btn.text(HOSPITAL_EDIT_ID ? "Updating..." : "Saving...");
 
     fetch("/services/hospital/services/save/", {
         method: "POST",
@@ -517,20 +675,52 @@ $(document).on("click", ".save-services-btn", function () {
             "Content-Type": "application/json",
             "X-CSRFToken": getCookie("csrftoken")
         },
-        body: JSON.stringify({ services, rooms })
+        body: JSON.stringify({
+            services: HOSPITAL_EDIT_TYPE === "room" ? [] : services,
+            rooms: HOSPITAL_EDIT_TYPE === "service" ? [] : rooms
+        })
     })
-    .then((response) => {
-        if (!response.ok) throw new Error("Failed to save hospital services");
-        return response.json();
+    .then(async response => {
+
+        const text = await response.text();
+
+        let data;
+
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            throw new Error("Server returned HTML instead of JSON");
+        }
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error || "Unable to save hospital services"
+            );
+        }
+
+        return data;
     })
-    .then((data) => {
-        if (!data.success) throw new Error(data.error || "Unable to save hospital services");
-        showToast("Services saved successfully");
-        setTimeout(() => { window.location.reload(); }, 1500);
+    .then(data => {
+
+        const message = HOSPITAL_EDIT_ID
+            ? "Updated successfully"
+            : "Services saved successfully";
+
+        showToast(message);
+
+        HOSPITAL_EDIT_ID = null;
+        HOSPITAL_EDIT_TYPE = null;
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+
     })
-    .catch((error) => {
+    .catch(error => {
+
         console.error(error);
         alert(error.message);
+
         $btn.prop("disabled", false);
         $btn.text("Save");
     });

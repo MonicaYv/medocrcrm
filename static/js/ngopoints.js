@@ -453,25 +453,66 @@ function truncateDescriptions() {
     }
   });
 
-  $(document).on('click', '.allRewardsCoupons .calendar-icon', function () {
-    const $picker = $(this).closest('.dropdown').find('.datepicker-inline');
-    let firstDate = '';
-    if ($.fn.datepicker && $picker.length) {
-      rewardsDateRange = '';
-      $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
-      $picker.datepicker('option', 'onSelect', function (dateText) {
-        if (!firstDate) { firstDate = dateText; rewardsStartDate = dateText; return; }
-        rewardsEndDate = dateText;
-        if (rewardsEndDate < rewardsStartDate) [rewardsStartDate, rewardsEndDate] = [rewardsEndDate, rewardsStartDate];
-        allrewards($('#allrewardssearch').val().trim(), '', 1);
-        popular_coupons($('#allrewardssearch').val().trim(), '', 1);
-        $(this).closest('.datepicker-container').hide();
-        firstDate = '';
-      });
-      $picker.closest('.datepicker-container').show();
-      $(this).closest('.filterDropdown').hide();
+  $(document).on('click', '.allRewardsCoupons .customDateFilter', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const $dropdown = $(this).closest('.dropdown');
+    const $filterDropdown = $dropdown.find('.allRewardsCoupons');
+    const $datepickerContainer = $dropdown.find('.datepicker-container');
+    const $picker = $dropdown.find('.datepicker-inline');
+    if (!$.fn.datepicker || !$picker.length) {
+        console.log('Datepicker not found');
+        return;
     }
-  });
+    rewardsDateRange = '';
+    rewardsStartDate = '';
+    rewardsEndDate = '';
+    let firstDate = '';
+    $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+    $picker.datepicker('option', 'onSelect', function (dateText) {
+        if (!firstDate) {
+            firstDate = dateText;
+            rewardsStartDate = dateText;
+            return;
+        }
+        rewardsEndDate = dateText;
+        if (rewardsStartDate > rewardsEndDate) {
+            [rewardsStartDate, rewardsEndDate] = [
+                rewardsEndDate,
+                rewardsStartDate
+            ];
+        }
+        const startDisplay = new Date(rewardsStartDate + 'T00:00:00')
+            .toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        const endDisplay = new Date(rewardsEndDate + 'T00:00:00')
+            .toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        $filterDropdown
+            .find('.customDateLabel')
+            .text(startDisplay + ' - ' + endDisplay);
+        allrewards(
+            $('#allrewardssearch').val().trim(),
+            '',
+            1
+        );
+        popular_coupons(
+            $('#allrewardssearch').val().trim(),
+            '',
+            1
+        );
+        $datepickerContainer.hide();
+        firstDate = '';
+    });
+    $filterDropdown.hide();
+    $datepickerContainer.show();
+});
 
   function fetchFilteredData(page = 1) {
     const search = $("input[name='search']").val();
