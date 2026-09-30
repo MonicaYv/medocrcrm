@@ -72,7 +72,26 @@ def load_country_codes():
     json_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'countryCodes.json')
     with open(json_path, 'r', encoding='utf-8') as f:
         return json.load(f)
-    
+
+def normalize_dial_code(value):
+    """Return a dial code (e.g. "+91") for the posted country phone code.
+
+    `countryCodes.js` fills the selects with the ISO country code ("IN") while
+    the templates render the dial code ("+91") when JS is unavailable, so both
+    shapes can reach the server. Storing the ISO code as `phone_country_code`
+    corrupted the profile, so map it back to the dial code before saving.
+    """
+    if not value:
+        return value
+    value = str(value).strip()
+    if value.startswith("+"):
+        return value
+    for country in load_country_codes():
+        if str(country.get("code", "")).upper() == value.upper():
+            return country.get("dial_code") or value
+    return value
+
+
 def validate_email_phone(post_data, errors):
     email = post_data.get("email", "").strip()
     if not email:
@@ -497,6 +516,46 @@ def handle_doctor_profile(user):
             return ""
         return str(path).replace("\\", "/").split("/")[-1]
 
+    # `validate_and_save_file` refreshes user.updated_on every upload, so it is
+    # the closest available "last edited" timestamp for the documents list.
+    last_edited = (
+        user.updated_at.strftime("%d %b %Y, %I:%M %p")
+        if user.updated_at else "Not yet uploaded"
+    )
+
+    # A doctor can reach Settings before the KYC profile has been created.
+    # Keep the page available in that state (like the pharmacy handler) instead
+    # of dereferencing a missing profile and returning a server error.
+    if not profile:
+        return {
+            'full_name': '', 'gender': '', 'age': None, 'specialty': None,
+            'all_speciality': all_speciality,
+            'education': None, 'all_education': all_education,
+            'experience': None, 'all_experience': all_experience,
+            'profile_photo_path': '',
+            'clinic_name': '', 'owner_name': '', 'contact_number': '',
+            'alt_contact_number': '', 'address': '', 'city': '', 'state': '',
+            'pincode': '', 'country': '',
+            'clinic_timing_from': '', 'clinic_timing_to': '',
+            'home_visit_available': False, 'registration_number': '',
+            'registration_certificate_path': '',
+            'registration_certificate_filename': '',
+            'registration_certificate_virus_scanned': False,
+            'aadhar_number': '', 'aadhar_doc_path': '',
+            'aadhar_doc_filename': '', 'aadhar_doc_virus_scanned': False,
+            'pan_number': '', 'pan_doc_path': '',
+            'pan_doc_filename': '', 'pan_doc_virus_scanned': False,
+            'clinic_logo_path': '', 'clinic_logo_filename': '',
+            'clinic_logo_virus_scanned': False,
+            'clinic_photo_path': '', 'clinic_photo_filename': '',
+            'clinic_photo_virus_scanned': False,
+            'doc_status': 'Pending', 'doc_status_is_approved': False,
+            'doc_last_edited': last_edited,
+            'is_verified': False, 'verification_status': 'pending',
+            'rejection_reason': None, 'verified_at': None,
+            'referral_code': '',
+        }
+
     # A rejected document keeps the reviewer's reason, so show it instead of a
     # generic label. `verification_status` is one of pending/approved/rejected.
     status_label = (profile.verification_status or "pending").strip().lower()
@@ -506,13 +565,6 @@ def handle_doctor_profile(user):
         doc_status = profile.rejection_reason or "Rejected"
     else:
         doc_status = "Pending"
-
-    # `validate_and_save_file` refreshes user.updated_on every upload, so it is
-    # the closest available "last edited" timestamp for the documents list.
-    last_edited = (
-        user.updated_at.strftime("%d %b %Y, %I:%M %p")
-        if user.updated_at else "Not yet uploaded"
-    )
 
     data = {
         'full_name': profile.full_name,
@@ -535,6 +587,10 @@ def handle_doctor_profile(user):
         'city': get_related_location_name(profile, 'city'),
         'state': get_related_location_name(profile, 'state'),
         'pincode': profile.pincode,
+        # Older records stored "1" for India, so show the country name like the
+        # other profile handlers do. The edit form prefills this value so saving
+        # no longer wipes the stored country.
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else ''),
         'clinic_timing_from': profile.clinic_timing_from,
         'clinic_timing_to': profile.clinic_timing_to,
         'home_visit_available': profile.home_visit_available,
@@ -1406,8 +1462,12 @@ def update_doctor_profile(request):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
     if errors:
+        # The edit form posts through fetch() and shows `message` in the error
+        # toast, so return a readable sentence next to the per-field errors
+        # (previously the toast displayed a raw JSON blob of `errors`).
         return JsonResponse({
             "success": False,
+            "message": " ".join(str(msg) for msg in errors.values()),
             "errors": errors
         }, status=400)
 
@@ -1417,7 +1477,7 @@ def update_doctor_profile(request):
 
             # USER UPDATE
             user.email = post_data.get('email')
-            user.phone_country_code = post_data.get("countryCodes")
+            user.phone_country_code = normalize_dial_code(post_data.get("countryCodes"))
             user.phone_number = post_data.get("phone")
             user.save()
 
@@ -1463,7 +1523,19 @@ def update_doctor_profile(request):
 
             # doctor_profile.state = post_data.get("state")
 
-            doctor_profile.country = post_data.get("country")
+            # The account details screen shows the profile contact numbers, so
+            # persist them here as well (only `user.phone_number` was saved
+            # before, which left the displayed numbers unchanged after saving).
+            doctor_profile.contact_number = post_data.get("phone")
+
+            doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
+
+            # Only overwrite the country when the form actually submits one.
+            # The input used to render empty, and saving wiped the stored value.
+            country = (post_data.get("country") or "").strip()
+
+            if country:
+                doctor_profile.country = country
 
             doctor_profile.pincode = post_data.get("pincode")
 

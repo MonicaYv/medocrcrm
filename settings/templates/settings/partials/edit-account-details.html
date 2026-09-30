@@ -1291,13 +1291,13 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class=" lg:w-1/4">
-                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
-                    {% for code in country_codes %}
-                        <option value="{{ code.dial_code }}"
-                            {% if code.dial_code == country_code %}selected{% endif %}>
-                            {{ code.name }} ({{ code.dial_code }})
-                        </option>
-                    {%endfor%}
+                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                        {% for code in country_codes %}
+                            <option value="{{ code.dial_code }}"
+                                {% if code.dial_code == country_code %}selected{% endif %}>
+                                {{ code.name }} ({{ code.dial_code }})
+                            </option>
+                        {%endfor%}
                     </select>
                 </div>
 
@@ -1565,14 +1565,14 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class=" lg:w-1/4">
-                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}"></select>
-                    {% for code in country_codes %}
-                        <option value="{{ code.dial_code }}"
-                            {% if code.dial_code == country_code %}selected{% endif %}>
-                            {{ code.name }} ({{ code.dial_code }})
-                        </option>
-                    {%endfor%}
-                     </select>
+                    <select name="alt_countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                        {% for code in country_codes %}
+                            <option value="{{ code.dial_code }}"
+                                {% if code.dial_code == country_code %}selected{% endif %}>
+                                {{ code.name }} ({{ code.dial_code }})
+                            </option>
+                        {%endfor%}
+                    </select>
                 </div>
 
                 <!-- Phone -->
