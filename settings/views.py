@@ -1,7 +1,9 @@
 import os
 import re
 import json
+import uuid
 import traceback
+from decimal import Decimal
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -27,6 +29,7 @@ from dashboard.utils import (
     get_common_context,
 )
 from settings.models import SellerSubscription
+from appointments.models import WalletTransaction
 from registration.models import (
     User,
     NGOProfile,
@@ -123,6 +126,16 @@ def settings_page(request):
         context.update(handler_func(user))
 
     context['country_codes'] = load_country_codes()
+
+    # The Subscription tab settles the plan fee from the Advance (prepaid
+    # wallet), so render the live balance server-side. The status API refreshes
+    # it afterwards, but this avoids flashing a stale/hardcoded value.
+    context.update({
+        "advance_balance": get_advance_balance(user),
+        "subscription_price": SUBSCRIPTION_PRICE,
+        "subscription_gst": SUBSCRIPTION_GST,
+        "subscription_total": SUBSCRIPTION_TOTAL,
+    })
 
     template_map = {
         "pharmacy": "settings/seller_settings.html",
@@ -1662,6 +1675,31 @@ def get_seller_profile_id(user):
     profile = model.objects.filter(user=user).only("id").first()
     return profile.id if profile else None
 
+
+# Subscription pricing (kept in sync with the Payment Details popup in
+# settings/templates/subscription/subscription.html)
+SUBSCRIPTION_PRICE = Decimal("999.00")
+SUBSCRIPTION_GST = Decimal("180.00")
+SUBSCRIPTION_TOTAL = SUBSCRIPTION_PRICE + SUBSCRIPTION_GST
+SUBSCRIPTION_VALIDITY_DAYS = 30
+
+
+def get_advance_balance(user):
+    """Current Advance (prepaid wallet) balance for a user.
+
+    The wallet keeps a running ``current_balance`` on every transaction, so the
+    balance is the latest row's value. Mirrors the logic used by the Advance
+    screens in dashboard/views.py.
+    """
+    last_txn = (
+        WalletTransaction.objects
+        .filter(user=user)
+        .order_by("-created_at")
+        .first()
+    )
+    return last_txn.current_balance if last_txn else Decimal("0.00")
+
+
 @dashboard_login_required
 def seller_subscription_status(request):
     """
@@ -1679,10 +1717,18 @@ def seller_subscription_status(request):
         is_enabled=True
     ).first()
 
+    # The subscription is paid out of the Advance (prepaid wallet), so the
+    # section has to show the live balance alongside the plan state.
+    advance_balance = get_advance_balance(user)
+
     if not sub:
         return JsonResponse({
             "has_subscription": False,
             "plan": "Free",
+            "price": float(SUBSCRIPTION_PRICE),
+            "gst": float(SUBSCRIPTION_GST),
+            "total": float(SUBSCRIPTION_TOTAL),
+            "advance_balance": float(advance_balance),
         })
 
     days_left = None
@@ -1695,6 +1741,8 @@ def seller_subscription_status(request):
         "price": float(sub.price),
         "expiry_date": sub.expiry_date.strftime("%d/%m/%Y") if sub.expiry_date else None,
         "days_left": days_left,
+        "total": float(SUBSCRIPTION_TOTAL),
+        "advance_balance": float(advance_balance),
     })
 
 @require_POST
@@ -1704,26 +1752,68 @@ def subscribe_subscription(request):
 
     seller_profile_id = get_seller_profile_id(user)
     if not seller_profile_id:
-        return JsonResponse({"success": False}, status=400)
+        return JsonResponse({"success": False, "message": "Seller profile not found"}, status=400)
 
-    # deactivate old
-    SellerSubscription.objects.filter(
-        seller_type=user.user_type,
-        seller_profile_id=seller_profile_id,
-        is_active=True
-    ).update(is_active=False)
+    # The plan fee is settled from the Advance (prepaid wallet). Reject when the
+    # balance can't cover it instead of granting a subscription for free, and
+    # write the debit so the Advance balance actually updates.
+    with transaction.atomic():
+        last_txn = (
+            WalletTransaction.objects
+            .select_for_update()
+            .filter(user=user)
+            .order_by("-created_at")
+            .first()
+        )
+        current_balance = last_txn.current_balance if last_txn else Decimal("0.00")
 
-    # create new subscription
-    SellerSubscription.objects.create(
-        seller_type=user.user_type,
-        seller_profile_id=seller_profile_id,
-        plan_name="Premium",
-        price=999,
-        is_active=True,
-        expiry_date=timezone.now() + timedelta(days=30),
-    )
+        if current_balance < SUBSCRIPTION_TOTAL:
+            return JsonResponse({
+                "success": False,
+                "insufficient": True,
+                "required": float(SUBSCRIPTION_TOTAL),
+                "advance_balance": float(current_balance),
+                "message": "Insufficient advance balance",
+            }, status=400)
 
-    return JsonResponse({"success": True})
+        new_balance = current_balance - SUBSCRIPTION_TOTAL
+        WalletTransaction.objects.create(
+            user=user,
+            order_id=f"SUB-{uuid.uuid4().hex[:12].upper()}",
+            tranx_id=str(uuid.uuid4()),
+            amount=SUBSCRIPTION_TOTAL,
+            transaction_type="DEBIT",
+            points_earned=Decimal("0.00"),
+            current_balance=new_balance,
+            created_at=timezone.now(),
+        )
+
+        # deactivate old
+        SellerSubscription.objects.filter(
+            seller_type=user.user_type,
+            seller_profile_id=seller_profile_id,
+            is_active=True
+        ).update(is_active=False)
+
+        # create new subscription
+        SellerSubscription.objects.create(
+            seller_type=user.user_type,
+            seller_profile_id=seller_profile_id,
+            plan_name="Premium",
+            price=SUBSCRIPTION_PRICE,
+            is_active=True,
+            is_enabled=True,
+            expiry_date=timezone.now() + timedelta(days=SUBSCRIPTION_VALIDITY_DAYS),
+        )
+
+    return JsonResponse({
+        "success": True,
+        "charged": float(SUBSCRIPTION_TOTAL),
+        "advance_balance": float(new_balance),
+        # Spending the balance is a DEBIT, so no points are granted here
+        # (points are awarded on Advance recharge, see add_advance_amount).
+        "points_earned": 0,
+    })
 
 @dashboard_login_required
 @require_POST

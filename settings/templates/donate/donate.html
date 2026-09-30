@@ -27,14 +27,14 @@
           <button 
             class="{{ tab_class }} {% if active_tab == 'donation-history' %}{{ active_tab_class }}{% endif %} px-4 text-18-fs cursor-pointer text-{{ text }}"
             data-tab="donation-history"
-            data-parent="settings">
+            data-parent="donate">
             Donation History
           </button>
         </div>
       </div>
 
       <!-- Organizations Section -->
-      <div  class="organization tab-content mt-4" data-start-date="" data-end-date="" data-range-label="">
+      <div  class="organization tab-content mt-4 hidden" data-start-date="" data-end-date="" data-range-label="">
         <!-- Search + Filter Section (for Organizations tab only) -->
         <div id="organizationFilters" class="search-filter-section flex flex-row items-center justify-end gap-3 sm:gap-4 w-auto pb-1">
           <div class="w-[280px] sm:w-[300px] h-10 rounded-[6px] bg-light-white flex items-center px-2">
@@ -75,7 +75,7 @@
           {% include "donate/partials/organization-cards.html" with ngo_posts=ngo_posts %}
         </div>
         <!-- Pagination Placeholder -->
-        <div id="pagination-container" class="gap-2 mt-4 flex justify-center"></div>
+        <div id="organization-pagination-container" class="gap-2 mt-4 flex justify-center"></div>
       </div>
 
       <!-- Donation History Section (hidden by default) -->
