@@ -1412,45 +1412,22 @@ function highlightCurrentStatus(currentStatus) {
 
 //filter date and custome date wise
 document.querySelectorAll(".help-filter-option").forEach((el) => {
-  el.addEventListener("click", function (event) {
-    const filter =
-      this.getAttribute("data-support-filter") ||
-      this.getAttribute("data-filter");
-
-    // Keep support filtering inside the current settings/support tab. The
-    // global dropdown handler must not turn this into a page navigation.
-    event.stopPropagation();
+  el.addEventListener("click", function () {
+    const filter = this.getAttribute("data-support-filter");
 
     if (filter === "custom") {
-      const dropdown = this.closest(".dropdown");
-      dropdown.querySelector(".filterDropdown").classList.add("hidden");
-      dropdown.querySelector(".datepicker-container").classList.remove("hidden");
+      document
+        .querySelector(".datepicker-container")
+        .classList.remove("hidden");
       return; // Stop further processing
     }
 
-    const today = new Date();
-    let fromDate = new Date(today);
-
-    switch (filter) {
-      case "1week":
-        fromDate.setDate(today.getDate() - 7); // 7 days ago
-        break;
-      case "1month":
-        fromDate.setMonth(today.getMonth() - 1); // 1 month ago
-        break;
-      case "1year":
-        fromDate.setFullYear(today.getFullYear() - 1); // 1 year ago
-        break;
+    if (["1week", "1month", "1year"].includes(filter)) {
+      filterTickets("", "", filter);
     }
-
-    const formatLocalDate = (date) =>
-      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-    const formattedFromDate = formatLocalDate(fromDate);
-    const formattedToDate = formatLocalDate(today);
-
-    filterTickets(formattedFromDate, formattedToDate);
   });
 });
+
 
 // The shared datepicker is jQuery UI, so handle its onSelect callback here.
 $(function () {
@@ -1479,16 +1456,20 @@ $(function () {
   });
 });
 
-function filterTickets(fromDate, toDate) {
+function filterTickets(fromDate, toDate, range = "") {
   fetch(ticketDetailsDateWise, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-CSRFToken": getCookie("csrftoken"),
     },
-    body: JSON.stringify({ from_date: fromDate, to_date: toDate }),
+    body: JSON.stringify({ from_date: fromDate, to_date: toDate, range: range }),
   })
-    .then((res) => res.json())
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Unable to filter support tickets.");
+      return data;
+    })
     .then((data) => {
       allTickets = data.tickets; // Update the global variable
       currentPage = 1; // Reset to page 1
@@ -1498,6 +1479,7 @@ function filterTickets(fromDate, toDate) {
     })
     .catch((err) => {
       console.error("Filter fetch error:", err);
+      if (window.toastr) toastr.error(err.message || "Unable to filter support tickets.");
     });
 }
 
