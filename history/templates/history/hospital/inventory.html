@@ -395,25 +395,11 @@
                                 <!-- Status -->
                                 <div class="relative flex flex-col justify-center">
 
-                                    {% if bed.is_occupied %}
                                     <button
-                                        class="status-btn flex items-center justify-between text-error bg-rosewater text-sm font-semibold p-2 rounded-md w-[128px]">
+                                        class="status-btn flex items-center justify-between {% if bed.is_occupied %}text-error bg-rosewater{% else %}text-dodger-blue bg-light-dodger-blue{% endif %} text-sm font-semibold p-2 rounded-md w-[128px]">
 
                                         <span class="status-text bed-status-text">
-                                            Occupied
-                                        </span>
-
-                                        <span class="material-symbols-outlined">
-                                            keyboard_arrow_down
-                                        </span>
-
-                                    </button>
-                                    {% else %}
-                                    <button
-                                        class="status-btn flex items-center justify-between text-dodger-blue bg-light-dodger-blue text-sm font-semibold p-2 rounded-md w-[128px]">
-
-                                        <span class="status-text bed-status-text">
-                                            Available
+                                            {% if bed.is_occupied %}Occupied{% else %}Available{% endif %}
                                         </span>
 
                                         <span class="material-symbols-outlined">
@@ -430,7 +416,6 @@
                                             class="dropdown-item px-3 py-2 text-sm font-semibold text-dodger-blue hover:bg-light-dodger-blue cursor-pointer">
                                             Occupied</p>
                                     </div>
-                                    {% endif %}
 
                                 </div>
 

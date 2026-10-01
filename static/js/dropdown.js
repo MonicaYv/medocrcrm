@@ -65,6 +65,8 @@ $(document).ready(function () {
 
   // Toggle filter dropdown
   $('.filterToggle').click(function (e) {
+    // Hospital history owns its filter menus with class-based visibility.
+    if ($('#historySearch').length) return;
     // Appointment pages manage their own filter dropdown visibility in
     // appointment.js (class-based). Skip the shared show/hide here so inline
     // styles don't permanently hide the picker.
@@ -130,6 +132,10 @@ $(document).ready(function () {
     // jQuery UI redraws the clicked arrow before this document handler runs,
     // detaching it from the picker. Use the original click path to keep it open.
     if (clickedMonthNavigation) return;
+
+    // Hospital history closes its own menus; inline display styles here would
+    // prevent its class-based filter from reopening after an outside click.
+    if ($('#historySearch').length) return;
 
     if (!$target.closest('.dropdown, .datepicker-container, .ui-datepicker, .statusDropdown').length) {
       // Appointment pages use class-based visibility; don't inject inline
