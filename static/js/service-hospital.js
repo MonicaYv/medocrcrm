@@ -1,6 +1,9 @@
 let HOSPITAL_CATEGORIES = [];
 let HOSPITAL_SERVICES = [];
 let HOSPITAL_BED_ROOMS = [];
+let HOSPITAL_EDIT_ID = null;
+let HOSPITAL_EDIT_TYPE = null;
+let HOSPITAL_ADD_TYPE = null;
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -368,20 +371,53 @@ $(document).on("click", function (e) {
 $(document).on("click", ".add-services-home, .home-add-service", function (e) {
     e.preventDefault();
     e.stopPropagation();
+
+    HOSPITAL_EDIT_ID = null;
+    HOSPITAL_EDIT_TYPE = null;
+
+    HOSPITAL_ADD_TYPE = "service";
+
     $(".home-section").addClass("hidden");
     $(".services-section.popup-overlay")
         .removeClass("hidden")
         .addClass("flex");
+
+    $(".popup-overlay .services-list").empty();
+
+    const template = document.getElementById("popup-service-card-template");
+
+    if (template) {
+        const $card = $(template.content.firstElementChild.cloneNode(true));
+        resetServiceCard($card);
+        $(".popup-overlay .services-list").append($card);
+    }
     showStep(1);
 });
 
 $(document).on("click", ".add-bed-room-home", function (e) {
     e.preventDefault();
     e.stopPropagation();
+
+    HOSPITAL_EDIT_ID = null;
+    HOSPITAL_EDIT_TYPE = null;
+
+    HOSPITAL_ADD_TYPE = "room";
+
     $(".home-section").addClass("hidden");
     $(".services-section.popup-overlay")
         .removeClass("hidden")
         .addClass("flex");
+
+     $(".popup-overlay .bed-services-list").empty();
+
+    const template = document.getElementById("popup-bed-room-card-template");
+
+    if (template) {
+        const $card = $(template.content.firstElementChild.cloneNode(true));
+        resetRoomCard($card);
+        $(".popup-overlay .bed-services-list").append($card);
+    }
+
     showStep(2);
 });
 
@@ -391,30 +427,93 @@ $(document).on("click", "#popup-cancel-steps", function () {
         .addClass("hidden")
         .removeClass("flex");
     $(".home-section").removeClass("hidden");
+
+    HOSPITAL_EDIT_ID = null;
+    HOSPITAL_EDIT_TYPE = null;
 });
 
 $(document).on("click", ".step-btn[data-target]", function (e) {
     e.preventDefault();
+
     const target = Number($(this).data("target"));
     const currentStep = $(".popup-step-content:not(.hidden)").attr("id");
-    if (target === 2 && currentStep === "popup-step-1") {
+
+    // ==========================================
+    // SERVICE FLOW
+    // Service Step -> Summary
+    // ==========================================
+    if (
+        HOSPITAL_ADD_TYPE === "service" &&
+        currentStep === "popup-step-1"
+    ) {
         const services = collectServices();
+
+        if (!services.length) {
+            alert("Please add at least one complete service.");
+            return;
+        }
+
+        renderSummary();
+
+        // SKIP BED & ROOM
+        showStep(3);
+        return;
+    }
+
+    // ==========================================
+    // NORMAL SERVICE -> BED & ROOM FLOW
+    // ==========================================
+    if (
+        target === 2 &&
+        currentStep === "popup-step-1" &&
+        HOSPITAL_ADD_TYPE !== "service"
+    ) {
+        const services = collectServices();
+
         if (!services.length) {
             alert("Please add at least one complete service.");
             return;
         }
     }
+
+    // ==========================================
+    // BED & ROOM -> SUMMARY
+    // ==========================================
+    if (
+        target === 3 &&
+        HOSPITAL_ADD_TYPE === "room"
+    ) {
+        const rooms = collectRooms();
+
+        if (!rooms.length) {
+            alert("Please add at least one complete bed/room.");
+            return;
+        }
+
+        renderSummary();
+
+        showStep(3);
+        return;
+    }
+
+    // ==========================================
+    // NORMAL FLOW -> SUMMARY
+    // ==========================================
     if (target === 3) {
         const services = collectServices();
         const rooms = collectRooms();
+
         if (!services.length && !rooms.length) {
             alert("Please add at least one service or bed/room.");
             return;
         }
+
         renderSummary();
     }
+
     showStep(target);
 });
+
 $(document).on("click", ".add-service-bed", function () {
     const template = document.getElementById("popup-bed-room-card-template");
     if (!template) {
@@ -517,6 +616,7 @@ $(document).on("click", ".edit-hospital-service", function (e) {
 
     HOSPITAL_EDIT_ID = $btn.data("rate-id");
     HOSPITAL_EDIT_TYPE = "service";
+    HOSPITAL_ADD_TYPE = "service";
 
     const categoryId = String($btn.attr("data-category-id"));
     const serviceId = String($btn.attr("data-service-id"));
@@ -578,6 +678,7 @@ $(document).on("click", ".edit-hospital-room", function (e) {
 
     HOSPITAL_EDIT_ID = $btn.data("rate-id");
     HOSPITAL_EDIT_TYPE = "room";
+    HOSPITAL_ADD_TYPE = "room";
 
     const roomId = String($btn.attr("data-bed-room-id"));
     const days = $btn.attr("data-days");
@@ -798,6 +899,9 @@ $(document).on("click", ".close-icon", function (e) {
         .removeClass("flex");
 
     $(".home-section").removeClass("hidden");
+
+    HOSPITAL_EDIT_ID = null;
+    HOSPITAL_EDIT_TYPE = null;
 
     showStep(1);
 });
