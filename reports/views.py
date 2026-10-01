@@ -7,7 +7,6 @@ import subscription.models as subscription_models
 from django.db.models import (
     Avg,
     Count,
-    DateField,
     DecimalField,
     ExpressionWrapper,
     F,
@@ -15,7 +14,7 @@ from django.db.models import (
     Sum,
     Value,
 )
-from django.db.models.functions import Cast, Coalesce, Concat, ExtractWeekDay, TruncDate, TruncHour
+from django.db.models.functions import Coalesce, Concat, ExtractWeekDay, TruncDate, TruncHour
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -1383,21 +1382,14 @@ def hospital_report_data(request):
 # REPORT DATE / VISIT-TYPE FILTERS
 # ---------------------------------------------------------------------------
 #
-# The doctor report groups and charts every row by `created_at` (see the
-# `TruncDate("created_at")` day buckets below), so the date filter has to
-# match on that same column.
-#
-# `created_at` is a naive local (IST) column while `settings.USE_TZ` is True,
-# so the usual `created_at__date=` lookup renders
-# `col AT TIME ZONE 'Asia/Kolkata'::date`, re-shifting the stored value by the
-# UTC offset and comparing against the wrong day. `CAST(col AS date)` simply
-# truncates, which is exactly the day the report displays. See
-# appointments.utils.appointment_date_expression for the same reasoning.
+# The doctor report groups and charts rows with `TruncDate("created_at")`
+# below. Use the same timezone-aware expression for filtering, so an
+# appointment near midnight is assigned to the same local date in both places.
 
 
 def report_created_date_expression():
     """Wall-clock date expression for a report row's ``created_at``."""
-    return Cast("created_at", DateField())
+    return TruncDate("created_at")
 
 
 def apply_report_date_filter(qs, filter_type, start_date=None, end_date=None):
@@ -1457,6 +1449,15 @@ VISIT_TYPE_FILTER_ALIASES = {
     ],
 }
 
+VISIT_TYPE_FILTER_KEYS = {
+    "home": "home",
+    "home_visit": "home",
+    "home_service": "home",
+    "clinic": "clinic",
+    "clinic_visit": "clinic",
+    "in_clinic_visit": "clinic",
+}
+
 
 def apply_report_visit_type_filter(qs, visit_type):
     """Restrict a report queryset to one visit type ("home" / "clinic")."""
@@ -1464,9 +1465,11 @@ def apply_report_visit_type_filter(qs, visit_type):
     if not visit_type or visit_type in {"all", "none", "clear"}:
         return qs
 
-    aliases = VISIT_TYPE_FILTER_ALIASES.get(visit_type)
-    if not aliases:
+    visit_type_key = visit_type.replace("-", "_").replace(" ", "_")
+    canonical_type = VISIT_TYPE_FILTER_KEYS.get(visit_type_key)
+    if not canonical_type:
         return qs
+    aliases = VISIT_TYPE_FILTER_ALIASES[canonical_type]
 
     condition = Q()
     for alias in aliases:

@@ -543,12 +543,12 @@ $(document).on("click", ".view-attachment", function () {
   }
 
   // Calendar icon toggles the picker without selecting a preset yet.
-  $(document).on("click", "[data-date-filter] .calendar-icon", function (e) {
+  $("[data-date-filter] .calendar-icon").on("click", function (e) {
     e.stopPropagation();
     openHistoryDatepicker($(this).closest(".dropdown"));
   });
 
-  $(document).on("click", "[data-date-filter]", function (e) {
+  $("[data-date-filter]").on("click", function (e) {
     // Ignore the icon click - it is handled by the toggle above.
     if ($(e.target).closest(".calendar-icon").length) return;
     // Never treat the inline datepicker itself as a filter option.
