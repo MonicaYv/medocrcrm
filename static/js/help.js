@@ -1616,3 +1616,22 @@ function sendEmailSupport() {
     }
   });
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const faqToggleLink = document.getElementById("faq-toggle-link");
+    const faqSection = document.getElementById("faq-section");
+
+    if (faqToggleLink && faqSection) {
+        faqToggleLink.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            faqSection.classList.toggle("hidden");
+
+            if (faqSection.classList.contains("hidden")) {
+                faqToggleLink.textContent = "Click to read More";
+            } else {
+                faqToggleLink.textContent = "Click to Hide";
+            }
+        });
+    }
+});

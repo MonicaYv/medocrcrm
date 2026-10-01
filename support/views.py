@@ -23,6 +23,7 @@ def support_view(request):
 
     issue_types = IssueType.objects.exclude(name='chatbot_query').all()
     tickets = SupportTicket.objects.filter(user_id=user.id).order_by('-created_at')
+    faqs = FAQ.objects.filter(profile_type=user.user_type)
 
     if search_query:
         ticket_id_numeric = search_query.replace('#', '').strip()
@@ -37,6 +38,7 @@ def support_view(request):
     context.update({
         'issue_types': issue_types,
         'tickets': tickets,
+        'faqs': faqs,
     })
     return render(request, 'support.html', context)
 
@@ -446,6 +448,7 @@ def filter_tickets_old(request):
     return JsonResponse({"error": "Invalid method"})
 
 @dashboard_login_required
+@dashboard_login_required
 def faq_lists(request):
     user = request.user_obj
     query = request.GET.get('search', '').strip()
@@ -453,11 +456,10 @@ def faq_lists(request):
     if query:
         faqs = FAQ.objects.filter(
             Q(question__icontains=query) | Q(answer__icontains=query),
-            user=user
+            profile_type=user.user_type
         )
     else:
-       faqs = FAQ.objects.filter(user=user)
-
+        faqs = FAQ.objects.filter(profile_type=user.user_type)
     return render(request, 'support-faq.html', {'faqs': faqs})
 
 def faq_lists_old(request):

@@ -27,7 +27,7 @@
             <div
               class="w-full max-w-[360px] h-[48px] rounded-[6px] text-sm flex items-center justify-center"
             >
-              <a href="#" class="underline text-{{ text }} font-normal">
+              <a href="javascript:void(0);" id="faq-toggle-link" class="underline text-{{ text }} font-normal cursor-pointer">
                 Click to read More/Hide
               </a>
             </div>
@@ -45,7 +45,9 @@
             <span class="material-symbols-outlined"> search </span>
           </span>
         </div>
-          {% include "settings-support/support-faq.html" %}
+          <div id="faq-section">
+              {% include "settings-support/support-faq.html" %}
+          </div>
         
       </div>
     
