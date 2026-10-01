@@ -292,7 +292,34 @@ $(document).ready(function () {
     });
 
     //Share Popup on  Home Page of All Sections
-    $(".open-share-modal").on("click", function () {
+    $(".open-share-modal").on("click", function (e) {
+      e.preventDefault();
+
+      // Appointment modals share their own record details. Keep this action
+      // separate from the dashboard's generic share popup.
+      const $appointmentModal = $(this).closest(".modal-cancelled, .modal-missed");
+      if ($appointmentModal.length) {
+        const readValue = (selector) =>
+          $appointmentModal.find(selector).first().text().trim() || "-";
+        const shareText = [
+          `Patient: ${readValue("#modal-name")}`,
+          `Phone: ${readValue("#modal-phone")}`,
+          `Appointment: ${readValue("#modal-date")}`,
+        ].join("\n");
+
+        if (navigator.share) {
+          navigator.share({ title: "Appointment Details", text: shareText })
+            .catch((error) => {
+              if (error.name === "AbortError") return;
+              console.error("Unable to share appointment details:", error);
+              window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer");
+            });
+        } else {
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer");
+        }
+        return;
+      }
+
       $("#shareModal").removeClass("hidden").addClass("flex");
     });
     $(".close-share-modal").on("click", function () {

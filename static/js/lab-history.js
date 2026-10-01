@@ -955,64 +955,6 @@ function showToast(message, type = "success") {
         });
     }, 2500);
 }
-$(document).on("click", "#shareBtn", function () {
-  console.log("SHARE BUTTON CLICKED");
-  alert("Share clicked");
-
-
-    const patient = $("#modal-name").text();
-    const phone = $("#modal-phone").text();
-    const date = $("#modal-date").text();
-
-    const text =
-        `Patient: ${patient}\nPhone: ${phone}\nAppointment: ${date}`;
-
-    window.open(
-        "https://wa.me/?text=" + encodeURIComponent(text),
-        "_blank"
-    );
-});
-
-$(document).on("click", "#shareBtn", function (e) {
-
-    e.preventDefault();
-
-    const patient = $("#modal-name").text();
-    const phone = $("#modal-phone").text();
-    const date = $("#modal-date").text();
-
-    const text =
-      `Patient: ${patient}\nPhone: ${phone}\nAppointment: ${date}`;
-
-    if (navigator.share) {
-
-        navigator.share({
-            title: "Appointment Details",
-            text: text
-        });
-
-    } else {
-
-        window.open(
-            "https://wa.me/?text=" + encodeURIComponent(text),
-            "_blank"
-        );
-    }
-});
-function shareAppointment() {
-
-    const patient = $("#modal-name").text();
-    const phone = $("#modal-phone").text();
-    const date = $("#modal-date").text();
-
-    const text =
-        `Patient: ${patient}\nPhone: ${phone}\nAppointment: ${date}`;
-
-    window.open(
-        "https://wa.me/?text=" + encodeURIComponent(text),
-        "_blank"
-    );
-}
 $(document).on("click", ".patient-share-btn", function () {
 
     $("#patientSharePopup")

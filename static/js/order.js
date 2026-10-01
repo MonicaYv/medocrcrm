@@ -408,6 +408,35 @@ $(document).on("click", ".pharmacy-close-share", function () {
     $(this).closest(".pharmacy-share-modal").addClass("hidden").removeClass("flex");
 });
 
+$(document).on("click", ".pharmacy-share-app", function () {
+    const app = $(this).data("app");
+    const shareText = $(this).closest(".pharmacy-share-modal").find(".pharmacy-share-link").val();
+    const encodedText = encodeURIComponent(shareText);
+    let url;
+
+    switch (app) {
+        case "whatsapp":
+            url = `https://wa.me/?text=${encodedText}`;
+            break;
+        case "telegram":
+            url = `https://t.me/share/url?text=${encodedText}`;
+            break;
+        case "facebook":
+            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodedText}`;
+            break;
+        case "sms":
+            url = `sms:?body=${encodedText}`;
+            break;
+        case "gmail":
+            url = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent("Order details")}&body=${encodedText}`;
+            break;
+        default:
+            return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+});
+
 $(document).on("click", ".pharmacy-copy-btn", function () {
     const $input = $(this).siblings(".pharmacy-share-link");
     navigator.clipboard.writeText($input.val());
