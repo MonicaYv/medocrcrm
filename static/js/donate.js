@@ -225,24 +225,31 @@ $(".close-donation-history-popup").on("click", function () {
   $(".view-donation-history-popup").removeClass("flex").addClass("hidden");
 });
 
-$(document).on("click", ".download-btn", function (event) {
+$(document).on("click", ".download-btn", async function (event) {
   event.stopPropagation();
-  // Find the next sibling with class 'download-container'
   const $container = $(this).closest(".popup").find(".download-container");
 
   if ($container.length === 0) {
     console.error("[ERROR] download-container not found");
     return;
   }
+  if (typeof html2pdf !== "function") {
+    toastr.error("PDF export is unavailable. Please try again later.");
+    return;
+  }
 
-  // Clone the element properly
   const clone = $container[0].cloneNode(true);
-  clone.style.position = "static";
+  clone.style.position = "fixed";
+  clone.style.left = "-10000px";
+  clone.style.top = "0";
+  clone.style.width = `${$container.outerWidth()}px`;
+  clone.style.height = "auto";
+  clone.style.maxHeight = "none";
+  clone.style.overflow = "visible";
   clone.style.visibility = "visible";
   clone.style.display = "block";
   clone.style.zIndex = "1";
-  clone.id = "download-container-clone";
-  // document.body.appendChild(clone);
+  document.body.appendChild(clone);
 
   const opt = {
     margin: 0,
@@ -252,17 +259,14 @@ $(document).on("click", ".download-btn", function (event) {
     jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
   };
 
-  html2pdf()
-    .set(opt)
-    .from(clone)
-    .save()
-    .then(() => {
-      document.body.removeChild(clone);
-    })
-    .catch((err) => {
-      console.error("[ERROR] PDF generation failed:", err);
-      document.body.removeChild(clone);
-    });
+  try {
+    await html2pdf().set(opt).from(clone).save();
+  } catch (error) {
+    console.error("[ERROR] PDF generation failed:", error);
+    toastr.error("Failed to export donation history.");
+  } finally {
+    clone.remove();
+  }
 });
 function loadDonationHistory(page = 1, $container = $("#donationHistory")) {
   const query = $container.find('input[name="donation_history_query"]').val();

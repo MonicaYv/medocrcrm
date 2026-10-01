@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from .utils import send_custom_email
 from dashboard.utils import dashboard_login_required, get_common_context
 from .models import IssueType, IssueOption, SupportTicket, FAQ, ChatOptionGroup, ChatSupport
@@ -23,6 +23,7 @@ def support_view(request):
 
     issue_types = IssueType.objects.exclude(name='chatbot_query').all()
     tickets = SupportTicket.objects.filter(user_id=user.id).order_by('-created_at')
+    faqs = FAQ.objects.filter(profile_type=user.user_type)
 
     if search_query:
         ticket_id_numeric = search_query.replace('#', '').strip()
@@ -37,6 +38,7 @@ def support_view(request):
     context.update({
         'issue_types': issue_types,
         'tickets': tickets,
+        'faqs': faqs,
     })
     return render(request, 'support.html', context)
 
@@ -373,15 +375,21 @@ def filter_tickets(request):
             return JsonResponse({"error": "Invalid request body"}, status=400)
         from_date_str = data.get("from_date")
         to_date_str = data.get("to_date")
+        range_filter = data.get("range")
 
-        try:
-            from_date = datetime.strptime(from_date_str, "%Y-%m-%d").date()
-            to_date = (
-                datetime.strptime(to_date_str, "%Y-%m-%d").date()
-                if to_date_str else None
-            )
-        except Exception:
-            return JsonResponse({"error": "Invalid date format"}, status=400)
+        preset_days = {"1week": 7, "1month": 30, "1year": 365}
+        if range_filter in preset_days:
+            to_date = timezone.localdate()
+            from_date = to_date - timedelta(days=preset_days[range_filter] - 1)
+        else:
+            try:
+                from_date = datetime.strptime(from_date_str, "%Y-%m-%d").date()
+                to_date = (
+                    datetime.strptime(to_date_str, "%Y-%m-%d").date()
+                    if to_date_str else None
+                )
+            except (TypeError, ValueError):
+                return JsonResponse({"error": "Invalid date format"}, status=400)
 
         if to_date and to_date < from_date:
             return JsonResponse({"error": "End date must be on or after start date"}, status=400)
@@ -446,6 +454,7 @@ def filter_tickets_old(request):
     return JsonResponse({"error": "Invalid method"})
 
 @dashboard_login_required
+@dashboard_login_required
 def faq_lists(request):
     user = request.user_obj
     query = request.GET.get('search', '').strip()
@@ -453,11 +462,10 @@ def faq_lists(request):
     if query:
         faqs = FAQ.objects.filter(
             Q(question__icontains=query) | Q(answer__icontains=query),
-            user=user
+            profile_type=user.user_type
         )
     else:
-       faqs = FAQ.objects.filter(user=user)
-
+        faqs = FAQ.objects.filter(profile_type=user.user_type)
     return render(request, 'support-faq.html', {'faqs': faqs})
 
 def faq_lists_old(request):

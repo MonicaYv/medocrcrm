@@ -1,8 +1,11 @@
+from datetime import timedelta
+
 from django.core.paginator import Paginator
 from django.db.models import Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.utils import timezone
 from dashboard.utils import dashboard_login_required, get_common_context, get_theme_colors
 from orders.models import OrderStatusChoices, PurchaseMedicine, UserPurchase
 from django.views.decorators.http import require_POST
@@ -129,7 +132,11 @@ def ajax_doctor_history(request):
     page_number = request.GET.get("page", 1)
 
     # Date filter - mirrors the contract used by appointments.ajax_appointments.
-    date_filter = request.GET.get("date_filter", "").strip().lower()
+    date_filter = (
+        request.GET.get("date_filter")
+        or request.GET.get("filter")
+        or ""
+    ).strip().lower()
     selected_date = (
         request.GET.get("date", "")
         or request.GET.get("selected_date", "")
@@ -143,6 +150,14 @@ def ajax_doctor_history(request):
         request.GET.get("end_date", "")
         or request.GET.get("end", "")
     ).strip()
+    if not date_filter and (selected_date or start_date or end_date):
+        date_filter = "custom"
+    if date_filter in {"month", "year"}:
+        window_days = 30 if date_filter == "month" else 365
+        today = timezone.localdate()
+        start_date = (today - timedelta(days=window_days - 1)).isoformat()
+        end_date = today.isoformat()
+        date_filter = "custom"
 
     doctor = DoctorProfile.objects.filter(
         user=user

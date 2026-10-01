@@ -151,38 +151,61 @@ $(document).ready(function () {
         window.open(url, "_blank"); // open in new tab / app
       }
     });
-    let generatedPdfUrl = null; // Variable to hold the Blob URL of the generated PDF
+    let generatedPdfFile = null;
 
-    // Generate PDF on clicking the share button
-    $(".share-btn").click(function () {
-      console.log("share");
+    function downloadGeneratedPdf(file) {
+      const url = URL.createObjectURL(file);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
+
+    // Generate and share the actual PDF file, not a browser-local blob URL.
+    $(".share-btn").on("click", async function () {
       const element = $(this).closest(".popup").find(".download-container");
+      if (!element.length || typeof html2pdf !== "function") {
+        toastr.error("Donation history PDF is unavailable.");
+        return;
+      }
 
-      // Set up html2pdf options
-      var opt = {
+      const options = {
         margin: 1,
-        filename: "share-pdf.pdf",
+        filename: "donation-history.pdf",
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { dpi: 192, letterRendering: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
 
-      // Generate the PDF asynchronously
-      html2pdf()
-        .from(element[0])
-        .set(opt)
-        .toPdf()
-        .get("pdf")
-        .then(function (pdf) {
-          // Convert the PDF into a Blob
-          var pdfBlob = pdf.output("blob");
-
-          // Create a Blob URL for sharing
-          generatedPdfUrl = URL.createObjectURL(pdfBlob);
-
-          // Show the share popup
-          $("#sharePopup").removeClass("hidden").addClass("flex");
+      try {
+        const pdf = await html2pdf().set(options).from(element[0]).toPdf().get("pdf");
+        generatedPdfFile = new File([pdf.output("blob")], "donation-history.pdf", {
+          type: "application/pdf",
         });
+
+        if (
+          navigator.share &&
+          navigator.canShare &&
+          navigator.canShare({ files: [generatedPdfFile] })
+        ) {
+          await navigator.share({
+            files: [generatedPdfFile],
+            title: "Donation history",
+            text: "Donation history PDF",
+          });
+          return;
+        }
+
+        $("#sharePopup").removeClass("hidden").addClass("flex");
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Donation history share failed:", error);
+          toastr.error("Failed to prepare donation history for sharing.");
+        }
+      }
     });
 
     // Close the share popup
@@ -192,46 +215,36 @@ $(document).ready(function () {
 
     // Share the generated PDF when the user clicks on a share button
     $(".share-pdf").click(function () {
-      if (generatedPdfUrl) {
+      if (generatedPdfFile) {
         const app = $(this).data("app");
+        downloadGeneratedPdf(generatedPdfFile);
+        const message = encodeURIComponent(
+          "I downloaded the donation history PDF. Please attach donation-history.pdf to this message."
+        );
+        let url = "";
 
-        // Share via the appropriate app
         switch (app) {
           case "whatsapp":
-            window.open(
-              `https://wa.me/?text=${encodeURIComponent(generatedPdfUrl)}`,
-              "_blank",
-            );
+            url = `https://wa.me/?text=${message}`;
             break;
           case "telegram":
-            window.open(
-              `https://t.me/share/url?url=${encodeURIComponent(generatedPdfUrl)}`,
-              "_blank",
-            );
+            url = `https://t.me/share/url?url=${encodeURIComponent(window.location.origin)}&text=${message}`;
             break;
           case "facebook":
-            window.open(
-              `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(generatedPdfUrl)}`,
-              "_blank",
-            );
+            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin)}`;
             break;
           case "sms":
-            window.open(
-              `sms:?body=${encodeURIComponent(generatedPdfUrl)}`,
-              "_blank",
-            );
+            url = `sms:?body=${message}`;
             break;
           case "gmail":
-            window.open(
-              `https://mail.google.com/mail/?view=cm&fs=1&to=&su=Share%20Pdf&body=${encodeURIComponent(generatedPdfUrl)}`,
-              "_blank",
-            );
+            url = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=Donation%20History&body=${message}`;
             break;
           default:
             break;
         }
+        if (url) window.open(url, "_blank", "noopener");
       } else {
-        alert("Please generate the PDF first by clicking the share button.");
+        toastr.error("Please prepare the donation history PDF first.");
       }
     });
     // Scan Virus Functionality
@@ -279,7 +292,34 @@ $(document).ready(function () {
     });
 
     //Share Popup on  Home Page of All Sections
-    $(".open-share-modal").on("click", function () {
+    $(".open-share-modal").on("click", function (e) {
+      e.preventDefault();
+
+      // Appointment modals share their own record details. Keep this action
+      // separate from the dashboard's generic share popup.
+      const $appointmentModal = $(this).closest(".modal-cancelled, .modal-missed");
+      if ($appointmentModal.length) {
+        const readValue = (selector) =>
+          $appointmentModal.find(selector).first().text().trim() || "-";
+        const shareText = [
+          `Patient: ${readValue("#modal-name")}`,
+          `Phone: ${readValue("#modal-phone")}`,
+          `Appointment: ${readValue("#modal-date")}`,
+        ].join("\n");
+
+        if (navigator.share) {
+          navigator.share({ title: "Appointment Details", text: shareText })
+            .catch((error) => {
+              if (error.name === "AbortError") return;
+              console.error("Unable to share appointment details:", error);
+              window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer");
+            });
+        } else {
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer");
+        }
+        return;
+      }
+
       $("#shareModal").removeClass("hidden").addClass("flex");
     });
     $(".close-share-modal").on("click", function () {
