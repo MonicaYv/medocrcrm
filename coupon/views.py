@@ -215,6 +215,30 @@ def coupon_view(request):
     user = request.user_obj
     context = get_common_context(request, user)
     if user.user_type == "pharmacy":
+        coupons = Coupon.objects.filter(
+            validity__gte=timezone.now().date()
+        ).select_related(
+            "category",
+            "brand_name",
+            "offer_type"
+        ).order_by("-created_at")
+
+        for coupon in coupons:
+            coupon.redeemed_percentage = (
+                (coupon.redeemed_count * 100) / coupon.max_redemptions
+                if coupon.max_redemptions
+                else 0
+            )
+
+            coupon.image_url = (
+                f"{settings.MEDIA_URL}{coupon.image.lstrip('/')}"
+                if coupon.image and default_storage.exists(coupon.image)
+                else ""
+            )
+
+        context["coupons"] = coupons
+        context["popular_coupons"] = coupons.order_by("-redeemed_count")[:4]
+
         return render(request, "pharmacy/pharmacy_coupon.html", context)
 
     if request.method == 'POST':
