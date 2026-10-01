@@ -1410,107 +1410,174 @@ function highlightCurrentStatus(currentStatus) {
   });
 }
 
-//filter date and custome date wise
-document.querySelectorAll(".help-filter-option").forEach((el) => {
-  el.addEventListener("click", function () {
-    const filter = this.getAttribute("data-support-filter");
+  document.querySelectorAll(".help-filter-option").forEach((el) => {
+    el.addEventListener("click", function (event) {
+      const filter =
+        this.getAttribute("data-support-filter") ||
+        this.getAttribute("data-filter");
 
-    if (filter === "custom") {
-      document
-        .querySelector(".datepicker-container")
-        .classList.remove("hidden");
-      return; // Stop further processing
-    }
+      event.stopPropagation();
 
-    if (["1week", "1month", "1year"].includes(filter)) {
-      filterTickets("", "", filter);
-    }
+      if (filter === "custom") {
+        const dropdown = this.closest(".dropdown");
+
+        dropdown.querySelector(".filterDropdown").classList.add("hidden");
+        dropdown
+          .querySelector(".datepicker-container")
+          .classList.remove("hidden");
+
+        return;
+      }
+
+      const today = new Date();
+      let fromDate = new Date(today);
+
+      switch (filter) {
+        case "1week":
+          fromDate.setDate(today.getDate() - 7);
+          break;
+
+        case "1month":
+          fromDate.setMonth(today.getMonth() - 1);
+          break;
+
+        case "1year":
+          fromDate.setFullYear(today.getFullYear() - 1);
+          break;
+      }
+
+      const formatLocalDate = (date) =>
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+      const formattedFromDate = formatLocalDate(fromDate);
+      const formattedToDate = formatLocalDate(today);
+
+      filterTickets(formattedFromDate, formattedToDate);
+    });
   });
-});
-
-
-// The shared datepicker is jQuery UI, so handle its onSelect callback here.
-$(function () {
-  const $datepicker = $(".help-filter-datepicker[inline-datepicker]");
-  if (!$datepicker.length || !$.fn.datepicker) return;
 
   let customStartDate = null;
   let customEndDate = null;
-  $datepicker.datepicker("option", "dateFormat", "yy-mm-dd");
-  $datepicker.datepicker("option", "onSelect", function (dateText) {
-    if (!customStartDate || customEndDate) {
-      customStartDate = dateText;
-      customEndDate = null;
-      return;
-    }
 
-    customEndDate = dateText;
-    if (customStartDate > customEndDate) {
-      [customStartDate, customEndDate] = [customEndDate, customStartDate];
-    }
+  $(function () {
+    setTimeout(function () {
+      const $datepicker = $("#inline-datepicker");
 
-    filterTickets(customStartDate, customEndDate);
+      if (!$datepicker.length) {
+        return;
+      }
+
+      if (!$.fn.datepicker) {
+        return;
+      }
+
+      function handleCustomDate(dateText) {
+        if (!customStartDate || customEndDate) {
+          customStartDate = dateText;
+          customEndDate = null;
+          return;
+        }
+
+        customEndDate = dateText;
+
+        if (customStartDate > customEndDate) {
+          [customStartDate, customEndDate] = [
+            customEndDate,
+            customStartDate,
+          ];
+        }
+
+        filterTickets(customStartDate, customEndDate);
+
+        customStartDate = null;
+        customEndDate = null;
+
+        $(".datepicker-container").addClass("hidden");
+      }
+
+      if (!$datepicker.hasClass("hasDatepicker")) {
+        $datepicker.datepicker({
+          dateFormat: "yy-mm-dd",
+          onSelect: function (dateText) {
+            handleCustomDate(dateText);
+          },
+        });
+      } else {
+        $datepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+
+        $datepicker.datepicker("option", "onSelect", function (dateText) {
+          handleCustomDate(dateText);
+        });
+      }
+    }, 0);
+  });
+
+  function resetSupportFilter() {
     customStartDate = null;
     customEndDate = null;
+
     $(".datepicker-container").addClass("hidden");
-  });
-});
+    $(".filterDropdown").addClass("hidden");
 
-function filterTickets(fromDate, toDate, range = "") {
-  fetch(ticketDetailsDateWise, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCookie("csrftoken"),
-    },
-    body: JSON.stringify({ from_date: fromDate, to_date: toDate, range: range }),
-  })
-    .then(async (res) => {
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Unable to filter support tickets.");
-      return data;
-    })
-    .then((data) => {
-      allTickets = data.tickets; // Update the global variable
-      currentPage = 1; // Reset to page 1
-      renderTickets(allTickets); // Render from filtered data
-      renderSupportPagination();
-      // renderTickets(data.tickets); // Use your existing renderTickets()
-    })
-    .catch((err) => {
-      console.error("Filter fetch error:", err);
-      if (window.toastr) toastr.error(err.message || "Unable to filter support tickets.");
-    });
-}
+    const $datepicker = $("#inline-datepicker");
 
-function goToPage(pageNum) {
-  currentPage = pageNum;
-  renderTickets(allTickets); // Always render based on current `allTickets`
-}
-
-// faq code start ------------------------------------------
-// tab
-$(document).ready(function () {
-  let faqLoaded = false;
-
-  $(".ngo-sprt-tab-btn").click(function () {
-    const target = $(this).data("tab");
-
-    // Reset active class using context-driven class
-    $(".ngo-sprt-tab-btn").removeClass("{{ active_tab_class }}");
-    $(this).addClass("{{ active_tab_class }}");
-
-    // Show target content
-    $(".tab-content").addClass("hidden");
-    $("." + target).removeClass("hidden");
-
-    if (target === "contact-support" && !faqLoaded) {
-      fetchFaqs();
-      faqLoaded = true;
-      setTimeout(() => $("#faq-search-input").focus(), 100);
+    if ($datepicker.length && $.fn.datepicker) {
+      $datepicker.datepicker("setDate", null);
     }
+    fetchTickets();
+  }
+
+  function filterTickets(fromDate, toDate) {
+    fetch(ticketDetailsDateWise, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: JSON.stringify({
+        from_date: fromDate,
+        to_date: toDate,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        allTickets = data.tickets || [];
+        currentPage = 1;
+
+        renderTickets(allTickets);
+        renderSupportPagination();
+      })
+      .catch((err) => {});
+  }
+
+  function goToPage(pageNum) {
+    currentPage = pageNum;
+    renderTickets(allTickets);
+  }
+
+  // faq code start ------------------------------------------
+  // tab
+  $(document).ready(function () {
+    let faqLoaded = false;
+
+    $(".ngo-sprt-tab-btn").click(function () {
+      resetSupportFilter();
+
+      const target = $(this).data("tab");
+
+      $(".ngo-sprt-tab-btn").removeClass("{{ active_tab_class }}");
+      $(this).addClass("{{ active_tab_class }}");
+
+      $(".tab-content").addClass("hidden");
+      $("." + target).removeClass("hidden");
+
+      if (target === "contact-support" && !faqLoaded) {
+        fetchFaqs();
+        faqLoaded = true;
+        setTimeout(() => $("#faq-search-input").focus(), 100);
+      }
+    });
   });
-});
 
   // Reusable FAQ fetcher
   function fetchFaqs(query = "") {
