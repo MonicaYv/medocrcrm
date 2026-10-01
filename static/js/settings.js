@@ -392,6 +392,7 @@ saveBtns.forEach(saveBtn => {
             if (data.success) {
 
                 toastr.success("Document updated successfully");
+                sessionStorage.setItem("settings.documentUploadReturnTab", "documents");
 
                 setTimeout(() => {
 
@@ -411,6 +412,11 @@ saveBtns.forEach(saveBtn => {
             toastr.error("Upload failed");
         }
     });
+
+    if (sessionStorage.getItem("settings.documentUploadReturnTab") === "documents") {
+        sessionStorage.removeItem("settings.documentUploadReturnTab");
+        document.querySelector('[data-tab="documents"]')?.click();
+    }
 });
     // const previewImage = (file) => {
     // $("#modalImg").empty();
@@ -630,13 +636,6 @@ function clearSavedData() {
     });
 }
 
-$(document).on("click",".issue-type-wrapper" ,function (e) {
-    console.log("initialized")
-    e.stopPropagation();
-    $(".issue-type-dropdown").not($(this).find(".issue-type-dropdown")).hide();
-    $(this).find(".issue-type-dropdown").toggle();
-  });
-
   // Single-select logic
   $(document).on("change",".issue-checkbox", function () {
     const $wrapper = $(this).closest(".issue-type-wrapper");
@@ -678,11 +677,6 @@ $(document).on("click",".issue-type-wrapper" ,function (e) {
       $(this).prop("readonly", true);
     });
   });
-
-// Close on outside click
-$(document).on("click", function () {
-    $(".issue-type-dropdown").hide();
-});
 
 $(document).ready(function () {
     $(document).on(

@@ -1469,7 +1469,7 @@
         </div>
     </div>
 {% elif user.user_type == 'doctor' %}
-    <div class="hidden tab-content documents">
+    <div id="documents" class="hidden tab-content documents">
         <div class="flex lg:items-center justify-between pt-7 flex-col lg:flex-row">
             <div class="flex flex-col gap-1">
                 <p class="font-semibold text-lg text-jet-black">
@@ -1489,15 +1489,19 @@
 
             </div>
             <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
-                <div class="flex items-center gap-2 lg:pr-32 text-nowrap">
+                <div class="flex items-center gap-2 lg:w-36 lg:justify-center shrink-0">
                     {% if doc_status_is_approved %}
                     <span
                         class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                     <p class="font-normal text-xs text-bright-green">{{ doc_status }}</p>
-                    {% else %}
+                    {% elif doc_status_is_rejected %}
                     <span
                         class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
-                    <p class="font-normal text-xs text-strong-red">{{ doc_status }}</p>
+                    <p class="font-normal text-xs text-strong-red" title="{{ doc_status }}">Rejected</p>
+                    {% else %}
+                    <span
+                        class="material-symbols-outlined material-filled text-dodger-blue">schedule</span>
+                    <p class="font-normal text-xs text-dodger-blue">Pending</p>
                     {% endif %}
                 </div>
                 <div class="flex items-center gap-2">
@@ -1518,7 +1522,7 @@
                             <p class="font-normal text-xs text-strong-red">Virus Scan</p>
                         </div>
                         {% endif %}
-                        <span class="font-normal text-xs text-medium-gray">Last edited: {{ doc_last_edited }}</span>
+                        <span class="font-normal text-xs text-medium-gray">Last edited: {{ registration_certificate_last_edited }}</span>
                     </div>
                     <span title="View"
                     data-doc-type="clinic_registration"
@@ -1559,15 +1563,19 @@
 
             </div>
             <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
-                <div class="flex items-center gap-2 lg:pr-25 text-nowrap">
+                <div class="flex items-center gap-2 lg:w-36 lg:justify-center shrink-0">
                     {% if doc_status_is_approved %}
                     <span
                         class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                     <p class="font-normal text-xs text-bright-green">{{ doc_status }}</p>
-                    {% else %}
+                    {% elif doc_status_is_rejected %}
                     <span
                         class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
-                    <p class="font-normal text-xs text-strong-red">{{ doc_status }}</p>
+                    <p class="font-normal text-xs text-strong-red" title="{{ doc_status }}">Rejected</p>
+                    {% else %}
+                    <span
+                        class="material-symbols-outlined material-filled text-dodger-blue">schedule</span>
+                    <p class="font-normal text-xs text-dodger-blue">Pending</p>
                     {% endif %}
                 </div>
                 <div class="flex items-center gap-2">
@@ -1588,7 +1596,7 @@
                             <p class="font-normal text-xs text-strong-red">Virus Scan</p>
                         </div>
                         {% endif %}
-                        <span class="font-normal text-xs text-medium-gray">Last edited: {{ doc_last_edited }}</span>
+                        <span class="font-normal text-xs text-medium-gray">Last edited: {{ aadhar_doc_last_edited }}</span>
                     </div>
                     <span 
                         title="View"
@@ -1630,15 +1638,19 @@
 
             </div>
             <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-                <div class="flex items-center gap-2 lg:pr-14 text-nowrap">
+                <div class="flex items-center gap-2 lg:w-36 lg:justify-center shrink-0">
                     {% if doc_status_is_approved %}
                     <span
                         class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                     <p class="font-normal text-xs text-bright-green">{{ doc_status }}</p>
-                    {% else %}
+                    {% elif doc_status_is_rejected %}
                     <span
                         class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
-                    <p class="font-normal text-xs text-strong-red">{{ doc_status }}</p>
+                    <p class="font-normal text-xs text-strong-red" title="{{ doc_status }}">Rejected</p>
+                    {% else %}
+                    <span
+                        class="material-symbols-outlined material-filled text-dodger-blue">schedule</span>
+                    <p class="font-normal text-xs text-dodger-blue">Pending</p>
                     {% endif %}
                 </div>
                 <div class="flex items-center gap-2">
@@ -1659,7 +1671,7 @@
                             <p class="font-normal text-xs text-strong-red">Virus Scan</p>
                         </div>
                         {% endif %}
-                        <span class="font-normal text-xs text-medium-gray">Last edited: {{ doc_last_edited }}</span>
+                        <span class="font-normal text-xs text-medium-gray">Last edited: {{ pan_doc_last_edited }}</span>
                     </div>
                     <span 
                         title="View"
@@ -1702,15 +1714,19 @@
 
             </div>
             <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-                <div class="flex items-center gap-2 lg:pr-35 text-nowrap">
+                <div class="flex items-center gap-2 lg:w-36 lg:justify-center shrink-0">
                     {% if doc_status_is_approved %}
                     <span
                         class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                     <p class="font-normal text-xs text-bright-green">{{ doc_status }}</p>
-                    {% else %}
+                    {% elif doc_status_is_rejected %}
                     <span
                         class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
-                    <p class="font-normal text-xs text-strong-red">{{ doc_status }}</p>
+                    <p class="font-normal text-xs text-strong-red" title="{{ doc_status }}">Rejected</p>
+                    {% else %}
+                    <span
+                        class="material-symbols-outlined material-filled text-dodger-blue">schedule</span>
+                    <p class="font-normal text-xs text-dodger-blue">Pending</p>
                     {% endif %}
                 </div>
                 <div class="flex items-center gap-2">
@@ -1731,7 +1747,7 @@
                             <p class="font-normal text-xs text-strong-red">Virus Scan</p>
                         </div>
                         {% endif %}
-                        <span class="font-normal text-xs text-medium-gray">Last edited: {{ doc_last_edited }}</span>
+                        <span class="font-normal text-xs text-medium-gray">Last edited: {{ clinic_photo_last_edited }}</span>
                     </div>
                     <span title="View"
                         data-doc-type="clinic_photo"

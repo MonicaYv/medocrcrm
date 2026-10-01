@@ -6,6 +6,7 @@ import traceback
 from decimal import Decimal
 
 from django.core.cache import cache
+from django.core.files.storage import default_storage
 from django.utils import timezone
 from asgiref.sync import async_to_sync
 from registration.models import State, City, LabTiming
@@ -66,6 +67,7 @@ from maps.models import SearchHistory, SavedLocation
 from coupon.models import Coupon
 from donate.models import Donation
 from ngopost.models import NGOPost
+from services.models import DoctorServiceRate, ServiceDescription
 
 ## Settings
 def load_country_codes():
@@ -506,6 +508,8 @@ def handle_doctor_profile(user):
     all_speciality = DoctorSpeciality.objects.filter(is_active=True)
     all_education = DoctorEducation.objects.filter(is_active=True)
     all_experience = DoctorExperience.objects.filter(is_active=True)
+    all_services = ServiceDescription.objects.select_related("category").order_by("name")
+    all_facilities = LabFacility.objects.filter(is_active=True)
 
     # The Documents tab renders the stored file name, the virus-scan result and
     # the review status for each document. `validate_and_save_file` stores the
@@ -523,6 +527,17 @@ def handle_doctor_profile(user):
         if user.updated_at else "Not yet uploaded"
     )
 
+    def document_last_edited(path):
+        if not path:
+            return "Not uploaded"
+        try:
+            modified_at = default_storage.get_modified_time(path)
+            if timezone.is_naive(modified_at):
+                modified_at = timezone.make_aware(modified_at)
+            return timezone.localtime(modified_at).strftime("%d %b %Y, %I:%M %p")
+        except (OSError, NotImplementedError, ValueError):
+            return last_edited
+
     # A doctor can reach Settings before the KYC profile has been created.
     # Keep the page available in that state (like the pharmacy handler) instead
     # of dereferencing a missing profile and returning a server error.
@@ -532,6 +547,10 @@ def handle_doctor_profile(user):
             'all_speciality': all_speciality,
             'education': None, 'all_education': all_education,
             'experience': None, 'all_experience': all_experience,
+            'services_selected': ServiceDescription.objects.none(),
+            'all_services': all_services,
+            'facilities_selected': LabFacility.objects.none(),
+            'all_facilities': all_facilities,
             'profile_photo_path': '',
             'clinic_name': '', 'owner_name': '', 'contact_number': '',
             'alt_contact_number': '', 'address': '', 'city': '', 'state': '',
@@ -541,14 +560,18 @@ def handle_doctor_profile(user):
             'registration_certificate_path': '',
             'registration_certificate_filename': '',
             'registration_certificate_virus_scanned': False,
+            'registration_certificate_last_edited': 'Not uploaded',
             'aadhar_number': '', 'aadhar_doc_path': '',
             'aadhar_doc_filename': '', 'aadhar_doc_virus_scanned': False,
+            'aadhar_doc_last_edited': 'Not uploaded',
             'pan_number': '', 'pan_doc_path': '',
             'pan_doc_filename': '', 'pan_doc_virus_scanned': False,
+            'pan_doc_last_edited': 'Not uploaded',
             'clinic_logo_path': '', 'clinic_logo_filename': '',
             'clinic_logo_virus_scanned': False,
             'clinic_photo_path': '', 'clinic_photo_filename': '',
             'clinic_photo_virus_scanned': False,
+            'clinic_photo_last_edited': 'Not uploaded',
             'doc_status': 'Pending', 'doc_status_is_approved': False,
             'doc_last_edited': last_edited,
             'is_verified': False, 'verification_status': 'pending',
@@ -576,6 +599,14 @@ def handle_doctor_profile(user):
         'all_education': all_education,
         'experience': profile.experience,
         'all_experience': all_experience,
+        'services_selected': ServiceDescription.objects.filter(
+            id__in=DoctorServiceRate.objects.filter(
+                doctor=profile
+            ).values_list("service_id", flat=True)
+        ),
+        'all_services': all_services,
+        'facilities_selected': LabFacility.objects.none(),
+        'all_facilities': all_facilities,
         'profile_photo_path': profile.profile_photo_path,
         'clinic_name': profile.clinic_name,
         'owner_name': profile.owner_name,
@@ -598,22 +629,27 @@ def handle_doctor_profile(user):
         'registration_certificate_path': profile.registration_certificate_path or "",
         'registration_certificate_filename': doc_name(profile.registration_certificate_path),
         'registration_certificate_virus_scanned': profile.registration_certificate_virus_scanned,
+        'registration_certificate_last_edited': document_last_edited(profile.registration_certificate_path),
         'aadhar_number': profile.aadhar_number,
         'aadhar_doc_path': profile.aadhar_doc_path or "",
         'aadhar_doc_filename': doc_name(profile.aadhar_doc_path),
         'aadhar_doc_virus_scanned': profile.aadhar_doc_virus_scanned,
+        'aadhar_doc_last_edited': document_last_edited(profile.aadhar_doc_path),
         'pan_number': profile.pan_number,
         'pan_doc_path': profile.pan_doc_path or "",
         'pan_doc_filename': doc_name(profile.pan_doc_path),
         'pan_doc_virus_scanned': profile.pan_doc_virus_scanned,
+        'pan_doc_last_edited': document_last_edited(profile.pan_doc_path),
         'clinic_logo_path': profile.clinic_logo_path or "",
         'clinic_logo_filename': doc_name(profile.clinic_logo_path),
         'clinic_logo_virus_scanned': profile.clinic_logo_virus_scanned,
         'clinic_photo_path': profile.clinic_photo_path or "",
         'clinic_photo_filename': doc_name(profile.clinic_photo_path),
         'clinic_photo_virus_scanned': profile.clinic_photo_virus_scanned,
+        'clinic_photo_last_edited': document_last_edited(profile.clinic_photo_path),
         'doc_status': doc_status,
         'doc_status_is_approved': status_label == "approved",
+        'doc_status_is_rejected': status_label == "rejected",
         'doc_last_edited': last_edited,
         'is_verified': profile.is_verified,
         'verification_status': profile.verification_status,
@@ -882,6 +918,12 @@ def update_user_document(request):
     # Set paths dynamically and update verification flag fields
     setattr(profile, doc_fields[0], file_path)
     setattr(profile, doc_fields[1], True)
+
+    if user_type == "doctor":
+        profile.verification_status = "pending"
+        profile.is_verified = False
+        profile.verified_at = None
+        profile.rejection_reason = None
     
     # Extra check before saving to confirm fields were changed in memory
     print(f"CONFIRMING PROPERTY ATTR VALUE SET ON INSTANCE: '{getattr(profile, doc_fields[0])}'")

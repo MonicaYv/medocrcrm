@@ -118,9 +118,9 @@ function toggleChat() {
 
 // Toggle dropdowns
 $(
-  ".issue-type-wrapper .issue-type-input, .issue-type-wrapper .material-symbols-outlined"
+  "#support-form .issue-type-wrapper .issue-type-input, #support-form .issue-type-wrapper .material-symbols-outlined"
 ).on("click", function () {
-  $(".issue-type-dropdown").toggleClass("hidden");
+  $(this).closest(".issue-type-wrapper").find(".issue-type-dropdown").toggleClass("hidden");
 });
 $(
   ".select-issue-wrapper .select-issue-input, .select-issue-wrapper .material-symbols-outlined"
@@ -211,8 +211,8 @@ $(
 
 // Close dropdowns when clicking outside
 $(document).on("click", function (e) {
-  if (!$(e.target).closest(".issue-type-wrapper").length) {
-    $(".issue-type-dropdown").addClass("hidden");
+  if (!$(e.target).closest("#support-form .issue-type-wrapper").length) {
+    $("#support-form .issue-type-dropdown").addClass("hidden");
   }
   if (!$(e.target).closest(".select-issue-wrapper").length) {
     $(".select-issue-dropdown").addClass("hidden");
