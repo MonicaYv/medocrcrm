@@ -87,6 +87,10 @@ $(document).ready(function () {
     if ($(this).closest('.appointment-page').length) return;
     // Date-filter options are owned by their page-specific delegated handlers.
     if ($(this).closest('[data-date-filter]').length) return;
+    if ($(this).closest('.allRewardsCoupons').length ||
+        $(this).closest('#rewards').length) {
+        return;
+    }
     e.stopPropagation();
     const $container = $(this).closest('.dropdown');
     const $datepicker = $container.find('.datepicker-container');

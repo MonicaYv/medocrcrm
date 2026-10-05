@@ -272,7 +272,7 @@ $('#nextPage1').on('click', function () {
 
 
 function truncateDescriptions() {
-  document.querySelectorAll('*').forEach(element => {
+  document.querySelectorAll('#popular-coupons .coupon-card').forEach(element => {
     if (element.textContent && element.children.length === 0) {
       const text = element.textContent.trim();
       
@@ -453,11 +453,11 @@ function truncateDescriptions() {
     }
   });
 
-  $(document).on('click', '.allRewardsCoupons .customDateFilter', function (e) {
+  $(document).on('click', '.allRewardsCoupons .customDateFilter,.allRewardsCoupons .calendar-icon', function (e) {
     e.preventDefault();
     e.stopPropagation();
     const $dropdown = $(this).closest('.dropdown');
-    const $filterDropdown = $dropdown.find('.allRewardsCoupons');
+    const $filterDropdown = $(this).closest('.filterDropdown');
     const $datepickerContainer = $dropdown.find('.datepicker-container');
     const $picker = $dropdown.find('.datepicker-inline');
     if (!$.fn.datepicker || !$picker.length) {
