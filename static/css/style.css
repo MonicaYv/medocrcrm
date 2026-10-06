@@ -1290,3 +1290,20 @@ input[type="number"] {
  .step-line.active-line{
     background:#007BFF !important;
 }
+
+/* Keep reward controls from growing the settings layout while searching. */
+.rewards-search-control,
+.rewards-search-control input {
+    min-width: 0;
+}
+
+.rewards-search-control {
+    width: 320px;
+    max-width: 100%;
+}
+
+/* Keep filter labels readable across seller themes. */
+.rewards-filter-option:hover,
+.rewards-filter-option:hover * {
+    color: #484848 !important;
+}

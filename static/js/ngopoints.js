@@ -272,21 +272,14 @@ $('#nextPage1').on('click', function () {
 
 
 function truncateDescriptions() {
-  document.querySelectorAll('#popular-coupons .coupon-card').forEach(element => {
-    if (element.textContent && element.children.length === 0) {
-      const text = element.textContent.trim();
-      
-      // Check for very long text (more than 100 characters) or repeating patterns
-      if (text.length > 100 || /(.{4,})\1{3,}/.test(text)) {
-        const words = text.split(' ');
-        if (words.length > 15) {
-          element.textContent = words.slice(0, 15).join(' ') + '...';
-        } else {
-          element.textContent = text.substring(0, 80) + '...';
-        }
-        console.log('Truncated long text');
-      }
-    }
+  document.querySelectorAll('#popular-coupons .coupon-card .coupon-description').forEach(element => {
+    const text = element.textContent.trim();
+    if (text.length <= 100 && !/(.{4,})\1{3,}/.test(text)) return;
+
+    const words = text.split(' ');
+    element.textContent = words.length > 15
+      ? words.slice(0, 15).join(' ') + '...'
+      : text.substring(0, 80) + '...';
   });
 }
 

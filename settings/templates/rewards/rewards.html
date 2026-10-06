@@ -272,17 +272,17 @@
               <!--All Rewards Tab content-->
               <div class="tab-content hidden all-rewards relative">
                 <!--Rewards section-->
-                <div class="flex justify-between items-center pt-5">
+                <div class="rewards-toolbar flex flex-wrap justify-between items-center gap-4 pt-5">
                   <p class="font-semibold lg:text-lg sm:text-nowrap text-jet-black">New Coupons for you </p>
-                  <div class="flex-1 flex items-center justify-end gap-4 w-full">
-                    <div class="w-full max-w-[280px] rounded-[6px] bg-light-white flex items-center gap-2 px-2">
+                  <div class="flex flex-1 min-w-0 items-center justify-end gap-4 w-full sm:w-auto">
+                    <div class="rewards-search-control flex min-w-0 rounded-[6px] bg-light-white items-center gap-2 px-2">
                       <span class="material-symbols-outlined text-dark-gray">
                         search
                       </span>
                       <input id="allrewardssearch"
                         type="text"
                         placeholder="Search by name or categories"
-                        class="w-full py-2.5 focus:!outline-none placeholder:text-medium-gray border-none bg-transparent focus:ring-0 only-text"
+                        class="w-full min-w-0 py-2.5 focus:!outline-none placeholder:text-medium-gray border-none bg-transparent focus:ring-0 only-text"
                       />
                     </div>
                   
@@ -292,13 +292,13 @@
                         </button>
                         <div class="filterDropdown absolute hidden allRewardsCoupons right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026]  rounded-md w-44 z-10">
                           <div data-filter="custom"
-                              class="customDateFilter p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-dark-gray rounded">
+                              class="rewards-filter-option customDateFilter p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-dark-gray rounded">
                               <span class="customDateLabel">Custom date</span>
                               <span class="material-symbols-outlined calendar-icon">calendar_today</span>
                           </div>
-                          <div data-range="1 Week" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer" >1 Week</div>
-                          <div data-range="1 Month" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Month</div>
-                          <div data-range="1 Year" class="daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Year</div>
+                          <div data-range="1 Week" class="rewards-filter-option daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer" >1 Week</div>
+                          <div data-range="1 Month" class="rewards-filter-option daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Month</div>
+                          <div data-range="1 Year" class="rewards-filter-option daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Year</div>
                         </div>
                         <div class="datepicker-container hidden px-4 pb-3 absolute right-43 z-100">
                           <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
@@ -338,11 +338,11 @@
 
               <!--Rewards Claimed Tab section-->
               <div class="tab-content hidden rewards-claimed relative">
-                <div class="flex justify-between items-center pt-5">
+                <div class="rewards-toolbar flex flex-wrap justify-between items-center gap-4 pt-5">
                   <p class="font-semibold text-lg sm:text-nowrap">Recent Redemptions</p>
-                  <div class="flex flex-1 items-center justify-end w-full gap-4">
+                  <div class="flex flex-1 min-w-0 items-center justify-end w-full sm:w-auto gap-4">
                     <div
-                    class="w-full max-w-[280px] rounded-[6px] bg-light-white flex items-center gap-2 px-2"
+                    class="rewards-search-control flex min-w-0 rounded-[6px] bg-light-white items-center gap-2 px-2"
                   >
                     <span class="material-symbols-outlined text-dark-gray">
                       search
@@ -350,7 +350,7 @@
                     <input
                       type="text"
                       placeholder="Search by name or categories" id="rewards-claimed-search"
-                      class="w-full py-2.5 focus:!outline-none placeholder:text-medium-gray border-none bg-transparent focus:ring-0 only-text"
+                      class="w-full min-w-0 py-2.5 focus:!outline-none placeholder:text-medium-gray border-none bg-transparent focus:ring-0 only-text"
                     />
                     
                   </div>
@@ -363,15 +363,15 @@
                         class="filterDropdown rewardsClaimed absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10"
                       >
                       
-                        <div class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-dark-gray rounded">
+                        <div class="rewards-filter-option p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-dark-gray rounded">
                           Custom date<span class="material-symbols-outlined calendar-icon"
                             >calendar_today</span
                           >
                           
                         </div>
-                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Week">1 Week</div>
-                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Month">1 Month</div>
-                        <div class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Year">1 Year</div>
+                        <div class="rewards-filter-option p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Week">1 Week</div>
+                        <div class="rewards-filter-option p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Month">1 Month</div>
+                        <div class="rewards-filter-option p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Year">1 Year</div>
 
                       </div>
                       <div class="datepicker-container hidden px-4 pb-3 absolute  right-43 z-100">
@@ -444,15 +444,15 @@
                       <input type="date" name="end_date" id="endDateInput" class="hidden" style="display: none;">
                     </form>
                     <div class="filter-dropdown-option dropdown-option absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44">
-                      <div onclick="applyDateFilter('custom')" class="p-2 pl-4 flex justify-between items-center hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">
+                      <div onclick="applyDateFilter('custom')" class="rewards-filter-option p-2 pl-4 flex justify-between items-center hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">
                         Custom date
                         <span class="material-symbols-outlined">calendar_today</span>
                       </div>
-                      <div onclick="applyDateFilter('last_week')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Week</div>
+                      <div onclick="applyDateFilter('last_week')" class="rewards-filter-option p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Week</div>
 
-                      <div onclick="applyDateFilter('last_month')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Month</div>
+                      <div onclick="applyDateFilter('last_month')" class="rewards-filter-option p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Month</div>
 
-                      <div onclick="applyDateFilter('last_year')" class="p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Year</div>
+                      <div onclick="applyDateFilter('last_year')" class="rewards-filter-option p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Year</div>
                     </div>
                     <div class="datepicker-container hidden px-4 pb-3 absolute  right-43 z-100">
                       <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
