@@ -4,22 +4,6 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<style>
-    #pharmacy-page-content,
-    #pharmacy-page-skeleton {
-        transition: opacity 180ms ease-in-out;
-    }
-
-    #pharmacy-page-content.is-ready,
-    #pharmacy-page-skeleton.is-hidden {
-        opacity: 0;
-    }
-
-    #pharmacy-page-content.is-visible,
-    #pharmacy-page-skeleton.is-visible {
-        opacity: 1;
-    }
-</style>
 
 <div id="pharmacy-page-skeleton" class="flex flex-col gap-5 p-6 animate-pulse" aria-hidden="true">
     <div class="bg-white rounded-[10px] p-5 space-y-6">
@@ -761,70 +745,5 @@
 
 {% block extra_js %}
     <script src="{% static 'js/coupons.js' %}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const skeleton = document.getElementById('pharmacy-page-skeleton');
-            const content = document.getElementById('pharmacy-page-content');
-
-            if (!skeleton || !content) {
-                return;
-            }
-
-            content.classList.remove('is-ready');
-            content.classList.add('is-visible');
-            skeleton.classList.remove('is-visible');
-            skeleton.classList.add('is-hidden');
-
-            window.setTimeout(function () {
-                skeleton.remove();
-            }, 180);
-        });
-
-
-        $(document).ready(function () {
-
-    $('.filterToggle').on('click', function (e) {
-        e.stopPropagation();
-
-        $(this).siblings('.filterDropdown').toggleClass('hidden');
-    });
-
-
-    $('.filterOption').on('click', function (e) {
-
-        e.stopPropagation();
-
-        // Remove blue from ALL ticks
-        $('.filterOption .material-symbols-outlined:first-child')
-            .removeClass('text-dodger-blue')
-            .addClass('text-light-gray');
-
-        // Make ONLY clicked option blue
-        $(this)
-            .find('.material-symbols-outlined:first-child')
-            .removeClass('text-light-gray')
-            .addClass('text-dodger-blue');
-
-        // Get selected value
-        let selectedValue = $(this).data('value');
-
-        // Update Today text
-        $('.filterToggle')
-            .closest('.flex.items-center.gap-2\\.5')
-            .find('> p')
-            .text(selectedValue);
-
-        // Close dropdown
-        $('.filterDropdown').addClass('hidden');
-
-    });
-
-
-    // Close when clicking outside
-    $(document).on('click', function () {
-        $('.filterDropdown').addClass('hidden');
-    });
-
-});
-    </script>
+   
 {% endblock %}
