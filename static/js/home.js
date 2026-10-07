@@ -1,6 +1,6 @@
-const csrftoken = document.querySelector(
-    'meta[name="csrf-token"]'
-).getAttribute('content');
+const csrftoken = document
+  .querySelector('meta[name="csrf-token"]')
+  .getAttribute("content");
 
 $(document).ready(function () {
   // 1 variable with multiple theme colors
@@ -27,12 +27,12 @@ $(document).ready(function () {
         selectedColor == "vivid-orange"
           ? "#F79E1B"
           : selectedColor == "living-coral"
-          ? "#FF6F61"
-          : selectedColor == "light-sea-green"
-          ? "#3AAFA9"
-          : selectedColor == "dark-blue"
-          ? "#123456"
-          : "#6B79F5";
+            ? "#FF6F61"
+            : selectedColor == "light-sea-green"
+              ? "#3AAFA9"
+              : selectedColor == "dark-blue"
+                ? "#123456"
+                : "#6B79F5";
       return false;
     }
   });
@@ -421,11 +421,11 @@ $(document).ready(function () {
       $calendarDays.empty();
       dayNames.forEach((day) => {
         $calendarDays.append(
-          `<div class="font-semibold text-sm text-gray-700 mt-auto">${day}</div>`
+          `<div class="font-semibold text-sm text-gray-700 mt-auto">${day}</div>`,
         );
       });
       $calendarDays.append(
-        `<div class="col-span-7"><hr class="border-t border-gray-300 my-2" /></div>`
+        `<div class="col-span-7"><hr class="border-t border-gray-300 my-2" /></div>`,
       );
 
       const firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -450,7 +450,7 @@ $(document).ready(function () {
 
         const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(
           2,
-          "0"
+          "0",
         )}-${String(day).padStart(2, "0")}`;
         const events = getEventsForDate(dateStr);
         let eventsHtml = "";
@@ -458,7 +458,7 @@ $(document).ready(function () {
         // Show event indicators for each event with their individual colors
         events.forEach((event) => {
           const eventColor = event.color || `bg-${highlightColor}`;
-          console.log('Event:', event.name, 'Color:', eventColor); // Debug log
+          console.log("Event:", event.name, "Color:", eventColor); // Debug log
           eventsHtml += `
           <div class="h-2 w-2 rounded-full ${eventColor}" style="background-color: ${getColorValue(eventColor)};"></div>          
         `;
@@ -484,20 +484,21 @@ $(document).ready(function () {
       e.stopPropagation(); // Prevent document click from firing immediately
 
       // Remove any existing event display first
-      $('.event-display').remove();
+      $(".event-display").remove();
 
       const dateStr = $(this).data("date");
       const events = getEventsForDate(dateStr);
 
       if (events.length > 0) {
         // Position the popup relative to the clicked date cell
-        let eventsHtml = '<div class="event-display absolute z-10 mt-2 p-2 bg-white border border-gray-300 rounded shadow-lg">';
-        
-        events.forEach(event => {
+        let eventsHtml =
+          '<div class="event-display absolute z-10 mt-2 p-2 bg-white border border-gray-300 rounded shadow-lg">';
+
+        events.forEach((event) => {
           eventsHtml += `<div class="text-sm text-gray-700 whitespace-nowrap">• ${event.name} at ${event.time}</div>`;
         });
-        
-        eventsHtml += '</div>';
+
+        eventsHtml += "</div>";
 
         $(this).append(eventsHtml);
       }
@@ -542,8 +543,11 @@ $(document).ready(function () {
       }
 
       // Close event display on outside click
-      if (!$(e.target).closest('.event-display').length && !$(e.target).closest('div[data-date]').length) {
-        $('.event-display').remove();
+      if (
+        !$(e.target).closest(".event-display").length &&
+        !$(e.target).closest("div[data-date]").length
+      ) {
+        $(".event-display").remove();
       }
     });
 
@@ -651,7 +655,7 @@ $(document).ready(function () {
       function () {
         // $("#location").text("Unable to retrieve location.");
         $("#location").text("");
-      }
+      },
     );
   } else {
     $("#location").text("Geolocation is not supported.");
@@ -738,7 +742,7 @@ $(document).ready(function () {
             `);
         $(document).on("click", ".calendar-day", function () {
           $(".calendar-day .day-circle").removeClass(
-            "bg-vivid-orange text-white"
+            "bg-vivid-orange text-white",
           );
           $(this).find(".day-circle").addClass("bg-vivid-orange text-white");
         });
@@ -842,11 +846,11 @@ $(document).ready(function () {
         $calendarDays.empty();
         dayNames.forEach((day) => {
           $calendarDays.append(
-            `<div class="font-semibold text-sm text-gray-700">${day}</div>`
+            `<div class="font-semibold text-sm text-gray-700">${day}</div>`,
           );
         });
         $calendarDays.append(
-          `<div class="col-span-7"><hr class="border-t border-gray-300 my-2" /></div>`
+          `<div class="col-span-7"><hr class="border-t border-gray-300 my-2" /></div>`,
         );
 
         const firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -854,7 +858,7 @@ $(document).ready(function () {
         const daysInMonth = new Date(
           currentYear,
           currentMonth + 1,
-          0
+          0,
         ).getDate();
 
         for (let i = 0; i < startDay; i++) {
@@ -875,7 +879,7 @@ $(document).ready(function () {
 
           const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(
             2,
-            "0"
+            "0",
           )}-${String(day).padStart(2, "0")}`;
           const events = getEventsForDate(dateStr);
           let eventsHtml = "";
@@ -953,9 +957,11 @@ $(document).ready(function () {
   }
 
   //Select Patient Dropdown on End Customers Home Page
-  $(".dropdown-btn").not(".points-history .dropdown-btn").on("click", function () {
-    $(this).siblings(".dropdown-option").toggleClass("hidden");
-  });
+  $(".dropdown-btn")
+    .not(".points-history .dropdown-btn")
+    .on("click", function () {
+      $(this).siblings(".dropdown-option").toggleClass("hidden");
+    });
   $(".dropdown-option .option-item").on("click", function () {
     const selectedOption = $(this).text();
     $(this)
@@ -1028,7 +1034,7 @@ $(document).ready(function () {
         $calendarDays.empty();
         dayNames.forEach((day) => {
           $calendarDays.append(
-            `<div class="font-semibold text-sm text-smoke-gray">${day}</div>`
+            `<div class="font-semibold text-sm text-smoke-gray">${day}</div>`,
           );
         });
 
@@ -1037,7 +1043,7 @@ $(document).ready(function () {
         const daysInMonth = new Date(
           currentYear,
           currentMonth + 1,
-          0
+          0,
         ).getDate();
 
         for (let i = 0; i < startDay; i++) {
@@ -1055,24 +1061,24 @@ $(document).ready(function () {
           const dateClass = isToday
             ? `text-${highlightColor}`
             : isToday
-            ? `text-${highlightColor}`
-            : `hover:text-${highlightColor}`;
+              ? `text-${highlightColor}`
+              : `hover:text-${highlightColor}`;
 
           const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(
             2,
-            "0"
+            "0",
           )}-${String(day).padStart(2, "0")}`;
 
           // Check if there are events for this date
           const eventsForDate = getEventsForDate(dateStr);
           const hasEvents = eventsForDate.length > 0;
-          
+
           // Add event indicators for each event with their individual colors
-          let eventIndicators = '';
+          let eventIndicators = "";
           if (hasEvents) {
             eventsForDate.forEach((event) => {
               const eventColor = event.color || `bg-${highlightColor}`;
-              console.log('Popup Event:', event.name, 'Color:', eventColor); // Debug log
+              console.log("Popup Event:", event.name, "Color:", eventColor); // Debug log
               eventIndicators += `<div class="w-2 h-2 ${eventColor} rounded-full mx-auto mt-1 has-tooltip" style="background-color: ${getColorValue(eventColor)};"></div>
                                   <div class="absolute py-1 px-1.5 text-start text-xs tooltip mt-1 z-50 bg-white border rounded-md border-living-coral font-normal">
                                     ${event.name} at ${event.time}
@@ -1088,7 +1094,7 @@ $(document).ready(function () {
       `);
         }
         $calendarDays.append(
-          `<div class="col-span-7"><hr class="border-t border-gray-300 my-2" /></div>`
+          `<div class="col-span-7"><hr class="border-t border-gray-300 my-2" /></div>`,
         );
         updateMonthYearLabel();
       }
@@ -1103,7 +1109,7 @@ $(document).ready(function () {
 
         // Store selected date
         selectedDate = $(this).data("date");
-        
+
         // Show events for this date if any
         // const eventsForDate = getEventsForDate(selectedDate);
         // if (eventsForDate.length > 0) {
@@ -1112,7 +1118,7 @@ $(document).ready(function () {
         //     eventsHtml += `<div class="text-sm text-gray-700">• ${event.name} at ${event.time}</div>`;
         //   });
         //   eventsHtml += '</div>';
-          
+
         //   // Remove any existing event display
         //   $calendarDays.find('.event-display').remove();
         //   // Add new event display
@@ -1162,10 +1168,10 @@ $(document).ready(function () {
         ) {
           $dropdown.hide();
         }
-        
+
         // Clear event display when clicking outside calendar days
-        if (!$(e.target).closest('div[data-date]').length) {
-          $calendarDays.find('.event-display').remove();
+        if (!$(e.target).closest("div[data-date]").length) {
+          $calendarDays.find(".event-display").remove();
         }
       });
 
@@ -1271,22 +1277,22 @@ $(document).ready(function () {
   let selectedDate = null;
 
   // Function to save event
-  function saveEvent(){
-    const eventName = document.getElementById('event-name').value.trim();
-    const eventTime = document.getElementById('start-time').value;
-    
+  function saveEvent() {
+    const eventName = document.getElementById("event-name").value.trim();
+    const eventTime = document.getElementById("start-time").value;
+
     if (!eventName) {
-      toastr.error('Please enter an event name');
+      toastr.error("Please enter an event name");
       return;
     }
-    
+
     if (!selectedDate) {
-      toastr.error('Please select a date');
+      toastr.error("Please select a date");
       return;
     }
-    
+
     if (!eventTime) {
-      toastr.error('Please select a time');
+      toastr.error("Please select a time");
       return;
     }
 
@@ -1294,24 +1300,26 @@ $(document).ready(function () {
     const eventData = {
       name: eventName,
       date: selectedDate,
-      time: eventTime
+      time: eventTime,
     };
 
     // Send AJAX request to save event
     $.ajax({
-      url: '/dashboard/save-event/',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/dashboard/save-event/",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify(eventData),
       headers: {
-        'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() || $('meta[name=csrf-token]').attr('content')
+        "X-CSRFToken":
+          $("[name=csrfmiddlewaretoken]").val() ||
+          $("meta[name=csrf-token]").attr("content"),
       },
-      success: function(response) {
+      success: function (response) {
         if (response.success) {
-          toastr.success('Event saved successfully!');
+          toastr.success("Event saved successfully!");
           // Clear form
-          document.getElementById('event-name').value = '';
-          document.getElementById('start-time').value = '09:00';
+          document.getElementById("event-name").value = "";
+          document.getElementById("start-time").value = "09:00";
           selectedDate = null;
           // Hide popup
           $(".event-calendar").addClass("hidden");
@@ -1319,33 +1327,33 @@ $(document).ready(function () {
           loadEvents();
           loadUpcomingEvents(); // Refresh upcoming events list
         } else {
-          alert('Error saving event: ' + (response.error || 'Unknown error'));
+          alert("Error saving event: " + (response.error || "Unknown error"));
         }
       },
-      error: function(xhr, status, error) {
-        console.error('Error:', error);
-        alert('Error saving event. Please try again.');
-      }
+      error: function (xhr, status, error) {
+        console.error("Error:", error);
+        alert("Error saving event. Please try again.");
+      },
     });
   }
 
   // Function to refresh all calendars
   function refreshAllCalendars() {
     // Re-render main calendar by re-initializing it
-    $(".calendar-container").each(function() {
+    $(".calendar-container").each(function () {
       const $root = $(this);
       // Force a re-render by temporarily changing the month and changing it back
       const $prevBtn = $root.find("#prevMonth");
       const $nextBtn = $root.find("#nextMonth");
       if ($prevBtn.length > 0 && $nextBtn.length > 0) {
         // Trigger a month change to force re-render
-        $prevBtn.trigger('click');
+        $prevBtn.trigger("click");
         setTimeout(() => {
-          $nextBtn.trigger('click');
+          $nextBtn.trigger("click");
         }, 100);
       }
     });
-    
+
     // Re-render event calendar
     if (document.getElementById("eventCal")) {
       initEventCalendar();
@@ -1355,13 +1363,13 @@ $(document).ready(function () {
   // Function to load events from backend
   function loadEvents() {
     $.ajax({
-      url: '/dashboard/get-events/',
-      method: 'GET',
-      success: function(response) {
+      url: "/dashboard/get-events/",
+      method: "GET",
+      success: function (response) {
         if (response.events) {
           // Store events globally for use in calendar rendering
           window.calendarEvents = response.events;
-          
+
           // Refresh all calendars
           refreshAllCalendars();
         }
@@ -1369,18 +1377,17 @@ $(document).ready(function () {
       // error: function(xhr, status, error) {
       //   console.error('Error loading events:', error);
       // }
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
+        console.log(xhr.responseText);
 
-    console.log(xhr.responseText);
+        const container = $("#upcoming-events-container");
 
-    const container = $('#upcoming-events-container');
+        if (!container.length) {
+          return;
+        }
 
-    if (!container.length) {
-        return;
-    }
-
-    console.error('Error loading events:', error);
-}
+        console.error("Error loading events:", error);
+      },
     });
   }
 
@@ -1395,44 +1402,44 @@ $(document).ready(function () {
   // Function to convert CSS class names to actual color values
   function getColorValue(colorClass) {
     const colorMap = {
-      'bg-slate-blue': '#64748b',
-      'bg-strong-red': '#dc2626',
-      'bg-green': '#16a34a',
-      'bg-vivid-orange': '#ea580c',
-      'bg-purple': '#9333ea',
-      'bg-pink': '#ec4899',
-      'bg-teal': '#0d9488',
-      'bg-dark-blue': '#1e40af',
-      'bg-dark-green': '#15803d',
-      'bg-dark-purple': '#7c3aed',
-      'bg-yellow': '#eab308',
-      'bg-indigo': '#6366f1',
-      'bg-cyan': '#0891b2'
+      "bg-slate-blue": "#64748b",
+      "bg-strong-red": "#dc2626",
+      "bg-green": "#16a34a",
+      "bg-vivid-orange": "#ea580c",
+      "bg-purple": "#9333ea",
+      "bg-pink": "#ec4899",
+      "bg-teal": "#0d9488",
+      "bg-dark-blue": "#1e40af",
+      "bg-dark-green": "#15803d",
+      "bg-dark-purple": "#7c3aed",
+      "bg-yellow": "#eab308",
+      "bg-indigo": "#6366f1",
+      "bg-cyan": "#0891b2",
     };
-    return colorMap[colorClass] || '#64748b'; // Default to slate-blue if not found
+    return colorMap[colorClass] || "#64748b"; // Default to slate-blue if not found
   }
 
   // Function to load and display upcoming events
   function loadUpcomingEvents() {
     $.ajax({
-      url: '/dashboard/get-upcoming-events/',
-      method: 'GET',
-      success: function(response) {
-        const container = $('#upcoming-events-container');
+      url: "/dashboard/get-upcoming-events/",
+      method: "GET",
+      success: function (response) {
+        const container = $("#upcoming-events-container");
         if (container.length === 0) {
           return;
         }
-        const title = container.find('h4').first(); // Keep the title
+        const title = container.find("h4").first(); // Keep the title
         if (!container.length) {
           return;
         }
-        
+
         // Clear existing content except title
-        container.find('*').not('h4').remove();
-        
+        container.find("*").not("h4").remove();
+
         if (response.upcoming_events && response.upcoming_events.length > 0) {
           // Add events
-          response.upcoming_events.forEach(function(event) {
+          response.upcoming_events.forEach(function (event) {
             const eventElement = $(`
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full" style="background-color: ${event.color_hex};"></span>
@@ -1451,32 +1458,32 @@ $(document).ready(function () {
           container.append(noEventsElement);
         }
       },
-      error: function(xhr, status, error) {
-        const container = $('#upcoming-events-container');
+      error: function (xhr, status, error) {
+        const container = $("#upcoming-events-container");
         if (!container.length) {
           return;
-}
-        const title = container.find('h4').first();
-        container.find('*').not('h4').remove();
-        
+        }
+        const title = container.find("h4").first();
+        container.find("*").not("h4").remove();
+
         const errorElement = $(`
           <div class="flex items-center gap-2">
             <span class="text-red-500">Error loading events</span>
           </div>
         `);
         container.append(errorElement);
-      }
+      },
     });
   }
 
   // Load events when page loads
-  $(document).ready(function() {
+  $(document).ready(function () {
     // Load events first, then initialize calendars
     loadEvents();
     loadUpcomingEvents();
-    
+
     // Also refresh calendars after a short delay to ensure events are loaded
-    setTimeout(function() {
+    setTimeout(function () {
       refreshAllCalendars();
     }, 500);
   });
@@ -1659,13 +1666,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-
-//ngo chart and filters : via checkbox , custom date filter and week-month-year wise 
+//ngo chart and filters : via checkbox , custom date filter and week-month-year wise
 let originalChartData = null;
 let ngoChartInstance = null;
 
 async function fetchChartData(startDate = null, endDate = null) {
-  let url = '/dashboard/ngo-graph-data/';
+  let url = "/dashboard/ngo-graph-data/";
   if (startDate && endDate) {
     url += `?start_date=${startDate}&end_date=${endDate}`;
   }
@@ -1681,14 +1687,14 @@ async function fetchChartData(startDate = null, endDate = null) {
       "Total Post": "#6B79F5",
       "Total Views": "#FF0000",
       "Target Donation": "#FF7F50",
-      "Donation Received": "#3AAFA9"
+      "Donation Received": "#3AAFA9",
     };
 
     const axisMap = {
       "Total Post": "yLeft",
       "Total Views": "yRight",
       "Target Donation": "yRight",
-      "Donation Received": "yRight"
+      "Donation Received": "yRight",
     };
 
     Object.entries(data.datasets).forEach(([label, values]) => {
@@ -1738,22 +1744,22 @@ async function initDynamicNGOChart(startDate = null, endDate = null) {
     options: {
       responsive: true,
       interaction: {
-        mode: 'index',
+        mode: "index",
         intersect: false,
       },
       stacked: false,
       plugins: {
-        legend: { display: true }
+        legend: { display: true },
       },
       scales: {
-        yLeft: { type: 'linear', position: 'left' },
+        yLeft: { type: "linear", position: "left" },
         yRight: {
-          type: 'linear',
-          position: 'right',
-          grid: { drawOnChartArea: false }
-        }
-      }
-    }
+          type: "linear",
+          position: "right",
+          grid: { drawOnChartArea: false },
+        },
+      },
+    },
   });
 
   attachCheckboxListeners();
@@ -1764,12 +1770,15 @@ function attachCheckboxListeners() {
   checkboxes.forEach((chk) => {
     chk.addEventListener("change", () => {
       const selectedLabels = Array.from(checkboxes)
-        .filter(c => c.checked)
-        .map(c => c.dataset.label);
+        .filter((c) => c.checked)
+        .map((c) => c.dataset.label);
 
-      let filteredDatasets = selectedLabels.length === 0
-        ? originalChartData.datasets
-        : originalChartData.datasets.filter(ds => selectedLabels.includes(ds.label));
+      let filteredDatasets =
+        selectedLabels.length === 0
+          ? originalChartData.datasets
+          : originalChartData.datasets.filter((ds) =>
+              selectedLabels.includes(ds.label),
+            );
 
       ngoChartInstance.data.datasets = filteredDatasets;
       ngoChartInstance.update();
@@ -1782,40 +1791,40 @@ $(document).ready(function () {
   initDynamicNGOChart();
 
   // 2. Initialize jQuery UI datepicker
-  $('.ngo-custom-date').datepicker({
-    dateFormat: 'yy-mm-dd',
+  $(".ngo-custom-date").datepicker({
+    dateFormat: "yy-mm-dd",
     onSelect: function (dateText) {
       console.log("Selected date:", dateText);
       initDynamicNGOChart(dateText, dateText); // Use same date as start and end
-    }
+    },
   });
 
   // 3. Toggle filter dropdown
-  $('.ngo-filterToggle').click(function (e) {
+  $(".ngo-filterToggle").click(function (e) {
     e.stopPropagation();
-    const $container = $(this).closest('.ngo-dropdown');
-    const $dropdown = $container.find('.ngo-filterDropdown');
-    $('.ngo-filterDropdown').not($dropdown).hide();
-    $('.ngo-datepicker-container').hide();
+    const $container = $(this).closest(".ngo-dropdown");
+    const $dropdown = $container.find(".ngo-filterDropdown");
+    $(".ngo-filterDropdown").not($dropdown).hide();
+    $(".ngo-datepicker-container").hide();
     $dropdown.toggle();
   });
 
   // 4. Show calendar on calendar icon click
-  $('.ngo-calendar-icon').click(function (e) {
+  $(".ngo-calendar-icon").click(function (e) {
     e.stopPropagation();
-    const $container = $(this).closest('.ngo-dropdown');
-    const $datepicker = $container.find('.ngo-datepicker-container');
-    $('.ngo-datepicker-container').not($datepicker).hide();
+    const $container = $(this).closest(".ngo-dropdown");
+    const $datepicker = $container.find(".ngo-datepicker-container");
+    $(".ngo-datepicker-container").not($datepicker).hide();
     $datepicker.toggle();
   });
 
-  // 5. Filter by day range (1 week, 1 month, etc.)  
-  $('.ngo-filterDropdown [data-filter]').click(function () {
-    const days = parseInt($(this).data('filter'));
+  // 5. Filter by day range (1 week, 1 month, etc.)
+  $(".ngo-filterDropdown [data-filter]").click(function () {
+    const days = parseInt($(this).data("filter"));
     if (days === 0) {
       // ✅ RESET clicked
       initDynamicNGOChart(); // load full data with no date filters
-      $('.ngo-datepicker-container').hide(); // hide calendar if open
+      $(".ngo-datepicker-container").hide(); // hide calendar if open
     } else {
       // Load based on date range
       const end = new Date();
@@ -1824,34 +1833,33 @@ $(document).ready(function () {
 
       // const format = date => date.toISOString().split('T')[0];
       const format = (date) => {
-
         if (!(date instanceof Date) || isNaN(date.getTime())) {
+          console.log("Invalid Date:", date);
 
-            console.log("Invalid Date:", date);
-
-            return "";
+          return "";
         }
 
-       return date.toISOString().split('T')[0];
-
-   };
+        return date.toISOString().split("T")[0];
+      };
       initDynamicNGOChart(format(start), format(end));
     }
 
     // Hide filter dropdown after click
-    $('.ngo-filterDropdown').hide();
+    $(".ngo-filterDropdown").hide();
   });
 
-  $(".hospital-home-filter [data-filter], .doctor-home-filter [data-filter], .lab-home-filter [data-filter]").on("click", function (e) {
+  $(
+    ".hospital-home-filter [data-filter], .doctor-home-filter [data-filter], .lab-home-filter [data-filter]",
+  ).on("click", function (e) {
     e.stopPropagation();
 
     const filter = $(this).data("filter");
 
     if (filter === "custom") {
-        const $dropdownRoot = $(this).closest(".dropdown");
-        $dropdownRoot.find('.filterDropdown').hide();
-        $dropdownRoot.find('.datepicker-container').show();
-        return;
+      const $dropdownRoot = $(this).closest(".dropdown");
+      $dropdownRoot.find(".filterDropdown").hide();
+      $dropdownRoot.find(".datepicker-container").show();
+      return;
     }
 
     const url = new URL(window.location.href);
@@ -1860,57 +1868,49 @@ $(document).ready(function () {
     url.searchParams.delete("end_date");
 
     window.location.href = url.toString();
-});
+  });
 
   // 6. Hide all dropdowns on outside click
-  $(document).on('click', function (e) {
+  $(document).on("click", function (e) {
     const $target = $(e.target);
-    if (!$target.closest('.ngo-dropdown, .ngo-datepicker-container').length) {
-      $('.ngo-filterDropdown').hide();
-      $('.ngo-datepicker-container').hide();
+    if (!$target.closest(".ngo-dropdown, .ngo-datepicker-container").length) {
+      $(".ngo-filterDropdown").hide();
+      $(".ngo-datepicker-container").hide();
     }
   });
 });
 
 $(document).ready(function () {
+  // $(".view-appointment").click(function (e) {
 
-    // $(".view-appointment").click(function (e) {
+  //     e.stopPropagation();
 
-    //     e.stopPropagation();
+  //     $(".appointmentRequestDetail").removeClass("hidden");
 
-    //     $(".appointmentRequestDetail").removeClass("hidden");
-
-    //     $("body").addClass("overflow-hidden");
-    // });
-    $(document).on("click",".view-appointment",function(){
-
+  //     $("body").addClass("overflow-hidden");
+  // });
+  $(document).on("click", ".view-appointment", function () {
     const appointmentId = $(this).data("id");
 
     $.ajax({
-        url: `/appointment/appointment-details/${appointmentId}/`,
-        type: "GET",
+      url: `/appointment/appointment-details/${appointmentId}/`,
+      type: "GET",
 
-        success:function(response){
+      success: function (response) {
+        const a = response.appointment;
 
-            const a = response.appointment;
+        $("#popup-name").text(a.patient_name);
+        $("#popup-gender").text(a.gender);
+        $("#popup-age").text(a.age);
+        $("#popup-phone").text(a.phone);
+        $("#popup-address").text(a.address);
+        $("#popup-date").text(a.appointment_date);
+        $("#popup-service").text(a.visit_type);
 
-            $("#popup-name").text(a.patient_name);
-            $("#popup-gender").text(a.gender);
-            $("#popup-age").text(a.age);
-            $("#popup-phone").text(a.phone);
-            $("#popup-address").text(a.address);
-            $("#popup-date").text(a.appointment_date);
-            $("#popup-service").text(a.visit_type);
-
-            $(".appointmentRequestDetail")
-                .removeClass("hidden");
-
-        }
+        $(".appointmentRequestDetail").removeClass("hidden");
+      },
     });
-
-});
-
-
+  });
 });
 // $(document).on("click", ".cancelAppointmentBtn", function () {
 
@@ -1926,183 +1926,143 @@ $(document).ready(function () {
 // });
 
 $(document).on("click", ".complete-appointment-btn", function () {
+  const appointmentId = $(this).data("id");
 
-    const appointmentId = $(this).data("id");
-
-    $.ajax({
-        url: "/history/lab/complete/",
-        type: "POST",
-        data: {
-            id: appointmentId,
-            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
-        },
-        success: function () {
-            location.reload();
-        }
-    });
-
+  $.ajax({
+    url: "/history/lab/complete/",
+    type: "POST",
+    data: {
+      id: appointmentId,
+      csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+    },
+    success: function () {
+      location.reload();
+    },
+  });
 });
 // =============================
 // OPEN ORDER DETAILS POPUP
 // =============================
 $(".order-card").on("click", async function () {
+  const popupId = $(this).data("popup");
+  const orderId = $(this).data("order-id");
 
-    const popupId = $(this).data("popup");
-    const orderId = $(this).data("order-id");
+  console.log("Order Clicked:", orderId);
 
-    console.log("Order Clicked:", orderId);
+  if (!orderId) {
+    console.error("Missing data-order-id");
+    return;
+  }
 
-    if (!orderId) {
-        console.error("Missing data-order-id");
-        return;
+  try {
+    const response = await fetch(`/dashboard/pharmacy/order/${orderId}/`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error: ${response.status}`);
     }
 
-    try {
+    const data = await response.json();
 
-        const response = await fetch(
-            `/dashboard/pharmacy/order/${orderId}/`
-        );
+    console.log("Order Data:", data);
 
-        if (!response.ok) {
-            throw new Error(
-                `HTTP Error: ${response.status}`
-            );
-        }
+    populateOrderPopup(data);
 
-        const data = await response.json();
-
-        console.log("Order Data:", data);
-
-        populateOrderPopup(data);
-
-        $("." + popupId)
-            .removeClass("hidden")
-            .addClass("flex");
-
-    } catch (err) {
-
-        console.error(
-            "Failed to load order details:",
-            err
-        );
-
-    }
-
+    $("." + popupId)
+      .removeClass("hidden")
+      .addClass("flex");
+  } catch (err) {
+    console.error("Failed to load order details:", err);
+  }
 });
-
 
 // =============================
 // CLOSE POPUP
 // =============================
 $(".close-popup").on("click", function () {
+  const popupId = $(this).data("popup");
 
-    const popupId = $(this).data("popup");
-
-    $("." + popupId)
-        .addClass("hidden")
-        .removeClass("flex");
-
+  $("." + popupId)
+    .addClass("hidden")
+    .removeClass("flex");
 });
-
 
 // =============================
 // POPULATE ORDER DETAILS
 // =============================
 function populateOrderPopup(data) {
+  // Patient Name
+  const patientName = document.getElementById("patientName");
 
-    // Patient Name
-    const patientName =
-        document.getElementById("patientName");
+  if (patientName) {
+    patientName.innerText = data.patient_name || "N/A";
+  }
 
-    if (patientName) {
-        patientName.innerText =
-            data.patient_name || "N/A";
-    }
+  // Order Number
+  const orderNumber = document.getElementById("orderNumber");
 
-    // Order Number
-    const orderNumber =
-        document.getElementById("orderNumber");
+  if (orderNumber) {
+    orderNumber.innerText = "#" + data.id;
+  }
 
-    if (orderNumber) {
-        orderNumber.innerText =
-            "#" + data.id;
-    }
+  // Phone Number
+  const phoneNumber = document.getElementById("phoneNumber");
 
-    // Phone Number
-    const phoneNumber =
-        document.getElementById("phoneNumber");
+  if (phoneNumber) {
+    phoneNumber.innerText = data.phone || "N/A";
+  }
+  document.getElementById("gender").innerText = data.gender || "N/A";
 
-    if (phoneNumber) {
-        phoneNumber.innerText =
-            data.phone || "N/A";
-    }
-    document.getElementById("gender").innerText =
-    data.gender || "N/A";
+  document.getElementById("age").innerText = data.age || "N/A";
 
-    document.getElementById("age").innerText =
-        data.age || "N/A";
-    
-    document.getElementById("addressText").innerText =
-        [
-            data.address?.address,
-            data.address?.city,
-            data.address?.state,
-            data.address?.pincode,
-            data.address?.country
-        ]
-        .filter(Boolean)
-        .join(", ");
+  document.getElementById("addressText").innerText = [
+    data.address?.address,
+    data.address?.city,
+    data.address?.state,
+    data.address?.pincode,
+    data.address?.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
-    const profileImage = document.getElementById("profileImage");
+  const profileImage = document.getElementById("profileImage");
 
-    profileImage.src =
-        data.profile_photo
-            ? data.profile_photo
-            : "/static/images/dolly-paris1.svg";
+  profileImage.src = data.profile_photo
+    ? data.profile_photo
+    : "/static/images/dolly-paris1.svg";
 
-    profileImage.onerror = function () {
-        this.src = "/static/images/dolly-paris1.svg";
-    };
+  profileImage.onerror = function () {
+    this.src = "/static/images/dolly-paris1.svg";
+  };
 
-    // Total Amount
-    const orderTotal =
-        document.getElementById("orderTotal");
+  // Total Amount
+  const orderTotal = document.getElementById("orderTotal");
 
-    if (orderTotal) {
-        orderTotal.innerText =
-            "₹" + data.total;
-    }
+  if (orderTotal) {
+    orderTotal.innerText = "₹" + data.total;
+  }
 
-    // Medicine List
-    const container =
-        document.getElementById("medicineContainer");
+  // Medicine List
+  const container = document.getElementById("medicineContainer");
 
-    if (!container) {
-        console.error(
-            "medicineContainer not found"
-        );
-        return;
-    }
+  if (!container) {
+    console.error("medicineContainer not found");
+    return;
+  }
 
-    container.innerHTML = "";
+  container.innerHTML = "";
 
-    if (
-        !data.medicines ||
-        !data.medicines.length
-    ) {
-
-        container.innerHTML = `
+  if (!data.medicines || !data.medicines.length) {
+    container.innerHTML = `
             <div class="text-center py-4 text-gray-500">
                 No medicines found
             </div>
         `;
 
-        return;
-    }
+    return;
+  }
 
-    data.medicines.forEach((med) => {
-
-        container.innerHTML += `
+  data.medicines.forEach((med) => {
+    container.innerHTML += `
             <div class="flex items-start gap-3 border-b border-grayish-gray pb-3">
 
                 <div class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
@@ -2128,15 +2088,15 @@ function populateOrderPopup(data) {
                         <span
                             class="px-2 py-0.5 rounded-md text-white text-[8px]
                             ${
-                                med.requires_prescription
-                                    ? "bg-dark-crimson-red"
-                                    : "bg-ocean-green"
+                              med.requires_prescription
+                                ? "bg-dark-crimson-red"
+                                : "bg-ocean-green"
                             }">
 
                             ${
-                                med.requires_prescription
-                                    ? "Prescription Needed"
-                                    : "Prescription Received"
+                              med.requires_prescription
+                                ? "Prescription Needed"
+                                : "Prescription Received"
                             }
 
                         </span>
@@ -2159,153 +2119,114 @@ function populateOrderPopup(data) {
 
             </div>
         `;
-
-    });
-
+  });
 }
 
 // Open Share Popup
 $(document).on("click", ".pharmacy-open-share", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
+  e.preventDefault();
+  e.stopPropagation();
 
-    $(".pharmacy-share-modal")
-        .removeClass("hidden")
-        .addClass("flex");
+  $(".pharmacy-share-modal").removeClass("hidden").addClass("flex");
 });
 
 // Close Share Popup
 $(document).on("click", ".pharmacy-close-share", function () {
-
-    $(".pharmacy-share-modal")
-        .addClass("hidden")
-        .removeClass("flex");
+  $(".pharmacy-share-modal").addClass("hidden").removeClass("flex");
 });
 
-  $(document).on("click", ".popup-btn", function (e) {
-    e.preventDefault();
-    let popupId = $(this).data("popup");
-    const $scope = $(this).closest(".appointmentRequestDetail");
-    const $popup = $scope.length ? $scope.find("." + popupId) : $("." + popupId);
-    $popup
-      .removeClass("hidden")
-      .addClass("flex");
-  });
+$(document).on("click", ".popup-btn", function (e) {
+  e.preventDefault();
+  let popupId = $(this).data("popup");
+  const $scope = $(this).closest(".appointmentRequestDetail");
+  const $popup = $scope.length ? $scope.find("." + popupId) : $("." + popupId);
+  $popup.removeClass("hidden").addClass("flex");
+});
 
 // Close popup
-  $(document).on("click", ".close-popup", function (e) {
-    e.preventDefault();
-    let popupId = $(this).data("popup");
-    $(this)
-      .closest("." + popupId)
-      .addClass("hidden")
-      .removeClass("flex");
-  });
+$(document).on("click", ".close-popup", function (e) {
+  e.preventDefault();
+  let popupId = $(this).data("popup");
+  $(this)
+    .closest("." + popupId)
+    .addClass("hidden")
+    .removeClass("flex");
+});
 
-  // The lab home request popup uses a direct share action rather than the
-  // larger share-app menu used by doctor/hospital popups.
-  $(document).on("click", ".lab-appointment-share", async function (e) {
-    e.preventDefault();
-    const $modal = $(this).closest(".appointmentRequestDetail");
-    const shareText = [
-      "Appointment Details",
-      `Patient: ${$modal.find("#popup-name, #popup-patient-name").first().text()}`,
-      `Phone: ${$modal.find("#popup-phone").text()}`,
-      `Date: ${$modal.find("#popup-date").text()}`,
-    ].join("\n");
+// The lab home request popup uses a direct share action rather than the
+// larger share-app menu used by doctor/hospital popups.
+$(document).on("click", ".lab-appointment-share", async function (e) {
+  e.preventDefault();
+  const $modal = $(this).closest(".appointmentRequestDetail");
+  const shareText = [
+    "Appointment Details",
+    `Patient: ${$modal.find("#popup-name, #popup-patient-name").first().text()}`,
+    `Phone: ${$modal.find("#popup-phone").text()}`,
+    `Date: ${$modal.find("#popup-date").text()}`,
+  ].join("\n");
 
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "Appointment Details", text: shareText });
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(shareText);
-        toastr.success("Appointment details copied");
-      }
-    } catch (error) {
-      if (error.name !== "AbortError") toastr.error("Unable to share appointment details");
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: "Appointment Details", text: shareText });
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(shareText);
+      toastr.success("Appointment details copied");
     }
-  });
+  } catch (error) {
+    if (error.name !== "AbortError")
+      toastr.error("Unable to share appointment details");
+  }
+});
 
 // =============================
 // ATTACHMENT PREVIEW POPUP (Doctor / Lab home)
 // =============================
 if ($(".attachmentPopup").length) {
+  $(document).on("click", ".view-attachment", function () {
+    $(".attachmentPopup").removeClass("hidden").addClass("flex");
+  });
 
-    $(document).on("click", ".view-attachment", function () {
+  $(document).on("click", ".close-attachment", function () {
+    $(".attachmentPopup").addClass("hidden").removeClass("flex");
+  });
 
-        $(".attachmentPopup")
-            .removeClass("hidden")
-            .addClass("flex");
-
-    });
-
-    $(document).on("click", ".close-attachment", function () {
-
-        $(".attachmentPopup")
-            .addClass("hidden")
-            .removeClass("flex");
-
-    });
-
-    // Close on backdrop click
-    $(document).on("click", ".attachmentPopup", function (e) {
-
-        if ($(e.target).is(".attachmentPopup")) {
-
-            $(this)
-                .addClass("hidden")
-                .removeClass("flex");
-
-        }
-
-    });
-
+  // Close on backdrop click
+  $(document).on("click", ".attachmentPopup", function (e) {
+    if ($(e.target).is(".attachmentPopup")) {
+      $(this).addClass("hidden").removeClass("flex");
+    }
+  });
 }
 
-
 $(document).on("click", ".place-bid-btn", function () {
+  const appointmentId = $(this).data("id");
+  const row = $(this).closest(".appointment-row");
 
-    const appointmentId = $(this).data("id");
-    const row = $(this).closest(".appointment-row");
+  $.ajax({
+    url: "/appointment/place-bid/",
+    type: "POST",
 
-    $.ajax({
-        url: "/appointment/place-bid/",
-        type: "POST",
+    data: {
+      appointment_id: appointmentId,
+      csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content"),
+    },
 
-        data: {
-            appointment_id: appointmentId,
-            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr('content')
-        },
+    success: function (resp) {
+      if (resp.success) {
+        toastr.success(resp.message || "Bid placed successfully");
 
-        success: function(resp){
+        row.fadeOut(300, function () {
+          $(this).remove();
+        });
+      } else {
+        toastr.error(resp.message || "Unable to place bid");
+      }
+    },
 
-            if(resp.success){
-
-                toastr.success(
-                    resp.message || "Bid placed successfully"
-                );
-
-                row.fadeOut(300, function(){
-                    $(this).remove();
-                });
-
-            } else {
-
-                toastr.error(
-                    resp.message || "Unable to place bid"
-                );
-            }
-        },
-
-        error: function(xhr){
-
-            toastr.error(
-                xhr.responseJSON?.message ||
-                "Something went wrong"
-            );
-        }
-    });
-
+    error: function (xhr) {
+      toastr.error(xhr.responseJSON?.message || "Something went wrong");
+    },
+  });
 });
 
 // $(document).on("click", ".appointment-detail-btn", function () {
@@ -2402,66 +2323,48 @@ $(document).on("click", ".place-bid-btn", function () {
 // });
 
 $(document).on("click", ".appointment-detail-btn", function () {
+  const appointmentId = $(this).data("id");
 
-    const appointmentId = $(this).data("id");
+  $.ajax({
+    url: `/appointment/appointment-details/${appointmentId}/`,
+    type: "GET",
 
-    $.ajax({
-        url: `/appointment/appointment-details/${appointmentId}/`,
-        type: "GET",
+    success: function (response) {
+      if (!response.success) {
+        toastr.error(response.message);
+        return;
+      }
 
-        success: function (response) {
+      const a = response.appointment;
 
-            if (!response.success) {
-                toastr.error(response.message);
-                return;
-            }
+      $("#popup-name, #popup-patient-name").text(a.patient_name);
+      $("#popup-gender").text(a.gender || "-");
+      $("#popup-age").text(a.age || "-");
+      $("#popup-phone").text(a.phone || "-");
+      $("#popup-address").text(a.address || "-");
 
-            const a = response.appointment;
+      $("#popup-visit-type").text(a.consultation_type || "-");
 
-            $("#popup-name, #popup-patient-name").text(a.patient_name);
-            $("#popup-gender").text(a.gender || "-");
-            $("#popup-age").text(a.age || "-");
-            $("#popup-phone").text(a.phone || "-");
-            $("#popup-address").text(a.address || "-");
+      $("#popup-date").text(a.appointment_date || "-");
 
-            $("#popup-visit-type").text(
-                a.consultation_type || "-"
-            );
+      $("#popup-medical-requirement").text(a.consultation_type || "-");
 
-            $("#popup-date").text(
-                a.appointment_date || "-"
-            );
+      $("#popup-details").text(a.details || "-");
 
-            $("#popup-medical-requirement").text(
-                a.consultation_type || "-"
-            );
+      $("#popup-order-id").text(a.order_id || "-");
 
-            $("#popup-details").text(
-                a.details || "-"
-            );
+      $("#popup-budget").text("₹" + (a.budget || 0));
 
-            $("#popup-order-id").text(
-                a.order_id || "-"
-            );
+      $(".appointmentRequestDetail")
+        .attr("data-appointment-id", appointmentId)
+        .removeClass("hidden")
+        .addClass("flex");
+    },
 
-            $("#popup-budget").text(
-                "₹" + (a.budget || 0)
-            );
-
-            $(".appointmentRequestDetail")
-                .attr("data-appointment-id", appointmentId)
-                .removeClass("hidden")
-                .addClass("flex");
-        },
-
-        error: function () {
-
-            toastr.error(
-                "Unable to load appointment details"
-            );
-        }
-    });
-
+    error: function () {
+      toastr.error("Unable to load appointment details");
+    },
+  });
 });
 
 // $(document).on("click", ".place-bid-btn", function () {
@@ -2507,56 +2410,100 @@ $(document).on("click", ".appointment-detail-btn", function () {
 //     });
 
 // });
+document.addEventListener("DOMContentLoaded", function () {
+  const skeleton = document.getElementById("pharmacy-page-skeleton");
+  const content = document.getElementById("pharmacy-page-content");
+
+  if (!skeleton || !content) {
+    return;
+  }
+
+  content.classList.remove("is-ready");
+  content.classList.add("is-visible");
+  skeleton.classList.remove("is-visible");
+  skeleton.classList.add("is-hidden");
+
+  window.setTimeout(function () {
+    skeleton.remove();
+  }, 180);
+});
+
+$(document).ready(function () {
+  $(".filterToggle").on("click", function (e) {
+    e.stopPropagation();
+
+    $(this).siblings(".filterDropdown").toggleClass("hidden");
+  });
+
+  $(".filterOption").on("click", function (e) {
+    e.stopPropagation();
+
+    // Remove blue from ALL ticks
+    $(".filterOption .material-symbols-outlined:first-child")
+      .removeClass("text-dodger-blue")
+      .addClass("text-light-gray");
+
+    // Make ONLY clicked option blue
+    $(this)
+      .find(".material-symbols-outlined:first-child")
+      .removeClass("text-light-gray")
+      .addClass("text-dodger-blue");
+
+    // Get selected value
+    let selectedValue = $(this).data("value");
+
+    // Update Today text
+    $(".filterToggle")
+      .closest(".flex.items-center.gap-2\\.5")
+      .find("> p")
+      .text(selectedValue);
+
+    // Close dropdown
+    $(".filterDropdown").addClass("hidden");
+  });
+
+  // Close when clicking outside
+  $(document).on("click", function () {
+    $(".filterDropdown").addClass("hidden");
+  });
+});
 
 $(document).on("click", ".accept-button", function () {
+  // First try button's own data-id
+  let appointmentId = $(this).data("id");
 
-    // First try button's own data-id
-    let appointmentId = $(this).data("id");
+  // If clicked inside popup, fallback to popup attribute
+  if (!appointmentId) {
+    appointmentId = $(".appointmentRequestDetail").attr("data-appointment-id");
+  }
 
-    // If clicked inside popup, fallback to popup attribute
-    if (!appointmentId) {
-        appointmentId = $(".appointmentRequestDetail")
-            .attr("data-appointment-id");
-    }
+  console.log("Appointment ID:", appointmentId);
 
-    console.log("Appointment ID:", appointmentId);
+  if (!appointmentId) {
+    toastr.error("Appointment ID not found");
+    return;
+  }
 
-    if (!appointmentId) {
-        toastr.error("Appointment ID not found");
-        return;
-    }
+  $.ajax({
+    url: "/appointment/place-bid/",
+    type: "POST",
+    data: {
+      appointment_id: appointmentId,
+      csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content"),
+    },
 
-    $.ajax({
-        url: "/appointment/place-bid/",
-        type: "POST",
-        data: {
-            appointment_id: appointmentId,
-            csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
-        },
+    success: function (resp) {
+      if (resp.success) {
+        toastr.success(resp.message || "Bid placed successfully");
 
-        success: function(resp){
+        $(".appointmentRequestDetail").addClass("hidden").removeClass("flex");
 
-            if(resp.success){
-
-                toastr.success(
-                    resp.message || "Bid placed successfully"
-                );
-
-                $(".appointmentRequestDetail")
-                    .addClass("hidden")
-                    .removeClass("flex");
-
-                setTimeout(function(){
-                    location.reload();
-                },1000);
-
-            } else {
-
-                toastr.error(
-                    resp.message || "Unable to place bid"
-                );
-            }
-        }
-    });
-
+        setTimeout(function () {
+          location.reload();
+        }, 1000);
+      } else {
+        toastr.error(resp.message || "Unable to place bid");
+      }
+    },
+  });
 });
