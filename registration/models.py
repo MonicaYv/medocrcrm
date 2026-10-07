@@ -97,6 +97,7 @@ class LabFacility(models.Model):
         db_table = 'lab_facility'        
     
 class LabTiming(models.Model):
+    day_of_week = models.CharField(max_length=20,null=True,blank=True)
     open_time = models.TimeField(null=True, blank=True)
     close_time = models.TimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
