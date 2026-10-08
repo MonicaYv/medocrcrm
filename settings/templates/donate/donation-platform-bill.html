@@ -7,13 +7,20 @@
     <div style="display: flex; align-items: center; justify-content: space-between; height: 2.5rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
             <span
-            class="material-symbols-outlined cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg">
+            class="material-symbols-outlined donation-document-share cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg"
+            role="button" tabindex="0" aria-label="Share platform bill" title="Share platform bill">
             share
             </span>
             <span
             onclick="downloadPlatformPDF()"
             class="material-symbols-outlined cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg">
             download
+            </span>
+            <span
+            data-print-target="platformReceiptContent"
+            class="material-symbols-outlined donation-document-print cursor-pointer text-white bg-dark-blue p-2 rounded-md text-lg"
+            role="button" tabindex="0" aria-label="Print platform bill" title="Print platform bill">
+            print
             </span>
         </div>
         <p class="text-xl font-semibold text-dark-blue">

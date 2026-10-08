@@ -358,14 +358,6 @@ $(document).on("click", ".view-attachment", function () {
   applyHistorySearchAndFilter();
 });
 
-  // 1. Toggle Main Dropdown
-  $(".filterToggle").on("click", function (e) {
-    e.stopPropagation();
-    const isHidden = $(".filterDropdown").hasClass("hidden");
-    $(".filterDropdown, .submenu").addClass("hidden"); // Reset all
-    if (isHidden) $(".filterDropdown").removeClass("hidden");
-  });
-
   // 2. Open Date Submenu (Keep main open)
   $(".trigger-date").on("click", function (e) {
     e.stopPropagation();
@@ -609,7 +601,8 @@ $(document).on("click", ".view-attachment", function () {
   });
 
   // 7. Global Close
-  $(document).on("click", function () {
+  $(document).on("click", function (e) {
+    if ($(e.target).closest(".filterToggle").length) return;
     $(".filterDropdown, .submenu").addClass("hidden");
     $("#calendarContainer").addClass("hidden");
   });
@@ -990,6 +983,16 @@ switch (status) {
 });
 });
 
+$(document).on("click.hospitalHistoryFilter", ".filterToggle", function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const $dropdown = $(this).closest(".dropdown").find(".filterDropdown").first();
+  const isHidden = $dropdown.hasClass("hidden");
+  $(".filterDropdown, .submenu").addClass("hidden");
+  if (isHidden) $dropdown.removeClass("hidden");
+});
+
 /* =========================================================
    HISTORY SEARCH + FILTER (appointment tabs & bed inventory)
 ========================================================= */
@@ -1012,6 +1015,15 @@ function getHistoryActiveTab() {
   return "";
 }
 
+function getHistoryActivePane() {
+  if (getHistoryActiveTab() === "equipment") {
+    return $(".equipment.tab-content").first();
+  }
+
+  // All appointment statuses render into the accepted pane's shared AJAX container.
+  return $(".accepted.tab-content").first();
+}
+
 function updateHistorySearchContext() {
   const isEquipment = getHistoryActiveTab() === "equipment";
   $("#historySearch").attr(
@@ -1019,33 +1031,23 @@ function updateHistorySearchContext() {
     isEquipment ? "Search by bed name" : "Search by name or categories"
   );
   $(".trigger-date, .trigger-visit").toggleClass("hidden", isEquipment);
+  $(".filterToggle").attr("aria-label", "Open history filters");
 }
 
 function getHistoryCards() {
-  // Collect cards from whichever tab content is currently visible so search
-  // never depends on hidden containers or on ID-seeded selector lookups.
-  const $visibleTabs = $(".tab-content").filter(":visible");
-  let $cards = $();
+  const $active = getHistoryActivePane();
+  if ($active.hasClass("equipment")) {
+    return $active.find(".card-equipment");
+  }
 
-  $visibleTabs.each(function () {
-    const $tab = $(this);
-
-    if ($tab.hasClass("equipment")) {
-      // Bed Inventory tab
-      $cards = $cards.add($tab.find(".card-equipment"));
-    } else {
-      // Appointment tabs - cards are injected via AJAX
-      $cards = $cards.add($tab.find("[class*='card-all-']"));
-    }
-  });
-
-  return $cards;
+  // Appointment cards are injected via AJAX into the currently selected pane.
+  return $active.find("[class*='card-all-']");
 }
 
 function applyHistorySearchAndFilter() {
   const term = historySearchTerm.toLowerCase().trim();
   const statusFilter = historyStatusFilter.toLowerCase();
-  const $active = $(".tab-content").filter(":visible").first();
+  const $active = getHistoryActivePane();
   const $cards = getHistoryCards();
 
   let visibleCount = 0;
@@ -1155,13 +1157,10 @@ function onHistorySearchInput() {
 }
 
 $(document).on(
-  "input",
-  "#historySearch, input[placeholder='Search by name or categories']",
+  "input.hospitalHistorySearch",
+  "input[placeholder^='Search by']",
   onHistorySearchInput
 );
-
-// Direct binding as a fallback for the static search box
-$("#historySearch").off("input.historySearch").on("input.historySearch", onHistorySearchInput);
 
 // Initialise the status submenu and filter state on page load
 rebuildStatusSubmenu();
