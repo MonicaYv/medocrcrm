@@ -4,8 +4,6 @@ const screenSignIn = document.getElementById("screenSignIn");
 const screenOtp = document.getElementById("screenOtp");
 const signinScene = document.getElementById("signinScene");
 const otpScene = document.getElementById("otpScene");
-const dot0 = document.getElementById("dot0");
-const dot1 = document.getElementById("dot1");
 const otpPhoneDisplay = document.getElementById("otpPhoneDisplay");
 const editNumberBtn = document.getElementById("editNumberBtn");
 
@@ -34,10 +32,9 @@ function goToOtp() {
   screenSignIn.classList.remove("active");
   screenOtp.classList.add("active");
   screenOtp.classList.add("fade-in");
-  signinScene.style.display = "none";
-  otpScene.style.display = "flex";
-  dot0.classList.remove("active");
-  dot1.classList.add("active");
+  if (typeof window.setAuthSlide === "function") {
+    window.setAuthSlide(1);
+  }
   otpPhoneDisplay.textContent = maskNumber(phoneInput.value || "81022");
   startTimer();
   setTimeout(() => document.querySelector(".otp-box").focus(), 100);
@@ -47,10 +44,9 @@ function goToSignIn() {
   screenOtp.classList.remove("active");
   screenSignIn.classList.add("active");
   screenSignIn.classList.add("fade-in");
-  otpScene.style.display = "none";
-  signinScene.style.display = "flex";
-  dot1.classList.remove("active");
-  dot0.classList.add("active");
+  if (typeof window.setAuthSlide === "function") {
+    window.setAuthSlide(0);
+  }
 }
 
 //login screen - continue btn

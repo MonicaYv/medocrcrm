@@ -15,18 +15,18 @@
       
 
       <!-- SCENE 0: role selection — shopping cart + pill blister pack -->
-      <div class="illus-scene" id="roleScene">
-        <img src="../../../static/images/register-img.webp" alt="logo">
+      <div class="illus-scene active" id="roleScene">
+        <img class="auth-slide-image" src="{% static 'images/register-img.webp' %}" alt="Healthcare illustration">
       </div>
 
-      <!-- SCENE 1: sign up — shield/pills/heart (same family as sign-in) -->
-      <div class="illus-scene" id="signupScene" style="display:none;">
-        <img src="../../../static/images/healt-care.png" alt="logo">
+      <!-- SCENE 1: sign up — shield/pills/heart -->
+      <div class="illus-scene" id="signupScene">
+        <img class="auth-slide-image" src="{% static 'images/healt-care.png' %}" alt="Healthcare illustration">
       </div>
 
       <!-- SCENE 2: OTP verify — doctor figure -->
-      <div class="illus-scene" id="otpScene" style="display:none;">
-       <img src="../../../static/images/register-img.webp" alt="logo">
+      <div class="illus-scene" id="otpScene">
+       <img class="auth-slide-image" src="{% static 'images/otp-img.webp' %}" alt="OTP verification illustration">
       </div>
 
       <div class="dots">
@@ -181,5 +181,6 @@
 {% endblock %}
 
 {% block extra_js %}
+    <script src="{% static 'js/auth-slider.js' %}"></script>
     <script src="{% static 'js/sign-up.js' %}"></script>
 {% endblock %}
