@@ -14,13 +14,17 @@
       </div>
       
 
-      <div class="illus-scene" id="signinScene">
-         <img src="../../../static/images/healt-care.png" alt="logo">
+      <div class="illus-scene active" id="signinScene">
+         <img class="auth-slide-image signin-slide-image" src="{% static 'images/pharmacy-services-bg.jpg' %}" alt="Hospital reception">
       </div>
 
-      <div class="illus-scene" id="otpScene" style="display:none;">
-        <!-- Verify OTP illustration: doctor + medical icons -->
-         <img src="../../../static/images/otp-img.webp" alt="logo">
+      <div class="illus-scene" id="otpScene">
+        <!-- Verify OTP illustration: medicine -->
+         <img class="auth-slide-image signin-slide-image" src="{% static 'images/reward3.jpeg' %}" alt="Medicines">
+      </div>
+
+      <div class="illus-scene" id="signinExtraScene">
+        <img class="auth-slide-image signin-slide-image" src="{% static 'images/lab-bg.png' %}" alt="Medical laboratory">
       </div>
 
       <div class="dots">
@@ -115,5 +119,6 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/auth-slider.js' %}"></script>
 <script src="{% static 'js/sign-in.js' %}"></script>
 {% endblock %}

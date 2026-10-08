@@ -1,9 +1,6 @@
 const roleScene = document.getElementById("roleScene");
 const signupScene = document.getElementById("signupScene");
 const otpScene = document.getElementById("otpScene");
-const dot0 = document.getElementById("dot0");
-const dot1 = document.getElementById("dot1");
-const dot2 = document.getElementById("dot2");
 
 const screenRole = document.getElementById("screenRole");
 const screenSignUp = document.getElementById("screenSignUp");
@@ -41,12 +38,11 @@ function showScreen(scene, dotIndex) {
   [screenRole, screenSignUp, screenOtp].forEach((s) =>
     s.classList.remove("active"),
   );
-  [roleScene, signupScene, otpScene].forEach((s) => (s.style.display = "none"));
   scene.screenEl.classList.add("active");
   scene.screenEl.classList.add("fade-in");
-  scene.illusEl.style.display = "flex";
-  [dot0, dot1, dot2].forEach((d) => d.classList.remove("active"));
-  [dot0, dot1, dot2][dotIndex].classList.add("active");
+  if (typeof window.setAuthSlide === "function") {
+    window.setAuthSlide(dotIndex);
+  }
 }
 
 //role continue btn
