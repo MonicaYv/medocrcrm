@@ -354,3 +354,132 @@ $(document).on("click", ".copy-coupon", function () {
         }
     });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("couponFilterToggle");
+    const dropdown = document.getElementById("couponFilterDropdown");
+    const datePicker = document.getElementById("couponDatePicker");
+    if (!button || !dropdown) {
+        return;
+    }
+    button.onclick = function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        dropdown.classList.toggle("hidden");
+        if (datePicker) {
+            datePicker.classList.add("hidden");
+        }
+    };
+    const options = dropdown.querySelectorAll(":scope > div");
+    options.forEach(function (option) {
+        option.onclick = function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const text = this.textContent.trim();
+            dropdown.classList.add("hidden");
+            if (text.includes("Custom date")) {
+                if (datePicker) {
+                    datePicker.classList.remove("hidden");
+                }
+                return;
+            }
+            if (text === "1 Week") {filterCoupons(7);}
+            if (text === "1 Month") {filterCoupons(30);}
+            if (text === "1 Year") {filterCoupons(365);}
+        };
+    });
+    if (datePicker) {
+        datePicker.onclick = function (e) {
+            e.stopPropagation();
+        };
+    }
+    const applyButton =
+        document.getElementById("applyCouponDateFilter");
+    if (applyButton) {
+        applyButton.onclick = function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const start =
+                document.getElementById("couponStartDate").value;
+            const end =
+                document.getElementById("couponEndDate").value;
+            if (!start || !end) {
+                alert("Please select both dates.");
+                return;
+            }
+            if (start > end) {
+                alert("Start date cannot be greater than end date.");
+                return;
+            }
+            filterCouponsCustom(start, end);
+            datePicker.classList.add("hidden");
+        };
+    }
+    function filterCoupons(days) {
+        const cards =
+            document.querySelectorAll(
+                "#featured-rewards .reward-card"
+            );
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        const startDate = new Date();
+        startDate.setDate(
+            startDate.getDate() - days
+        );
+        startDate.setHours(0, 0, 0, 0);
+        cards.forEach(function (card) {
+            const value = card.getAttribute("data-date");
+            if (!value) {
+                card.style.display = "none";
+                return;
+            }
+            const couponDate =
+                new Date(value + "T00:00:00");
+            card.style.display =
+                couponDate >= startDate &&
+                couponDate <= today
+                    ? ""
+                    : "none";
+        });
+    }
+
+    function filterCouponsCustom(startDate, endDate) {
+        const cards =
+            document.querySelectorAll(
+                "#featured-rewards .reward-card"
+            );
+        cards.forEach(function (card) {
+            const value = card.getAttribute("data-date");
+            if (!value) {
+                card.style.display = "none";
+                return;
+            }
+            card.style.display =
+                value >= startDate &&
+                value <= endDate
+                    ? ""
+                    : "none";
+        });
+    }
+});
+
+$(document).on("input", "#couponSearch", function () {
+    const searchValue = $(this).val().toLowerCase().trim();
+
+    $("#featured-rewards .reward-card").each(function () {
+        const card = $(this);
+
+        const title = card.find(".text-dark-gray").first().text().toLowerCase();
+        const description = card.find(".text-dark-gray").eq(1).text().toLowerCase();
+        const category = card.find(".text-dodger-blue").first().text().toLowerCase();
+
+        const searchableText = title + " " + description + " " + category;
+
+        if (searchableText.includes(searchValue)) {
+            card.show();
+        } else {
+            card.hide();
+        }
+    });
+});

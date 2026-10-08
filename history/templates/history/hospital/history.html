@@ -53,14 +53,18 @@
                             </div>
 
                             <!-- Filter Dropdown -->
-                            <div class="relative dropdown inline-block">
+                            <div class="relative z-30 dropdown inline-block">
                                 <button
-                                    class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
+                                    class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer"
+                                    type="button"
+                                    aria-label="Open history filters"
+                                    aria-controls="historyFilterDropdown">
                                     <span class="material-symbols-outlined flex justify-center items-center">tune</span>
                                 </button>
 
                                 <div
-                                    class="filterDropdown absolute right-0 mt-2 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
+                                    id="historyFilterDropdown"
+                                    class="filterDropdown absolute right-0 mt-2 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-50">
                                     <div
                                         class="trigger-date p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer flex justify-between items-center">
                                         Date
@@ -801,6 +805,5 @@
 
 {% block extra_js %}
 <script src="/static/js/tabs.js"></script>
-<script src="/static/js/hospital-history.js?v=20261001-2"></script>
+<script src="/static/js/hospital-history.js?v=20261008-2"></script>
 {% endblock %}
-

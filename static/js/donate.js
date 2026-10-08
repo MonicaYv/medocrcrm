@@ -451,8 +451,14 @@ $(document).on("click", ".pagination-btn", function () {
 
 //open donate popup
 function openDonatePopup(donationId) {
-  fetch(`/donate/get-donate-bill/${donationId}/`)
-    .then((response) => response.json())
+  fetch(`/donate/get-donate-bill/${encodeURIComponent(donationId)}/`)
+    .then(async (response) => {
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to load receipt.");
+      }
+      return data;
+    })
     .then((data) => {
       document.getElementById("receiptNo").innerText = data.receipt_no;
       document.getElementById("paymentDate").innerText = data.payment_date;
@@ -465,11 +471,13 @@ function openDonatePopup(donationId) {
       document.getElementById("amount").innerText = data.amount;
       document.getElementById("payMode").innerText = data.pay_mode;
 
-      document.getElementById("donateReceiptModal").style.display = "flex";
+      const modal = document.getElementById("donateReceiptModal");
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
     })
     .catch((err) => {
       console.error("Error loading receipt:", err);
-      alert("Unable to load receipt.");
+      toastr.error(err.message || "Unable to load receipt.");
     });
 }
 
@@ -494,28 +502,126 @@ function downloadDonatePDF() {
   html2pdf().set(opt).from(element).save();
 }
 
+function printDonationElement(element) {
+  const printWindow = window.open("", "_blank", "width=900,height=700");
+  if (!printWindow) {
+    toastr.error("Allow pop-ups to print this donation document.");
+    return;
+  }
+
+  const title = element.id === "donateReceiptContent"
+    ? "Donation Receipt"
+    : element.id === "platformReceiptContent"
+      ? "Platform Bill"
+      : "Donation History";
+
+  try {
+    printWindow.document.open();
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            @page { margin: 12mm; }
+            body { font: 14px Arial, sans-serif; color: #111; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { padding: 8px; border: 1px solid #bbb; text-align: left; }
+            img { max-width: 100%; }
+            @media print { thead { display: table-header-group; } tr { break-inside: avoid; } }
+          </style>
+        </head>
+        <body>${element.innerHTML}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    window.setTimeout(() => printWindow.print(), 250);
+  } catch (error) {
+    printWindow.close();
+    console.error("Donation document printing failed:", error);
+    toastr.error("Unable to print this donation document.");
+  }
+}
+
+$(document).on("click", ".donation-document-print", function () {
+  const targetId = $(this).data("print-target");
+  const element = document.getElementById(targetId);
+  if (!element) {
+    toastr.error("Donation document is unavailable for printing.");
+    return;
+  }
+  printDonationElement(element);
+});
+
+$(document).on("click", ".donation-history-print-btn", function () {
+  const element = $(this).closest(".popup").find(".download-container").get(0);
+  if (!element) {
+    toastr.error("Donation history is unavailable for printing.");
+    return;
+  }
+  printDonationElement(element);
+});
+
+$(document).on("click", ".donation-document-share", async function () {
+  const modal = $(this).closest(".popup");
+  const element = modal.find(".download-container > div[id$='Content']").get(0);
+  if (!element || typeof html2pdf !== "function") {
+    toastr.error("Donation document sharing is unavailable.");
+    return;
+  }
+
+  const isReceipt = element.id === "donateReceiptContent";
+  const filename = isReceipt ? "donation-receipt.pdf" : "platform-bill.pdf";
+  const title = isReceipt ? "Donation Receipt" : "Platform Bill";
+  const options = {
+    margin: 0.5,
+    filename,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+  };
+
+  try {
+    const pdf = await html2pdf().set(options).from(element).toPdf().get("pdf");
+    const blob = pdf.output("blob");
+    if (typeof File !== "undefined" && navigator.share && navigator.canShare) {
+      const file = new File([blob], filename, { type: "application/pdf" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title });
+        return;
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    toastr.info("The PDF was downloaded. You can now attach it to a message.");
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      console.error("Donation document sharing failed:", error);
+      toastr.error("Unable to share this donation document.");
+    }
+  }
+});
+
 ////////////
 // open platform popup
 function openPlatformPopup(donationId) {
-  console.log("Opening platform popup for donation ID:", donationId);
-
-  fetch(`/donate/get-platform-bill/${donationId}/`)
-    .then((response) => {
-      console.log("Fetch completed. Status:", response.status);
-      return response.text();
-    })
-    .then((text) => {
-      console.log("Raw fetch response:", text);
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.error("JSON parse error:", e);
-        return;
+  fetch(`/donate/get-platform-bill/${encodeURIComponent(donationId)}/`)
+    .then(async (response) => {
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to load platform bill.");
       }
-
-      // ✅ Fill modal content
+      return data;
+    })
+    .then((data) => {
       document.getElementById("receiptNoPlatform").textContent =
         data.receipt_no || "";
       document.getElementById("paymentDatePlatform").textContent =
@@ -536,31 +642,18 @@ function openPlatformPopup(donationId) {
         data.amount || "";
       document.getElementById("signPlatform").textContent = data.ngo_name || "";
 
-      // ✅ Open modal
       const modal = document.getElementById("platformReceiptModal");
-      console.log("Modal found:", !!modal);
-
       if (!modal) {
-        console.error("Modal not found in DOM!");
-        return;
+        throw new Error("Platform bill popup is unavailable.");
       }
 
       modal.classList.remove("hidden");
-      modal.style.display = "flex"; // Force visible
+      modal.style.display = "flex";
       modal.style.visibility = "visible";
-
-      console.log("Modal visibility class removed.");
-      console.log(
-        "Modal computed display:",
-        window.getComputedStyle(modal).display,
-      );
-      console.log(
-        "Modal computed visibility:",
-        window.getComputedStyle(modal).visibility,
-      );
     })
     .catch((err) => {
-      console.error("Error loading receipt:", err);
+      console.error("Error loading platform bill:", err);
+      toastr.error(err.message || "Unable to load platform bill.");
     });
 }
 

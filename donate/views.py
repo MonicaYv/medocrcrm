@@ -266,60 +266,65 @@ def get_donation_history(request):
         "total_items": paginator.count,
     })
 
-@dashboard_login_required    
-def get_donate_bill(request, donation_id):
-    user = request.user_obj
-    donation = Donation.objects.select_related('ngopost__user__ngoprofile').get(id=donation_id)
-    
-    ngo_user = donation.ngopost.user
-    ngo_profile = NGOProfile.objects.filter(user=ngo_user).first()
+def _get_donation_document_data(user, donation_id):
+    donation = (
+        Donation.objects
+        .select_related("ngopost__user__ngoprofile")
+        .filter(id=donation_id, user=user)
+        .first()
+    )
+    if donation is None:
+        return None
+
+    ngo_profile = NGOProfile.objects.filter(user=donation.ngopost.user).first()
     contact_person = ContactPerson.objects.filter(
         profile_type=user.user_type,
-        profile=user
-    ).first()  
+        profile=user,
+    ).first()
+    address = ", ".join(
+        str(part)
+        for part in (
+            ngo_profile.address if ngo_profile else None,
+            ngo_profile.city if ngo_profile else None,
+            ngo_profile.state if ngo_profile else None,
+            ngo_profile.pincode if ngo_profile else None,
+        )
+        if part
+    )
+    gst = donation.gst or Decimal("0")
 
-
-    response_data = {
+    return {
         "receipt_no": donation.id,
-        "payment_date": donation.payment_date.strftime("%d-%b-%Y"),
-        "ngo_name": ngo_profile.ngo_name,
-        "pan": ngo_profile.pan_number,
+        "payment_date": (
+            donation.payment_date.strftime("%d-%b-%Y")
+            if donation.payment_date else ""
+        ),
+        "ngo_name": ngo_profile.ngo_name if ngo_profile else "",
+        "pan": ngo_profile.pan_number if ngo_profile else "",
         "amount": f"₹{donation.amount}",
-        "pay_mode": f"{donation.payment_method}",
-        "address": f"{ngo_profile.address}, {ngo_profile.city}, {ngo_profile.state}, {ngo_profile.pincode}",
+        "pay_mode": donation.payment_method,
+        "address": address,
         "name": contact_person.name if contact_person else "",
-        "email": user.email if user.email else "",
+        "email": user.email or "",
+        "gst": f"{gst:.2f}",
+        "finalTotal": f"{donation.amount + gst:.2f}",
     }
 
+
+@dashboard_login_required
+def get_donate_bill(request, donation_id):
+    response_data = _get_donation_document_data(request.user_obj, donation_id)
+    if response_data is None:
+        return JsonResponse({"error": "Donation not found."}, status=404)
     return JsonResponse(response_data)
 
-@dashboard_login_required    
+
+@dashboard_login_required
 def get_platform_bill(request, donation_id):
-    user = request.user_obj
-    donation = Donation.objects.select_related('ngopost__user__ngoprofile').get(id=donation_id)
-    
-    ngo_user = donation.ngopost.user
-    ngo_profile = NGOProfile.objects.filter(user=ngo_user).first()
-    contact_person = ContactPerson.objects.filter(
-        profile_type=user.user_type,
-        profile=user
-    ).first()
-
-
-    response_data = {
-        "receipt_no": donation.id,
-        "payment_date": donation.payment_date.strftime("%d-%b-%Y"),
-        "ngo_name": ngo_profile.ngo_name,
-        "pan": ngo_profile.pan_number,
-        "gst": donation.gst,
-        "amount": f"₹{donation.amount}",
-        "pay_mode": f"₹{donation.payment_method}",
-        "address": f"{ngo_profile.address}, {ngo_profile.city}, {ngo_profile.state}, {ngo_profile.pincode}",
-        "name": contact_person.name if contact_person else "",
-        "email": user.email if user.email else "",
-        "finalTotal": f"{(donation.amount + donation.gst):.2f}",
-    }
-
+    response_data = _get_donation_document_data(request.user_obj, donation_id)
+    if response_data is None:
+        return JsonResponse({"error": "Donation not found."}, status=404)
+    response_data["pay_mode"] = f"₹{response_data['pay_mode']}"
     return JsonResponse(response_data)
 
 @dashboard_login_required
@@ -356,5 +361,4 @@ def export_donation_history(request):
         "html": html,
         "total_items": donations.count(),  # Add this
     })
-
 
