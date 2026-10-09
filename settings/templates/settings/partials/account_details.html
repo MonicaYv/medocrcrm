@@ -736,7 +736,11 @@
                 Working Hours
             </p>
             <p class="font-normal text-base text-medium-gray">
-                {{lab_timing}}
+                {% if lab_timing %}
+                    {{ lab_timing.day_of_week }} :
+                    {{ lab_timing.open_time|time:"h:i A" }} -
+                    {{ lab_timing.close_time|time:"h:i A" }}
+                {% endif %}
             </p>
         </div>
         <!--Address-->
