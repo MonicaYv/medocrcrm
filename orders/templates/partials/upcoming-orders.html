@@ -128,7 +128,7 @@
     {% endfor %}
 
     {% if orders.has_other_pages %}
-    <div class="flex justify-center items-center gap-2 mt-6">
+    <div id="orderPagination" class="flex justify-center items-center gap-2 mt-6">
         {% if orders.has_previous %}
             <a href="?page={{ orders.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
                class="px-4 py-2 rounded-lg bg-white border border-blue-haze text-sm text-gray-600 hover:bg-gray-50">

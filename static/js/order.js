@@ -67,8 +67,9 @@ $(document).ready(function () {
       .addClass("flex");
   });
 
-  // Show specific popup
-  $(".popup-btn").on("click", function () {
+  // Show specific popup. Delegate this because the order cards are replaced
+  // when pagination or filters are loaded through AJAX.
+  $(document).on("click", ".popup-btn", function () {
     let popupId = $(this).data("popup");
     $("." + popupId)
       .removeClass("hidden")
@@ -76,7 +77,7 @@ $(document).ready(function () {
   });
 
   // Close popup
-  $(".close-popup").on("click", function () {
+  $(document).on("click", ".close-popup", function () {
     let popupId = $(this).data("popup");
     $(this).closest("." + popupId).addClass("hidden").removeClass("flex");
   });
@@ -624,9 +625,86 @@ $(document).on("click", ".accept-order-submit", function () {
 });
 
 // Order search and filter - submit form on change
-$('#orderStatusFilter').on('change', function () {
-    $('#orderFilterForm').submit();
+$(document).on('change', '#orderStatusFilter', function () {
+    $(this).closest('#orderFilterForm').trigger('submit');
 });
+
+// Load order pages and filters without reloading the dashboard.
+(function () {
+    let orderPageRequest = null;
+
+    function loadOrders(url, updateHistory) {
+        const $ordersSection = $('.upcoming');
+        if (!$ordersSection.length) return;
+
+        if (orderPageRequest) {
+            orderPageRequest.abort();
+        }
+
+        $ordersSection.addClass('opacity-60 pointer-events-none');
+        const requestController = new AbortController();
+        orderPageRequest = requestController;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            signal: requestController.signal
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Unable to load orders');
+                }
+                return response.text();
+            })
+            .then(function (html) {
+                const nextSection = new DOMParser()
+                    .parseFromString(html, 'text/html')
+                    .querySelector('.upcoming');
+
+                if (!nextSection) {
+                    throw new Error('Orders partial was not returned');
+                }
+
+                $ordersSection.replaceWith(nextSection);
+
+                if (updateHistory) {
+                    window.history.pushState({}, '', url);
+                }
+            })
+            .catch(function (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Order list could not be loaded:', error);
+                    if (window.showToaster) {
+                        window.showToaster('error', 'Unable to load orders. Please try again.');
+                    }
+                }
+            })
+            .finally(function () {
+                if (orderPageRequest === requestController) {
+                    orderPageRequest = null;
+                }
+            });
+    }
+
+    $(document).on('click', '#orderPagination a', function (event) {
+        event.preventDefault();
+        loadOrders(this.href, true);
+    });
+
+    $(document).on('submit', '#orderFilterForm', function (event) {
+        event.preventDefault();
+        const params = new URLSearchParams(new FormData(this));
+        params.set('page', '1');
+        const query = params.toString();
+        const url = this.getAttribute('action') || window.location.pathname;
+        loadOrders(query ? `${url}?${query}` : url, true);
+    });
+
+    window.addEventListener('popstate', function () {
+        loadOrders(window.location.href, false);
+    });
+})();
 
 // Invoice Download
 // =====================================
