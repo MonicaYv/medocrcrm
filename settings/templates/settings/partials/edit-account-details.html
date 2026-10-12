@@ -984,7 +984,7 @@
                                 class="issue-checkbox w-5 h-5"
                                 {% if lab_timing and lab_timing.id == timing.id %}checked{% endif %} />
                             <span class="text-base">
-                               {{ timing.day_of_week }}
+                               {{ timing.day_of_week }} : {{ timing.open_time|time:"h:i A" }} - {{ timing.close_time|time:"h:i A" }}
                             </span>
                         </div>
                     </li>

@@ -35,7 +35,7 @@
                             </div>
 
                             <!-- Filter Dropdown -->
-                            <div class="relative dropdown inline-block">
+                            <div class="relative dropdown inline-block doctor-filter">
                                 <button
                                     class="doctorFilterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
                                     <span class="material-symbols-outlined flex justify-center items-center">tune</span>
@@ -50,10 +50,6 @@
                                     <div
                                         class="trigger-status p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer flex justify-between items-center">
                                         Status
-                                    </div>
-                                    <div
-                                        class="trigger-visit p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer flex justify-between items-center">
-                                        Visit Type
                                     </div>
                                 </div>
 
@@ -88,30 +84,19 @@
                                 <div id="statusSubmenu"
                                     class="submenu hidden absolute top-10 right-44 z-50 bg-white shadow-md rounded w-40 border border-gray-200">
                                     <div
+                                        data-status="present"
                                         class="p-2 pl-4 hover:bg-dodger-blue hover:text-white cursor-pointer flex items-center gap-2">
                                         <span class="material-symbols-outlined text-light-gray !text-xl">check</span>
-                                        Accepted
+                                        Present
                                     </div>
                                     <div
+                                        data-status="absent"
                                         class="p-2 pl-4 hover:bg-dodger-blue hover:text-white cursor-pointer flex items-center gap-2">
                                         <span class="material-symbols-outlined text-light-gray !text-xl">check</span>
-                                        Rejected
+                                        Absent
                                     </div>
                                 </div>
 
-                                <div id="visitSubmenu"
-                                    class="submenu hidden absolute top-10 right-44 z-50 bg-white shadow-md rounded w-40 border border-gray-200">
-                                    <div
-                                        class="p-2 pl-4 hover:bg-dodger-blue hover:text-white cursor-pointer flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-light-gray !text-xl">check</span>
-                                        Home
-                                    </div>
-                                    <div
-                                        class="p-2 pl-4 hover:bg-dodger-blue hover:text-white cursor-pointer flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-light-gray !text-xl">check</span>
-                                        Hospital
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -318,7 +303,7 @@
                                         .replace(/(\..*)\./g, '$1')
                                         .replace(/^(\d{0,6})(\.\d{0,2})?.*$/, '$1$2');"
                                             class="focus:ring-0 focus:outline-none border-b border-blue-haze pb-1 placeholder:font-semibold placeholder:text-sm placeholder:text-dodger-blue font-semibold text-sm text-dodger-blue w-[37px]"
-                                            placeholder="00.00">
+                                            placeholder="00.00" data-fee="home_visit">
                                     </div>
                                 </div>
 
@@ -332,7 +317,7 @@
                                         .replace(/(\..*)\./g, '$1')
                                         .replace(/^(\d{0,6})(\.\d{0,2})?.*$/, '$1$2');"
                                             class="focus:ring-0 focus:outline-none border-b border-blue-haze pb-1 placeholder:font-semibold placeholder:text-sm placeholder:text-dodger-blue font-semibold text-sm text-dodger-blue w-[37px]"
-                                            placeholder="00.00">
+                                            placeholder="00.00" data-fee="hospital_visit">
                                     </div>
                                 </div>
                             </div>
@@ -598,9 +583,9 @@
                             </div>
                             <div class="flex items-center justify-between">
                                 <p class="font-normal text-sm">Home Visit <span
-                                        class="text-dodger-blue" id="doctor-home-fee">₹500</span></p>
+                                        class="text-dodger-blue" id="doctor-home-fee">₹—</span></p>
                                 <p class="font-normal text-sm">Hospital Visit <span
-                                        class="text-dodger-blue" id="doctor-hospital-fee">₹500</span></p>
+                                        class="text-dodger-blue" id="doctor-hospital-fee">₹—</span></p>
                             </div>
                             <div id="doctor-availability" class="border border-blue-haze p-4 flex flex-col gap-4">
                                 <p class="text-sm text-spanish-gray"> Loading availability... </p>
@@ -628,64 +613,13 @@
                             </div>
                             <hr class="text-blue-haze">
                             <div class="flex items-center justify-between">
-                                <span class="font-normal text-sm">Dr. Rachel Kate</span>
-                                <span class="font-normal text-sm text-blue-gray">Neurologist</span>
+                                <span class="font-normal text-sm" id="attendance-doctor-name">-</span>
+                                <span class="font-normal text-sm text-blue-gray" id="attendance-doctor-specialty">-</span>
                             </div>
                             <hr class="text-blue-haze">
                             <div class="p-4 border border-blue-haze">
-                                <div class="flex flex-col gap-4 h-[236px] overflow-y-auto scroll">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">01/01/2025</span>
-                                        <span class="font-normal text-sm text-dodger-blue">Present</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">02/01/2025</span>
-                                        <span class="font-normal text-sm text-dodger-blue">Present</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">03/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">04/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">05/01/2025</span>
-                                        <span class="font-normal text-sm text-strong-red">Absent</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">06/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">07/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">08/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">09/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">10/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">11/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">12/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-normal text-sm">13/01/2025</span>
-                                        <span class="font-normal text-sm text-blue-haze">Not Available</span>
-                                    </div>
+                                <div class="flex flex-col gap-4 h-[236px] overflow-y-auto scroll" id="attendance-history-list">
+                                    <p class="text-sm text-spanish-gray">No attendance recorded.</p>
                                 </div>
                             </div>
                         </div>

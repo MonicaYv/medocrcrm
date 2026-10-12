@@ -25,29 +25,46 @@ $(document).ready(function () {
   let filteredDoctors = [];
   let activeDateFilter = "";
   let activeCustomDate = null;
+  let activeStatusFilter = "";
+  const $doctorFilter = $(".doctor-filter");
+
+  function closeDoctorFilters() {
+    $doctorFilter
+      .find(".filterDropdown, .submenu")
+      .addClass("hidden")
+      .css("display", "");
+  }
 
   // 1. Toggle Main Dropdown
   $(".doctorFilterToggle").on("click", function (e) {
     e.stopPropagation();
-    const $menu = $(this).closest(".dropdown").children(".filterDropdown");
+    const $menu = $(this).closest(".doctor-filter").children(".filterDropdown");
     const shouldOpen = $menu.hasClass("hidden");
 
-    $(".filterDropdown, .submenu").addClass("hidden");
-    if (shouldOpen) $menu.removeClass("hidden");
+    closeDoctorFilters();
+    if (shouldOpen) $menu.removeClass("hidden").css("display", "");
   });
 
   // 2. Open Date Submenu (Keep main open)
   $(".trigger-date").on("click", function (e) {
     e.stopPropagation();
-    $(".submenu").not("#dateSubmenu").addClass("hidden"); // Close other submenus except date
-    $("#calendarContainer").addClass("hidden"); // Close calendar if open
-    $("#dateSubmenu").removeClass("hidden").css("top", $(this).position().top);
+    $doctorFilter.find(".submenu").not("#dateSubmenu").addClass("hidden").css("display", "");
+    $("#calendarContainer").addClass("hidden").css("display", "");
+    $("#dateSubmenu").removeClass("hidden").css({
+      top: $(this).position().top,
+      display: "",
+    });
   });
 
   // Initialize the jQuery UI Datepicker inline
-  $(".datepicker-inline").datepicker({
+  const $doctorDatepicker = $doctorFilter.find(".datepicker-inline");
+  if ($doctorDatepicker.hasClass("hasDatepicker")) {
+    $doctorDatepicker.datepicker("destroy");
+  }
+  $doctorDatepicker.datepicker({
+    dateFormat: "yy-mm-dd",
     onSelect: function (dateText) {
-      activeCustomDate = $(this).datepicker("getDate");
+      activeCustomDate = $.datepicker.parseDate("yy-mm-dd", dateText);
       activeDateFilter = "";
       applyDoctorFilters();
 
@@ -58,8 +75,7 @@ $(document).ready(function () {
         .addClass("!text-dodger-blue");
 
       // Close everything after date selection
-      $(".filterDropdown, .submenu").addClass("hidden");
-      $("#calendarContainer").addClass("hidden");
+      closeDoctorFilters();
     },
   });
 
@@ -71,24 +87,17 @@ $(document).ready(function () {
     const topPos = $(this).position().top;
 
     // Show the calendar
-    $("#calendarContainer").removeClass("hidden").css("top", topPos);
+    $("#calendarContainer").removeClass("hidden").css({ top: topPos, display: "" });
   });
 
-  // 4. Status & Visit Submenus
+  // 4. Status submenu
   $(".trigger-status").on("click", function (e) {
     e.stopPropagation();
-    $(".submenu").addClass("hidden");
-    $("#calendarContainer").addClass("hidden"); // Close calendar if open
+    $doctorFilter.find(".submenu").addClass("hidden").css("display", "");
+    $("#calendarContainer").addClass("hidden").css("display", "");
     $("#statusSubmenu")
       .removeClass("hidden")
-      .css("top", $(this).position().top);
-  });
-
-  $(".trigger-visit").on("click", function (e) {
-    e.stopPropagation();
-    $(".submenu").addClass("hidden");
-    $("#calendarContainer").addClass("hidden"); // Close calendar if open
-    $("#visitSubmenu").removeClass("hidden").css("top", $(this).position().top);
+      .css({ top: $(this).position().top, display: "" });
   });
 
   // 5. Handle option selection in Date submenu (Week/Month only, not Custom)
@@ -107,11 +116,11 @@ $(document).ready(function () {
       .addClass("!text-dodger-blue");
 
     // Close all dropdowns
-    $(".filterDropdown, .submenu").addClass("hidden");
+    closeDoctorFilters();
   });
 
-  // 6. Handle option selection in Status and Visit submenus
-  $("#statusSubmenu > div, #visitSubmenu > div").on("click", function (e) {
+  // 6. Handle status selection
+  $("#statusSubmenu > div").on("click", function (e) {
     e.stopPropagation();
 
     // Get the parent submenu
@@ -129,18 +138,21 @@ $(document).ready(function () {
       .removeClass("text-light-gray")
       .addClass("!text-dodger-blue");
 
+    activeStatusFilter = String($(this).data("status") || "").toLowerCase();
+    applyDoctorFilters();
+
     // Close all dropdowns
-    $(".filterDropdown, .submenu").addClass("hidden");
+    closeDoctorFilters();
   });
 
   // 7. Global Close
-  $(document).on("click", function () {
-    $(".filterDropdown, .submenu").addClass("hidden");
-    $("#calendarContainer").addClass("hidden");
+  $(document).on("click.doctorFilters", function (event) {
+    if ($(event.target).closest(".doctor-filter").length) return;
+    closeDoctorFilters();
   });
 
   // Prevent menu from closing when clicking inside
-  $(".filterDropdown, .submenu, #calendarContainer").on("click", function (e) {
+  $doctorFilter.find(".filterDropdown, .submenu").on("click", function (e) {
     e.stopPropagation();
   });
 
@@ -235,8 +247,7 @@ $(document).ready(function () {
           console.log("Doctors loaded from database:", allDoctors);
 
           currentPage = 1;
-          renderDoctors(currentPage);
-          renderPagination();
+          applyDoctorFilters();
         } else {
           console.error("Failed to load doctors:", res.error);
           toastr.error(res.error || "Failed to load doctors");
@@ -251,6 +262,7 @@ $(document).ready(function () {
   }
 
   // Initial render
+  window.refreshHospitalDoctorsList = loadHospitalDoctors;
   loadHospitalDoctors();
 
   function applyDoctorFilters() {
@@ -273,7 +285,10 @@ $(document).ready(function () {
           createdAt.getMonth() === activeCustomDate.getMonth() &&
           createdAt.getDate() === activeCustomDate.getDate()
         : !cutoff || !createdAt || createdAt >= cutoff;
-      return matchesQuery && matchesDate;
+      const matchesStatus =
+        !activeStatusFilter ||
+        (doctor.attendance_status || "").toLowerCase() === activeStatusFilter;
+      return matchesQuery && matchesDate && matchesStatus;
     });
     currentPage = 1;
     renderDoctors(currentPage);
@@ -295,6 +310,10 @@ $(document).ready(function () {
 
   $(".popup-btn").on("click", function () {
     let popupId = $(this).data("popup");
+
+    if ($(this).hasClass("addDoctorBtn")) {
+      clearAddDoctorForm();
+    }
 
     $("." + popupId)
       .removeClass("hidden")
@@ -400,6 +419,33 @@ $(document).ready(function () {
   // Append it to the body
   $("body").append(fileInput);
 
+  function renderUploadPreview(src) {
+    $(".upload-image").html(`
+      <div class="relative w-full h-full">
+        <img src="${src}" alt="Uploaded" class="w-full h-full object-cover rounded-lg">
+        <div class="absolute -top-4 right-0 flex gap-1">
+          <button type="button" class="btn-reupload text-primary-blue cursor-pointer">
+            <span class="material-symbols-outlined !text-sm">refresh</span>
+          </button>
+          <button type="button" class="btn-remove text-strong-red cursor-pointer">
+            <span class="material-symbols-outlined !text-sm">close</span>
+          </button>
+        </div>
+      </div>
+    `);
+
+    $(".btn-remove, .btn-reupload").on("click", function (e) {
+      e.stopPropagation();
+    });
+    $(".btn-remove").on("click", resetUploadDiv);
+    $(".btn-reupload").on("click", function () {
+      fileInput.click();
+    });
+  }
+
+  window.showDoctorUploadPreview = renderUploadPreview;
+  window.doctorFileInput = fileInput;
+
   // Handle click on upload div
   $(".upload-image").on("click", function () {
     fileInput.click();
@@ -420,35 +466,7 @@ $(document).ready(function () {
       const reader = new FileReader();
 
       reader.onload = function (event) {
-        // Display the image with remove and reupload buttons
-        $(".upload-image").html(`
-                    <div class="relative w-full h-full">
-                        <img src="${event.target.result}" alt="Uploaded" class="w-full h-full object-cover rounded-lg">
-                        <div class="absolute -top-4 right-0 flex gap-1">
-                            <button class="btn-reupload  text-primary-blue cursor-pointer">
-                                <span class="material-symbols-outlined !text-sm">refresh</span>
-                            </button>
-                             <button class="btn-remove  text-strong-red cursor-pointer">
-                                <span class="material-symbols-outlined !text-sm">close</span>
-                            </button>
-                        </div>
-                    </div>
-                `);
-
-        // Prevent click event from bubbling to parent
-        $(".btn-remove, .btn-reupload").on("click", function (e) {
-          e.stopPropagation();
-        });
-
-        // Handle remove button
-        $(".btn-remove").on("click", function () {
-          resetUploadDiv();
-        });
-
-        // Handle reupload button
-        $(".btn-reupload").on("click", function () {
-          fileInput.click();
-        });
+        renderUploadPreview(event.target.result);
       };
 
       reader.readAsDataURL(file);
@@ -462,6 +480,8 @@ $(document).ready(function () {
         `);
     fileInput.val(""); // Clear the file input
   }
+
+  window.resetDoctorUpload = resetUploadDiv;
 
   $(document).ready(function () {
     // Toggle dropdown on button click
@@ -599,16 +619,18 @@ $(document).ready(function () {
     }
 
     // Create inline time selector
+    const existingStart = $row.attr("data-start-time") || "09:00";
+    const existingEnd = $row.attr("data-end-time") || "13:00";
     const timeSelectorHTML = `
             <div class="time-selector absolute right-0 top-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-50 w-[300px]">
                 <div class="flex flex-col gap-3">
                     <div class="flex items-center gap-2">
                         <label class="text-sm w-[50px]">From:</label>
-                        <input type="time" class="time-from border border-gray-300 rounded px-2 py-1 flex-1" value="09:00">
+                        <input type="time" class="time-from border border-gray-300 rounded px-2 py-1 flex-1" value="${existingStart}">
                     </div>
                     <div class="flex items-center gap-2">
                         <label class="text-sm w-[50px]">To:</label>
-                        <input type="time" class="time-to border border-gray-300 rounded px-2 py-1 flex-1" value="13:00">
+                        <input type="time" class="time-to border border-gray-300 rounded px-2 py-1 flex-1" value="${existingEnd}">
                     </div>
                     <button class="apply-time-btn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">Apply</button>
                 </div>
@@ -643,6 +665,8 @@ $(document).ready(function () {
 
       const formattedFrom = formatTime(timeFrom);
       const formattedTo = formatTime(timeTo);
+
+      $row.attr("data-start-time", timeFrom).attr("data-end-time", timeTo);
 
       // Update the status text with time
       $statusText
@@ -688,6 +712,11 @@ $(document).ready(function () {
     const education = $popup.find(".dropdown-text").eq(1).text().trim();
     const experience =
       parseInt($popup.find(".increaseBtn").siblings("span").text()) || 0;
+    const homeVisitFee = $popup.find('[data-fee="home_visit"]').val().trim();
+    const hospitalVisitFee = $popup
+      .find('[data-fee="hospital_visit"]')
+      .val()
+      .trim();
 
     const availability = [];
 
@@ -721,6 +750,8 @@ $(document).ready(function () {
     formData.append("specialty", specialty);
     formData.append("education", education);
     formData.append("experience", experience);
+    formData.append("home_visit_fee", homeVisitFee);
+    formData.append("hospital_visit_fee", hospitalVisitFee);
     formData.append("availability", JSON.stringify(availability));
     const doctorId = $popup.data("doctor-id");
     if (doctorId) formData.append("doctor_id", doctorId);
@@ -747,28 +778,9 @@ $(document).ready(function () {
               : "Doctor registered successfully!",
           );
 
-          // 1. If backend gave us the single doctor data, append it to our local state array
-          if (res.doctor) {
-            // Create a unified schema matching exactly what renderDoctors needs
-            const newDoctor = {
-              id: res.doctor.id,
-              name: res.doctor.name,
-              phone: res.doctor.phone,
-              specialty: res.doctor.specialty, // Aligns perfectly with your map structure
-              rating: res.doctor.rating || "0.0",
-              image: res.doctor.image,
-            };
-
-            allDoctors.unshift(newDoctor); // Adds the new doctor to the top/beginning of the array
-            filteredDoctors = allDoctors.slice();
-
-            // 2. Re-render the grid and pagination instantly with the new data
-            renderDoctors(currentPage);
-            renderPagination();
-          } else {
-            // Fallback to reloading if no doctor object was provided
-            loadHospitalDoctors();
-          }
+          // Reload the canonical list so dates, attendance status and the
+          // updated image are all reflected after both add and edit.
+          loadHospitalDoctors();
 
           $(".addDoctorPopup").addClass("hidden").removeClass("flex");
           clearAddDoctorForm();
@@ -787,6 +799,78 @@ $(document).ready(function () {
 // GLOBAL EVENT LISTENERS & HELPER FUNCTIONS
 // (Keep these outside $(document).ready)
 // ==========================================
+
+function formatDoctorFee(value) {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return "₹—";
+  }
+  return `₹${value}`;
+}
+
+function getTodayAttendance(records) {
+  const today = new Date();
+  const isoDate = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, "0"),
+    String(today.getDate()).padStart(2, "0"),
+  ].join("-");
+  const record = (records || []).find((item) => item.date === isoDate);
+  return record ? record.status : "";
+}
+
+function escapeDoctorHtml(value) {
+  return $("<div>").text(value == null ? "" : String(value)).html();
+}
+
+function renderAttendanceHistory(records) {
+  const $list = $("#attendance-history-list");
+  if (!$list.length) return;
+
+  const rows = (records || []).map((item) => {
+    const status = String(item.status || "").toLowerCase();
+    const statusClass = status === "absent" ? "text-strong-red" : "text-dodger-blue";
+    const dateParts = String(item.date || "").split("-");
+    const displayDate = dateParts.length === 3
+      ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`
+      : item.date || "-";
+    return `<div class="flex items-center justify-between">
+      <span class="font-normal text-sm">${escapeDoctorHtml(displayDate)}</span>
+      <span class="font-normal text-sm ${statusClass}">${escapeDoctorHtml(item.status)}</span>
+    </div>`;
+  }).join("");
+
+  $list.html(rows || '<p class="text-sm text-spanish-gray">No attendance recorded.</p>');
+}
+
+$(document).on("click", ".status-dropdown .dropdown-item", function () {
+  if (!selectedDoctor) return;
+
+  const status = $(this).text().trim();
+  const previousStatus = getTodayAttendance(selectedDoctor.attendance);
+
+  $.ajax({
+    url: "/staff/hospital/doctors/attendance/",
+    type: "POST",
+    headers: { "X-CSRFToken": getCookie("csrftoken") },
+    data: { doctor_id: selectedDoctor.id, status: status },
+    success: function (response) {
+      if (!response.success) {
+        toastr.error(response.error || "Unable to update attendance");
+        $(".status-text").text(previousStatus || "Select");
+        return;
+      }
+      selectedDoctor.attendance = response.attendance || [];
+      $(".status-text").text(response.status);
+      renderAttendanceHistory(selectedDoctor.attendance);
+      if (window.refreshHospitalDoctorsList) window.refreshHospitalDoctorsList();
+      toastr.success(`Marked ${response.status.toLowerCase()}`);
+    },
+    error: function (xhr) {
+      $(".status-text").text(previousStatus || "Select");
+      toastr.error(xhr.responseJSON?.error || "Unable to update attendance");
+    },
+  });
+});
 
 $(document).on("click", ".doctorCard", function () {
   const doctorId = $(this).data("id");
@@ -815,9 +899,15 @@ $(document).on("click", ".doctorCard", function () {
       $("#doctor-speciality").text(d.specialty || "-");
       $("#doctor-education").text(d.education || "-");
       $("#doctor-experience").text(`${d.experience || 0} Years`);
+      $("#doctor-home-fee").text(formatDoctorFee(d.home_visit_fee));
+      $("#doctor-hospital-fee").text(formatDoctorFee(d.hospital_visit_fee));
+      $(".status-text").text(getTodayAttendance(d.attendance) || "Select");
+      $("#attendance-doctor-name").text(d.name || "-");
+      $("#attendance-doctor-specialty").text(d.specialty || "-");
+      renderAttendanceHistory(d.attendance);
 
       let availabilityHtml = "";
-      d.availability.forEach((item) => {
+      (d.availability || []).forEach((item) => {
         availabilityHtml += `
           <div class="flex items-center justify-between">
               <span class="font-normal text-sm">${item.day}</span>
@@ -887,6 +977,17 @@ $(document).on("click", ".edit-doctor", function () {
     .find(".increaseBtn")
     .siblings("span")
     .text(d.experience || 0);
+  $popup.find('[data-fee="home_visit"]').val(d.home_visit_fee || "");
+  $popup
+    .find('[data-fee="hospital_visit"]')
+    .val(d.hospital_visit_fee || "");
+  if (window.doctorFileInput) window.doctorFileInput.val("");
+  if (d.image && window.showDoctorUploadPreview) {
+    window.showDoctorUploadPreview(d.image);
+  } else if (window.resetDoctorUpload) {
+    window.resetDoctorUpload();
+  }
+  restoreDoctorAvailability($popup, d.availability || []);
   $popup.removeClass("hidden").addClass("flex");
   $(".docInfoPopup").addClass("hidden").removeClass("flex");
 });
@@ -904,10 +1005,64 @@ function clearAddDoctorForm() {
   // Reset experience counter text back to 0
   $popup.find(".increaseBtn").siblings("span").text("0");
 
+  $popup.find('[data-fee="home_visit"], [data-fee="hospital_visit"]').val("");
+  restoreDoctorAvailability($popup, []);
+
   // Reset file input preview if your custom framework relies on it
-  if (typeof resetUploadDiv === "function") {
-    resetUploadDiv();
+  if (window.resetDoctorUpload) {
+    window.resetDoctorUpload();
   }
+}
+
+function restoreDoctorAvailability($popup, availability) {
+  const availabilityByDay = {};
+  (availability || []).forEach((item) => {
+    availabilityByDay[String(item.day || "").toLowerCase()] = item;
+  });
+
+  const $rows = $popup
+    .find(".bg-white.border.border-blue-haze.p-4")
+    .first()
+    .children(".flex.items-center.justify-between");
+  $rows.each(function () {
+    const $row = $(this);
+    const day = $row.find("span.font-normal.text-sm").first().text().trim();
+    const item = availabilityByDay[day.toLowerCase()];
+    const $check = $row.find('.material-symbols-outlined:contains("check")');
+    const $timer = $row.find('.material-symbols-outlined:contains("timer")');
+    const $status = $row.find(".flex.items-center.gap-10 span.font-normal.text-sm");
+    $row.find(".time-selector").remove();
+
+    if (item) {
+      $row.attr("data-start-time", normalizeDoctorTime(item.start_time, "09:00"));
+      $row.attr("data-end-time", normalizeDoctorTime(item.end_time, "13:00"));
+      $check.removeClass("text-light-gray").addClass("text-primary-blue");
+      $timer.removeClass("text-light-gray").addClass("text-primary-blue");
+      $status
+        .text(`${item.start_time || ""} - ${item.end_time || ""}`)
+        .removeClass("text-light-gray")
+        .addClass("text-primary-blue");
+    } else {
+      $row.removeAttr("data-start-time data-end-time");
+      $check.removeClass("text-primary-blue").addClass("text-light-gray");
+      $timer.removeClass("text-primary-blue").addClass("text-light-gray");
+      $status
+        .text("Not Available")
+        .removeClass("text-primary-blue")
+        .addClass("text-light-gray");
+    }
+  });
+}
+
+function normalizeDoctorTime(value, fallback) {
+  const raw = String(value || "").trim();
+  if (/^\d{2}:\d{2}$/.test(raw)) return raw;
+  const match = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return fallback;
+  let hours = Number(match[1]);
+  if (match[3].toUpperCase() === "PM" && hours !== 12) hours += 12;
+  if (match[3].toUpperCase() === "AM" && hours === 12) hours = 0;
+  return `${String(hours).padStart(2, "0")}:${match[2]}`;
 }
 
 // ==========================================

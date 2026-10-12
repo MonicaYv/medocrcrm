@@ -405,10 +405,7 @@ def handle_lab_profile(user):
         # 'city': profile.city,
         # 'state': profile.state,
         # 'lab_timing': profile.lab_timing,
-        'lab_timing': (
-            f"{profile.lab_timing.open_time} - {profile.lab_timing.close_time}"
-            if profile.lab_timing else ""
-        ),
+        'lab_timing': profile.lab_timing,
         'city': get_related_location_name(profile, 'city'),
         'state': get_related_location_name(profile, 'state'),
         'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),

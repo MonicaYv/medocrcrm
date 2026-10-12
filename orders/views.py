@@ -103,6 +103,12 @@ def orders(request):
         "total_cancelled": total_cancelled,
     })
 
+    # Pagination and filters are loaded asynchronously by the pharmacy order
+    # list. Return only the list partial for those requests instead of the
+    # complete dashboard page.
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return render(request, "partials/upcoming-orders.html", context)
+
     return render(request, "orders.html", context)
 
 
