@@ -40,22 +40,87 @@ function resetUploadDiv() {
 $(document).ready(function () {
   loadTechnicians();
 
+  let technicianDateFilter = null;
+  let technicianCustomStart = null;
+  let technicianCustomEnd = null;
+  let technicianDepartmentFilter = "";
+  let technicianDateResults = null;
 
-$("#searchTechnician").on("keyup", function () {
+  function getFilteredTechnicians() {
+    const searchValue = String($("#searchTechnician").val() || "").toLowerCase().trim();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  let searchValue = $(this).val().toLowerCase();
+    const source = technicianDateResults || allTechnicians;
+    return source.filter((technician) => {
+      const name = String(technician.full_name || "").toLowerCase();
+      const department = String(technician.specialization || "").toLowerCase();
+      if (searchValue && !name.includes(searchValue) && !department.includes(searchValue)) return false;
+      if (technicianDepartmentFilter) {
+        const selectedDepartment = technicianDepartmentFilter.toLowerCase();
+        if (selectedDepartment === "etc") {
+          if (department.includes("lab technician") || department.includes("pathology technician")) return false;
+        } else if (!department.includes(selectedDepartment)) return false;
+      }
 
-  let filteredData = allTechnicians.filter(function (t) {
+      const createdAt = technician.created_at ? new Date(technician.created_at) : null;
+      if (!technicianDateFilter) return true;
+      if (!createdAt || Number.isNaN(createdAt.getTime())) return false;
+      const createdDate = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
 
-    return (
-      t.full_name.toLowerCase().includes(searchValue) ||
-      t.specialization.toLowerCase().includes(searchValue)
-    );
+      if (technicianDateFilter === "week") {
+        const from = new Date(today);
+        from.setDate(from.getDate() - 7);
+        return createdDate >= from && createdDate <= today;
+      }
+      if (technicianDateFilter === "month") {
+        const from = new Date(today);
+        from.setMonth(from.getMonth() - 1);
+        return createdDate >= from && createdDate <= today;
+      }
+      if (technicianDateFilter === "custom") {
+        if (!technicianCustomStart) return true;
+        if (createdDate < technicianCustomStart) return false;
+        return !technicianCustomEnd || createdDate <= technicianCustomEnd;
+      }
+      return true;
+    });
+  }
 
-  });
+  function refreshTechnicianFilters() {
+    currentPage = 1;
+    renderTechnicianPage(currentPage);
+    renderPagination();
+  }
 
-  renderTechnicians(filteredData);
+  function requestTechniciansForCustomDates(startDate, endDate) {
+    const formatDate = (date) => $.datepicker.formatDate("yy-mm-dd", date);
+    const payload = { from_date: formatDate(startDate), to_date: formatDate(endDate) };
+    console.log("Technician custom date range selected:", payload);
+    $.ajax({
+      url: "/staff/get-technicians/",
+      type: "POST",
+      contentType: "application/json",
+      headers: { "X-CSRFToken": getCSRFToken() },
+      data: JSON.stringify(payload),
+      success: function (data) {
+        if (!Array.isArray(data)) {
+          console.error("Technician custom date filter returned an invalid response:", data);
+          return;
+        }
+        console.log("Technicians returned for custom date range:", data.length);
+        technicianDateResults = data;
+        refreshTechnicianFilters();
+      },
+      error: function (xhr) {
+        console.error("Technician date filter failed:", xhr.responseText || xhr.statusText);
+      }
+    });
+  }
 
+
+$("#searchTechnician").on("input", function () {
+  refreshTechnicianFilters();
 });
 
 // function resetUploadDiv() {
@@ -208,12 +273,12 @@ $("#searchTechnician").on("keyup", function () {
       e.preventDefault();
       e.stopPropagation();
 
-      const $dropdown = $(this).siblings(".filterDropdown");
+      const $container = $(this).closest(".dropdown");
+      const $dropdown = $container.children(".filterDropdown");
 
       // Close everything else
       $(".filterDropdown").not($dropdown).addClass("hidden");
-      $(".submenu").addClass("hidden");
-      $("#calendarContainer").addClass("hidden");
+      $container.find(".submenu").addClass("hidden");
 
       // Toggle main filter
       $dropdown.toggleClass("hidden");
@@ -271,8 +336,12 @@ $("#searchTechnician").on("keyup", function () {
               .removeClass("text-light-gray")
               .addClass("!text-dodger-blue");
 
-          $(".filterDropdown, .submenu").addClass("hidden");
-          $("#calendarContainer").addClass("hidden");
+          const text = $(this).text().trim().toLowerCase();
+          technicianDateFilter = text.includes("week") ? "week" : "month";
+          technicianCustomStart = technicianCustomEnd = null;
+          technicianDateResults = null;
+          $(".filterDropdown, #dateSubmenu, #statusSubmenu, #calendarContainer").addClass("hidden");
+          refreshTechnicianFilters();
       }
   );
 
@@ -295,27 +364,44 @@ $("#searchTechnician").on("keyup", function () {
               .removeClass("text-light-gray")
               .addClass("!text-dodger-blue");
 
-          $(".filterDropdown, .submenu").addClass("hidden");
-          $("#calendarContainer").addClass("hidden");
+          technicianDepartmentFilter = $(this).clone().children().remove().end().text().trim();
+          $(".filterDropdown, #dateSubmenu, #statusSubmenu, #calendarContainer").addClass("hidden");
+          refreshTechnicianFilters();
       }
   );
 
 
-  // Initialize datepicker
+  // Initialize and explicitly set the inline picker callback. The shared
+  // dropdown script may initialize this widget first on the same page.
   if ($.fn.datepicker) {
-      $(".datepicker-inline").datepicker({
-          onSelect: function (dateText) {
-
-              console.log("Selected date:", dateText);
-
-              $("#dateSubmenu .trigger-custom .material-symbols-outlined")
-                  .removeClass("text-light-gray")
-                  .addClass("!text-dodger-blue");
-
-              $(".filterDropdown, .submenu").addClass("hidden");
-              $("#calendarContainer").addClass("hidden");
-          }
-      });
+      const $technicianDatepicker = $("#calendarContainer .datepicker-inline");
+      if ($technicianDatepicker.length) {
+        if (!$technicianDatepicker.hasClass("hasDatepicker")) {
+            $technicianDatepicker.datepicker();
+        }
+        $technicianDatepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+        $technicianDatepicker.datepicker("option", "onSelect", function (dateText) {
+              const selected = new Date(`${dateText}T00:00:00`);
+              const formatDate = (date) => $.datepicker.formatDate("yy-mm-dd", date);
+              if (!technicianCustomStart || technicianCustomEnd) {
+                  technicianCustomStart = selected;
+                  technicianCustomEnd = null;
+                  technicianDateFilter = "custom";
+                  console.log("Technician custom start date selected:", formatDate(technicianCustomStart));
+              } else {
+                  technicianCustomEnd = selected;
+                  if (technicianCustomStart > technicianCustomEnd) {
+                      [technicianCustomStart, technicianCustomEnd] = [technicianCustomEnd, technicianCustomStart];
+                  }
+                  console.log("Technician custom start date:", formatDate(technicianCustomStart));
+                  console.log("Technician custom end date:", formatDate(technicianCustomEnd));
+                  requestTechniciansForCustomDates(technicianCustomStart, technicianCustomEnd);
+                  $("#dateSubmenu .trigger-custom .material-symbols-outlined")
+                      .removeClass("text-light-gray").addClass("!text-dodger-blue");
+                  $(".filterDropdown, #dateSubmenu, #calendarContainer").addClass("hidden");
+              }
+        });
+      }
   }
 
 
@@ -332,9 +418,12 @@ $("#searchTechnician").on("keyup", function () {
   // Close filter when clicking outside
   $(document).on("click", function (e) {
 
+      const eventPath = e.originalEvent?.composedPath?.() || [];
+      if (eventPath.some((node) => node instanceof Element && node.closest(".ui-datepicker"))) return;
+
       if (
           !$(e.target).closest(
-              ".filterToggle, .filterDropdown, .submenu, #calendarContainer"
+              ".dropdown, .filterToggle, .filterDropdown, .submenu, #calendarContainer, .ui-datepicker"
           ).length
       ) {
           $(".filterDropdown").addClass("hidden");
@@ -356,7 +445,7 @@ $("#searchTechnician").on("keyup", function () {
       const startIndex = (page - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
 
-      const techniciansToShow = allTechnicians.slice(
+      const techniciansToShow = getFilteredTechnicians().slice(
           startIndex,
           endIndex
       );
@@ -367,9 +456,7 @@ $("#searchTechnician").on("keyup", function () {
 
   function renderPagination() {
 
-      const totalPages = Math.ceil(
-          allTechnicians.length / itemsPerPage
-      );
+      const totalPages = Math.ceil(getFilteredTechnicians().length / itemsPerPage);
 
       let pageButtons = "";
 
@@ -398,16 +485,14 @@ $("#searchTechnician").on("keyup", function () {
 
       $("#nextBtn").prop(
           "disabled",
-          currentPage === totalPages
+          totalPages === 0 || currentPage >= totalPages
       );
   }
 
 
   function goToPage(page) {
 
-      const totalPages = Math.ceil(
-          allTechnicians.length / itemsPerPage
-      );
+      const totalPages = Math.ceil(getFilteredTechnicians().length / itemsPerPage);
 
       if (page >= 1 && page <= totalPages) {
 

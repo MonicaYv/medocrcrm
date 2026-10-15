@@ -129,13 +129,13 @@ $(document).ready(function () {
   $(document).on('click', function (e) {
     const $target = $(e.target);
     const eventPath = e.originalEvent?.composedPath?.() || [];
-    const clickedMonthNavigation = eventPath.some((node) =>
-      node instanceof Element && node.matches('.ui-datepicker-prev, .ui-datepicker-next')
+    const clickedDatepicker = eventPath.some((node) =>
+      node instanceof Element && node.closest('.ui-datepicker')
     );
 
-    // jQuery UI redraws the clicked arrow before this document handler runs,
-    // detaching it from the picker. Use the original click path to keep it open.
-    if (clickedMonthNavigation) return;
+    // jQuery UI may detach the clicked arrow or day cell during redraw. Use the
+    // original event path so any click inside the picker stays inside it.
+    if (clickedDatepicker) return;
 
     // Hospital history closes its own menus; inline display styles here would
     // prevent its class-based filter from reopening after an outside click.

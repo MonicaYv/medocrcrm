@@ -479,6 +479,19 @@ def get_technicians(request):
 
         technicians = LabTechnician.objects.filter(lab=lab)
 
+        if request.method == "POST":
+            try:
+                filter_data = json.loads(request.body or "{}")
+                start_date = date.fromisoformat(filter_data.get("from_date", ""))
+                end_date = date.fromisoformat(filter_data.get("to_date", ""))
+            except (TypeError, ValueError, json.JSONDecodeError):
+                return JsonResponse({"success": False, "message": "Valid start and end dates are required."}, status=400)
+
+            if start_date > end_date:
+                return JsonResponse({"success": False, "message": "Start date must be on or before end date."}, status=400)
+
+            technicians = technicians.filter(created_at__date__range=(start_date, end_date)).order_by("-created_at")
+
         data = []
 
         for t in technicians:
@@ -508,6 +521,7 @@ def get_technicians(request):
                 "specialization": t.specialization.name if t.specialization else "Technician",
                 "experience_years": t.experience_years or 0,
                 "image": image_url,
+                "created_at": t.created_at.isoformat() if t.created_at else None,
 
                 "gender": t.gender,
                 "age": t.age,
