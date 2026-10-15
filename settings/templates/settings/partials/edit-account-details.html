@@ -54,7 +54,7 @@
                     <input name="otp1" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
                     oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"/>
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="flex items-center gap-2 justify-end">
+                    <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
 
                         <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">Verified</p>
@@ -152,7 +152,7 @@
                 <input name="otp2" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"/>
                 <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                <div class="flex items-center gap-2 justify-end">
+                <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                     <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                     <p class="font-normal text-xs text-bright-green">Verified</p>
                 </div>
@@ -218,7 +218,7 @@
                     <input name="otp1" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
                     oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"/>
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="flex items-center gap-2 justify-end">
+                    <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                         <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">Verified</p>
                     </div>
@@ -331,7 +331,7 @@
                     <input id="otp2" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"/>
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="flex items-center gap-2 justify-end">
+                    <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                         <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">Verified</p>
                     </div>
@@ -414,7 +414,7 @@
                 <span
                 class="error phoneError text-red-500 text-sm mt-1 hidden"
                 ></span>
-                <div class="flex items-center gap-2 justify-end">
+                <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                 <span
                     class="material-symbols-outlined material-filled text-bright-green"
                     >check_box</span
@@ -615,7 +615,7 @@
                 <span
                 class="error phoneError text-red-500 text-sm mt-1 hidden"
                 ></span>
-                <div class="flex items-center gap-2 justify-end">
+                <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                 <span
                     class="material-symbols-outlined material-filled text-bright-green"
                     >check_box</span
@@ -692,7 +692,7 @@
                     <input name="otp1" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
                     oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"/>
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="flex items-center gap-2 justify-end">
+                    <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                         <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">Verified</p>
                     </div>
@@ -832,7 +832,7 @@
                     <input id="otp2" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"/>
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="flex items-center gap-2 justify-end">
+                    <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                         <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">Verified</p>
                     </div>
@@ -899,7 +899,7 @@
                     placeholder="224584" placeholder="224584" maxlength="6" 
                     oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" />
                 <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                <div class="flex items-center gap-2 justify-end">
+                <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                     <span
                         class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                     <p class="font-normal text-xs text-bright-green">
@@ -926,18 +926,20 @@
            <div class="issue-type-wrapper w-full rounded-[6px] text-dark-gray border pl-0.5 text-sm relative">
                 <input type="text"
                     placeholder="Available Facilities"
-                    class="issue-type-input w-full rounded px-3 py-2 cursor-pointer"
+                    class="issue-type-input w-full border-0 outline-none focus:outline-none focus:ring-0 rounded px-3 py-2 cursor-pointer"
                     readonly>
                 <span class="material-symbols-outlined absolute right-2 top-2 cursor-pointer">
                     keyboard_arrow_down
                 </span>
                 <ul class="dropdown-menu hidden absolute left-0 top-full w-full z-50 border rounded bg-white mt-1 shadow-md max-h-60 overflow-y-auto">
                     {% for f in all_facilities %}
-                    <li class="flex justify-between items-center px-3 py-2 hover:bg-blue-100 cursor-pointer">
+                    <li class="facility-option flex justify-between items-center px-3 py-2 hover:bg-blue-100 cursor-pointer select-none">
                         <span>{{ f.name }}</span>
+
                         <input type="checkbox"
                             name="facilities[]"
                             value="{{ f.id }}"
+                            class="facility-checkbox"
                             {% if f.id in selected_facilities %}checked{% endif %}>
                     </li>
                     {% endfor %}
@@ -947,18 +949,22 @@
             <div class="issue-type-wrapper w-full rounded-[6px] text-dark-gray border pl-0.5 text-sm relative">
                 <input type="text"
                     placeholder="Services"
-                    class="issue-type-input w-full rounded px-3 py-2 cursor-pointer"
+                    class="issue-type-input w-full border-0 outline-none focus:outline-none focus:ring-0 rounded px-3 py-2 cursor-pointer"
                     readonly>
+
                 <span class="material-symbols-outlined absolute right-2 top-2 cursor-pointer">
                     keyboard_arrow_down
                 </span>
-                <ul class="dropdown-menu hidden absolute left-0 top-full w-full z-50 border rounded bg-white mt-1 shadow-md max-h-60 overflow-y-auto">
+
+                <ul class="dropdown-menu hidden absolute left-0 top-full w-full z-50 border border-gray-300 rounded bg-white mt-1 shadow-md max-h-60 overflow-y-auto">
                     {% for s in all_services %}
-                    <li class="flex justify-between items-center px-3 py-2 hover:bg-blue-100 cursor-pointer">
+                    <li class="service-option flex justify-between items-center px-3 py-2 hover:bg-blue-100 cursor-pointer select-none">
                         <span>{{ s.name }}</span>
+
                         <input type="checkbox"
                             name="services[]"
                             value="{{ s.id }}"
+                            class="service-checkbox"
                             {% if s.id in selected_services %}checked{% endif %}>
                     </li>
                     {% endfor %}
@@ -1062,7 +1068,7 @@
                     <input name="otp2" type="text" class="border rounded px-2 py-2 w-full"
                         placeholder="224584" />
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="flex items-center gap-2 justify-end">
+                    <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">
@@ -1140,7 +1146,7 @@
                    inputmode="numeric" class="border rounded px-2 py-2 w-full"
                     placeholder="224584" />
                  <span class="error otp1Error text-red-500 text-sm mt-1 hidden"></span>
-                <div class="flex items-center gap-2 justify-end">
+                <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                     <span
                         class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                     <p class="font-normal text-xs text-bright-green">
@@ -1319,7 +1325,7 @@
                 <input name="otp1" type="text" class="border rounded px-2 py-2 w-full"
                     placeholder="224584" />
                 <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                <div class="flex items-center gap-2 justify-end">
+                <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                     <span
                         class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                     <p class="font-normal text-xs text-bright-green">
@@ -1593,7 +1599,7 @@
                     <input id="otp2" type="text" class="border rounded px-2 py-2 w-full"
                         placeholder="224584" />
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="flex items-center gap-2 justify-end">
+                    <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                         <span
                             class="material-symbols-outlined material-filled text-bright-green">check_box</span>
                         <p class="font-normal text-xs text-bright-green">
@@ -1616,3 +1622,85 @@
         </div>
     </form>
 {% endif %}
+
+
+{% block extra_js %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // =====================================================
+    // AVAILABLE FACILITIES
+    // =====================================================
+
+    document.querySelectorAll(".facility-option").forEach(function (row) {
+
+        row.addEventListener("click", function (event) {
+
+            const checkbox = row.querySelector(".facility-checkbox");
+
+            if (!checkbox) {
+                return;
+            }
+
+            // Don't toggle twice when clicking the checkbox itself
+            if (event.target === checkbox) {
+                return;
+            }
+
+            // Don't toggle when clicking the price input
+            if (event.target.classList.contains("price-input")) {
+                return;
+            }
+
+            checkbox.checked = !checkbox.checked;
+
+            // Trigger existing checkbox change handlers
+            checkbox.dispatchEvent(new Event("change", {
+                bubbles: true
+            }));
+
+        });
+
+    });
+
+
+    // =====================================================
+    // SERVICES
+    // =====================================================
+
+    document.querySelectorAll(".service-option").forEach(function (row) {
+
+        row.addEventListener("click", function (event) {
+
+            const checkbox = row.querySelector(".service-checkbox");
+
+            if (!checkbox) {
+                return;
+            }
+
+            // Don't toggle twice when clicking the checkbox itself
+            if (event.target === checkbox) {
+                return;
+            }
+
+            // Don't toggle when clicking the price input
+            if (event.target.classList.contains("price-input")) {
+                return;
+            }
+
+            checkbox.checked = !checkbox.checked;
+
+            // Trigger existing checkbox change handlers
+            checkbox.dispatchEvent(new Event("change", {
+                bubbles: true
+            }));
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

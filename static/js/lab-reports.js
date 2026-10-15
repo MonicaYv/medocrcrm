@@ -273,15 +273,21 @@ $(document).ready(function () {
 // DYNAMIC REPORT DATA
 // =====================================
 
-function loadDashboardData(filterType = "today") {
+// function loadDashboardData(filterType = "today") {
+function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
 
     $.ajax({
 
         url: "/reports/lab-report-data/",
         type: "GET",
 
+        // data: {
+        //     filter: filterType
+        // },
         data: {
-            filter: filterType
+           filter: filterType,
+           start: startDate,
+           end: endDate
         },
 
         success: function (response) {
@@ -431,7 +437,19 @@ function loadDashboardData(filterType = "today") {
 
 // DEFAULT LOAD
 // loadDashboardData("today");
-loadDashboardData("all");
+// loadDashboardData("all");
+// DEFAULT LOAD: URL se selected filter aur dates read karo
+const urlParams = new URLSearchParams(window.location.search);
+
+const selectedFilter = urlParams.get("date_filter") || "today";
+const startDate = urlParams.get("start_date") || "";
+const endDate = urlParams.get("end_date") || "";
+
+if (selectedFilter === "custom" && startDate && endDate) {
+    loadDashboardData("custom", startDate, endDate);
+} else {
+    loadDashboardData(selectedFilter);
+}
 // =====================================
 // SEARCH
 // =====================================
@@ -500,33 +518,151 @@ $("input[type='text']").on("keyup", function () {
 // =====================================
 // FILTER FUNCTIONALITY
 // =====================================
-$(document).off("click", ".filterDropdown div");
-$(".filterDropdown div").on("click", function () {
+// $(document).off("click", ".filterDropdown div");
+// $(".filterDropdown div").on("click", function () {
 
-    let filterText = $(this)
-        .attr("data-filter")
-        .trim();
+//     let filterText = $(this)
+//         .attr("data-filter")
+//         .trim();
 
-    console.log("FILTER:", filterText);
+//     console.log("FILTER:", filterText);
 
-    // RESET CHECK ICONS
-    $(".filterDropdown span:first-child")
-        .removeClass("text-dodger-blue")
-        .addClass("text-light-gray");
+//     // RESET CHECK ICONS
+//     $(".filterDropdown span:first-child")
+//         .removeClass("text-dodger-blue")
+//         .addClass("text-light-gray");
 
-    // ACTIVE CHECK
-    $(this)
-        .find("span:first")
-        .removeClass("text-light-gray")
-        .addClass("text-dodger-blue");
+//     // ACTIVE CHECK
+//     $(this)
+//         .find("span:first")
+//         .removeClass("text-light-gray")
+//         .addClass("text-dodger-blue");
 
-    // LOAD API
-    loadDashboardData(filterText);
+//     // LOAD API
+//     loadDashboardData(filterText);
 
-    // CLOSE DROPDOWN
-    $(".filterDropdown").addClass("hidden");
+//     // CLOSE DROPDOWN
+//     $(".filterDropdown").addClass("hidden");
 
-});
+// });
+
+
+// // LAB REPORT FILTER
+// $(document).off("click.labReportFilter");
+
+// $(document).on(
+//     "click.labReportFilter",
+//     ".filterDropdown [data-filter]",
+//     function (e) {
+//         e.preventDefault();
+//         e.stopPropagation();
+
+//         const filterText = String(
+//             $(this).attr("data-filter") || ""
+//         ).trim().toLowerCase();
+
+//         console.log("Selected filter:", filterText);
+//         // Reset all filter tick colors
+//         $(".filterDropdown [data-filter] span:first-child")
+//             .removeClass("text-dodger-blue")
+//             .addClass("text-light-gray");
+
+//         // Set blue tick on selected filter
+//         $(this)
+//            .find("span:first-child")
+//            .removeClass("text-light-gray")
+//            .addClass("text-dodger-blue");
+
+//         if (!["today", "week", "month", "all", "custom"].includes(filterText)) {
+//             console.error("Invalid filter:", filterText);
+//             return;
+//         }
+
+//         loadDashboardData(filterText);
+
+//         $(".filterDropdown").addClass("hidden");
+//     }
+// );
+// // LAB REPORT FILTER
+// $(document).off("click.labReportFilter");
+
+// $(document).on(
+//     "click.labReportFilter",
+//     ".filterDropdown [data-filter]",
+//     function (e) {
+//         e.preventDefault();
+//         e.stopPropagation();
+
+//         const filterText = String(
+//             $(this).attr("data-filter") || ""
+//         ).trim().toLowerCase();
+
+//         console.log("Selected filter:", filterText);
+
+//         $(".filterDropdown [data-filter] span:first-child")
+//             .removeClass("text-dodger-blue")
+//             .addClass("text-light-gray");
+
+//         $(this)
+//             .find("span:first-child")
+//             .removeClass("text-light-gray")
+//             .addClass("text-dodger-blue");
+
+//         if (!["today", "week", "month", "all", "custom"].includes(filterText)) {
+//             console.error("Invalid filter:", filterText);
+//             return;
+//         }
+
+//         if (filterText === "custom") {
+//             // Calendar se dates select karni hongi.
+//             console.log("Custom filter selected; waiting for date selection.");
+//             return;
+//         }
+
+//         loadDashboardData(filterText);
+
+//         $(".filterDropdown").addClass("hidden");
+//     }
+// );
+$(document).off("click.labReportFilter");
+
+$(document).on(
+    "click.labReportFilter",
+    ".filterDropdown [data-filter]",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const filterText = String(
+            $(this).attr("data-filter") || ""
+        ).trim().toLowerCase();
+
+        console.log("Selected filter:", filterText);
+
+        $(".filterDropdown [data-filter] span:first-child")
+            .removeClass("text-dodger-blue")
+            .addClass("text-light-gray");
+
+        $(this)
+            .find("span:first-child")
+            .removeClass("text-light-gray")
+            .addClass("text-dodger-blue");
+
+        if (!["today", "week", "month", "all", "custom"].includes(filterText)) {
+            console.error("Invalid filter:", filterText);
+            return;
+        }
+
+        if (filterText === "custom") {
+            console.log("Custom filter selected; waiting for date selection.");
+            return;
+        }
+
+        loadDashboardData(filterText);
+
+        $(".filterDropdown").addClass("hidden");
+    }
+);
 // =====================================
 // FILTER DROPDOWN TOGGLE
 // =====================================

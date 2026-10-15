@@ -7,6 +7,11 @@
       <!--Main Content-->
 
       <div id="pharmacy-page-skeleton" class="flex flex-col gap-5 p-6 animate-pulse" aria-hidden="true">
+      <style>
+        #pharmacy-page-skeleton {
+          display: none !important;
+        }
+      </style>
     <div class="bg-white rounded-[10px] p-5 space-y-6">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-3">
@@ -99,8 +104,10 @@
             </div>
           </div>
           <!--Hospital Image and Admin Details-->
-          <div class="flex flex-col lg:flex-row gap-2  pt-5 ml-3">
-            <div class="relative">
+          <!-- <div class="flex flex-col lg:flex-row gap-2  pt-5 ml-3"> -->
+          <div class="flex flex-col lg:flex-row gap-2 pt-5 ml-3 w-full">
+            <!-- <div class="relative"> -->
+            <div class="relative w-full lg:w-[80%] h-[330px]">
               <img src="{% if lab_profile.lab_photo_path %}/document/{{ lab_profile.lab_photo_path }}{% else %}/static/images/lab-bg.png{% endif %}" alt="Lab" class="w-[880px] h-[330px] object-cover rounded-lg">
               <div class="absolute inset-0 flex items-end">
                 <div class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">

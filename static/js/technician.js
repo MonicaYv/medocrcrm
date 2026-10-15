@@ -28,42 +28,106 @@ function getCSRFToken() {
 
 
 function resetUploadDiv() {
-  $(".upload-image").html(`
-    <span class="material-symbols-outlined text-primary-blue text-6xl">
-      upload
-    </span>
-  `);
+    $(".upload-image").html(`
+        <span class="material-symbols-outlined text-dodger-blue !text-6xl">
+            upload
+        </span>
+    `);
 
-  $("#fileInput").val("");
+    $("#profile_image").val("");
 }
-
 
 $(document).ready(function () {
   loadTechnicians();
 
+  let technicianDateFilter = null;
+  let technicianCustomStart = null;
+  let technicianCustomEnd = null;
+  let technicianDepartmentFilter = "";
+  let technicianDateResults = null;
 
-$("#searchTechnician").on("keyup", function () {
+  function getFilteredTechnicians() {
+    const searchValue = String($("#searchTechnician").val() || "").toLowerCase().trim();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  let searchValue = $(this).val().toLowerCase();
+    const source = technicianDateResults || allTechnicians;
+    return source.filter((technician) => {
+      const name = String(technician.full_name || "").toLowerCase();
+      const department = String(technician.specialization || "").toLowerCase();
+      if (searchValue && !name.includes(searchValue) && !department.includes(searchValue)) return false;
+      if (technicianDepartmentFilter) {
+        const selectedDepartment = technicianDepartmentFilter.toLowerCase();
+        if (selectedDepartment === "etc") {
+          if (department.includes("lab technician") || department.includes("pathology technician")) return false;
+        } else if (!department.includes(selectedDepartment)) return false;
+      }
 
-  let filteredData = allTechnicians.filter(function (t) {
+      const createdAt = technician.created_at ? new Date(technician.created_at) : null;
+      if (!technicianDateFilter) return true;
+      if (!createdAt || Number.isNaN(createdAt.getTime())) return false;
+      const createdDate = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
 
-    return (
-      t.full_name.toLowerCase().includes(searchValue) ||
-      t.specialization.toLowerCase().includes(searchValue)
-    );
+      if (technicianDateFilter === "week") {
+        const from = new Date(today);
+        from.setDate(from.getDate() - 7);
+        return createdDate >= from && createdDate <= today;
+      }
+      if (technicianDateFilter === "month") {
+        const from = new Date(today);
+        from.setMonth(from.getMonth() - 1);
+        return createdDate >= from && createdDate <= today;
+      }
+      if (technicianDateFilter === "custom") {
+        if (!technicianCustomStart) return true;
+        if (createdDate < technicianCustomStart) return false;
+        return !technicianCustomEnd || createdDate <= technicianCustomEnd;
+      }
+      return true;
+    });
+  }
 
-  });
+  function refreshTechnicianFilters() {
+    currentPage = 1;
+    renderTechnicianPage(currentPage);
+    renderPagination();
+  }
 
-  renderTechnicians(filteredData);
+  function requestTechniciansForCustomDates(startDate, endDate) {
+    const formatDate = (date) => $.datepicker.formatDate("yy-mm-dd", date);
+    const payload = { from_date: formatDate(startDate), to_date: formatDate(endDate) };
+    console.log("Technician custom date range selected:", payload);
+    $.ajax({
+      url: "/staff/get-technicians/",
+      type: "POST",
+      contentType: "application/json",
+      headers: { "X-CSRFToken": getCSRFToken() },
+      data: JSON.stringify(payload),
+      success: function (data) {
+        if (!Array.isArray(data)) {
+          console.error("Technician custom date filter returned an invalid response:", data);
+          return;
+        }
+        console.log("Technicians returned for custom date range:", data.length);
+        technicianDateResults = data;
+        refreshTechnicianFilters();
+      },
+      error: function (xhr) {
+        console.error("Technician date filter failed:", xhr.responseText || xhr.statusText);
+      }
+    });
+  }
 
+
+$("#searchTechnician").on("input", function () {
+  refreshTechnicianFilters();
 });
 
-function resetUploadDiv() {
-    $("#uploadDiv").html("");   // adjust ID if different
-    $("#uploadPreview").attr("src", "");
-    $("#fileInput").val("");
-}
+// function resetUploadDiv() {
+//     $("#uploadDiv").html("");   // adjust ID if different
+//     $("#uploadPreview").attr("src", "");
+//     $("#fileInput").val("");
+// }
 
 
 
@@ -200,199 +264,287 @@ function resetUploadDiv() {
   //   },
   // ];
 
-  // 1. Toggle Main Dropdown
-  $(".filterToggle").on("click", function (e) {
-    e.stopPropagation();
-    const isHidden = $(".filterDropdown").hasClass("hidden");
-    $(".filterDropdown, .submenu").addClass("hidden"); // Reset all
-    if (isHidden) $(".filterDropdown").removeClass("hidden");
+  // ==========================================
+  // TECHNICIAN FILTER DROPDOWN
+  // ==========================================
+
+  // Main filter button
+  $(document).on("click", ".filterToggle", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const $container = $(this).closest(".dropdown");
+      const $dropdown = $container.children(".filterDropdown");
+
+      // Close everything else
+      $(".filterDropdown").not($dropdown).addClass("hidden");
+      $container.find(".submenu").addClass("hidden");
+
+      // Toggle main filter
+      $dropdown.toggleClass("hidden");
   });
 
-  // 2. Open Date Submenu (Keep main open)
-  $(".trigger-date").on("click", function (e) {
-    e.stopPropagation();
-    $(".submenu").not("#dateSubmenu").addClass("hidden"); // Close other submenus except date
-    $("#calendarContainer").addClass("hidden"); // Close calendar if open
-    $("#dateSubmenu").removeClass("hidden").css("top", $(this).position().top);
-  });
 
-  // Initialize the jQuery UI Datepicker inline
-  $(".datepicker-inline").datepicker({
-    onSelect: function (dateText) {
-      console.log("Selected date: " + dateText);
+  // Available / Date filter
+  $(document).on("click", ".trigger-date", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
 
-      // Mark Custom option as selected
-      $("#dateSubmenu .trigger-custom .material-symbols-outlined")
-        .first()
-        .removeClass("text-light-gray")
-        .addClass("!text-dodger-blue");
-
-      // Close everything after date selection
-      $(".filterDropdown, .submenu").addClass("hidden");
+      $("#statusSubmenu").addClass("hidden");
       $("#calendarContainer").addClass("hidden");
-    },
+
+      $("#dateSubmenu").removeClass("hidden");
   });
 
-  // 3. Open Calendar when clicking "Custom"
-  $(".trigger-custom").on("click", function (e) {
-    e.stopPropagation();
 
-    // Position the calendar relative to the Custom menu item
-    const topPos = $(this).position().top;
+  // Department filter
+  $(document).on("click", ".trigger-status", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
 
-    // Show the calendar
-    $("#calendarContainer").removeClass("hidden").css("top", topPos);
+      $("#dateSubmenu").addClass("hidden");
+      $("#calendarContainer").addClass("hidden");
+
+      $("#statusSubmenu").removeClass("hidden");
   });
 
-  // 4. Status & Visit Submenus
-  $(".trigger-status").on("click", function (e) {
-    e.stopPropagation();
-    $(".submenu").addClass("hidden");
-    $("#calendarContainer").addClass("hidden"); // Close calendar if open
-    $("#statusSubmenu")
-      .removeClass("hidden")
-      .css("top", $(this).position().top);
+
+  // Custom date
+  $(document).on("click", ".trigger-custom", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $("#calendarContainer").removeClass("hidden");
   });
 
-  $(".trigger-visit").on("click", function (e) {
-    e.stopPropagation();
-    $(".submenu").addClass("hidden");
-    $("#calendarContainer").addClass("hidden"); // Close calendar if open
-    $("#visitSubmenu").removeClass("hidden").css("top", $(this).position().top);
+
+  // Date options
+  $(document).on(
+      "click",
+      "#dateSubmenu > div:not(.trigger-custom)",
+      function (e) {
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          $("#dateSubmenu .material-symbols-outlined")
+              .removeClass("!text-dodger-blue")
+              .addClass("text-light-gray");
+
+          $(this)
+              .find(".material-symbols-outlined")
+              .removeClass("text-light-gray")
+              .addClass("!text-dodger-blue");
+
+          const text = $(this).text().trim().toLowerCase();
+          technicianDateFilter = text.includes("week") ? "week" : "month";
+          technicianCustomStart = technicianCustomEnd = null;
+          technicianDateResults = null;
+          $(".filterDropdown, #dateSubmenu, #statusSubmenu, #calendarContainer").addClass("hidden");
+          refreshTechnicianFilters();
+      }
+  );
+
+
+  // Department options
+  $(document).on(
+      "click",
+      "#statusSubmenu > div",
+      function (e) {
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          $("#statusSubmenu .material-symbols-outlined")
+              .removeClass("!text-dodger-blue")
+              .addClass("text-light-gray");
+
+          $(this)
+              .find(".material-symbols-outlined")
+              .removeClass("text-light-gray")
+              .addClass("!text-dodger-blue");
+
+          technicianDepartmentFilter = $(this).clone().children().remove().end().text().trim();
+          $(".filterDropdown, #dateSubmenu, #statusSubmenu, #calendarContainer").addClass("hidden");
+          refreshTechnicianFilters();
+      }
+  );
+
+
+  // Initialize and explicitly set the inline picker callback. The shared
+  // dropdown script may initialize this widget first on the same page.
+  if ($.fn.datepicker) {
+      const $technicianDatepicker = $("#calendarContainer .datepicker-inline");
+      if ($technicianDatepicker.length) {
+        if (!$technicianDatepicker.hasClass("hasDatepicker")) {
+            $technicianDatepicker.datepicker();
+        }
+        $technicianDatepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+        $technicianDatepicker.datepicker("option", "onSelect", function (dateText) {
+              const selected = new Date(`${dateText}T00:00:00`);
+              const formatDate = (date) => $.datepicker.formatDate("yy-mm-dd", date);
+              if (!technicianCustomStart || technicianCustomEnd) {
+                  technicianCustomStart = selected;
+                  technicianCustomEnd = null;
+                  technicianDateFilter = "custom";
+                  console.log("Technician custom start date selected:", formatDate(technicianCustomStart));
+              } else {
+                  technicianCustomEnd = selected;
+                  if (technicianCustomStart > technicianCustomEnd) {
+                      [technicianCustomStart, technicianCustomEnd] = [technicianCustomEnd, technicianCustomStart];
+                  }
+                  console.log("Technician custom start date:", formatDate(technicianCustomStart));
+                  console.log("Technician custom end date:", formatDate(technicianCustomEnd));
+                  requestTechniciansForCustomDates(technicianCustomStart, technicianCustomEnd);
+                  $("#dateSubmenu .trigger-custom .material-symbols-outlined")
+                      .removeClass("text-light-gray").addClass("!text-dodger-blue");
+                  $(".filterDropdown, #dateSubmenu, #calendarContainer").addClass("hidden");
+              }
+        });
+      }
+  }
+
+
+  // Prevent clicks inside filter from closing it
+  $(document).on(
+      "click",
+      ".filterDropdown, .submenu, #calendarContainer",
+      function (e) {
+          e.stopPropagation();
+      }
+  );
+
+
+  // Close filter when clicking outside
+  $(document).on("click", function (e) {
+
+      const eventPath = e.originalEvent?.composedPath?.() || [];
+      if (eventPath.some((node) => node instanceof Element && node.closest(".ui-datepicker"))) return;
+
+      if (
+          !$(e.target).closest(
+              ".dropdown, .filterToggle, .filterDropdown, .submenu, #calendarContainer, .ui-datepicker"
+          ).length
+      ) {
+          $(".filterDropdown").addClass("hidden");
+          $(".submenu").addClass("hidden");
+          $("#calendarContainer").addClass("hidden");
+      }
+
   });
+  
+  // ==========================================
+  // PAGINATION
+  // ==========================================
 
-  // 5. Handle option selection in Date submenu (Week/Month only, not Custom)
-  $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
-    e.stopPropagation();
-
-    // Remove active state from all options in date submenu
-    $("#dateSubmenu .material-symbols-outlined")
-      .removeClass("!text-dodger-blue")
-      .addClass("text-light-gray");
-
-    // Add active state to clicked option
-    $(this)
-      .find(".material-symbols-outlined")
-      .removeClass("text-light-gray")
-      .addClass("!text-dodger-blue");
-
-    // Close all dropdowns
-    $(".filterDropdown, .submenu").addClass("hidden");
-  });
-
-  // 6. Handle option selection in Status and Visit submenus
-  $("#statusSubmenu > div, #visitSubmenu > div").on("click", function (e) {
-    e.stopPropagation();
-
-    // Get the parent submenu
-    const $submenu = $(this).closest(".submenu");
-
-    // Remove active state from all options in this submenu
-    $submenu
-      .find(".material-symbols-outlined")
-      .removeClass("!text-dodger-blue")
-      .addClass("text-light-gray");
-
-    // Add active state to clicked option
-    $(this)
-      .find(".material-symbols-outlined")
-      .removeClass("text-light-gray")
-      .addClass("!text-dodger-blue");
-
-    // Close all dropdowns
-    $(".filterDropdown, .submenu").addClass("hidden");
-  });
-
-  // 7. Global Close
-  $(document).on("click", function () {
-    $(".filterDropdown, .submenu").addClass("hidden");
-    $("#calendarContainer").addClass("hidden");
-  });
-
-  // Prevent menu from closing when clicking inside
-  $(".filterDropdown, .submenu, #calendarContainer").on("click", function (e) {
-    e.stopPropagation();
-  });
-
-  // Pagination functionality
   let currentPage = 1;
-  const totalPages = 3;
   const itemsPerPage = 8;
 
-  function renderDoctors(page) {
-    const startIndex = (page - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const doctorsToShow = allDoctors.slice(startIndex, endIndex);
+  function renderTechnicianPage(page) {
 
-    const doctorCards = doctorsToShow
-      .map(
-        (doctor) => `
-          <div class="border border-cool-slate-gray rounded-lg py-4 shadow-appointments relative flex flex-col items-center gap-4 cursor-pointer doctorCard">
-            <img src="${doctor.image}" alt="Doctor Image" class="w-[104px] h-[104px] rounded-full object-cover shadow-doctor">
-            <div class="flex flex-col">
-              <span class="font-semibold text-sm">${doctor.name}</span>
-              <span class="font-normal text-sm text-spanish-gray">${doctor.phone}</span>
-            </div>
-            <span class="font-semibold text-sm text-primary-blue">${doctor.specialty}</span>
-            
-            <div class="bg-soft-peach-cream rounded-tr-full rounded-br-full absolute left-0 top-8 flex items-center gap-1.5 justify-center p-2.5">
-              <span class="material-symbols-outlined material-filled text-warm-apricot-orange">star</span>
-              <span class="text-warm-apricot-orange font-semibold text-sm">${doctor.rating}</span>
-            </div>
-          </div>
-        `
-      )
-      .join("");
+      const startIndex = (page - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
 
-    $("#doctorGrid").html(doctorCards);
+      const techniciansToShow = getFilteredTechnicians().slice(
+          startIndex,
+          endIndex
+      );
+
+      renderTechnicians(techniciansToShow);
   }
+
 
   function renderPagination() {
-    let pageButtons = "";
-    for (let i = 1; i <= totalPages; i++) {
-      const activeClass =
-        i === currentPage ? "bg-primary-blue text-white " : "bg-gray-200 ";
-      pageButtons += `<button class="w-8 h-8 cursor-pointer rounded-lg font-medium transition-all ${activeClass} page-btn" data-page="${i}">${i}</button>`;
-    }
-    $("#pageNumbers").html(pageButtons);
 
-    // Update Previous/Next button states
-    $("#prevBtn").prop("disabled", currentPage === 1);
-    $("#nextBtn").prop("disabled", currentPage === totalPages);
+      const totalPages = Math.ceil(getFilteredTechnicians().length / itemsPerPage);
+
+      let pageButtons = "";
+
+      for (let i = 1; i <= totalPages; i++) {
+
+          const activeClass =
+              i === currentPage
+                  ? "bg-primary-blue text-white"
+                  : "bg-gray-200";
+
+          pageButtons += `
+              <button
+                  class="w-8 h-8 cursor-pointer rounded-lg font-medium transition-all page-btn ${activeClass}"
+                  data-page="${i}">
+                  ${i}
+              </button>
+          `;
+      }
+
+      $("#pageNumbers").html(pageButtons);
+
+      $("#prevBtn").prop(
+          "disabled",
+          currentPage === 1
+      );
+
+      $("#nextBtn").prop(
+          "disabled",
+          totalPages === 0 || currentPage >= totalPages
+      );
   }
+
 
   function goToPage(page) {
-    if (page >= 1 && page <= totalPages) {
-      currentPage = page;
-      // renderDoctors(currentPage);
-      // renderPagination();
-      $("html, body").animate({ scrollTop: 0 }, 300);
-    }
+
+      const totalPages = Math.ceil(getFilteredTechnicians().length / itemsPerPage);
+
+      if (page >= 1 && page <= totalPages) {
+
+          currentPage = page;
+
+          renderTechnicianPage(currentPage);
+          renderPagination();
+
+          $("html, body").animate({
+              scrollTop: 0
+          }, 300);
+      }
   }
 
-  // Event handlers
+
+  // Previous
   $("#prevBtn").on("click", function () {
-    goToPage(currentPage - 1);
+      goToPage(currentPage - 1);
   });
 
+
+  // Next
   $("#nextBtn").on("click", function () {
-    goToPage(currentPage + 1);
+      goToPage(currentPage + 1);
   });
 
+
+  // Page number
   $(document).on("click", ".page-btn", function () {
-    const page = parseInt($(this).data("page"));
-    goToPage(page);
+
+      const page = parseInt($(this).data("page"));
+
+      goToPage(page);
   });
 
   // Initial render
   // renderDoctors(currentPage);
   // renderPagination();
 
-  $(".popup-btn").on("click", function () {
-    let popupId = $(this).data("popup");
-    $("." + popupId)
-      .removeClass("hidden")
-      .addClass("flex");
+  $(document).on("click", ".popup-btn", function () {
+
+      let popupId = $(this).data("popup");
+
+      // Clear previous technician data
+      if (popupId === "addDoctorPopup") {
+          clearAddDoctorForm();
+      }
+
+      // Open popup
+      $("." + popupId)
+          .removeClass("hidden")
+          .addClass("flex");
   });
 
   // Close popup
@@ -511,69 +663,120 @@ $(document).on("click", ".doctorCard", function () {
   });
   $(".material-symbols-outlined").css("transition", "transform 0.3s ease");
 
-  // Create a hidden file input
-  const fileInput = $("<input>", {
-    type: "file",
-    accept: "image/*",
-    style: "display: none;",
-  });
+  // ==========================================
+  // PROFILE IMAGE UPLOAD
+  // ==========================================
 
-  // Append it to the body
-  $("body").append(fileInput);
+  const fileInput = $("#profile_image");
 
-  // Handle click on upload div
-  $(".upload-image").on("click", function () {
-    fileInput.click();
-  });
+  // Open file chooser when upload box is clicked
+  $(document).on("click", ".upload-image", function (e) {
 
-  // Handle file selection
-  fileInput.on("change", function (e) {
-    const file = e.target.files[0];
-
-    if (file) {
-      // Validate if it's an image
-      if (!file.type.match("image.*")) {
-        alert("Please select an image file");
-        return;
+      // Don't open file chooser if clicking
+      // remove or re-upload buttons
+      if ($(e.target).closest(".btn-remove, .btn-reupload").length) {
+          return;
       }
 
-      // Create a FileReader to preview the image
+      fileInput.trigger("click");
+  });
+
+
+  // Handle image selection
+  fileInput.on("change", function (e) {
+
+      const file = e.target.files[0];
+
+      if (!file) {
+          return;
+      }
+
+      // Validate image
+      if (!file.type.startsWith("image/")) {
+
+          toastr.error("Please select an image file.");
+
+          fileInput.val("");
+
+          return;
+      }
+
+      // Show selected file name in browser's file input
+      console.log("Selected file:", file.name);
+
+      // Preview image
       const reader = new FileReader();
 
       reader.onload = function (event) {
-        // Display the image with remove and reupload buttons
-        $(".upload-image").html(`
-                    <div class="relative w-full h-full">
-                        <img src="${event.target.result}" alt="Uploaded" class="w-full h-full object-cover rounded-lg">
-                        <div class="absolute -top-4 right-0 flex gap-1">
-                            <button class="btn-reupload  text-primary-blue cursor-pointer">
-                                <span class="material-symbols-outlined !text-sm">refresh</span>
-                            </button>
-                             <button class="btn-remove  text-strong-red cursor-pointer">
-                                <span class="material-symbols-outlined !text-sm">close</span>
-                            </button>
-                        </div>
-                    </div>
-                `);
 
-        // Prevent click event from bubbling to parent
-        $(".btn-remove, .btn-reupload").on("click", function (e) {
-          e.stopPropagation();
-        });
+          $(".upload-image").html(`
+              <div class="relative w-full h-full">
 
-        // // Handle remove button
-        // $(".btn-remove").on("click", function () {
-        //   // resetUploadDiv();
-        // });
+                  <img
+                      src="${event.target.result}"
+                      alt="Uploaded"
+                      class="w-full h-full object-cover rounded-lg"
+                  >
 
-        // Handle reupload button
-        $(".btn-reupload").on("click", function () {
-          fileInput.click();
-        });
+                  <div class="absolute -top-3 right-0 flex gap-1">
+
+                      <button
+                          type="button"
+                          class="btn-reupload text-primary-blue cursor-pointer bg-white rounded-full"
+                          title="Change image">
+
+                          <span class="material-symbols-outlined !text-sm">
+                              refresh
+                          </span>
+
+                      </button>
+
+                      <button
+                          type="button"
+                          class="btn-remove text-strong-red cursor-pointer bg-white rounded-full"
+                          title="Remove image">
+
+                          <span class="material-symbols-outlined !text-sm">
+                              close
+                          </span>
+
+                      </button>
+
+                  </div>
+
+              </div>
+          `);
       };
 
       reader.readAsDataURL(file);
-    }
+  });
+
+
+  // Re-upload / change image
+  $(document).on("click", ".btn-reupload", function (e) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      fileInput.trigger("click");
+  });
+
+
+  // Remove image
+  $(document).on("click", ".btn-remove", function (e) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clear selected file
+      fileInput.val("");
+
+      // Restore upload box
+      $(".upload-image").html(`
+          <span class="material-symbols-outlined text-dodger-blue !text-6xl">
+              upload
+          </span>
+      `);
   });
 
  
@@ -878,16 +1081,18 @@ function loadTechnicians() {
 
     success: function (data) {
 
-      allTechnicians = data;
+        allTechnicians = data;
 
-      console.log("REAL DATA:", data);
+        console.log("REAL DATA:", data);
 
-      if (!Array.isArray(data)) {
-        return;
-      }
+        if (!Array.isArray(data)) {
+            return;
+        }
 
-      // ✅ SHOW TECHNICIANS
-      renderTechnicians(data);
+        currentPage = 1;
+
+        renderTechnicianPage(currentPage);
+        renderPagination();
     },
 
     error: function (err) {
@@ -919,10 +1124,10 @@ function loadTechnicians() {
     let formData = new FormData(form);
 
     // ✅ ADD HERE
-    let file = fileInput[0].files[0];
-    if (file) {
-       formData.append("profile_image", file);
-    }
+    // let file = fileInput[0].files[0];
+    // if (file) {
+    //    formData.append("profile_image", file);
+    // }
 
     formData.set("experience", $("#experience").val() || 0);
     let specialization = $("#specialization").val();
@@ -960,6 +1165,9 @@ function loadTechnicians() {
 
         if (resp.success) {
           toastr.success("Technician Registered Successfully");
+
+          // clear form
+          clearAddDoctorForm();
 
           $(".addDoctorPopup").addClass("hidden").removeClass("flex");
 
@@ -1197,40 +1405,51 @@ function loadTechnicians() {
 
   // Function to clear all form fields in Add Doctor popup
   function clearAddDoctorForm() {
-    // Reset image upload
-    // resetUploadDiv();
+
+    // Reset profile image
+    resetUploadDiv();
 
     // Clear all text inputs
     $('.addDoctorPopup input[type="text"]').val("");
+
+    // Clear number inputs
     $('.addDoctorPopup input[type="number"]').val("");
 
-    // Reset dropdowns
-    $(".addDoctorPopup .dropdown-text").text("Select");
-    $(".addDoctorPopup .dropdown").addClass("hidden");
-    $(".addDoctorPopup .dropdown-btn").css("transform", "rotate(0deg)");
+    // Reset specialization dropdown
+    $("#specialization").val("");
 
-    // Reset experience counter
-    $(".addDoctorPopup .increaseBtn").siblings("span").text("0");
+    // Clear education
+    $("#education").val("");
 
-    // Reset all check icons to gray
-    $('.addDoctorPopup .material-symbols-outlined:contains("check")')
-      .removeClass("text-primary-blue")
-      .addClass("text-light-gray");
+    // Reset experience
+    $("#experience").val("0");
+    $("#expValue").text("0");
 
-    // Reset all timer icons to gray
-    $('.addDoctorPopup .material-symbols-outlined:contains("timer")')
-      .removeClass("text-primary-blue")
-      .addClass("text-light-gray");
-
-    // Reset all availability text to "Not Available"
+    // Reset availability
     $(".addDoctorPopup .flex.items-center.gap-10 span.font-normal.text-sm")
-      .text("Not Available")
-      .removeClass("text-primary-blue")
-      .addClass("text-light-gray");
+        .text("Not Available")
+        .removeClass("text-dodger-blue text-primary-blue")
+        .addClass("text-light-gray");
 
-    // Remove any open time selectors
+    // Reset check icons
+    $('.addDoctorPopup .material-symbols-outlined:contains("check")')
+        .removeClass("text-dodger-blue text-primary-blue")
+        .addClass("text-light-gray");
+
+    // Reset timer icons
+    $('.addDoctorPopup .material-symbols-outlined:contains("timer")')
+        .removeClass("text-dodger-blue text-primary-blue")
+        .addClass("text-light-gray");
+
+    // Remove dynamically created time selectors
     $(".addDoctorPopup .time-selector").remove();
-  }
+
+    // Close any dropdowns
+    $(".addDoctorPopup .dropdown").addClass("hidden");
+
+    // Reset calendar if open
+    $("#calendarContainer").addClass("hidden");
+}
 $("#technicianForm").submit(function (e) {
     e.preventDefault(); // stop page reload
 

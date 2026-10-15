@@ -650,7 +650,7 @@ function clearSavedData() {
     const selected = $wrapper
       .find(".issue-checkbox:checked")
       .map(function () {
-        return $(this).closest("li").find("span").text();
+        return $(this).closest("li").find("span").first().text().trim();
       })
       .get()
       .join(", ");

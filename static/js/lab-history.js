@@ -807,23 +807,43 @@ $(document).on("click", ".cancel-bid-btn", function () {
             bid_id: window.currentBidId
         },
 
+        // success: function (response) {
+
+        //     if (response.success) {
+
+        //         toastr.success("Bid cancelled successfully");
+
+        //         $(".modal-pending, .modal-accepted, .modal-cancelled, .modal-missed")
+        //           .addClass("hidden");
+
+        //         loadLabHistory(currentHistoryStatus, 1);
+
+        //     } else {
+
+        //         toastr.error(response.message);
+
+        //     }
+
+        // },
+
         success: function (response) {
 
-            if (response.success) {
+          if (response.success) {
 
-                toastr.success("Bid cancelled successfully");
+            toastr.success("Bid cancelled successfully");
 
-                $(".modal-pending, .modal-accepted, .modal-cancelled, .modal-missed")
-                  .addClass("hidden");
+            // Close all history modals
+            $(".modal-pending, .modal-accepted, .modal-cancelled, .modal-missed")
+              .addClass("hidden");
 
-                loadLabHistory(currentHistoryStatus, 1);
+            // Refresh the currently selected history tab
+            loadLabHistory(currentHistoryStatus, 1);
 
-            } else {
+          } else {
 
-                toastr.error(response.message);
+            toastr.error(response.message || "Unable to cancel bid");
 
-            }
-
+          }
         },
 
         error: function () {
@@ -1017,34 +1037,102 @@ $(document).on("click", ".close-proforma", function () {
     $(".proformaBillPopup").addClass("hidden");
 
 });
+// function applyHistorySearch() {
+
+//     $("#historySearch").off("keyup").on("keyup", function () {
+
+//         let value = $(this).val().toLowerCase().trim();
+
+//         let visibleCount = 0;
+
+//         $("#lab-history-cards-container [class*='card-all-']")
+//         .each(function () {
+
+//             let cardText = $(this).text().toLowerCase();
+
+//             if (cardText.includes(value)) {
+//                 $(this).show();
+//                 visibleCount++;
+//             } else {
+//                 $(this).hide();
+//             }
+
+//         });
+
+//         // if (visibleCount === 0) {
+//         //     $("#noSearchResults").removeClass("hidden");
+//         // } else {
+//         //     $("#noSearchResults").addClass("hidden");
+//         // }
+
+//     });
+
+// }
 function applyHistorySearch() {
 
-    $("#historySearch").off("keyup").on("keyup", function () {
+    const $search = $("#historySearch");
 
-        let value = $(this).val().toLowerCase().trim();
+    // Normalize search text: lowercase, remove punctuation, and trim spaces
+    const normalizeSearchText = (text) => {
+        return String(text || "")
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    };
 
-        let visibleCount = 0;
+    $search
+        .off("input.labHistorySearch keyup.labHistorySearch")
+        .on("input.labHistorySearch keyup.labHistorySearch", function () {
 
-        $("#lab-history-cards-container [class*='card-all-']")
-        .each(function () {
+            const value = normalizeSearchText($(this).val());
 
-            let cardText = $(this).text().toLowerCase();
+            // Split multiple words into separate search terms
+            const searchTerms = value.split(/\s+/).filter(Boolean);
 
-            if (cardText.includes(value)) {
-                $(this).show();
-                visibleCount++;
-            } else {
-                $(this).hide();
-            }
+            // Get all currently loaded history cards
+            const $cards = $(
+                "#lab-history-cards-container [class*='card-all-']"
+            );
+
+            let visibleCount = 0;
+
+            $cards.each(function () {
+
+                const $card = $(this);
+
+                // Collect patient name and other searchable information
+                const rawCardText = [
+                    $card.text(),
+                    $card.attr("data-name"),
+                    $card.attr("data-category"),
+                    $card.attr("data-service-type"),
+                    $card.attr("data-visit-type")
+                ].filter(Boolean).join(" ");
+
+                // Normalize card text to match different punctuation formats
+                const cardText = normalizeSearchText(rawCardText);
+
+                // Every search term must match the card text
+                const matches = searchTerms.every(function (term) {
+                    return cardText.includes(term);
+                });
+
+                if (matches) {
+                    $card.show();
+                    visibleCount++;
+                } else {
+                    $card.hide();
+                }
+
+            });
+
+            console.log("Search value:", value);
+            console.log("Matching cards:", visibleCount);
 
         });
 
-        // if (visibleCount === 0) {
-        //     $("#noSearchResults").removeClass("hidden");
-        // } else {
-        //     $("#noSearchResults").addClass("hidden");
-        // }
-
-    });
-
+    // Apply the current search after AJAX loads the history cards
+    $search.trigger("input");
 }
+
