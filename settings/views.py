@@ -1252,7 +1252,10 @@ def update_lab_profile(request):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
     if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+        return JsonResponse({
+            "success": False,
+            "message": next(iter(errors.values()))
+        }, status=400)
     
     try:
     
