@@ -1,4 +1,41 @@
 $(document).ready(function () {
+
+  // Show OTP status only after a code has been entered. This edit form uses a
+  // fixed development OTP; the status is feedback, while save validation also
+  // checks the code before accepting the form.
+  function updateAccountOtpStatus(input) {
+    const $input = $(input);
+    const $status = $input.closest(".flex-1").find(".otp-verification-status").first();
+    if (!$status.length) return;
+
+    const code = String($input.val() || "").replace(/\D/g, "").slice(0, 6);
+    if ($input.val() !== code) $input.val(code);
+
+    const $icon = $status.find(".material-symbols-outlined");
+    const $label = $status.find("p");
+    $status.removeClass("hidden");
+
+    if (!code) {
+      $status.addClass("hidden");
+      return;
+    }
+
+    if (code === "123456") {
+      $icon.text("check_box").removeClass("text-red-500").addClass("text-bright-green");
+      $label.text("Verified").removeClass("text-red-500").addClass("text-bright-green");
+    } else {
+      $icon.text("cancel").removeClass("text-bright-green").addClass("text-red-500");
+      $label.text(code.length === 6 ? "Wrong OTP" : "Not verified")
+        .removeClass("text-bright-green").addClass("text-red-500");
+    }
+  }
+
+  $(document).on("input", '#editForm [name^="otp"]', function () {
+    updateAccountOtpStatus(this);
+  });
+  $('#editForm [name^="otp"]').each(function () {
+    updateAccountOtpStatus(this);
+  });
  
   // Edit icon
   $(".editIcon").on("click", function () {
