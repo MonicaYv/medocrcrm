@@ -1,5 +1,6 @@
 # appointments/utils.py
 
+import re
 from datetime import date, datetime, timedelta
 
 from django.db.models import DateField, F
@@ -21,6 +22,69 @@ APPOINTMENT_DATE_FIELDS = {
     "lab": "preferred_date_time",
     "doctor": "preferred_date_time",
 }
+
+VISIT_TYPE_FILTER_ALIASES = {
+    "home": (
+        "home_visit",
+        "home visit",
+        "home",
+        "home_service",
+        "home service",
+    ),
+    "clinic": (
+        "clinic_visit",
+        "clinic visit",
+        "clinic",
+        "in_clinic_visit",
+        "in-clinic visit",
+        "in clinic visit",
+    ),
+}
+
+VISIT_TYPE_FILTER_KEYS = {
+    "home": "home",
+    "home_visit": "home",
+    "home_service": "home",
+    "clinic": "clinic",
+    "clinic_visit": "clinic",
+    "in_clinic_visit": "clinic",
+}
+
+
+def _normalize_visit_type(value):
+    value = str(value or "").strip().lower()
+    value = re.sub(r"[^a-z0-9]+", " ", value)
+    return " ".join(value.split())
+
+
+def _canonical_visit_type(value):
+    normalized = _normalize_visit_type(value)
+    key = normalized.replace(" ", "_")
+    canonical_type = VISIT_TYPE_FILTER_KEYS.get(key)
+    if canonical_type:
+        return canonical_type
+
+    for visit_type, aliases in VISIT_TYPE_FILTER_ALIASES.items():
+        if normalized in {_normalize_visit_type(alias) for alias in aliases}:
+            return visit_type
+    return normalized
+
+
+def visit_types_match(left, right):
+    """Compare visit type slugs and labels, including clinic/home aliases."""
+    left = _normalize_visit_type(left)
+    right = _normalize_visit_type(right)
+    return (
+        bool(left and right)
+        and _canonical_visit_type(left) == _canonical_visit_type(right)
+    )
+
+
+def visit_type_filter_aliases(value):
+    """Return stored visit-type spellings for a report filter, if recognized."""
+    key = _normalize_visit_type(value).replace(" ", "_")
+    canonical_type = VISIT_TYPE_FILTER_KEYS.get(key)
+    return VISIT_TYPE_FILTER_ALIASES.get(canonical_type)
 
 
 def appointment_date_field(user_type):
