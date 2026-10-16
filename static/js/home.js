@@ -1858,7 +1858,16 @@ $(document).ready(function () {
     if (filter === "custom") {
       const $dropdownRoot = $(this).closest(".dropdown");
       $dropdownRoot.find(".filterDropdown").hide();
-      $dropdownRoot.find(".datepicker-container").show();
+      $dropdownRoot.find(".datepicker-container")
+        .removeClass("hidden")
+        .show();
+      if (
+        $dropdownRoot.find(".doctor-home-filter").length &&
+        !$(e.target).closest(".calendar-icon").length &&
+        typeof toastr !== "undefined"
+      ) {
+        toastr.info("Please select a start date.");
+      }
       return;
     }
 
@@ -1869,6 +1878,21 @@ $(document).ready(function () {
 
     window.location.href = url.toString();
   });
+
+  $(document).on(
+    "click",
+    ".doctor-home-filter [data-filter='custom'] .calendar-icon",
+    function () {
+      const $dropdownRoot = $(this).closest(".dropdown");
+      $dropdownRoot.find(".filterDropdown").hide();
+      $dropdownRoot.find(".datepicker-container")
+        .removeClass("hidden")
+        .show();
+      if (typeof toastr !== "undefined") {
+        toastr.info("Please select a start date.");
+      }
+    }
+  );
 
   // 6. Hide all dropdowns on outside click
   $(document).on("click", function (e) {

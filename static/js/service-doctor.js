@@ -578,8 +578,8 @@ $(document).on('click', '#save-doctor-services', function () {
         toastr.error("Failed to save services");
       }
     },
-    error() {
-      toastr.error("Something went wrong");
+    error(xhr) {
+      toastr.error(xhr.responseJSON?.message || "Something went wrong");
     }
   });
 });

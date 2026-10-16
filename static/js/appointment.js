@@ -877,6 +877,13 @@ function _placeBid(appointmentId, $row) {
                     .addClass("hidden")
                     .removeClass("flex");
 
+                if (resp.redirect_url) {
+                    setTimeout(function () {
+                        window.location.assign(resp.redirect_url);
+                    }, 700);
+                    return;
+                }
+
                 // Remove the row from list if passed
                 if ($row && $row.length) {
                     $row.fadeOut(300, function () { $(this).remove(); });
