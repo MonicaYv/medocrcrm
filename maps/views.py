@@ -3,6 +3,7 @@ import json
 import polyline
 import requests
 from bson import ObjectId
+from pymongo.errors import PyMongoError
 from django.conf import settings
 from django.http import JsonResponse
 from .models import SavedLocation, SearchHistory, PincodeLocation
@@ -13,9 +14,26 @@ from math import radians, cos, sin, sqrt, atan2
 from dashboard.utils import dashboard_login_required, get_common_context
 from django.views.decorators.http import require_POST
 
+
+def _profile_location_value(profile, field_name):
+    """Return a safe location string even when legacy FK data is dangling."""
+    field = profile._meta.get_field(field_name)
+    if not field.is_relation:
+        return getattr(profile, field_name, "") or ""
+
+    related_id = getattr(profile, f"{field_name}_id", None)
+    if not related_id:
+        return ""
+
+    related_model = field.remote_field.model
+    related_object = related_model.objects.filter(pk=related_id).only("name").first()
+    return getattr(related_object, "name", "") if related_object else ""
+
+
 @dashboard_login_required
 def map_view(request):
     user = request.user_obj
+    profile = None
     if user.user_type == 'ngo':
         profile = NGOProfile.objects.filter(user=user).first()
     elif user.user_type == 'advertiser':
@@ -30,16 +48,15 @@ def map_view(request):
         profile = DoctorProfile.objects.filter(user=user).first()
     elif user.user_type == 'hospital':
         profile = HospitalProfile.objects.filter(user=user).first()
-    else:
-        pass
-
     if profile:
         context = get_common_context(request, user)
         context.update({
             'user': user,
             'address': profile.address if hasattr(profile, 'address') else '',
-            'city': profile.city,
-            'state': profile.state,
+            # Do not dereference profile.city/state directly: some legacy
+            # profiles reference records that no longer exist.
+            'city': _profile_location_value(profile, 'city'),
+            'state': _profile_location_value(profile, 'state'),
             'pincode': profile.pincode,
         })
         return render(request, 'maps/maps.html', context)
@@ -152,9 +169,12 @@ def get_amenities(request):
         }
     }
 
-    docs = list(
-        coll.find(query)
-        .limit(100)
+    try:
+        docs = list(coll.find(query).limit(100))
+    except PyMongoError:
+        return JsonResponse(
+            {"error": "Nearby locations are temporarily unavailable. Please try again shortly."},
+            status=503,
         )
     amenities = []
     for d in docs:

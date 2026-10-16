@@ -23,6 +23,15 @@ $(document).ready(function () {
     return params;
   }
 
+  function notifyIncompleteRange() {
+    const message = "Please select an end date.";
+    if (window.toastr) {
+      toastr.warning(message);
+    } else if (window.showToaster) {
+      window.showToaster("error", message);
+    }
+  }
+
   function setText(selector, value) {
     $(selector).text(value == null || value === "" ? "0" : value);
   }
@@ -237,11 +246,28 @@ $(document).ready(function () {
   }
 
   loadReport();
-  // Calendar date selection
-let selectedStartDate = "";
-let selectedEndDate = "";
-// Initialize all inline calendars
-$(".datepicker-inline").each(function () {
+  // The shared dropdown script uses inline show/hide styles. Those styles
+  // conflict with this page's Tailwind `hidden` classes, so pharmacy reports
+  // owns these controls completely.
+  $(".filterToggle, .calendar-icon").off("click");
+
+  const initialParams = new URLSearchParams(window.location.search);
+  let selectedStartDate = initialParams.get("period") === "custom"
+    ? (initialParams.get("start") || "")
+    : "";
+  let selectedEndDate = initialParams.get("period") === "custom"
+    ? (initialParams.get("end") || "")
+    : "";
+  updateSelectedPeriod(initialParams.get("period") || "month");
+
+  function showOnlyDatepicker($calendar) {
+    $(".filterDropdown").addClass("hidden").css("display", "");
+    $(".datepicker-container").not($calendar).addClass("hidden").css("display", "");
+    $calendar.removeClass("hidden").css("display", "");
+  }
+
+  // Initialize all inline calendars.
+  $(".datepicker-inline").each(function () {
     const $calendar = $(this);
 
     if ($calendar.hasClass("hasDatepicker")) {
@@ -259,8 +285,7 @@ $(".datepicker-inline").each(function () {
             if (!selectedStartDate || selectedEndDate) {
                 selectedStartDate = dateText;
                 selectedEndDate = "";
-
-                console.log("Start Date:", selectedStartDate);
+                notifyIncompleteRange();
                 return;
             }
 
@@ -273,9 +298,6 @@ $(".datepicker-inline").each(function () {
                 [start, end] = [end, start];
             }
 
-            console.log("Selected Start:", start);
-            console.log("Selected End:", end);
-
             const url = new URL(window.location.href);
             url.searchParams.set("period", "custom");
             url.searchParams.set("start", start);
@@ -285,31 +307,32 @@ $(".datepicker-inline").each(function () {
 
             updateSelectedPeriod("custom");
 
-            $(".filterDropdown").addClass("hidden");
-            $(".datepicker-container").addClass("hidden");
+            $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
 
             loadReport({
                 period: "custom",
                 start: start,
                 end: end
             })
-            .done(function (response) {
-                console.log("Custom report loaded:", response);
-            })
             .fail(function (xhr) {
-                console.error(
-                    "Custom report failed:",
-                    xhr.status,
-                    xhr.responseText
-                );
+                const message = xhr.responseJSON?.error || "Unable to load the selected report range.";
+                if (window.toastr) toastr.error(message);
             });
         }
     });
 });
 
+  $(document).on("click", ".filterToggle", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const $dropdown = $(this).closest(".dropdown").find(".filterDropdown").first();
+    const shouldOpen = $dropdown.hasClass("hidden");
+    $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
+    if (shouldOpen) $dropdown.removeClass("hidden");
+  });
 
-// Open calendar from chart calendar icons
-$(document).on("click", ".calendar-icon", function (e) {
+  // Open a date range calendar from any chart calendar icon.
+  $(document).on("click", ".calendar-icon", function (e) {
 
     // Main Custom menu is handled separately
     if ($(this).closest(".filterDropdown").length) {
@@ -324,11 +347,12 @@ $(document).on("click", ".calendar-icon", function (e) {
         .find(".datepicker-container")
         .first();
 
-    $(".filterDropdown").addClass("hidden");
-    $(".datepicker-container").not($calendar).addClass("hidden");
-
-    $calendar.toggleClass("hidden");
-});
+    if ($calendar.hasClass("hidden")) {
+      showOnlyDatepicker($calendar);
+    } else {
+      $calendar.addClass("hidden").css("display", "");
+    }
+  });
 
 
 // Prevent clicks inside calendars from closing them
@@ -349,8 +373,7 @@ $(document).on("click", function (e) {
             ".dropdown, .datepicker-container, .ui-datepicker"
         ).length
     ) {
-        $(".filterDropdown").addClass("hidden");
-        $(".datepicker-container").addClass("hidden");
+        $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
     }
 });
   // $(".filterDropdown > div").on("click", function () {
@@ -407,8 +430,7 @@ $(document).on(
 
         window.history.replaceState({}, "", url.toString());
 
-        $(".filterDropdown").addClass("hidden");
-        $(".datepicker-container").addClass("hidden");
+        $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
 
         loadReport({
             period: period,
@@ -433,12 +455,26 @@ $(document).on(
             .find(".datepicker-container")
             .first();
 
-        $(".filterDropdown").addClass("hidden");
-        $(".datepicker-container").not($calendar).addClass("hidden");
-
-        $calendar.removeClass("hidden");
+        showOnlyDatepicker($calendar);
     }
 );
+
+  // Search by name/type updates the same report data without discarding the
+  // currently selected date filter.
+  $("#pharmacy-report-root form[method='get']").on("submit", function (e) {
+    e.preventDefault();
+    const query = $(this).find("[name='q']").val().trim();
+    const url = new URL(window.location.href);
+    if (query) {
+      url.searchParams.set("q", query);
+    } else {
+      url.searchParams.delete("q");
+    }
+    window.history.replaceState({}, "", url.toString());
+    loadReport({ q: query }).fail(function () {
+      if (window.toastr) toastr.error("Unable to search report data.");
+    });
+  });
     // .on("click", function (e) {
     //     e.stopPropagation();
 

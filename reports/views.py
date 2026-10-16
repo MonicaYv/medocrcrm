@@ -114,6 +114,7 @@ def _percent(part, total):
 
 def _parse_report_range(request):
     today = timezone.localdate()
+    end_date = today
     period = request.GET.get("period", "month")
 
     if period == "today":
@@ -123,31 +124,31 @@ def _parse_report_range(request):
     elif period == "custom":
         start_str = request.GET.get("start", "").strip()
         end_str = request.GET.get("end", "").strip()
-        
-        # Try multiple parsing variations to catch different frontend inputs
-        parsed_start = None
-        parsed_end = None
-        
+
+        # The datepicker submits ISO dates, but accepting the legacy display
+        # formats keeps old bookmarked report URLs working as well.
+        parsed_start = parsed_end = None
         for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"):
             try:
                 if not parsed_start and start_str:
-                    parsed_start = timezone.datetime.strptime(start_str, fmt).date()
+                    parsed_start = datetime.strptime(start_str, fmt).date()
                 if not parsed_end and end_str:
-                    parsed_end = timezone.datetime.strptime(end_str, fmt).date()
+                    parsed_end = datetime.strptime(end_str, fmt).date()
             except ValueError:
                 continue
 
-        # Fallback only if the parsed results are completely missing or invalid
+        # Never return a range with an end date before its start date.  This
+        # also means both dates selected in either order produce valid data.
         if parsed_start and parsed_end:
-            start_date = parsed_start
-            today = parsed_end
+            start_date, end_date = sorted((parsed_start, parsed_end))
         else:
-            # Logger alert or fallback default
             start_date = today - timedelta(days=29)
+            end_date = today
     else:
         start_date = today - timedelta(days=29)
+        end_date = today
 
-    return start_date, today
+    return start_date, end_date
 
 
 def _pharmacy_reports_context(request, user):

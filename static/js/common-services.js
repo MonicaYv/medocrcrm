@@ -239,6 +239,11 @@ function clearPharmacyValidation() {
 
 function setMedicineCardValue($card, index, value) {
     const cleanValue = String(value || '').trim();
+    const manualField = index === 0 ? '.medicine-category-input' : index === 1 ? '.medicine-name-input' : null;
+    if (manualField && $card.find(manualField).length) {
+        $card.find(manualField).val(cleanValue);
+        return;
+    }
     $card.find('.custom-dropdown').eq(index).find('.selected-text')
         .text(cleanValue)
         .attr('data-value', cleanValue);
@@ -427,9 +432,10 @@ function collectPharmacyMedicineRows(showValidation = false) {
     $('.services-section #step-1 .service-card').each(function () {
         const $card = $(this);
         const dropdowns = $card.find('.custom-dropdown');
-        const category = dropdowns.eq(0).find('.selected-text').attr('data-value') || dropdowns.eq(0).find('.selected-text').text().trim();
-        const name = dropdowns.eq(1).find('.selected-text').attr('data-value') || dropdowns.eq(1).find('.selected-text').text().trim();
-        const type = dropdowns.eq(2).find('.selected-text').attr('data-value') || dropdowns.eq(2).find('.selected-text').text().trim();
+        const category = $card.find('.medicine-category-input').val()?.trim() || dropdowns.eq(0).find('.selected-text').attr('data-value') || dropdowns.eq(0).find('.selected-text').text().trim();
+        const name = $card.find('.medicine-name-input').val()?.trim() || dropdowns.eq(1).find('.selected-text').attr('data-value') || dropdowns.eq(1).find('.selected-text').text().trim();
+        const typeIndex = $card.find('.medicine-name-input').length ? 0 : 2;
+        const type = dropdowns.eq(typeIndex).find('.selected-text').attr('data-value') || dropdowns.eq(typeIndex).find('.selected-text').text().trim();
         const quantity = $card.find('.medicine-quantity').val().trim();
         const price = $card.find('.medicine-price').val().trim();
 
@@ -554,4 +560,90 @@ $(document).on('click', '.delete-pharmacy-medicine', function (e) {
             }
         })
         .catch((error) => showPharmacyValidation(error.message));
+});
+
+function updatePharmacyMedicineCard(medicine) {
+    const $card = $(`.pharmacy-medicine-card[data-id="${medicine.id}"]`);
+    if (!$card.length) return;
+
+    $card.find('h3').text(medicine.name);
+    $card.find('p').text(`${medicine.quantity} | ${medicine.type} | ${medicine.category}`);
+    $card.find('.text-dodger-blue').text(`₹${medicine.price}`);
+}
+
+function closePharmacyMedicineEditor() {
+    $('#edit-pharmacy-medicine-modal').addClass('hidden').removeClass('flex');
+}
+
+$(document).on('click', '.edit-pharmacy-medicine', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const medicineId = Number($(this).data('id'));
+    const medicine = (window.PHARMACY_MEDICINES || []).find((item) => Number(item.id) === medicineId);
+    if (!medicine) {
+        if (window.toastr) toastr.error('Medicine details could not be loaded.');
+        return;
+    }
+
+    const $modal = $('#edit-pharmacy-medicine-modal');
+    const $form = $('#edit-pharmacy-medicine-form');
+    $form.find('[name="medicine_id"]').val(medicine.id);
+    $form.find('[name="category"]').val(medicine.category);
+    $form.find('[name="name"]').val(medicine.name);
+    $form.find('[name="type"]').val(medicine.type);
+    $form.find('[name="quantity"]').val(medicine.quantity);
+    $form.find('[name="price"]').val(medicine.price);
+    $('.more-dropdown').addClass('hidden');
+    $modal.removeClass('hidden').addClass('flex');
+});
+
+$(document).on('click', '.close-edit-pharmacy-medicine', closePharmacyMedicineEditor);
+
+$(document).on('input', '#edit-pharmacy-medicine-form [name="quantity"]', function () {
+    this.value = this.value.replace(/\D/g, '');
+});
+
+$(document).on('submit', '#edit-pharmacy-medicine-form', function (e) {
+    e.preventDefault();
+    const $form = $(this);
+    const medicineId = $form.find('[name="medicine_id"]').val();
+    const payload = {
+        category: $form.find('[name="category"]').val().trim(),
+        name: $form.find('[name="name"]').val().trim(),
+        type: $form.find('[name="type"]').val().trim(),
+        quantity: $form.find('[name="quantity"]').val().trim(),
+        price: $form.find('[name="price"]').val().trim(),
+    };
+    const $button = $form.find('.save-edit-pharmacy-medicine');
+    $button.prop('disabled', true).addClass('opacity-60');
+
+    fetch(`/services/pharmacy/medicines/${medicineId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify(payload),
+    })
+        .then(async (response) => {
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Unable to update medicine.');
+            }
+            return data;
+        })
+        .then((data) => {
+            updatePharmacyMedicineCard(data.medicine);
+            const medicines = window.PHARMACY_MEDICINES || [];
+            const index = medicines.findIndex((item) => Number(item.id) === Number(data.medicine.id));
+            if (index >= 0) medicines[index] = data.medicine;
+            window.PHARMACY_MEDICINES = medicines;
+            closePharmacyMedicineEditor();
+            if (window.toastr) toastr.success('Medicine updated successfully.');
+        })
+        .catch((error) => {
+            if (window.toastr) toastr.error(error.message);
+        })
+        .finally(() => $button.prop('disabled', false).removeClass('opacity-60'));
 });

@@ -19,6 +19,7 @@ urlpatterns = [
     # PHARMACY
     path('pharmacy/medicines/', views.get_pharmacy_medicines, name='get_pharmacy_medicines'),
     path('pharmacy/medicines/save/', views.save_pharmacy_medicines, name='save_pharmacy_medicines'),
+    path('pharmacy/medicines/<int:medicine_id>/update/', views.update_pharmacy_medicine, name='update_pharmacy_medicine'),
     path('pharmacy/medicines/<int:medicine_id>/delete/', views.delete_pharmacy_medicine, name='delete_pharmacy_medicine'),
     path('pharmacy/dropdowns/', views.pharmacy_dropdowns, name='pharmacy_dropdowns'),
 

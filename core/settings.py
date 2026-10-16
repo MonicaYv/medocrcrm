@@ -131,7 +131,15 @@ connect(
     host=MONGO_DATABASE_HOST,
 )
 
-MONGO_CLIENT = MongoClient(MONGO_DATABASE_HOST)
+# Keep an unavailable optional Mongo catalogue from holding up an entire page
+# for the driver defaults (20–30 seconds). Views using it handle failures and
+# continue with their local data.
+MONGO_CLIENT = MongoClient(
+    MONGO_DATABASE_HOST,
+    serverSelectionTimeoutMS=3000,
+    connectTimeoutMS=3000,
+    socketTimeoutMS=3000,
+)
 MONGO_DB = MONGO_CLIENT[MONGO_DATABASE_NAME]
 
 MONGO_COLLECTIONS = {
