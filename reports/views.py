@@ -1498,10 +1498,15 @@ def doctor_report_data(request):
         appointments = DoctorAppointment.objects.filter(
             doctor=doctor_profile
         ).select_related("address")
+    
     else:
         appointments = DoctorAppointment.objects.filter(
             user=user
         ).select_related("address")
+    print("DOCTOR APPOINTMENTS FOR PROFILE:", appointments.count())
+    print("DOCTOR USER:", user)
+    print("DOCTOR PROFILE:", doctor_profile)
+    print("APPOINTMENTS BEFORE DATE FILTER:", appointments.count())
 
     # Date filter (today / week / month / custom start..end).
     appointments = apply_report_date_filter(
@@ -1510,7 +1515,9 @@ def doctor_report_data(request):
         start_date=request.GET.get("start_date", "").strip(),
         end_date=request.GET.get("end_date", "").strip(),
     )
-
+    print("DOCTOR REPORT FILTER:", filter_type)
+    print("DOCTOR START DATE:", request.GET.get("start_date"))
+    print("DOCTOR FILTERED APPOINTMENTS:", appointments.count())
     # Visit type filter (home / clinic); "all"/empty leaves the list untouched.
     appointments = apply_report_visit_type_filter(appointments, visit_type)
 

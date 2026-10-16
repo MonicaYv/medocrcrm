@@ -237,7 +237,122 @@ $(document).ready(function () {
   }
 
   loadReport();
+  // Calendar date selection
+let selectedStartDate = "";
+let selectedEndDate = "";
+// Initialize all inline calendars
+$(".datepicker-inline").each(function () {
+    const $calendar = $(this);
 
+    if ($calendar.hasClass("hasDatepicker")) {
+        $calendar.datepicker("destroy");
+    }
+
+    $calendar.datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+
+        onSelect: function (dateText) {
+            console.log("Calendar date selected:", dateText);
+
+            if (!selectedStartDate || selectedEndDate) {
+                selectedStartDate = dateText;
+                selectedEndDate = "";
+
+                console.log("Start Date:", selectedStartDate);
+                return;
+            }
+
+            selectedEndDate = dateText;
+
+            let start = selectedStartDate;
+            let end = selectedEndDate;
+
+            if (start > end) {
+                [start, end] = [end, start];
+            }
+
+            console.log("Selected Start:", start);
+            console.log("Selected End:", end);
+
+            const url = new URL(window.location.href);
+            url.searchParams.set("period", "custom");
+            url.searchParams.set("start", start);
+            url.searchParams.set("end", end);
+
+            window.history.replaceState({}, "", url.toString());
+
+            updateSelectedPeriod("custom");
+
+            $(".filterDropdown").addClass("hidden");
+            $(".datepicker-container").addClass("hidden");
+
+            loadReport({
+                period: "custom",
+                start: start,
+                end: end
+            })
+            .done(function (response) {
+                console.log("Custom report loaded:", response);
+            })
+            .fail(function (xhr) {
+                console.error(
+                    "Custom report failed:",
+                    xhr.status,
+                    xhr.responseText
+                );
+            });
+        }
+    });
+});
+
+
+// Open calendar from chart calendar icons
+$(document).on("click", ".calendar-icon", function (e) {
+
+    // Main Custom menu is handled separately
+    if ($(this).closest(".filterDropdown").length) {
+        return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const $calendar = $(this)
+        .closest(".dropdown")
+        .find(".datepicker-container")
+        .first();
+
+    $(".filterDropdown").addClass("hidden");
+    $(".datepicker-container").not($calendar).addClass("hidden");
+
+    $calendar.toggleClass("hidden");
+});
+
+
+// Prevent clicks inside calendars from closing them
+$(document).on(
+    "click",
+    ".filterDropdown, .datepicker-container, .ui-datepicker",
+    function (e) {
+        e.stopPropagation();
+    }
+);
+
+
+// Close calendars when clicking outside
+$(document).on("click", function (e) {
+
+    if (
+        !$(e.target).closest(
+            ".dropdown, .datepicker-container, .ui-datepicker"
+        ).length
+    ) {
+        $(".filterDropdown").addClass("hidden");
+        $(".datepicker-container").addClass("hidden");
+    }
+});
   // $(".filterDropdown > div").on("click", function () {
   //   const label = $(this).text().trim().toLowerCase();
   //   const period = label.includes("today") ? "today" : label.includes("week") ? "week" : label.includes("month") ? "month" : "custom";
@@ -247,13 +362,123 @@ $(document).ready(function () {
   //   loadReport({ period });
   // });
 
-  $(".filterDropdown > div").on("click", function () {
-    const period = $(this).data("period") || "month";
-    const url = new URL(window.location.href);
-    url.searchParams.set("period", period);
-    window.history.replaceState({}, "", url.toString());
-    loadReport({ period });
-});
+//   $(".filterDropdown > div").on("click", function () {
+//     const period = $(this).data("period") || "month";
+//     const url = new URL(window.location.href);
+//     url.searchParams.set("period", period);
+//     window.history.replaceState({}, "", url.toString());
+//     loadReport({ period });
+// });
+// Today / Week / Month filters
+// $(".filterDropdown > div[data-period='today'], .filterDropdown > div[data-period='week'], .filterDropdown > div[data-period='month']")
+// Update the blue tick for the selected filter
+function updateSelectedPeriod(period) {
+    $(".filterDropdown > div[data-period]").each(function () {
+        const itemPeriod = $(this).data("period");
+        const $tick = $(this).find(".material-symbols-outlined").first();
+
+        if (itemPeriod === period) {
+            $tick.removeClass("text-light-gray").addClass("text-dodger-blue");
+        } else {
+            $tick.removeClass("text-dodger-blue").addClass("text-light-gray");
+        }
+    });
+}
+
+// Today, Week and Month filters
+$(document).on(
+    "click",
+    ".filterDropdown > div[data-period='today'], .filterDropdown > div[data-period='week'], .filterDropdown > div[data-period='month']",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const period = $(this).data("period");
+
+        selectedStartDate = "";
+        selectedEndDate = "";
+
+        updateSelectedPeriod(period);
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("period", period);
+        url.searchParams.delete("start");
+        url.searchParams.delete("end");
+
+        window.history.replaceState({}, "", url.toString());
+
+        $(".filterDropdown").addClass("hidden");
+        $(".datepicker-container").addClass("hidden");
+
+        loadReport({
+            period: period,
+            start: "",
+            end: ""
+        });
+    }
+);
+
+// Custom filter opens the calendar
+$(document).on(
+    "click",
+    ".filterDropdown > div[data-period='custom']",
+    function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        updateSelectedPeriod("custom");
+
+        const $calendar = $(this)
+            .closest(".dropdown")
+            .find(".datepicker-container")
+            .first();
+
+        $(".filterDropdown").addClass("hidden");
+        $(".datepicker-container").not($calendar).addClass("hidden");
+
+        $calendar.removeClass("hidden");
+    }
+);
+    // .on("click", function (e) {
+    //     e.stopPropagation();
+
+    //     const period = $(this).data("period");
+
+    //     selectedStartDate = "";
+    //     selectedEndDate = "";
+
+    //     const url = new URL(window.location.href);
+
+    //     url.searchParams.set("period", period);
+    //     url.searchParams.delete("start");
+    //     url.searchParams.delete("end");
+
+    //     window.history.replaceState({}, "", url.toString());
+
+    //     $(".filterDropdown").addClass("hidden");
+    //     $(".datepicker-container").addClass("hidden");
+
+    //     loadReport({
+    //         period: period,
+    //         start: "",
+    //         end: ""
+    //     });
+    // });
+
+// // Custom filter opens the main calendar
+// $(".filterDropdown > div[data-period='custom']").on("click", function (e) {
+//     e.stopPropagation();
+
+//     const $calendar = $(this)
+//         .closest(".dropdown")
+//         .find(".datepicker-container")
+//         .first();
+
+//     $(".filterDropdown").addClass("hidden");
+//     $(".datepicker-container").not($calendar).addClass("hidden");
+
+//     $calendar.removeClass("hidden");
+// });
 
   $(".download-btn").on("click", function () {
     const targetId = $(this).data("target");

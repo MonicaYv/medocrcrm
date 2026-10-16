@@ -114,17 +114,17 @@ $(document).ready(function () {
     $(".filterDropdown").toggleClass("hidden");
   });
 
-  $(".calendar-icon").on("click", function (e) {
-    e.stopPropagation();
-    $(".datepicker-container").addClass("hidden");
-    $(this).closest(".dropdown").find(".datepicker-container").toggleClass("hidden");
-  });
+  // $(".calendar-icon").on("click", function (e) {
+  //   e.stopPropagation();
+  //   $(".datepicker-container").addClass("hidden");
+  //   $(this).closest(".dropdown").find(".datepicker-container").toggleClass("hidden");
+  // });
 
-  $(document).on("click", function () {
-    $(".filterDropdown").addClass("hidden");
-    $(".datepicker-container").addClass("hidden");
-    $(".dropdown-menu").addClass("hidden");
-  });
+  // $(document).on("click", function () {
+  //   $(".filterDropdown").addClass("hidden");
+  //   $(".datepicker-container").addClass("hidden");
+  //   $(".dropdown-menu").addClass("hidden");
+  // });
 
   $(document).on("click", ".dropdown-btn", function (e) {
     e.stopPropagation();
@@ -281,7 +281,7 @@ $(document).ready(function () {
         }
     });
     $datePicker.datepicker("destroy").datepicker({
-        dateFormat: "yy-mm-dd", changeMonth: true, changeYear: true, maxDate: 0, numberOfMonths: 1,
+        dateFormat: "yy-mm-dd", changeMonth: true, changeYear: true, maxDate: null, numberOfMonths: 1,
         onSelect: function (dateText) {
             if (selectingStartDate) {
                 startDate = dateText; endDate = ""; selectingStartDate = false; selectedFilter = "custom";
@@ -296,11 +296,65 @@ $(document).ready(function () {
             }
         }
     });
-    $(".calendar-icon").on("click", function (e) {
-        e.preventDefault(); e.stopPropagation();
-        selectedFilter = "custom"; startDate = ""; endDate = ""; selectingStartDate = true;
-        updateActiveFilter("custom"); $dropdown.removeClass("hidden"); $calendar.removeClass("hidden");
+    // $(".calendar-icon").on("click", function (e) {
+    //     e.preventDefault(); e.stopPropagation();
+    //     selectedFilter = "custom"; startDate = ""; endDate = ""; selectingStartDate = true;
+    //     updateActiveFilter("custom"); $dropdown.removeClass("hidden"); $calendar.removeClass("hidden");
+    //     $datePicker.datepicker("refresh");
+    // });
+    // MAIN FILTER CALENDAR
+    $(".filterDropdown .report-filter[data-type='custom'] .calendar-icon")
+      .off("click.reportCalendar")
+      .on("click.reportCalendar", function (e) {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        selectedFilter = "custom";
+        startDate = "";
+        endDate = "";
+        selectingStartDate = true;
+
+        updateActiveFilter("custom");
+
+        $dropdown.removeClass("hidden");
+
+        const $mainCalendar = $(".report-date-picker")
+            .closest(".datepicker-container");
+
+        $(".datepicker-container").addClass("hidden");
+        $mainCalendar.removeClass("hidden");
+
+        $dateLabel.text("Select start date");
+
         $datePicker.datepicker("refresh");
+    });
+
+
+  // INDIVIDUAL CHART CALENDARS
+  $(".calendar-icon")
+    .not(".filterDropdown .report-filter .calendar-icon")
+    .off("click.chartCalendar")
+    .on("click.chartCalendar", function (e) {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const $chart = $(this).closest("[id$='Section']");
+
+        const $chartCalendar = $chart
+            .find(".datepicker-container")
+            .first();
+
+        if (!$chartCalendar.length) {
+            return;
+        }
+
+        $(".datepicker-container").addClass("hidden");
+
+        $dropdown.addClass("hidden");
+
+        $chartCalendar.removeClass("hidden");
     });
     $(".report-filter").on("click", function (e) {
         e.preventDefault(); e.stopPropagation();
