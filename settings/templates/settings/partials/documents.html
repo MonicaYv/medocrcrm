@@ -7,9 +7,17 @@
             <p class="font-semibold text-lg text-jet-black">
               NGO Registration Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
-              {{ngo_registration_number}}
-            </p>
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="ngo_registration_doc">
+              <p class="font-normal text-base text-medium-gray doc-info">
+                {{ngo_registration_number}}
+              </p>
+              <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{ngo_registration_number}}" />
+              <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+              <div class="flex items-center gap-2 hidden buttons-container">
+                <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+                <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+              </div>
+            </div>
           </div>
           <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2 lg:pr-32 text-nowrap">
@@ -49,9 +57,17 @@
             <p class="font-semibold text-lg text-jet-black">
               GST Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
-              {{gst_number}}
-            </p>
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="gst_doc">
+              <p class="font-normal text-base text-medium-gray doc-info">
+                {{gst_number}}
+              </p>
+              <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{gst_number}}" />
+              <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+              <div class="flex items-center gap-2 hidden buttons-container">
+                <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+                <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+              </div>
+            </div>
           </div>
           <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2  lg:pr-25  text-nowrap">          
@@ -90,9 +106,17 @@
             <p class="font-semibold text-lg text-jet-black">
               PAN Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
-              {{pan_number}}
-            </p>
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="pan_doc">
+              <p class="font-normal text-base text-medium-gray doc-info">
+                {{pan_number}}
+              </p>
+              <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{pan_number}}" />
+              <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+              <div class="flex items-center gap-2 hidden buttons-container">
+                <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+                <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+              </div>
+            </div>
           </div>
           <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2  lg:pr-14  text-nowrap">          
@@ -131,9 +155,17 @@
             <p class="font-semibold text-lg text-jet-black">
               TAN Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
-              {{tan_number}}
-            </p>
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="tan_doc">
+              <p class="font-normal text-base text-medium-gray doc-info">
+                {{tan_number}}
+              </p>
+              <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{tan_number}}" />
+              <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+              <div class="flex items-center gap-2 hidden buttons-container">
+                <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+                <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+              </div>
+            </div>
           </div>
           <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2  lg:pr-35  text-nowrap">          
@@ -172,9 +204,17 @@
             <p class="font-semibold text-lg text-jet-black">
               12A Document Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="doc_12a">
+              <p class="font-normal text-base text-medium-gray doc-info">
                 {{doc_12a_number}}
-            </p>
+              </p>
+              <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{doc_12a_number}}" />
+              <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+              <div class="flex items-center gap-2 hidden buttons-container">
+                <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+                <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+              </div>
+            </div>
           </div>
           <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2  lg:pr-35  text-nowrap">          
@@ -213,9 +253,17 @@
             <p class="font-semibold text-lg text-jet-black">
               Section 8 Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
-              {{section8_number}}
-            </p>
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="section8_doc">
+              <p class="font-normal text-base text-medium-gray doc-info">
+                {{section8_number}}
+              </p>
+              <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{section8_number}}" />
+              <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+              <div class="flex items-center gap-2 hidden buttons-container">
+                <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+                <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+              </div>
+            </div>
           </div>
           <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2  lg:pr-35  text-nowrap">          
@@ -296,9 +344,17 @@
         <p class="font-semibold text-lg text-jet-black">
         Incorporation Number & Document
         </p>
-        <p class="font-normal text-base text-medium-gray">
+        <div class="flex items-center gap-2 doc-container" data-doc-number-type="incorporation_doc">
+        <p class="font-normal text-base text-medium-gray doc-info">
         {{incorporation_number}}
         </p>
+        <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{incorporation_number}}" />
+        <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+        <div class="flex items-center gap-2 hidden buttons-container">
+        <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+        <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+        </div>
+        </div>
     </div>
     <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
         <div class="flex items-center gap-2 lg:pr-32 text-nowrap">
@@ -338,9 +394,17 @@
         <p class="font-semibold text-lg text-jet-black">
         GST Number & Document
         </p>
-        <p class="font-normal text-base text-medium-gray">
+        <div class="flex items-center gap-2 doc-container" data-doc-number-type="gst_doc">
+        <p class="font-normal text-base text-medium-gray doc-info">
         {{gst_number}}
         </p>
+        <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{gst_number}}" />
+        <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+        <div class="flex items-center gap-2 hidden buttons-container">
+        <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+        <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+        </div>
+        </div>
     </div>
     <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
         <div class="flex items-center gap-2  lg:pr-25  text-nowrap">          
@@ -379,9 +443,17 @@
         <p class="font-semibold text-lg text-jet-black">
         PAN Number & Document
         </p>
-        <p class="font-normal text-base text-medium-gray">
+        <div class="flex items-center gap-2 doc-container" data-doc-number-type="pan_doc">
+        <p class="font-normal text-base text-medium-gray doc-info">
         {{pan_number}}
         </p>
+        <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{pan_number}}" />
+        <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+        <div class="flex items-center gap-2 hidden buttons-container">
+        <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+        <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+        </div>
+        </div>
     </div>
     <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
         <div class="flex items-center gap-2  lg:pr-14  text-nowrap">          
@@ -420,9 +492,17 @@
         <p class="font-semibold text-lg text-jet-black">
         TAN Number & Document
         </p>
-        <p class="font-normal text-base text-medium-gray">
+        <div class="flex items-center gap-2 doc-container" data-doc-number-type="tan_doc">
+        <p class="font-normal text-base text-medium-gray doc-info">
         {{tan_number}}
         </p>
+        <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{tan_number}}" />
+        <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+        <div class="flex items-center gap-2 hidden buttons-container">
+        <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+        <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+        </div>
+        </div>
     </div>
     <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
         <div class="flex items-center gap-2  lg:pr-35  text-nowrap">          
@@ -513,9 +593,17 @@
             <p class="font-semibold text-lg text-jet-black">
             Incorporation Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="incorporation_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">
             {{incorporation_number}}
             </p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{incorporation_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+            <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+            <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+            </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2 lg:pr-32 text-nowrap">
@@ -566,9 +654,17 @@
             <p class="font-semibold text-lg text-jet-black">
             GST Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="gst_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">
             {{gst_number}}
             </p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{gst_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+            <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+            <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+            </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2 lg:pr-25 text-nowrap">
@@ -619,9 +715,17 @@
             <p class="font-semibold text-lg text-jet-black">
             PAN Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="pan_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">
             {{pan_number}}
             </p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{pan_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+            <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+            <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+            </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2 lg:pr-14 text-nowrap">
@@ -672,9 +776,17 @@
             <p class="font-semibold text-lg text-jet-black">
             TAN Number & Document
             </p>
-            <p class="font-normal text-base text-medium-gray">
+            <div class="flex items-center gap-2 doc-container" data-doc-number-type="tan_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">
             {{tan_number}}
             </p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{tan_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+            <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+            <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+            </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
             <div class="flex items-center gap-2 lg:pr-35 text-nowrap">
@@ -757,7 +869,15 @@
       <div class="flex lg:items-center justify-between pt-7 flex-col lg:flex-row">
         <div class="flex flex-col gap-1">
           <p class="font-semibold text-lg text-jet-black">Incorporation Number & Document</p>
-          <p class="font-normal text-base text-medium-gray">{{incorporation_number}}</p>
+          <div class="flex items-center gap-2 doc-container" data-doc-number-type="incorporation_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">{{incorporation_number}}</p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{incorporation_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+              <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+              <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+          </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
           <div class="flex items-center gap-2 lg:pr-32 text-nowrap">
@@ -792,7 +912,15 @@
       <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
         <div class="flex flex-col gap-1">
           <p class="font-semibold text-lg text-jet-black">GST Number & Document</p>
-          <p class="font-normal text-base text-medium-gray">{{gst_number}}</p>
+          <div class="flex items-center gap-2 doc-container" data-doc-number-type="gst_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">{{gst_number}}</p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{gst_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+              <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+              <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+          </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
           <div class="flex items-center gap-2 lg:pr-25 text-nowrap">
@@ -830,7 +958,15 @@
       <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
         <div class="flex flex-col gap-1">
           <p class="font-semibold text-lg text-jet-black">PAN Number & Document</p>
-          <p class="font-normal text-base text-medium-gray">{{pan_number}}</p>
+          <div class="flex items-center gap-2 doc-container" data-doc-number-type="pan_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">{{pan_number}}</p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{pan_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+              <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+              <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+          </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
           <div class="flex items-center gap-2 lg:pr-14 text-nowrap">
@@ -867,7 +1003,15 @@
       <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
         <div class="flex flex-col gap-1">
           <p class="font-semibold text-lg text-jet-black">TAN Number & Document</p>
-          <p class="font-normal text-base text-medium-gray">{{tan_number}}</p>
+          <div class="flex items-center gap-2 doc-container" data-doc-number-type="tan_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">{{tan_number}}</p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{tan_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+              <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+              <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+          </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
           <div class="flex items-center gap-2 lg:pr-35 text-nowrap">
@@ -903,7 +1047,15 @@
       <div class="flex lg:items-center justify-between pt-4 flex-col lg:flex-row">
         <div class="flex flex-col gap-1">
           <p class="font-semibold text-lg text-jet-black">Medical License Number & Document</p>
-          <p class="font-normal text-base text-medium-gray">{{medical_license_number}}</p>
+          <div class="flex items-center gap-2 doc-container" data-doc-number-type="medical_license_doc">
+            <p class="font-normal text-base text-medium-gray doc-info">{{medical_license_number}}</p>
+            <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{medical_license_number}}" />
+            <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
+            <div class="flex items-center gap-2 hidden buttons-container">
+              <button type="button" class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
+              <button type="button" class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
+            </div>
+          </div>
         </div>
         <div class="flex lg:items-center gap-4 flex-col lg:flex-row">
           <div class="flex items-center gap-2 lg:pr-35 text-nowrap">
@@ -986,16 +1138,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Lab Registration Certificate
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{lab_registration_number}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="lab_certificate">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{lab_registration_number}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{lab_registration_number}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            type="button"
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1041,16 +1193,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Identity Proof (Aadhar Card of Owner)
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{identity_proof_aadhar_number}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="identity_proof_aadhar">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{identity_proof_aadhar_number}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{identity_proof_aadhar_number}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            type="button"
-                             class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1095,16 +1247,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Identity Proof (PAN Card of Owner)
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{identity_proof_pan_number}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="identity_proof_pan">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{identity_proof_pan_number}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{identity_proof_pan_number}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            type="button"
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc" data-doc-save="true">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1149,16 +1301,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Gov License/Accreditation (e.g.NABL)
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{gov_license_number}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="gov_license">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{gov_license_number}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{gov_license_number}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            type="button"
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc" data-doc-save="true">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1258,16 +1410,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Hospital License Number & Document
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{registration_no}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="hospital_license">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{registration_no}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{registration_no}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            type="button"
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1313,16 +1465,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Admin Identity Proof
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{aadhar_card_no}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="admin_identity_proof">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{aadhar_card_no}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{aadhar_card_no}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            type="button"
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1370,16 +1522,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     PAN Number & Document
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{pan_card_no}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="hospital_pan">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{pan_card_no}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{pan_card_no}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            type="button"
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc"data-doc-save="true">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1475,15 +1627,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Clinic Registration Certificate
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{registration_number}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="clinic_registration">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{registration_number}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{registration_number}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1549,15 +1702,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Identity Proof (Aadhar Card of Owner)
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{aadhar_number}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="aadhar_doc">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{aadhar_number}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{aadhar_number}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 
@@ -1624,15 +1778,16 @@
                 <p class="font-semibold text-lg text-jet-black">
                     Identity Proof (PAN Card of Owner)
                 </p>
-                <div class="flex items-center gap-2 doc-container">
-                    <p class="font-normal text-base text-medium-gray doc-info">
-                        {{pan_number}}
+                <div class="flex items-center gap-2 doc-container" data-doc-number-type="doctor_pan">
+                    <p class="font-normal text-base text-medium-gray doc-info">{{pan_number}}
                     </p>
+                    <input type="text" class="hidden doc-number-input border border-dodger-blue rounded-md px-2 py-1 text-sm text-jet-black w-40" value="{{pan_number}}" />
+                    <span title="Edit Number" class="material-symbols-outlined border p-1 rounded-md cursor-pointer edit-doc-number">edit</span>
                     <div class="flex items-center gap-2 hidden buttons-container">
-                        <button
+                        <button type="button"
                             class="border border-dodger-blue text-dodger-blue rounded-[10px] py-1 px-2 cursor-pointer cancel-btn-doc">Cancel</button>
-                        <button
-                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-btn-doc">Save</button>
+                        <button type="button"
+                            class="bg-dodger-blue text-white rounded-[10px] py-1 px-4 cursor-pointer save-doc-number">Save</button>
                     </div>
                 </div>
 

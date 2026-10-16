@@ -425,7 +425,13 @@ function fetchPlaces(type, buttonElement, mode = "map") {
             range: 100000  // you can increase to 5000 if needed
         }),
     })
-    .then((res) => res.json())
+    .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.error || `Unable to load nearby ${type}s.`);
+        }
+        return data;
+    })
     .then((data) => {
         $(".cards, #pagination").removeClass('hidden');
         if (data?.amenities?.length > 0) {
@@ -483,7 +489,7 @@ function fetchPlaces(type, buttonElement, mode = "map") {
     })
     .catch((err) => {
         console.error("Fetch error:", err);
-        toastr.error(`Failed to load nearby ${type}s.`);
+        toastr.error(err.message || `Failed to load nearby ${type}s.`);
         $(".cards, #pagination").addClass('hidden');
         $(".placeholder").removeClass('hidden').text(`No ${type}s found nearby.`);
     });

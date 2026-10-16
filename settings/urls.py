@@ -13,6 +13,7 @@ urlpatterns = [
     path('update-hospital-profile', views.update_hospital_profile, name='update_hospital_profile'),
     path('update-notification-field/', views.update_notification_field, name='update_notification_field'),
     path('update-document/', views.update_user_document, name='update_document'),
+    path('update-document-number/', views.update_document_number, name='update_document_number'),
     path('clear-search-history/', views.clear_search_history, name='clear_search_history'),
     path('clear-saved-data/', views.clear_saved_data, name='clear_saved_data'),
     path('delete-account/', views.delete_account, name='delete_account'),

@@ -20,7 +20,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from appointments.models import DoctorAppointment, HospitalAppointments, LabAppointments
-from appointments.utils import parse_filter_date
+from appointments.utils import parse_filter_date, visit_type_filter_aliases
 from dashboard.utils import (
     dashboard_login_required,
     get_common_context,
@@ -1434,42 +1434,15 @@ def apply_report_date_filter(qs, filter_type, start_date=None, end_date=None):
     ).filter(_report_date__range=(start, end))
 
 
-# The UI offers Home / Clinic, but `consultation_type` has been stored both as
-# a slug ("home_visit") and as the VisitType label ("Home Visit"), so match the
-# spellings we have actually seen in the column.
-VISIT_TYPE_FILTER_ALIASES = {
-    "home": ["home_visit", "home visit", "home", "home_service", "home service"],
-    "clinic": [
-        "clinic_visit",
-        "clinic visit",
-        "clinic",
-        "in_clinic_visit",
-        "in-clinic visit",
-        "in clinic visit",
-    ],
-}
-
-VISIT_TYPE_FILTER_KEYS = {
-    "home": "home",
-    "home_visit": "home",
-    "home_service": "home",
-    "clinic": "clinic",
-    "clinic_visit": "clinic",
-    "in_clinic_visit": "clinic",
-}
-
-
 def apply_report_visit_type_filter(qs, visit_type):
     """Restrict a report queryset to one visit type ("home" / "clinic")."""
     visit_type = str(visit_type or "").strip().lower()
     if not visit_type or visit_type in {"all", "none", "clear"}:
         return qs
 
-    visit_type_key = visit_type.replace("-", "_").replace(" ", "_")
-    canonical_type = VISIT_TYPE_FILTER_KEYS.get(visit_type_key)
-    if not canonical_type:
+    aliases = visit_type_filter_aliases(visit_type)
+    if not aliases:
         return qs
-    aliases = VISIT_TYPE_FILTER_ALIASES[canonical_type]
 
     condition = Q()
     for alias in aliases:
@@ -1644,6 +1617,7 @@ from django.utils import timezone
 from appointments.models import LabAppointments, AppointmentStatus
 from dashboard.utils import dashboard_login_required
 
+
 @dashboard_login_required
 def lab_report_data(request):
     # filter_type = request.GET.get("filter", "today").strip().lower()
@@ -1655,40 +1629,26 @@ def lab_report_data(request):
     if not current_lab:
         return JsonResponse({"error": "Unauthorized lab profile access."}, status=403)
 
-    # appointments = LabAppointments.objects.filter(accepted_lab=current_lab)
-    appointments = LabAppointments.objects.filter(
-        Q(accepted_lab=current_lab) |
-        Q(
-           lab_bids__lab=current_lab,
-           lab_bids__is_active=True
-        )
-    ).distinct()
-    print("LAB PROFILE ID:", current_lab.id)
-    print("ALL APPOINTMENTS COUNT:", LabAppointments.objects.count())
-    print("ACCEPTED LAB COUNTS:", list(
-       LabAppointments.objects.values("accepted_lab_id").distinct()
-    ))
-    print("LAB PROFILE:", current_lab)
-    print("TOTAL LAB APPOINTMENTS:", LabAppointments.objects.filter(accepted_lab=current_lab).count())
+    appointments = LabAppointments.objects.filter(accepted_lab=current_lab)
 
     # =========================================
     # FILTER LOGIC
     # =========================================
-    # today = timezone.now()
-    # first_record = (
-    #     LabAppointments.objects
-    #     .filter(accepted_lab=current_lab)
-    #     .order_by("created_at")
-    #     .first()
-    # )
+    today = timezone.now()
+    first_record = (
+        LabAppointments.objects
+        .filter(accepted_lab=current_lab)
+        .order_by("created_at")
+        .first()
+    )
 
-    # if first_record:
-    #     range_label = (
-    #       f"{first_record.created_at.strftime('%b %d, %Y')} - "
-    #       f"{today.strftime('%b %d, %Y')}"
-    #     )
-    # else:
-    #     range_label = today.strftime("%b %d, %Y")
+    if first_record:
+        range_label = (
+          f"{first_record.created_at.strftime('%b %d, %Y')} - "
+          f"{today.strftime('%b %d, %Y')}"
+        )
+    else:
+        range_label = today.strftime("%b %d, %Y")
 
     # if filter_type == "today":
     #     appointments = appointments.filter(created_at__date=today.date())
@@ -1723,134 +1683,34 @@ def lab_report_data(request):
     #         appointments = appointments.filter(created_at__year=today.year)
     # else:
     #     appointments = appointments.all()
-    # if filter_type == "all":
-    #    # Registration se ab tak ka saara data
-    #    pass
-
-    # elif filter_type == "today":
-    #    appointments = appointments.filter(
-    #        created_at__date=today.date()
-    #     )
-
-    # elif filter_type == "week":
-    #     appointments = appointments.filter(
-    #        created_at__gte=today - timedelta(days=7)
-    #     )
-
-    # elif filter_type == "month":
-    #     appointments = appointments.filter(
-    #         created_at__gte=today - timedelta(days=30)
-    #     )
-
-    # elif filter_type == "custom":
-    #     start_str = request.GET.get("start", "").strip()
-    #     end_str = request.GET.get("end", "").strip()
-
-    #     if start_str and end_str:
-    #         appointments = appointments.filter(
-    #             created_at__date__range=[start_str, end_str]
-    #     )
-        # =========================================
-    # FILTER LOGIC - LAB REPORTS
-    # =========================================
-
-    today = timezone.localdate()
-
-    start_date = None
-    end_date = today
-
     if filter_type == "all":
-
-        # Show all appointments for this lab
-        pass
+       # Registration se ab tak ka saara data
+       pass
 
     elif filter_type == "today":
-
-        start_date = today
-        end_date = today
+       appointments = appointments.filter(
+           created_at__date=today.date()
+        )
 
     elif filter_type == "week":
-
-        # Last 7 days, including today
-        start_date = today - timedelta(days=6)
-        end_date = today
+        appointments = appointments.filter(
+           created_at__gte=today - timedelta(days=7)
+        )
 
     elif filter_type == "month":
-
-        # Current calendar month
-        start_date = today.replace(day=1)
-        end_date = today
+        appointments = appointments.filter(
+            created_at__gte=today - timedelta(days=30)
+        )
 
     elif filter_type == "custom":
-
         start_str = request.GET.get("start", "").strip()
         end_str = request.GET.get("end", "").strip()
 
-        if not start_str or not end_str:
-            return JsonResponse(
-                {"error": "Please select both start and end dates."},
-                status=400
-            )
-
-        try:
-            start_date = date.fromisoformat(start_str)
-            end_date = date.fromisoformat(end_str)
-
-        except ValueError:
-            return JsonResponse(
-                {"error": "Invalid date format. Use YYYY-MM-DD."},
-                status=400
-            )
-
-        # Handle reversed dates
-        if start_date > end_date:
-            start_date, end_date = end_date, start_date
-
-    else:
-
-        return JsonResponse(
-            {"error": "Invalid filter type."},
-            status=400
+        if start_str and end_str:
+            appointments = appointments.filter(
+                created_at__date__range=[start_str, end_str]
         )
 
-    # Apply date filter
-    if start_date is not None and end_date is not None:
-
-        appointments = appointments.filter(
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date
-        )
-
-    print("FILTER TYPE:", filter_type)
-    print("DATE RANGE:", start_date, "to", end_date)
-    print("FILTERED APPOINTMENTS COUNT:", appointments.count())
-
-    # =========================================
-    # DATE RANGE LABEL
-    # =========================================
-
-    if filter_type == "all":
-
-        first_record = appointments.order_by("created_at").first()
-
-        if first_record:
-            range_label = (
-                f"{timezone.localtime(first_record.created_at).strftime('%b %d, %Y')}"
-                f" - {today.strftime('%b %d, %Y')}"
-            )
-        else:
-            range_label = today.strftime("%b %d, %Y")
-
-    elif start_date == end_date:
-
-        range_label = start_date.strftime("%b %d, %Y")
-
-    else:
-
-        range_label = (
-            f"{start_date.strftime('%b %d, %Y')}"
-            f" - {end_date.strftime('%b %d, %Y')}"
-        )
     # =========================================
     # STATS AGGREGATION
     # =========================================

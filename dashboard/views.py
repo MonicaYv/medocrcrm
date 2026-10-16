@@ -18,7 +18,7 @@ from django.template.loader import render_to_string
 from subscription.models import SubscriptionHistory
 from django.views.decorators.http import require_GET, require_POST
 from .utils import dashboard_login_required, get_common_context, get_theme_colors
-from appointments.utils import filter_appointments_between_dates
+from appointments.utils import filter_appointments_between_dates, parse_filter_date
 from .models import SettingMenu, CouponPerformance,  CalendarEvent, TrendingCoupon
 from django.db.models import Sum, Count, Q, Max, F, ExpressionWrapper, DurationField
 from registration.models import (
@@ -46,6 +46,32 @@ from django.http import HttpResponse
 from settings.models import SellerSubscription, SellerType 
 from registration.models import ContactPerson
 from django.db.models import Count
+
+
+def get_dashboard_appointment_date_range(request, today):
+    date_filter = request.GET.get("date_filter", "today").strip().lower()
+
+    if date_filter == "week":
+        start_date = today - timedelta(days=6)
+        end_date = today
+    elif date_filter == "month":
+        start_date = today - timedelta(days=29)
+        end_date = today
+    elif date_filter == "custom":
+        start_date = parse_filter_date(request.GET.get("start_date"))
+        end_date = parse_filter_date(request.GET.get("end_date"))
+        if not start_date or not end_date:
+            date_filter = "today"
+            start_date = end_date = today
+        elif start_date > end_date:
+            start_date, end_date = end_date, start_date
+    else:
+        date_filter = "today"
+        start_date = end_date = today
+
+    return date_filter, start_date, end_date
+
+
 def build_media_url(path):
     if not path:
         return ""
@@ -503,21 +529,24 @@ def dashboard_home(request):
                 return render(request, "dashboard/not_found.html")
 
             today = timezone.localdate()
+            date_filter, start_date, end_date = (
+                get_dashboard_appointment_date_range(request, today)
+            )
 
             doctor_appointments = DoctorAppointment.objects.filter(
                 doctor=doctor_profile
             )
 
             total_appointments_today = filter_appointments_between_dates(
-                doctor_appointments, "doctor", today, today
+                doctor_appointments, "doctor", start_date, end_date
             ).count()
 
             confirmed_count = filter_appointments_between_dates(
-                doctor_appointments, "doctor", today, today
+                doctor_appointments, "doctor", start_date, end_date
             ).filter(status="Accepted").count()
 
             pending_count = filter_appointments_between_dates(
-                doctor_appointments, "doctor", today, today
+                doctor_appointments, "doctor", start_date, end_date
             ).filter(status="Pending").count()
 
             pending_requests_count = DoctorAppointment.objects.filter(
@@ -609,6 +638,9 @@ def dashboard_home(request):
             context.update({
                 'doctor_profile': doctor_profile,
                 'contact_person': contact_person,
+                'date_filter': date_filter,
+                'start_date': start_date,
+                'end_date': end_date,
                 'total_appointments_today': total_appointments_today,
                 'confirmed_count': confirmed_count,
                 'pending_count': pending_count,

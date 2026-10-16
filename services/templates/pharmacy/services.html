@@ -168,6 +168,11 @@
                                                     </div>
                                                     <span class="material-symbols-outlined cursor-pointer more-btn">more_vert</span>
                                                     <div class="more-dropdown hidden absolute right-4 top-10 bg-white rounded-2xl w-40 z-20 px-4 shadow-12">
+                                                        <button class="edit-pharmacy-medicine w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
+                                                                data-id="{{ med.id }}">
+                                                            <span class="material-symbols-outlined !text-lg">edit</span>
+                                                            Edit
+                                                        </button>
                                                         <button class="delete-pharmacy-medicine w-full text-left py-2.5 text-sm sm:text-base text-ebony font-semibold flex items-center gap-4 cursor-pointer"
                                                                 data-id="{{ med.id }}">
                                                             <img src="/static/images/delete-icon.svg" alt="delete">
@@ -197,6 +202,11 @@
                     </div>
 
                     <!-- Services Section -->
+                    {% if not medicine_catalog_available %}
+                    <div class="rounded-lg border border-premium-yellow bg-premium-light-blue px-4 py-3 text-sm text-dark-gray">
+                        The master medicine catalogue is temporarily unavailable. You can still add medicines manually.
+                    </div>
+                    {% endif %}
                      {% include 'pharmacy/partials/services_section.html' %}
 
 
@@ -210,6 +220,27 @@
 
             <!-- Add Service Popup -->
              {% include 'pharmacy/partials/add_service_popup.html' %}
+
+            <div id="edit-pharmacy-medicine-modal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 items-center justify-center">
+                <form id="edit-pharmacy-medicine-form" class="w-full max-w-lg rounded-xl bg-white p-5 shadow-17 space-y-4">
+                    <div class="flex items-center justify-between border-b border-blue-haze pb-3">
+                        <h2 class="text-lg font-bold text-desaturated-blue">Edit Medicine</h2>
+                        <button type="button" class="close-edit-pharmacy-medicine material-symbols-outlined cursor-pointer">close</button>
+                    </div>
+                    <input type="hidden" name="medicine_id">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <label class="text-sm font-semibold">Category<input required name="category" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal" maxlength="100"></label>
+                        <label class="text-sm font-semibold">Medicine name<input required name="name" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal" maxlength="255"></label>
+                        <label class="text-sm font-semibold">Type<input required name="type" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal" maxlength="50"></label>
+                        <label class="text-sm font-semibold">Quantity<input required name="quantity" inputmode="numeric" pattern="[0-9]+" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal"></label>
+                        <label class="text-sm font-semibold sm:col-span-2">Price<input required name="price" type="number" min="0" step="0.01" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal"></label>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" class="close-edit-pharmacy-medicine rounded-lg border border-strong-red px-4 py-2 text-sm font-semibold text-strong-red">Cancel</button>
+                        <button type="submit" class="save-edit-pharmacy-medicine rounded-lg bg-dodger-blue px-4 py-2 text-sm font-semibold text-white">Save changes</button>
+                    </div>
+                </form>
+            </div>
 {% endblock %}
 
 {% block extra_js %}

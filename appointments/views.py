@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.db.models import Value
 from django.db.models.functions import Concat
@@ -21,6 +22,7 @@ from appointments.utils import (
     apply_appointment_date_filter,
     get_appointment_stats,
     parse_filter_date,
+    visit_types_match,
 )
 from .models import (
     DoctorAppointment,
@@ -815,36 +817,68 @@ def place_bid(request):
         visit_charge = next(
             (
                 charge for charge in DoctorVisitCharge.objects.filter(doctor=doctor).select_related("visit_type")
-                if _normalized_label(charge.visit_type.name)
-                == _normalized_label(appointment.consultation_type)
+                if visit_types_match(
+                    charge.visit_type.name,
+                    appointment.consultation_type,
+                )
             ),
             None,
         )
         if not visit_charge:
+            visit_type_label = (
+                "clinic" if visit_types_match(appointment.consultation_type, "clinic_visit")
+                else "home" if visit_types_match(appointment.consultation_type, "home_visit")
+                else appointment.consultation_type
+            )
             return JsonResponse({
                 "success": False,
-                "message": f"No visit charge configured for {appointment.consultation_type}",
+                "message": (
+                    f"No {visit_type_label} visit charge configured. Add and save "
+                    "this visit type under Services > Visit Charge, then try again."
+                ),
             })
 
         service_charges = service_rate.price
         visit_charges = visit_charge.price
         total_bid_amount = float(service_charges) + float(visit_charges)
 
-        bid = DoctorBidding.objects.create(
-            appointment=appointment,
-            doctor=doctor,
-            service_charges=service_charges,
-            visit_charges=visit_charges,
-            total_bid_amount=total_bid_amount,
-            delivery_time=2,
-            remarks="Auto-generated based on rate cards",
-            bid_status=DoctorBidStatus.PENDING,
-            is_active=True,
-        )
+        with transaction.atomic():
+            appointment_claimed = DoctorAppointment.objects.filter(
+                id=appointment.id,
+                status="Pending",
+            ).update(
+                doctor=doctor,
+                status="Accepted",
+            )
+            if not appointment_claimed:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Appointment was already accepted or closed",
+                })
+
+            DoctorBidding.objects.filter(
+                appointment=appointment,
+                bid_status=DoctorBidStatus.PENDING,
+            ).update(
+                bid_status=DoctorBidStatus.REJECTED,
+                is_active=False,
+            )
+            bid = DoctorBidding.objects.create(
+                appointment=appointment,
+                doctor=doctor,
+                service_charges=service_charges,
+                visit_charges=visit_charges,
+                total_bid_amount=total_bid_amount,
+                delivery_time=2,
+                remarks="Auto-generated based on rate cards",
+                bid_status=DoctorBidStatus.ACCEPTED,
+                is_active=True,
+            )
 
         return JsonResponse({
             "success": True,
-            "message": "Bid placed successfully",
+            "message": "Appointment accepted successfully",
+            "redirect_url": "/history/",
             "match_score": match_score,
             "bid": {
                 "bid_id": bid.id,

@@ -209,6 +209,9 @@ $(document).ready(function () {
         $picker.addClass("hidden").css("display", "");
         $("#filterDropdown").addClass("hidden");
         setDoctorReportDateStatus("");
+        console.log("Doctor Custom Start:", rangeStart);
+        console.log("Doctor Custom End:", rangeEnd);
+
 
         loadDoctorDashboardData("custom");
       },

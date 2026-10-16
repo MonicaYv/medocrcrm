@@ -1,5 +1,8 @@
 import json
 import os
+import logging
+from decimal import Decimal, InvalidOperation
+from pymongo.errors import PyMongoError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
@@ -33,6 +36,9 @@ from appointments.models import (
 from .models import HospitalServiceRateCard, HospitalRoomRateCard
 
 
+logger = logging.getLogger(__name__)
+
+
 def build_media_url(path, default_subdir=""):
     if not path:
         return ""
@@ -64,6 +70,11 @@ def services(request):
 
     if user.user_type == 'pharmacy':
         pharmacy_profile = user.pharmacyprofile
+        medicines = PharmacyMedicine.objects.filter(
+            pharmacy=pharmacy_profile,
+            is_active=True
+        ).order_by("-updated_at", "-created_at")
+
         master_medicine = MONGO_COLLECTIONS["master_medicine"]
         pipeline = [
             {
@@ -84,7 +95,15 @@ def services(request):
             }
         ]
 
-        result = list(master_medicine.aggregate(pipeline))
+        try:
+            result = list(master_medicine.aggregate(pipeline, maxTimeMS=2500))
+            medicine_catalog_available = True
+        except PyMongoError as error:
+            # The medicine catalogue is an enhancement, not a prerequisite for
+            # viewing or maintaining this pharmacy's own services.
+            logger.warning("Master medicine catalogue is unavailable; using manual entry: %s", error)
+            result = []
+            medicine_catalog_available = False
         medicine_map = {}
         categories = []
 
@@ -93,16 +112,23 @@ def services(request):
                 categories.append(row["category"])
                 medicine_map[row["category"]] = sorted(row["medicines"])
 
+        # Keep the add flow usable during a catalogue outage for pharmacies
+        # which have medicines configured already.
+        if not medicine_catalog_available:
+            for medicine in medicines:
+                if medicine.category:
+                    categories.append(medicine.category)
+                    medicine_map.setdefault(medicine.category, []).append(medicine.name)
+            medicine_map = {
+                category: sorted(set(names))
+                for category, names in medicine_map.items()
+            }
+
         context["medicine_categories"] = sorted(categories)
         context["medicine_map"] = json.dumps(medicine_map)
 
         types = MedicineType.objects.filter(is_active=True).values_list("name", flat=True)
         context["medicine_types"] = list(types)
-
-        medicines = PharmacyMedicine.objects.filter(
-            pharmacy=pharmacy_profile,
-            is_active=True
-        ).order_by("-updated_at", "-created_at")
 
         sub = SellerSubscription.objects.filter(
             seller_type="pharmacy",
@@ -113,6 +139,7 @@ def services(request):
 
         context.update({
             "pharmacy_profile": pharmacy_profile,
+            "medicine_catalog_available": medicine_catalog_available,
             "pharmacy_storefront_image_url": build_media_url(
                 pharmacy_profile.storefront_image_path,
                 "pharmacy_docs/store_front"
@@ -635,6 +662,61 @@ def save_pharmacy_medicines(request):
         })
 
     return JsonResponse({"success": True, "medicines": saved})
+
+
+@dashboard_login_required
+@require_POST
+def update_pharmacy_medicine(request, medicine_id):
+    """Update one active medicine belonging to the signed-in pharmacy."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid request data."}, status=400)
+
+    pharmacy = request.user_obj.pharmacyprofile
+    medicine = get_object_or_404(
+        PharmacyMedicine,
+        id=medicine_id,
+        pharmacy=pharmacy,
+        is_active=True,
+    )
+
+    category = str(data.get("category", "")).strip()
+    name = str(data.get("name", "")).strip()
+    med_type = str(data.get("type", "")).strip()
+    quantity = str(data.get("quantity", "")).strip()
+    price = str(data.get("price", "")).strip()
+
+    if not all([category, name, med_type, quantity, price]):
+        return JsonResponse({"success": False, "error": "Please fill in all medicine details."}, status=400)
+    if not quantity.isdigit():
+        return JsonResponse({"success": False, "error": "Quantity should contain numbers only."}, status=400)
+
+    try:
+        price_value = Decimal(price)
+        if not price_value.is_finite() or price_value < 0:
+            raise InvalidOperation
+    except (InvalidOperation, ValueError):
+        return JsonResponse({"success": False, "error": "Please enter a valid price."}, status=400)
+
+    medicine.category = category
+    medicine.name = name
+    medicine.type = med_type
+    medicine.quantity = quantity
+    medicine.price = price_value
+    medicine.save(update_fields=["category", "name", "type", "quantity", "price", "updated_at"])
+
+    return JsonResponse({
+        "success": True,
+        "medicine": {
+            "id": medicine.id,
+            "category": medicine.category,
+            "name": medicine.name,
+            "type": medicine.type,
+            "quantity": medicine.quantity,
+            "price": str(medicine.price),
+        },
+    })
 
 
 @dashboard_login_required
