@@ -1054,7 +1054,10 @@ def update_ngo_profile(request):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
     
     if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+        return JsonResponse({
+            "success": False,
+            "message": next(iter(errors.values()))
+        }, status=400)
         
     with transaction.atomic():
     # Update User model
@@ -1096,7 +1099,10 @@ def update_advertiser_profile(request):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
     if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+        return JsonResponse({
+            "success": False,
+            "message": next(iter(errors.values()))
+        }, status=400)
 
     try:
         with transaction.atomic():
@@ -1153,7 +1159,10 @@ def update_client_profile(request):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
     if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+        return JsonResponse({
+            "success": False,
+            "message": next(iter(errors.values()))
+        }, status=400)
     try:
         with transaction.atomic():
             # Update User model
@@ -1211,7 +1220,10 @@ def update_pharmacy_profile(request):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
     if errors:
-        return JsonResponse({"success": False, "errors": errors}, status=400)
+        return JsonResponse({
+            "success": False,
+            "message": next(iter(errors.values()))
+        }, status=400)
 
     try:
         with transaction.atomic():
@@ -1467,7 +1479,7 @@ def update_hospital_profile(request):
         if errors:
             return JsonResponse({
                 "success": False,
-                "errors": errors
+                "message": next(iter(errors.values()))
             }, status=400)
 
         try:
@@ -1613,8 +1625,7 @@ def update_doctor_profile(request):
         # (previously the toast displayed a raw JSON blob of `errors`).
         return JsonResponse({
             "success": False,
-            "message": " ".join(str(msg) for msg in errors.values()),
-            "errors": errors
+            "message": next(iter(errors.values()))
         }, status=400)
 
     try:
@@ -1911,7 +1922,10 @@ def change_password(request):
             error = "Passwords do not match."
             
         if errors:
-            return JsonResponse({"success": False, "errors": errors, "message": error})
+            return JsonResponse({
+                "success": False,
+                "message": next(iter(errors.values()))
+            }, status=400)
         
         user.password = make_password(new_password)
         user.save()
