@@ -931,6 +931,110 @@ def update_user_document(request):
 
     return JsonResponse({'success': True, 'message': 'Document updated successfully.'})
 
+
+## Update document number (Settings -> Documents tab)
+# Whitelisted doc_type -> model field mapping per user type so only known
+# document number fields can be written from the settings page.
+DOC_NUMBER_FIELD_MAP = {
+    'ngo': {
+        'ngo_registration_doc': 'ngo_registration_number',
+        'pan_doc': 'pan_number',
+        'gst_doc': 'gst_number',
+        'tan_doc': 'tan_number',
+        'section8_doc': 'section8_number',
+        'doc_12a': 'doc_12a_number',
+    },
+    'advertiser': {
+        'incorporation_doc': 'incorporation_number',
+        'gst_doc': 'gst_number',
+        'pan_doc': 'pan_number',
+        'tan_doc': 'tan_number',
+    },
+    'client': {
+        'incorporation_doc': 'incorporation_number',
+        'gst_doc': 'gst_number',
+        'pan_doc': 'pan_number',
+        'tan_doc': 'tan_number',
+    },
+    'pharmacy': {
+        'incorporation_doc': 'pharmacy_registration_number',
+        'gst_doc': 'gst_number',
+        'medical_license_doc': 'medical_license_number',
+        'pan_doc': 'pan_number',
+        'tan_doc': 'tan_number',
+    },
+    'lab': {
+        'lab_certificate': 'lab_registration_number',
+        'identity_proof_aadhar': 'identity_proof_aadhar_number',
+        'identity_proof_pan': 'identity_proof_pan_number',
+        'gov_license': 'gov_license_number',
+    },
+    'hospital': {
+        'hospital_license': 'registration_no',
+        'admin_identity_proof': 'aadhar_card_no',
+        'hospital_pan': 'pan_card_no',
+    },
+    'doctor': {
+        'clinic_registration': 'registration_number',
+        'aadhar_doc': 'aadhar_number',
+        'doctor_pan': 'pan_number',
+    },
+}
+
+
+@require_POST
+@dashboard_login_required
+def update_document_number(request):
+    """Save an edited document number from the Settings -> Documents tab."""
+    user = request.user_obj
+    user_type = user.user_type
+
+    doc_type = request.POST.get("doc_type", "").strip()
+    number = request.POST.get("number", "").strip()
+
+    field_map = DOC_NUMBER_FIELD_MAP.get(user_type, {})
+    model_field = field_map.get(doc_type)
+    if not model_field:
+        return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
+
+    if not number:
+        return JsonResponse({'success': False, 'error': 'Document number cannot be empty.'}, status=400)
+
+    profile_model = {
+        'ngo': NGOProfile,
+        'advertiser': AdvertiserProfile,
+        'client': ClientProfile,
+        'pharmacy': PharmacyProfile,
+        'lab': LabProfile,
+        'hospital': HospitalProfile,
+        'doctor': DoctorProfile,
+    }.get(user_type)
+
+    profile = profile_model.objects.filter(user=user).first() if profile_model else None
+    if not profile:
+        return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
+
+    max_length = profile_model._meta.get_field(model_field).max_length
+    if max_length and len(number) > max_length:
+        return JsonResponse(
+            {'success': False, 'error': f'Document number cannot exceed {max_length} characters.'},
+            status=400,
+        )
+
+    setattr(profile, model_field, number)
+
+    if user_type == "doctor":
+        # Keep consistent with document re-upload: a changed number needs re-verification
+        profile.verification_status = "pending"
+        profile.is_verified = False
+        profile.verified_at = None
+        profile.rejection_reason = None
+
+    profile.save()
+
+    return JsonResponse({'success': True, 'message': 'Document number updated successfully.', 'number': number})
+
+
 @require_POST
 @dashboard_login_required
 def update_ngo_profile(request):
