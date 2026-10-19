@@ -228,17 +228,121 @@ def save_hospital_doctor(request):
         }
     })
 
+# @dashboard_login_required
+# def get_hospital_doctors(request):
+#     if request.user_obj.user_type != "hospital":
+#         return JsonResponse({"success": False, "error": "Unauthorized"}, status=403)
+    
+#     doctors = DoctorsProfile.objects.filter(
+#         user = request.user_obj,
+#         created_by_hospital=True,
+#         is_active=True
+#     ).annotate(
+#         _attendance_details_raw=Cast("attendance_details", TextField())
+#     ).values(
+#         "id",
+#         "first_name",
+#         "last_name",
+#         "phone_number",
+#         "specialties",
+#         "profile_pic_path",
+#         "created_at",
+#         "_attendance_details_raw",
+#     ).order_by("-created_at")
+
+#     data = []
+#     today = timezone.localdate().isoformat()
+#     for d in doctors:
+#         attendance_raw = d["_attendance_details_raw"]
+#         if isinstance(attendance_raw, str):
+#             try:
+#                 attendance_raw = json.loads(attendance_raw)
+#             except json.JSONDecodeError:
+#                 attendance_raw = None
+#         if isinstance(attendance_raw, dict):
+#             records = attendance_raw.get("attendance") or []
+#         elif isinstance(attendance_raw, list):
+#             records = attendance_raw
+#         else:
+#             records = []
+#         attendance = []
+#         for record in records:
+#             if not isinstance(record, dict):
+#                 continue
+#             record_date = str(record.get("date") or "")
+#             status = str(record.get("status") or "").strip().title()
+#             if record_date and status in {"Present", "Absent"}:
+#                 attendance.append({"date": record_date, "status": status})
+#         today_record = next((item for item in attendance if item["date"] == today), None)
+#         latest_record = max(attendance, key=lambda item: item["date"], default=None)
+#         data.append({
+#             "id": d["id"],
+#             "name": f"Dr. {d['first_name']} {d['last_name'] or ''}".strip(),
+#             "phone": f"+91 {d['phone_number']}" if d["phone_number"] else "",
+#             "specialty": d["specialties"] or "",
+#             "rating": "0.0",
+#             "image": _doctor_image_url(d["profile_pic_path"]),
+#             "created_at": d["created_at"].isoformat() if d["created_at"] else "",
+#             # Status filters should still find a doctor whose latest marked
+#             # attendance is older than today; today takes precedence when it
+#             # exists.
+#             "attendance_status": (
+#                 today_record or latest_record or {}
+#             ).get("status", ""),
+#         })
+
+#     return JsonResponse({
+#         "success": True,
+#         "doctors": data
+#     })  
+
+
 @dashboard_login_required
 def get_hospital_doctors(request):
     if request.user_obj.user_type != "hospital":
-        return JsonResponse({"success": False, "error": "Unauthorized"}, status=403)
-    
+        return JsonResponse(
+            {"success": False, "error": "Unauthorized"},
+            status=403
+        )
+
+    # Get custom date range from AJAX request
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
     doctors = DoctorsProfile.objects.filter(
-        user = request.user_obj,
+        user=request.user_obj,
         created_by_hospital=True,
         is_active=True
-    ).annotate(
-        _attendance_details_raw=Cast("attendance_details", TextField())
+    )
+
+    # Apply date filter only when both dates are provided
+    if start_date and end_date:
+        try:
+            start = date.fromisoformat(start_date)
+            end = date.fromisoformat(end_date)
+
+            # Ensure start date is not after end date
+            if start > end:
+                start, end = end, start
+
+            doctors = doctors.filter(
+                created_at__date__range=(start, end)
+            )
+
+        except (ValueError, TypeError):
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Invalid date format. Use YYYY-MM-DD."
+                },
+                status=400
+            )
+
+    doctors = doctors.annotate(
+        _attendance_details_raw=Cast(
+            "attendance_details",
+            TextField()
+        )
     ).values(
         "id",
         "first_name",
@@ -252,29 +356,49 @@ def get_hospital_doctors(request):
 
     data = []
     today = timezone.localdate().isoformat()
+
     for d in doctors:
         attendance_raw = d["_attendance_details_raw"]
+
         if isinstance(attendance_raw, str):
             try:
                 attendance_raw = json.loads(attendance_raw)
             except json.JSONDecodeError:
                 attendance_raw = None
+
         if isinstance(attendance_raw, dict):
             records = attendance_raw.get("attendance") or []
         elif isinstance(attendance_raw, list):
             records = attendance_raw
         else:
             records = []
+
         attendance = []
+
         for record in records:
             if not isinstance(record, dict):
                 continue
+
             record_date = str(record.get("date") or "")
             status = str(record.get("status") or "").strip().title()
+
             if record_date and status in {"Present", "Absent"}:
-                attendance.append({"date": record_date, "status": status})
-        today_record = next((item for item in attendance if item["date"] == today), None)
-        latest_record = max(attendance, key=lambda item: item["date"], default=None)
+                attendance.append({
+                    "date": record_date,
+                    "status": status
+                })
+
+        today_record = next(
+            (item for item in attendance if item["date"] == today),
+            None
+        )
+
+        latest_record = max(
+            attendance,
+            key=lambda item: item["date"],
+            default=None
+        )
+
         data.append({
             "id": d["id"],
             "name": f"Dr. {d['first_name']} {d['last_name'] or ''}".strip(),
@@ -282,10 +406,10 @@ def get_hospital_doctors(request):
             "specialty": d["specialties"] or "",
             "rating": "0.0",
             "image": _doctor_image_url(d["profile_pic_path"]),
-            "created_at": d["created_at"].isoformat() if d["created_at"] else "",
-            # Status filters should still find a doctor whose latest marked
-            # attendance is older than today; today takes precedence when it
-            # exists.
+            "created_at": (
+                d["created_at"].isoformat()
+                if d["created_at"] else ""
+            ),
             "attendance_status": (
                 today_record or latest_record or {}
             ).get("status", ""),
@@ -294,7 +418,7 @@ def get_hospital_doctors(request):
     return JsonResponse({
         "success": True,
         "doctors": data
-    })  
+    })
 
 @dashboard_login_required
 def doctor_details(request, doctor_id):

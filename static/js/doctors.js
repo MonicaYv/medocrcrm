@@ -56,39 +56,75 @@ $(document).ready(function () {
     });
   });
 
+  
   // Initialize the jQuery UI Datepicker inline
+  let customStartDate = null;
+  let customEndDate = null;
+
   const $doctorDatepicker = $doctorFilter.find(".datepicker-inline");
+
   if ($doctorDatepicker.hasClass("hasDatepicker")) {
     $doctorDatepicker.datepicker("destroy");
   }
+
   $doctorDatepicker.datepicker({
     dateFormat: "yy-mm-dd",
     onSelect: function (dateText) {
-      activeCustomDate = $.datepicker.parseDate("yy-mm-dd", dateText);
+      if (customStartDate === null || customEndDate !== null) {
+        customStartDate = dateText;
+        customEndDate = null;
+
+        $(this).datepicker("option", "minDate", customStartDate);
+        console.log("Start date:", customStartDate);
+        toastr.info("Now select the end date.");
+        return;
+      }
+
+      customEndDate = dateText;
+
+      let startDate = customStartDate;
+      let endDate = customEndDate;
+
+      if (startDate > endDate) {
+        [startDate, endDate] = [endDate, startDate];
+      }
+
+      console.log("Selected range:", startDate, "to", endDate);
+      loadHospitalDoctors(startDate, endDate);
+
       activeDateFilter = "";
+      activeCustomDate = {
+        start: $.datepicker.parseDate("yy-mm-dd", startDate),
+        end: $.datepicker.parseDate("yy-mm-dd", endDate)
+      };
+
       applyDoctorFilters();
 
-      // Mark Custom option as selected
-      $("#dateSubmenu .trigger-custom .material-symbols-outlined")
-        .first()
-        .removeClass("text-light-gray")
-        .addClass("!text-dodger-blue");
-
-      // Close everything after date selection
+      $(this).datepicker("option", "minDate", null);
+      $("#calendarContainer").addClass("hidden").css("display", "");
       closeDoctorFilters();
-    },
+
+      customStartDate = null;
+      customEndDate = null;
+    }
   });
 
   // 3. Open Calendar when clicking "Custom"
   $(".trigger-custom").on("click", function (e) {
     e.stopPropagation();
 
-    // Position the calendar relative to the Custom menu item
-    const topPos = $(this).position().top;
+    customStartDate = null;
+    customEndDate = null;
+    activeCustomDate = null;
 
-    // Show the calendar
-    $("#calendarContainer").removeClass("hidden").css({ top: topPos, display: "" });
+    $doctorDatepicker.datepicker("option", "minDate", null);
+
+    const topPos = $(this).position().top;
+    $("#calendarContainer")
+      .removeClass("hidden")
+      .css({ top: topPos, display: "" });
   });
+
 
   // 4. Status submenu
   $(".trigger-status").on("click", function (e) {
@@ -99,6 +135,7 @@ $(document).ready(function () {
       .removeClass("hidden")
       .css({ top: $(this).position().top, display: "" });
   });
+
 
   // 5. Handle option selection in Date submenu (Week/Month only, not Custom)
   $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
@@ -231,35 +268,48 @@ $(document).ready(function () {
     goToPage(page);
   });
 
-  function loadHospitalDoctors() {
-    $.ajax({
-      url: "/staff/hospital/doctors/list/",
-      type: "GET",
-      dataType: "json",
+  
+function loadHospitalDoctors(startDate = "", endDate = "") {
+  console.log("Loading doctors with date range:", {
+    start_date: startDate,
+    end_date: endDate
+  });
 
-      success: function (res) {
-        console.log("Doctors list response:", res);
+  $.ajax({
+    url: "/staff/hospital/doctors/list/",
+    type: "GET",
+    dataType: "json",
+    data: {
+      start_date: startDate,
+      end_date: endDate
+    },
 
-        if (res.success) {
-          allDoctors = Array.isArray(res.doctors) ? res.doctors : [];
-          filteredDoctors = allDoctors.slice();
+    success: function (res) {
+      console.log("Doctors list response:", res);
 
-          console.log("Doctors loaded from database:", allDoctors);
+      if (res.success) {
+        allDoctors = Array.isArray(res.doctors) ? res.doctors : [];
+        filteredDoctors = allDoctors.slice();
 
-          currentPage = 1;
-          applyDoctorFilters();
-        } else {
-          console.error("Failed to load doctors:", res.error);
-          toastr.error(res.error || "Failed to load doctors");
-        }
-      },
+        currentPage = 1;
+        applyDoctorFilters();
+      } else {
+        console.error("Failed to load doctors:", res.error);
+        toastr.error(res.error || "Failed to load doctors");
+      }
+    },
 
-      error: function (xhr) {
-        console.error("Doctor list API error:", xhr.status, xhr.responseText);
-        toastr.error("Unable to load doctors");
-      },
-    });
-  }
+    error: function (xhr) {
+      console.error(
+        "Doctor list API error:",
+        xhr.status,
+        xhr.responseText
+      );
+      toastr.error("Unable to load doctors");
+    }
+  });
+}
+
 
   // Initial render
   window.refreshHospitalDoctorsList = loadHospitalDoctors;
@@ -279,12 +329,17 @@ $(document).ready(function () {
         doctor.name.toLowerCase().includes(query) ||
         (doctor.specialty || "").toLowerCase().includes(query);
       const createdAt = doctor.created_at ? new Date(doctor.created_at) : null;
+      
       const matchesDate = activeCustomDate
         ? createdAt &&
-          createdAt.getFullYear() === activeCustomDate.getFullYear() &&
-          createdAt.getMonth() === activeCustomDate.getMonth() &&
-          createdAt.getDate() === activeCustomDate.getDate()
+          createdAt >= activeCustomDate.start &&
+          createdAt < new Date(
+            activeCustomDate.end.getFullYear(),
+            activeCustomDate.end.getMonth(),
+            activeCustomDate.end.getDate() + 1
+          )
         : !cutoff || !createdAt || createdAt >= cutoff;
+
       const matchesStatus =
         !activeStatusFilter ||
         (doctor.attendance_status || "").toLowerCase() === activeStatusFilter;
