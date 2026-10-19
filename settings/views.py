@@ -1480,101 +1480,216 @@ def update_lab_profile(request):
     # except Exception as e:
     #     return JsonResponse({"success": False, "message": str(e)}, status=500)
 
+# @require_POST
+# @dashboard_login_required
+# def update_hospital_profile(request):
+
+#     if request.method == "POST":
+
+#         print(request.POST)
+
+#         post_data = request.POST
+#         errors = {}
+
+#         user = request.user_obj
+
+#         validate_email_phone(post_data, errors)
+
+#         required_fields = ["hospital_name", "city", "state", "pincode"]
+
+#         for field in required_fields:
+#             if not post_data.get(field):
+#                 errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+#         if errors:
+#             return JsonResponse({
+#                 "success": False,
+#                 "message": next(iter(errors.values()))
+#             }, status=400)
+
+#         try:
+
+#             with transaction.atomic():
+
+#                 user.email = post_data.get('email')
+#                 # user.phone_country_code = post_data.get("countryCodes")
+#                 # user.phone_number = post_data.get("contact_number")
+#                 user.phone_country_code = post_data.get("phone_country_code")
+#                 user.phone_number = post_data.get("phone")
+#                 user.save()
+
+#                 hospital_profile = get_object_or_404(
+#                     HospitalProfile,
+#                     user=user
+#                 )
+
+#                 hospital_profile.hospital_name = post_data.get("hospital_name")
+#                 hospital_profile.address = post_data.get("address")
+#                 # hospital_profile.city = post_data.get("city")
+#                 # hospital_profile.state = post_data.get("state")
+#                 # hospital_profile.city_name = post_data.get("city")
+#                 # hospital_profile.state_id = None
+#                 hospital_profile.owner_name = post_data.get("owner_name")
+#                 user.phone_country_code = post_data.get("phone_country_code")
+#                 user.phone_number = post_data.get("phone")
+#                 # hospital_profile.country = post_data.get("country")
+#                 # hospital_profile.pincode = post_data.get("pincode")
+#                 hospital_profile.owner_name = post_data.get("owner_name")
+
+#                 state_name = post_data.get("state", "").strip()
+#                 # city_name = post_data.get("city", "").strip()
+#                 city_name = post_data.get("city", "").split(",")[0].strip()
+
+#                 state = State.objects.filter(
+#                    name__iexact=state_name
+#                 ).first()
+
+#                 if state:
+#                     hospital_profile.state = state
+
+#                     city = City.objects.filter(
+#                         name__iexact=city_name,
+#                         state=state
+#                     ).first()
+
+#                     if city:
+#                         hospital_profile.city = city
+
+#                 hospital_profile.country = post_data.get("country")
+#                 hospital_profile.pincode = post_data.get("pincode")
+
+#                 hospital_profile.save()
+
+#                 print("DATA SAVED SUCCESSFULLY")
+
+#                 return JsonResponse({
+#                     "success": True,
+#                     "message": "Hospital profile updated successfully"
+#                 })
+
+#         except Exception as e:
+
+#             print("SAVE ERROR:", e)
+
+#             return JsonResponse({
+#                 "success": False,
+#                 "message": str(e)
+#             }, status=500)
+
 @require_POST
 @dashboard_login_required
 def update_hospital_profile(request):
 
-    if request.method == "POST":
+    post_data = request.POST
+    errors = {}
 
-        print(request.POST)
+    user = request.user_obj
 
-        post_data = request.POST
-        errors = {}
+    # Existing email and phone validation
+    validate_email_phone(post_data, errors)
 
-        user = request.user_obj
+    # Required fields validation
+    required_fields = [
+        "hospital_name",
+        "address",
+        "city",
+        "state",
+        "country",
+        "pincode",
+        "owner_name",
+        "contact_number",
+    ]
 
-        validate_email_phone(post_data, errors)
+    for field in required_fields:
+        value = (post_data.get(field) or "").strip()
 
-        required_fields = ["hospital_name", "city", "state", "pincode"]
+        if not value:
+            errors[field] = (
+                f"{field.replace('_', ' ').capitalize()} is required."
+            )
 
-        for field in required_fields:
-            if not post_data.get(field):
-                errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+    # Existing OTP logic: do not save if OTP is missing or invalid
+    otp1 = (post_data.get("otp1") or "").strip()
 
-        if errors:
-            return JsonResponse({
-                "success": False,
-                "message": next(iter(errors.values()))
-            }, status=400)
+    if not otp1:
+        errors["otp1"] = "OTP is required."
+    elif otp1 != "123456":
+        errors["otp1"] = "Not verified."
 
-        try:
+    # Stop before any database changes if validation fails
+    if errors:
+        return JsonResponse({
+            "success": False,
+            "message": next(iter(errors.values())),
+            "errors": errors,
+        }, status=400)
 
-            with transaction.atomic():
+    try:
+        with transaction.atomic():
 
-                user.email = post_data.get('email')
-                # user.phone_country_code = post_data.get("countryCodes")
-                # user.phone_number = post_data.get("contact_number")
-                user.phone_country_code = post_data.get("phone_country_code")
-                user.phone_number = post_data.get("phone")
-                user.save()
+            hospital_profile = get_object_or_404(
+                HospitalProfile,
+                user=user
+            )
 
-                hospital_profile = get_object_or_404(
-                    HospitalProfile,
-                    user=user
-                )
+            # Update user details
+            user.email = post_data.get("email")
+            user.phone_country_code = post_data.get(
+                "phone_country_code"
+            )
+            user.phone_number = post_data.get("phone")
 
-                hospital_profile.hospital_name = post_data.get("hospital_name")
-                hospital_profile.address = post_data.get("address")
-                # hospital_profile.city = post_data.get("city")
-                # hospital_profile.state = post_data.get("state")
-                # hospital_profile.city_name = post_data.get("city")
-                # hospital_profile.state_id = None
-                hospital_profile.owner_name = post_data.get("owner_name")
-                user.phone_country_code = post_data.get("phone_country_code")
-                user.phone_number = post_data.get("phone")
-                # hospital_profile.country = post_data.get("country")
-                # hospital_profile.pincode = post_data.get("pincode")
-                hospital_profile.owner_name = post_data.get("owner_name")
+            # Update hospital details
+            hospital_profile.hospital_name = post_data.get(
+                "hospital_name"
+            )
+            hospital_profile.address = post_data.get("address")
+            hospital_profile.owner_name = post_data.get("owner_name")
+            hospital_profile.country = post_data.get("country")
+            hospital_profile.pincode = post_data.get("pincode")
 
-                state_name = post_data.get("state", "").strip()
-                # city_name = post_data.get("city", "").strip()
-                city_name = post_data.get("city", "").split(",")[0].strip()
+            # Update state and city
+            state_name = (post_data.get("state") or "").strip()
+            city_name = (
+                (post_data.get("city") or "")
+                .split(",")[0]
+                .strip()
+            )
 
-                state = State.objects.filter(
-                   name__iexact=state_name
+            state = State.objects.filter(
+                name__iexact=state_name
+            ).first()
+
+            if state:
+                hospital_profile.state = state
+
+                city = City.objects.filter(
+                    name__iexact=city_name,
+                    state=state
                 ).first()
 
-                if state:
-                    hospital_profile.state = state
+                if city:
+                    hospital_profile.city = city
 
-                    city = City.objects.filter(
-                        name__iexact=city_name,
-                        state=state
-                    ).first()
+            # Save only after validation succeeds
+            user.save()
+            hospital_profile.save()
 
-                    if city:
-                        hospital_profile.city = city
-
-                hospital_profile.country = post_data.get("country")
-                hospital_profile.pincode = post_data.get("pincode")
-
-                hospital_profile.save()
-
-                print("DATA SAVED SUCCESSFULLY")
-
-                return JsonResponse({
-                    "success": True,
-                    "message": "Hospital profile updated successfully"
-                })
-
-        except Exception as e:
-
-            print("SAVE ERROR:", e)
+            print("DATA SAVED SUCCESSFULLY")
 
             return JsonResponse({
-                "success": False,
-                "message": str(e)
-            }, status=500)
+                "success": True,
+                "message": "Hospital profile updated successfully"
+            })
+
+    except Exception as e:
+        print("SAVE ERROR:", e)
+
+        return JsonResponse({
+            "success": False,
+            "message": "Unable to update hospital profile."
+        }, status=500)
+
 # def update_hospital_profile(request):
 #     if request.method == "POST":
 #         print(request.POST)
