@@ -3,6 +3,7 @@ import re
 import json
 import uuid
 import traceback
+import requests
 from decimal import Decimal
 
 from django.core.cache import cache
@@ -789,6 +790,69 @@ def update_notification_field(request):
 
 #     return JsonResponse({'success': True, 'message': 'Document updated successfully.'})
 
+def _extract_number_from_ocr(ocr_result, field_name):
+    """Return a confidently recognizable ID number from OCR response data."""
+    text_values = []
+
+    def collect(value, key=""):
+        if isinstance(value, dict):
+            for child_key, child_value in value.items():
+                collect(child_value, str(child_key).lower())
+        elif isinstance(value, (list, tuple)):
+            for child in value:
+                collect(child, key)
+        elif isinstance(value, str):
+            text_values.append(value)
+
+    collect(ocr_result)
+    full_text = "\n".join(text_values).upper()
+    normalized_field = field_name.lower()
+
+    patterns = []
+    if "pan" in normalized_field:
+        patterns = [r"\b[A-Z]{5}\d{4}[A-Z]\b"]
+    elif "gst" in normalized_field:
+        patterns = [r"\b\d{2}[A-Z]{5}\d{4}[A-Z][A-Z\d]Z[A-Z\d]\b"]
+    elif "tan" in normalized_field:
+        patterns = [r"\b[A-Z]{4}\d{5}[A-Z]\b"]
+    elif "aadhar" in normalized_field or "aadhaar" in normalized_field:
+        patterns = [r"\b\d{4}[ -]?\d{4}[ -]?\d{4}\b"]
+
+    for pattern in patterns:
+        match = re.search(pattern, full_text)
+        if match:
+            return re.sub(r"[ -]", "", match.group(0))
+
+    # Registration and license IDs vary by issuing authority. Only accept a
+    # value found next to an explicit identifying label in the OCR text.
+    label = r"(?:REGISTRATION|LICENSE|LICENCE|CERTIFICATE)"
+    match = re.search(
+        rf"{label}(?:\s+(?:NO|NUMBER|#))?\s*[:#-]?\s*([A-Z0-9][A-Z0-9/-]{{3,29}})",
+        full_text,
+    )
+    return match.group(1).strip("/-") if match else ""
+
+
+def _read_document_number_with_ocr(file_path, model_field):
+    """Ask the configured OCR service to read a newly uploaded document."""
+    ocr_url = os.getenv("OCR_SERVICE_URL")
+    if not ocr_url:
+        return ""
+    try:
+        with default_storage.open(file_path, "rb") as document:
+            response = requests.post(
+                ocr_url,
+                files={"file": (os.path.basename(file_path), document)},
+                timeout=25,
+            )
+        response.raise_for_status()
+        return _extract_number_from_ocr(response.json(), model_field)
+    except (OSError, requests.RequestException, ValueError, TypeError):
+        # Document upload should still succeed if OCR is temporarily unavailable.
+        traceback.print_exc()
+        return ""
+
+
 @dashboard_login_required
 @require_POST
 def update_user_document(request):
@@ -916,6 +980,16 @@ def update_user_document(request):
     setattr(profile, doc_fields[0], file_path)
     setattr(profile, doc_fields[1], True)
 
+    number_field = DOC_NUMBER_FIELD_MAP.get(user_type, {}).get(doc_type)
+    extracted_number = (
+        _read_document_number_with_ocr(file_path, number_field)
+        if number_field else ""
+    )
+    if extracted_number:
+        max_length = profile_model._meta.get_field(number_field).max_length
+        if not max_length or len(extracted_number) <= max_length:
+            setattr(profile, number_field, extracted_number)
+
     if user_type == "doctor":
         profile.verification_status = "pending"
         profile.is_verified = False
@@ -929,7 +1003,11 @@ def update_user_document(request):
     print("[DEBUG SUCCESS] profile.save() executed smoothly without an exception crash.")
     print("--- [DEBUG TAN END] ---\n")
 
-    return JsonResponse({'success': True, 'message': 'Document updated successfully.'})
+    return JsonResponse({
+        'success': True,
+        'message': 'Document updated successfully.',
+        'number': extracted_number,
+    })
 
 
 ## Update document number (Settings -> Documents tab)
@@ -980,59 +1058,6 @@ DOC_NUMBER_FIELD_MAP = {
         'doctor_pan': 'pan_number',
     },
 }
-
-
-@require_POST
-@dashboard_login_required
-def update_document_number(request):
-    """Save an edited document number from the Settings -> Documents tab."""
-    user = request.user_obj
-    user_type = user.user_type
-
-    doc_type = request.POST.get("doc_type", "").strip()
-    number = request.POST.get("number", "").strip()
-
-    field_map = DOC_NUMBER_FIELD_MAP.get(user_type, {})
-    model_field = field_map.get(doc_type)
-    if not model_field:
-        return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
-
-    if not number:
-        return JsonResponse({'success': False, 'error': 'Document number cannot be empty.'}, status=400)
-
-    profile_model = {
-        'ngo': NGOProfile,
-        'advertiser': AdvertiserProfile,
-        'client': ClientProfile,
-        'pharmacy': PharmacyProfile,
-        'lab': LabProfile,
-        'hospital': HospitalProfile,
-        'doctor': DoctorProfile,
-    }.get(user_type)
-
-    profile = profile_model.objects.filter(user=user).first() if profile_model else None
-    if not profile:
-        return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
-
-    max_length = profile_model._meta.get_field(model_field).max_length
-    if max_length and len(number) > max_length:
-        return JsonResponse(
-            {'success': False, 'error': f'Document number cannot exceed {max_length} characters.'},
-            status=400,
-        )
-
-    setattr(profile, model_field, number)
-
-    if user_type == "doctor":
-        # Keep consistent with document re-upload: a changed number needs re-verification
-        profile.verification_status = "pending"
-        profile.is_verified = False
-        profile.verified_at = None
-        profile.rejection_reason = None
-
-    profile.save()
-
-    return JsonResponse({'success': True, 'message': 'Document number updated successfully.', 'number': number})
 
 
 @require_POST
