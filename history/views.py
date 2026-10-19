@@ -495,11 +495,10 @@ def ajax_hospital_history(request):
         )
 
     elif status == "cancelled":
-
         qs = qs.filter(
-            accepted_hospital=hospital,
-            status="Cancelled"
-        )
+            bids__hospital=hospital,
+            bids__bid_status=HospitalBidStatus.CANCELLED
+        ).distinct()
 
     elif status == "all":
 
@@ -545,13 +544,26 @@ def ajax_hospital_history(request):
 
         # Apply Appointment Status filter
         # Apply Appointment Status filter
-    if appointment_status:
-        status_value = appointment_status.replace("_", " ").strip()
+    
+        if appointment_status:
+            if status == "cancelled":
+                if appointment_status == "all":
+                    pass
+                elif appointment_status in {"accepted", "rejected"}:
+                    qs = qs.filter(
+                        bids__hospital=hospital,
+                        bids__bid_status=appointment_status,
+                    ).distinct()
+                else:
+                    qs = qs.none()
+            else:
+                status_value = appointment_status.replace("_", " ").strip()
 
-        if status_value == "no show":
-            status_value = "No_Show"
+                if status_value == "no show":
+                    status_value = "No_Show"
 
-        qs = qs.filter(status__iexact=status_value)
+                qs = qs.filter(status__iexact=status_value)
+
 
     # Apply Visit Type filter
     if visit_type:

@@ -587,23 +587,53 @@ $("#calendarContainer .datepicker-inline").datepicker(
   });
 
   // 5. Handle option selection in Date submenu (Week/Month only, not Custom)
-  $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
+  // $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
+  //   e.stopPropagation();
+
+  //   // Remove active state from all options in date submenu
+  //   $("#dateSubmenu .material-symbols-outlined")
+  //     .removeClass("!text-dodger-blue")
+  //     .addClass("text-light-gray");
+
+  //   // Add active state to clicked option
+  //   $(this)
+  //     .find(".material-symbols-outlined")
+  //     .removeClass("text-light-gray")
+  //     .addClass("!text-dodger-blue");
+
+  //   // Close all dropdowns
+  //   $(".filterDropdown, .submenu").addClass("hidden");
+  // });
+  
+$("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
     e.stopPropagation();
 
-    // Remove active state from all options in date submenu
+    const selectedText = $(this).text().trim().toLowerCase();
+
+    if (selectedText.includes("week")) {
+        hospitalHistoryFilters.date_filter = "week";
+    } else if (selectedText.includes("month")) {
+        hospitalHistoryFilters.date_filter = "month";
+    } else {
+        return;
+    }
+
+    hospitalHistoryFilters.from_date = "";
+    hospitalHistoryFilters.to_date = "";
+
     $("#dateSubmenu .material-symbols-outlined")
-      .removeClass("!text-dodger-blue")
-      .addClass("text-light-gray");
+        .removeClass("!text-dodger-blue")
+        .addClass("text-light-gray");
 
-    // Add active state to clicked option
-    $(this)
-      .find(".material-symbols-outlined")
-      .removeClass("text-light-gray")
-      .addClass("!text-dodger-blue");
+    $(this).find(".material-symbols-outlined")
+        .removeClass("text-light-gray")
+        .addClass("!text-dodger-blue");
 
-    // Close all dropdowns
     $(".filterDropdown, .submenu").addClass("hidden");
-  });
+
+    loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+});
+
 
   /* ------------------------------------------------------------------
    * DATE FILTER (data-date-filter driven)
@@ -753,27 +783,54 @@ $("#calendarContainer .datepicker-inline").datepicker(
 
   // 6. Handle option selection in the Visit submenu
   // Bed status is handled by the delegated filter handler below.
+  // $("#visitSubmenu > div").on("click", function (e) {
+  //   e.stopPropagation();
+
+  //   // Get the parent submenu
+  //   const $submenu = $(this).closest(".submenu");
+
+  //   // Remove active state from all options in this submenu
+  //   $submenu
+  //     .find(".material-symbols-outlined")
+  //     .removeClass("!text-dodger-blue")
+  //     .addClass("text-light-gray");
+
+  //   // Add active state to clicked option
+  //   $(this)
+  //     .find(".material-symbols-outlined")
+  //     .removeClass("text-light-gray")
+  //     .addClass("!text-dodger-blue");
+
+  //   // Close all dropdowns
+  //   $(".filterDropdown, .submenu").addClass("hidden");
+  // });
   $("#visitSubmenu > div").on("click", function (e) {
+    e.preventDefault();
     e.stopPropagation();
 
-    // Get the parent submenu
-    const $submenu = $(this).closest(".submenu");
+    const $option = $(this);
+    const selectedText = $option.text().trim();
 
-    // Remove active state from all options in this submenu
-    $submenu
-      .find(".material-symbols-outlined")
-      .removeClass("!text-dodger-blue")
-      .addClass("text-light-gray");
+    // Highlight selected option
+    $("#visitSubmenu .material-symbols-outlined")
+        .removeClass("!text-dodger-blue")
+        .addClass("text-light-gray");
 
-    // Add active state to clicked option
-    $(this)
-      .find(".material-symbols-outlined")
-      .removeClass("text-light-gray")
-      .addClass("!text-dodger-blue");
+    $option.find(".material-symbols-outlined")
+        .removeClass("text-light-gray")
+        .addClass("!text-dodger-blue");
 
-    // Close all dropdowns
+    // Save selected visit type
+    hospitalHistoryFilters.visit_type =
+        selectedText.toLowerCase().replace(/\s+/g, "-");
+
+    console.log("Selected Visit Type:", hospitalHistoryFilters.visit_type);
+
+    // Send AJAX request
+    loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+
     $(".filterDropdown, .submenu").addClass("hidden");
-  });
+});
 
   // 7. Global Close
   $(document).on("click", function (e) {
@@ -1304,26 +1361,54 @@ function rebuildStatusSubmenu() {
     .on("click.historyStatusFilter", selectHistoryStatusFilter);
 }
 
-// Status filter selection
+// // Status filter selection
+// function selectHistoryStatusFilter(e) {
+//   e.stopPropagation();
+
+//   // Highlight the selected option
+//   $("#statusSubmenu .material-symbols-outlined")
+//     .removeClass("!text-dodger-blue")
+//     .addClass("text-light-gray");
+//   $(this)
+//     .find(".material-symbols-outlined")
+//     .removeClass("text-light-gray")
+//     .addClass("!text-dodger-blue");
+
+//   const selected = String($(this).attr("data-status-filter-value") || "").trim();
+//   historyStatusFilter = selected === "All" ? "" : selected;
+//   applyHistorySearchAndFilter();
+
+//   // Close the dropdowns
+//   $(".filterDropdown, .submenu").addClass("hidden");
+// }
+
 function selectHistoryStatusFilter(e) {
   e.stopPropagation();
 
-  // Highlight the selected option
   $("#statusSubmenu .material-symbols-outlined")
     .removeClass("!text-dodger-blue")
     .addClass("text-light-gray");
+
   $(this)
     .find(".material-symbols-outlined")
     .removeClass("text-light-gray")
     .addClass("!text-dodger-blue");
 
-  const selected = String($(this).attr("data-status-filter-value") || "").trim();
-  historyStatusFilter = selected === "All" ? "" : selected;
-  applyHistorySearchAndFilter();
+  const selected = String(
+    $(this).attr("data-status-filter-value") || ""
+  ).trim();
 
-  // Close the dropdowns
+  historyStatusFilter = selected === "All" ? "" : selected;
+
+  // Send selected status to backend through AJAX
+  hospitalHistoryFilters.appointment_status =
+    historyStatusFilter.toLowerCase();
+
+  loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+
   $(".filterDropdown, .submenu").addClass("hidden");
 }
+
 
 // Search input handler - filters the currently visible tab cards (incl. beds)
 function onHistorySearchInput() {
