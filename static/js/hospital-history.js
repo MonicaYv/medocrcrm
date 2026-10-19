@@ -71,41 +71,41 @@
 }
 
 
-  function loadHospitalHistory(status = "accepted", page = 1) {
-  const isDoctorPage = $("#doctor-cards-container").length > 0;
+//   function loadHospitalHistory(status = "accepted", page = 1) {
+//   const isDoctorPage = $("#doctor-cards-container").length > 0;
 
-  const container = isDoctorPage
-    ? "#doctor-cards-container"
-    : "#hospital-cards-container";
+//   const container = isDoctorPage
+//     ? "#doctor-cards-container"
+//     : "#hospital-cards-container";
 
-  const ajaxUrl = isDoctorPage
-    ? "/history/doctor/history/ajax/"
-    : "/history/hospital/history/ajax/";
+//   const ajaxUrl = isDoctorPage
+//     ? "/history/doctor/history/ajax/"
+//     : "/history/hospital/history/ajax/";
 
-  currentStatus = status;
+//   currentStatus = status;
 
-  $(container).html(
-    `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
-  );
+//   $(container).html(
+//     `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
+//   );
 
-  $.ajax({
-    url: ajaxUrl,
-    type: "GET",
-    data: Object.assign(
-      { status: status, page: page },
-      getHistoryDateFilterParams()
-    ),
-    success: function (res) {
-      $(container).html(res.html);
-      applyHistorySearchAndFilter();
-    },
-    error: function () {
-      $(container).html(
-        `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
-      );
-    }
-  });
-}
+//   $.ajax({
+//     url: ajaxUrl,
+//     type: "GET",
+//     data: Object.assign(
+//       { status: status, page: page },
+//       getHistoryDateFilterParams()
+//     ),
+//     success: function (res) {
+//       $(container).html(res.html);
+//       applyHistorySearchAndFilter();
+//     },
+//     error: function () {
+//       $(container).html(
+//         `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
+//       );
+//     }
+//   });
+// }
 $(document).ready(function () {
 
 
@@ -392,7 +392,7 @@ $(document).on("click", ".view-attachment", function () {
   } else {
     $(".tab-content").addClass("hidden");
     $(".accepted").removeClass("hidden");
-    loadHospitalHistory(targetTab, 1);
+    loadHospitalHistory(targetTab, 1, hospitalHistoryFilters);
   }
 
   $(".tab-btn-hospital")
