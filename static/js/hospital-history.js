@@ -1,5 +1,12 @@
-  let currentStatus = "accepted";
 
+  let currentStatus = "accepted";
+  let hospitalHistoryFilters = {
+    date_filter: "",
+    from_date: "",
+    to_date: "",
+    appointment_status: "",
+    visit_type: ""
+};
 // Date filter state, mirroring appointment.js so both pages send the same
 // GET contract (date_filter / start_date / end_date) to the backend.
   let historyDateFilter = "";
@@ -7,14 +14,62 @@
   let historyStartDate = "";
   let historyEndDate = "";
 
-  function getHistoryDateFilterParams() {
-    const params = {};
-    if (historyDateFilter) params.date_filter = historyDateFilter;
-    if (historySelectedDate) params.date = historySelectedDate;
-    if (historyStartDate) params.start_date = historyStartDate;
-    if (historyEndDate) params.end_date = historyEndDate;
-    return params;
-  }
+  // function getHistoryDateFilterParams() {
+  //   const params = {};
+  //   if (historyDateFilter) params.date_filter = historyDateFilter;
+  //   if (historySelectedDate) params.date = historySelectedDate;
+  //   if (historyStartDate) params.start_date = historyStartDate;
+  //   if (historyEndDate) params.end_date = historyEndDate;
+  //   return params;
+  // }
+
+  function loadHospitalHistory(status = "accepted", page = 1, filters = {}) {
+  const isDoctorPage = $("#doctor-cards-container").length > 0;
+
+  const container = isDoctorPage
+    ? "#doctor-cards-container"
+    : "#hospital-cards-container";
+
+  const ajaxUrl = isDoctorPage
+    ? "/history/doctor/history/ajax/"
+    : "/history/hospital/history/ajax/";
+
+  currentStatus = status;
+
+  $(container).html(
+    `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
+  );
+
+  $.ajax({
+    url: ajaxUrl,
+    type: "GET",
+    data: {
+      status: status,
+      page: page,
+      date_filter: filters.date_filter || "",
+      from_date: filters.from_date || "",
+      to_date: filters.to_date || "",
+      appointment_status: filters.appointment_status || "",
+      visit_type: filters.visit_type || ""
+    },
+    success: function (res) {
+      $(container).html(res.html);
+      console.log("History filters sent:", {
+        status,
+        page,
+        ...filters
+      });
+    },
+    error: function (xhr) {
+      console.error("History AJAX error:", xhr.status, xhr.responseText);
+
+      $(container).html(
+        `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
+      );
+    }
+  });
+}
+
 
   function loadHospitalHistory(status = "accepted", page = 1) {
   const isDoctorPage = $("#doctor-cards-container").length > 0;
@@ -383,6 +438,126 @@ $(document).on("click", ".view-attachment", function () {
     },
   });
 
+  let hospitalHistoryStartDate = null;
+  let hospitalHistoryEndDate = null;
+
+const $hospitalHistoryDatepicker = $(
+    "#calendarContainer .datepicker-inline"
+);
+
+$hospitalHistoryDatepicker.datepicker({
+    dateFormat: "yy-mm-dd",
+
+    beforeShowDay: function (date) {
+        const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+        const classes = [];
+
+        if (
+            hospitalHistoryStartDate &&
+            dateText >= hospitalHistoryStartDate &&
+            dateText <= (hospitalHistoryEndDate || hospitalHistoryStartDate)
+        ) {
+            classes.push("hospital-date-range");
+        }
+
+        if (dateText === hospitalHistoryStartDate) {
+            classes.push("hospital-date-range-start");
+        }
+
+        if (hospitalHistoryEndDate && dateText === hospitalHistoryEndDate) {
+            classes.push("hospital-date-range-end");
+        }
+
+        return [true, classes.join(" "), ""];
+    },
+
+    onSelect: function (dateText) {
+      console.log("DATE SELECTED:", dateText);
+
+      if (!hospitalHistoryStartDate || hospitalHistoryEndDate) {
+          hospitalHistoryStartDate = dateText;
+          hospitalHistoryEndDate = null;
+
+          $hospitalHistoryDatepicker.datepicker("refresh");
+
+          console.log("START DATE:", hospitalHistoryStartDate);
+          console.log("Ab End Date select karo.");
+
+          return;
+      }
+
+      hospitalHistoryEndDate = dateText;
+
+      if (hospitalHistoryEndDate < hospitalHistoryStartDate) {
+          const temp = hospitalHistoryStartDate;
+          hospitalHistoryStartDate = hospitalHistoryEndDate;
+          hospitalHistoryEndDate = temp;
+      }
+
+      hospitalHistoryFilters.date_filter = "custom";
+      hospitalHistoryFilters.from_date = hospitalHistoryStartDate;
+      hospitalHistoryFilters.to_date = hospitalHistoryEndDate;
+
+      console.log("FINAL DATE RANGE:", {
+          from_date: hospitalHistoryFilters.from_date,
+          to_date: hospitalHistoryFilters.to_date
+      });
+
+      $(".filterDropdown, .submenu").addClass("hidden");
+      $("#calendarContainer").addClass("hidden");
+
+      loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+  }
+});
+
+  // Register Custom Date Range Handler
+$("#calendarContainer .datepicker-inline").datepicker(
+    "option",
+    "onSelect",
+    function (dateText) {
+        console.log("DATE SELECTED:", dateText);
+
+        const selectedDate = $.datepicker.parseDate(
+            "mm/dd/yy",
+            dateText
+        );
+
+        const formattedDate = $.datepicker.formatDate(
+            "yy-mm-dd",
+            selectedDate
+        );
+
+        // First click: Start Date
+        if (!hospitalHistoryStartDate || hospitalHistoryEndDate) {
+            hospitalHistoryStartDate = formattedDate;
+            hospitalHistoryEndDate = null;
+
+            console.log("START DATE:", hospitalHistoryStartDate);
+            console.log("Ab End Date select karo.");
+            return;
+        }
+
+        // Second click: End Date
+        hospitalHistoryEndDate = formattedDate;
+
+        if (hospitalHistoryEndDate < hospitalHistoryStartDate) {
+            const temp = hospitalHistoryStartDate;
+            hospitalHistoryStartDate = hospitalHistoryEndDate;
+            hospitalHistoryEndDate = temp;
+        }
+
+        hospitalHistoryFilters.date_filter = "custom";
+        hospitalHistoryFilters.from_date = hospitalHistoryStartDate;
+        hospitalHistoryFilters.to_date = hospitalHistoryEndDate;
+
+        console.log("FINAL DATE RANGE:", hospitalHistoryFilters);
+
+        $(".filterDropdown, .submenu").addClass("hidden");
+        $("#calendarContainer").addClass("hidden");
+
+        loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+    }
+); 
   // 3. Open Calendar when clicking "Custom"
   $(".trigger-custom").on("click", function (e) {
     e.stopPropagation();

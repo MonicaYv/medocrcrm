@@ -21,6 +21,9 @@ from services.models import (
     LabBidding,
     LabBidStatus,
 )
+from datetime import datetime, timedelta
+from django.utils import timezone
+
 # Create your views here.
 
 @dashboard_login_required
@@ -440,6 +443,22 @@ def ajax_hospital_history(request):
     user = request.user_obj
     status = request.GET.get("status", "accepted").strip().lower()
     page_number = request.GET.get("page", 1)
+        
+    date_filter = request.GET.get("date_filter", "").strip().lower()
+    from_date = request.GET.get("from_date", "").strip()
+    to_date = request.GET.get("to_date", "").strip()
+    appointment_status = request.GET.get("appointment_status", "").strip().lower()
+    visit_type = request.GET.get("visit_type", "").strip().lower()
+
+    print("HOSPITAL HISTORY FILTERS:", {
+        "status": status,
+        "date_filter": date_filter,
+        "from_date": from_date,
+        "to_date": to_date,
+        "appointment_status": appointment_status,
+        "visit_type": visit_type,
+    })
+
 
     if status == "canceled":
         status = "cancelled"
@@ -456,8 +475,6 @@ def ajax_hospital_history(request):
 
         qs = qs.filter(
             bids__hospital=hospital,
-            bids__bid_status=HospitalBidStatus.PENDING,
-            bids__is_active=True,
             accepted_bid__isnull=True,
             accepted_hospital__isnull=True,
             status="Pending"
@@ -480,9 +497,9 @@ def ajax_hospital_history(request):
     elif status == "cancelled":
 
         qs = qs.filter(
-            bids__hospital=hospital,
-            bids__bid_status=HospitalBidStatus.CANCELLED,
-        ).distinct()
+            accepted_hospital=hospital,
+            status="Cancelled"
+        )
 
     elif status == "all":
 
@@ -494,23 +511,66 @@ def ajax_hospital_history(request):
     else:
         qs = qs.none()
 
+    # Apply date filters
+    today = timezone.localdate()
+
+    if date_filter == "week":
+        start_date = today - timedelta(days=6)
+
+        qs = qs.filter(
+            created_at__date__gte=start_date,
+            created_at__date__lte=today
+        )
+
+    elif date_filter == "month":
+        start_date = today.replace(day=1)
+
+        qs = qs.filter(
+            created_at__date__gte=start_date,
+            created_at__date__lte=today
+        )
+
+    elif date_filter == "custom" and from_date and to_date:
+        try:
+            start_date = datetime.strptime(from_date, "%Y-%m-%d").date()
+            end_date = datetime.strptime(to_date, "%Y-%m-%d").date()
+
+            qs = qs.filter(
+                created_at__date__gte=start_date,
+                created_at__date__lte=end_date
+            )
+
+        except ValueError:
+            print("Invalid custom date range:", from_date, to_date)
+
+        # Apply Appointment Status filter
+        # Apply Appointment Status filter
+    if appointment_status:
+        status_value = appointment_status.replace("_", " ").strip()
+
+        if status_value == "no show":
+            status_value = "No_Show"
+
+        qs = qs.filter(status__iexact=status_value)
+
+    # Apply Visit Type filter
+    if visit_type:
+        visit_type_value = visit_type.replace("_", "-").strip()
+
+        qs = qs.filter(
+            preferred_mode__iexact=visit_type_value
+        )
+    print("FILTERED APPOINTMENTS COUNT:", qs.count())
     qs = qs.order_by("-created_at")
 
     paginator = Paginator(qs, 5)
     page_obj = paginator.get_page(page_number)
     for appointment in page_obj:
-        bid_qs = HospitalBidding.objects.filter(
+        appointment.current_bid = HospitalBidding.objects.filter(
             appointment=appointment,
             hospital=hospital,
-        )
-        if status == "cancelled":
-            appointment.current_bid = bid_qs.filter(
-                bid_status=HospitalBidStatus.CANCELLED,
-            ).first()
-        else:
-            appointment.current_bid = bid_qs.filter(
-                is_active=True,
-            ).first()
+            is_active=True
+        ).first()
     html = render_to_string(
         "history/hospital/hospital_history_cards.html",
         {
@@ -528,6 +588,7 @@ def ajax_hospital_history(request):
         "has_next": page_obj.has_next(),
         "has_prev": page_obj.has_previous(),
     })
+
 
 @require_POST
 @dashboard_login_required
