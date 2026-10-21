@@ -331,31 +331,217 @@ $(document).ready(function () {
     });
 
 
+    
+  // // INDIVIDUAL CHART CALENDARS
+  // const individualChartDates = {};
+
+  // $(".calendar-icon")
+  //   .not(".filterDropdown .report-filter .calendar-icon")
+  //   .off("click.chartCalendar")
+  //   .on("click.chartCalendar", function (e) {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+
+  //     const $chart = $(this).closest("[id$='Section']");
+  //     const $pickerContainer = $chart.find(".datepicker-container").first();
+  //     const $inline = $pickerContainer.find(".datepicker-inline").first();
+
+  //     if (!$pickerContainer.length || !$inline.length) {
+  //       console.warn("Calendar container not found for:", $chart.attr("id"));
+  //       return;
+  //     }
+
+  //     $(".datepicker-container").addClass("hidden");
+  //     $dropdown.addClass("hidden");
+  //     $pickerContainer.removeClass("hidden");
+
+  //     const chartId = $chart.attr("id");
+
+  //     if ($inline.hasClass("hasDatepicker")) {
+  //       $inline.datepicker("destroy");
+  //     }
+
+  //     $inline.empty().datepicker({
+  //       dateFormat: "yy-mm-dd",
+  //       changeMonth: true,
+  //       changeYear: true,
+  //       onSelect: function (dateText) {
+  //         const state = individualChartDates[chartId] || {
+  //           start: "",
+  //           end: ""
+  //         };
+
+  //         if (!state.start || state.end) {
+  //           state.start = dateText;
+  //           state.end = "";
+  //           individualChartDates[chartId] = state;
+
+  //           $inline.datepicker("option", "minDate", dateText);
+  //           console.log("Individual graph start date:", chartId, dateText);
+  //           return;
+  //         }
+
+  //         state.end = dateText;
+
+  //         if (state.start > state.end) {
+  //           [state.start, state.end] = [state.end, state.start];
+  //         }
+
+  //         individualChartDates[chartId] = state;
+
+  //         console.log("Individual graph date range:", {
+  //           chart: chartId,
+  //           start_date: state.start,
+  //           end_date: state.end
+  //         });
+
+  //         $pickerContainer.addClass("hidden");
+  //         $inline.datepicker("option", "minDate", null);
+
+  //         $.ajax({
+  //           url: "/reports/hospital-report-data/",
+  //           type: "GET",
+  //           dataType: "json",
+  //           data: {
+  //             filter: "custom",
+  //             visit_type: $("#visitTypeFilter").val() || "",
+  //             start_date: state.start,
+  //             end_date: state.end
+  //           },
+  //           success: function (response) {
+  //             console.log("Individual graph response:", chartId, response);
+
+  //             // Update only the selected graph.
+  //             if (chartId === "departmentRevenueSection" &&
+  //                 response.most_requested_test) {
+  //               barChart.data.labels = response.most_requested_test.labels;
+  //               barChart.data.datasets[0].data = response.most_requested_test.data;
+  //               barChart.update();
+  //             } else if (chartId === "packageSection" &&
+  //                        response.revenue_by_test) {
+  //               pieChart.data.labels = response.revenue_by_test.labels;
+  //               pieChart.data.datasets[0].data = response.revenue_by_test.data;
+  //               pieChart.update();
+  //             } else if (chartId === "loadAnalyticsSection" &&
+  //                        response.bid_trend) {
+  //               lineChart.data.labels = response.bid_trend.labels;
+  //               lineChart.data.datasets[0].data = response.bid_trend.cbc;
+  //               lineChart.update();
+  //             } else if (chartId === "patientJourneySection" &&
+  //                        response.patient_journey) {
+  //               patientJourneyChart.data.labels = response.patient_journey.labels;
+  //               patientJourneyChart.data.datasets[0].data = response.patient_journey.data;
+  //               patientJourneyChart.update();
+  //             }
+  //           },
+  //           error: function (xhr) {
+  //             console.error(
+  //               "Individual graph date filter failed:",
+  //               xhr.status,
+  //               xhr.responseText
+  //             );
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
   // INDIVIDUAL CHART CALENDARS
-  $(".calendar-icon")
-    .not(".filterDropdown .report-filter .calendar-icon")
-    .off("click.chartCalendar")
-    .on("click.chartCalendar", function (e) {
+const individualChartDates = {};
 
-        e.preventDefault();
-        e.stopPropagation();
+$(".calendar-icon")
+  .not(".filterDropdown .report-filter .calendar-icon")
+  .off("click.chartCalendar")
+  .on("click.chartCalendar", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
 
-        const $chart = $(this).closest("[id$='Section']");
+    const $chart = $(this).closest("[id$='Section']");
+    const $pickerContainer = $chart.find(".datepicker-container").first();
+    const $inline = $pickerContainer.find(".datepicker-inline").first();
 
-        const $chartCalendar = $chart
-            .find(".datepicker-container")
-            .first();
+    if (!$pickerContainer.length || !$inline.length) {
+      console.warn(
+        "Calendar container not found for:",
+        $chart.attr("id")
+      );
+      return;
+    }
 
-        if (!$chartCalendar.length) {
-            return;
+    $(".datepicker-container").addClass("hidden");
+    $dropdown.addClass("hidden");
+    $pickerContainer.removeClass("hidden");
+
+    const chartId = $chart.attr("id");
+
+    if ($inline.hasClass("hasDatepicker")) {
+      $inline.datepicker("destroy");
+    }
+
+    $inline.empty().datepicker({
+      dateFormat: "yy-mm-dd",
+      changeMonth: true,
+      changeYear: true,
+
+      onSelect: function (dateText) {
+        const state = individualChartDates[chartId] || {
+          start: "",
+          end: ""
+        };
+
+        // Select start date
+        if (!state.start || state.end) {
+          state.start = dateText;
+          state.end = "";
+
+          individualChartDates[chartId] = state;
+
+          $inline.datepicker("option", "minDate", dateText);
+
+          console.log(
+            "Individual graph start date:",
+            chartId,
+            dateText
+          );
+
+          return;
         }
 
-        $(".datepicker-container").addClass("hidden");
+        // Select end date
+        state.end = dateText;
 
-        $dropdown.addClass("hidden");
+        // Keep dates in chronological order
+        if (state.start > state.end) {
+          [state.start, state.end] = [
+            state.end,
+            state.start
+          ];
+        }
 
-        $chartCalendar.removeClass("hidden");
+        individualChartDates[chartId] = state;
+
+        console.log("Individual graph date range:", {
+          chart: chartId,
+          start_date: state.start,
+          end_date: state.end
+        });
+
+        $pickerContainer.addClass("hidden");
+        $inline.datepicker("option", "minDate", null);
+
+        // Reload the complete reports page with selected dates
+        const params = new URLSearchParams({
+          filter: "custom",
+          visit_type: $("#visitTypeFilter").val() || "",
+          start_date: state.start,
+          end_date: state.end,
+          chart: chartId
+        });
+
+        window.location.href = "/reports/?" + params.toString();
+      }
     });
+  });
+
     $(".report-filter").on("click", function (e) {
         e.preventDefault(); e.stopPropagation();
         const type = $(this).data("type");

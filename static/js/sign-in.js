@@ -50,84 +50,97 @@ function goToSignIn() {
 }
 
 //login screen - continue btn
-let redirectUrl = "";
-continueBtn.addEventListener("click", function () {
+
+async function handleContinue() {
 
     if (continueBtn.disabled) return;
 
     const form = document.getElementById("loginForm");
     const formData = new FormData(form);
 
-    fetch(form.dataset.checkUrl, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-        },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+        const response = await fetch(form.dataset.checkUrl, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector(
+                    "[name=csrfmiddlewaretoken]"
+                ).value,
+            },
+            body: formData
+        });
+
+        const data = await response.json();
 
         if (!data.success) {
             toastr.error(data.message);
             return;
         }
-
-        // toastr.success(data.message);
 
         otpPhoneDisplay.textContent = maskNumber(phoneInput.value);
-
         goToOtp();
 
-    })
-    .catch(() => {
+    } catch (error) {
         toastr.error("Something went wrong.");
-    });
+    }
+}
 
+// Continue button click
+continueBtn.addEventListener("click", handleContinue);
+
+// Press Enter in the phone input
+phoneInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+
+        if (!continueBtn.disabled) {
+            handleContinue();
+        }
+    }
 });
+
 
 //otp screen - done btn
-document.getElementById("doneBtn").addEventListener("click", function () {
+// document.getElementById("doneBtn").addEventListener("click", function () {
 
-    const otp = otpBoxes.map(box => box.value).join("");
+//     const otp = otpBoxes.map(box => box.value).join("");
 
-    if (otp.length !== 6) {
-        toastr.error("Please enter 6 digit OTP.");
-        return;
-    }
+//     if (otp.length !== 6) {
+//         toastr.error("Please enter 6 digit OTP.");
+//         return;
+//     }
 
-    const form = document.getElementById("loginForm");
-    const formData = new FormData(form);
+//     const form = document.getElementById("loginForm");
+//     const formData = new FormData(form);
 
-    formData.append("otp", otp);
+//     formData.append("otp", otp);
 
-    fetch(form.dataset.loginUrl, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-        },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
+//     fetch(form.dataset.loginUrl, {
+//         method: "POST",
+//         headers: {
+//             "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+//         },
+//         body: formData
+//     })
+//     .then(res => res.json())
+//     .then(data => {
 
-        if (!data.success) {
-            toastr.error(data.message);
-            return;
-        }
+//         if (!data.success) {
+//             toastr.error(data.message);
+//             return;
+//         }
 
-        toastr.success(data.message);
+//         toastr.success(data.message);
 
-        setTimeout(() => {
-            window.location.href = data.redirect;
-        }, 1000);
+//         setTimeout(() => {
+//             window.location.href = data.redirect;
+//         }, 1000);
 
-    })
-    .catch(() => {
-        toastr.error("Something went wrong.");
-    });
+//     })
+//     .catch(() => {
+//         toastr.error("Something went wrong.");
+//     });
 
-});
+// });
 
 
 
@@ -164,6 +177,73 @@ otpBoxes.forEach((box, i) => {
     if (otpBoxes[digits.length]) otpBoxes[digits.length].focus();
   });
 });
+
+
+async function handleDone() {
+
+    const otp = otpBoxes.map(box => box.value).join("");
+
+    if (otp.length !== 6) {
+        toastr.error("Please enter 6 digit OTP.");
+
+        // Focus the first empty OTP box
+        const firstEmptyBox = otpBoxes.find(box => !box.value);
+        if (firstEmptyBox) {
+            firstEmptyBox.focus();
+        }
+
+        return;
+    }
+
+    const form = document.getElementById("loginForm");
+    const formData = new FormData(form);
+
+    formData.set("otp", otp);
+
+    try {
+        const response = await fetch(form.dataset.loginUrl, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector(
+                    "[name=csrfmiddlewaretoken]"
+                ).value,
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            toastr.error(data.message);
+            return;
+        }
+
+        toastr.success(data.message);
+
+        setTimeout(() => {
+            window.location.href = data.redirect;
+        }, 1000);
+
+    } catch (error) {
+        toastr.error("Something went wrong.");
+    }
+}
+
+
+// Click Done
+document.getElementById("doneBtn").addEventListener("click", handleDone);
+
+
+// Press Enter in any OTP box
+otpBoxes.forEach(box => {
+    box.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleDone();
+        }
+    });
+});
+
 
 // resend timer
 let timerInterval;

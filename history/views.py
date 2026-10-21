@@ -301,6 +301,15 @@ def ajax_lab_history(request):
 
     status = request.GET.get("status", "accepted").strip().lower()
     page_number = request.GET.get("page", 1)
+    date_filter = request.GET.get("date_filter", "").strip().lower()
+    start_date = (
+        request.GET.get("start_date", "")
+        or request.GET.get("from_date", "")
+    ).strip()
+    end_date = (
+        request.GET.get("end_date", "")
+        or request.GET.get("to_date", "")
+    ).strip()
 
     if status == "canceled":
         status = "cancelled"
@@ -308,6 +317,8 @@ def ajax_lab_history(request):
     lab = LabProfile.objects.filter(
         user=user
     ).first()
+    if not lab:
+        return JsonResponse({"error": "Lab profile not found."}, status=403)
     print("LAB =", lab.id)
 
     bids = LabBidding.objects.filter(lab=lab)
@@ -361,9 +372,15 @@ def ajax_lab_history(request):
     elif status == "cancelled":
 
         qs = qs.filter(
-            lab_bids__lab=lab,
-            lab_bids__bid_status=LabBidStatus.CANCELLED,
+            Q(accepted_lab=lab, status=AppointmentStatus.CANCELLED)
+            | Q(lab_bids__lab=lab, lab_bids__bid_status=LabBidStatus.CANCELLED),
         ).distinct()
+
+    elif status == "missed":
+        qs = qs.filter(
+            accepted_lab=lab,
+            status__iexact="No_Show",
+        )
 
     elif status == "all":
 
@@ -374,6 +391,16 @@ def ajax_lab_history(request):
 
     else:
         qs = qs.none()
+
+    if date_filter:
+        qs = apply_appointment_date_filter(
+            qs,
+            "lab",
+            date_filter,
+            "",
+            start_date=start_date,
+            end_date=end_date,
+        )
 
     qs = qs.order_by("-created_at")
     print("STATUS =", status)
@@ -401,6 +428,15 @@ def ajax_lab_history(request):
                 appointment=appointment,
                 lab=lab,
                 bid_status=LabBidStatus.CANCELLED,
+            ).first()
+            if not appointment.current_bid:
+                appointment.current_bid = appointment.accepted_bid
+
+        elif status == "missed":
+            appointment.current_bid = LabBidding.objects.filter(
+                appointment=appointment,
+                lab=lab,
+                bid_status=LabBidStatus.ACCEPTED,
             ).first()
 
         elif status == "pending":

@@ -6,7 +6,17 @@ $(document).ready(function () {
   // --------- 1. INTERACTIVE FILTER DROPDOWN TOGGLES ----------
   $("#filterToggle").on("click", function (e) {
     e.stopPropagation();
-    $("#filterDropdown").toggleClass("hidden");
+    const $dropdown = $("#filterDropdown");
+    const opening = $dropdown.hasClass("hidden");
+
+    if (opening) {
+      // Submenu navigation hides the main menu. Restore it whenever the
+      // dropdown opens so the filter remains usable after applying a choice.
+      $("#dateMenu, #visitMenu, #doctorReportDatepicker").addClass("hidden");
+      $("#mainMenu").removeClass("hidden");
+    }
+
+    $dropdown.toggleClass("hidden");
   });
 
   // Handle dropdown internal submenus navigation
@@ -320,6 +330,9 @@ function loadDoctorDashboardData(filterType) {
         },
         success: function (response) {
             console.log("DOCTOR LIVE PIPELINE DISPATCH MATRIX RECIEVED:", response);
+            if (response.range_label) {
+                $("#doctorReportRangeLabel").text(`Data shown: ${response.range_label}`);
+            }
 
             // 1. Hydrate Overview Stats Cards selectors text values
             $("#totalPatients").text(response.stats.total_patients);

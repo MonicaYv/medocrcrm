@@ -53,7 +53,7 @@
             <div
               class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-50">
               <div class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }}  rounded organization-daterange" data-range="custom">
-                Custom date<span class="material-symbols-outlined calendar-icon">calendar_today</span>
+                <span id="organizationCustomRangeLabel">Custom date</span><span class="material-symbols-outlined calendar-icon">calendar_today</span>
               </div>
               <div class="p-2 pl-4 hover:bg-{{ hover_bg }}  rounded cursor-pointer organization-daterange" data-range="1 week">
                 1 Week
@@ -67,6 +67,12 @@
             </div>
             <div
               class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
+              <div class="flex items-center justify-between gap-4 border-b border-gray-200 py-2">
+                <p class="organization-date-status rounded bg-blue-50 px-2 py-1 text-xs font-medium text-dark-gray" aria-live="polite">Select start date</p>
+                <button type="button" class="organization-datepicker-back flex shrink-0 items-center gap-1 text-xs text-dark-gray hover:text-blue-600">
+                  <span class="material-symbols-outlined text-sm">arrow_back</span>Back
+                </button>
+              </div>
               <div class="datepicker-inline"></div>
             </div>
           </div>

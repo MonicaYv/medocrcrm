@@ -1461,6 +1461,32 @@ def doctor_report_data(request):
 
     visit_type = request.GET.get("visit_type", "").strip().lower()
     search = (request.GET.get("search", "") or request.GET.get("q", "")).strip()
+    start_date = request.GET.get("start_date", "").strip()
+    end_date = request.GET.get("end_date", "").strip()
+
+    # Keep the visible range label aligned with the same presets and custom
+    # dates used by apply_report_date_filter below.
+    today = timezone.localdate()
+    if filter_type == "today":
+        range_start = range_end = today
+    elif filter_type == "week":
+        range_start, range_end = today - timedelta(days=6), today
+    elif filter_type == "month":
+        range_start, range_end = today.replace(day=1), today
+    elif filter_type == "custom":
+        range_start = parse_filter_date(start_date) if start_date else None
+        range_end = parse_filter_date(end_date) if end_date else None
+        range_start = range_start or range_end
+        range_end = range_end or range_start
+        if range_start and range_end and range_start > range_end:
+            range_start, range_end = range_end, range_start
+    else:
+        range_start = range_end = None
+
+    range_label = (
+        f"{range_start:%b %d, %Y} – {range_end:%b %d, %Y}"
+        if range_start and range_end else "All dates"
+    )
 
     user = request.user_obj
     doctor_profile = getattr(user, "doctor_profile", None)
@@ -1480,8 +1506,8 @@ def doctor_report_data(request):
     appointments = apply_report_date_filter(
         appointments,
         filter_type,
-        start_date=request.GET.get("start_date", "").strip(),
-        end_date=request.GET.get("end_date", "").strip(),
+        start_date=start_date,
+        end_date=end_date,
     )
 
     # Visit type filter (home / clinic); "all"/empty leaves the list untouched.
@@ -1596,6 +1622,7 @@ def doctor_report_data(request):
         heatmap_data = [{"id": "IN-MH", "value": 0}]
 
     data = {
+        "range_label": range_label,
         "stats": {
             "total_patients": total_patients,
             "birds_received": birds_received,
@@ -1620,8 +1647,7 @@ from dashboard.utils import dashboard_login_required
 
 @dashboard_login_required
 def lab_report_data(request):
-    # filter_type = request.GET.get("filter", "today").strip().lower()
-    filter_type = request.GET.get("filter", "all").strip().lower()
+    filter_type = request.GET.get("filter", "today").strip().lower()
     user = request.user_obj
     current_lab = getattr(user, "lab_profile", None)
 
@@ -1632,9 +1658,9 @@ def lab_report_data(request):
     appointments = LabAppointments.objects.filter(accepted_lab=current_lab)
 
     # =========================================
-    # FILTER LOGIC
+    # FILTER LOGIC AND RANGE LABEL
     # =========================================
-    today = timezone.now()
+    today = timezone.localdate()
     first_record = (
         LabAppointments.objects
         .filter(accepted_lab=current_lab)
@@ -1642,74 +1668,44 @@ def lab_report_data(request):
         .first()
     )
 
-    if first_record:
-        range_label = (
-          f"{first_record.created_at.strftime('%b %d, %Y')} - "
-          f"{today.strftime('%b %d, %Y')}"
-        )
-    else:
-        range_label = today.strftime("%b %d, %Y")
-
-    # if filter_type == "today":
-    #     appointments = appointments.filter(created_at__date=today.date())
-
-    # elif filter_type == "week":
-    #     # Rolling last 7 days inclusive
-    #     appointments = appointments.filter(created_at__gte=today - timedelta(days=7))
-
-    # elif filter_type == "month":
-    #     # Rolling 30 days to avoid empty states at the beginning of a calendar month
-    #     appointments = appointments.filter(created_at__gte=today - timedelta(days=30))
-
-    # elif filter_type == "custom":
-    #     start_str = request.GET.get("start", "").strip()
-    #     end_str = request.GET.get("end", "").strip()
-        
-    #     parsed_start, parsed_end = None, None
-    #     # Safely evaluate date formats passed down from frontend inputs
-    #     for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"):
-    #         try:
-    #             if not parsed_start and start_str:
-    #                 parsed_start = timezone.datetime.strptime(start_str, fmt).date()
-    #             if not parsed_end and end_str:
-    #                 parsed_end = timezone.datetime.strptime(end_str, fmt).date()
-    #         except ValueError:
-    #             continue
-
-    #     if parsed_start and parsed_end:
-    #         appointments = appointments.filter(created_at__date__range=[parsed_start, parsed_end])
-    #     else:
-    #         # Fallback configuration parameter if inputs are completely missing/malformed
-    #         appointments = appointments.filter(created_at__year=today.year)
-    # else:
-    #     appointments = appointments.all()
-    if filter_type == "all":
-       # Registration se ab tak ka saara data
-       pass
-
-    elif filter_type == "today":
-       appointments = appointments.filter(
-           created_at__date=today.date()
-        )
-
+    if filter_type == "today":
+        range_start = range_end = today
     elif filter_type == "week":
-        appointments = appointments.filter(
-           created_at__gte=today - timedelta(days=7)
-        )
-
+        range_start, range_end = today - timedelta(days=6), today
     elif filter_type == "month":
-        appointments = appointments.filter(
-            created_at__gte=today - timedelta(days=30)
-        )
-
+        range_start, range_end = today - timedelta(days=29), today
     elif filter_type == "custom":
-        start_str = request.GET.get("start", "").strip()
-        end_str = request.GET.get("end", "").strip()
+        start_value = request.GET.get("start", "").strip() or request.GET.get("start_date", "").strip()
+        end_value = request.GET.get("end", "").strip() or request.GET.get("end_date", "").strip()
+        range_start = parse_filter_date(start_value) if start_value else None
+        range_end = parse_filter_date(end_value) if end_value else None
+        if not range_start or not range_end:
+            return JsonResponse({"error": "Select both a valid start date and end date."}, status=400)
+        if range_start > range_end:
+            range_start, range_end = range_end, range_start
+    elif filter_type in {"all", "none", "clear"}:
+        filter_type = "all"
+        if first_record:
+            created_at = first_record.created_at
+            range_start = (
+                timezone.localtime(created_at).date()
+                if timezone.is_aware(created_at)
+                else created_at.date()
+            )
+        else:
+            range_start = None
+        range_end = today if first_record else None
+    else:
+        return JsonResponse({"error": "Invalid report date filter."}, status=400)
 
-        if start_str and end_str:
-            appointments = appointments.filter(
-                created_at__date__range=[start_str, end_str]
-        )
+    if filter_type != "all" or range_start:
+        if range_start and range_end:
+            appointments = appointments.filter(created_at__date__range=(range_start, range_end))
+
+    range_label = (
+        f"{range_start:%b %d, %Y} – {range_end:%b %d, %Y}"
+        if range_start and range_end else "All dates"
+    )
 
     # =========================================
     # STATS AGGREGATION

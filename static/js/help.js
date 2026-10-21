@@ -1458,6 +1458,34 @@ function highlightCurrentStatus(currentStatus) {
 
   let customStartDate = null;
   let customEndDate = null;
+  let incompleteDateRangeToast = null;
+  let incompleteDateRangeUsesToastr = false;
+
+  function clearIncompleteDateRangeToast() {
+    if (!incompleteDateRangeToast) {
+      return;
+    }
+
+    if (incompleteDateRangeUsesToastr && window.toastr) {
+      window.toastr.clear(incompleteDateRangeToast);
+    } else if (typeof incompleteDateRangeToast.stop === "function") {
+      incompleteDateRangeToast.stop(true, true).remove();
+    }
+
+    incompleteDateRangeToast = null;
+  }
+
+  function notifyIncompleteDateRange() {
+    clearIncompleteDateRangeToast();
+    const message = "Please select an end date.";
+    if (window.toastr) {
+      incompleteDateRangeToast = window.toastr.info(message);
+      incompleteDateRangeUsesToastr = true;
+    } else if (window.showToaster) {
+      incompleteDateRangeToast = window.showToaster("info", message);
+      incompleteDateRangeUsesToastr = false;
+    }
+  }
 
   $(function () {
     setTimeout(function () {
@@ -1475,10 +1503,12 @@ function highlightCurrentStatus(currentStatus) {
         if (!customStartDate || customEndDate) {
           customStartDate = dateText;
           customEndDate = null;
+          notifyIncompleteDateRange();
           return;
         }
 
         customEndDate = dateText;
+        clearIncompleteDateRangeToast();
 
         if (customStartDate > customEndDate) {
           [customStartDate, customEndDate] = [

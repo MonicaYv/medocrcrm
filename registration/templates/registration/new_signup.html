@@ -93,7 +93,7 @@
         </div>
 
         <div class="flex-1"></div>
-        <button class="btn-primary w-full mt-6" id="roleContinueBtn">Continue</button>
+        <button type="button" class="btn-primary w-full mt-6" id="roleContinueBtn">Continue</button>
         <p class="footer-link mt-4">Need Help? <a href="https://helpdesk.med-ecom.aibuzz.net" target="_blank">Get In Touch</a></p>
       </div>
 
@@ -164,7 +164,7 @@
           <a href="#" class="link-teal text-[13px] hidden" id="resendLink">Resend Code</a>
         </div>
 
-        <button class="btn-primary w-full mt-6" id="doneBtn">Done</button>
+        <button type="button" class="btn-primary w-full mt-6" id="doneBtn">Done</button>
 
         <p class="text-center text-[13px] mt-4" style="color:var(--muted);">
           <a href="#" class="link-teal">Get OTP on SMS</a> &nbsp;|&nbsp; <a href="#" class="link-teal">Get OTP on Call</a>
@@ -182,5 +182,5 @@
 
 {% block extra_js %}
     <script src="{% static 'js/auth-slider.js' %}"></script>
-    <script src="{% static 'js/sign-up.js' %}"></script>
+    <script src="{% static 'js/sign-up.js' %}?v=20261021-2"></script>
 {% endblock %}
