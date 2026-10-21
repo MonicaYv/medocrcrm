@@ -913,6 +913,35 @@ $(document).on("click", ".pagination-btn", function () {
  // Organization Date Range Filter
 
 let organizationCustomStartDate = "";
+let organizationDateRangeToast = null;
+let organizationDateRangeUsesToastr = false;
+
+function clearOrganizationDateRangeToast() {
+  if (!organizationDateRangeToast) {
+    return;
+  }
+
+  if (organizationDateRangeUsesToastr && window.toastr) {
+    window.toastr.clear(organizationDateRangeToast);
+  } else if (typeof organizationDateRangeToast.stop === "function") {
+    organizationDateRangeToast.stop(true, true).remove();
+  }
+
+  organizationDateRangeToast = null;
+}
+
+function notifyOrganizationDateRangeIncomplete() {
+  clearOrganizationDateRangeToast();
+  const message = "Please select an end date.";
+
+  if (window.toastr) {
+    organizationDateRangeToast = window.toastr.info(message);
+    organizationDateRangeUsesToastr = true;
+  } else if (window.showToaster) {
+    organizationDateRangeToast = window.showToaster("info", message);
+    organizationDateRangeUsesToastr = false;
+  }
+}
 
 $(document).on("click", ".organization-daterange", function (e) {
   e.preventDefault();
@@ -938,6 +967,7 @@ $(document).on("click", ".organization-daterange", function (e) {
     $calendar.removeClass("hidden").show();
 
     organizationCustomStartDate = "";
+    clearOrganizationDateRangeToast();
 
     // Destroy the old datepicker and initialize it again
     if ($inline.hasClass("hasDatepicker")) {
@@ -958,6 +988,7 @@ $(document).on("click", ".organization-daterange", function (e) {
         // First click: Start date
         if (!organizationCustomStartDate) {
           organizationCustomStartDate = dateText;
+          notifyOrganizationDateRangeIncomplete();
 
           $inline.datepicker("option", "minDate", dateText);
 
@@ -967,6 +998,7 @@ $(document).on("click", ".organization-daterange", function (e) {
         }
 
         // Second click: End date
+        clearOrganizationDateRangeToast();
         let startDate = organizationCustomStartDate;
         let endDate = dateText;
 

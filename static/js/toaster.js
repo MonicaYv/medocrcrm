@@ -13,12 +13,14 @@
     const toasterClasses = {
     success: 'bg-green-500',
     error: 'bg-red-500',
+    info: 'bg-sky-500',
     };
 
     // Define icons based on toaster type
     const toasterIcons = {
     success: 'task_alt',
     error: 'error',              
+    info: 'info',
     };
 
     // Create toaster element
@@ -47,6 +49,8 @@
         $(this).remove();
       });
     });
+
+    return $('#' + toasterId);
   }
 
   // Expose the showToaster function globally for use in other scripts
