@@ -1,5 +1,12 @@
-  let currentStatus = "accepted";
 
+  let currentStatus = "accepted";
+  let hospitalHistoryFilters = {
+    date_filter: "",
+    from_date: "",
+    to_date: "",
+    appointment_status: "",
+    visit_type: ""
+};
 // Date filter state, mirroring appointment.js so both pages send the same
 // GET contract (date_filter / start_date / end_date) to the backend.
   let historyDateFilter = "";
@@ -7,16 +14,16 @@
   let historyStartDate = "";
   let historyEndDate = "";
 
-  function getHistoryDateFilterParams() {
-    const params = {};
-    if (historyDateFilter) params.date_filter = historyDateFilter;
-    if (historySelectedDate) params.date = historySelectedDate;
-    if (historyStartDate) params.start_date = historyStartDate;
-    if (historyEndDate) params.end_date = historyEndDate;
-    return params;
-  }
+  // function getHistoryDateFilterParams() {
+  //   const params = {};
+  //   if (historyDateFilter) params.date_filter = historyDateFilter;
+  //   if (historySelectedDate) params.date = historySelectedDate;
+  //   if (historyStartDate) params.start_date = historyStartDate;
+  //   if (historyEndDate) params.end_date = historyEndDate;
+  //   return params;
+  // }
 
-  function loadHospitalHistory(status = "accepted", page = 1) {
+  function loadHospitalHistory(status = "accepted", page = 1, filters = {}) {
   const isDoctorPage = $("#doctor-cards-container").length > 0;
 
   const container = isDoctorPage
@@ -36,21 +43,69 @@
   $.ajax({
     url: ajaxUrl,
     type: "GET",
-    data: Object.assign(
-      { status: status, page: page },
-      getHistoryDateFilterParams()
-    ),
+    data: {
+      status: status,
+      page: page,
+      date_filter: filters.date_filter || "",
+      from_date: filters.from_date || "",
+      to_date: filters.to_date || "",
+      appointment_status: filters.appointment_status || "",
+      visit_type: filters.visit_type || ""
+    },
     success: function (res) {
       $(container).html(res.html);
-      applyHistorySearchAndFilter();
+      console.log("History filters sent:", {
+        status,
+        page,
+        ...filters
+      });
     },
-    error: function () {
+    error: function (xhr) {
+      console.error("History AJAX error:", xhr.status, xhr.responseText);
+
       $(container).html(
         `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
       );
     }
   });
 }
+
+
+//   function loadHospitalHistory(status = "accepted", page = 1) {
+//   const isDoctorPage = $("#doctor-cards-container").length > 0;
+
+//   const container = isDoctorPage
+//     ? "#doctor-cards-container"
+//     : "#hospital-cards-container";
+
+//   const ajaxUrl = isDoctorPage
+//     ? "/history/doctor/history/ajax/"
+//     : "/history/hospital/history/ajax/";
+
+//   currentStatus = status;
+
+//   $(container).html(
+//     `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
+//   );
+
+//   $.ajax({
+//     url: ajaxUrl,
+//     type: "GET",
+//     data: Object.assign(
+//       { status: status, page: page },
+//       getHistoryDateFilterParams()
+//     ),
+//     success: function (res) {
+//       $(container).html(res.html);
+//       applyHistorySearchAndFilter();
+//     },
+//     error: function () {
+//       $(container).html(
+//         `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
+//       );
+//     }
+//   });
+// }
 $(document).ready(function () {
 
 
@@ -337,7 +392,7 @@ $(document).on("click", ".view-attachment", function () {
   } else {
     $(".tab-content").addClass("hidden");
     $(".accepted").removeClass("hidden");
-    loadHospitalHistory(targetTab, 1);
+    loadHospitalHistory(targetTab, 1, hospitalHistoryFilters);
   }
 
   $(".tab-btn-hospital")
@@ -383,6 +438,126 @@ $(document).on("click", ".view-attachment", function () {
     },
   });
 
+  let hospitalHistoryStartDate = null;
+  let hospitalHistoryEndDate = null;
+
+const $hospitalHistoryDatepicker = $(
+    "#calendarContainer .datepicker-inline"
+);
+
+$hospitalHistoryDatepicker.datepicker({
+    dateFormat: "yy-mm-dd",
+
+    beforeShowDay: function (date) {
+        const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+        const classes = [];
+
+        if (
+            hospitalHistoryStartDate &&
+            dateText >= hospitalHistoryStartDate &&
+            dateText <= (hospitalHistoryEndDate || hospitalHistoryStartDate)
+        ) {
+            classes.push("hospital-date-range");
+        }
+
+        if (dateText === hospitalHistoryStartDate) {
+            classes.push("hospital-date-range-start");
+        }
+
+        if (hospitalHistoryEndDate && dateText === hospitalHistoryEndDate) {
+            classes.push("hospital-date-range-end");
+        }
+
+        return [true, classes.join(" "), ""];
+    },
+
+    onSelect: function (dateText) {
+      console.log("DATE SELECTED:", dateText);
+
+      if (!hospitalHistoryStartDate || hospitalHistoryEndDate) {
+          hospitalHistoryStartDate = dateText;
+          hospitalHistoryEndDate = null;
+
+          $hospitalHistoryDatepicker.datepicker("refresh");
+
+          console.log("START DATE:", hospitalHistoryStartDate);
+          console.log("Ab End Date select karo.");
+
+          return;
+      }
+
+      hospitalHistoryEndDate = dateText;
+
+      if (hospitalHistoryEndDate < hospitalHistoryStartDate) {
+          const temp = hospitalHistoryStartDate;
+          hospitalHistoryStartDate = hospitalHistoryEndDate;
+          hospitalHistoryEndDate = temp;
+      }
+
+      hospitalHistoryFilters.date_filter = "custom";
+      hospitalHistoryFilters.from_date = hospitalHistoryStartDate;
+      hospitalHistoryFilters.to_date = hospitalHistoryEndDate;
+
+      console.log("FINAL DATE RANGE:", {
+          from_date: hospitalHistoryFilters.from_date,
+          to_date: hospitalHistoryFilters.to_date
+      });
+
+      $(".filterDropdown, .submenu").addClass("hidden");
+      $("#calendarContainer").addClass("hidden");
+
+      loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+  }
+});
+
+  // Register Custom Date Range Handler
+$("#calendarContainer .datepicker-inline").datepicker(
+    "option",
+    "onSelect",
+    function (dateText) {
+        console.log("DATE SELECTED:", dateText);
+
+        const selectedDate = $.datepicker.parseDate(
+            "mm/dd/yy",
+            dateText
+        );
+
+        const formattedDate = $.datepicker.formatDate(
+            "yy-mm-dd",
+            selectedDate
+        );
+
+        // First click: Start Date
+        if (!hospitalHistoryStartDate || hospitalHistoryEndDate) {
+            hospitalHistoryStartDate = formattedDate;
+            hospitalHistoryEndDate = null;
+
+            console.log("START DATE:", hospitalHistoryStartDate);
+            console.log("Ab End Date select karo.");
+            return;
+        }
+
+        // Second click: End Date
+        hospitalHistoryEndDate = formattedDate;
+
+        if (hospitalHistoryEndDate < hospitalHistoryStartDate) {
+            const temp = hospitalHistoryStartDate;
+            hospitalHistoryStartDate = hospitalHistoryEndDate;
+            hospitalHistoryEndDate = temp;
+        }
+
+        hospitalHistoryFilters.date_filter = "custom";
+        hospitalHistoryFilters.from_date = hospitalHistoryStartDate;
+        hospitalHistoryFilters.to_date = hospitalHistoryEndDate;
+
+        console.log("FINAL DATE RANGE:", hospitalHistoryFilters);
+
+        $(".filterDropdown, .submenu").addClass("hidden");
+        $("#calendarContainer").addClass("hidden");
+
+        loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+    }
+); 
   // 3. Open Calendar when clicking "Custom"
   $(".trigger-custom").on("click", function (e) {
     e.stopPropagation();
@@ -412,23 +587,53 @@ $(document).on("click", ".view-attachment", function () {
   });
 
   // 5. Handle option selection in Date submenu (Week/Month only, not Custom)
-  $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
+  // $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
+  //   e.stopPropagation();
+
+  //   // Remove active state from all options in date submenu
+  //   $("#dateSubmenu .material-symbols-outlined")
+  //     .removeClass("!text-dodger-blue")
+  //     .addClass("text-light-gray");
+
+  //   // Add active state to clicked option
+  //   $(this)
+  //     .find(".material-symbols-outlined")
+  //     .removeClass("text-light-gray")
+  //     .addClass("!text-dodger-blue");
+
+  //   // Close all dropdowns
+  //   $(".filterDropdown, .submenu").addClass("hidden");
+  // });
+  
+$("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
     e.stopPropagation();
 
-    // Remove active state from all options in date submenu
+    const selectedText = $(this).text().trim().toLowerCase();
+
+    if (selectedText.includes("week")) {
+        hospitalHistoryFilters.date_filter = "week";
+    } else if (selectedText.includes("month")) {
+        hospitalHistoryFilters.date_filter = "month";
+    } else {
+        return;
+    }
+
+    hospitalHistoryFilters.from_date = "";
+    hospitalHistoryFilters.to_date = "";
+
     $("#dateSubmenu .material-symbols-outlined")
-      .removeClass("!text-dodger-blue")
-      .addClass("text-light-gray");
+        .removeClass("!text-dodger-blue")
+        .addClass("text-light-gray");
 
-    // Add active state to clicked option
-    $(this)
-      .find(".material-symbols-outlined")
-      .removeClass("text-light-gray")
-      .addClass("!text-dodger-blue");
+    $(this).find(".material-symbols-outlined")
+        .removeClass("text-light-gray")
+        .addClass("!text-dodger-blue");
 
-    // Close all dropdowns
     $(".filterDropdown, .submenu").addClass("hidden");
-  });
+
+    loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+});
+
 
   /* ------------------------------------------------------------------
    * DATE FILTER (data-date-filter driven)
@@ -578,27 +783,54 @@ $(document).on("click", ".view-attachment", function () {
 
   // 6. Handle option selection in the Visit submenu
   // Bed status is handled by the delegated filter handler below.
+  // $("#visitSubmenu > div").on("click", function (e) {
+  //   e.stopPropagation();
+
+  //   // Get the parent submenu
+  //   const $submenu = $(this).closest(".submenu");
+
+  //   // Remove active state from all options in this submenu
+  //   $submenu
+  //     .find(".material-symbols-outlined")
+  //     .removeClass("!text-dodger-blue")
+  //     .addClass("text-light-gray");
+
+  //   // Add active state to clicked option
+  //   $(this)
+  //     .find(".material-symbols-outlined")
+  //     .removeClass("text-light-gray")
+  //     .addClass("!text-dodger-blue");
+
+  //   // Close all dropdowns
+  //   $(".filterDropdown, .submenu").addClass("hidden");
+  // });
   $("#visitSubmenu > div").on("click", function (e) {
+    e.preventDefault();
     e.stopPropagation();
 
-    // Get the parent submenu
-    const $submenu = $(this).closest(".submenu");
+    const $option = $(this);
+    const selectedText = $option.text().trim();
 
-    // Remove active state from all options in this submenu
-    $submenu
-      .find(".material-symbols-outlined")
-      .removeClass("!text-dodger-blue")
-      .addClass("text-light-gray");
+    // Highlight selected option
+    $("#visitSubmenu .material-symbols-outlined")
+        .removeClass("!text-dodger-blue")
+        .addClass("text-light-gray");
 
-    // Add active state to clicked option
-    $(this)
-      .find(".material-symbols-outlined")
-      .removeClass("text-light-gray")
-      .addClass("!text-dodger-blue");
+    $option.find(".material-symbols-outlined")
+        .removeClass("text-light-gray")
+        .addClass("!text-dodger-blue");
 
-    // Close all dropdowns
+    // Save selected visit type
+    hospitalHistoryFilters.visit_type =
+        selectedText.toLowerCase().replace(/\s+/g, "-");
+
+    console.log("Selected Visit Type:", hospitalHistoryFilters.visit_type);
+
+    // Send AJAX request
+    loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+
     $(".filterDropdown, .submenu").addClass("hidden");
-  });
+});
 
   // 7. Global Close
   $(document).on("click", function (e) {
@@ -1129,26 +1361,54 @@ function rebuildStatusSubmenu() {
     .on("click.historyStatusFilter", selectHistoryStatusFilter);
 }
 
-// Status filter selection
+// // Status filter selection
+// function selectHistoryStatusFilter(e) {
+//   e.stopPropagation();
+
+//   // Highlight the selected option
+//   $("#statusSubmenu .material-symbols-outlined")
+//     .removeClass("!text-dodger-blue")
+//     .addClass("text-light-gray");
+//   $(this)
+//     .find(".material-symbols-outlined")
+//     .removeClass("text-light-gray")
+//     .addClass("!text-dodger-blue");
+
+//   const selected = String($(this).attr("data-status-filter-value") || "").trim();
+//   historyStatusFilter = selected === "All" ? "" : selected;
+//   applyHistorySearchAndFilter();
+
+//   // Close the dropdowns
+//   $(".filterDropdown, .submenu").addClass("hidden");
+// }
+
 function selectHistoryStatusFilter(e) {
   e.stopPropagation();
 
-  // Highlight the selected option
   $("#statusSubmenu .material-symbols-outlined")
     .removeClass("!text-dodger-blue")
     .addClass("text-light-gray");
+
   $(this)
     .find(".material-symbols-outlined")
     .removeClass("text-light-gray")
     .addClass("!text-dodger-blue");
 
-  const selected = String($(this).attr("data-status-filter-value") || "").trim();
-  historyStatusFilter = selected === "All" ? "" : selected;
-  applyHistorySearchAndFilter();
+  const selected = String(
+    $(this).attr("data-status-filter-value") || ""
+  ).trim();
 
-  // Close the dropdowns
+  historyStatusFilter = selected === "All" ? "" : selected;
+
+  // Send selected status to backend through AJAX
+  hospitalHistoryFilters.appointment_status =
+    historyStatusFilter.toLowerCase();
+
+  loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+
   $(".filterDropdown, .submenu").addClass("hidden");
 }
+
 
 // Search input handler - filters the currently visible tab cards (incl. beds)
 function onHistorySearchInput() {

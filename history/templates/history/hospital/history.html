@@ -2,6 +2,22 @@
 {% load static %}
 {% block title %}History{% endblock %}
 
+{% block extra_css %}
+<style>
+    #calendarContainer .ui-datepicker td.hospital-date-range a {
+        background: #dbeafe;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    #calendarContainer .ui-datepicker td.hospital-date-range-start a,
+    #calendarContainer .ui-datepicker td.hospital-date-range-end a {
+        background: #1683f9;
+        border-color: #1683f9;
+        color: #fff;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
             <div
@@ -45,26 +61,19 @@
                             <!-- Search Input -->
                             <div class="flex items-center w-full lg:w-[300px] h-10 rounded-[6px] bg-light-white px-2">
                                 <span class="material-symbols-outlined text-dark-gray">search</span>
-                                <input
-                                    type="text"
-                                    id="historySearch"
-                                    placeholder="Search by name or categories"
+                                <input type="text" placeholder="Search by name or categories"
                                     class="w-full ml-1 border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-medium-gray" />
                             </div>
 
                             <!-- Filter Dropdown -->
-                            <div class="relative z-30 dropdown inline-block">
+                            <div class="relative dropdown inline-block">
                                 <button
-                                    class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer"
-                                    type="button"
-                                    aria-label="Open history filters"
-                                    aria-controls="historyFilterDropdown">
+                                    class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
                                     <span class="material-symbols-outlined flex justify-center items-center">tune</span>
                                 </button>
 
                                 <div
-                                    id="historyFilterDropdown"
-                                    class="filterDropdown absolute right-0 mt-2 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-50">
+                                    class="filterDropdown absolute right-0 mt-2 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
                                     <div
                                         class="trigger-date p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer flex justify-between items-center">
                                         Date
@@ -805,5 +814,5 @@
 
 {% block extra_js %}
 <script src="/static/js/tabs.js"></script>
-<script src="/static/js/hospital-history.js?v=20261008-2"></script>
+<script src="/static/js/hospital-history.js"></script>
 {% endblock %}

@@ -391,7 +391,11 @@ saveBtns.forEach(saveBtn => {
 
             if (data.success) {
 
-                toastr.success("Document updated successfully");
+                if (data.number) {
+                    toastr.success(`Document updated. Number detected: ${data.number}`);
+                } else {
+                    toastr.success("Document updated. No number was detected, so the saved number was kept.");
+                }
                 sessionStorage.setItem("settings.documentUploadReturnTab", "documents");
 
                 setTimeout(() => {

@@ -886,25 +886,129 @@ $(document).on("click", ".pagination-btn", function () {
 // ----------------------------
 // Date range filter buttons
 // ----------------------------
-$(document).on("click", ".organization-daterange", function () {
-  $(".organization-daterange").removeClass("font-bold");
-  $(this).addClass("font-bold");
+// $(document).on("click", ".organization-daterange", function () {
+//   $(".organization-daterange").removeClass("font-bold");
+//   $(this).addClass("font-bold");
 
-  const rangeLabel = $(this).data("range");
+//   const rangeLabel = $(this).data("range");
+//   const $tabDiv = $("#organizationSectionId");
+
+//   const { start, end } = calculateDateRange(rangeLabel);
+
+//   // ✅ Store range on container
+//   $tabDiv.data("start-date", start);
+//   $tabDiv.data("end-date", end);
+//   $tabDiv.data("range-label", rangeLabel);
+
+//   // ✅ Pass the same container back (not hardcoded)
+//   loadOrganizations(1, $tabDiv);
+
+//   console.log("Loading organizations with range:", rangeLabel, start, end);
+// });
+
+ // ----------------------------
+ // Organization Date Range Filter
+ // ----------------------------
+
+ // Organization Date Range Filter
+
+let organizationCustomStartDate = "";
+
+$(document).on("click", ".organization-daterange", function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const rangeLabel = String($(this).data("range") || "")
+    .trim()
+    .toLowerCase();
+
   const $tabDiv = $("#organizationSectionId");
+  const $dropdown = $(this).closest(".dropdown");
+
+  if (rangeLabel === "custom") {
+    const $calendar = $dropdown.find(".datepicker-container").first();
+    const $inline = $calendar.find(".datepicker-inline").first();
+
+    if (!$calendar.length || !$inline.length || !$.fn.datepicker) {
+      console.error("Organization calendar not found.");
+      return;
+    }
+
+    $(".datepicker-container").not($calendar).hide();
+    $calendar.removeClass("hidden").show();
+
+    organizationCustomStartDate = "";
+
+    // Destroy the old datepicker and initialize it again
+    if ($inline.hasClass("hasDatepicker")) {
+      $inline.datepicker("destroy");
+    }
+
+    $inline.empty().removeClass("hasDatepicker");
+
+    $inline.datepicker({
+      dateFormat: "yy-mm-dd",
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "2000:2035",
+
+      onSelect: function (dateText) {
+        console.log("Organization date selected:", dateText);
+
+        // First click: Start date
+        if (!organizationCustomStartDate) {
+          organizationCustomStartDate = dateText;
+
+          $inline.datepicker("option", "minDate", dateText);
+
+          console.log("Start date:", organizationCustomStartDate);
+          console.log("Now select the end date.");
+          return;
+        }
+
+        // Second click: End date
+        let startDate = organizationCustomStartDate;
+        let endDate = dateText;
+
+        if (startDate > endDate) {
+          [startDate, endDate] = [endDate, startDate];
+        }
+
+        $tabDiv.data("start-date", startDate);
+        $tabDiv.data("end-date", endDate);
+        $tabDiv.data("range-label", "custom");
+
+        console.log("Final organization date range:", {
+          start_date: startDate,
+          end_date: endDate
+        });
+
+        organizationCustomStartDate = "";
+
+        $inline.datepicker("option", "minDate", null);
+        $calendar.hide();
+
+        loadOrganizations(1, $tabDiv);
+      }
+    });
+
+    return;
+  }
 
   const { start, end } = calculateDateRange(rangeLabel);
 
-  // ✅ Store range on container
   $tabDiv.data("start-date", start);
   $tabDiv.data("end-date", end);
   $tabDiv.data("range-label", rangeLabel);
 
-  // ✅ Pass the same container back (not hardcoded)
-  loadOrganizations(1, $tabDiv);
+  $(".organization-daterange").removeClass("font-bold");
+  $(this).addClass("font-bold");
 
-  console.log("Loading organizations with range:", rangeLabel, start, end);
+  loadOrganizations(1, $tabDiv);
 });
+
+
+
 
 function changePage(page) {
   const $container = $("#organizationSectionId"); // scope to your section
