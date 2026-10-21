@@ -179,11 +179,11 @@
                     </div>
 
                     <!--Overview-->
-                    <div class="pt-5 flex flex-col ml-3">
+                    <div id="pharmacy-overview" data-endpoint="{% url 'pharmacy_overview_data' %}" class="pt-5 flex flex-col ml-3">
                         <div class="flex justify-between items-center">
                         <p class="font-semibold text-lg">Overview</p>
                         <div class="flex items-center gap-2.5">
-                            <p class="font-normal text-sm">Today</p>
+                            <p id="pharmacy-overview-period" class="font-normal text-sm">Today</p>
                             <div class="relative dropdown">
                             <button
                                 class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
@@ -229,10 +229,10 @@
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-4">
                         <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                             <div class="flex flex-col gap-2">
-                            <p class="font-normal text-sm">Total Orders Today</p>
-                            <p class="font-semibold text-2xl">12</p>
-                            <p class="text-green font-normal text-xs">Confirmed: 7</p>
-                            <p class="text-golden-yellow1 font-normal text-xs">Pending: 3</p>
+                            <p class="font-normal text-sm">Total Orders</p>
+                            <p id="pharmacy-overview-total-orders" class="font-semibold text-2xl">{{ pharmacy_overview.total_orders }}</p>
+                            <p class="text-green font-normal text-xs">Confirmed: <span id="pharmacy-overview-confirmed-orders">{{ pharmacy_overview.confirmed_orders }}</span></p>
+                            <p class="text-golden-yellow1 font-normal text-xs">Pending: <span id="pharmacy-overview-pending-orders">{{ pharmacy_overview.pending_orders }}</span></p>
                             </div>
                             <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                             <img src="/static/images/orders-box.svg" alt="">
@@ -242,9 +242,9 @@
                         <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                             <div class="flex flex-col gap-2">
                             <p class="font-normal text-sm">Medicine in Stock</p>
-                            <p class="font-semibold text-2xl">1,240</p>
-                            <p class="font-normal text-xs text-green">Available: 1,110</p>
-                            <p class="font-normal text-xs text-crimson-red2">Low Stock: 34</p>
+                            <p id="pharmacy-overview-total-stock" class="font-semibold text-2xl">{{ pharmacy_overview.total_stock }}</p>
+                            <p class="font-normal text-xs text-green">Available: <span id="pharmacy-overview-available-stock">{{ pharmacy_overview.available_stock }}</span></p>
+                            <p class="font-normal text-xs text-crimson-red2">Low Stock: <span id="pharmacy-overview-low-stock">{{ pharmacy_overview.low_stock_medicines }}</span></p>
                             </div>
                             <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                             <img src="/static/images/stock-medicine.svg" alt="">
@@ -254,9 +254,9 @@
                         <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                             <div class="flex flex-col gap-2">
                             <p class="font-normal text-sm">Revenue</p>
-                            <p class="font-semibold text-2xl">₹48,630</p>
-                            <p class="text-green font-normal text-xs">Prescribe Orders: ₹36,400 </p>
-                            <p class="text-golden-yellow1 font-normal text-xs">OTC Sales: ₹12,220</p>
+                            <p class="font-semibold text-2xl">₹<span id="pharmacy-overview-revenue">{{ pharmacy_overview.revenue }}</span></p>
+                            <p class="text-green font-normal text-xs">Prescribe Orders: ₹<span id="pharmacy-overview-prescription-revenue">{{ pharmacy_overview.prescription_revenue }}</span></p>
+                            <p class="text-golden-yellow1 font-normal text-xs">OTC Sales: ₹<span id="pharmacy-overview-otc-revenue">{{ pharmacy_overview.otc_revenue }}</span></p>
                             </div>
                             <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                             <img src="/static/images/revenue-wallet.svg" alt="">
@@ -745,5 +745,6 @@
 
 {% block extra_js %}
     <script src="{% static 'js/coupons.js' %}"></script>
+    <script src="{% static 'js/pharmacy-overview.js' %}?v=20261021-2"></script>
    
 {% endblock %}

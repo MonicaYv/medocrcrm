@@ -3,7 +3,11 @@ from datetime import date
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from .utils import POINTS_ACTION_ALIASES
-from .views import build_media_url, get_dashboard_appointment_date_range
+from .views import (
+    build_media_url,
+    get_dashboard_appointment_date_range,
+    parse_pharmacy_overview_range,
+)
 
 
 @override_settings(MEDIA_URL="/document/")
@@ -66,3 +70,34 @@ class DashboardAppointmentDateRangeTests(SimpleTestCase):
             get_dashboard_appointment_date_range(request, self.today),
             ("today", self.today, self.today),
         )
+
+
+class PharmacyOverviewDateRangeTests(SimpleTestCase):
+    def setUp(self):
+        self.today = date(2026, 10, 21)
+
+    def test_week_filter_includes_today_and_previous_six_days(self):
+        self.assertEqual(
+            parse_pharmacy_overview_range("week", "", "", self.today),
+            (date(2026, 10, 15), self.today),
+        )
+
+    def test_month_filter_includes_today_and_previous_twenty_nine_days(self):
+        self.assertEqual(
+            parse_pharmacy_overview_range("month", "", "", self.today),
+            (date(2026, 9, 22), self.today),
+        )
+
+    def test_custom_filter_sorts_reversed_dates(self):
+        self.assertEqual(
+            parse_pharmacy_overview_range(
+                "custom", "2026-10-20", "2026-10-12", self.today
+            ),
+            (date(2026, 10, 12), date(2026, 10, 20)),
+        )
+
+    def test_custom_filter_requires_both_valid_dates(self):
+        with self.assertRaises(ValueError):
+            parse_pharmacy_overview_range(
+                "custom", "2026-10-12", "", self.today
+            )
