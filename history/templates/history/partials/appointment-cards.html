@@ -116,5 +116,22 @@
     </div>
 
   </div>
+
+  {% comment %} {% if current_tab == "pending" and appointment.current_bid %}
+    <div class="mt-4 flex justify-end gap-3" onclick="event.stopPropagation()">
+      <button type="button"
+              class="confirm-appointment-btn rounded-lg bg-dodger-blue px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
+              data-id="{{ appointment.id }}"
+              data-bid-id="{{ appointment.current_bid.id }}">
+        Confirm
+      </button>
+      <button type="button"
+              class="cancel-bid cancel-bid-btn rounded-lg border border-red-500 px-5 py-2 text-sm font-semibold text-red-500 hover:bg-red-50"
+              data-id="{{ appointment.id }}"
+              data-bid-id="{{ appointment.current_bid.id }}">
+        Cancel
+      </button>
+    </div>
+  {% endif %} {% endcomment %}
 </div>
 {% include "history/partials/performa-bill.html" %}

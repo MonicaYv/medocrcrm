@@ -664,7 +664,14 @@ $("#lab-history-cards-container").on(
         if (status === "pending") {
 
             buttons = `
-                <div class="pt-5 flex justify-center">
+                <div class="pt-5 flex justify-center gap-3">
+
+                    <button
+                        class="confirm-appointment-btn bg-dodger-blue text-white rounded-lg w-[180px] h-10"
+                        data-id="${card.data("id")}"
+                        data-bid-id="${card.data("bid-id")}">
+                        Confirm
+                    </button>
 
                     <button
                         class="cancel-bid-btn border border-red-500 text-red-500 rounded-lg w-[220px] h-10"
@@ -843,9 +850,9 @@ function getCookie(name) {
 
 // const csrftoken = getCookie("csrftoken");
 
-$(document).on("click", ".cancel-bid-btn", function () {
-    console.log("Appointment ID =", window.currentAppointmentId);
-    console.log("Bid ID =", window.currentBidId);
+$(document).on("click", ".cancel-bid-btn", function (event) {
+    event.stopPropagation();
+    const bidId = $(this).data("bid-id") || window.currentBidId;
     $.ajax({
         url: "/history/cancel-bid/",
         type: "POST",
@@ -853,7 +860,7 @@ $(document).on("click", ".cancel-bid-btn", function () {
             "X-CSRFToken": csrftoken
         },
         data: {
-            bid_id: window.currentBidId
+            bid_id: bidId
         },
 
         // success: function (response) {
@@ -886,7 +893,7 @@ $(document).on("click", ".cancel-bid-btn", function () {
               .addClass("hidden");
 
             // Refresh the currently selected history tab
-            loadLabHistory(currentHistoryStatus, 1);
+            $(".tab-btn-hospital[data-tab='canceled']").trigger("click");
 
           } else {
 
@@ -903,6 +910,31 @@ $(document).on("click", ".cancel-bid-btn", function () {
 
     });
 
+});
+
+$(document).on("click", ".confirm-appointment-btn", function (event) {
+    event.stopPropagation();
+    const appointmentId = $(this).data("id") || window.currentAppointmentId;
+    const bidId = $(this).data("bid-id") || window.currentBidId;
+
+    $.ajax({
+        url: "/history/confirm-appointment/",
+        type: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        data: { appointment_id: appointmentId, bid_id: bidId },
+        success: function (response) {
+            if (!response.success) {
+                toastr.error(response.message || "Unable to confirm appointment");
+                return;
+            }
+            toastr.success(response.message);
+            $(".modal-pending, .modal-accepted, .modal-cancelled, .modal-missed").addClass("hidden");
+            $(".tab-btn-hospital[data-tab='accepted']").trigger("click");
+        },
+        error: function (xhr) {
+            toastr.error(xhr.responseJSON?.message || "Unable to confirm appointment");
+        }
+    });
 });
 
 $(document).on("click", ".complete-appointment-btn", function () {

@@ -207,7 +207,8 @@ def ajax_appointments(request):
 
         if lab_profile:
             qs = qs.exclude(
-                lab_bids__lab=lab_profile
+                lab_bids__lab=lab_profile,
+                lab_bids__bid_status__in=[LabBidStatus.PENDING, LabBidStatus.ACCEPTED],
             ).distinct()
         
 
@@ -227,7 +228,10 @@ def ajax_appointments(request):
             "user",
         ).filter(status="Pending")
         if doctor_profile:
-            qs = qs.exclude(bids__doctor=doctor_profile).distinct()
+            qs = qs.exclude(
+                bids__doctor=doctor_profile,
+                bids__bid_status__in=[DoctorBidStatus.PENDING, DoctorBidStatus.ACCEPTED],
+            ).distinct()
 
     elif user_type == "hospital":
         hospital_profile = HospitalProfile.objects.filter(user=user).first()
@@ -243,7 +247,8 @@ def ajax_appointments(request):
 
         if hospital_profile:
             qs = qs.exclude(
-                bids__hospital=hospital_profile
+                bids__hospital=hospital_profile,
+                bids__bid_status__in=[HospitalBidStatus.PENDING, HospitalBidStatus.ACCEPTED],
             ).distinct()
     else:
         qs = HospitalAppointments.objects.none()
@@ -465,8 +470,12 @@ def place_bid(request):
         if not appointment:
             return JsonResponse({"success": False, "message": "Appointment not found or already closed"})
 
-        if LabBidding.objects.filter(appointment=appointment, lab=lab).exists():
-            return JsonResponse({"success": False, "message": "You already placed a bid"})
+        if LabBidding.objects.filter(
+            appointment=appointment,
+            lab=lab,
+            bid_status__in=[LabBidStatus.PENDING, LabBidStatus.ACCEPTED],
+        ).exists():
+            return JsonResponse({"success": False, "message": "You already accepted this appointment"})
 
         # Lab appointments use the legacy ``labtest_packages`` table, while
         # lab rate cards use ``lab_test_package_master``. The IDs therefore
@@ -564,17 +573,30 @@ def place_bid(request):
         bid_gst = bid_amount * 0.18
         total_amount = bid_amount + bid_gst
 
-        bid = LabBidding.objects.create(
-            appointment=appointment,
-            lab=lab,
-            bid_amount=bid_amount,
-            bid_gst=bid_gst,
-            total_amount=total_amount,
-            delivery_time=24,
-            remarks="Auto-generated based on lab rate card",
-            bid_status=LabBidStatus.PENDING,
-            is_active=True,
-        )
+        with transaction.atomic():
+            locked_appointment = LabAppointments.objects.select_for_update().filter(
+                id=appointment.id,
+                status=AppointmentStatus.PENDING,
+            ).first()
+            if not locked_appointment:
+                return JsonResponse({"success": False, "message": "Appointment was already accepted or closed"})
+            if LabBidding.objects.filter(
+                appointment=locked_appointment,
+                lab=lab,
+                bid_status__in=[LabBidStatus.PENDING, LabBidStatus.ACCEPTED],
+            ).exists():
+                return JsonResponse({"success": False, "message": "This appointment is already in your Pending or Accepted history"})
+            bid = LabBidding.objects.create(
+                appointment=locked_appointment,
+                lab=lab,
+                bid_amount=bid_amount,
+                bid_gst=bid_gst,
+                total_amount=total_amount,
+                delivery_time=24,
+                remarks="Auto-generated based on lab rate card",
+                bid_status=LabBidStatus.PENDING,
+                is_active=True,
+            )
         appointment.refresh_from_db()
         print(
             appointment.id,
@@ -584,7 +606,7 @@ def place_bid(request):
         )
         return JsonResponse({
             "success": True,
-            "message": "Bid placed successfully",
+            "message": "Appointment moved to Pending history. Confirm it there to accept.",
             "bid": {
                 "bid_id": bid.id,
                 "bid_amount": bid_amount,
@@ -607,8 +629,12 @@ def place_bid(request):
         if not appointment:
             return JsonResponse({"success": False, "message": "Appointment not found or already closed"})
 
-        if HospitalBidding.objects.filter(appointment=appointment, hospital=hospital).exists():
-            return JsonResponse({"success": False, "message": "You already placed a bid"})
+        if HospitalBidding.objects.filter(
+            appointment=appointment,
+            hospital=hospital,
+            bid_status__in=[HospitalBidStatus.PENDING, HospitalBidStatus.ACCEPTED],
+        ).exists():
+            return JsonResponse({"success": False, "message": "You already accepted this appointment"})
 
         active_rate_cards = Q(is_active=True) | Q(is_active__isnull=True)
         service_rates = list(
@@ -685,21 +711,34 @@ def place_bid(request):
         total_bid_amount = service_charges + room_charges
         match_score = 80 + (20 if room_rate else 0)
 
-        bid = HospitalBidding.objects.create(
-            appointment=appointment,
-            hospital=hospital,
-            service_charges=service_charges,
-            room_charges=room_charges,
-            total_bid_amount=total_bid_amount,
-            delivery_time=30,
-            remarks="Auto-generated based on rate cards",
-            bid_status=HospitalBidStatus.PENDING,
-            is_active=True,
-        )
+        with transaction.atomic():
+            locked_appointment = HospitalAppointments.objects.select_for_update().filter(
+                id=appointment.id,
+                status=HospitalAppointmentStatus.PENDING,
+            ).first()
+            if not locked_appointment:
+                return JsonResponse({"success": False, "message": "Appointment was already accepted or closed"})
+            if HospitalBidding.objects.filter(
+                appointment=locked_appointment,
+                hospital=hospital,
+                bid_status__in=[HospitalBidStatus.PENDING, HospitalBidStatus.ACCEPTED],
+            ).exists():
+                return JsonResponse({"success": False, "message": "This appointment is already in your Pending or Accepted history"})
+            bid = HospitalBidding.objects.create(
+                appointment=locked_appointment,
+                hospital=hospital,
+                service_charges=service_charges,
+                room_charges=room_charges,
+                total_bid_amount=total_bid_amount,
+                delivery_time=30,
+                remarks="Auto-generated based on rate cards",
+                bid_status=HospitalBidStatus.PENDING,
+                is_active=True,
+            )
 
         return JsonResponse({
             "success": True,
-            "message": "Bid placed successfully",
+            "message": "Appointment moved to Pending history. Confirm it there to accept.",
             "match_score": match_score,
             "bid": {
                 "bid_id": bid.id,
@@ -720,8 +759,12 @@ def place_bid(request):
         if not appointment:
             return JsonResponse({"success": False, "message": "Appointment not found or already closed"})
 
-        if DoctorBidding.objects.filter(appointment=appointment, doctor=doctor).exists():
-            return JsonResponse({"success": False, "message": "Bid already placed"})
+        if DoctorBidding.objects.filter(
+            appointment=appointment,
+            doctor=doctor,
+            bid_status__in=[DoctorBidStatus.PENDING, DoctorBidStatus.ACCEPTED],
+        ).exists():
+            return JsonResponse({"success": False, "message": "You already accepted this appointment"})
 
         service_rates = list(
             DoctorServiceRate.objects.filter(doctor=doctor)
@@ -843,42 +886,33 @@ def place_bid(request):
         total_bid_amount = float(service_charges) + float(visit_charges)
 
         with transaction.atomic():
-            appointment_claimed = DoctorAppointment.objects.filter(
+            locked_appointment = DoctorAppointment.objects.select_for_update().filter(
                 id=appointment.id,
-                status="Pending",
-            ).update(
+                status=AppointmentStatus.PENDING,
+            ).first()
+            if not locked_appointment:
+                return JsonResponse({"success": False, "message": "Appointment was already accepted or closed"})
+            if DoctorBidding.objects.filter(
+                appointment=locked_appointment,
                 doctor=doctor,
-                status="Accepted",
-            )
-            if not appointment_claimed:
-                return JsonResponse({
-                    "success": False,
-                    "message": "Appointment was already accepted or closed",
-                })
-
-            DoctorBidding.objects.filter(
-                appointment=appointment,
-                bid_status=DoctorBidStatus.PENDING,
-            ).update(
-                bid_status=DoctorBidStatus.REJECTED,
-                is_active=False,
-            )
+                bid_status__in=[DoctorBidStatus.PENDING, DoctorBidStatus.ACCEPTED],
+            ).exists():
+                return JsonResponse({"success": False, "message": "This appointment is already in your Pending or Accepted history"})
             bid = DoctorBidding.objects.create(
-                appointment=appointment,
+                appointment=locked_appointment,
                 doctor=doctor,
                 service_charges=service_charges,
                 visit_charges=visit_charges,
                 total_bid_amount=total_bid_amount,
                 delivery_time=2,
                 remarks="Auto-generated based on rate cards",
-                bid_status=DoctorBidStatus.ACCEPTED,
+                bid_status=DoctorBidStatus.PENDING,
                 is_active=True,
             )
 
         return JsonResponse({
             "success": True,
-            "message": "Appointment accepted successfully",
-            "redirect_url": "/history/",
+            "message": "Appointment moved to Pending history. Confirm it there to accept.",
             "match_score": match_score,
             "bid": {
                 "bid_id": bid.id,

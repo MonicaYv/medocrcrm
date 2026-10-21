@@ -563,7 +563,10 @@ def dashboard_home(request):
             # ).order_by("-created_at")[:5]
             appointment_requests = LabAppointments.objects.filter(
                 status="Pending"
-            ).order_by("-created_at")[:5]
+            ).exclude(
+                lab_bids__lab=lab_profile,
+                lab_bids__bid_status__in=[LabBidStatus.PENDING, LabBidStatus.ACCEPTED],
+            ).distinct().order_by("-created_at")[:5]
             print("\n===== APPOINTMENT REQUESTS =====")
 
             for a in appointment_requests:
@@ -684,8 +687,9 @@ def dashboard_home(request):
             appointment_requests = DoctorAppointment.objects.filter(
                 status="Pending"
             ).exclude(
-                bids__doctor=doctor_profile
-            ).select_related(
+                bids__doctor=doctor_profile,
+                bids__bid_status__in=[DoctorBidStatus.PENDING, DoctorBidStatus.ACCEPTED],
+            ).distinct().select_related(
                 "user__userprofile"
             ).order_by("-created_at")[:5]
             print("DOCTOR PROFILE =", doctor_profile.id)
@@ -804,8 +808,9 @@ def dashboard_home(request):
             appointment_requests = HospitalAppointments.objects.filter(
                 status="Pending"
             ).exclude(
-                bids__hospital=hospital_profile
-            ).select_related(
+                bids__hospital=hospital_profile,
+                bids__bid_status__in=[HospitalBidStatus.PENDING, HospitalBidStatus.ACCEPTED],
+            ).distinct().select_related(
                 "user__userprofile",
                 "category",
                 "description",
