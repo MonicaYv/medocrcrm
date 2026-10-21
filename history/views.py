@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -176,24 +177,14 @@ def ajax_doctor_history(request):
 
     if status == "pending":
 
-        # Pending must mirror the Appointments page: appointments still
-        # awaiting a decision that this doctor is involved with. That means
-        # either they have not bid yet (what the Appointments page lists) or
-        # their own bid is still pending. Requiring an existing pending bid
-        # here made this tab permanently empty for doctors who have not bid,
-        # and the two sections could never show the same appointment.
+        # This tab contains requests the doctor accepted from Appointments
+        # and still needs to confirm or cancel. Unclaimed requests remain in
+        # the Appointments list.
         qs = qs.filter(
             status=AppointmentStatus.PENDING,
-        ).exclude(
-            # Skip appointments this doctor has already resolved (accepted /
-            # rejected / cancelled / expired) - those belong to another tab.
             bids__doctor=doctor,
-            bids__bid_status__in=[
-                DoctorBidStatus.ACCEPTED,
-                DoctorBidStatus.REJECTED,
-                DoctorBidStatus.CANCELLED,
-                DoctorBidStatus.EXPIRED,
-            ],
+            bids__bid_status=DoctorBidStatus.PENDING,
+            bids__is_active=True,
         ).distinct()
 
     elif status == "accepted":
@@ -475,6 +466,8 @@ def ajax_hospital_history(request):
 
         qs = qs.filter(
             bids__hospital=hospital,
+            bids__bid_status=HospitalBidStatus.PENDING,
+            bids__is_active=True,
             accepted_bid__isnull=True,
             accepted_hospital__isnull=True,
             status="Pending"
@@ -578,11 +571,30 @@ def ajax_hospital_history(request):
     paginator = Paginator(qs, 5)
     page_obj = paginator.get_page(page_number)
     for appointment in page_obj:
-        appointment.current_bid = HospitalBidding.objects.filter(
+        bid_qs = HospitalBidding.objects.filter(
             appointment=appointment,
             hospital=hospital,
-            is_active=True
-        ).first()
+        )
+        if status == "cancelled":
+            appointment.current_bid = bid_qs.filter(
+                bid_status=HospitalBidStatus.CANCELLED
+            ).order_by("-id").first()
+        elif status == "pending":
+            appointment.current_bid = bid_qs.filter(
+                bid_status=HospitalBidStatus.PENDING,
+                is_active=True,
+            ).order_by("-id").first()
+        elif status == "accepted":
+            appointment.current_bid = bid_qs.filter(
+                bid_status=HospitalBidStatus.ACCEPTED,
+                is_active=True,
+            ).order_by("-id").first()
+        elif status == "completed":
+            appointment.current_bid = bid_qs.filter(
+                bid_status=HospitalBidStatus.COMPLETED
+            ).order_by("-id").first()
+        else:
+            appointment.current_bid = bid_qs.order_by("-id").first()
     html = render_to_string(
         "history/hospital/hospital_history_cards.html",
         {
@@ -604,16 +616,135 @@ def ajax_hospital_history(request):
 
 @require_POST
 @dashboard_login_required
+def confirm_appointment(request):
+    user = request.user_obj
+    user_type = user.user_type
+    bid_id = request.POST.get("bid_id")
+    requested_appointment_id = request.POST.get("appointment_id")
+
+    if user_type == "lab":
+        lab = LabProfile.objects.filter(user=user).first()
+        with transaction.atomic():
+            bid = LabBidding.objects.filter(
+                id=bid_id, lab=lab, bid_status=LabBidStatus.PENDING, is_active=True
+            ).first()
+            if not bid or (requested_appointment_id and str(bid.appointment_id) != requested_appointment_id):
+                return JsonResponse({"success": False, "message": "Pending lab appointment was not found"})
+            appointment = LabAppointments.objects.select_for_update().filter(
+                id=bid.appointment_id,
+                status=AppointmentStatus.PENDING,
+                accepted_bid__isnull=True,
+                accepted_lab__isnull=True,
+            ).first()
+            if not appointment:
+                return JsonResponse({"success": False, "message": "Appointment was already confirmed or closed"})
+            bid = LabBidding.objects.select_for_update().filter(
+                id=bid.id, lab=lab, bid_status=LabBidStatus.PENDING, is_active=True
+            ).first()
+            if not bid:
+                return JsonResponse({"success": False, "message": "Pending lab appointment was not found"})
+
+            LabBidding.objects.filter(
+                appointment=appointment, bid_status=LabBidStatus.PENDING
+            ).exclude(id=bid.id).update(bid_status=LabBidStatus.REJECTED, is_active=False)
+            bid.bid_status = LabBidStatus.ACCEPTED
+            bid.save(update_fields=["bid_status", "updated_at"])
+            appointment.status = AppointmentStatus.ACCEPTED
+            appointment.accepted_lab = lab
+            appointment.accepted_bid = bid
+            appointment.accepted_total_amount = bid.total_amount
+            appointment.save(update_fields=[
+                "status", "accepted_lab", "accepted_bid", "accepted_total_amount", "updated_at"
+            ])
+
+    elif user_type == "hospital":
+        hospital = HospitalProfile.objects.filter(user=user).first()
+        with transaction.atomic():
+            bid = HospitalBidding.objects.filter(
+                id=bid_id, hospital=hospital, bid_status=HospitalBidStatus.PENDING, is_active=True
+            ).first()
+            if not bid or (requested_appointment_id and str(bid.appointment_id) != requested_appointment_id):
+                return JsonResponse({"success": False, "message": "Pending hospital appointment was not found"})
+            appointment = HospitalAppointments.objects.select_for_update().filter(
+                id=bid.appointment_id,
+                status=HospitalAppointmentStatus.PENDING,
+                accepted_bid__isnull=True,
+                accepted_hospital__isnull=True,
+            ).first()
+            if not appointment:
+                return JsonResponse({"success": False, "message": "Appointment was already confirmed or closed"})
+            bid = HospitalBidding.objects.select_for_update().filter(
+                id=bid.id, hospital=hospital, bid_status=HospitalBidStatus.PENDING, is_active=True
+            ).first()
+            if not bid:
+                return JsonResponse({"success": False, "message": "Pending hospital appointment was not found"})
+
+            HospitalBidding.objects.filter(
+                appointment=appointment, bid_status=HospitalBidStatus.PENDING
+            ).exclude(id=bid.id).update(bid_status=HospitalBidStatus.REJECTED, is_active=False)
+            bid.bid_status = HospitalBidStatus.ACCEPTED
+            bid.save(update_fields=["bid_status", "updated_at"])
+            appointment.status = HospitalAppointmentStatus.ACCEPTED
+            appointment.accepted_hospital = hospital
+            appointment.accepted_bid = bid
+            appointment.accepted_total_amount = bid.total_bid_amount
+            appointment.save(update_fields=[
+                "status", "accepted_hospital", "accepted_bid", "accepted_total_amount", "updated_at"
+            ])
+
+    elif user_type == "doctor":
+        doctor = DoctorProfile.objects.filter(user=user).first()
+        with transaction.atomic():
+            bid = DoctorBidding.objects.filter(
+                id=bid_id, doctor=doctor, bid_status=DoctorBidStatus.PENDING, is_active=True
+            ).first()
+            if not bid or (requested_appointment_id and str(bid.appointment_id) != requested_appointment_id):
+                return JsonResponse({"success": False, "message": "Pending doctor appointment was not found"})
+            appointment = DoctorAppointment.objects.select_for_update().filter(
+                id=bid.appointment_id, status=AppointmentStatus.PENDING
+            ).first()
+            if not appointment:
+                return JsonResponse({"success": False, "message": "Appointment was already confirmed or closed"})
+            bid = DoctorBidding.objects.select_for_update().filter(
+                id=bid.id, doctor=doctor, bid_status=DoctorBidStatus.PENDING, is_active=True
+            ).first()
+            if not bid:
+                return JsonResponse({"success": False, "message": "Pending doctor appointment was not found"})
+
+            DoctorBidding.objects.filter(
+                appointment=appointment, bid_status=DoctorBidStatus.PENDING
+            ).exclude(id=bid.id).update(bid_status=DoctorBidStatus.REJECTED, is_active=False)
+            bid.bid_status = DoctorBidStatus.ACCEPTED
+            bid.save(update_fields=["bid_status", "updated_at"])
+            appointment.status = AppointmentStatus.ACCEPTED
+            appointment.doctor = doctor
+            appointment.save(update_fields=["status", "doctor"])
+
+    else:
+        return JsonResponse({"success": False, "message": "Invalid user type"})
+
+    return JsonResponse({"success": True, "message": "Appointment confirmed and moved to Accepted history"})
+
+
+@require_POST
+@dashboard_login_required
 def cancel_bid(request):
     user = request.user_obj
     user_type = user.user_type
 
     bid_id = request.POST.get("bid_id")
+    appointment_id = request.POST.get("appointment_id")
 
     # ── LAB ───────────────────────────────────────────
     if user_type == "lab":
         lab = LabProfile.objects.filter(user=user).first()
-        bid = LabBidding.objects.filter(id=bid_id, lab=lab).first()
+        bid_qs = LabBidding.objects.filter(lab=lab)
+        bid = bid_qs.filter(id=bid_id).first() if bid_id else None
+        if not bid and appointment_id:
+            bid = bid_qs.filter(
+                appointment_id=appointment_id,
+                bid_status=LabBidStatus.ACCEPTED,
+            ).order_by("-id").first()
         if not bid:
             return JsonResponse({"success": False, "message": "Bid not found"})
 
@@ -638,7 +769,13 @@ def cancel_bid(request):
     # ── HOSPITAL ──────────────────────────────────────
     elif user_type == "hospital":
         hospital = HospitalProfile.objects.filter(user=user).first()
-        bid = HospitalBidding.objects.filter(id=bid_id, hospital=hospital).first()
+        bid_qs = HospitalBidding.objects.filter(hospital=hospital)
+        bid = bid_qs.filter(id=bid_id).first() if bid_id else None
+        if not bid and appointment_id:
+            bid = bid_qs.filter(
+                appointment_id=appointment_id,
+                bid_status=HospitalBidStatus.ACCEPTED,
+            ).order_by("-id").first()
         if not bid:
             return JsonResponse({"success": False, "message": "Bid not found"})
 
@@ -660,7 +797,13 @@ def cancel_bid(request):
     # ── DOCTOR ────────────────────────────────────────
     elif user_type == "doctor":
         doctor = DoctorProfile.objects.filter(user=user).first()
-        bid = DoctorBidding.objects.filter(id=bid_id, doctor=doctor).first()
+        bid_qs = DoctorBidding.objects.filter(doctor=doctor)
+        bid = bid_qs.filter(id=bid_id).first() if bid_id else None
+        if not bid and appointment_id:
+            bid = bid_qs.filter(
+                appointment_id=appointment_id,
+                bid_status=DoctorBidStatus.ACCEPTED,
+            ).order_by("-id").first()
         if not bid:
             return JsonResponse({"success": False, "message": "Bid not found"})
 
@@ -692,22 +835,27 @@ def complete_appointment(request):
     if user_type == "lab":
         lab = LabProfile.objects.filter(user=user).first()
 
-        # Lab completes via bid_id since that's the accepted entity
         bid_id = request.POST.get("bid_id")
-        bid = LabBidding.objects.filter(
-            id=bid_id, lab=lab, bid_status=LabBidStatus.ACCEPTED
-        ).first()
+        with transaction.atomic():
+            bid = LabBidding.objects.select_for_update().filter(
+                id=bid_id, lab=lab, bid_status=LabBidStatus.ACCEPTED
+            ).first()
+            if not bid:
+                return JsonResponse({"success": False, "message": "Accepted bid not found"})
 
-        if not bid:
-            return JsonResponse({"success": False, "message": "Accepted bid not found"})
+            appointment = LabAppointments.objects.select_for_update().filter(
+                id=bid.appointment_id,
+                accepted_lab=lab,
+                accepted_bid=bid,
+                status=AppointmentStatus.ACCEPTED,
+            ).first()
+            if not appointment:
+                return JsonResponse({"success": False, "message": "Accepted appointment not found"})
 
-        bid.bid_status = LabBidStatus.COMPLETED
-        bid.save()
-
-        appointment = bid.appointment
-        if appointment:
-            appointment.status = "Completed"
-            appointment.save()
+            bid.bid_status = LabBidStatus.COMPLETED
+            bid.save(update_fields=["bid_status", "updated_at"])
+            appointment.status = AppointmentStatus.COMPLETED
+            appointment.save(update_fields=["status", "updated_at"])
 
         return JsonResponse({
             "success": True,
@@ -719,40 +867,47 @@ def complete_appointment(request):
     # ── HOSPITAL ──────────────────────────────────────
     elif user_type == "hospital":
         hospital = HospitalProfile.objects.filter(user=user).first()
-        appointment = HospitalAppointments.objects.filter(
-            id=appointment_id, accepted_hospital=hospital
-        ).first()
+        with transaction.atomic():
+            appointment = HospitalAppointments.objects.select_for_update().filter(
+                id=appointment_id,
+                accepted_hospital=hospital,
+                status=HospitalAppointmentStatus.ACCEPTED,
+            ).first()
+            if not appointment:
+                return JsonResponse({"success": False, "message": "Accepted appointment not found"})
 
-        if not appointment:
-            return JsonResponse({"success": False, "message": "Appointment not found"})
-        if appointment.status != "Accepted":
-            return JsonResponse({"success": False, "message": "Only accepted appointments can be completed"})
+            appointment.status = HospitalAppointmentStatus.COMPLETED
+            appointment.save(update_fields=["status", "updated_at"])
 
-        appointment.status = "Completed"
-        appointment.save()
-
-        if appointment.accepted_bid:
-            appointment.accepted_bid.bid_status = "Completed"
-            appointment.accepted_bid.save()
+            if appointment.accepted_bid:
+                HospitalBidding.objects.filter(
+                    id=appointment.accepted_bid_id,
+                    hospital=hospital,
+                    bid_status=HospitalBidStatus.ACCEPTED,
+                ).update(bid_status=HospitalBidStatus.COMPLETED)
 
         return JsonResponse({"success": True, "message": "Appointment completed successfully"})
 
     # ── DOCTOR ────────────────────────────────────────
     elif user_type == "doctor":
         doctor = DoctorProfile.objects.filter(user=user).first()
-        appointment = DoctorAppointment.objects.filter(
-            id=appointment_id, doctor=doctor, status="Accepted"
-        ).first()
+        with transaction.atomic():
+            appointment = DoctorAppointment.objects.select_for_update().filter(
+                id=appointment_id,
+                doctor=doctor,
+                status=AppointmentStatus.ACCEPTED,
+            ).first()
+            if not appointment:
+                return JsonResponse({"success": False, "message": "Accepted appointment not found"})
 
-        if not appointment:
-            return JsonResponse({"success": False, "message": "Appointment not found"})
+            appointment.status = AppointmentStatus.COMPLETED
+            appointment.save(update_fields=["status"])
 
-        appointment.status = "Completed"
-        appointment.save()
-
-        DoctorBidding.objects.filter(
-            appointment=appointment, bid_status=DoctorBidStatus.ACCEPTED
-        ).update(bid_status="completed")
+            DoctorBidding.objects.filter(
+                appointment=appointment,
+                doctor=doctor,
+                bid_status=DoctorBidStatus.ACCEPTED,
+            ).update(bid_status=DoctorBidStatus.COMPLETED)
 
         return JsonResponse({"success": True, "message": "Appointment marked as completed"})
 

@@ -8,6 +8,7 @@ class DoctorBidStatus(models.TextChoices):
     REJECTED = "rejected", "Rejected"
     EXPIRED = "expired", "Expired"
     CANCELLED = "cancelled", "Cancelled"
+    COMPLETED = "completed", "Completed"
 
 
 class HospitalBidStatus(models.TextChoices):
@@ -15,6 +16,7 @@ class HospitalBidStatus(models.TextChoices):
     ACCEPTED = "accepted", "Accepted"
     REJECTED = "rejected", "Rejected"
     CANCELLED = "cancelled", "Cancelled"
+    COMPLETED = "completed", "Completed"
 
 
 class LabBidStatus(models.TextChoices):
@@ -22,6 +24,7 @@ class LabBidStatus(models.TextChoices):
     ACCEPTED = "accepted", "Accepted"
     REJECTED = "rejected", "Rejected"
     CANCELLED = "cancelled", "Cancelled"
+    COMPLETED = "completed", "Completed"
 
 
 class PharmacyBidStatus(models.TextChoices):

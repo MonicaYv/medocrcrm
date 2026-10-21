@@ -357,7 +357,7 @@ loadAppointments("all", 1, "");
       else {
         // pending / accepted / completed
         $("#modal-enquiry-detail").html(
-          ENQUIRY_TEMPLATES.pending(orderId, budget)
+          ENQUIRY_TEMPLATES.pending(orderId, budget, status, appointmentId)
         );
       }
 
@@ -381,7 +381,7 @@ $(document).on("click", ".modal-pending", function (e) {
 
 const ENQUIRY_TEMPLATES = {
 
-  pending: (orderId, budget) => `
+  pending: (orderId, budget, status = "pending", appointmentId = "") => `
     <div class="enquiredDetail">
       <div class="flex flex-col mt-4 py-4 gap-4">
         <div class="flex justify-center items-center gap-1">
@@ -416,12 +416,20 @@ const ENQUIRY_TEMPLATES = {
         </div>
       </div>
 
-    <div class="pt-4 flex justify-center gap-2 mb-2">
+    ${status === "pending" ? `
+      <div class="pt-4 flex justify-center gap-2 mb-2">
         <button class="accept-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10">
-            Accept
+          Accept
         </button>
-
       </div>
+    ` : status === "accepted" ? `
+      <div class="pt-4 flex justify-center gap-2 mb-2">
+        <button class="cancel-bid-btn border border-strong-red text-strong-red rounded-lg w-[180px] h-10"
+          data-appointment-id="${appointmentId}">
+          Cancel Appointment
+        </button>
+      </div>
+    ` : ""}
     </div>
   `,
 
@@ -908,8 +916,10 @@ function _placeBid(appointmentId, $row) {
 // ── Cancel bid ───────────────────────────────────────────────
 $(document).on("click", ".cancel-bid-btn", function () {
 
-    const bidId = $(this).data("bid-id");
-    if (!bidId) return;
+    const bidId = $(this).data("bid-id") || "";
+    const appointmentId = $(this).data("appointment-id") ||
+        $(".modal-pending").attr("data-appointment-id") || "";
+    if (!bidId && !appointmentId) return;
 
     $.ajax({
         url: "/appointment/cancel-bid/",
@@ -917,6 +927,7 @@ $(document).on("click", ".cancel-bid-btn", function () {
 
         data: {
             bid_id: bidId,
+            appointment_id: appointmentId,
             csrfmiddlewaretoken: $('meta[name="csrf-token"]').attr("content")
         },
 
