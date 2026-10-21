@@ -16,19 +16,46 @@ if (userTypeInput) {
 }
 
 //select role
-document.querySelectorAll(".role-card").forEach((card) => {
+const roleCards = Array.from(document.querySelectorAll(".role-card"));
+const roleCardGroup = roleCards[0]?.parentElement;
+if (roleCardGroup) {
+  roleCardGroup.setAttribute("role", "radiogroup");
+  roleCardGroup.setAttribute("aria-label", "Choose your provider role");
+}
+
+roleCards.forEach((card) => {
+  card.setAttribute("tabindex", "0");
+  card.setAttribute("role", "radio");
+  card.setAttribute("aria-checked", card.classList.contains("selected") ? "true" : "false");
+
   card.addEventListener("click", () => {
-    document.querySelectorAll(".role-card").forEach((c) => {
+    roleCards.forEach((c) => {
       c.classList.remove("selected");
+      c.setAttribute("aria-checked", "false");
     });
 
     card.classList.add("selected");
+    card.setAttribute("aria-checked", "true");
 
     selectedSignUpRole = card.dataset.role;
 
     // Update hidden input
     if (userTypeInput) {
       userTypeInput.value = selectedSignUpRole;
+    }
+  });
+
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (card.classList.contains("selected")) {
+        document.getElementById("roleContinueBtn").click();
+      } else {
+        card.click();
+      }
+    } else if (event.key === " ") {
+      event.preventDefault();
+      card.click();
     }
   });
 });
@@ -94,9 +121,23 @@ const continueBtn = document.getElementById("continueBtn");
 const otpPhoneDisplay = document.getElementById("otpPhoneDisplay");
 const editNumberBtn = document.getElementById("editNumberBtn");
 
-phoneInput.addEventListener("input", () => {
+function syncSignupContinueButton() {
   phoneInput.value = phoneInput.value.replace(/\D/g, "").slice(0, 10);
   continueBtn.disabled = phoneInput.value.length !== 10;
+}
+
+["input", "change", "keyup"].forEach((eventName) => {
+  phoneInput.addEventListener(eventName, syncSignupContinueButton);
+});
+phoneInput.addEventListener("paste", () => setTimeout(syncSignupContinueButton, 0));
+syncSignupContinueButton();
+
+phoneInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    syncSignupContinueButton();
+    if (!continueBtn.disabled) continueBtn.click();
+  }
 });
 
 function maskNumber(num) {
@@ -287,12 +328,16 @@ otpBoxes.forEach((box, i) => {
     if (e.key === "Backspace" && !box.value && otpBoxes[i - 1]) {
       otpBoxes[i - 1].focus();
     }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      document.getElementById("doneBtn").click();
+    }
   });
   box.addEventListener("paste", (e) => {
     e.preventDefault();
     const digits = (e.clipboardData.getData("text") || "")
       .replace(/\D/g, "")
-      .slice(0, 4)
+      .slice(0, otpBoxes.length)
       .split("");
     digits.forEach((d, idx) => {
       if (otpBoxes[idx]) {

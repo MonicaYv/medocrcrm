@@ -913,6 +913,35 @@ $(document).on("click", ".pagination-btn", function () {
  // Organization Date Range Filter
 
 let organizationCustomStartDate = "";
+let organizationDateRangeToast = null;
+let organizationDateRangeUsesToastr = false;
+
+function clearOrganizationDateRangeToast() {
+  if (!organizationDateRangeToast) {
+    return;
+  }
+
+  if (organizationDateRangeUsesToastr && window.toastr) {
+    window.toastr.clear(organizationDateRangeToast);
+  } else if (typeof organizationDateRangeToast.stop === "function") {
+    organizationDateRangeToast.stop(true, true).remove();
+  }
+
+  organizationDateRangeToast = null;
+}
+
+function notifyOrganizationDateRangeIncomplete() {
+  clearOrganizationDateRangeToast();
+  const message = "Please select an end date.";
+
+  if (window.toastr) {
+    organizationDateRangeToast = window.toastr.info(message);
+    organizationDateRangeUsesToastr = true;
+  } else if (window.showToaster) {
+    organizationDateRangeToast = window.showToaster("info", message);
+    organizationDateRangeUsesToastr = false;
+  }
+}
 
 $(document).on("click", ".organization-daterange", function (e) {
   e.preventDefault();
@@ -928,16 +957,20 @@ $(document).on("click", ".organization-daterange", function (e) {
   if (rangeLabel === "custom") {
     const $calendar = $dropdown.find(".datepicker-container").first();
     const $inline = $calendar.find(".datepicker-inline").first();
+    const $status = $calendar.find(".organization-date-status");
 
     if (!$calendar.length || !$inline.length || !$.fn.datepicker) {
       console.error("Organization calendar not found.");
       return;
     }
 
+    $dropdown.find(".filterDropdown").first().hide();
     $(".datepicker-container").not($calendar).hide();
     $calendar.removeClass("hidden").show();
 
     organizationCustomStartDate = "";
+    clearOrganizationDateRangeToast();
+    $status.text("Select start date");
 
     // Destroy the old datepicker and initialize it again
     if ($inline.hasClass("hasDatepicker")) {
@@ -958,8 +991,10 @@ $(document).on("click", ".organization-daterange", function (e) {
         // First click: Start date
         if (!organizationCustomStartDate) {
           organizationCustomStartDate = dateText;
+          notifyOrganizationDateRangeIncomplete();
 
           $inline.datepicker("option", "minDate", dateText);
+          $status.text(`Start: ${dateText} — Select end date`);
 
           console.log("Start date:", organizationCustomStartDate);
           console.log("Now select the end date.");
@@ -967,6 +1002,7 @@ $(document).on("click", ".organization-daterange", function (e) {
         }
 
         // Second click: End date
+        clearOrganizationDateRangeToast();
         let startDate = organizationCustomStartDate;
         let endDate = dateText;
 
@@ -977,6 +1013,8 @@ $(document).on("click", ".organization-daterange", function (e) {
         $tabDiv.data("start-date", startDate);
         $tabDiv.data("end-date", endDate);
         $tabDiv.data("range-label", "custom");
+        $status.text(`Range applied: ${startDate} through ${endDate}.`);
+        $("#organizationCustomRangeLabel").text(`${startDate} to ${endDate}`);
 
         console.log("Final organization date range:", {
           start_date: startDate,
@@ -987,6 +1025,8 @@ $(document).on("click", ".organization-daterange", function (e) {
 
         $inline.datepicker("option", "minDate", null);
         $calendar.hide();
+        $(".organization-daterange").removeClass("font-bold");
+        $(".organization-daterange[data-range='custom']").addClass("font-bold");
 
         loadOrganizations(1, $tabDiv);
       }
@@ -1005,6 +1045,21 @@ $(document).on("click", ".organization-daterange", function (e) {
   $(this).addClass("font-bold");
 
   loadOrganizations(1, $tabDiv);
+  });
+
+$(document).on("click", ".organization-datepicker-back", function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const $calendar = $(this).closest(".datepicker-container");
+  const $inline = $calendar.find(".datepicker-inline").first();
+  if ($inline.hasClass("hasDatepicker")) {
+    $inline.datepicker("option", "minDate", null);
+  }
+  organizationCustomStartDate = "";
+  clearOrganizationDateRangeToast();
+  $calendar.hide();
+  $calendar.closest(".dropdown").find(".filterDropdown").first().show();
 });
 
 

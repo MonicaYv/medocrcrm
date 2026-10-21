@@ -1461,6 +1461,32 @@ def doctor_report_data(request):
 
     visit_type = request.GET.get("visit_type", "").strip().lower()
     search = (request.GET.get("search", "") or request.GET.get("q", "")).strip()
+    start_date = request.GET.get("start_date", "").strip()
+    end_date = request.GET.get("end_date", "").strip()
+
+    # Keep the visible range label aligned with the same presets and custom
+    # dates used by apply_report_date_filter below.
+    today = timezone.localdate()
+    if filter_type == "today":
+        range_start = range_end = today
+    elif filter_type == "week":
+        range_start, range_end = today - timedelta(days=6), today
+    elif filter_type == "month":
+        range_start, range_end = today.replace(day=1), today
+    elif filter_type == "custom":
+        range_start = parse_filter_date(start_date) if start_date else None
+        range_end = parse_filter_date(end_date) if end_date else None
+        range_start = range_start or range_end
+        range_end = range_end or range_start
+        if range_start and range_end and range_start > range_end:
+            range_start, range_end = range_end, range_start
+    else:
+        range_start = range_end = None
+
+    range_label = (
+        f"{range_start:%b %d, %Y} – {range_end:%b %d, %Y}"
+        if range_start and range_end else "All dates"
+    )
 
     user = request.user_obj
     doctor_profile = getattr(user, "doctor_profile", None)
@@ -1480,8 +1506,8 @@ def doctor_report_data(request):
     appointments = apply_report_date_filter(
         appointments,
         filter_type,
-        start_date=request.GET.get("start_date", "").strip(),
-        end_date=request.GET.get("end_date", "").strip(),
+        start_date=start_date,
+        end_date=end_date,
     )
 
     # Visit type filter (home / clinic); "all"/empty leaves the list untouched.
@@ -1596,6 +1622,7 @@ def doctor_report_data(request):
         heatmap_data = [{"id": "IN-MH", "value": 0}]
 
     data = {
+        "range_label": range_label,
         "stats": {
             "total_patients": total_patients,
             "birds_received": birds_received,

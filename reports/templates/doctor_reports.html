@@ -18,8 +18,8 @@
           </div>
 
           <div class="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2.5 relative">
-            <p class="text-xs sm:text-sm text-dodger-blue whitespace-nowrap">
-              Data shown: Jan 12, 2025 – Mar 14, 2025
+            <p id="doctorReportRangeLabel" class="text-xs sm:text-sm text-dodger-blue whitespace-nowrap">
+              Data shown: {{ report_range_label|default:"Loading report dates…" }}
             </p>
             <!-- Filter -->
             <div class="relative shrink-0">
