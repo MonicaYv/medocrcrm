@@ -13,14 +13,24 @@ from django.utils.timezone import now
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from datetime import date, datetime, timedelta
-from django.db.models.functions import TruncDate
+from django.db.models.functions import Coalesce, TruncDate
 from django.template.loader import render_to_string
 from subscription.models import SubscriptionHistory
 from django.views.decorators.http import require_GET, require_POST
 from .utils import dashboard_login_required, get_common_context, get_theme_colors
 from appointments.utils import filter_appointments_between_dates, parse_filter_date
 from .models import SettingMenu, CouponPerformance,  CalendarEvent, TrendingCoupon
-from django.db.models import Sum, Count, Q, Max, F, ExpressionWrapper, DurationField
+from django.db.models import (
+    Count,
+    DecimalField,
+    ExpressionWrapper,
+    F,
+    Max,
+    Q,
+    Sum,
+    Value,
+    DurationField,
+)
 from registration.models import (
     PharmacyProfile, 
     NGOProfile, 
@@ -35,6 +45,7 @@ from appointments.models import WalletTransaction
 from services.models import LabBidding, LabBidStatus
 from services.models import HospitalBidding, HospitalBidStatus
 from services.models import DoctorBidding, DoctorBidStatus
+from services.models import PharmacyMedicine
 from appointments.models import LabAppointments
 from appointments.models import HospitalAppointments, HospitalAppointmentStatus
 from appointments.models import DoctorAppointment
@@ -46,6 +57,8 @@ from django.http import HttpResponse
 from settings.models import SellerSubscription, SellerType 
 from registration.models import ContactPerson
 from django.db.models import Count
+
+PHARMACY_LOW_STOCK_THRESHOLD = 20
 
 
 def get_dashboard_appointment_date_range(request, today):
@@ -87,6 +100,113 @@ def build_media_url(path):
         path = path[len(media_prefix) + 1:]
 
     return f"{media_url}/{path.lstrip('/')}"
+
+
+def parse_pharmacy_overview_range(filter_value, start_value, end_value, today):
+    filter_value = (filter_value or "today").strip().lower()
+
+    if filter_value == "today":
+        return today, today
+    if filter_value == "week":
+        return today - timedelta(days=6), today
+    if filter_value == "month":
+        return today - timedelta(days=29), today
+    if filter_value != "custom":
+        raise ValueError("Unsupported date filter.")
+
+    try:
+        start_date = datetime.strptime(start_value, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_value, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        raise ValueError("Select both dates for the custom range.")
+
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
+    return start_date, end_date
+
+
+def get_pharmacy_overview_metrics(pharmacy_profile, start_date, end_date):
+    orders = UserPurchase.objects.filter(
+        assigned_pharmacy=pharmacy_profile,
+        created_at__date__range=(start_date, end_date),
+    )
+    completed_orders = orders.exclude(order_status=OrderStatusChoices.CANCELLED)
+    amounts = completed_orders.aggregate(
+        total=Sum(
+            Coalesce(
+                "final_amount",
+                "total_amount",
+                Value(Decimal("0.00")),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            )
+        )
+    )
+    sales = PurchaseMedicine.objects.filter(
+        purchase__assigned_pharmacy=pharmacy_profile,
+        purchase__created_at__date__range=(start_date, end_date),
+    ).exclude(purchase__order_status=OrderStatusChoices.CANCELLED)
+    sales_totals = sales.aggregate(
+        prescription=Sum("total_price", filter=Q(requires_prescription=True)),
+        otc=Sum("total_price", filter=Q(requires_prescription=False)),
+    )
+
+    stock_quantities = PharmacyMedicine.objects.filter(
+        pharmacy=pharmacy_profile,
+        is_active=True,
+    ).values_list("quantity", flat=True)
+    quantities = [
+        int(quantity)
+        for quantity in stock_quantities
+        if quantity and quantity.isdigit()
+    ]
+
+    return {
+        "total_orders": orders.count(),
+        "confirmed_orders": orders.filter(
+            order_status=OrderStatusChoices.CONFIRMED
+        ).count(),
+        "pending_orders": orders.filter(
+            order_status=OrderStatusChoices.PENDING
+        ).count(),
+        "total_stock": sum(quantities),
+        "available_stock": sum(quantity for quantity in quantities if quantity > 0),
+        "low_stock_medicines": sum(
+            1
+            for quantity in quantities
+            if quantity <= PHARMACY_LOW_STOCK_THRESHOLD
+        ),
+        "revenue": str(amounts["total"] or Decimal("0.00")),
+        "prescription_revenue": str(
+            sales_totals["prescription"] or Decimal("0.00")
+        ),
+        "otc_revenue": str(sales_totals["otc"] or Decimal("0.00")),
+    }
+
+
+@require_GET
+@dashboard_login_required
+def pharmacy_overview_data(request):
+    user = request.user_obj
+    if user.user_type != "pharmacy":
+        return JsonResponse({"error": "Pharmacy access required."}, status=403)
+
+    pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+    if not pharmacy_profile:
+        return JsonResponse({"error": "Pharmacy profile not found."}, status=404)
+
+    try:
+        start_date, end_date = parse_pharmacy_overview_range(
+            request.GET.get("filter"),
+            request.GET.get("start_date"),
+            request.GET.get("end_date"),
+            timezone.localdate(),
+        )
+    except ValueError as error:
+        return JsonResponse({"error": str(error)}, status=400)
+
+    return JsonResponse(
+        get_pharmacy_overview_metrics(pharmacy_profile, start_date, end_date)
+    )
 from django.http import HttpResponse    
 
 @dashboard_login_required
@@ -225,8 +345,10 @@ def dashboard_home(request):
             else:
                 print("CONTACT PERSON NOT FOUND")
             pharmacy_profile = PharmacyProfile.objects.get(user=user)
-            
-            
+            today = timezone.localdate()
+            pharmacy_overview = get_pharmacy_overview_metrics(
+                pharmacy_profile, today, today
+            )
             
 
             pending_orders = UserPurchase.objects.filter(
@@ -280,6 +402,7 @@ def dashboard_home(request):
                 'contact_person': contact_person,
 
                 'scheduled_orders': scheduled_orders,
+                'pharmacy_overview': pharmacy_overview,
                 'popular_coupons': popular_coupons,
 
                 'user_display_name': pharmacy_profile.company_name,

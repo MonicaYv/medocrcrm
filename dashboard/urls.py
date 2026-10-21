@@ -5,6 +5,7 @@ urlpatterns = [
 
     
     path('', views.dashboard_home, name='advertiser-home'),
+    path('pharmacy-overview-data/', views.pharmacy_overview_data, name='pharmacy_overview_data'),
     path('api/coupon-chart-data/', views.get_coupon_chart_data, name='coupon_chart_data'),
     path('save-event/', views.save_event, name='save_event'),
     path('get-events/', views.get_events, name='get_events'),
@@ -30,4 +31,3 @@ urlpatterns = [
     path("pharmacy/order/<int:order_id>/", views.pharmacy_order_details, name="pharmacy_order_details"),
 
 ]
-
