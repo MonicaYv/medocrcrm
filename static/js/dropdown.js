@@ -76,6 +76,8 @@ $(document).ready(function () {
 
   // Toggle filter dropdown
   $('.filterToggle').click(function (e) {
+    // Lab dashboard filters use the class-based handler in home.js.
+    if ($(this).closest('.dropdown').find('.lab-home-filter').length) return;
     // Hospital history owns its filter menus with class-based visibility.
     if ($('#historySearch').length) return;
     // Appointment pages manage their own filter dropdown visibility in
@@ -96,6 +98,8 @@ $(document).ready(function () {
   $('.calendar-icon').click(function (e) {
     // Appointment pages manage their own picker in appointment.js.
     if ($(this).closest('.appointment-page').length) return;
+    // Lab reports manage a guided two-date inline picker in lab-reports.js.
+    if ($(this).closest('.lab-report-filter').length) return;
     // Date-filter options are owned by their page-specific delegated handlers.
     if ($(this).closest('[data-date-filter]').length) return;
     if ($(this).closest('.organization-daterange').length) return;

@@ -1,5 +1,12 @@
 $(document).ready(function () {
   let currentHistoryStatus = "accepted";
+  let labHistoryRequest = null;
+  const labHistoryFilters = {
+    date_filter: "",
+    start_date: "",
+    end_date: "",
+  };
+  let pendingLabStartDate = "";
 
   function loadLabHistory(status = "accepted", page = 1) {
     currentHistoryStatus = status;
@@ -8,10 +15,17 @@ $(document).ready(function () {
       `<p class="text-center mt-10 text-spanish-gray">Loading...</p>`
     );
 
-    $.ajax({
+    if (labHistoryRequest) labHistoryRequest.abort();
+    labHistoryRequest = $.ajax({
       url: "/history/lab/history/ajax/",
       type: "GET",
-      data: { status: status, page: page },
+      data: {
+        status: status,
+        page: page,
+        date_filter: labHistoryFilters.date_filter,
+        start_date: labHistoryFilters.start_date,
+        end_date: labHistoryFilters.end_date,
+      },
       // success: function (res) {
       //   $("#lab-history-cards-container").html(res.html);
       // },
@@ -20,10 +34,12 @@ $(document).ready(function () {
 
           applyHistorySearch();
       },
-      error: function () {
-        $("#lab-history-cards-container").html(
-          `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
-        );
+      error: function (xhr, requestStatus) {
+        if (requestStatus !== "abort") {
+          $("#lab-history-cards-container").html(
+            `<p class="text-center text-red-500 mt-10">Failed to load history</p>`
+          );
+        }
       }
     });
   }
@@ -262,15 +278,6 @@ loadLabHistory("accepted", 1);
   $(".tab-btn-hospital").on("click", function () {
     const targetTab = $(this).data("tab");
 
-    if (targetTab === "equipment") {
-      $(".tab-content").addClass("hidden");
-      $(".equipment").removeClass("hidden");
-    } else {
-      $(".tab-content").addClass("hidden");
-      $(".accepted").removeClass("hidden");
-      loadLabHistory(targetTab, 1);
-    }
-
     // Update active tab button
     $(".tab-btn-hospital")
       .removeClass("active-tab-hospital font-semibold")
@@ -289,13 +296,26 @@ loadLabHistory("accepted", 1);
     }
   });
 
-  // 1. Toggle Main Dropdown
-  $(".filterToggle").on("click", function (e) {
-    e.stopPropagation();
-    const isHidden = $(".filterDropdown").hasClass("hidden");
-    $(".filterDropdown, .submenu").addClass("hidden"); // Reset all
-    if (isHidden) $(".filterDropdown").removeClass("hidden");
-  });
+  // The history filter is scoped to its own button/menu so shared dropdown
+  // handlers elsewhere in the dashboard cannot toggle or hide it.
+  $(document)
+    .off("click.labHistoryFilterToggle", "#lab-history-filter-toggle")
+    .on("click.labHistoryFilterToggle", "#lab-history-filter-toggle", function (e) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const $dropdown = $(this).closest(".dropdown").children(".filterDropdown").first();
+      const opening =
+        $dropdown.hasClass("hidden") || $dropdown.css("display") === "none";
+
+      $(".filterDropdown, .submenu").not($dropdown).addClass("hidden").css("display", "");
+      if (opening) {
+        $dropdown.removeClass("hidden").css("display", "");
+      } else {
+        $dropdown.addClass("hidden").css("display", "");
+      }
+      $(this).attr("aria-expanded", String(opening));
+    });
 
   // 2. Open Date Submenu (Keep main open)
   $(".trigger-date").on("click", function (e) {
@@ -305,32 +325,54 @@ loadLabHistory("accepted", 1);
     $("#dateSubmenu").removeClass("hidden").css("top", $(this).position().top);
   });
 
-  // Initialize the jQuery UI Datepicker inline
-  $(".datepicker-inline").datepicker({
-    onSelect: function (dateText) {
-      console.log("Selected date: " + dateText);
+  // Custom dates follow the appointment picker flow: first choose a start
+  // date, then an end date. The server request is sent only after both exist.
+  function openLabHistoryDatepicker() {
+    const $calendar = $("#calendarContainer");
+    const $inline = $calendar.find(".datepicker-inline");
+    const $status = $calendar.find(".appointment-date-status");
 
-      // Mark Custom option as selected
-      $("#dateSubmenu .trigger-custom .material-symbols-outlined")
-        .first()
-        .removeClass("text-light-gray")
-        .addClass("!text-dodger-blue");
+    pendingLabStartDate = "";
+    $status.text("Select start date");
+    $(".filterDropdown, #dateSubmenu").addClass("hidden").css("display", "");
+    $calendar.removeClass("hidden").css("display", "");
 
-      // Close everything after date selection
-      $(".filterDropdown, .submenu").addClass("hidden");
-      $("#calendarContainer").addClass("hidden");
-    },
-  });
+    if ($inline.hasClass("hasDatepicker")) {
+      $inline.datepicker("destroy");
+    }
+    $inline.empty().datepicker({
+      dateFormat: "yy-mm-dd",
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "2000:2035",
+      onSelect: function (dateText) {
+        if (!pendingLabStartDate) {
+          pendingLabStartDate = dateText;
+          $inline.datepicker("option", "minDate", dateText);
+          $status.text("Start: " + dateText + " — Select end date");
+          return;
+        }
 
-  // 3. Open Calendar when clicking "Custom"
+        labHistoryFilters.date_filter = "custom";
+        labHistoryFilters.start_date = pendingLabStartDate;
+        labHistoryFilters.end_date = dateText;
+        $status.text(
+          "Start: " + labHistoryFilters.start_date +
+          " — End: " + labHistoryFilters.end_date
+        );
+        pendingLabStartDate = "";
+        $inline.datepicker("option", "minDate", null);
+        $calendar.addClass("hidden");
+        $(".filterDropdown, .submenu").addClass("hidden").css("display", "");
+        loadLabHistory(currentHistoryStatus, 1);
+      },
+    });
+  }
+
+  // Open the guided picker from either the Custom row or its calendar icon.
   $(".trigger-custom").on("click", function (e) {
     e.stopPropagation();
-
-    // Position the calendar relative to the Custom menu item
-    const topPos = $(this).position().top;
-
-    // Show the calendar
-    $("#calendarContainer").removeClass("hidden").css("top", topPos);
+    openLabHistoryDatepicker();
   });
 
   // 4. Status & Visit Submenus
@@ -350,9 +392,15 @@ loadLabHistory("accepted", 1);
     $("#visitSubmenu").removeClass("hidden").css("top", $(this).position().top);
   });
 
-  // 5. Handle option selection in Date submenu (Week/Month only, not Custom)
+  // Apply the date presets and keep the selected date range for every status tab.
   $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
     e.stopPropagation();
+
+    const selectedFilter = $(this).text().trim().toLowerCase();
+    labHistoryFilters.date_filter = selectedFilter;
+    labHistoryFilters.start_date = "";
+    labHistoryFilters.end_date = "";
+    pendingLabStartDate = "";
 
     // Remove active state from all options in date submenu
     $("#dateSubmenu .material-symbols-outlined")
@@ -367,6 +415,7 @@ loadLabHistory("accepted", 1);
 
     // Close all dropdowns
     $(".filterDropdown, .submenu").addClass("hidden");
+    loadLabHistory(currentHistoryStatus, 1);
   });
 
   // 6. Handle option selection in Status and Visit submenus

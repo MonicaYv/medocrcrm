@@ -1215,14 +1215,17 @@ switch (status) {
 });
 });
 
-$(document).on("click.hospitalHistoryFilter", ".filterToggle", function (e) {
+$(document)
+  .off("click.hospitalHistoryFilter", ".filterToggle")
+  .on("click.hospitalHistoryFilter", ".filterToggle", function (e) {
   e.preventDefault();
-  e.stopPropagation();
+  e.stopImmediatePropagation();
 
-  const $dropdown = $(this).closest(".dropdown").find(".filterDropdown").first();
-  const isHidden = $dropdown.hasClass("hidden");
-  $(".filterDropdown, .submenu").addClass("hidden");
-  if (isHidden) $dropdown.removeClass("hidden");
+  const $dropdown = $(this).closest(".dropdown").children(".filterDropdown").first();
+  const opening = $dropdown.hasClass("hidden") || $dropdown.css("display") === "none";
+  $(".filterDropdown, .submenu").not($dropdown).addClass("hidden").css("display", "");
+  $dropdown.toggleClass("hidden", !opening).css("display", "");
+  $(this).attr("aria-expanded", String(opening));
 });
 
 /* =========================================================

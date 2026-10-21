@@ -56,7 +56,9 @@
                             <!-- Filter Dropdown -->
                             <div class="relative dropdown inline-block">
                                 <button
-                                    class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
+                                    id="lab-history-filter-toggle"
+                                    class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer"
+                                    type="button" aria-label="Open history filters" aria-expanded="false">
                                     <span class="material-symbols-outlined flex justify-center items-center">tune</span>
                                 </button>
 
@@ -101,6 +103,7 @@
 
                                 <div id="calendarContainer"
                                     class="submenu hidden absolute !top-8 !right-80 mr-4 z-[60] bg-white shadow-lg rounded border border-gray-200 p-2">
+                                    <p class="appointment-date-status text-sm p-2 text-dark-gray">Select start date</p>
                                     <div class="datepicker-inline"></div>
                                 </div>
 
@@ -1402,6 +1405,6 @@
 </script>
 
 {% block extra_js %}
-<script src="/static/js/lab-history.js?v=20261001-3"></script>
+<script src="/static/js/lab-history.js?v=20261021-3"></script>
 {% endblock %}
 
