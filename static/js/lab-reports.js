@@ -297,6 +297,7 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
             $("#reportRange").text(
                 "Data shown: " + response.range_label
             );
+            $(".lab-report-range-label").text(response.range_label || "All dates");
            updateHeatmap(
               response.heatmap_data
            );
@@ -643,7 +644,7 @@ $("input[type='text']").on("keyup", function () {
 //         $(".filterDropdown").addClass("hidden");
 //     }
 // );
-function openLabReportDatepicker($dropdown) {
+function openLabReportDatepicker($dropdown, $trigger) {
     const $picker = $dropdown.find(".datepicker-container").first();
     const $inline = $picker.find(".datepicker-inline").first();
     if (!$picker.length || !$inline.length || !$.fn.datepicker) return;
@@ -651,7 +652,7 @@ function openLabReportDatepicker($dropdown) {
     labReportPendingStartDate = "";
     $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
     $(".datepicker-container").not($picker).addClass("hidden").css("display", "");
-    $picker.removeClass("hidden").css("display", "");
+    $picker.removeClass("hidden").css({ display: "", position: "fixed", width: "max-content", zIndex: 10000 });
     $("#labReportDateStatus").text("Select start date");
 
     if ($inline.hasClass("hasDatepicker")) $inline.datepicker("destroy");
@@ -677,9 +678,28 @@ function openLabReportDatepicker($dropdown) {
             $("#labReportDateStatus").text(`${rangeStart} to ${rangeEnd}`);
             $picker.addClass("hidden").css("display", "");
             $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
+            const url = new URL(window.location.href);
+            url.searchParams.set("date_filter", "custom");
+            url.searchParams.set("start_date", rangeStart);
+            url.searchParams.set("end_date", rangeEnd);
+            window.history.replaceState({}, "", url.toString());
+            setLabReportActiveFilter("custom");
             loadDashboardData("custom", rangeStart, rangeEnd);
         },
     });
+
+    const placePicker = function () {
+        if ($picker.hasClass("hidden")) return;
+        const anchor = ($trigger && $trigger.length ? $trigger[0] : $dropdown.find(".filterToggle")[0]);
+        if (!anchor) return;
+        const rect = anchor.getBoundingClientRect();
+        const width = $picker.outerWidth();
+        const left = Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8));
+        const top = Math.min(rect.bottom + 8, window.innerHeight - $picker.outerHeight() - 8);
+        $picker.css({ left: `${left}px`, top: `${Math.max(8, top)}px`, right: "auto" });
+    };
+    requestAnimationFrame(placePicker);
+    $(window).off("resize.labReportPicker").on("resize.labReportPicker", placePicker);
 }
 
 $(document).off("click.labReportFilter");
@@ -704,11 +724,16 @@ $(document).on(
 
         if (filterText === "custom") {
             setLabReportActiveFilter(filterText);
-            openLabReportDatepicker($(this).closest(".dropdown"));
+            openLabReportDatepicker($(this).closest(".dropdown"), $(".filterToggle"));
             return;
         }
 
         setLabReportActiveFilter(filterText);
+        const url = new URL(window.location.href);
+        url.searchParams.set("date_filter", filterText);
+        url.searchParams.delete("start_date");
+        url.searchParams.delete("end_date");
+        window.history.replaceState({}, "", url.toString());
 
         labReportPendingStartDate = "";
         $(".datepicker-container").addClass("hidden").css("display", "");
@@ -718,10 +743,10 @@ $(document).on(
     }
 );
 
-$(document).on("click.labReportCalendarIcon", ".lab-report-filter .calendar-icon", function (e) {
+$(document).on("click.labReportCalendarIcon", ".lab-report-chart-calendar", function (e) {
     e.preventDefault();
     e.stopPropagation();
-    openLabReportDatepicker($(this).closest(".dropdown"));
+    openLabReportDatepicker($(this).closest(".dropdown"), $(this));
 });
 
 $(document).on("click.labReportDatepickerBack", "#labReportDatepickerBack", function (e) {
@@ -738,7 +763,7 @@ $(document).on("click.labReportDatepickerBack", "#labReportDatepickerBack", func
 // FILTER DROPDOWN TOGGLE
 // =====================================
 
-$(".filterToggle").click(function (e) {
+$(".filterToggle").off("click.labReportToggle").on("click.labReportToggle", function (e) {
 
     e.stopPropagation();
 
@@ -746,10 +771,13 @@ $(".filterToggle").click(function (e) {
 
 });
 
-$(document).click(function () {
+$(document).off("click.labReportOutside").on("click.labReportOutside", function (e) {
+    if ($(e.target).closest(".lab-report-filter, .datepicker-container, .ui-datepicker").length) return;
+    $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
+});
 
-    $(".filterDropdown").addClass("hidden");
-
+$(document).off("click.labReportPickerInside").on("click.labReportPickerInside", ".datepicker-container, .ui-datepicker", function (e) {
+    e.stopPropagation();
 });
 // =====================================
 // CUSTOM DROPDOWN
