@@ -4,7 +4,6 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from registration.models import (
-    User,
     DoctorSpeciality,
     DoctorEducation,
     DoctorExperience,
@@ -157,18 +156,6 @@ def save_hospital_doctor(request):
         filename = fs.save(photo.name, photo)
 
         photo_path = "/document/doctor_photos/" + filename
-
-    email = f"doctor_{phone}@hospital.local"
-
-    doctor_user, _ = User.objects.get_or_create(
-        email=email,
-        defaults={
-            "phone_number": phone,
-            "phone_country_code": "+91",
-            "password": "",
-            "user_type": "doctor",
-        }
-    )
 
     doctor_id = data.get("doctor_id")
     if doctor_id:

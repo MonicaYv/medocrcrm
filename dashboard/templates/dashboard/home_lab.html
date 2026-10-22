@@ -143,8 +143,8 @@
                 </p>
 
                 <p class="font-semibold text-sm text-dodger-blue">
-                    {{ contact_person.phone_country_code }}
-                    {{ contact_person.phone_number }}
+                    {{ user.phone_country_code|default:"+91" }}
+                    {{ lab_profile.contact_number|default:user.phone_number|default:"N/A" }}
                 </p>
 
                 <p class="font-semibold text-sm">

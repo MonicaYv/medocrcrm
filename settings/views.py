@@ -20,7 +20,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.views.decorators.http import (
     require_POST,
     require_GET,
@@ -268,6 +268,7 @@ def handle_client_profile(user):
         'city': get_related_location_name(profile, 'city'),
         'state': get_related_location_name(profile, 'state'),
         'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
+        'country_options': load_country_codes(),
         'pincode': profile.pincode,
         'referral_code': profile.referral_code,
         'incorporation_number': profile.incorporation_number,
@@ -466,7 +467,9 @@ def handle_hospital_profile(user):
         'hospital_name' : profile.hospital_name,
         'owner_name': profile.owner_name,
         'contact_no': profile.contact_no,
+        'contact_number': profile.contact_no,
         'alternate_contact_no': profile.alternate_contact_no,
+        'alt_contact_number': profile.alternate_contact_no,
         'address': profile.address,
         # 'country': profile.country,
         # 'city': profile.city,
@@ -1597,7 +1600,6 @@ def update_hospital_profile(request):
         "country",
         "pincode",
         "owner_name",
-        "contact_number",
     ]
 
     for field in required_fields:
@@ -1634,10 +1636,10 @@ def update_hospital_profile(request):
 
             # Update user details
             user.email = post_data.get("email")
-            user.phone_country_code = post_data.get(
-                "phone_country_code"
+            user.phone_country_code = normalize_dial_code(
+                post_data.get("phone_country_code")
             )
-            user.phone_number = post_data.get("phone")
+            user.phone_number = post_data.get("phone", "").strip()
 
             # Update hospital details
             hospital_profile.hospital_name = post_data.get(
@@ -1645,6 +1647,10 @@ def update_hospital_profile(request):
             )
             hospital_profile.address = post_data.get("address")
             hospital_profile.owner_name = post_data.get("owner_name")
+            hospital_profile.contact_no = user.phone_number
+            hospital_profile.alternate_contact_no = (
+                post_data.get("alt_contact_number") or ""
+            ).strip() or None
             hospital_profile.country = post_data.get("country")
             hospital_profile.pincode = post_data.get("pincode")
 
@@ -1682,6 +1688,11 @@ def update_hospital_profile(request):
                 "message": "Hospital profile updated successfully"
             })
 
+    except IntegrityError:
+        return JsonResponse({
+            "success": False,
+            "message": "This phone number or email is already in use.",
+        }, status=400)
     except Exception as e:
         print("SAVE ERROR:", e)
 

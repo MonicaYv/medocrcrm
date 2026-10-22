@@ -510,54 +510,6 @@ $hospitalHistoryDatepicker.datepicker({
   }
 });
 
-  // Register Custom Date Range Handler
-$("#calendarContainer .datepicker-inline").datepicker(
-    "option",
-    "onSelect",
-    function (dateText) {
-        console.log("DATE SELECTED:", dateText);
-
-        const selectedDate = $.datepicker.parseDate(
-            "mm/dd/yy",
-            dateText
-        );
-
-        const formattedDate = $.datepicker.formatDate(
-            "yy-mm-dd",
-            selectedDate
-        );
-
-        // First click: Start Date
-        if (!hospitalHistoryStartDate || hospitalHistoryEndDate) {
-            hospitalHistoryStartDate = formattedDate;
-            hospitalHistoryEndDate = null;
-
-            console.log("START DATE:", hospitalHistoryStartDate);
-            console.log("Ab End Date select karo.");
-            return;
-        }
-
-        // Second click: End Date
-        hospitalHistoryEndDate = formattedDate;
-
-        if (hospitalHistoryEndDate < hospitalHistoryStartDate) {
-            const temp = hospitalHistoryStartDate;
-            hospitalHistoryStartDate = hospitalHistoryEndDate;
-            hospitalHistoryEndDate = temp;
-        }
-
-        hospitalHistoryFilters.date_filter = "custom";
-        hospitalHistoryFilters.from_date = hospitalHistoryStartDate;
-        hospitalHistoryFilters.to_date = hospitalHistoryEndDate;
-
-        console.log("FINAL DATE RANGE:", hospitalHistoryFilters);
-
-        $(".filterDropdown, .submenu").addClass("hidden");
-        $("#calendarContainer").addClass("hidden");
-
-        loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
-    }
-); 
   // 3. Open Calendar when clicking "Custom"
   $(".trigger-custom").on("click", function (e) {
     e.stopPropagation();

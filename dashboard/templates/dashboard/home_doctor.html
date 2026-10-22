@@ -134,8 +134,8 @@
               <div class="flex flex-col items-center gap-2">
                 <p class="font-semibold text-sm">{{ contact_person.name|default:doctor_profile.owner_name|default:"N/A" }}</p>
                 <p class="font-semibold text-sm text-dodger-blue">
-                  {{ contact_person.phone_country_code|default:"+91" }}
-                  {{ contact_person.phone_number|default:doctor_profile.contact_number|default:"N/A" }}
+                  {{ user.phone_country_code|default:"+91" }}
+                  {{ doctor_profile.contact_number|default:user.phone_number|default:"N/A" }}
                 </p>
                 <p class="font-semibold text-sm">
                   Designation: {{ contact_person.role|default:"N/A" }}

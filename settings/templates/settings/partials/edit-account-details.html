@@ -516,13 +516,14 @@
             </div>
             <!-- Country -->
             <div class="flex flex-col">
-            <input
-                name="country"
-                value="{{country}}"
-                type="text"
-                class="border rounded px-3 py-2"
-                placeholder="Country"
-            />
+            <select name="country" class="border rounded px-3 py-2">
+                <option value="">Select Country</option>
+                {% for country_option in country_options %}
+                    <option value="{{ country_option.name }}" {% if country_option.name == country %}selected{% endif %}>
+                        {{ country_option.name }}
+                    </option>
+                {% endfor %}
+            </select>
             <span
                 class="error countryError text-red-500 text-sm mt-1 hidden"
             ></span>
@@ -1200,28 +1201,11 @@
                     placeholder="Owner Name" value="{{owner_name}}"/>
                  <span class="error owner_nameError text-red-500 text-sm mt-1 hidden"></span>
             </div>
-            <!-- Country code + Phone -->
-            <div class="flex flex-col lg:flex-row gap-4">
-                <!-- Country Code -->
-                <div class="pl-4 lg:w-1/4">
-                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
-                        {% for code in country_codes %}
-                            <option value="{{ code.dial_code }}"
-                                {% if code.dial_code == country_code %}selected{% endif %}>
-                                {{ code.name }} ({{ code.dial_code }})
-                            </option>
-                        {%endfor%}
-                    </select>
-                    <span class="error countryCodesError text-red-500 text-sm mt-1 hidden"></span>
-                </div>
-
-                <!-- Phone -->
-                <div class="flex-1">
-                    <input name="contact_number" type="text" maxlength="10" class="border rounded px-3 py-2 w-full"
-                        placeholder="Phone No." value="{{contact_number}}"/>
-                     <span class="error contact_numberError text-red-500 text-sm mt-1 hidden"></span>
-                </div>
-            </div>
+        <!-- Alternate Phone -->
+        <div class="flex flex-col">
+            <input name="alt_contact_number" type="text" maxlength="20" class="border rounded px-3 py-2 w-full"
+                placeholder="Alternate Phone No." value="{{alt_contact_number|default:alternate_contact_no}}"/>
+        </div>
             <!--Send OTP-->
             <div class="flex flex-col lg:flex-row lg:items-center gap-2 hidden">
                 <div class="flex-1">

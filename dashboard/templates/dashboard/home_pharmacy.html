@@ -165,7 +165,7 @@
                                 </p>
 
                                 <p class="font-semibold text-sm text-dodger-blue">
-                                    +91 {{ contact_person.phone_number|default:"N/A" }}
+                                    {{ user.phone_country_code|default:"+91" }} {{ pharmacy_profile.contact_number|default:user.phone_number|default:"N/A" }}
                                 </p>
 
                                 <p class="font-semibold text-sm">
