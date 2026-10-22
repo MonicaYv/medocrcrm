@@ -266,7 +266,14 @@ $(document).ready(function () {
   }
 
 $(document).ready(function () {
-    let selectedFilter = "today", selectedVisitType = "", startDate = "", endDate = "", selectingStartDate = true, reportRequest = null;
+    const reportParams = new URLSearchParams(window.location.search);
+
+    let selectedFilter = reportParams.get("filter") || "today";
+    let selectedVisitType = reportParams.get("visit_type") || "";
+    let startDate = reportParams.get("start_date") || "";
+    let endDate = reportParams.get("end_date") || "";
+    let selectingStartDate = true;
+    let reportRequest = null;
     const $dropdown = $(".filterDropdown"), $calendar = $(".datepicker-container"), $datePicker = $(".report-date-picker");
     const $dateLabel = $(".filterToggle").closest(".dropdown").parent().find("p.text-dodger-blue").first();
     $(".filterToggle").on("click", function (e) {
@@ -446,6 +453,8 @@ $(document).ready(function () {
   //     });
   //   });
   // INDIVIDUAL CHART CALENDARS
+  // INDIVIDUAL CHART CALENDARS
+// INDIVIDUAL CHART CALENDARS
 const individualChartDates = {};
 
 $(".calendar-icon")
@@ -461,7 +470,7 @@ $(".calendar-icon")
 
     if (!$pickerContainer.length || !$inline.length) {
       console.warn(
-        "Calendar container not found for:",
+        "Calendar container not found:",
         $chart.attr("id")
       );
       return;
@@ -488,7 +497,7 @@ $(".calendar-icon")
           end: ""
         };
 
-        // Select start date
+        // First date: Start date
         if (!state.start || state.end) {
           state.start = dateText;
           state.end = "";
@@ -497,19 +506,18 @@ $(".calendar-icon")
 
           $inline.datepicker("option", "minDate", dateText);
 
-          console.log(
-            "Individual graph start date:",
-            chartId,
-            dateText
-          );
+          console.log("Individual graph start date:", {
+            chart: chartId,
+            start_date: dateText
+          });
 
           return;
         }
 
-        // Select end date
+        // Second date: End date
         state.end = dateText;
 
-        // Keep dates in chronological order
+        // Ensure chronological order
         if (state.start > state.end) {
           [state.start, state.end] = [
             state.end,
@@ -528,16 +536,29 @@ $(".calendar-icon")
         $pickerContainer.addClass("hidden");
         $inline.datepicker("option", "minDate", null);
 
-        // Reload the complete reports page with selected dates
-        const params = new URLSearchParams({
-          filter: "custom",
-          visit_type: $("#visitTypeFilter").val() || "",
-          start_date: state.start,
-          end_date: state.end,
-          chart: chartId
-        });
+        // Preserve existing query parameters
+        const params = new URLSearchParams(
+          window.location.search
+        );
 
-        window.location.href = "/reports/?" + params.toString();
+        params.set("filter", "custom");
+        params.set(
+          "visit_type",
+          $("#visitTypeFilter").val() || ""
+        );
+
+        // Store date range separately for this chart
+        params.set(`${chartId}_start_date`, state.start);
+        params.set(`${chartId}_end_date`, state.end);
+
+        // Remove old generic date parameters
+        params.delete("start_date");
+        params.delete("end_date");
+        params.delete("chart");
+
+        // Reload reports page
+        window.location.href =
+          window.location.pathname + "?" + params.toString();
       }
     });
   });
@@ -613,7 +634,8 @@ $(".calendar-icon")
             }
         });
     }
-    updateActiveFilter("today"); loadDashboardData();
+    updateActiveFilter(selectedFilter);
+    loadDashboardData();
 });
 
   // FIXED: Removed automated loadDashboardData("month") from here to protect Django initial values!
@@ -744,3 +766,64 @@ function loadDashboardData(filterType) {
         }
     });
 }
+
+
+// INDIVIDUAL CHART DATE LABELS
+$(document).ready(function () {
+    const params = new URLSearchParams(window.location.search);
+
+    function formatChartDate(dateString) {
+        const [year, month, day] = dateString.split("-");
+        return `${day}/${month}/${year.slice(-2)}`;
+    }
+
+    // Restore dates for every chart after page reload
+    [
+        "departmentRevenueSection",
+        "packageSection",
+        "conversionSection",
+        "loadAnalyticsSection",
+        "heatmapSection",
+        "patientJourneySection"
+    ].forEach(function (chartId) {
+        const start = params.get(`${chartId}_start_date`);
+        const end = params.get(`${chartId}_end_date`);
+
+        if (start && end) {
+            $("#" + chartId)
+                .find(".chart-date-label")
+                .first()
+                .text(
+                    `${formatChartDate(start)} – ${formatChartDate(end)}`
+                );
+        }
+    });
+
+    // Support the currently selected chart's existing URL parameters
+    const chartId = params.get("chart");
+    const start = params.get("start_date");
+    const end = params.get("end_date");
+
+    if (chartId && start && end) {
+        params.set(`${chartId}_start_date`, start);
+        params.set(`${chartId}_end_date`, end);
+
+        $("#" + chartId)
+            .find(".chart-date-label")
+            .first()
+            .text(
+                `${formatChartDate(start)} – ${formatChartDate(end)}`
+            );
+
+        // Keep the individual chart dates in the URL
+        params.delete("start_date");
+        params.delete("end_date");
+        params.delete("chart");
+
+        history.replaceState(
+            null,
+            "",
+            window.location.pathname + "?" + params.toString()
+        );
+    }
+});
