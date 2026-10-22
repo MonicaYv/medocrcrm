@@ -137,50 +137,92 @@ $(document).ready(function () {
   });
 
 
-  // 5. Handle option selection in Date submenu (Week/Month only, not Custom)
-  $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
-    e.stopPropagation();
+  
+  
+  // 5. Handle Week / Month date filters with AJAX
+  $("#dateSubmenu > div:not(.trigger-custom)")
+    .off("click")
+    .on("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
 
-    // Remove active state from all options in date submenu
-    $("#dateSubmenu .material-symbols-outlined")
-      .removeClass("!text-dodger-blue")
-      .addClass("text-light-gray");
+      const $selected = $(this);
+      const selectedFilter = $selected.text().trim().toLowerCase();
 
-    // Add active state to clicked option
-    $(this)
-      .find(".material-symbols-outlined")
-      .removeClass("text-light-gray")
-      .addClass("!text-dodger-blue");
+      // Update active icon
+      $("#dateSubmenu .material-symbols-outlined")
+        .removeClass("!text-dodger-blue")
+        .addClass("text-light-gray");
 
-    // Close all dropdowns
-    closeDoctorFilters();
-  });
+      $selected
+        .find(".material-symbols-outlined")
+        .removeClass("text-light-gray")
+        .addClass("!text-dodger-blue");
 
-  // 6. Handle status selection
-  $("#statusSubmenu > div").on("click", function (e) {
-    e.stopPropagation();
+      // Calculate selected date range
+      const endDate = new Date();
+      const startDate = new Date();
 
-    // Get the parent submenu
-    const $submenu = $(this).closest(".submenu");
+      if (selectedFilter.includes("week")) {
+        startDate.setDate(endDate.getDate() - 7);
+        activeDateFilter = 7;
+      } else {
+        startDate.setDate(endDate.getDate() - 30);
+        activeDateFilter = 30;
+      }
 
-    // Remove active state from all options in this submenu
-    $submenu
-      .find(".material-symbols-outlined")
-      .removeClass("!text-dodger-blue")
-      .addClass("text-light-gray");
+      activeCustomDate = null;
 
-    // Add active state to clicked option
-    $(this)
-      .find(".material-symbols-outlined")
-      .removeClass("text-light-gray")
-      .addClass("!text-dodger-blue");
+      const formatDate = (d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
 
-    activeStatusFilter = String($(this).data("status") || "").toLowerCase();
-    applyDoctorFilters();
+      // AJAX request; page reload nahi hoga
+      loadHospitalDoctors(
+        formatDate(startDate),
+        formatDate(endDate),
+        activeStatusFilter
+      );
 
-    // Close all dropdowns
-    closeDoctorFilters();
-  });
+      closeDoctorFilters();
+    });
+
+
+
+  
+  // 6. Handle Present / Absent status filters with AJAX
+  $("#statusSubmenu > div")
+    .off("click")
+    .on("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const $selected = $(this);
+      const $submenu = $selected.closest(".submenu");
+
+      // Update active icon
+      $submenu.find(".material-symbols-outlined")
+        .removeClass("!text-dodger-blue")
+        .addClass("text-light-gray");
+
+      $selected.find(".material-symbols-outlined")
+        .removeClass("text-light-gray")
+        .addClass("!text-dodger-blue");
+
+      activeStatusFilter = String(
+        $selected.data("status") || ""
+      ).toLowerCase();
+
+      // AJAX request; page reload nahi hoga
+      loadHospitalDoctors("", "", activeStatusFilter);
+
+      closeDoctorFilters();
+    });
+
+
 
   // 7. Global Close
   $(document).on("click.doctorFilters", function (event) {
@@ -269,46 +311,89 @@ $(document).ready(function () {
   });
 
   
-function loadHospitalDoctors(startDate = "", endDate = "") {
-  console.log("Loading doctors with date range:", {
-    start_date: startDate,
-    end_date: endDate
-  });
+// function loadHospitalDoctors(startDate = "", endDate = "") {
+//   console.log("Loading doctors with date range:", {
+//     start_date: startDate,
+//     end_date: endDate
+//   });
 
+//   $.ajax({
+//     url: "/staff/hospital/doctors/list/",
+//     type: "GET",
+//     dataType: "json",
+//     data: {
+//       start_date: startDate,
+//       end_date: endDate
+//     },
+
+//     success: function (res) {
+//       console.log("Doctors list response:", res);
+
+//       if (res.success) {
+//         allDoctors = Array.isArray(res.doctors) ? res.doctors : [];
+//         filteredDoctors = allDoctors.slice();
+
+//         currentPage = 1;
+//         applyDoctorFilters();
+//       } else {
+//         console.error("Failed to load doctors:", res.error);
+//         toastr.error(res.error || "Failed to load doctors");
+//       }
+//     },
+
+//     error: function (xhr) {
+//       console.error(
+//         "Doctor list API error:",
+//         xhr.status,
+//         xhr.responseText
+//       );
+//       toastr.error("Unable to load doctors");
+//     }
+//   });
+// }
+
+function loadHospitalDoctors(
+  startDate = "",
+  endDate = "",
+  status = ""
+) {
   $.ajax({
     url: "/staff/hospital/doctors/list/",
     type: "GET",
     dataType: "json",
     data: {
       start_date: startDate,
-      end_date: endDate
+      end_date: endDate,
+      status: status
     },
 
     success: function (res) {
-      console.log("Doctors list response:", res);
+      console.log("Doctors filter response:", res);
 
       if (res.success) {
-        allDoctors = Array.isArray(res.doctors) ? res.doctors : [];
-        filteredDoctors = allDoctors.slice();
+        allDoctors = Array.isArray(res.doctors)
+          ? res.doctors
+          : [];
 
+        filteredDoctors = allDoctors.slice();
         currentPage = 1;
+
         applyDoctorFilters();
       } else {
-        console.error("Failed to load doctors:", res.error);
-        toastr.error(res.error || "Failed to load doctors");
+        console.error("Doctor filter failed:", res.error);
       }
     },
 
     error: function (xhr) {
       console.error(
-        "Doctor list API error:",
+        "Doctor AJAX error:",
         xhr.status,
         xhr.responseText
       );
-      toastr.error("Unable to load doctors");
     }
   });
 }
+
 
 
   // Initial render
@@ -354,14 +439,14 @@ function loadHospitalDoctors(startDate = "", endDate = "") {
     "input",
     applyDoctorFilters,
   );
-  $("#dateSubmenu > div")
-    .not(".trigger-custom")
-    .on("click", function () {
-      activeCustomDate = null;
-      const selectedFilter = $(this).text().trim();
-      activeDateFilter = selectedFilter === "Week" ? 7 : selectedFilter === "Month" ? 30 : 365;
-      applyDoctorFilters();
-    });
+  // $("#dateSubmenu > div")
+  //   .not(".trigger-custom")
+  //   .on("click", function () {
+  //     activeCustomDate = null;
+  //     const selectedFilter = $(this).text().trim();
+  //     activeDateFilter = selectedFilter === "Week" ? 7 : selectedFilter === "Month" ? 30 : 365;
+  //     applyDoctorFilters();
+  //   });
 
   $(".popup-btn").on("click", function () {
     let popupId = $(this).data("popup");
