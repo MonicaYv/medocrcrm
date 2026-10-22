@@ -38,7 +38,7 @@ $(document).ready(function () {
   $(document).on("click", function (e) {
     // Clicks inside the custom date picker must not dismiss the dropdown - this
     // handler is bound before the picker handlers, so it has to opt out here.
-    if ($(e.target).closest("#doctorReportDatepicker").length) return;
+    if ($(e.target).closest("#filterDropdown, .datepicker-container, .ui-datepicker").length) return;
 
     $("#filterDropdown").addClass("hidden");
     $(".datepicker-container").addClass("hidden");
@@ -181,6 +181,10 @@ $(document).ready(function () {
     // Swap the submenu for the calendar, keeping the dropdown itself open.
     $("#mainMenu, #dateMenu, #visitMenu").addClass("hidden");
     $picker.removeClass("hidden").css("display", "");
+    // The inline calendar is wider than the filter menu and the page content
+    // clips overflow. Float the picker against the viewport and clamp it to
+    // the available width so every weekday/date remains reachable.
+    $picker.css({ position: "fixed", width: "max-content", zIndex: 10000 });
     setDoctorReportDateStatus("Select start date");
     doctorReportPendingStart = "";
 
@@ -226,6 +230,17 @@ $(document).ready(function () {
         loadDoctorDashboardData("custom");
       },
     });
+
+    const placePicker = function () {
+      if ($picker.hasClass("hidden")) return;
+      const trigger = document.getElementById("filterToggle").getBoundingClientRect();
+      const pickerWidth = $picker.outerWidth();
+      const left = Math.max(8, Math.min(trigger.right - pickerWidth, window.innerWidth - pickerWidth - 8));
+      const top = Math.min(trigger.bottom + 8, window.innerHeight - $picker.outerHeight() - 8);
+      $picker.css({ left: left + "px", top: Math.max(8, top) + "px", right: "auto" });
+    };
+    requestAnimationFrame(placePicker);
+    $(window).off("resize.doctorReportPicker").on("resize.doctorReportPicker", placePicker);
   }
 
   // The calendar icon on the "Custom" row toggles the picker directly.
@@ -262,9 +277,19 @@ $(document).ready(function () {
       $("#dateMenu .option").removeClass("active");
       $("#dateMenu .option[data-value='Custom']").addClass("active");
       window.doctorReportFilter = "custom";
+      // The shared range picker lives in the report filter. Open its parent
+      // before showing it so chart-level Custom never renders inside a hidden
+      // dropdown.
+      $("#filterDropdown").removeClass("hidden");
+      $("#mainMenu, #dateMenu, #visitMenu").addClass("hidden");
       openDoctorReportDatepicker();
       return;
     }
+    window.doctorReportStartDate = "";
+    window.doctorReportEndDate = "";
+    window.doctorReportFilter = value;
+    $("#dateMenu .option").removeClass("active");
+    $("#dateMenu .option[data-value='" + value + "']").addClass("active");
     loadDoctorDashboardData(value);
   });
 
@@ -332,6 +357,7 @@ function loadDoctorDashboardData(filterType) {
             console.log("DOCTOR LIVE PIPELINE DISPATCH MATRIX RECIEVED:", response);
             if (response.range_label) {
                 $("#doctorReportRangeLabel").text(`Data shown: ${response.range_label}`);
+                $(".calendar-date-text").text(response.range_label);
             }
 
             // 1. Hydrate Overview Stats Cards selectors text values
