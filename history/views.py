@@ -310,6 +310,8 @@ def ajax_lab_history(request):
         request.GET.get("end_date", "")
         or request.GET.get("to_date", "")
     ).strip()
+    bid_status_filter = request.GET.get("bid_status", "").strip().lower()
+    visit_type = request.GET.get("visit_type", "").strip().lower()
 
     if status == "canceled":
         status = "cancelled"
@@ -344,7 +346,27 @@ def ajax_lab_history(request):
         "user",
     )
 
-    if status == "pending":
+    bid_status_values = {
+        "accepted": LabBidStatus.ACCEPTED,
+        "rejected": LabBidStatus.REJECTED,
+    }
+    display_status = (
+        bid_status_filter
+        if bid_status_filter in bid_status_values or bid_status_filter == "all"
+        else status
+    )
+
+    # A selected bid status is a report-wide filter. It must be able to show
+    # rejected bids, which are intentionally absent from the Pending tab's
+    # active-bid query and may belong to an appointment accepted by another lab.
+    if bid_status_filter in bid_status_values:
+        qs = qs.filter(
+            lab_bids__lab=lab,
+            lab_bids__bid_status=bid_status_values[bid_status_filter],
+        ).distinct()
+    elif bid_status_filter == "all":
+        qs = qs.filter(Q(lab_bids__lab=lab) | Q(accepted_lab=lab)).distinct()
+    elif status == "pending":
 
         qs = qs.filter(
             lab_bids__lab=lab,
@@ -392,6 +414,18 @@ def ajax_lab_history(request):
     else:
         qs = qs.none()
 
+    if visit_type == "home":
+        # Lab appointments store modes such as ``Home_sample``; match the
+        # stable mode prefix as well as older home-service values.
+        qs = qs.filter(preferred_mode__icontains="home")
+    elif visit_type == "hospital":
+        # The UI calls this Hospital, while lab rows commonly store
+        # ``Visit_lab`` for the in-lab visit mode.
+        qs = qs.filter(
+            Q(preferred_mode__icontains="visit")
+            | Q(preferred_mode__icontains="hospital")
+        )
+
     if date_filter:
         qs = apply_appointment_date_filter(
             qs,
@@ -403,7 +437,7 @@ def ajax_lab_history(request):
         )
 
     qs = qs.order_by("-created_at")
-    print("STATUS =", status)
+    print("STATUS =", display_status)
     print("COUNT =", qs.count())
     # for a in qs:
     #     print(
@@ -415,7 +449,7 @@ def ajax_lab_history(request):
     paginator = Paginator(qs, 5)
     page_obj = paginator.get_page(page_number)
     for appointment in page_obj:
-        if status == "accepted":
+        if display_status == "accepted":
             appointment.current_bid = LabBidding.objects.filter(
                 appointment=appointment,
                 lab=lab,
@@ -423,7 +457,7 @@ def ajax_lab_history(request):
                 is_active=True,
             ).first()
 
-        elif status == "cancelled":
+        elif display_status == "cancelled":
             appointment.current_bid = LabBidding.objects.filter(
                 appointment=appointment,
                 lab=lab,
@@ -432,27 +466,38 @@ def ajax_lab_history(request):
             if not appointment.current_bid:
                 appointment.current_bid = appointment.accepted_bid
 
-        elif status == "missed":
+        elif display_status == "missed":
             appointment.current_bid = LabBidding.objects.filter(
                 appointment=appointment,
                 lab=lab,
                 bid_status=LabBidStatus.ACCEPTED,
             ).first()
 
-        elif status == "pending":
+        elif display_status == "pending":
             appointment.current_bid = LabBidding.objects.filter(
                 appointment=appointment,
                 lab=lab,
                 bid_status=LabBidStatus.PENDING,
                 is_active=True,
             ).first()
+        elif display_status == "rejected":
+            appointment.current_bid = LabBidding.objects.filter(
+                appointment=appointment,
+                lab=lab,
+                bid_status=LabBidStatus.REJECTED,
+            ).first()
+        elif display_status == "all":
+            appointment.current_bid = LabBidding.objects.filter(
+                appointment=appointment,
+                lab=lab,
+            ).order_by("-updated_at").first() or appointment.accepted_bid
 
     html = render_to_string(
         "history/lab/lab_history_cards.html",
         {
             "appointments": page_obj,
             "page_obj": page_obj,
-            "current_tab": status,
+            "current_tab": "" if display_status == "all" else display_status,
         },
         request=request,
     )

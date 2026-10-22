@@ -5,7 +5,10 @@ $(document).ready(function () {
     date_filter: "",
     start_date: "",
     end_date: "",
+    bid_status: "",
+    visit_type: "",
   };
+  window.labHistoryVisitType = "";
   let pendingLabStartDate = "";
 
   function loadLabHistory(status = "accepted", page = 1) {
@@ -25,6 +28,8 @@ $(document).ready(function () {
         date_filter: labHistoryFilters.date_filter,
         start_date: labHistoryFilters.start_date,
         end_date: labHistoryFilters.end_date,
+        bid_status: labHistoryFilters.bid_status,
+        visit_type: labHistoryFilters.visit_type,
       },
       // success: function (res) {
       //   $("#lab-history-cards-container").html(res.html);
@@ -277,6 +282,14 @@ loadLabHistory("accepted", 1);
   // Tab switching functionality
   $(".tab-btn-hospital").on("click", function () {
     const targetTab = $(this).data("tab");
+    // Selecting a history tab clears the report-wide bid status override.
+    labHistoryFilters.bid_status = "";
+    $("#statusSubmenu .material-symbols-outlined")
+      .removeClass("!text-dodger-blue")
+      .addClass("text-light-gray");
+    $("#statusSubmenu > div").first().find(".material-symbols-outlined")
+      .removeClass("text-light-gray")
+      .addClass("!text-dodger-blue");
 
     // Update active tab button
     $(".tab-btn-hospital")
@@ -437,8 +450,26 @@ loadLabHistory("accepted", 1);
       .removeClass("text-light-gray")
       .addClass("!text-dodger-blue");
 
+    // Material Symbols icons are ligature text ("check"), so reading the
+    // entire row text produced values such as "checkhome" and "checkaccepted".
+    // Read only the label's direct text node, outside the icon span.
+    const selected = $(this).contents()
+      .filter(function () { return this.nodeType === 3; })
+      .text()
+      .trim()
+      .toLowerCase();
+    if ($submenu.is("#statusSubmenu")) {
+      labHistoryFilters.bid_status = selected;
+    } else {
+      const value = selected === "all" ? "" : selected;
+      labHistoryFilters.visit_type = value;
+      window.labHistoryVisitType = value;
+    }
+
     // Close all dropdowns
     $(".filterDropdown, .submenu").addClass("hidden");
+    applyHistorySearch();
+    loadLabHistory(currentHistoryStatus, 1);
   });
 
   // 7. Global Close
@@ -1193,11 +1224,19 @@ function applyHistorySearch() {
 
                 // Normalize card text to match different punctuation formats
                 const cardText = normalizeSearchText(rawCardText);
+                const visitType = String($card.attr("data-visit-type") || "").toLowerCase();
+                const selectedVisitType = String(window.labHistoryVisitType || "").toLowerCase();
+                const matchesVisitType = !selectedVisitType || (
+                    selectedVisitType === "home"
+                        ? visitType.includes("home")
+                        : visitType.includes("visit") || visitType.includes("hospital")
+                );
 
                 // Every search term must match the card text
-                const matches = searchTerms.every(function (term) {
+                const matchesSearch = searchTerms.every(function (term) {
                     return cardText.includes(term);
                 });
+                const matches = matchesSearch && matchesVisitType;
 
                 if (matches) {
                     $card.show();
