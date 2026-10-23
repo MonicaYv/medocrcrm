@@ -206,6 +206,14 @@ function toggleExpand(btn) {
 // for exporting donation history
 $(".view-donation-history-btn").on("click", function () {
   console.log("View donation history button clicked");
+  const rangeEnd = new Date();
+  const rangeStart = new Date(rangeEnd);
+  rangeStart.setDate(rangeStart.getDate() - 6);
+  const formatShortDate = (date) =>
+    `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getFullYear()).slice(-2)}`;
+  $("#donation-history-export-date-range").text(
+    `Last 7 days (${formatShortDate(rangeStart)} to ${formatShortDate(rangeEnd)})`
+  );
   $(".view-donation-history-popup").addClass("flex").removeClass("hidden");
   console.log("Loading donation history...");
   $.ajax({
