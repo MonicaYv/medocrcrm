@@ -42,45 +42,36 @@
                                 </div>
 
                                 <div class="relative dropdown">
-                                    <button type="button" id="couponFilterToggle" class="filterToggle flex items-center justify-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
+                                    <button type="button" id="couponFilterToggle" class="flex items-center justify-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
                                         <span class="material-symbols-outlined flex justify-center items-center">
                                             tune
                                         </span>
                                     </button>
-                                    <div id="couponFilterDropdown" class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-[9999]">
+                                    <div id="couponFilterDropdown" class="absolute right-0 top-full bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-[9999]">
                                         <div
-                                            class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-dodger-blue hover:text-white rounded">
+                                            data-coupon-date-filter="custom" class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-dodger-blue hover:text-white rounded">
                                             Custom date
-                                            <span class="material-symbols-outlined calendar-icon">
+                                            <span class="material-symbols-outlined">
                                                 calendar_today
                                             </span>
                                         </div>
                                         <div
-                                            class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                                            data-coupon-date-filter="week" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                                             1 Week
                                         </div>
                                         <div
-                                            class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                                            data-coupon-date-filter="month" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                                             1 Month
                                         </div>
                                         <div
-                                            class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
+                                            data-coupon-date-filter="year" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
                                             1 Year
                                         </div>
                                     </div>
                                 </div>
-                                <div id="couponDatePicker" class="hidden fixed right-4 top-20 z-[9999] bg-white shadow-lg rounded-md p-4">
-                                    <div class="flex flex-col gap-3 w-[280px]">
-                                        <div>
-                                            <label class="text-sm font-medium text-dark-gray">Start Date</label>
-                                            <input type="date" id="couponStartDate" class="w-full border border-slate-gray rounded-md p-2 mt-1">
-                                        </div>
-                                        <div>
-                                            <label class="text-sm font-medium text-dark-gray">End Date </label>
-                                            <input type="date" id="couponEndDate"class="w-full border border-slate-gray rounded-md p-2 mt-1">
-                                        </div>
-                                        <button type="button" id="applyCouponDateFilter" class="bg-dodger-blue text-white rounded-md py-2">Apply </button>
-                                    </div>
+                                <div id="couponDatePicker" class="hidden fixed right-4 top-20 z-[10000] bg-white shadow-lg rounded-md p-4">
+                                    <p id="couponDateRangeStatus" class="mb-2 text-sm text-dark-gray" aria-live="polite">Select a start date</p>
+                                    <div id="couponDateRangeCalendar"></div>
                                 </div>
                             </div>
                         </div>
