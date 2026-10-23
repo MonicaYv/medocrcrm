@@ -376,6 +376,13 @@ function openDonationHistoryDatepicker($container) {
   $datepicker.datepicker("option", "onSelect", function (dateText) {
     if (!firstDate) {
       firstDate = dateText;
+      // Donation history custom ranges need a second selection to complete.
+      // Keep the prompt visible above the inline calendar.
+      if (window.toastr) {
+        window.toastr.info("Please select an end date.");
+      } else if (window.showToaster) {
+        window.showToaster("info", "Please select an end date.");
+      }
       return;
     }
 
