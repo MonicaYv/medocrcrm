@@ -52,6 +52,9 @@ $(document).ready(function () {
       if (!customStartDate || customEndDate) {
         customStartDate = dateText;
         customEndDate = null;
+        // Keep the second pick on or after the start date and tell the user
+        // that the range is not applied until an end date is selected.
+        $hospitalDatepicker.datepicker('option', 'minDate', dateText);
 
         console.log("Custom Start Date:", customStartDate);
         if (isHospitalHomeDatepicker && window.toastr) {
@@ -69,6 +72,7 @@ $(document).ready(function () {
 
       } else {
         customEndDate = dateText;
+        $hospitalDatepicker.datepicker('option', 'minDate', null);
         if (isHospitalHomeDatepicker) {
           clearHospitalDateRangeToast();
         }
@@ -86,6 +90,15 @@ $(document).ready(function () {
             customEndDate,
             customStartDate
           ];
+        }
+
+        // Persist the range on the hospital overview so refreshes and copied
+        // URLs continue to show the same filtered metrics.
+        if (isHospitalHomeDatepicker) {
+          const $filterLabel = $('#hospital-home-filter-label');
+          const formatDate = (value) => value.split('-').reverse().join('/');
+          $filterLabel.text(`${formatDate(customStartDate)} - ${formatDate(customEndDate)}`);
+          $('.hospital-home-filter').closest('.dropdown').find('.datepicker-container').addClass('hidden').hide();
         }
 
         console.log("Custom Start Date:", customStartDate);
