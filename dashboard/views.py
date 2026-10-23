@@ -4,6 +4,7 @@ import random
 import uuid
 from decimal import Decimal
 from django.conf import settings
+from django.core.files.storage import default_storage
 from coupon.models import Coupon
 from django.utils import timezone
 from donate.models import Donation
@@ -39,7 +40,8 @@ from registration.models import (
     ContactPerson, 
     LabProfile, 
     DoctorProfile, 
-    HospitalProfile
+    HospitalProfile,
+    UserProfile,
 )
 from appointments.models import WalletTransaction
 from services.models import LabBidding, LabBidStatus
@@ -58,6 +60,7 @@ from django.http import HttpResponse
 from settings.models import SellerSubscription, SellerType 
 from registration.models import ContactPerson
 from django.db.models import Count
+from PIL import Image, UnidentifiedImageError
 
 PHARMACY_LOW_STOCK_THRESHOLD = 20
 
@@ -249,6 +252,99 @@ def lab_overview_data(request):
             status=AppointmentStatus.PENDING
         ).count(),
     })
+
+
+@require_POST
+@dashboard_login_required
+def upload_admin_profile_photo(request):
+    user = request.user_obj
+    if user.user_type not in {"lab", "hospital", "pharmacy", "doctor"}:
+        return JsonResponse({"error": "Profile photo upload is not available."}, status=403)
+
+    contact_person = ContactPerson.objects.filter(
+        profile_type=user.user_type,
+        profile=user,
+    ).order_by("-id").first()
+
+    photo = request.FILES.get("profile_photo")
+    if not photo:
+        return JsonResponse({"error": "Choose a profile picture to upload."}, status=400)
+    if photo.size > 5 * 1024 * 1024:
+        return JsonResponse({"error": "Profile pictures must be 5 MB or smaller."}, status=400)
+
+    extension = os.path.splitext(photo.name)[1].lower()
+    if extension not in {".jpg", ".jpeg", ".png"}:
+        return JsonResponse(
+            {"error": "Upload a JPG or PNG profile picture."},
+            status=400,
+        )
+
+    try:
+        image = Image.open(photo)
+        expected_format = "PNG" if extension == ".png" else "JPEG"
+        if (
+            image.format != expected_format
+            or image.width > 4096
+            or image.height > 4096
+        ):
+            return JsonResponse(
+                {"error": "Upload a JPG or PNG image no larger than 4096 by 4096 pixels."},
+                status=400,
+            )
+        image.verify()
+    except (Image.DecompressionBombError, UnidentifiedImageError, OSError, ValueError):
+        return JsonResponse(
+            {"error": "Upload a valid JPG or PNG image."},
+            status=400,
+        )
+    finally:
+        photo.seek(0)
+
+    admin_name = contact_person.name if contact_person else ""
+    if not admin_name:
+        if user.user_type == "lab":
+            admin_name = LabProfile.objects.filter(user=user).values_list(
+                "owner_name", flat=True
+            ).first()
+        elif user.user_type == "hospital":
+            admin_name = HospitalProfile.objects.filter(user=user).values_list(
+                "owner_name", flat=True
+            ).first()
+        elif user.user_type == "pharmacy":
+            pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+            if pharmacy_profile:
+                admin_name = " ".join(
+                    value for value in (
+                        pharmacy_profile.first_name,
+                        pharmacy_profile.last_name,
+                    ) if value
+                )
+        else:
+            doctor_profile = DoctorProfile.objects.filter(user=user).first()
+            if doctor_profile:
+                admin_name = doctor_profile.full_name or doctor_profile.owner_name
+    admin_name_parts = (admin_name or user.user_type.title()).split()
+    first_name = admin_name_parts[0]
+    last_name = " ".join(admin_name_parts[1:])
+    file_path = default_storage.save(
+        f"admin_profiles/{user.user_type}/{user.id}/{uuid.uuid4().hex}{extension}",
+        photo,
+    )
+    user_profile, _ = UserProfile.objects.get_or_create(
+        user=user,
+        defaults={
+            "first_name": first_name,
+            "last_name": last_name,
+        },
+    )
+    user_profile.profile_photo_path = file_path
+    user_profile.save(update_fields=["profile_photo_path"])
+
+    return JsonResponse({
+        "success": True,
+        "image_url": default_storage.url(file_path),
+    })
+
 from django.http import HttpResponse    
 
 @dashboard_login_required
@@ -269,6 +365,10 @@ def dashboard_home(request):
 
     context = get_common_context(request, user)
     context["theme_colors"] = get_theme_colors(user_type)
+    admin_user_profile = UserProfile.objects.filter(user=user).first()
+    context["admin_profile_photo_path"] = (
+        admin_user_profile.profile_photo_path if admin_user_profile else ""
+    )
     
     context["sidebar_menu"] = menu_items
 

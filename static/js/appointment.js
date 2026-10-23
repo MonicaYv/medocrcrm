@@ -256,7 +256,18 @@ loadAppointments("all", 1, "");
   $(document).on("click", function (event) {
     // Keep the calendar open while the user browses months/years inside it;
     // only a click *outside* should dismiss the filter UI.
-    if ($(event.target).closest(".datepicker-container").length) return;
+    const eventPath = event.originalEvent?.composedPath?.() || [];
+    const clickedInsideDatepicker = eventPath.some(
+      (node) =>
+        node instanceof Element &&
+        node.closest(".datepicker-container, .ui-datepicker")
+    );
+    if (
+      clickedInsideDatepicker ||
+      $(event.target).closest(".datepicker-container, .ui-datepicker").length
+    ) {
+      return;
+    }
     $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
   });
 
