@@ -234,9 +234,11 @@ $(document).on('click', '.points-chart-custom', function () {
     $picker.datepicker('option', 'onSelect', function (dateText) {
       if (!chartCustomStart) {
         chartCustomStart = dateText;
-        chartDateRangeToast = window.toastr
-          ? window.toastr.info('Please select an end date.')
-          : null;
+        if (window.toastr) {
+          window.toastr.info("Please select an end date.");
+        } else if (window.showToaster) {
+          window.showToaster("info", "Please select an end date.");
+        }
         return;
       }
       clearChartDateRangeToast();
@@ -547,7 +549,11 @@ function truncateDescriptions() {
         if (!firstDate) {
             firstDate = dateText;
             rewardsStartDate = dateText;
-            rewardsCustomDateToast = showDateRangeToast();
+            if (window.toastr) {
+              window.toastr.info("Please select an end date.");
+            } else if (window.showToaster) {
+              window.showToaster("info", "Please select an end date.");
+            }
             return;
         }
         clearDateRangeToast(rewardsCustomDateToast);
@@ -655,7 +661,11 @@ window.loadPointsHistoryFilter = function(type) {
     $picker.datepicker('option', 'onSelect', function(dateText) {
       if (!firstDate) {
         firstDate = dateText;
-        showPointsHistoryDateRangeToast();
+        if (window.toastr) {
+          window.toastr.info("Please select an end date.");
+        } else if (window.showToaster) {
+          window.showToaster("info", "Please select an end date.");
+        }
         return;
       }
       clearPointsHistoryDateRangeToast();
@@ -789,7 +799,11 @@ $(document).on("click", ".claim-btn", function () {
         if (!firstDate) {
           firstDate = dateText;
           claimedStartDate = dateText;
-          claimedCustomDateToast = showDateRangeToast();
+          if (window.toastr) {
+            window.toastr.info("Please select an end date.");
+          } else if (window.showToaster) {
+            window.showToaster("info", "Please select an end date.");
+          }
           return;
         }
         clearDateRangeToast(claimedCustomDateToast);
