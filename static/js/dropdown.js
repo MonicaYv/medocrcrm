@@ -2,6 +2,14 @@ $(document).ready(function () {
   // Initialize the datepicker
   let customStartDate = null;
   let customEndDate = null;
+  let hospitalDateRangeToast = null;
+
+  function clearHospitalDateRangeToast() {
+    if (hospitalDateRangeToast && window.toastr) {
+      window.toastr.clear(hospitalDateRangeToast);
+      hospitalDateRangeToast = null;
+    }
+  }
 
   // Appointment pages own their date picker/filter through appointment.js
   // (AJAX + inline calendar). Skip the global/shared initialisation there so
@@ -21,10 +29,22 @@ $(document).ready(function () {
 
   if ($hospitalDatepicker.length) {
     $hospitalDatepicker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+    $hospitalDatepicker.datepicker('option', 'changeMonth', true);
+    $hospitalDatepicker.datepicker('option', 'changeYear', true);
+    $hospitalDatepicker.datepicker('option', 'yearRange', '2000:2035');
+    const isHospitalHomeDatepicker = $hospitalDatepicker
+      .closest('.dropdown')
+      .find('.hospital-home-filter').length > 0;
 
     $('.doctor-home-filter [data-filter="custom"]').on('click', function () {
       customStartDate = null;
       customEndDate = null;
+    });
+
+    $('.hospital-home-filter [data-filter="custom"]').on('click', function () {
+      customStartDate = null;
+      customEndDate = null;
+      clearHospitalDateRangeToast();
     });
 
     $hospitalDatepicker.datepicker('option', 'onSelect', function (dateText) {
@@ -34,6 +54,12 @@ $(document).ready(function () {
         customEndDate = null;
 
         console.log("Custom Start Date:", customStartDate);
+        if (isHospitalHomeDatepicker && window.toastr) {
+          clearHospitalDateRangeToast();
+          hospitalDateRangeToast = window.toastr.info(
+            "Please select an end date."
+          );
+        }
         if (
           $(this).closest(".dropdown").find(".doctor-home-filter").length &&
           typeof toastr !== "undefined"
@@ -43,6 +69,9 @@ $(document).ready(function () {
 
       } else {
         customEndDate = dateText;
+        if (isHospitalHomeDatepicker) {
+          clearHospitalDateRangeToast();
+        }
 
         // Rewards owns its date filtering through AJAX; don't reload the
         // settings page with date query parameters from this shared handler.
@@ -103,6 +132,8 @@ $(document).ready(function () {
     // The lab dashboard handles its custom range in home.js, including
     // opening the picker and resetting the selected range.
     if ($(this).closest('.lab-home-filter').length) return;
+    // Hospital Overview also opens its custom picker from the filter row.
+    if ($(this).closest('.hospital-home-filter').length) return;
     // Date-filter options are owned by their page-specific delegated handlers.
     if ($(this).closest('[data-date-filter]').length) return;
     if ($(this).closest('.organization-daterange').length) return;

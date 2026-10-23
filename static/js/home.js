@@ -1851,6 +1851,20 @@ $(document).ready(function () {
   let labCustomStartDate = "";
   let labDateRangeToast = null;
 
+  if ($(".hospital-home-filter").length) {
+    const url = new URL(window.location.href);
+    const hadDateFilterParams =
+      url.searchParams.has("date_filter") ||
+      url.searchParams.has("start_date") ||
+      url.searchParams.has("end_date");
+    if (hadDateFilterParams) {
+      url.searchParams.delete("date_filter");
+      url.searchParams.delete("start_date");
+      url.searchParams.delete("end_date");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }
+
   function clearLabDateRangeToast() {
     if (labDateRangeToast && window.toastr) {
       window.toastr.clear(labDateRangeToast);
