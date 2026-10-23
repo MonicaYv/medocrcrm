@@ -1848,12 +1848,152 @@ $(document).ready(function () {
     $(".ngo-filterDropdown").hide();
   });
 
+  let labCustomStartDate = "";
+  let labDateRangeToast = null;
+
+  function clearLabDateRangeToast() {
+    if (labDateRangeToast && window.toastr) {
+      window.toastr.clear(labDateRangeToast);
+      labDateRangeToast = null;
+    }
+  }
+
+  function clearLabDateFilterFromUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("date_filter");
+    url.searchParams.delete("start_date");
+    url.searchParams.delete("end_date");
+    window.history.replaceState({}, "", url.toString());
+  }
+
+  $("#lab-home-filter-toggle").on("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const $dropdown = $(this).closest(".dropdown");
+    const $filterDropdown = $dropdown.find(".lab-home-filter");
+    const shouldOpen = !$filterDropdown.is(":visible");
+
+    $(".filterDropdown").not($filterDropdown).addClass("hidden").hide();
+    $(".datepicker-container").not($dropdown.find(".datepicker-container"))
+      .addClass("hidden")
+      .hide();
+
+    if (shouldOpen) {
+      $filterDropdown.removeClass("hidden").show();
+    } else {
+      $filterDropdown.addClass("hidden").hide();
+    }
+  });
+
   $(
     ".hospital-home-filter [data-filter], .doctor-home-filter [data-filter], .lab-home-filter [data-filter]",
   ).on("click", function (e) {
     e.stopPropagation();
 
     const filter = $(this).data("filter");
+    const $labFilter = $(this).closest(".lab-home-filter");
+
+    if ($labFilter.length) {
+      const $dropdownRoot = $(this).closest(".dropdown");
+      const $datepickerContainer = $dropdownRoot.find(".datepicker-container");
+      const $datepicker = $datepickerContainer.find(".datepicker-inline");
+      const $filterLabel = $("#lab-home-filter-label");
+
+      if (filter === "custom") {
+        clearLabDateRangeToast();
+        labCustomStartDate = "";
+        $dropdownRoot.find(".filterDropdown").hide();
+        $datepickerContainer.removeClass("hidden").show();
+
+        if ($.fn.datepicker && $datepicker.length) {
+          $datepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+          $datepicker.datepicker("option", "changeMonth", true);
+          $datepicker.datepicker("option", "changeYear", true);
+          $datepicker.datepicker("option", "minDate", null);
+          $datepicker.datepicker("option", "onSelect", function (dateText) {
+            if (!labCustomStartDate) {
+              labCustomStartDate = dateText;
+              labDateRangeToast = window.toastr
+                ? window.toastr.info("Please select an end date.")
+                : null;
+              return;
+            }
+
+            clearLabDateRangeToast();
+
+            const startDate =
+              labCustomStartDate <= dateText ? labCustomStartDate : dateText;
+            const endDate =
+              labCustomStartDate <= dateText ? dateText : labCustomStartDate;
+            labCustomStartDate = "";
+            const formatDate = (value) => value.split("-").reverse().join("/");
+
+            $filterLabel.text(`${formatDate(startDate)} - ${formatDate(endDate)}`);
+            $datepickerContainer.addClass("hidden").hide();
+
+            clearLabDateFilterFromUrl();
+
+            $.getJSON($filterLabel.data("endpoint"), {
+              start_date: startDate,
+              end_date: endDate,
+            })
+              .done(function (data) {
+                $("#lab-home-total-appointments").text(data.total_appointments);
+                $("#lab-home-confirmed-count").text(data.confirmed_count);
+                $("#lab-home-pending-count").text(data.pending_count);
+              })
+              .fail(function (xhr) {
+                const message =
+                  xhr.responseJSON?.error ||
+                  "Unable to load appointments for the selected dates.";
+                if (window.toastr) {
+                  window.toastr.error(message);
+                }
+              });
+          });
+        }
+        return;
+      }
+
+      clearLabDateRangeToast();
+      labCustomStartDate = "";
+      clearLabDateFilterFromUrl();
+      const today = new Date();
+      const start = new Date(today);
+      if (filter === "week") {
+        start.setDate(start.getDate() - 6);
+      } else if (filter === "month") {
+        start.setDate(start.getDate() - 29);
+      }
+      const formatIsoDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+      const labels = { today: "Today", week: "Week", month: "Month" };
+      $filterLabel.text(labels[filter] || "Today");
+      $datepickerContainer.addClass("hidden").hide();
+
+      $.getJSON($filterLabel.data("endpoint"), {
+        start_date: formatIsoDate(start),
+        end_date: formatIsoDate(today),
+      })
+        .done(function (data) {
+          $("#lab-home-total-appointments").text(data.total_appointments);
+          $("#lab-home-confirmed-count").text(data.confirmed_count);
+          $("#lab-home-pending-count").text(data.pending_count);
+        })
+        .fail(function (xhr) {
+          const message =
+            xhr.responseJSON?.error || "Unable to load the selected appointment range.";
+          if (window.toastr) {
+            window.toastr.error(message);
+          }
+        });
+      return;
+    }
 
     if (filter === "custom") {
       const $dropdownRoot = $(this).closest(".dropdown");
@@ -2454,6 +2594,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 $(document).ready(function () {
   $(".filterToggle").on("click", function (e) {
+    if ($(this).is("#lab-home-filter-toggle")) {
+      return;
+    }
     e.stopPropagation();
 
     $(this).siblings(".filterDropdown").toggleClass("hidden");

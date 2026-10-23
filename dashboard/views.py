@@ -47,6 +47,7 @@ from services.models import HospitalBidding, HospitalBidStatus
 from services.models import DoctorBidding, DoctorBidStatus
 from services.models import PharmacyMedicine
 from appointments.models import LabAppointments
+from appointments.models import AppointmentStatus
 from appointments.models import HospitalAppointments, HospitalAppointmentStatus
 from appointments.models import DoctorAppointment
 from orders.models import UserPurchase, OrderStatusChoices, PurchaseMedicine
@@ -207,6 +208,47 @@ def pharmacy_overview_data(request):
     return JsonResponse(
         get_pharmacy_overview_metrics(pharmacy_profile, start_date, end_date)
     )
+
+
+@require_GET
+@dashboard_login_required
+def lab_overview_data(request):
+    user = request.user_obj
+    if user.user_type != "lab":
+        return JsonResponse({"error": "Lab access required."}, status=403)
+
+    lab_profile = LabProfile.objects.filter(user=user).first()
+    if not lab_profile:
+        return JsonResponse({"error": "Lab profile not found."}, status=404)
+
+    try:
+        start_date = datetime.strptime(
+            request.GET.get("start_date", ""), "%Y-%m-%d"
+        ).date()
+        end_date = datetime.strptime(
+            request.GET.get("end_date", ""), "%Y-%m-%d"
+        ).date()
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "Select valid start and end dates."}, status=400)
+
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
+
+    appointments = filter_appointments_between_dates(
+        LabAppointments.objects.filter(accepted_lab=lab_profile),
+        "lab",
+        start_date,
+        end_date,
+    )
+    return JsonResponse({
+        "total_appointments": appointments.count(),
+        "confirmed_count": appointments.filter(
+            status=AppointmentStatus.ACCEPTED
+        ).count(),
+        "pending_count": appointments.filter(
+            status=AppointmentStatus.PENDING
+        ).count(),
+    })
 from django.http import HttpResponse    
 
 @dashboard_login_required

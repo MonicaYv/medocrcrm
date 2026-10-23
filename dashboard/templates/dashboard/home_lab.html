@@ -162,9 +162,11 @@
             <div class="flex justify-between items-center">
               <p class="font-semibold text-lg">Overview</p>
               <div class="flex items-center gap-2.5">
-                <p class="font-normal text-sm">
+                <p id="lab-home-filter-label" class="font-normal text-sm"
+                  data-endpoint="{% url 'lab_overview_data' %}">
                     {% if date_filter == "week" %}Week
                     {% elif date_filter == "month" %}Month
+                    {% elif date_filter == "custom" and start_date and end_date %}{{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}
                     {% elif date_filter == "custom" %}Custom
                     {% else %}Today{% endif %}
                 </p>
@@ -215,17 +217,12 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-4">
               <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
                 <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">
-                    {% if date_filter == "week" %}Total Appointments This Week
-                    {% elif date_filter == "month" %}Total Appointments This Month
-                    {% elif date_filter == "custom" %}Total Appointments{% if start_date and end_date %} ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}){% endif %}
-                    {% else %}Total Appointments Today{% endif %}
-                  </p>
+                  <p class="font-normal text-sm">Total Appointments</p>
                   <!-- <p class="font-semibold text-2xl">12</p> -->
-                  <p class="font-semibold text-2xl">
+                  <p id="lab-home-total-appointments" class="font-semibold text-2xl">
                       {{ today_appointments }}
                   </p>
-                  <p class="text-green font-normal text-xs">{{ confirmed_count }} Confirmed,{{ pending_count }} Pending</p>
+                  <p class="text-green font-normal text-xs"><span id="lab-home-confirmed-count">{{ confirmed_count }}</span> Confirmed, <span id="lab-home-pending-count">{{ pending_count }}</span> Pending</p>
                 </div>
                 <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
                   <img src="/static/images/book.svg" alt="">

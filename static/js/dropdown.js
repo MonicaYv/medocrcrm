@@ -100,6 +100,9 @@ $(document).ready(function () {
     if ($(this).closest('.appointment-page').length) return;
     // Lab reports manage a guided two-date inline picker in lab-reports.js.
     if ($(this).closest('.lab-report-filter').length) return;
+    // The lab dashboard handles its custom range in home.js, including
+    // opening the picker and resetting the selected range.
+    if ($(this).closest('.lab-home-filter').length) return;
     // Date-filter options are owned by their page-specific delegated handlers.
     if ($(this).closest('[data-date-filter]').length) return;
     if ($(this).closest('.organization-daterange').length) return;
