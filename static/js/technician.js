@@ -43,8 +43,16 @@ $(document).ready(function () {
   let technicianDateFilter = null;
   let technicianCustomStart = null;
   let technicianCustomEnd = null;
+  let technicianDateRangeToast = null;
   let technicianDepartmentFilter = "";
   let technicianDateResults = null;
+
+  function clearTechnicianDateRangeToast() {
+    if (technicianDateRangeToast && window.toastr) {
+      window.toastr.clear(technicianDateRangeToast);
+      technicianDateRangeToast = null;
+    }
+  }
 
   function getFilteredTechnicians() {
     const searchValue = String($("#searchTechnician").val() || "").toLowerCase().trim();
@@ -314,6 +322,13 @@ $("#searchTechnician").on("input", function () {
       e.preventDefault();
       e.stopPropagation();
 
+      clearTechnicianDateRangeToast();
+      technicianCustomStart = null;
+      technicianCustomEnd = null;
+      technicianDateFilter = "custom";
+      if ($.fn.datepicker && $("#calendarContainer .datepicker-inline").hasClass("hasDatepicker")) {
+          $("#calendarContainer .datepicker-inline").datepicker("option", "minDate", null);
+      }
       $("#calendarContainer").removeClass("hidden");
   });
 
@@ -340,6 +355,7 @@ $("#searchTechnician").on("input", function () {
           technicianDateFilter = text.includes("week") ? "week" : "month";
           technicianCustomStart = technicianCustomEnd = null;
           technicianDateResults = null;
+          clearTechnicianDateRangeToast();
           $(".filterDropdown, #dateSubmenu, #statusSubmenu, #calendarContainer").addClass("hidden");
           refreshTechnicianFilters();
       }
@@ -380,22 +396,32 @@ $("#searchTechnician").on("input", function () {
             $technicianDatepicker.datepicker();
         }
         $technicianDatepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+        $technicianDatepicker.datepicker("option", "changeMonth", true);
+        $technicianDatepicker.datepicker("option", "changeYear", true);
         $technicianDatepicker.datepicker("option", "onSelect", function (dateText) {
               const selected = new Date(`${dateText}T00:00:00`);
               const formatDate = (date) => $.datepicker.formatDate("yy-mm-dd", date);
               if (!technicianCustomStart || technicianCustomEnd) {
+                  clearTechnicianDateRangeToast();
                   technicianCustomStart = selected;
                   technicianCustomEnd = null;
                   technicianDateFilter = "custom";
+                  technicianDateResults = null;
+                  technicianDateRangeToast = window.toastr
+                      ? window.toastr.info("Please select an end date.")
+                      : null;
+                  $technicianDatepicker.datepicker("option", "minDate", dateText);
                   console.log("Technician custom start date selected:", formatDate(technicianCustomStart));
               } else {
                   technicianCustomEnd = selected;
+                  clearTechnicianDateRangeToast();
                   if (technicianCustomStart > technicianCustomEnd) {
                       [technicianCustomStart, technicianCustomEnd] = [technicianCustomEnd, technicianCustomStart];
                   }
                   console.log("Technician custom start date:", formatDate(technicianCustomStart));
                   console.log("Technician custom end date:", formatDate(technicianCustomEnd));
                   requestTechniciansForCustomDates(technicianCustomStart, technicianCustomEnd);
+                  $technicianDatepicker.datepicker("option", "minDate", null);
                   $("#dateSubmenu .trigger-custom .material-symbols-outlined")
                       .removeClass("text-light-gray").addClass("!text-dodger-blue");
                   $(".filterDropdown, #dateSubmenu, #calendarContainer").addClass("hidden");

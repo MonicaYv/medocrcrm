@@ -2,6 +2,14 @@ $(document).ready(function () {
   // Initialize the datepicker
   let customStartDate = null;
   let customEndDate = null;
+  let hospitalDateRangeToast = null;
+
+  function clearHospitalDateRangeToast() {
+    if (hospitalDateRangeToast && window.toastr) {
+      window.toastr.clear(hospitalDateRangeToast);
+      hospitalDateRangeToast = null;
+    }
+  }
 
   // Appointment pages own their date picker/filter through appointment.js
   // (AJAX + inline calendar). Skip the global/shared initialisation there so
@@ -21,10 +29,22 @@ $(document).ready(function () {
 
   if ($hospitalDatepicker.length) {
     $hospitalDatepicker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+    $hospitalDatepicker.datepicker('option', 'changeMonth', true);
+    $hospitalDatepicker.datepicker('option', 'changeYear', true);
+    $hospitalDatepicker.datepicker('option', 'yearRange', '2000:2035');
+    const isHospitalHomeDatepicker = $hospitalDatepicker
+      .closest('.dropdown')
+      .find('.hospital-home-filter').length > 0;
 
     $('.doctor-home-filter [data-filter="custom"]').on('click', function () {
       customStartDate = null;
       customEndDate = null;
+    });
+
+    $('.hospital-home-filter [data-filter="custom"]').on('click', function () {
+      customStartDate = null;
+      customEndDate = null;
+      clearHospitalDateRangeToast();
     });
 
     $hospitalDatepicker.datepicker('option', 'onSelect', function (dateText) {
@@ -32,8 +52,17 @@ $(document).ready(function () {
       if (!customStartDate || customEndDate) {
         customStartDate = dateText;
         customEndDate = null;
+        // Keep the second pick on or after the start date and tell the user
+        // that the range is not applied until an end date is selected.
+        $hospitalDatepicker.datepicker('option', 'minDate', dateText);
 
         console.log("Custom Start Date:", customStartDate);
+        if (isHospitalHomeDatepicker && window.toastr) {
+          clearHospitalDateRangeToast();
+          hospitalDateRangeToast = window.toastr.info(
+            "Please select an end date."
+          );
+        }
         if (
           $(this).closest(".dropdown").find(".doctor-home-filter").length &&
           typeof toastr !== "undefined"
@@ -43,6 +72,10 @@ $(document).ready(function () {
 
       } else {
         customEndDate = dateText;
+        $hospitalDatepicker.datepicker('option', 'minDate', null);
+        if (isHospitalHomeDatepicker) {
+          clearHospitalDateRangeToast();
+        }
 
         // Rewards owns its date filtering through AJAX; don't reload the
         // settings page with date query parameters from this shared handler.
@@ -57,6 +90,15 @@ $(document).ready(function () {
             customEndDate,
             customStartDate
           ];
+        }
+
+        // Persist the range on the hospital overview so refreshes and copied
+        // URLs continue to show the same filtered metrics.
+        if (isHospitalHomeDatepicker) {
+          const $filterLabel = $('#hospital-home-filter-label');
+          const formatDate = (value) => value.split('-').reverse().join('/');
+          $filterLabel.text(`${formatDate(customStartDate)} - ${formatDate(customEndDate)}`);
+          $('.hospital-home-filter').closest('.dropdown').find('.datepicker-container').addClass('hidden').hide();
         }
 
         console.log("Custom Start Date:", customStartDate);
@@ -100,6 +142,11 @@ $(document).ready(function () {
     if ($(this).closest('.appointment-page').length) return;
     // Lab reports manage a guided two-date inline picker in lab-reports.js.
     if ($(this).closest('.lab-report-filter').length) return;
+    // The lab dashboard handles its custom range in home.js, including
+    // opening the picker and resetting the selected range.
+    if ($(this).closest('.lab-home-filter').length) return;
+    // Hospital Overview also opens its custom picker from the filter row.
+    if ($(this).closest('.hospital-home-filter').length) return;
     // Date-filter options are owned by their page-specific delegated handlers.
     if ($(this).closest('[data-date-filter]').length) return;
     if ($(this).closest('.organization-daterange').length) return;

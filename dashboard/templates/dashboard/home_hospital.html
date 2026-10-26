@@ -1,4 +1,5 @@
 {% extends "dashboard/layout.html" %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
@@ -124,7 +125,21 @@
             <div class="bg-pale-azure w-[224px] h-[330px] px-4 py-2 rounded-lg ml-3">
               <h1 class="text-center text-lg font-semibold">Admin Details</h1>
               <div class="flex items-center justify-center py-[22.5px]">
-                <img src="/static/images/admin-profile.svg" alt="">
+                <div class="relative">
+                  <img
+                    id="admin-profile-photo"
+                    src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
+                    alt="Admin profile picture"
+                    class="w-20 h-20 rounded-full object-cover">
+                  <label for="admin-profile-photo-input"
+                    class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-dodger-blue text-white flex items-center justify-center cursor-pointer shadow"
+                    title="Change profile picture">
+                    <span class="material-symbols-outlined !text-base">edit</span>
+                  </label>
+                  <input id="admin-profile-photo-input" type="file"
+                    accept="image/jpeg,image/png" class="hidden"
+                    data-upload-url="{% url 'upload_admin_profile_photo' %}">
+                </div>
               </div>
               <div class="flex flex-col items-center gap-2">
                 <p class="font-semibold text-sm">
@@ -147,8 +162,10 @@
             <div class="flex justify-between items-center"> 
               <p class="font-semibold text-lg">Overview</p> 
               <div class="flex items-center gap-2.5"> 
-                <p class="font-normal text-sm">
-                    {% if date_filter == "week" %}
+                <p id="hospital-home-filter-label" class="font-normal text-sm">
+                    {% if date_filter == "custom" and start_date and end_date %}
+                        {{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}
+                    {% elif date_filter == "week" %}
                         Week
                     {% elif date_filter == "month" %}
                         Month

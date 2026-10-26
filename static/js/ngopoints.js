@@ -134,6 +134,77 @@ document.querySelectorAll('.badge-description').forEach(function(descElem) {
   let claimedStartDate = '';
   let claimedEndDate = '';
   let chartCustomStart = '';
+  let rewardsCustomDateToast = null;
+  let claimedCustomDateToast = null;
+  let pointsHistoryDateRangeToast = null;
+
+  function clearDateRangeToast(toastState) {
+    if (!toastState) {
+      return;
+    }
+
+    if (toastState.usesToastr && window.toastr) {
+      window.toastr.clear(toastState.toast);
+    } else if (typeof toastState.toast.stop === 'function') {
+      toastState.toast.stop(true, true).remove();
+    }
+  }
+
+  function showDateRangeToast() {
+    if (window.toastr) {
+      return {
+        toast: window.toastr.info('Please select an end date.'),
+        usesToastr: true
+      };
+    }
+
+    if (window.showToaster) {
+      return {
+        toast: window.showToaster('info', 'Please select an end date.'),
+        usesToastr: false
+      };
+    }
+
+    return null;
+  }
+
+  function clearPointsHistoryDateRangeToast() {
+    if (!pointsHistoryDateRangeToast) {
+      return;
+    }
+
+    if (pointsHistoryDateRangeToast.usesToastr && window.toastr) {
+      window.toastr.clear(pointsHistoryDateRangeToast.toast);
+    } else if (typeof pointsHistoryDateRangeToast.toast.stop === 'function') {
+      pointsHistoryDateRangeToast.toast.stop(true, true).remove();
+    }
+
+    pointsHistoryDateRangeToast = null;
+  }
+
+  function showPointsHistoryDateRangeToast() {
+    clearPointsHistoryDateRangeToast();
+
+    if (window.toastr) {
+      pointsHistoryDateRangeToast = {
+        toast: window.toastr.info('Please select an end date.'),
+        usesToastr: true
+      };
+    } else if (window.showToaster) {
+      pointsHistoryDateRangeToast = {
+        toast: window.showToaster('info', 'Please select an end date.'),
+        usesToastr: false
+      };
+    }
+  }
+  let chartDateRangeToast = null;
+
+  function clearChartDateRangeToast() {
+    if (chartDateRangeToast && window.toastr) {
+      window.toastr.clear(chartDateRangeToast);
+      chartDateRangeToast = null;
+    }
+  }
 
 function loadChartData(filter, startDate = '', endDate = '') {
   $.getJSON('/points/chart-data/', { date_filter: filter, start_date: startDate, end_date: endDate })
@@ -155,12 +226,22 @@ $(document).on('click', '.pointsChartFilter', function () {
 });
 
 $(document).on('click', '.points-chart-custom', function () {
+  clearChartDateRangeToast();
   chartCustomStart = '';
   const $picker = $(this).closest('.dropdown').find('.datepicker-inline');
   if ($.fn.datepicker && $picker.length) {
     $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
     $picker.datepicker('option', 'onSelect', function (dateText) {
-      if (!chartCustomStart) { chartCustomStart = dateText; return; }
+      if (!chartCustomStart) {
+        chartCustomStart = dateText;
+        if (window.toastr) {
+          window.toastr.info("Please select an end date.");
+        } else if (window.showToaster) {
+          window.showToaster("info", "Please select an end date.");
+        }
+        return;
+      }
+      clearChartDateRangeToast();
       let first = chartCustomStart, last = dateText;
       if (first > last) [first, last] = [last, first];
       loadChartData('custom', first, last);
@@ -460,14 +541,23 @@ function truncateDescriptions() {
     rewardsDateRange = '';
     rewardsStartDate = '';
     rewardsEndDate = '';
+    clearDateRangeToast(rewardsCustomDateToast);
+    rewardsCustomDateToast = null;
     let firstDate = '';
     $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
     $picker.datepicker('option', 'onSelect', function (dateText) {
         if (!firstDate) {
             firstDate = dateText;
             rewardsStartDate = dateText;
+            if (window.toastr) {
+              window.toastr.info("Please select an end date.");
+            } else if (window.showToaster) {
+              window.showToaster("info", "Please select an end date.");
+            }
             return;
         }
+        clearDateRangeToast(rewardsCustomDateToast);
+        rewardsCustomDateToast = null;
         rewardsEndDate = dateText;
         if (rewardsStartDate > rewardsEndDate) {
             [rewardsStartDate, rewardsEndDate] = [
@@ -542,6 +632,7 @@ function applyDateFilter(type) {
 }
 
 window.loadPointsHistoryFilter = function(type) {
+  clearPointsHistoryDateRangeToast();
   $('#dateFilterInput').val(type);
   const rangeEnd = new Date();
   const today = new Date(rangeEnd);
@@ -568,7 +659,16 @@ window.loadPointsHistoryFilter = function(type) {
     let firstDate = '';
     $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
     $picker.datepicker('option', 'onSelect', function(dateText) {
-      if (!firstDate) { firstDate = dateText; return; }
+      if (!firstDate) {
+        firstDate = dateText;
+        if (window.toastr) {
+          window.toastr.info("Please select an end date.");
+        } else if (window.showToaster) {
+          window.showToaster("info", "Please select an end date.");
+        }
+        return;
+      }
+      clearPointsHistoryDateRangeToast();
       let startDate = firstDate, endDate = dateText;
       if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
       $('#startDateInput').val(startDate);
@@ -689,12 +789,25 @@ $(document).on("click", ".claim-btn", function () {
 
   $(document).on('click', '.rewardsClaimed .calendar-icon', function () {
     const $picker = $(this).closest('.dropdown').find('.datepicker-inline');
+    clearDateRangeToast(claimedCustomDateToast);
+    claimedCustomDateToast = null;
     let firstDate = '';
     if ($.fn.datepicker && $picker.length) {
       claimedDateRange = '';
       $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
       $picker.datepicker('option', 'onSelect', function (dateText) {
-        if (!firstDate) { firstDate = dateText; claimedStartDate = dateText; return; }
+        if (!firstDate) {
+          firstDate = dateText;
+          claimedStartDate = dateText;
+          if (window.toastr) {
+            window.toastr.info("Please select an end date.");
+          } else if (window.showToaster) {
+            window.showToaster("info", "Please select an end date.");
+          }
+          return;
+        }
+        clearDateRangeToast(claimedCustomDateToast);
+        claimedCustomDateToast = null;
         claimedEndDate = dateText;
         if (claimedEndDate < claimedStartDate) [claimedStartDate, claimedEndDate] = [claimedEndDate, claimedStartDate];
         rewardClaimed($('#rewards-claimed-search').val().trim(), claimedStartDate, claimedEndDate, 1, '');

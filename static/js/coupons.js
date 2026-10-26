@@ -359,63 +359,61 @@ document.addEventListener("DOMContentLoaded", function () {
     const button = document.getElementById("couponFilterToggle");
     const dropdown = document.getElementById("couponFilterDropdown");
     const datePicker = document.getElementById("couponDatePicker");
+    const calendar = document.getElementById("couponDateRangeCalendar");
+    const rangeStatus = document.getElementById("couponDateRangeStatus");
+    let customStartDate = "";
     if (!button || !dropdown) {
         return;
     }
     button.onclick = function (e) {
         e.preventDefault();
-        e.stopImmediatePropagation();
+        e.stopPropagation();
         dropdown.classList.toggle("hidden");
         if (datePicker) {
             datePicker.classList.add("hidden");
         }
     };
-    const options = dropdown.querySelectorAll(":scope > div");
-    options.forEach(function (option) {
-        option.onclick = function (e) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-
-            const text = this.textContent.trim();
+    dropdown.addEventListener("click", function (e) {
+        const option = e.target.closest("[data-coupon-date-filter]");
+        if (!option) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const range = option.dataset.couponDateFilter;
+        if (range === "custom") {
             dropdown.classList.add("hidden");
-            if (text.includes("Custom date")) {
-                if (datePicker) {
-                    datePicker.classList.remove("hidden");
-                }
-                return;
+            if (datePicker) datePicker.classList.remove("hidden");
+            customStartDate = "";
+            if (rangeStatus) rangeStatus.textContent = "Select a start date";
+            if (calendar && window.jQuery && jQuery.fn.datepicker) {
+                const $calendar = jQuery(calendar);
+                if ($calendar.hasClass("hasDatepicker")) $calendar.datepicker("destroy");
+                $calendar.empty().datepicker({
+                    dateFormat: "yy-mm-dd",
+                    onSelect: function (dateText) {
+                        if (!customStartDate) {
+                            customStartDate = dateText;
+                            if (rangeStatus) rangeStatus.textContent = "Select an end date";
+                            if (window.toastr) window.toastr.info("Please select an end date.");
+                            return;
+                        }
+                        let start = customStartDate;
+                        let end = dateText;
+                        if (start > end) [start, end] = [end, start];
+                        filterCouponsCustom(start, end);
+                        customStartDate = "";
+                        if (datePicker) datePicker.classList.add("hidden");
+                    }
+                });
             }
-            if (text === "1 Week") {filterCoupons(7);}
-            if (text === "1 Month") {filterCoupons(30);}
-            if (text === "1 Year") {filterCoupons(365);}
-        };
+            return;
+        }
+
+        if (datePicker) datePicker.classList.add("hidden");
+        if (range === "week") filterCoupons(7);
+        if (range === "month") filterCoupons(30);
+        if (range === "year") filterCoupons(365);
     });
-    if (datePicker) {
-        datePicker.onclick = function (e) {
-            e.stopPropagation();
-        };
-    }
-    const applyButton =
-        document.getElementById("applyCouponDateFilter");
-    if (applyButton) {
-        applyButton.onclick = function (e) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            const start =
-                document.getElementById("couponStartDate").value;
-            const end =
-                document.getElementById("couponEndDate").value;
-            if (!start || !end) {
-                alert("Please select both dates.");
-                return;
-            }
-            if (start > end) {
-                alert("Start date cannot be greater than end date.");
-                return;
-            }
-            filterCouponsCustom(start, end);
-            datePicker.classList.add("hidden");
-        };
-    }
+    if (datePicker) datePicker.onclick = (e) => e.stopPropagation();
     function filterCoupons(days) {
         const cards =
             document.querySelectorAll(

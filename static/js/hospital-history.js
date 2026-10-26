@@ -440,6 +440,14 @@ $(document).on("click", ".view-attachment", function () {
 
   let hospitalHistoryStartDate = null;
   let hospitalHistoryEndDate = null;
+  let hospitalHistoryRangeToast = null;
+
+  function clearHospitalHistoryRangeToast() {
+      if (hospitalHistoryRangeToast && window.toastr) {
+          window.toastr.clear(hospitalHistoryRangeToast);
+          hospitalHistoryRangeToast = null;
+      }
+  }
 
 const $hospitalHistoryDatepicker = $(
     "#calendarContainer .datepicker-inline"
@@ -510,6 +518,61 @@ $hospitalHistoryDatepicker.datepicker({
   }
 });
 
+  // Register Custom Date Range Handler
+$("#calendarContainer .datepicker-inline").datepicker(
+    "option",
+    "onSelect",
+    function (dateText) {
+        console.log("DATE SELECTED:", dateText);
+
+        const selectedDate = $.datepicker.parseDate(
+            "mm/dd/yy",
+            dateText
+        );
+
+        const formattedDate = $.datepicker.formatDate(
+            "yy-mm-dd",
+            selectedDate
+        );
+
+        // First click: Start Date
+        if (!hospitalHistoryStartDate || hospitalHistoryEndDate) {
+            hospitalHistoryStartDate = formattedDate;
+            hospitalHistoryEndDate = null;
+            $hospitalHistoryDatepicker.datepicker("option", "minDate", formattedDate);
+            clearHospitalHistoryRangeToast();
+            hospitalHistoryRangeToast = window.toastr
+                ? window.toastr.info("Please select an end date.")
+                : null;
+
+            console.log("START DATE:", hospitalHistoryStartDate);
+            return;
+        }
+
+        // Second click: End Date
+        hospitalHistoryEndDate = formattedDate;
+
+        if (hospitalHistoryEndDate < hospitalHistoryStartDate) {
+            const temp = hospitalHistoryStartDate;
+            hospitalHistoryStartDate = hospitalHistoryEndDate;
+            hospitalHistoryEndDate = temp;
+        }
+
+        clearHospitalHistoryRangeToast();
+        $hospitalHistoryDatepicker.datepicker("option", "minDate", null);
+
+        hospitalHistoryFilters.date_filter = "custom";
+        hospitalHistoryFilters.from_date = hospitalHistoryStartDate;
+        hospitalHistoryFilters.to_date = hospitalHistoryEndDate;
+
+        console.log("FINAL DATE RANGE:", hospitalHistoryFilters);
+
+        $(".filterDropdown, .submenu").addClass("hidden");
+        $("#calendarContainer").addClass("hidden");
+
+        loadHospitalHistory(currentStatus, 1, hospitalHistoryFilters);
+    }
+); 
   // 3. Open Calendar when clicking "Custom"
   $(".trigger-custom").on("click", function (e) {
     e.stopPropagation();
@@ -518,6 +581,10 @@ $hospitalHistoryDatepicker.datepicker({
     const topPos = $(this).position().top;
 
     // Show the calendar
+    hospitalHistoryStartDate = null;
+    hospitalHistoryEndDate = null;
+    $hospitalHistoryDatepicker.datepicker("option", "minDate", null);
+    clearHospitalHistoryRangeToast();
     $("#calendarContainer").removeClass("hidden").css("top", topPos);
   });
 

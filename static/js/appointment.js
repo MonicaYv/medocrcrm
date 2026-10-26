@@ -97,6 +97,14 @@ loadAppointments("all", 1, "");
   // (and NOT sent to the API) until the end date is picked, so a half finished
   // selection can never narrow the appointment list by accident.
   let pendingStartDate = "";
+  let appointmentDateRangeToast = null;
+
+  function clearAppointmentDateRangeToast() {
+    if (appointmentDateRangeToast && window.toastr) {
+      window.toastr.clear(appointmentDateRangeToast);
+      appointmentDateRangeToast = null;
+    }
+  }
 
   function resetAppointmentDatepicker($picker) {
     const $inline = $picker.find(".datepicker-inline");
@@ -137,6 +145,7 @@ loadAppointments("all", 1, "");
     currentFilterDate = "";
     // Every time the calendar opens a new start → end selection begins.
     pendingStartDate = "";
+    clearAppointmentDateRangeToast();
 
     // Close the filter list and open the inline calendar instead.
     $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
@@ -154,6 +163,9 @@ loadAppointments("all", 1, "");
         // FIRST PICK: START DATE — keep the calendar open for the end date.
         if (!pendingStartDate) {
           pendingStartDate = dateText;
+          appointmentDateRangeToast = window.toastr
+            ? window.toastr.info("Please select an end date.")
+            : null;
           // An end date can only be on/after the selected start date.
           $inline.datepicker("option", "minDate", dateText);
           setAppointmentDateStatus(
@@ -175,6 +187,7 @@ loadAppointments("all", 1, "");
         currentStartDate = rangeStart;
         currentEndDate = rangeEnd;
         pendingStartDate = "";
+        clearAppointmentDateRangeToast();
 
         setAppointmentDateStatus($dropdown, rangeStart + " to " + rangeEnd);
 
@@ -233,6 +246,8 @@ loadAppointments("all", 1, "");
     currentFilterDate = "";
     currentStartDate = "";
     currentEndDate = "";
+    pendingStartDate = "";
+    clearAppointmentDateRangeToast();
 
     $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
     loadAppointments(currentStatus, 1, currentSearch);
@@ -241,7 +256,18 @@ loadAppointments("all", 1, "");
   $(document).on("click", function (event) {
     // Keep the calendar open while the user browses months/years inside it;
     // only a click *outside* should dismiss the filter UI.
-    if ($(event.target).closest(".datepicker-container").length) return;
+    const eventPath = event.originalEvent?.composedPath?.() || [];
+    const clickedInsideDatepicker = eventPath.some(
+      (node) =>
+        node instanceof Element &&
+        node.closest(".datepicker-container, .ui-datepicker")
+    );
+    if (
+      clickedInsideDatepicker ||
+      $(event.target).closest(".datepicker-container, .ui-datepicker").length
+    ) {
+      return;
+    }
     $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
   });
 

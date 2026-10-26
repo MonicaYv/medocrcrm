@@ -6,6 +6,8 @@ urlpatterns = [
     
     path('', views.dashboard_home, name='advertiser-home'),
     path('pharmacy-overview-data/', views.pharmacy_overview_data, name='pharmacy_overview_data'),
+    path('lab-overview-data/', views.lab_overview_data, name='lab_overview_data'),
+    path('admin-profile-photo/', views.upload_admin_profile_photo, name='upload_admin_profile_photo'),
     path('api/coupon-chart-data/', views.get_coupon_chart_data, name='coupon_chart_data'),
     path('save-event/', views.save_event, name='save_event'),
     path('get-events/', views.get_events, name='get_events'),
