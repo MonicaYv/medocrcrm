@@ -1674,6 +1674,8 @@ def lab_report_data(request):
         range_start, range_end = today - timedelta(days=6), today
     elif filter_type == "month":
         range_start, range_end = today - timedelta(days=29), today
+    elif filter_type == "year":
+        range_start, range_end = today.replace(month=1, day=1), today
     elif filter_type == "custom":
         start_value = request.GET.get("start", "").strip() or request.GET.get("start_date", "").strip()
         end_value = request.GET.get("end", "").strip() or request.GET.get("end_date", "").strip()

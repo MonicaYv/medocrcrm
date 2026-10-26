@@ -298,6 +298,8 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
                 "Data shown: " + response.range_label
             );
             $(".lab-report-range-label").text(response.range_label || "All dates");
+            $("#mostRequestedTestCaption").text(`Requests for ${response.range_label || "all dates"}`);
+            $("#revenueByTestCaption").text(`Revenue distribution for ${response.range_label || "all dates"}`);
            updateHeatmap(
               response.heatmap_data
            );
@@ -445,7 +447,7 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
 const urlParams = new URLSearchParams(window.location.search);
 
 const requestedFilter = urlParams.get("date_filter") || "today";
-const selectedFilter = ["today", "week", "month", "all", "custom"].includes(requestedFilter)
+const selectedFilter = ["today", "week", "month", "year", "all", "custom"].includes(requestedFilter)
     ? requestedFilter
     : "today";
 const startDate = urlParams.get("start_date") || "";
@@ -458,6 +460,19 @@ function setLabReportActiveFilter(filter) {
     $(`.filterDropdown [data-filter='${filter}'] span:first-child`)
         .removeClass("text-light-gray")
         .addClass("text-dodger-blue");
+}
+
+function applyLabReportPreset(filter) {
+    if (!["today", "week", "month", "year", "all"].includes(filter)) return;
+    labReportPendingStartDate = "";
+    setLabReportActiveFilter(filter);
+    const url = new URL(window.location.href);
+    url.searchParams.set("date_filter", filter);
+    url.searchParams.delete("start_date");
+    url.searchParams.delete("end_date");
+    window.history.replaceState({}, "", url.toString());
+    $(".datepicker-container, .filterDropdown").addClass("hidden").css("display", "");
+    loadDashboardData(filter);
 }
 
 setLabReportActiveFilter(selectedFilter);
@@ -717,7 +732,7 @@ $(document).on(
 
         console.log("Selected filter:", filterText);
 
-        if (!["today", "week", "month", "all", "custom"].includes(filterText)) {
+        if (!["today", "week", "month", "year", "all", "custom"].includes(filterText)) {
             console.error("Invalid filter:", filterText);
             return;
         }
@@ -728,18 +743,7 @@ $(document).on(
             return;
         }
 
-        setLabReportActiveFilter(filterText);
-        const url = new URL(window.location.href);
-        url.searchParams.set("date_filter", filterText);
-        url.searchParams.delete("start_date");
-        url.searchParams.delete("end_date");
-        window.history.replaceState({}, "", url.toString());
-
-        labReportPendingStartDate = "";
-        $(".datepicker-container").addClass("hidden").css("display", "");
-        loadDashboardData(filterText);
-
-        $(".filterDropdown").addClass("hidden").css("display", "");
+        applyLabReportPreset(filterText);
     }
 );
 
@@ -778,6 +782,20 @@ $(document).off("click.labReportOutside").on("click.labReportOutside", function 
 
 $(document).off("click.labReportPickerInside").on("click.labReportPickerInside", ".datepicker-container, .ui-datepicker", function (e) {
     e.stopPropagation();
+});
+
+// Chart period selectors used to update only their own caption. Route their
+// choice through the report loader so chart values and date captions refresh.
+$(document).off("click.labReportChartPeriod", ".dropdown-menu li").on("click.labReportChartPeriod", ".dropdown-menu li", function (e) {
+    const period = String($(this).text() || "").trim().toLowerCase();
+    const filter = { day: "today", week: "week", month: "month", year: "year" }[period];
+    if (!filter) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const $dropdown = $(this).closest(".dropdown");
+    $dropdown.find(".dropdown-value").text($(this).text().trim());
+    $dropdown.find(".dropdown-menu").addClass("hidden");
+    applyLabReportPreset(filter);
 });
 // =====================================
 // CUSTOM DROPDOWN
