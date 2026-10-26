@@ -691,8 +691,13 @@ def place_bid(request):
             candidates = category_rates or description_rates or service_rates
             if candidates:
                 service_rate = min(candidates, key=lambda rate: rate.price)
-        if not service_rate:
-            return JsonResponse({"success": False, "message": "Hospital does not have matching service rate card"})
+        # A missing or inactive rate card should not block a hospital from
+        # responding to a request. Use the patient's budget as the generated
+        # bid amount when available; otherwise keep the service amount at zero
+        # so the hospital can still move the request into Pending history.
+        service_charges = (
+            service_rate.price if service_rate else (appointment.budget or 0)
+        )
 
         room_rate = None
         if appointment.bed_room:
@@ -706,7 +711,6 @@ def place_bid(request):
                 None,
             )
 
-        service_charges = service_rate.price
         room_charges = room_rate.price if room_rate else 0
         total_bid_amount = service_charges + room_charges
         match_score = 80 + (20 if room_rate else 0)
@@ -731,7 +735,10 @@ def place_bid(request):
                 room_charges=room_charges,
                 total_bid_amount=total_bid_amount,
                 delivery_time=30,
-                remarks="Auto-generated based on rate cards",
+                remarks=(
+                    "Auto-generated based on rate cards"
+                    if service_rate else "Auto-generated using appointment budget"
+                ),
                 bid_status=HospitalBidStatus.PENDING,
                 is_active=True,
             )

@@ -984,12 +984,13 @@ def dashboard_home(request):
                 start = request.GET.get("start_date")
                 end = request.GET.get("end_date")
 
-                try:
-                    start_date = datetime.strptime(start, "%Y-%m-%d").date()
-                    end_date = datetime.strptime(end, "%Y-%m-%d").date()
-                except (ValueError, TypeError):
+                start_date = parse_filter_date(start)
+                end_date = parse_filter_date(end)
+                if not start_date or not end_date:
                     start_date = today
                     end_date = today
+                elif start_date > end_date:
+                    start_date, end_date = end_date, start_date
 
             else:
                 start_date = today

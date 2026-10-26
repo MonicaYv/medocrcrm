@@ -574,6 +574,12 @@ def ajax_hospital_history(request):
             bids__bid_status=HospitalBidStatus.CANCELLED
         ).distinct()
 
+    elif status == "missed":
+        qs = qs.filter(
+            accepted_hospital=hospital,
+            status=HospitalAppointmentStatus.NO_SHOW,
+        )
+
     elif status == "all":
 
         qs = qs.filter(
@@ -584,59 +590,37 @@ def ajax_hospital_history(request):
     else:
         qs = qs.none()
 
-    # Apply date filters
-    today = timezone.localdate()
-
-    if date_filter == "week":
-        start_date = today - timedelta(days=6)
-
-        qs = qs.filter(
-            created_at__date__gte=start_date,
-            created_at__date__lte=today
+    # Apply filters to the appointment's scheduled date. The history UI sends
+    # the custom range as from_date/to_date; accept start_date/end_date too for
+    # consistent API callers.
+    start_date = from_date or request.GET.get("start_date", "").strip()
+    end_date = to_date or request.GET.get("end_date", "").strip()
+    if not date_filter and (start_date or end_date):
+        date_filter = "custom"
+    if date_filter:
+        qs = apply_appointment_date_filter(
+            qs,
+            "hospital",
+            date_filter,
+            "",
+            start_date=start_date,
+            end_date=end_date,
         )
 
-    elif date_filter == "month":
-        start_date = today.replace(day=1)
-
-        qs = qs.filter(
-            created_at__date__gte=start_date,
-            created_at__date__lte=today
-        )
-
-    elif date_filter == "custom" and from_date and to_date:
-        try:
-            start_date = datetime.strptime(from_date, "%Y-%m-%d").date()
-            end_date = datetime.strptime(to_date, "%Y-%m-%d").date()
-
-            qs = qs.filter(
-                created_at__date__gte=start_date,
-                created_at__date__lte=end_date
-            )
-
-        except ValueError:
-            print("Invalid custom date range:", from_date, to_date)
-
-        # Apply Appointment Status filter
-        # Apply Appointment Status filter
-    
-        if appointment_status:
-            if status == "cancelled":
-                if appointment_status == "all":
-                    pass
-                elif appointment_status in {"accepted", "rejected"}:
-                    qs = qs.filter(
-                        bids__hospital=hospital,
-                        bids__bid_status=appointment_status,
-                    ).distinct()
-                else:
-                    qs = qs.none()
-            else:
-                status_value = appointment_status.replace("_", " ").strip()
-
-                if status_value == "no show":
-                    status_value = "No_Show"
-
-                qs = qs.filter(status__iexact=status_value)
+    if appointment_status:
+        if status == "cancelled":
+            if appointment_status in {"accepted", "rejected"}:
+                qs = qs.filter(
+                    bids__hospital=hospital,
+                    bids__bid_status=appointment_status,
+                ).distinct()
+            elif appointment_status != "all":
+                qs = qs.none()
+        else:
+            status_value = appointment_status.replace("_", " ").strip()
+            if status_value == "no show":
+                status_value = "No_Show"
+            qs = qs.filter(status__iexact=status_value)
 
 
     # Apply Visit Type filter
