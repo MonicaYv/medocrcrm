@@ -10,28 +10,34 @@ $(document).ready(function () {
     const opening = $dropdown.hasClass("hidden");
 
     if (opening) {
-      // Submenu navigation hides the main menu. Restore it whenever the
-      // dropdown opens so the filter remains usable after applying a choice.
-      $("#dateMenu, #visitMenu, #doctorReportDatepicker").addClass("hidden");
-      $("#mainMenu").removeClass("hidden");
+      showDoctorReportFilterPanel("main");
     }
 
     $dropdown.toggleClass("hidden");
   });
 
+  // Keep exactly one filter panel visible at a time. Explicitly manage both
+  // visibility classes because the inline picker is positioned outside the
+  // dropdown and may retain styles after a selection or resize.
+  function showDoctorReportFilterPanel(panel) {
+    $("#mainMenu, #dateMenu, #visitMenu, #doctorReportDatepicker")
+      .addClass("hidden")
+      .css("display", "");
+    if (panel === "main") $("#mainMenu").removeClass("hidden");
+    if (panel === "date") $("#dateMenu").removeClass("hidden");
+    if (panel === "visit") $("#visitMenu").removeClass("hidden");
+  }
+
   // Handle dropdown internal submenus navigation
   $(document).on("click", "[data-open]", function (e) {
     e.stopPropagation();
     const targetMenu = $(this).data("open");
-    $("#mainMenu").addClass("hidden");
-    if (targetMenu === "date") $("#dateMenu").removeClass("hidden");
-    if (targetMenu === "visit") $("#visitMenu").removeClass("hidden");
+    showDoctorReportFilterPanel(targetMenu);
   });
 
   $(document).on("click", "[data-back]", function (e) {
     e.stopPropagation();
-    $("#dateMenu, #visitMenu").addClass("hidden");
-    $("#mainMenu").removeClass("hidden");
+    showDoctorReportFilterPanel("main");
   });
 
   // Global closure scripts for clicking outside dropdowns
@@ -179,7 +185,7 @@ $(document).ready(function () {
     }
 
     // Swap the submenu for the calendar, keeping the dropdown itself open.
-    $("#mainMenu, #dateMenu, #visitMenu").addClass("hidden");
+    showDoctorReportFilterPanel("calendar");
     $picker.removeClass("hidden").css("display", "");
     // The inline calendar is wider than the filter menu and the page content
     // clips overflow. Float the picker against the viewport and clamp it to
@@ -261,8 +267,7 @@ $(document).ready(function () {
 
   $(document).on("click", "#doctorReportDatepickerBack", function (e) {
     e.stopPropagation();
-    $("#doctorReportDatepicker").addClass("hidden").css("display", "");
-    $("#mainMenu").removeClass("hidden");
+    showDoctorReportFilterPanel("main");
   });
 
   // Sync secondary action listeners
@@ -272,17 +277,26 @@ $(document).ready(function () {
     $(this).parent().addClass("hidden");
     $(this).closest(".relative").find(".calendar-date-text").text($(this).text().trim().replace("check", ""));
     if (value === "custom") {
-      // Route through the shared picker so a card-level "Custom" asks for a
-      // real range instead of silently loading an unfiltered report.
-      $("#dateMenu .option").removeClass("active");
-      $("#dateMenu .option[data-value='Custom']").addClass("active");
-      window.doctorReportFilter = "custom";
-      // The shared range picker lives in the report filter. Open its parent
-      // before showing it so chart-level Custom never renders inside a hidden
-      // dropdown.
-      $("#filterDropdown").removeClass("hidden");
-      $("#mainMenu, #dateMenu, #visitMenu").addClass("hidden");
-      openDoctorReportDatepicker();
+      // Use the calendar attached to this chart. Previously all chart
+      // calendars routed into the toolbar filter's hidden inline picker.
+      const $wrapper = $(this).closest(".heatmapCalendar, .consolidationCalendar, .relative");
+      let $picker = $wrapper.find(".chart-date-picker");
+      if (!$picker.length) {
+        $picker = $('<div class="chart-date-picker absolute right-0 top-full z-[60] bg-white shadow-md rounded p-2"></div>')
+          .appendTo($wrapper);
+      }
+      $picker.removeClass("hidden");
+      if (!$picker.hasClass("hasDatepicker")) {
+        $picker.datepicker({
+          dateFormat: "yy-mm-dd",
+          changeMonth: true,
+          changeYear: true,
+          onSelect: function (dateText) {
+            applyDoctorReportChartDate(dateText, $wrapper);
+            $picker.addClass("hidden");
+          },
+        });
+      }
       return;
     }
     window.doctorReportStartDate = "";
@@ -292,6 +306,16 @@ $(document).ready(function () {
     $("#dateMenu .option[data-value='" + value + "']").addClass("active");
     loadDoctorDashboardData(value);
   });
+
+  function applyDoctorReportChartDate(dateText, $wrapper) {
+    window.doctorReportFilter = "custom";
+    window.doctorReportStartDate = dateText;
+    window.doctorReportEndDate = dateText;
+    $("#dateMenu .option").removeClass("active");
+    $("#dateMenu .option[data-value='Custom']").addClass("active");
+    $wrapper.find(".calendar-date-text").text(dateText);
+    loadDoctorDashboardData("custom");
+  }
 
   // Default fallback load invocation if map engine is bypassed
   if (typeof am4core === "undefined") {
@@ -358,6 +382,7 @@ function loadDoctorDashboardData(filterType) {
             if (response.range_label) {
                 $("#doctorReportRangeLabel").text(`Data shown: ${response.range_label}`);
                 $(".calendar-date-text").text(response.range_label);
+                $("#bidChartRangeLabel").text(`(${response.range_label})`);
             }
 
             // 1. Hydrate Overview Stats Cards selectors text values
