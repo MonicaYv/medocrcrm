@@ -320,6 +320,18 @@ $(document).ready(function () {
         return;
       }
 
+      // const $shareLink = $("#shareModal #share-link");
+      // if ($shareLink.length) $shareLink.val(window.location.href);
+      // $("#shareModal").removeClass("hidden").addClass("flex");
+      const $shareLink = $("#shareModal #share-link");
+
+      if ($shareLink.length) {
+        const shareUrl =
+            "https://medcrm.aibuzz.net" + window.location.pathname;
+
+        $shareLink.val(shareUrl);
+      }
+
       $("#shareModal").removeClass("hidden").addClass("flex");
     });
     $(".close-share-modal").on("click", function () {

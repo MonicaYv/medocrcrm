@@ -59,6 +59,14 @@ $(document).ready(function () {
   /* ================================
      FILTER
   ================================ */
+$(document).on("click", ".advance-date-filter > .filterToggle", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const $menu = $(this).siblings(".filterDropdown");
+    $(".dropdown .filterDropdown").not($menu).addClass("hidden");
+    $menu.toggleClass("hidden");
+});
+
  $(document).on(
     "click",
     ".dropdown:not(.advance-date-filter) > .filterToggle",

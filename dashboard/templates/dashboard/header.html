@@ -57,15 +57,36 @@
                     <p class="font-normal text-base text-dark-gray">E-mail</p>
                   </div>
                 </div>
-                <div class="pt-4 relative mt-6">
-                  <input type="text" id="share-link" value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci"
-                    class="w-full rounded-md p-4 font-normal text-sm" disabled />
+                <!-- <div class="pt-4 relative mt-6">
+                  <input type="text" id="share-link" value="{{ request.build_absolute_uri }}"
+                    class="w-full rounded-md border border-gray-300 p-4 font-normal text-sm" disabled />
                   <button type="button"
                     class="copy-btn absolute right-3 top-6 bg-{{ border }} text-white rounded-md p-2 cursor-pointer"
                     data-target="#share-link">
                     Copy
                   </button>
+                </div> -->
+                <div class="pt-4 relative mt-6">
+                  <div class="flex items-center w-full border border-gray-300 rounded-md bg-white overflow-hidden">
+
+                    <input
+                      type="text"
+                      id="share-link"
+                      
+                      value="https://medcrm.aibuzz.net{{ request.path }}"
+                      class="flex-1 min-w-0 p-3 font-normal text-sm border-0 outline-none bg-transparent"
+                      readonly
+                    />
+
+                  <button
+                    type="button"
+                    class="copy-btn shrink-0 bg-{{ border }} text-white rounded-md px-4 py-2 m-1 cursor-pointer"
+                    data-target="#share-link">
+                    Copy
+                  </button>
+
                 </div>
+              </div>
               </div>
             </div>
           </div>

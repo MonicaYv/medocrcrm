@@ -153,38 +153,38 @@
         <p class="font-semibold text-base text-dark-gray pt-6">
           Select Mode of Payment
         </p>
-        <div class="border border-{{ border }} p-2 rounded-md mt-2">
+        <label class="block border border-{{ border }} p-2 rounded-md mt-2 cursor-pointer">
           <div class="flex justify-between items-center">
             <div class="flex items-center gap-2">
-              <label class="custom-radio-pharmacy">
+              <span class="custom-radio-pharmacy">
                 <input type="radio" name="payment_method" value="upi">
                 <span class="checkmark"></span>
-              </label>
+              </span>
               <p class="font-semibold text-base text-jet-black">UPI</p>
             </div>
             <img src="/static/images/upi.svg" alt="upi" />
           </div>
-        </div>
+        </label>
 
-        <div class="border border-{{ border }} p-2 rounded-md mt-2">
+        <label class="block border border-{{ border }} p-2 rounded-md mt-2 cursor-pointer">
           <div class="flex items-center gap-2">
-            <label class="custom-radio-pharmacy">
+            <span class="custom-radio-pharmacy">
               <input type="radio" name="payment_method" value="netbanking">
               <span class="checkmark"></span>
-            </label>
+            </span>
             <p class="font-semibold text-base text-jet-black">Net Banking</p>
           </div>
-        </div>
+        </label>
 
-        <div class="border border-{{ border }} p-2 rounded-md mt-2">
+        <label class="block border border-{{ border }} p-2 rounded-md mt-2 cursor-pointer">
           <div class="flex items-center gap-2">
-            <label class="custom-radio-pharmacy">
+            <span class="custom-radio-pharmacy">
               <input type="radio" name="payment_method" value="paymentgateway">
               <span class="checkmark"></span>
-            </label>
+            </span>
             <p class="font-semibold text-base text-jet-black">Payment Gateway</p>
           </div>
-        </div>
+        </label>
 
         <div class="flex items-center justify-between pt-4">
           <p class="font-semibold text-2xl text-light-gray1">Advance Total</p>
