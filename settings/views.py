@@ -5,6 +5,8 @@ import uuid
 import traceback
 import requests
 from decimal import Decimal
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_protect
 
 from django.core.cache import cache
 from django.core.files.storage import default_storage
@@ -2303,3 +2305,42 @@ def get_cities_by_state(request):
     except Exception as e:
         print("Error fetching cities:", e)
         return JsonResponse({'cities': []}, status=500)
+
+
+
+@csrf_protect
+@require_POST
+def send_phone_otp(request):
+    try:
+        data = json.loads(request.body)
+        phone = str(data.get("phone", "")).strip()
+
+        if not phone:
+            return JsonResponse(
+                {"error": "Phone number is required."},
+                status=400
+            )
+
+        digits = "".join(filter(str.isdigit, phone))
+
+        if len(digits) < 10 or len(digits) > 15:
+            return JsonResponse(
+                {"error": "Please enter a valid phone number."},
+                status=400
+            )
+
+        return JsonResponse({
+            "message": (
+                "Phone number validated. "
+                "SMS service integration is still required."
+            )
+        })
+
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return JsonResponse(
+            {"error": "Invalid request data."},
+            status=400
+        )
+
+
+

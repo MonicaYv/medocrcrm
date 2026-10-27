@@ -26,5 +26,11 @@ urlpatterns = [
     path('privacy-policy/',views.privacy_policy,name="privacy-policy"),
     path('disclaimer/',views.disclaimer,name="disclaimer"),
     path("send-change-password-otp/", views.send_change_password_otp, name="send_change_password_otp"),
+    path(
+       "send-phone-otp/",
+        views.send_phone_otp,
+       
+        name="send_phone_otp"
+    ),
     path("api/cities/", views.get_cities_by_state, name="get_cities_by_state")
 ]

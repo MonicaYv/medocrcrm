@@ -874,3 +874,97 @@ $(document).on('keydown', 'input[name="city"]', function(e) {
         $('.city-suggestions').remove();
     }
 });
+
+
+document.addEventListener("click", async function (event) {
+    const button = event.target.closest(".send-otp-btn");
+
+    if (!button) return;
+
+    event.preventDefault();
+
+    // Find the phone input from the same form/section
+    const form = button.closest("form");
+
+    let phoneInput = null;
+
+    if (form) {
+        phoneInput = form.querySelector(
+            'input[name="phone"], input[name="contact_phone_number"], input[type="tel"]'
+        );
+    }
+
+    // Fallback: find the closest phone input before the button
+    if (!phoneInput) {
+        let element = button.previousElementSibling;
+
+        while (element && !phoneInput) {
+            if (element.matches(
+                'input[name="phone"], input[name="contact_phone_number"], input[type="tel"]'
+            )) {
+                phoneInput = element;
+                break;
+            }
+
+            phoneInput = element.querySelector?.(
+                'input[name="phone"], input[name="contact_phone_number"], input[type="tel"]'
+            );
+
+            element = element.previousElementSibling;
+        }
+    }
+
+    if (!phoneInput || !phoneInput.value.trim()) {
+        alert("Please enter your phone number first.");
+        return;
+    }
+
+    const phone = phoneInput.value.trim();
+    const originalText = button.textContent;
+
+    // Keep the original button text
+
+    try {
+        const response = await fetch("/settings/send-phone-otp/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ phone: phone })
+        });
+
+        const responseText = await response.text();
+
+        console.log(
+            "PHONE OTP RESPONSE:",
+            response.status,
+            responseText
+        );
+
+        let data;
+
+        try {
+            data = JSON.parse(responseText);
+        } catch {
+            throw new Error("Server returned HTML instead of JSON.");
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data.error || data.message || "Unable to process request."
+            );
+        }
+
+        alert(data.message || "Request completed successfully.");
+
+    } catch (error) {
+        console.error("Phone OTP error:", error);
+        alert(error.message || "Unable to process request.");
+    } finally {
+        button.textContent = originalText;
+        button.disabled = false;
+    }
+});
+
