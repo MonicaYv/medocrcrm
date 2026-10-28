@@ -2607,15 +2607,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 $(document).ready(function () {
-  $(".filterToggle").on("click", function (e) {
-    if ($(this).is("#lab-home-filter-toggle")) {
-      return;
-    }
-    e.stopPropagation();
-
-    $(this).siblings(".filterDropdown").toggleClass("hidden");
-  });
-
   $(".filterOption").on("click", function (e) {
     e.stopPropagation();
 

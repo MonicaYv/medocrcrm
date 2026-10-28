@@ -1,6 +1,7 @@
 //doctor reports.js
 let heatmapChart;
 let polygonSeries;
+let heatmapInitialized = false;
 
 $(document).ready(function () {
   // --------- 1. INTERACTIVE FILTER DROPDOWN TOGGLES ----------
@@ -74,7 +75,13 @@ $(document).ready(function () {
   });
 
   // --------- 2. amCharts VECTOR HEATMAP INITIALIZATION ----------
-  if (typeof am4core !== "undefined") {
+  if (
+    typeof am4core !== "undefined" &&
+    typeof am4maps !== "undefined" &&
+    typeof am4geodata_india2019High !== "undefined" &&
+    typeof am4themes_animated !== "undefined"
+  ) {
+    try {
     am4core.useTheme(am4themes_animated);
     heatmapChart = am4core.create("heatmap", am4maps.MapChart);
     heatmapChart.geodata = am4geodata_india2019High;
@@ -113,6 +120,12 @@ $(document).ready(function () {
         console.log("Doctor Map Engine operational.");
         loadDoctorDashboardData("month");
     });
+    heatmapInitialized = true;
+    } catch (error) {
+      // A failed optional map must not prevent report filters and charts from
+      // loading their data.
+      console.error("Doctor report heatmap initialization failed:", error);
+    }
   }
 
   // --------- 3. ASYNCHRONOUS SUBMENU TABS ACTION EVENTS ----------
@@ -249,16 +262,6 @@ $(document).ready(function () {
     $(window).off("resize.doctorReportPicker").on("resize.doctorReportPicker", placePicker);
   }
 
-  // The calendar icon on the "Custom" row toggles the picker directly.
-  $(document).on(
-    "click",
-    "#filterDropdown [data-value='custom'] .material-symbols-outlined",
-    function (e) {
-      e.stopPropagation();
-      openDoctorReportDatepicker();
-    }
-  );
-
   // Keep the calendar usable: clicks inside it must not dismiss the dropdown,
   // and there is always a way back to the menus.
   $(document).on("click", "#doctorReportDatepicker", function (e) {
@@ -277,25 +280,26 @@ $(document).ready(function () {
     $(this).parent().addClass("hidden");
     $(this).closest(".relative").find(".calendar-date-text").text($(this).text().trim().replace("check", ""));
     if (value === "custom") {
-      // Use the calendar attached to this chart. Previously all chart
-      // calendars routed into the toolbar filter's hidden inline picker.
+      // Use a native date input attached to this chart. Each chart's calendar
+      // applies the chosen day as soon as a date is selected.
       const $wrapper = $(this).closest(".heatmapCalendar, .consolidationCalendar, .relative");
-      let $picker = $wrapper.find(".chart-date-picker");
-      if (!$picker.length) {
-        $picker = $('<div class="chart-date-picker absolute right-0 top-full z-[60] bg-white shadow-md rounded p-2"></div>')
-          .appendTo($wrapper);
+      let $dateInput = $wrapper.find(".chart-date-input");
+      if (!$dateInput.length) {
+        $dateInput = $('<input type="date" class="chart-date-input absolute right-0 top-full z-[60] rounded border border-gray-300 bg-white p-2 shadow-md">')
+          .appendTo($wrapper)
+          .on("change", function () {
+            if (!this.value) return;
+            applyDoctorReportChartDate(this.value, this.value, $wrapper);
+            $dateInput.addClass("hidden");
+          });
       }
-      $picker.removeClass("hidden");
-      if (!$picker.hasClass("hasDatepicker")) {
-        $picker.datepicker({
-          dateFormat: "yy-mm-dd",
-          changeMonth: true,
-          changeYear: true,
-          onSelect: function (dateText) {
-            applyDoctorReportChartDate(dateText, $wrapper);
-            $picker.addClass("hidden");
-          },
-        });
+      $dateInput.val("").removeClass("hidden");
+      const dateInput = $dateInput.get(0);
+      try {
+        if (dateInput.showPicker) dateInput.showPicker();
+        else dateInput.click();
+      } catch (error) {
+        dateInput.click();
       }
       return;
     }
@@ -307,18 +311,18 @@ $(document).ready(function () {
     loadDoctorDashboardData(value);
   });
 
-  function applyDoctorReportChartDate(dateText, $wrapper) {
+  function applyDoctorReportChartDate(startDate, endDate, $wrapper) {
     window.doctorReportFilter = "custom";
-    window.doctorReportStartDate = dateText;
-    window.doctorReportEndDate = dateText;
+    window.doctorReportStartDate = startDate;
+    window.doctorReportEndDate = endDate;
     $("#dateMenu .option").removeClass("active");
     $("#dateMenu .option[data-value='Custom']").addClass("active");
-    $wrapper.find(".calendar-date-text").text(dateText);
+    $wrapper.find(".calendar-date-text").text(`${startDate} – ${endDate}`);
     loadDoctorDashboardData("custom");
   }
 
   // Default fallback load invocation if map engine is bypassed
-  if (typeof am4core === "undefined") {
+  if (!heatmapInitialized) {
       loadDoctorDashboardData("month");
   }
 });
@@ -548,7 +552,7 @@ function applyDoctorReportSearch(query, skipReload) {
     }
 }
 
-$(document).on("keyup", "#reportSearch", function () {
+$(document).on("input", "#reportSearch", function () {
     clearTimeout(doctorReportSearchTimer);
     const value = $(this).val();
     if (!(value || "").trim()) {

@@ -154,6 +154,11 @@ $(document).ready(function () {
         $(this).closest('#rewards').length) {
         return;
     }
+    // These calendars are owned by their page modules. Let their delegated
+    // handlers receive the icon click instead of opening the generic picker.
+    if ($(this).closest(
+      '.points-chart-custom, .points-history, .calendar-option, .heatmap-cal-option, .consolidation-cal-option, .doctor-report-page'
+    ).length) return;
     e.stopPropagation();
     const $container = $(this).closest('.dropdown');
     const $datepicker = $container.find('.datepicker-container');

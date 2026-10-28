@@ -1527,6 +1527,8 @@ def doctor_report_data(request):
             Q(patient_full_name__icontains=search)
             | Q(user__userprofile__first_name__icontains=search)
             | Q(user__userprofile__last_name__icontains=search)
+            | Q(address__first_name__icontains=search)
+            | Q(address__last_name__icontains=search)
             | Q(consultation_type__icontains=search)
             | Q(service_type__icontains=search)
             | Q(status__icontains=search)
