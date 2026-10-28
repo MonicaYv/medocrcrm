@@ -874,7 +874,53 @@ $(document).on('keydown', 'input[name="city"]', function(e) {
         $('.city-suggestions').remove();
     }
 });
+// Automatically highlight Send OTP buttons when the phone number has 10 digits
+document.addEventListener("DOMContentLoaded", function () {
 
+    function updateOtpButtonColors(form) {
+        if (!form) return;
+
+        const phoneInputs = form.querySelectorAll(
+            'input[name="phone"], input[name="contact_phone_number"]'
+        );
+
+        const otpButtons = form.querySelectorAll(".send-otp-btn");
+
+        otpButtons.forEach((button, index) => {
+            const phoneInput = phoneInputs[index];
+
+            if (!phoneInput) return;
+
+            const digits = phoneInput.value.replace(/\D/g, "");
+            const isValid = digits.length === 10;
+
+            if (isValid) {
+                button.style.opacity = "1";
+                button.style.filter = "brightness(0.60)";
+            } else {
+                button.style.opacity = "0.5";
+                button.style.filter = "none";
+            }
+        });
+    }
+
+    // Update the button colour while typing
+    document.addEventListener("input", function (event) {
+        if (
+            event.target.matches(
+                'input[name="phone"], input[name="contact_phone_number"]'
+            )
+        ) {
+            updateOtpButtonColors(event.target.closest("form"));
+        }
+    });
+
+    // Set the correct colour when the page loads
+    document.querySelectorAll("form").forEach(function (form) {
+        updateOtpButtonColors(form);
+    });
+
+});
 
 document.addEventListener("click", async function (event) {
     const button = event.target.closest(".send-otp-btn");
