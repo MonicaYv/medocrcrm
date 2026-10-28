@@ -32,5 +32,10 @@ urlpatterns = [
        
         name="send_phone_otp"
     ),
+    path(
+        "verify-phone-otp/",
+        views.verify_phone_otp,
+        name="verify_phone_otp"
+    ),
     path("api/cities/", views.get_cities_by_state, name="get_cities_by_state")
 ]

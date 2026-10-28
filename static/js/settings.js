@@ -689,6 +689,16 @@ $(document).ready(function () {
         function (e) {
             e.preventDefault();
             const form = document.getElementById("editForm");
+            // Require successful OTP verification before saving pharmacy profile
+            if (form && form.querySelector('select[name="countryCodes"]')) {
+                const verifiedStatus = form.querySelector(".otp-verification-status");
+
+                if (!verifiedStatus || verifiedStatus.classList.contains("hidden")) {
+                    e.preventDefault();
+                    toastr.error("Please verify your pharmacy phone number with OTP before saving.");
+                    return;
+                }
+            }
             if (!form) {
                 toastr.error("Lab profile form not found");
                 return;
@@ -874,97 +884,226 @@ $(document).on('keydown', 'input[name="city"]', function(e) {
         $('.city-suggestions').remove();
     }
 });
+// Automatically highlight Send OTP buttons when the phone number has 10 digits
+document.addEventListener("DOMContentLoaded", function () {
 
+    function updateOtpButtonColors(form) {
+        if (!form) return;
 
-document.addEventListener("click", async function (event) {
-    const button = event.target.closest(".send-otp-btn");
-
-    if (!button) return;
-
-    event.preventDefault();
-
-    // Find the phone input from the same form/section
-    const form = button.closest("form");
-
-    let phoneInput = null;
-
-    if (form) {
-        phoneInput = form.querySelector(
-            'input[name="phone"], input[name="contact_phone_number"], input[type="tel"]'
+        const phoneInputs = form.querySelectorAll(
+            'input[name="phone"], input[name="contact_phone_number"]'
         );
+
+        const otpButtons = form.querySelectorAll(".send-otp-btn");
+
+        otpButtons.forEach((button, index) => {
+            const phoneInput = phoneInputs[index];
+
+            if (!phoneInput) return;
+
+            const digits = phoneInput.value.replace(/\D/g, "");
+            const isValid = digits.length === 10;
+
+            if (isValid) {
+                button.style.opacity = "1";
+                button.style.filter = "brightness(0.60)";
+            } else {
+                button.style.opacity = "0.5";
+                button.style.filter = "none";
+            }
+        });
     }
 
-    // Fallback: find the closest phone input before the button
-    if (!phoneInput) {
-        let element = button.previousElementSibling;
+    // Update the button colour while typing
+    document.addEventListener("input", function (event) {
+        if (
+            event.target.matches(
+                'input[name="phone"], input[name="contact_phone_number"]'
+            )
+        ) {
+            updateOtpButtonColors(event.target.closest("form"));
+        }
+    });
 
-        while (element && !phoneInput) {
-            if (element.matches(
-                'input[name="phone"], input[name="contact_phone_number"], input[type="tel"]'
-            )) {
-                phoneInput = element;
-                break;
-            }
+    // Set the correct colour when the page loads
+    document.querySelectorAll("form").forEach(function (form) {
+        updateOtpButtonColors(form);
+    });
 
-            phoneInput = element.querySelector?.(
-                'input[name="phone"], input[name="contact_phone_number"], input[type="tel"]'
-            );
+});
 
-            element = element.previousElementSibling;
+// Pharmacy phone OTP only
+document.addEventListener("click", async function (event) {
+    const sendButton = event.target.closest(".send-pharmacy-otp-btn");
+    const verifyButton = event.target.closest(".verify-otp-btn");
+
+    if (!sendButton && !verifyButton) return;
+
+    const form = event.target.closest("form") || document.querySelector("#editForm");
+    if (!form) return;
+
+    const phoneInput = form.querySelector('input[name="phone"]');
+    const countryInput = form.querySelector('select[name="countryCodes"]');
+    const otpInput = form.querySelector('input[name="otp1"]');
+    const errorBox = form.querySelector(".phone-otp-error");
+    const statusBox = form.querySelector(".otp-verification-status");
+    const verifyBtn = form.querySelector(".verify-otp-btn");
+
+    if (!phoneInput || !countryInput || !otpInput || !verifyBtn) return;
+
+    const phone = phoneInput.value.trim();
+    const countryCode = countryInput.value.trim();
+
+    function showError(message) {
+        if (errorBox) {
+            errorBox.textContent = message;
+            errorBox.classList.remove("hidden");
         }
     }
 
-    if (!phoneInput || !phoneInput.value.trim()) {
-        alert("Please enter your phone number first.");
+    function clearError() {
+        if (errorBox) {
+            errorBox.textContent = "";
+            errorBox.classList.add("hidden");
+        }
+    }
+
+    function resetVerification() {
+        verifyBtn.disabled = true;
+        if (statusBox) statusBox.classList.add("hidden");
+    }
+
+    clearError();
+
+    if (!phone || !countryCode) {
+        showError("Please enter your phone number and country code.");
         return;
     }
 
-    const phone = phoneInput.value.trim();
-    const originalText = button.textContent;
-
-    // Keep the original button text
-
-    try {
-        const response = await fetch("/settings/send-phone-otp/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-                "X-Requested-With": "XMLHttpRequest"
-            },
-            body: JSON.stringify({ phone: phone })
-        });
-
-        const responseText = await response.text();
-
-        console.log(
-            "PHONE OTP RESPONSE:",
-            response.status,
-            responseText
-        );
-
-        let data;
+    // Send OTP
+    if (sendButton) {
+        resetVerification();
+        otpInput.value = "";
+        sendButton.disabled = true;
 
         try {
-            data = JSON.parse(responseText);
-        } catch {
-            throw new Error("Server returned HTML instead of JSON.");
+            const response = await fetch("/settings/send-phone-otp/", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": form.querySelector(
+                        '[name="csrfmiddlewaretoken"]'
+                    )?.value || ""
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    country_code: countryCode
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                showError(data.message || "Could not send OTP.");
+                return;
+            }
+
+            // The test OTP in your current backend is 123456.
+           verifyBtn.disabled = false;
+            clearError();
+
+            alert("OTP sent successfully");
+        } catch (error) {
+            showError("Unable to send OTP. Please try again.");
+            console.error("Send OTP error:", error);
+        } finally {
+            sendButton.disabled = false;
         }
 
-        if (!response.ok) {
-            throw new Error(
-                data.error || data.message || "Unable to process request."
-            );
+        return;
+    }
+
+    // Verify OTP
+    if (verifyButton) {
+        const otp = otpInput.value.trim();
+
+        if (!/^\d{6}$/.test(otp)) {
+            showError("Please enter the 6-digit OTP.");
+            return;
         }
 
-        alert(data.message || "Request completed successfully.");
+        verifyButton.disabled = true;
 
-    } catch (error) {
-        console.error("Phone OTP error:", error);
-        alert(error.message || "Unable to process request.");
-    } finally {
-        button.textContent = originalText;
-        button.disabled = false;
+        try {
+            const response = await fetch("/settings/verify-phone-otp/", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": form.querySelector(
+                        '[name="csrfmiddlewaretoken"]'
+                    )?.value || ""
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    country_code: countryCode,
+                    otp: otp
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                showError(data.message || "OTP verification failed.");
+                return;
+            }
+
+            if (statusBox) {
+                statusBox.classList.remove("hidden");
+                statusBox.classList.add("flex");
+            }
+
+            verifyButton.textContent = "Verified";
+            verifyButton.classList.remove("bg-gray-400");
+            verifyButton.classList.add("bg-[#16A34A]");
+            verifyButton.disabled = true;
+        } catch (error) {
+            showError("Unable to verify OTP. Please try again.");
+            console.error("Verify OTP error:", error);
+        } finally {
+            // Allow retry if verification failed.
+            if (!statusBox || statusBox.classList.contains("hidden")) {
+                verifyButton.disabled = false;
+            }
+        }
     }
 });
 
+// If the phone number or country code changes, it must be verified again.
+document.addEventListener("input", function (event) {
+    if (!event.target.matches('#editForm input[name="phone"]')) return;
+
+    const form = event.target.closest("form");
+    const statusBox = form?.querySelector(".otp-verification-status");
+    const verifyButton = form?.querySelector(".verify-otp-btn");
+
+    if (statusBox) statusBox.classList.add("hidden");
+
+    if (verifyButton) {
+        verifyButton.disabled = true;
+        verifyButton.textContent = "Verify OTP";
+    }
+});
+
+document.addEventListener("change", function (event) {
+    if (event.target.matches('#editForm select[name="countryCodes"]')) {
+        const form = event.target.closest("form");
+        form?.querySelector(".otp-verification-status")?.classList.add("hidden");
+        const verifyButton = form?.querySelector(".verify-otp-btn");
+        if (verifyButton) {
+            verifyButton.disabled = true;
+            verifyButton.textContent = "Verify OTP";
+        }
+    }
+});

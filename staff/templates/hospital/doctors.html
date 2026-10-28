@@ -173,12 +173,27 @@
                                                 <span
                                                     class="material-symbols-outlined text-dodger-blue !text-lg">person</span>
                                             </div>
+                                            
                                             <div class="flex flex-col gap-2">
-                                                <label for="gender"
-                                                    class="font-normal text-xs text-spanish-gray">Gender</label>
-                                                <input type="text" maxlength="20"
+                                                <label for="gender" class="font-normal text-xs text-spanish-gray">
+                                                    Gender
+                                                </label>
+
+                                                <input
+                                                    type="text"
+                                                    id="gender"
+                                                    name="gender"
+                                                    maxlength="20"
+                                                    required
+                                                    pattern="(?i:male|female|other)"
+                                                    title="Enter only Male, Female, or Other."
                                                     class="focus:ring-0 focus:outline-none font-normal text-sm placeholder:font-normal placeholder:text-sm placeholder:text-gray-400"
-                                                    placeholder="Type Here...">
+                                                    placeholder="Type Here..."
+                                                >
+
+                                                <p id="gender-error" class="text-red-500 text-xs hidden">
+                                                    Type only Male, Female, or Other.
+                                                </p>
                                             </div>
                                         </div>
 
@@ -630,5 +645,27 @@
 {% endblock %}
 
 {% block extra_js %}
+
+<script>
+const genderInput = document.getElementById("gender");
+const genderError = document.getElementById("gender-error");
+
+genderInput.addEventListener("input", function () {
+    const value = this.value.trim().toLowerCase();
+    const isValid = ["male", "female", "other"].includes(value);
+
+    if (value === "" || isValid) {
+        genderError.classList.add("hidden");
+        this.setCustomValidity("");
+    } else {
+        genderError.classList.remove("hidden");
+        this.setCustomValidity(
+            "Enter only Male, Female, or Other."
+        );
+    }
+});
+</script>
+
+
 <script src="/static/js/doctors.js"></script>
 {% endblock %}

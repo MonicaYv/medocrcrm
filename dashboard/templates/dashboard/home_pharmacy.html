@@ -87,19 +87,29 @@
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <p>Auto Bid </p>
-                                    <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
-                                        <input type="checkbox" class="sr-only peer">
-                                        <div
-                                            class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5">
-                                        </div>
-                                        <div
-                                            class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal">
-                                        </div>
-                                    </label>
+                                <p>Auto Bid</p>
+
+                                <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
+                                    <input
+                                    type="checkbox"
+                                    id="autobid-toggle"
+                                    class="sr-only peer"
+                                    aria-label="Enable Auto Bid"
+                                    >
+
                                     <div
-                                        class="bg-gradient-to-r from-caribbean-green to-azure-radiance w-6 h-6 rounded-[7px] text-white text-xs flex items-center justify-center">
-                                        Rx</div>
+                                    class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5">
+                                    </div>
+
+                                    <div
+                                    class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal">
+                                    </div>
+                                </label>
+
+                                <div
+                                    class="bg-gradient-to-r from-caribbean-green to-azure-radiance w-6 h-6 rounded-[7px] text-white text-xs flex items-center justify-center">
+                                    Rx
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -760,5 +770,5 @@
 {% block extra_js %}
     <script src="{% static 'js/coupons.js' %}"></script>
     <script src="{% static 'js/pharmacy-overview.js' %}?v=20261021-2"></script>
-   
+   <script src="{% static 'js/autobid.js' %}"></script>
 {% endblock %}

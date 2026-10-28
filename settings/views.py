@@ -1242,6 +1242,26 @@ def update_pharmacy_profile(request):
     errors = {}
     user = request.user_obj  
 
+    # Require OTP verification for the submitted pharmacy phone number.
+    submitted_phone = "".join(
+        filter(str.isdigit, post_data.get("phone", "").strip())
+    )
+    submitted_country_code = post_data.get("countryCodes", "").strip()
+
+    expected_verification = f"{submitted_country_code}|{submitted_phone}"
+    verified_phone = request.session.get("verified_pharmacy_phone")
+    print("SAVE expected verification:", repr(expected_verification))
+    print(
+        "SAVE verified session phone:",
+        repr(request.session.get("verified_pharmacy_phone"))
+    )
+
+    if verified_phone != expected_verification:
+        return JsonResponse({
+            "success": False,
+            "message": "Please verify your phone number with OTP before saving."
+        }, status=400)
+
     validate_email_phone(post_data, errors)
     # required_fields = ["company_name", "city", "state", "pincode"]
     required_fields = ["company_name", "pincode"]
@@ -2306,6 +2326,7 @@ def get_cities_by_state(request):
         print("Error fetching cities:", e)
         return JsonResponse({'cities': []}, status=500)
 
+TEST_OTP = "123456"
 
 
 @csrf_protect
@@ -2313,34 +2334,82 @@ def get_cities_by_state(request):
 def send_phone_otp(request):
     try:
         data = json.loads(request.body)
+
         phone = str(data.get("phone", "")).strip()
+        country_code = str(data.get("country_code", "")).strip()
 
         if not phone:
-            return JsonResponse(
-                {"error": "Phone number is required."},
-                status=400
-            )
+            return JsonResponse({
+                "success": False,
+                "message": "Phone number is required."
+            }, status=400)
 
         digits = "".join(filter(str.isdigit, phone))
 
         if len(digits) < 10 or len(digits) > 15:
-            return JsonResponse(
-                {"error": "Please enter a valid phone number."},
-                status=400
-            )
+            return JsonResponse({
+                "success": False,
+                "message": "Please enter a valid phone number."
+            }, status=400)
 
+        # Development/testing only: no SMS is sent.
+        print(f"Phone: {country_code}{digits}")
+        print(f"Test OTP: {TEST_OTP}")
+        request.session["pending_pharmacy_phone"] = f"{country_code}|{digits}"
         return JsonResponse({
-            "message": (
-                "Phone number validated. "
-                "SMS service integration is still required."
-            )
+            "success": True,
+            "message": "Otp send to register mobile number"
         })
 
     except (json.JSONDecodeError, TypeError, ValueError):
-        return JsonResponse(
-            {"error": "Invalid request data."},
-            status=400
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid request data."
+        }, status=400)
+
+@csrf_protect
+@require_POST
+@dashboard_login_required
+def verify_phone_otp(request):
+    try:
+        data = json.loads(request.body)
+
+        entered_otp = str(data.get("otp", "")).strip()
+        phone = "".join(filter(str.isdigit, str(data.get("phone", "")).strip()))
+        country_code = str(data.get("country_code", "")).strip()
+
+        submitted_phone = f"{country_code}|{phone}"
+        pending_phone = request.session.get("pending_pharmacy_phone")
+        print("OTP submitted phone:", repr(submitted_phone))
+        print("Pending session phone:", repr(pending_phone))
+
+        if pending_phone != submitted_phone:
+            return JsonResponse({
+                "success": False,
+                "message": "Please request OTP for this phone number first."
+            }, status=400)
+
+        if entered_otp != TEST_OTP:
+            return JsonResponse({
+                "success": False,
+                "message": "Invalid OTP."
+            }, status=400)
+
+        request.session["verified_pharmacy_phone"] = submitted_phone
+        request.session.pop("pending_pharmacy_phone", None)
+        request.session.modified = True
+
+        print(
+            "VERIFIED PHONE SAVED:",
+            repr(request.session.get("verified_pharmacy_phone"))
         )
 
-
-
+        return JsonResponse({
+            "success": True,
+            "message": "OTP verified successfully."
+        })
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid request data."
+        }, status=400)
