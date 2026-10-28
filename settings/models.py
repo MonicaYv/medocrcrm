@@ -34,42 +34,83 @@ class SellerType(models.TextChoices):
     DOCTOR = "doctor", "Doctor"
 
 
+
+from django.db import models
+from django.utils import timezone
+
+
 class SellerSubscription(models.Model):
-    seller_type = models.CharField(max_length=20,choices=SellerType.choices,db_index=True)
-    seller_profile_id = models.PositiveIntegerField(db_index=True,)
-    plan_name = models.CharField(max_length=100,default="Free")
-    price = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
-    expiry_date = models.DateTimeField(null=True,blank=True)
-    is_active = models.BooleanField(default=False)
-    is_enabled = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    seller_type = models.CharField(
+        max_length=20,
+        choices=SellerType.choices,
+        db_index=True,
+    )
+
+    seller_profile_id = models.PositiveIntegerField(
+        db_index=True,
+    )
+
+    plan_name = models.CharField(
+        max_length=100,
+        default="Free",
+    )
+
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+    )
+
+    expiry_date = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    # Matches the FastAPI SQLAlchemy model
+    autobid_enabled = models.BooleanField(
+        default=False,
+    )
+
+    is_active = models.BooleanField(
+        default=False,
+    )
+
+    is_enabled = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
 
     class Meta:
         db_table = "seller_subscription"
 
         indexes = [
             models.Index(
-                fields=["seller_type", "seller_profile_id", "is_active"],
-                name="idx_seller_sub_active"  # ✅ SHORT NAME
+                fields=[
+                    "seller_type",
+                    "seller_profile_id",
+                    "is_active",
+                ],
+                name="idx_seller_sub_active",
             ),
         ]
 
         constraints = [
             models.UniqueConstraint(
-                fields=["seller_type", "seller_profile_id"],
+                fields=[
+                    "seller_type",
+                    "seller_profile_id",
+                ],
                 condition=models.Q(is_active=True),
-                name="uq_active_subscription_per_seller"
-            )
+                name="uq_active_subscription_per_seller",
+            ),
         ]
-
-    def __str__(self):
-        return (
-            f"{self.seller_type} | "
-            f"Profile {self.seller_profile_id} | "
-            f"{self.plan_name} | "
-            f"{'Active' if self.is_active else 'Inactive'}"
-        )
 
     @property
     def is_expired(self):
@@ -78,8 +119,18 @@ class SellerSubscription(models.Model):
 
         expiry = self.expiry_date
 
-        # 🔹 If expiry_date is naive, make it aware
         if timezone.is_naive(expiry):
-            expiry = timezone.make_aware(expiry, timezone.get_current_timezone())
+            expiry = timezone.make_aware(
+                expiry,
+                timezone.get_current_timezone(),
+            )
 
         return expiry < timezone.now()
+
+    def __str__(self):
+        return (
+            f"{self.seller_type} | "
+            f"Profile {self.seller_profile_id} | "
+            f"{self.plan_name} | "
+            f"{'Active' if self.is_active else 'Inactive'}"
+        )
