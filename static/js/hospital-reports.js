@@ -3,6 +3,24 @@ let pieChart;
 let lineChart;
 let patientJourneyChart;
 
+const hospitalReportUserId = document.getElementById("hospitalReportsPage")?.dataset.userId || "unknown";
+const hospitalChartDateStorageKey = `hospital-report-chart-dates:${hospitalReportUserId}`;
+let individualChartDates = {};
+try {
+  individualChartDates = JSON.parse(localStorage.getItem(hospitalChartDateStorageKey) || "{}");
+} catch (error) {
+  console.warn("Could not restore saved hospital report chart dates.", error);
+  individualChartDates = {};
+}
+
+function persistIndividualChartDates() {
+  try {
+    localStorage.setItem(hospitalChartDateStorageKey, JSON.stringify(individualChartDates));
+  } catch (error) {
+    console.warn("Could not save hospital report chart dates.", error);
+  }
+}
+
 $(document).ready(function () {
   // --------- 1. BAR CHART INITIALIZATION ----------
   const barCtx = document.getElementById("barChart");
@@ -268,7 +286,7 @@ $(document).ready(function () {
 $(document).ready(function () {
     const reportParams = new URLSearchParams(window.location.search);
 
-    let selectedFilter = reportParams.get("filter") || "today";
+    let selectedFilter = reportParams.get("filter") || "all";
     let selectedVisitType = reportParams.get("visit_type") || "";
     let startDate = reportParams.get("start_date") || "";
     let endDate = reportParams.get("end_date") || "";
@@ -455,8 +473,6 @@ $(document).ready(function () {
   // INDIVIDUAL CHART CALENDARS
   // INDIVIDUAL CHART CALENDARS
 // INDIVIDUAL CHART CALENDARS
-const individualChartDates = {};
-
 $(".calendar-icon")
   .not(".filterDropdown .report-filter .calendar-icon")
   .off("click.chartCalendar")
@@ -482,6 +498,14 @@ $(".calendar-icon")
 
     const chartId = $chart.attr("id");
 
+    const savedRange = individualChartDates[chartId];
+    const params = new URLSearchParams(window.location.search);
+    const queryStart = params.get(`${chartId}_start_date`);
+    const queryEnd = params.get(`${chartId}_end_date`);
+    if (queryStart && queryEnd) {
+      individualChartDates[chartId] = { start: queryStart, end: queryEnd };
+    }
+    const restoredRange = individualChartDates[chartId] || savedRange;
     if ($inline.hasClass("hasDatepicker")) {
       $inline.datepicker("destroy");
     }
@@ -490,6 +514,13 @@ $(".calendar-icon")
       dateFormat: "yy-mm-dd",
       changeMonth: true,
       changeYear: true,
+      defaultDate: restoredRange?.start || new Date(),
+      beforeShowDay: function (date) {
+        const range = individualChartDates[chartId];
+        if (!range?.start || !range?.end) return [true, ""];
+        const value = $.datepicker.formatDate("yy-mm-dd", date);
+        return [true, value >= range.start && value <= range.end ? "ui-state-range" : ""];
+      },
 
       onSelect: function (dateText) {
         const state = individualChartDates[chartId] || {
@@ -526,6 +557,7 @@ $(".calendar-icon")
         }
 
         individualChartDates[chartId] = state;
+        persistIndividualChartDates();
 
         console.log("Individual graph date range:", {
           chart: chartId,
@@ -561,6 +593,10 @@ $(".calendar-icon")
           window.location.pathname + "?" + params.toString();
       }
     });
+    if (restoredRange?.start) {
+      $inline.datepicker("setDate", restoredRange.start);
+      $inline.datepicker("refresh");
+    }
   });
 
     $(".report-filter").on("click", function (e) {
@@ -635,6 +671,15 @@ $(".calendar-icon")
         });
     }
     updateActiveFilter(selectedFilter);
+    $dateLabel.text({
+        today: "Data shown: Today",
+        week: "Data shown: This week",
+        month: "Data shown: This month",
+        all: "Data shown: All dates",
+        custom: startDate && endDate
+            ? `Data shown: ${formatDate(startDate)} – ${formatDate(endDate)}`
+            : "Data shown: Select date range"
+    }[selectedFilter] || "Data shown: All dates");
     loadDashboardData();
 });
 
@@ -790,12 +835,24 @@ $(document).ready(function () {
         const end = params.get(`${chartId}_end_date`);
 
         if (start && end) {
+            individualChartDates[chartId] = { start, end };
+            persistIndividualChartDates();
             $("#" + chartId)
                 .find(".chart-date-label")
                 .first()
                 .text(
                     `${formatChartDate(start)} – ${formatChartDate(end)}`
                 );
+      } else {
+            const savedRange = individualChartDates[chartId];
+            const today = new Date();
+            const todayString = $.datepicker.formatDate("yy-mm-dd", today);
+            $("#" + chartId)
+                .find(".chart-date-label")
+                .first()
+                .text(savedRange?.start && savedRange?.end
+                    ? `${formatChartDate(savedRange.start)} – ${formatChartDate(savedRange.end)}`
+                    : formatChartDate(todayString));
         }
     });
 

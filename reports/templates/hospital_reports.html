@@ -4,7 +4,14 @@
 
 
 {% block content %}
-            <div class="flex-grow flex flex-col gap-6 p-4 md:p-8 overflow-y-auto scroll">
+<style>
+    .ui-datepicker td a.ui-state-range {
+        background: #087cf0;
+        border-color: #087cf0;
+        color: #fff;
+    }
+</style>
+            <div id="hospitalReportsPage" data-user-id="{{ report_user_id }}" class="flex-grow flex flex-col gap-6 p-4 md:p-8 overflow-y-auto scroll">
                 <div class="flex gap-2 items-center">
                     <span class="material-symbols-outlined !font-semibold">patient_list</span>
                     <h1 class="font-semibold">Reports</h1>
@@ -19,7 +26,7 @@
                                class="py-1.5 pl-8 pr-2 w-full sm:w-[17rem] text-sm rounded-md border border-blue-haze placeholder:text-medium-gray focus:outline-none" />
                        </div>
                     <div class="flex items-center justify-end gap-2.5">
-                        <p class="font-normal text-xs text-dodger-blue">Data shown: Jan 12, 2025 – Mar 14, 2025</p>
+                        <p class="font-normal text-xs text-dodger-blue">Data shown: All dates</p>
                         <div class="relative dropdown">
                             <button
                                 class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
@@ -49,7 +56,7 @@
                                 <div
                                     class="report-filter p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
                                     data-type="today">
-                                    <span class="material-symbols-outlined !text-lg text-dodger-blue">
+                                    <span class="material-symbols-outlined !text-lg text-light-gray">
                                         check
                                     </span>
                                       Today
@@ -57,8 +64,8 @@
                                 <div
                                     class="report-filter p-2 pl-4 hover:bg-pale-azure rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
                                     data-type="all">
-                                    <span class="material-symbols-outlined !text-lg text-light-gray">check</span>
-                                    Reset
+                                    <span class="material-symbols-outlined !text-lg text-dodger-blue">check</span>
+                                    All dates
                                 </div>
                                 <div
                                     class=" report-filter p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
@@ -391,7 +398,7 @@
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   <script src="/static/js/tabs.js"></script>
-  <script src="/static/js/hospital-reports.js"></script>
+  <script src="/static/js/hospital-reports.js?v=20261028-3"></script>
   <script src="/static/js/table-pagination.js"></script>
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
