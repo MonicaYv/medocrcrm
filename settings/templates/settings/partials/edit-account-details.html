@@ -655,47 +655,69 @@
                     <span class="error emailError text-red-500 text-sm mt-1 hidden"></span>
                 </div>
 
-                <!-- Country code + Phone -->
-                <div class="flex flex-col lg:flex-row gap-4">
-                    <!-- Country Code -->
-                    <div class="pl-4 lg:w-1/4">
-                        <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
-                            {% for code in country_codes %}
-                                <option value="{{ code.dial_code }}"
-                                    {% if code.dial_code == country_code %}selected{% endif %}>
-                                    {{ code.name }} ({{ code.dial_code }})
-                                </option>
-                            {%endfor%}
-                        </select>
-                        <span class="error countryCodesError text-red-500 text-sm mt-1 hidden"></span>
-                    </div>
+               <!-- Country code + Phone -->
+<div class="flex flex-col lg:flex-row gap-4">
+    <div class="pl-4 lg:w-1/4">
+        <select name="countryCodes"
+                class="countryCodes border rounded px-3 py-2 w-full">
+            {% for code in country_codes %}
+                <option value="{{ code.dial_code }}"
+                    {% if code.dial_code == country_code %}selected{% endif %}>
+                    {{ code.name }} ({{ code.dial_code }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-                    <!-- Phone -->
-                    <div class="flex-1">
-                        <input name="phone" type="text" class="border rounded px-3 py-2 w-full"
-                        placeholder="Phone Number" value="{{phone_no}}"/>
-                        <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    </div>
-                </div>
-                <!-- OTP -->
+    <div class="flex-1">
+        <input name="phone" type="text"
+               class="border rounded px-3 py-2 w-full"
+               placeholder="Phone Number"
+               value="{{ phone_no }}">
+    </div>
+</div>
 
-                <div class="flex-1">
-                    <button type="button"
-                        class="send-otp-btn bg-living-coral text-white px-2 py-2.5 rounded mb-1.5 w-full cursor-pointer">
-                        Send Phone OTP
-                    </button>
-                    <span class="text-primary-color text-sm mt-2">Didn't get the code ?
-                        <span class="text-black">Resend</span></span>
-                </div>
-                <div class="flex-1 pl-4">
-                    <input name="otp1" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
-                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"/>
-                    <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-                    <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
-                        <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
-                        <p class="font-normal text-xs text-bright-green">Verified</p>
-                    </div>
-                </div>
+<!-- Pharmacy Phone OTP -->
+<div class="md:col-span-2">
+    <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr] gap-4">
+
+        <!-- Send OTP -->
+        <div>
+            <button type="button"
+                    class="send-otp-btn send-pharmacy-otp-btn bg-[#FF6B5F] text-white px-4 py-3 rounded-lg w-full font-semibold cursor-pointer hover:bg-[#FF574A] transition-all duration-200">
+                Send Phone OTP
+            </button>
+        </div>
+
+        <!-- Enter and Verify OTP -->
+        <div class="flex flex-col gap-2">
+            <div class="flex gap-2">
+                <input name="otp1"
+                       type="text"
+                       class="border border-gray-300 rounded-lg px-3 py-3 w-full min-w-0 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                       placeholder="Enter 6-digit OTP"
+                       maxlength="6"
+                       inputmode="numeric"
+                       autocomplete="one-time-code"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
+
+                <button type="button"
+                        class="verify-otp-btn bg-[#FF3B30] text-white px-5 py-3 rounded-lg font-bold whitespace-nowrap cursor-pointer hover:bg-[#E62E24] transition-all disabled:bg-[#FFB4AE] disabled:text-white disabled:cursor-not-allowed"
+                        disabled>
+                    Verify
+                </button>
+            </div>
+
+            <div class="otp-verification-status hidden items-center gap-2 text-sm text-green-600">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Phone number verified successfully</span>
+            </div>
+
+            <span class="phone-otp-error text-red-500 text-sm hidden"></span>
+        </div>
+
+    </div>
+</div>
             </div>
         </div>
         <!--Company Name-->
