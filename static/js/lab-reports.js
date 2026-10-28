@@ -1,8 +1,13 @@
 let barChart;
 let pieChart;
 let lineChart;
+
 let labReportPendingStartDate = "";
+let labReportRangeStartDate = "";
+let labReportRangeEndDate = "";
+
 let labReportRequest = null;
+
 $(document).ready(function () {
   // --------- BAR CHART (Most Requested Test) ----------
   const barCtx = document.getElementById("barChart").getContext("2d");
@@ -293,13 +298,53 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
         },
 
         success: function (response) {
-           console.log(response);
-            $("#reportRange").text(
-                "Data shown: " + response.range_label
+        //    console.log(response);
+        //     $("#reportRange").text(
+        //         "Data shown: " + response.range_label
+        //     );
+        //     $(".lab-report-range-label").text(response.range_label || "All dates");
+        //     $("#mostRequestedTestCaption").text(`Requests for ${response.range_label || "all dates"}`);
+        //     $("#revenueByTestCaption").text(`Revenue distribution for ${response.range_label || "all dates"}`);
+        console.log(response);
+
+        // Format YYYY-MM-DD as Oct 14, 2026
+        function formatReportDate(dateString) {
+           if (!dateString) return "";
+
+           const parts = dateString.split("-");
+
+            if (parts.length !== 3) return dateString;
+
+            const date = new Date(
+               Number(parts[0]),
+               Number(parts[1]) - 1,
+               Number(parts[2])
             );
-            $(".lab-report-range-label").text(response.range_label || "All dates");
-            $("#mostRequestedTestCaption").text(`Requests for ${response.range_label || "all dates"}`);
-            $("#revenueByTestCaption").text(`Revenue distribution for ${response.range_label || "all dates"}`);
+
+            return $.datepicker.formatDate("M dd, yy", date);
+        }
+
+        // Use the dates selected by the user for custom filtering.
+        let displayRange = response.range_label || "All dates";
+  
+        if (filterType === "custom" && startDate && endDate) {
+            displayRange =
+                `${formatReportDate(startDate)} – ${formatReportDate(endDate)}`;
+        }
+
+        // Update the date shown above the charts.
+        $("#reportRange").text("Data shown: " + displayRange);
+
+        $(".lab-report-range-label").text(displayRange);
+
+        // Update chart captions.
+        $("#mostRequestedTestCaption").text(
+            `Requests for ${displayRange}`
+        );
+
+        $("#revenueByTestCaption").text(
+           `Revenue distribution for ${displayRange}`
+        );
            updateHeatmap(
               response.heatmap_data
            );
@@ -659,65 +704,480 @@ $("input[type='text']").on("keyup", function () {
 //         $(".filterDropdown").addClass("hidden");
 //     }
 // );
+// function openLabReportDatepicker($dropdown, $trigger) {
+//     const $picker = $dropdown.find(".datepicker-container").first();
+//     const $inline = $picker.find(".datepicker-inline").first();
+//     if (!$picker.length || !$inline.length || !$.fn.datepicker) return;
+
+//     labReportPendingStartDate = "";
+//     $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
+//     $(".datepicker-container").not($picker).addClass("hidden").css("display", "");
+//     $picker.removeClass("hidden").css({ display: "", position: "fixed", width: "max-content", zIndex: 10000 });
+//     $("#labReportDateStatus").text("Select start date");
+
+//     if ($inline.hasClass("hasDatepicker")) $inline.datepicker("destroy");
+//     $inline.empty().removeClass("hasDatepicker");
+//     // $inline.datepicker({
+//     //     dateFormat: "yy-mm-dd",
+//     //     changeMonth: true,
+//     //     changeYear: true,
+//     //     yearRange: "2000:2035",
+//     //     onSelect: function (dateText) {
+//     $inline.datepicker({
+//     dateFormat: "yy-mm-dd",
+//     changeMonth: true,
+//     changeYear: true,
+//     yearRange: "2000:2035",
+
+//     // Highlight Start Date, End Date and dates between them
+//     beforeShowDay: function (date) {
+
+//         const year = date.getFullYear();
+//         const month = String(date.getMonth() + 1).padStart(2, "0");
+//         const day = String(date.getDate()).padStart(2, "0");
+
+//         const currentDate = `${year}-${month}-${day}`;
+
+//         const start = labReportRangeStartDate;
+//         const end = labReportRangeEndDate;
+
+//         if (!start) {
+//             return [true, ""];
+//         }
+
+//         if (end && currentDate >= start && currentDate <= end) {
+
+//             if (currentDate === start || currentDate === end) {
+//                 return [true, "lab-date-range-endpoint"];
+//             }
+
+//             return [true, "lab-date-range"];
+//         }
+
+//         if (!end && currentDate === start) {
+//             return [true, "lab-date-range-endpoint"];
+//         }
+
+//         return [true, ""];
+//     },
+
+//     // Keep your existing onSelect code below
+//     onSelect: function (dateText) {
+
+//            // FIRST CLICK: SELECT START DATE
+//            if (!labReportPendingStartDate) {
+
+//                 labReportPendingStartDate = dateText;
+
+//                 labReportRangeStartDate = dateText;
+//                 labReportRangeEndDate = "";
+
+//                 const startDateObj = $.datepicker.parseDate(
+//                   "yy-mm-dd",
+//                    dateText
+//                 );
+
+//                 // Prevent selecting an earlier end date
+//                 $inline.datepicker("option", "minDate", startDateObj);
+
+//                 // Refresh calendar highlighting
+//                 $inline.datepicker("refresh");
+
+//                 $("#labReportDateStatus").text(
+//                    `Start: ${dateText} — Select end date`
+//                 );
+
+//                 console.log("Start date:", dateText);
+
+//                 return;
+//             }
+
+//             // SECOND CLICK: SELECT END DATE
+//             let rangeStart = labReportPendingStartDate;
+//             let rangeEnd = dateText;
+
+//             // Keep dates in chronological order
+//             if (rangeStart > rangeEnd) {
+//                 [rangeStart, rangeEnd] = [rangeEnd, rangeStart];
+//             }
+
+//             // Save selected range
+//             labReportRangeStartDate = rangeStart;
+//             labReportRangeEndDate = rangeEnd;
+
+//             console.log("Selected range:", rangeStart, rangeEnd);
+
+//             // Refresh calendar
+//             $inline.datepicker("refresh");
+
+//             // Format dates for the label
+//             function formatDate(date) {
+//                const parts = date.split("-");
+
+//                 return $.datepicker.formatDate(
+//                   "M dd, yy",
+//                    new Date(
+//                         Number(parts[0]),
+//                         Number(parts[1]) - 1,
+//                         Number(parts[2])
+//                     )
+//                 );
+//             }
+
+//             $dropdown.find(".lab-report-range-label").text(
+//                 formatDate(rangeStart) + " – " + formatDate(rangeEnd)
+//             );
+
+//             $("#labReportDateStatus").text(
+//                 `${rangeStart} to ${rangeEnd}`
+//             );
+
+//             // Reset pending selection
+//             labReportPendingStartDate = "";
+
+//             $inline.datepicker("option", "minDate", null);
+
+//             // Update URL
+//             const url = new URL(window.location.href);
+
+//             url.searchParams.set("date_filter", "custom");
+//             url.searchParams.set("start_date", rangeStart);
+//             url.searchParams.set("end_date", rangeEnd);
+
+//             window.history.replaceState({}, "", url.toString());
+
+//             // Close calendar
+//             // $picker.addClass("hidden").css("display", "");
+
+//            // Refresh reports and graphs
+//         //    setLabReportActiveFilter("custom");
+
+//         //    loadDashboardData("custom", rangeStart, rangeEnd);
+
+//            // Keep calendar open so the selected range remains visible
+//            $picker.removeClass("hidden").css("display", "block");
+
+//            // Refresh reports and graphs
+//            setLabReportActiveFilter("custom");
+
+//            loadDashboardData("custom", rangeStart, rangeEnd);
+
+//        },
+//        });
+//     //     onSelect: function (dateText) {
+//     //         if (!labReportPendingStartDate) {
+//     //             labReportPendingStartDate = dateText;
+//     //             $inline.datepicker("option", "minDate", dateText);
+//     //             $("#labReportDateStatus").text(`Start: ${dateText} — Select end date`);
+//     //             return;
+//     //         }
+
+//     //         let rangeStart = labReportPendingStartDate;
+//     //         let rangeEnd = dateText;
+//     //         if (rangeStart > rangeEnd) [rangeStart, rangeEnd] = [rangeEnd, rangeStart];
+//     //         labReportPendingStartDate = "";
+//     //         $inline.datepicker("option", "minDate", null);
+//     //         $("#labReportDateStatus").text(`${rangeStart} to ${rangeEnd}`);
+//     //         $picker.addClass("hidden").css("display", "");
+//     //         $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
+//     //         const url = new URL(window.location.href);
+//     //         url.searchParams.set("date_filter", "custom");
+//     //         url.searchParams.set("start_date", rangeStart);
+//     //         url.searchParams.set("end_date", rangeEnd);
+//     //         window.history.replaceState({}, "", url.toString());
+//     //         setLabReportActiveFilter("custom");
+//     //         loadDashboardData("custom", rangeStart, rangeEnd);
+//     //     },
+//     // });
+
+//     const placePicker = function () {
+//         if ($picker.hasClass("hidden")) return;
+//         const anchor = ($trigger && $trigger.length ? $trigger[0] : $dropdown.find(".filterToggle")[0]);
+//         if (!anchor) return;
+//         const rect = anchor.getBoundingClientRect();
+//         const width = $picker.outerWidth();
+//         const left = Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8));
+//         const top = Math.min(rect.bottom + 8, window.innerHeight - $picker.outerHeight() - 8);
+//         $picker.css({ left: `${left}px`, top: `${Math.max(8, top)}px`, right: "auto" });
+//     };
+//     requestAnimationFrame(placePicker);
+//     $(window).off("resize.labReportPicker").on("resize.labReportPicker", placePicker);
+// }
+
+
+
 function openLabReportDatepicker($dropdown, $trigger) {
     const $picker = $dropdown.find(".datepicker-container").first();
     const $inline = $picker.find(".datepicker-inline").first();
-    if (!$picker.length || !$inline.length || !$.fn.datepicker) return;
 
+    if (!$picker.length || !$inline.length || !$.fn.datepicker) {
+        console.error("Lab report datepicker not found.");
+        return;
+    }
+
+    // Restore previously selected dates from URL.
+    const dateParams = new URLSearchParams(window.location.search);
+    const savedStartDate = dateParams.get("start_date") || "";
+    const savedEndDate = dateParams.get("end_date") || "";
+
+    if (savedStartDate && savedEndDate) {
+        labReportRangeStartDate = savedStartDate;
+        labReportRangeEndDate = savedEndDate;
+    }
+
+    // Reset only the pending click; retain the saved range.
     labReportPendingStartDate = "";
-    $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
-    $(".datepicker-container").not($picker).addClass("hidden").css("display", "");
-    $picker.removeClass("hidden").css({ display: "", position: "fixed", width: "max-content", zIndex: 10000 });
-    $("#labReportDateStatus").text("Select start date");
 
-    if ($inline.hasClass("hasDatepicker")) $inline.datepicker("destroy");
+    // Hide other calendars.
+    $(".datepicker-container")
+        .not($picker)
+        .addClass("hidden")
+        .css("display", "");
+
+    // Show this calendar.
+    $picker.removeClass("hidden").css({
+        display: "block",
+        position: "fixed",
+        width: "max-content",
+        zIndex: 10000
+    });
+
+ // Create a visible Start Date / End Date status bar.
+let $dateStatus = $picker.find(".labReportDateStatus");
+
+if (!$dateStatus.length) {
+    $dateStatus = $(`
+        <div class="labReportDateStatus"
+             style="
+                 display:block;
+                 width:100%;
+                 box-sizing:border-box;
+                 padding:10px;
+                 font-size:13px;
+                 color:#333;
+                 background:#fff;
+                 border-bottom:1px solid #ddd;
+             ">
+            Select start date
+        </div>
+    `);
+}
+
+// Keep the status bar at the top of the calendar.
+$picker.prepend($dateStatus);
+
+if (labReportRangeStartDate && labReportRangeEndDate) {
+    $dateStatus.text(
+        `Start Date: ${labReportRangeStartDate} | End Date: ${labReportRangeEndDate}`
+    );
+} else {
+    $dateStatus.text("Select start date");
+}
+
+    if (labReportRangeStartDate && labReportRangeEndDate) {
+        $dateStatus.text(
+            `Start Date: ${labReportRangeStartDate} | End Date: ${labReportRangeEndDate}`
+        );
+    } else {
+        $dateStatus.text("Select start date");
+    }
+
+    // Destroy the old datepicker before reinitializing it.
+    if ($inline.hasClass("hasDatepicker")) {
+        $inline.datepicker("destroy");
+    }
+
     $inline.empty().removeClass("hasDatepicker");
+
     $inline.datepicker({
         dateFormat: "yy-mm-dd",
         changeMonth: true,
         changeYear: true,
         yearRange: "2000:2035",
+        showOtherMonths: true,
+        selectOtherMonths: true,
+        navigationAsDateFormat: false,
+
+        beforeShowDay: function (date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            const currentDate = `${year}-${month}-${day}`;
+
+            if (
+                labReportRangeStartDate &&
+                labReportRangeEndDate &&
+                currentDate >= labReportRangeStartDate &&
+                currentDate <= labReportRangeEndDate
+            ) {
+                const isEndpoint =
+                    currentDate === labReportRangeStartDate ||
+                    currentDate === labReportRangeEndDate;
+
+                return [
+                    true,
+                    isEndpoint
+                        ? "lab-date-range-endpoint"
+                        : "lab-date-range",
+                    "Selected date range"
+                ];
+            }
+
+            return [true, "", ""];
+        },
+
         onSelect: function (dateText) {
+            console.log("Date clicked:", dateText);
+
+            // FIRST CLICK: Select Start Date.
             if (!labReportPendingStartDate) {
                 labReportPendingStartDate = dateText;
-                $inline.datepicker("option", "minDate", dateText);
-                $("#labReportDateStatus").text(`Start: ${dateText} — Select end date`);
+                labReportRangeStartDate = dateText;
+                labReportRangeEndDate = "";
+
+                $inline.datepicker(
+                    "option",
+                    "minDate",
+                    $.datepicker.parseDate("yy-mm-dd", dateText)
+                );
+
+                $dateStatus.text(
+                    `Start Date: ${dateText} | Now select End Date`
+                );
+
+                $inline.datepicker("refresh");
+
+                console.log("Start Date selected:", dateText);
                 return;
             }
 
-            let rangeStart = labReportPendingStartDate;
-            let rangeEnd = dateText;
-            if (rangeStart > rangeEnd) [rangeStart, rangeEnd] = [rangeEnd, rangeStart];
-            labReportPendingStartDate = "";
-            $inline.datepicker("option", "minDate", null);
-            $("#labReportDateStatus").text(`${rangeStart} to ${rangeEnd}`);
-            $picker.addClass("hidden").css("display", "");
-            $dropdown.find(".filterDropdown").addClass("hidden").css("display", "");
+            // SECOND CLICK: Select End Date.
+            const rangeStart = labReportPendingStartDate;
+            const rangeEnd = dateText;
+
+            // Do not accept an end date before the start date.
+            if (rangeEnd < rangeStart) {
+                $dateStatus.text(
+                    `Start Date: ${rangeStart} | Select an End Date on or after the Start Date`
+                );
+
+                console.warn("End Date cannot be earlier than Start Date.");
+                return;
+            }
+
+            // Save the completed date range.
+            labReportRangeStartDate = rangeStart;
+            labReportRangeEndDate = rangeEnd;
+
+            console.log("Selected date range:", rangeStart, rangeEnd);
+
+            function formatDate(value) {
+                const parts = value.split("-");
+
+                return $.datepicker.formatDate(
+                    "M dd, yy",
+                    new Date(
+                        Number(parts[0]),
+                        Number(parts[1]) - 1,
+                        Number(parts[2])
+                    )
+                );
+            }
+
+            const formattedRange =
+                `${formatDate(rangeStart)} – ${formatDate(rangeEnd)}`;
+
+            // Update date labels.
+            $(".lab-report-range-label").text(formattedRange);
+            $("#reportRange").text(`Data shown: ${formattedRange}`);
+
+            $dateStatus.text(
+                `Start Date: ${rangeStart} | End Date: ${rangeEnd}`
+            );
+
+            // Update URL parameters without reloading the page.
             const url = new URL(window.location.href);
+
             url.searchParams.set("date_filter", "custom");
             url.searchParams.set("start_date", rangeStart);
             url.searchParams.set("end_date", rangeEnd);
+
             window.history.replaceState({}, "", url.toString());
+
+            // Reset pending selection and date restrictions.
+            labReportPendingStartDate = "";
+
+            $inline.datepicker("option", "minDate", null);
+            $inline.datepicker("refresh");
+
+            // Hide the filter dropdown, but keep the calendar visible.
+            $dropdown.find(".filterDropdown")
+                .addClass("hidden")
+                .css("display", "");
+
+
+            // Apply custom filter to the complete Reports dashboard.
             setLabReportActiveFilter("custom");
+
+
+            // Load graph data for the selected range.
             loadDashboardData("custom", rangeStart, rangeEnd);
-        },
+        }
     });
 
-    const placePicker = function () {
-        if ($picker.hasClass("hidden")) return;
-        const anchor = ($trigger && $trigger.length ? $trigger[0] : $dropdown.find(".filterToggle")[0]);
-        if (!anchor) return;
+    // Position calendar next to its trigger icon.
+    function placePicker() {
+        if ($picker.hasClass("hidden")) {
+            return;
+        }
+
+        const anchor = (
+            $trigger && $trigger.length
+                ? $trigger[0]
+                : $dropdown.find(".filterToggle")[0]
+        );
+
+        if (!anchor) {
+            return;
+        }
+
         const rect = anchor.getBoundingClientRect();
         const width = $picker.outerWidth();
-        const left = Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8));
-        const top = Math.min(rect.bottom + 8, window.innerHeight - $picker.outerHeight() - 8);
-        $picker.css({ left: `${left}px`, top: `${Math.max(8, top)}px`, right: "auto" });
-    };
+        const height = $picker.outerHeight();
+
+        const left = Math.max(
+            8,
+            Math.min(
+                rect.right - width,
+                window.innerWidth - width - 8
+            )
+        );
+
+        const top = Math.max(
+            8,
+            Math.min(
+                rect.bottom + 8,
+                window.innerHeight - height - 8
+            )
+        );
+
+        $picker.css({
+            left: `${left}px`,
+            top: `${top}px`,
+            right: "auto"
+        });
+    }
+
     requestAnimationFrame(placePicker);
-    $(window).off("resize.labReportPicker").on("resize.labReportPicker", placePicker);
+
+    $(window)
+        .off("resize.labReportPicker")
+        .on("resize.labReportPicker", placePicker);
 }
 
+
 $(document).off("click.labReportFilter");
+
 
 $(document).on(
     "click.labReportFilter",
@@ -747,11 +1207,28 @@ $(document).on(
     }
 );
 
-$(document).on("click.labReportCalendarIcon", ".lab-report-chart-calendar", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    openLabReportDatepicker($(this).closest(".dropdown"), $(this));
-});
+// $(document).on("click.labReportCalendarIcon", ".lab-report-chart-calendar", function (e) {
+//     e.preventDefault();
+//     e.stopPropagation();
+//     openLabReportDatepicker($(this).closest(".dropdown"), $(this));
+// });
+// All graph calendar icons use the same dashboard date range.
+$(document)
+    .off("click.labReportCalendarIcon", ".lab-report-chart-calendar")
+    .on(
+        "click.labReportCalendarIcon",
+        ".lab-report-chart-calendar",
+        function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const $trigger = $(this);
+            const $dropdown = $trigger.closest(".dropdown");
+
+            // Open the calendar belonging to the clicked graph.
+            openLabReportDatepicker($dropdown, $trigger);
+        }
+    );
 
 $(document).on("click.labReportDatepickerBack", "#labReportDatepickerBack", function (e) {
     e.preventDefault();
@@ -775,14 +1252,81 @@ $(".filterToggle").off("click.labReportToggle").on("click.labReportToggle", func
 
 });
 
-$(document).off("click.labReportOutside").on("click.labReportOutside", function (e) {
-    if ($(e.target).closest(".lab-report-filter, .datepicker-container, .ui-datepicker").length) return;
-    $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
-});
+// $(document).off("click.labReportOutside").on("click.labReportOutside", function (e) {
+//     if ($(e.target).closest(".lab-report-filter, .datepicker-container, .ui-datepicker").length) return;
+//     $(".filterDropdown, .datepicker-container").addClass("hidden").css("display", "");
+// });
+// // Close calendar only when clicking outside.
+// $(document)
+//     .off("click.labReportOutside")
+//     .on("click.labReportOutside", function (e) {
 
-$(document).off("click.labReportPickerInside").on("click.labReportPickerInside", ".datepicker-container, .ui-datepicker", function (e) {
-    e.stopPropagation();
-});
+//         // Keep calendar open when clicking dates or month arrows.
+//         if (
+//             $(e.target).closest(
+//                 ".datepicker-container, .ui-datepicker, .lab-report-chart-calendar"
+//             ).length
+//         ) {
+//             return;
+//         }
+
+//         // Keep calendar open when interacting with its controls.
+//         $(".datepicker-container").addClass("hidden").css("display", "");
+//         $(".filterDropdown").addClass("hidden").css("display", "");
+//     });
+
+// // Prevent calendar interactions from bubbling to other handlers.
+// $(document)
+//     .off("click.labReportCalendarInside")
+//     .on(
+//         "click.labReportCalendarInside",
+//         ".datepicker-container, .ui-datepicker",
+//         function (e) {
+//             e.stopPropagation();
+//         }
+//     );
+// $(document).off("click.labReportPickerInside").on("click.labReportPickerInside", ".datepicker-container, .ui-datepicker", function (e) {
+//     e.stopPropagation();
+// });
+// Keep the calendar open when clicking dates or month arrows.
+$(document)
+    .off("click.labReportOutside")
+    .on("click.labReportOutside", function (e) {
+
+        const $target = $(e.target);
+
+        // Ignore clicks inside the calendar and its navigation arrows.
+        if (
+            $target.closest(
+                ".datepicker-container, .ui-datepicker, " +
+                ".ui-datepicker-header, .ui-datepicker-prev, " +
+                ".ui-datepicker-next, .lab-report-chart-calendar"
+            ).length
+        ) {
+            
+            return;
+        }
+
+        // Close the calendar only when clicking outside.
+        $(".datepicker-container")
+            .addClass("hidden")
+            .css("display", "");
+
+        $(".filterDropdown")
+            .addClass("hidden")
+            .css("display", "");
+    });
+
+// Prevent calendar clicks from triggering outside-click handling.
+// $(document)
+//     .off("click.labReportCalendarInside")
+//     .on(
+//         "click.labReportCalendarInside",
+//         ".datepicker-container, .ui-datepicker",
+//         function (e) {
+//             e.stopPropagation();
+//         }
+//     );
 
 // Chart period selectors used to update only their own caption. Route their
 // choice through the report loader so chart values and date captions refresh.
@@ -1156,3 +1700,6 @@ $(".download-btn").on("click", function () {
     });
 
 });
+
+
+

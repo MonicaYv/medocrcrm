@@ -368,7 +368,56 @@
           </div>
         </div>
       </div>
+<style>
+    /* Calendar header */
+    .ui-datepicker .ui-datepicker-header {
+        position: relative !important;
+        min-height: 35px;
+    }
+
+    /* Previous and Next month arrows */
+    .ui-datepicker .ui-datepicker-prev,
+    .ui-datepicker .ui-datepicker-next {
+        position: absolute !important;
+        top: 2px !important;
+        display: block !important;
+        width: 2em !important;
+        height: 2em !important;
+        cursor: pointer !important;
+        z-index: 10 !important;
+    }
+
+    .ui-datepicker .ui-datepicker-prev {
+        left: 2px !important;
+    }
+
+    .ui-datepicker .ui-datepicker-next {
+        right: 2px !important;
+    }
+
+    /* Calendar dates clickable */
+    .ui-datepicker td a {
+        cursor: pointer !important;
+        text-align: center !important;
+    }
+
+    /* Dates between start and end date */
+    .ui-datepicker td.lab-date-range a {
+        background: #dbeafe !important;
+        border: 1px solid #93c5fd !important;
+        color: #1d4ed8 !important;
+    }
+
+    /* Start date and end date */
+    .ui-datepicker td.lab-date-range-endpoint a {
+        background: #007bff !important;
+        border: 1px solid #007bff !important;
+        color: #ffffff !important;
+        font-weight: bold !important;
+    }
+</style>
 {% endblock %}
+
 
 {% block extra_js %}
   <script src="/static/js/tabs.js"></script>
@@ -391,7 +440,8 @@
 <!-- JSPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<script src="/static/js/lab-reports.js?v=20261021-1"></script>
+<!-- <script src="/static/js/lab-reports.js?v=20261021-1"></script> -->
+<script src="/static/js/lab-reports.js?v=20261028-range-calendar"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
