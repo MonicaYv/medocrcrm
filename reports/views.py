@@ -569,6 +569,7 @@ def reports(request):
 
     # Check if the user is a hospital user
     if user.user_type == 'hospital':
+        context["report_user_id"] = user.id
         try:
             current_hospital = user.hospital_profile
         except AttributeError:
