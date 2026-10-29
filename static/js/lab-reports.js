@@ -5,6 +5,8 @@ let lineChart;
 let labReportPendingStartDate = "";
 let labReportRangeStartDate = "";
 let labReportRangeEndDate = "";
+const labChartDateRanges = {};
+let labReportVisitType = new URLSearchParams(window.location.search).get("visit_type") || "";
 
 let labReportRequest = null;
 
@@ -294,7 +296,8 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
         data: {
            filter: filterType,
            start: startDate,
-           end: endDate
+           end: endDate,
+           visit_type: labReportVisitType
         },
 
         success: function (response) {
@@ -335,7 +338,13 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
         // Update the date shown above the charts.
         $("#reportRange").text("Data shown: " + displayRange);
 
-        $(".lab-report-range-label").text(displayRange);
+        const pageParams = new URLSearchParams(window.location.search);
+        $(".lab-report-chart-calendar").each(function () {
+            const chartId = $(this).attr("data-chart-id");
+            if (!pageParams.get(`${chartId}_start_date`)) {
+                $(this).closest(".dropdown").find(".lab-report-range-label").text(displayRange);
+            }
+        });
 
         // Update chart captions.
         $("#mostRequestedTestCaption").text(
@@ -345,9 +354,9 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
         $("#revenueByTestCaption").text(
            `Revenue distribution for ${displayRange}`
         );
-           updateHeatmap(
-              response.heatmap_data
-           );
+           if (!new URLSearchParams(window.location.search).get("heatmap_start_date")) {
+               updateHeatmap(response.heatmap_data);
+           }
 
         updateBidWinLoss(
            response.bid_win_loss
@@ -380,40 +389,32 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
             // BAR CHART
             // =========================
 
-            barChart.data.labels =
-                response.most_requested_test.labels;
-
-            barChart.data.datasets[0].data =
-                response.most_requested_test.data;
-
-            barChart.update();
+            if (!pageParams.get("most_requested_test_start_date")) {
+                barChart.data.labels = response.most_requested_test.labels;
+                barChart.data.datasets[0].data = response.most_requested_test.data;
+                barChart.update();
+            }
 
             // =========================
             // PIE CHART
             // =========================
 
-            pieChart.data.labels =
-                response.revenue_by_test.labels;
-
-            pieChart.data.datasets[0].data =
-                response.revenue_by_test.data;
-
-            pieChart.update();
+            if (!pageParams.get("revenue_by_test_start_date")) {
+                pieChart.data.labels = response.revenue_by_test.labels;
+                pieChart.data.datasets[0].data = response.revenue_by_test.data;
+                pieChart.update();
+            }
 
             // =========================
             // LINE CHART
             // =========================
 
-            lineChart.data.labels =
-                response.bid_trend.labels;
-
-            lineChart.data.datasets[0].data =
-                response.bid_trend.cbc;
-
-            lineChart.data.datasets[1].data =
-                response.bid_trend.rtpcr;
-
-            lineChart.update();
+            if (!pageParams.get("bid_trend_start_date")) {
+                lineChart.data.labels = response.bid_trend.labels;
+                lineChart.data.datasets[0].data = response.bid_trend.cbc;
+                lineChart.data.datasets[1].data = response.bid_trend.rtpcr;
+                lineChart.update();
+            }
             // UPDATE BID WIN LOSS
             // $(".bg-mint-leaf").eq(0).css("width", "81%");
             // $(".bg-bright-red").eq(0).css("width", "19%");
@@ -446,7 +447,7 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
 
             $("#ratings").html("");
 
-            response.ratings_data.forEach((r) => {
+            if (!new URLSearchParams(window.location.search).get("ratings_start_date")) response.ratings_data.forEach((r) => {
 
                 $("#ratings").append(`
 
@@ -492,11 +493,20 @@ function loadDashboardData(filterType = "today", startDate = "", endDate = "") {
 const urlParams = new URLSearchParams(window.location.search);
 
 const requestedFilter = urlParams.get("date_filter") || "today";
-const selectedFilter = ["today", "week", "month", "year", "all", "custom"].includes(requestedFilter)
+let selectedFilter = ["today", "week", "month", "year", "all", "custom"].includes(requestedFilter)
     ? requestedFilter
     : "today";
 const startDate = urlParams.get("start_date") || "";
 const endDate = urlParams.get("end_date") || "";
+labReportRangeStartDate = startDate;
+labReportRangeEndDate = endDate;
+$("#labVisitTypeFilter").val(labReportVisitType).on("change", function () {
+    labReportVisitType = $(this).val() || "";
+    const url = new URL(window.location.href);
+    if (labReportVisitType) url.searchParams.set("visit_type", labReportVisitType);
+    else url.searchParams.delete("visit_type");
+    window.location.href = url.toString();
+});
 
 function setLabReportActiveFilter(filter) {
     $(".filterDropdown [data-filter] span:first-child")
@@ -509,12 +519,21 @@ function setLabReportActiveFilter(filter) {
 
 function applyLabReportPreset(filter) {
     if (!["today", "week", "month", "year", "all"].includes(filter)) return;
+    selectedFilter = filter;
     labReportPendingStartDate = "";
+    labReportRangeStartDate = "";
+    labReportRangeEndDate = "";
     setLabReportActiveFilter(filter);
     const url = new URL(window.location.href);
     url.searchParams.set("date_filter", filter);
     url.searchParams.delete("start_date");
     url.searchParams.delete("end_date");
+    // A preset applies to every chart, so discard any saved per-chart custom
+    // ranges. Otherwise the chart-specific requests override the chosen preset.
+    Object.keys(labChartDateRanges).forEach((chartId) => delete labChartDateRanges[chartId]);
+    Array.from(url.searchParams.keys()).forEach((key) => {
+        if (/_start_date$|_end_date$/.test(key)) url.searchParams.delete(key);
+    });
     window.history.replaceState({}, "", url.toString());
     $(".datepicker-container, .filterDropdown").addClass("hidden").css("display", "");
     loadDashboardData(filter);
@@ -530,6 +549,70 @@ if (selectedFilter === "custom" && startDate && endDate) {
 } else {
     loadDashboardData(selectedFilter);
 }
+
+// Each chart can have its own Hospital Reports style date range. The normal
+// dashboard request still supplies the summary cards and default chart data.
+const labChartPayloadKeys = {
+    most_requested_test: "most_requested_test",
+    revenue_by_test: "revenue_by_test",
+    bid_trend: "bid_trend",
+    heatmap: "heatmap_data",
+    ratings: "ratings_data"
+};
+
+function applyLabChartPayload(chartId, response) {
+    if (chartId === "most_requested_test") {
+        barChart.data.labels = response.most_requested_test.labels;
+        barChart.data.datasets[0].data = response.most_requested_test.data;
+        barChart.update();
+    } else if (chartId === "revenue_by_test") {
+        pieChart.data.labels = response.revenue_by_test.labels;
+        pieChart.data.datasets[0].data = response.revenue_by_test.data;
+        pieChart.update();
+    } else if (chartId === "bid_trend") {
+        lineChart.data.labels = response.bid_trend.labels;
+        lineChart.data.datasets[0].data = response.bid_trend.cbc;
+        lineChart.data.datasets[1].data = response.bid_trend.rtpcr;
+        lineChart.update();
+    } else if (chartId === "heatmap") {
+        updateHeatmap(response.heatmap_data);
+    } else if (chartId === "ratings") {
+        const $ratings = $("#ratings").empty();
+        response.ratings_data.forEach((rating) => $ratings.append(`
+            <div class="flex items-center justify-between">
+                <span class="text-dodger-blue">${rating.stars} star</span>
+                <div class="w-3/4 bg-[#D3D3D3] rounded-full h-2">
+                    <div class="bg-[#FFCC48] h-2 rounded-full" style="width:${rating.percent}%;"></div>
+                </div>
+                <span>${rating.percent}%</span>
+            </div>`));
+    }
+}
+
+function formatLabChartRange(start, end) {
+    const fmt = (value) => $.datepicker.formatDate(
+        "M dd, yy",
+        $.datepicker.parseDate("yy-mm-dd", value)
+    );
+    return `${fmt(start)} – ${fmt(end)}`;
+}
+
+$(".lab-report-chart-calendar").each(function () {
+    const chartId = $(this).attr("data-chart-id");
+    const params = new URLSearchParams(window.location.search);
+    const start = params.get(`${chartId}_start_date`);
+    const end = params.get(`${chartId}_end_date`);
+    if (!chartId || !labChartPayloadKeys[chartId] || !start || !end) return;
+
+    labChartDateRanges[chartId] = { start, end };
+    const displayRange = formatLabChartRange(start, end);
+    $(this).closest(".dropdown").find(".lab-report-range-label").text(displayRange);
+    $.getJSON("/reports/lab-report-data/", {
+        filter: "custom", start, end, visit_type: labReportVisitType
+    }).done((response) => applyLabChartPayload(chartId, response))
+      .fail((xhr) => console.error(`Could not load ${chartId} date range:`, xhr.responseText));
+});
+
 // =====================================
 // SEARCH
 // =====================================
@@ -915,15 +998,16 @@ function openLabReportDatepicker($dropdown, $trigger) {
         return;
     }
 
-    // Restore previously selected dates from URL.
-    const dateParams = new URLSearchParams(window.location.search);
-    const savedStartDate = dateParams.get("start_date") || "";
-    const savedEndDate = dateParams.get("end_date") || "";
+    const chartId = $trigger.attr("data-chart-id") || "dashboard";
 
-    if (savedStartDate && savedEndDate) {
-        labReportRangeStartDate = savedStartDate;
-        labReportRangeEndDate = savedEndDate;
-    }
+    // Restore this chart's independently selected date range.
+    const dateParams = new URLSearchParams(window.location.search);
+    const savedStartDate = dateParams.get(chartId === "dashboard" ? "start_date" : `${chartId}_start_date`) || "";
+    const savedEndDate = dateParams.get(chartId === "dashboard" ? "end_date" : `${chartId}_end_date`) || "";
+    const chartRange = chartId === "dashboard"
+        ? { start: savedStartDate || labReportRangeStartDate, end: savedEndDate || labReportRangeEndDate }
+        : (labChartDateRanges[chartId] || { start: savedStartDate, end: savedEndDate });
+    labChartDateRanges[chartId] = chartRange;
 
     // Reset only the pending click; retain the saved range.
     labReportPendingStartDate = "";
@@ -943,7 +1027,9 @@ function openLabReportDatepicker($dropdown, $trigger) {
     });
 
  // Create a visible Start Date / End Date status bar.
-let $dateStatus = $picker.find(".labReportDateStatus");
+    let $dateStatus = chartId === "dashboard"
+        ? $picker.find("#labReportDateStatus")
+        : $picker.find(".labReportDateStatus");
 
 if (!$dateStatus.length) {
     $dateStatus = $(`
@@ -958,7 +1044,7 @@ if (!$dateStatus.length) {
                  background:#fff;
                  border-bottom:1px solid #ddd;
              ">
-            Select start date
+            Start date: — | End date: —
         </div>
     `);
 }
@@ -966,20 +1052,12 @@ if (!$dateStatus.length) {
 // Keep the status bar at the top of the calendar.
 $picker.prepend($dateStatus);
 
-if (labReportRangeStartDate && labReportRangeEndDate) {
-    $dateStatus.text(
-        `Start Date: ${labReportRangeStartDate} | End Date: ${labReportRangeEndDate}`
-    );
-} else {
-    $dateStatus.text("Select start date");
-}
-
-    if (labReportRangeStartDate && labReportRangeEndDate) {
+    if (chartRange.start && chartRange.end) {
         $dateStatus.text(
-            `Start Date: ${labReportRangeStartDate} | End Date: ${labReportRangeEndDate}`
+            `Start date: ${chartRange.start} | End date: ${chartRange.end}`
         );
     } else {
-        $dateStatus.text("Select start date");
+        $dateStatus.text("Start date: — | End date: —");
     }
 
     // Destroy the old datepicker before reinitializing it.
@@ -994,6 +1072,7 @@ if (labReportRangeStartDate && labReportRangeEndDate) {
         changeMonth: true,
         changeYear: true,
         yearRange: "2000:2035",
+        defaultDate: labReportRangeStartDate || new Date(),
         showOtherMonths: true,
         selectOtherMonths: true,
         navigationAsDateFormat: false,
@@ -1005,14 +1084,14 @@ if (labReportRangeStartDate && labReportRangeEndDate) {
             const currentDate = `${year}-${month}-${day}`;
 
             if (
-                labReportRangeStartDate &&
-                labReportRangeEndDate &&
-                currentDate >= labReportRangeStartDate &&
-                currentDate <= labReportRangeEndDate
+                chartRange.start &&
+                chartRange.end &&
+                currentDate >= chartRange.start &&
+                currentDate <= chartRange.end
             ) {
                 const isEndpoint =
-                    currentDate === labReportRangeStartDate ||
-                    currentDate === labReportRangeEndDate;
+                    currentDate === chartRange.start ||
+                    currentDate === chartRange.end;
 
                 return [
                     true,
@@ -1030,10 +1109,10 @@ if (labReportRangeStartDate && labReportRangeEndDate) {
             console.log("Date clicked:", dateText);
 
             // FIRST CLICK: Select Start Date.
-            if (!labReportPendingStartDate) {
-                labReportPendingStartDate = dateText;
-                labReportRangeStartDate = dateText;
-                labReportRangeEndDate = "";
+            if (!chartRange.pendingStart) {
+                chartRange.pendingStart = dateText;
+                chartRange.start = dateText;
+                chartRange.end = "";
 
                 $inline.datepicker(
                     "option",
@@ -1042,7 +1121,7 @@ if (labReportRangeStartDate && labReportRangeEndDate) {
                 );
 
                 $dateStatus.text(
-                    `Start Date: ${dateText} | Now select End Date`
+                    `Start date: ${dateText} | End date: Select date`
                 );
 
                 $inline.datepicker("refresh");
@@ -1052,13 +1131,13 @@ if (labReportRangeStartDate && labReportRangeEndDate) {
             }
 
             // SECOND CLICK: Select End Date.
-            const rangeStart = labReportPendingStartDate;
+            const rangeStart = chartRange.pendingStart;
             const rangeEnd = dateText;
 
             // Do not accept an end date before the start date.
             if (rangeEnd < rangeStart) {
                 $dateStatus.text(
-                    `Start Date: ${rangeStart} | Select an End Date on or after the Start Date`
+                    `Start date: ${rangeStart} | End date: Choose a date on or after the start date`
                 );
 
                 console.warn("End Date cannot be earlier than Start Date.");
@@ -1066,8 +1145,14 @@ if (labReportRangeStartDate && labReportRangeEndDate) {
             }
 
             // Save the completed date range.
-            labReportRangeStartDate = rangeStart;
-            labReportRangeEndDate = rangeEnd;
+            chartRange.start = rangeStart;
+            chartRange.end = rangeEnd;
+            chartRange.pendingStart = "";
+            selectedFilter = "custom";
+            if (chartId === "dashboard") {
+                labReportRangeStartDate = rangeStart;
+                labReportRangeEndDate = rangeEnd;
+            }
 
             console.log("Selected date range:", rangeStart, rangeEnd);
 
@@ -1087,45 +1172,39 @@ if (labReportRangeStartDate && labReportRangeEndDate) {
             const formattedRange =
                 `${formatDate(rangeStart)} – ${formatDate(rangeEnd)}`;
 
-            // Update date labels.
-            $(".lab-report-range-label").text(formattedRange);
-            $("#reportRange").text(`Data shown: ${formattedRange}`);
-
             $dateStatus.text(
-                `Start Date: ${rangeStart} | End Date: ${rangeEnd}`
+                `Start date: ${rangeStart} | End date: ${rangeEnd}`
             );
 
-            // Update URL parameters without reloading the page.
+            // Save both dates using the parameters read by the Lab report loader.
             const url = new URL(window.location.href);
 
-            url.searchParams.set("date_filter", "custom");
-            url.searchParams.set("start_date", rangeStart);
-            url.searchParams.set("end_date", rangeEnd);
+            if (chartId === "dashboard") {
+                Object.keys(labChartDateRanges).forEach((key) => delete labChartDateRanges[key]);
+                Array.from(url.searchParams.keys()).forEach((key) => {
+                    if (/_start_date$|_end_date$/.test(key)) url.searchParams.delete(key);
+                });
+                url.searchParams.set("date_filter", "custom");
+                url.searchParams.set("start_date", rangeStart);
+                url.searchParams.set("end_date", rangeEnd);
+            } else {
+                url.searchParams.set("filter", "custom");
+                url.searchParams.set(`${chartId}_start_date`, rangeStart);
+                url.searchParams.set(`${chartId}_end_date`, rangeEnd);
+            }
 
-            window.history.replaceState({}, "", url.toString());
-
-            // Reset pending selection and date restrictions.
-            labReportPendingStartDate = "";
-
-            $inline.datepicker("option", "minDate", null);
-            $inline.datepicker("refresh");
-
-            // Close the calendar once the complete range has been selected,
-            // matching the Hospital Reports chart calendar behavior.
-            $picker.addClass("hidden").css("display", "");
-            $dropdown.find(".filterDropdown")
-                .addClass("hidden")
-                .css("display", "");
-
-
-            // Apply custom filter to the complete Reports dashboard.
-            setLabReportActiveFilter("custom");
-
-
-            // Load graph data for the selected range.
-            loadDashboardData("custom", rangeStart, rangeEnd);
+            // Keep other charts' date ranges intact while updating this chart.
+            window.location.href = url.toString();
         }
     });
+
+    // Open on the saved start date so the active range is visible immediately
+    // when a chart calendar is reopened.
+    if (chartRange.start) {
+        const savedDate = $.datepicker.parseDate("yy-mm-dd", chartRange.start);
+        $inline.datepicker("setDate", savedDate);
+        $inline.datepicker("refresh");
+    }
 
     // Position calendar next to its trigger icon.
     function placePicker() {
@@ -1200,6 +1279,7 @@ $(document).on(
         }
 
         if (filterText === "custom") {
+            selectedFilter = "custom";
             setLabReportActiveFilter(filterText);
             openLabReportDatepicker($(this).closest(".dropdown"), $(".filterToggle"));
             return;
@@ -1300,6 +1380,7 @@ $(document)
         // Ignore clicks inside the calendar and its navigation arrows.
         if (
             $target.closest(
+                ".dropdown, .lab-report-filter, .filterDropdown, " +
                 ".datepicker-container, .ui-datepicker, " +
                 ".ui-datepicker-header, .ui-datepicker-prev, " +
                 ".ui-datepicker-next, .lab-report-chart-calendar"

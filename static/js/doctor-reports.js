@@ -144,7 +144,6 @@ $(document).ready(function () {
       window.doctorReportVisitType = value;
       $("#visitMenu .option").removeClass("active");
       $option.addClass("active");
-      $("#filterDropdown").addClass("hidden");
       loadDoctorDashboardData(currentDoctorReportFilter());
       return;
     }
