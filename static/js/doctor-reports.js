@@ -45,7 +45,13 @@ $(document).ready(function () {
   $(document).on("click", function (e) {
     // Clicks inside the custom date picker must not dismiss the dropdown - this
     // handler is bound before the picker handlers, so it has to opt out here.
-    if ($(e.target).closest("#filterDropdown, .datepicker-container, .ui-datepicker").length) return;
+    if ($(e.target).closest(
+      "#filterDropdown, .datepicker-container, .ui-datepicker, " +
+      ".calendarToggle, .heatmapCalendarToggle, .consolidationCalendarToggle, " +
+      ".calendarPopup, .heatmapCalendarPopup, .consolidationCalendarPopup, " +
+      ".calendar-option, .heatmap-cal-option, .consolidation-cal-option, " +
+      ".chart-range-calendar"
+    ).length) return;
 
     $("#filterDropdown").addClass("hidden");
     $(".datepicker-container").addClass("hidden");
@@ -391,7 +397,8 @@ function loadDoctorDashboardData(filterType) {
         window.doctorReportFilter = String(filterType).toLowerCase();
     }
     const activeFilter = window.doctorReportFilter || filterType || "month";
-    const searchValue = ($("#reportSearch").val() || "").trim();
+    const rawSearchValue = ($("#reportSearch").val() || "").trim();
+    const searchValue = isDoctorReportSectionSearch(rawSearchValue) ? "" : rawSearchValue;
     const range = currentDoctorReportRange();
     if (doctorReportRequest) {
         doctorReportRequest.abort();
@@ -550,6 +557,28 @@ function applyDoctorReportSearch(query, skipReload) {
     const value = (query || "").trim().toLowerCase();
     const hasQuery = value.length > 0;
 
+    const sectionKeywords = {
+        stats: ["patient", "patients", "bids received", "bids", "quarter", "growth", "revenue", "average", "avg"],
+        heatmap: ["heatmap", "map", "state", "location"],
+        bidChart: ["bid", "bids", "win", "loss", "won", "lost"],
+        consultation: ["consultation", "appointment", "appointments", "fee", "earning", "earnings", "day"]
+    };
+    const matchesSection = (keywords) => keywords.some((keyword) => keyword.includes(value) || value.includes(keyword));
+    const isSectionSearch = hasQuery && Object.values(sectionKeywords).some(matchesSection);
+
+    if (isSectionSearch) {
+        const showHeatmap = matchesSection(sectionKeywords.heatmap);
+        const showBidChart = matchesSection(sectionKeywords.bidChart);
+        $("#doctorStatsSection").toggle(matchesSection(sectionKeywords.stats));
+        $("#doctorHeatmapSection").toggle(showHeatmap);
+        $("#doctorBidChartSection").toggle(showBidChart);
+        $("#doctorChartsSection").toggle(showHeatmap || showBidChart);
+        $("#doctorConsultationSection").toggle(matchesSection(sectionKeywords.consultation));
+    } else {
+        $("#doctorStatsSection, #doctorChartsSection, #doctorHeatmapSection, #doctorBidChartSection, #doctorConsultationSection")
+            .show();
+    }
+
     // Day-wise rows of the "Consultation fee and appointments" table. Only
     // narrow them when the query actually matches at least one row, so a
     // search targeting another section doesn't blank out the table.
@@ -560,7 +589,7 @@ function applyDoctorReportSearch(query, skipReload) {
         return $(this).text().toLowerCase().indexOf(value) > -1;
     });
 
-    if (!hasQuery || !$matchingRows.length) {
+    if (!hasQuery || isSectionSearch || !$matchingRows.length) {
         $rows.add($totalRow).show().removeClass("hidden");
     } else {
         $rows.hide().addClass("hidden");
@@ -575,6 +604,18 @@ function applyDoctorReportSearch(query, skipReload) {
             loadDoctorDashboardData(currentDoctorReportFilter());
         }, 350);
     }
+}
+
+function isDoctorReportSectionSearch(query) {
+    const value = (query || "").trim().toLowerCase();
+    if (!value) return false;
+    const terms = [
+        "patient", "patients", "bids received", "bids", "quarter", "growth",
+        "revenue", "average", "avg", "heatmap", "map", "state", "location",
+        "win", "loss", "won", "lost", "consultation", "appointment",
+        "appointments", "fee", "earning", "earnings", "day"
+    ];
+    return terms.some((term) => term.includes(value) || value.includes(term));
 }
 
 $(document).on("input", "#reportSearch", function () {

@@ -212,6 +212,10 @@ $(document).ready(function () {
     // prevent its class-based filter from reopening after an outside click.
     if ($('#historySearch').length) return;
 
+    // Doctor Reports owns its chart calendar popups and outside-click rules.
+    // Shared inline hiding here closes a popup on the same click that opens it.
+    if ($('.doctor-report-page').length) return;
+
     if (!$target.closest('.dropdown, .datepicker-container, .ui-datepicker, .statusDropdown').length) {
       // Appointment pages use class-based visibility; don't inject inline
       // display:none that appointment.js can't clear.
