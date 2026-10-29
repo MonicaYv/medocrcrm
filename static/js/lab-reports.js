@@ -1110,7 +1110,9 @@ if (labReportRangeStartDate && labReportRangeEndDate) {
             $inline.datepicker("option", "minDate", null);
             $inline.datepicker("refresh");
 
-            // Hide the filter dropdown, but keep the calendar visible.
+            // Close the calendar once the complete range has been selected,
+            // matching the Hospital Reports chart calendar behavior.
+            $picker.addClass("hidden").css("display", "");
             $dropdown.find(".filterDropdown")
                 .addClass("hidden")
                 .css("display", "");

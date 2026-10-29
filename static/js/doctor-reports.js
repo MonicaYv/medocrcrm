@@ -51,6 +51,8 @@ $(document).ready(function () {
     $(".datepicker-container").addClass("hidden");
     $(".dropdown-menu").addClass("hidden");
     $(".calendarPopup, .heatmapCalendarPopup, .consolidationCalendarPopup").addClass("hidden");
+    $(".chart-range-picker").addClass("hidden");
+    $(".chart-range-calendar").addClass("hidden");
   });
 
   // Individual card calendar popup triggers
@@ -280,29 +282,44 @@ $(document).ready(function () {
     $(this).parent().addClass("hidden");
     $(this).closest(".relative").find(".calendar-date-text").text($(this).text().trim().replace("check", ""));
     if (value === "custom") {
-      // Use a native date input attached to this chart. Each chart's calendar
-      // applies the chosen day as soon as a date is selected.
+      // Use the same two-click jQuery UI range calendar as Hospital Reports.
       const $wrapper = $(this).closest(".heatmapCalendar, .consolidationCalendar, .relative");
-      let $dateInput = $wrapper.find(".chart-date-input");
-      if (!$dateInput.length) {
-        $dateInput = $('<input type="date" class="chart-date-input absolute right-0 top-full z-[60] rounded border border-gray-300 bg-white p-2 shadow-md">')
-          .appendTo($wrapper)
-          .on("change", function () {
-            if (!this.value) return;
-            applyDoctorReportChartDate(this.value, this.value, $wrapper);
-            $dateInput.addClass("hidden");
-          });
+      let $rangeCalendar = $wrapper.find(".chart-range-calendar");
+      if (!$rangeCalendar.length) {
+        $rangeCalendar = $('<div class="chart-range-calendar datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-[60] bg-white shadow-md rounded"><p class="chart-range-status mb-2 text-xs text-dark-gray" aria-live="polite">Select start date</p><div class="datepicker-inline"></div></div>').appendTo($wrapper);
+        $rangeCalendar.on("click", function (event) { event.stopPropagation(); });
       }
-      $dateInput.val("").removeClass("hidden");
-      const dateInput = $dateInput.get(0);
-      try {
-        if (dateInput.showPicker) dateInput.showPicker();
-        else dateInput.click();
-      } catch (error) {
-        dateInput.click();
-      }
+      const $inline = $rangeCalendar.find(".datepicker-inline");
+      if ($inline.hasClass("hasDatepicker")) $inline.datepicker("destroy");
+      $inline.empty();
+      $rangeCalendar.removeClass("hidden").find(".chart-range-status").text("Select start date");
+      let pendingStart = "";
+      $inline.datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        defaultDate: new Date(),
+        beforeShowDay: function (date) {
+          if (!pendingStart) return [true, ""];
+          const value = $.datepicker.formatDate("yy-mm-dd", date);
+          return [true, value >= pendingStart ? "ui-state-range" : ""];
+        },
+        onSelect: function (dateText) {
+          if (!pendingStart) {
+            pendingStart = dateText;
+            $inline.datepicker("option", "minDate", dateText);
+            $rangeCalendar.find(".chart-range-status").text("Start: " + dateText + " - Select end date");
+            return;
+          }
+          $rangeCalendar.addClass("hidden");
+          $inline.datepicker("option", "minDate", null);
+          applyDoctorReportChartDate(pendingStart, dateText, $wrapper);
+        }
+      });
       return;
     }
+    $(".chart-range-calendar").addClass("hidden");
+    $(".chart-range-picker").addClass("hidden");
     window.doctorReportStartDate = "";
     window.doctorReportEndDate = "";
     window.doctorReportFilter = value;
@@ -312,6 +329,7 @@ $(document).ready(function () {
   });
 
   function applyDoctorReportChartDate(startDate, endDate, $wrapper) {
+    if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
     window.doctorReportFilter = "custom";
     window.doctorReportStartDate = startDate;
     window.doctorReportEndDate = endDate;
