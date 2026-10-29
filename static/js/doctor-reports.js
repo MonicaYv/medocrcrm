@@ -131,7 +131,9 @@ $(document).ready(function () {
   }
 
   // --------- 3. ASYNCHRONOUS SUBMENU TABS ACTION EVENTS ----------
-  $(document).on("click", "#filterDropdown .option", function (e) {
+  $("#filterDropdown")
+    .off("click.doctorReportOption", ".option")
+    .on("click.doctorReportOption", ".option", function (e) {
     e.stopPropagation();
     const $option = $(this);
     const kind = String($option.data("type") || "date").toLowerCase();
@@ -142,8 +144,14 @@ $(document).ready(function () {
       // intact. Only this menu's options are toggled, so picking a visit type
       // can never overwrite the date filter (or vice versa).
       window.doctorReportVisitType = value;
-      $("#visitMenu .option").removeClass("active");
-      $option.addClass("active");
+      $("#visitMenu .option")
+        .removeClass("active bg-pale-azure text-dodger-blue font-medium")
+        .addClass("text-dark-gray");
+      $option
+        .addClass("active bg-pale-azure text-dodger-blue font-medium")
+        .removeClass("text-dark-gray");
+      $("#visitMenu .option").attr("aria-pressed", "false");
+      $option.attr("aria-pressed", "true");
       loadDoctorDashboardData(currentDoctorReportFilter());
       return;
     }
