@@ -221,7 +221,7 @@ async function handleDone() {
         toastr.success(data.message);
 
         setTimeout(() => {
-            window.location.href = data.redirect;
+            window.location.replace(data.redirect);
         }, 1000);
 
     } catch (error) {

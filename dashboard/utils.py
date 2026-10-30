@@ -9,6 +9,7 @@ from django.db.models import Sum, Q
 from settings.models import UserColorScheme
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404
+from django.views.decorators.cache import never_cache
 import datetime
 from registration.models import (
     User,
@@ -74,13 +75,13 @@ def dashboard_login_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
         user_id = request.session.get('user_id')
         if not user_id:
-            return redirect('/login')
+            return redirect('login')
         # Optionally: attach the user object
         request.user_obj = User.objects.filter(id=user_id).first()
         if not request.user_obj:
-            return redirect('/login')
+            return redirect('login')
         return view_func(request, *args, **kwargs)
-    return _wrapped_view
+    return never_cache(_wrapped_view)
 
 def get_common_context(request, user):
     user = request.user_obj
