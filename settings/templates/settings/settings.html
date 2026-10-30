@@ -431,17 +431,17 @@
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <div id="modalContent" class="text-center bg-white rounded-md h-96">
+    <div id="modalContent" class="text-center bg-white rounded-md h-96 flex items-center justify-center overflow-hidden">
 
       <!-- <img src="/static/images/incorp-certificate.svg" alt="" class="object-cover h-96 w-full"> -->
       <!-- <img id="modalImg" class="object-cover h-96 w-full hidden" alt="Document preview"> -->
       <img id="modalImg" class="hidden w-full h-full object-contain" alt="Document preview">
       <!-- <embed id="modalEmbed" class="w-full h-96 hidden" type="application/pdf" /> -->
-      <embed id="modalEmbed" class="hidden w-full h-full" type="application/pdf" />
+      <iframe id="modalEmbed" class="hidden w-full h-full border-0 rounded-md" src=""></iframe>
       <a id="modalLink" class="block py-8 text-{{ text }}" hidden target="_blank">Download Document</a>
     </div>
     <div class="flex items-center justify-between pt-1">
-      <p class="font-normal text-xs text-dark-gray">Image (JPG, PNG). Maximum file size: 1MB.</p>
+      <p id="modalFormatHint" class="font-normal text-xs text-dark-gray">Supported: PDF, JPG, PNG (Max 5MB)</p>
       <div class="flex items-center gap-2 text-nowrap">
         <p class="font-normal text-sm text-emerald-green">Virus Scan</p>
         <input type="checkbox"

@@ -796,12 +796,12 @@
           </div>
           <div class="flex items-center gap-2">
             <input type="text" class="border border-dashed border-light-sea-green p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="{{incorporation_doc_path}}" readonly />
+              value="{% if incorporation_doc_filename %}{{incorporation_doc_filename}}{% else %}{{incorporation_doc_path}}{% endif %}" readonly />
             <div class="flex items-center gap-2 text-nowrap">
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="incorporation_doc" data-doc-path="/document/pharmacy_docs/incorporation/{{incorporation_doc_path}}"
+            <span title="View" data-doc-type="incorporation_doc" data-doc-path="{% if incorporation_doc_path %}/document/{{incorporation_doc_path}}{% endif %}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
             <div class="relative inline-block">
             <span title="Upload Document"
@@ -833,12 +833,12 @@
           </div>
           <div class="flex items-center gap-2">
             <input type="text" class="border border-dashed border-light-sea-green p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="{{gst_doc_path}}" readonly />
+              value="{% if gst_doc_filename %}{{gst_doc_filename}}{% else %}{{gst_doc_path}}{% endif %}" readonly />
             <div class="flex items-center gap-2 text-nowrap">
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="gst_doc" data-doc-path="/document/pharmacy_docs/gst/{{gst_doc_path}}"
+            <span title="View" data-doc-type="gst_doc" data-doc-path="{% if gst_doc_path %}/document/{{gst_doc_path}}{% endif %}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
            <div class="relative inline-block">
 
@@ -873,12 +873,12 @@
           </div>
           <div class="flex items-center gap-2">
             <input type="text" class="border border-dashed border-light-sea-green p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="{{pan_doc_path}}" readonly />
+              value="{% if pan_doc_filename %}{{pan_doc_filename}}{% else %}{{pan_doc_path}}{% endif %}" readonly />
             <div class="flex items-center gap-2 text-nowrap">
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="pan_doc"  data-doc-path="/document/pharmacy_docs/pan/{{pan_doc_path}}"
+            <span title="View" data-doc-type="pan_doc"  data-doc-path="{% if pan_doc_path %}/document/{{pan_doc_path}}{% endif %}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
           <div class="relative inline-block">
           <span title="Upload Document"
@@ -912,12 +912,12 @@
           </div>
           <div class="flex items-center gap-2">
             <input type="text" class="border border-dashed border-light-sea-green p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="{{tan_doc_path}}" readonly />
+              value="{% if tan_doc_filename %}{{tan_doc_filename}}{% else %}{{tan_doc_path}}{% endif %}" readonly />
             <div class="flex items-center gap-2 text-nowrap">
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="tan_doc" data-doc-path="/document/pharmacy_docs/tan/{{tan_doc_path}}"
+            <span title="View" data-doc-type="tan_doc" data-doc-path="{% if tan_doc_path %}/document/{{tan_doc_path}}{% endif %}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
            <div class="relative inline-block">
            <span title="Upload Document"
@@ -950,12 +950,12 @@
           </div>
           <div class="flex items-center gap-2">
             <input type="text" class="border border-dashed border-light-sea-green p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="{{medical_license_doc_path}}" readonly />
+              value="{% if medical_license_doc_filename %}{{medical_license_doc_filename}}{% else %}{{medical_license_doc_path}}{% endif %}" readonly />
             <div class="flex items-center gap-2 text-nowrap">
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="medical_license_doc" data-doc-path="/document/pharmacy_docs/medical_license/{{medical_license_doc_path}}"
+            <span title="View" data-doc-type="medical_license_doc" data-doc-path="{% if medical_license_doc_path %}/document/{{medical_license_doc_path}}{% endif %}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
            <div class="relative inline-block">
            <span title="Upload Document"
@@ -984,12 +984,12 @@
           </div>
           <div class="flex items-center gap-2">
             <input type="text" class="border border-dashed border-light-sea-green p-2 rounded-md text-center w-28 font-normal text-sm text-jet-black"
-              value="{{storefront_image_path}}" readonly />
+              value="{% if storefront_image_filename %}{{storefront_image_filename}}{% else %}{{storefront_image_path}}{% endif %}" readonly />
             <div class="flex items-center gap-2 text-nowrap">
               <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
               <p class="font-normal text-xs text-bright-green">Virus Scan</p>
             </div>
-            <span title="View" data-doc-type="storefront_image"  data-doc-path="/document/pharmacy_docs/store_front/{{storefront_image_path}}"
+            <span title="View" data-doc-type="storefront_image"  data-doc-path="{% if storefront_image_path %}/document/{{storefront_image_path}}{% endif %}"
               class="material-symbols-outlined border p-1 rounded-md cursor-pointer view-icon">visibility</span>
              <div class="relative inline-block">
              <span title="Upload Document"

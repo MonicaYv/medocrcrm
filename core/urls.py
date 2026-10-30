@@ -33,6 +33,15 @@ urlpatterns = [
 # ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ]
 
+# Serve uploaded documents via a custom view that guarantees correct headers:
+# X-Frame-Options: SAMEORIGIN (needed for iframe previews) and Cache-Control: no-cache.
+# This replaces the DEBUG-only static() helper for the /document/ URL prefix.
+from django.urls import re_path
+from settings import views as settings_views
+urlpatterns += [
+    re_path(r'^document/(?P<path>.+)$', settings_views.serve_document, name='serve_document'),
+]
+
 if settings.DEBUG:
     # ... existing code ...
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

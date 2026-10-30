@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
@@ -37,5 +37,6 @@ urlpatterns = [
         views.verify_phone_otp,
         name="verify_phone_otp"
     ),
-    path("api/cities/", views.get_cities_by_state, name="get_cities_by_state")
+    path("api/cities/", views.get_cities_by_state, name="get_cities_by_state"),
+    re_path(r"^doc-preview/(?P<path>.+)$", views.serve_document, name="serve_document"),
 ]
