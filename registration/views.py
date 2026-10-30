@@ -30,6 +30,7 @@ from django.db import IntegrityError, transaction
 from django.core.validators import validate_email
 from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
@@ -54,9 +55,11 @@ ROLE_TO_TEMPLATE = {
     'doctor': "registration/doctor_register.html",
 }
 
+@never_cache
 def new_signin(request):
     return render(request, 'registration/new_signin.html')
 
+@never_cache
 def new_otp_verify(request):
     return render(request, 'registration/new_otp_verify.html')
 
@@ -2243,6 +2246,7 @@ def login_auth(request):
 
 @csrf_protect
 @require_POST
+@never_cache
 def verify_login_otp(request):
 
     phone_number = request.POST.get("phone_number")
