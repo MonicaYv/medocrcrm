@@ -1276,14 +1276,11 @@ function generateStars(rating, reviews) {
                         <div class="relative">
                             <p class="text-base font-normal cursor-pointer hover:bg-white p-2 filterItem" data-target="#sort">Sort by</p>
                             <div id="sort" class="absolute right-full top-0 mr-2 w-40 rounded-lg shadow-lg bg-white p-2 hidden z-50">
-                                <p class="text-sm p-2 cursor-pointer flex items-center gap-2">
-                                    <span class="material-symbols-outlined">check</span> Open
+                                <p class="text-sm p-2 cursor-pointer flex items-center gap-2 nearby-sort" data-sort="name">
+                                    <span class="material-symbols-outlined">sort_by_alpha</span> Name A–Z
                                 </p>
-                                <p class="text-sm p-2 cursor-pointer flex items-center gap-2">
-                                    <span class="material-symbols-outlined">check</span> Closed
-                                </p>
-                                <p class="text-sm p-2 cursor-pointer flex items-center gap-2">
-                                    <span class="material-symbols-outlined">check</span> Directions
+                                <p class="text-sm p-2 cursor-pointer flex items-center gap-2 nearby-sort" data-sort="rating">
+                                    <span class="material-symbols-outlined">star</span> Top rated
                                 </p>
                             </div>
                         </div>
@@ -1321,6 +1318,17 @@ function generateStars(rating, reviews) {
             $(target).toggleClass('hidden');
         });
 
+        $suggestionBox.on("click", ".nearby-sort", function (e) {
+            e.stopPropagation();
+            const sortBy = $(this).data("sort");
+            allFetchedPlaces.sort((a, b) => sortBy === "rating"
+                ? Number(b.rating || 0) - Number(a.rating || 0)
+                : String(a.title || "").localeCompare(String(b.title || "")));
+            renderListView(allFetchedPlaces);
+            switchNearbyToList();
+            $(".filterDropdown, #sort").addClass("hidden");
+        });
+
         // Close dropdown on click outside
         $(document).on('click', function (e) {
             if (!$(e.target).closest('.filterDropdown, .filterToggle').length) {
@@ -1329,6 +1337,11 @@ function generateStars(rating, reviews) {
             }
         });
     } 
+
+    function switchNearbyToList() {
+        $(".view-toggle").prop("checked", false);
+        $(".map-view").fadeOut(200, function () { $(".listview").fadeIn(300); });
+    }
 
     // Global variables for map and routing
     const $bookmarkIcon = $(".bookmark-icon");
@@ -1547,12 +1560,11 @@ function showFilteredSuggestions(title, filterFn) {
     $(".map-search").addClass("placeholder:text-white");
 
     $suggestionBox.append(`
-        <div class='flex justify-between p-2 border-b border-${selectedColor}'>
-        <span>${title}</span>
-        <span class="material-symbols-outlined">swap_vert</span>
-        <div class="flex gap-2 items-center">
+        <div class='flex justify-between items-center p-2 border-b border-${selectedColor}'>
+          <span>${title}</span>
+          <button type="button" class="nearby-see-all flex gap-1 items-center cursor-pointer" aria-label="See all ${title}">
             See All<span class="material-symbols-outlined">keyboard_arrow_right</span>
-        </div>
+          </button>
         </div>
     `);
 
@@ -1599,6 +1611,12 @@ function showFilteredSuggestions(title, filterFn) {
             });
         });
         $suggestionBox.append($item);
+    });
+    $suggestionBox.off("click.nearbySeeAll", ".nearby-see-all").on("click.nearbySeeAll", ".nearby-see-all", function (e) {
+        e.stopPropagation();
+        renderListView(filteredPlaces);
+        $suggestionBox.hide();
+        switchNearbyToList();
     });
     $suggestionBox.show();
 }

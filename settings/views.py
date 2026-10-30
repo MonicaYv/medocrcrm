@@ -18,15 +18,19 @@ from registration.views import verify_otp_token, async_send_otp_email
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
 from django.views.decorators.http import (
+    require_http_methods,
     require_POST,
     require_GET,
 )
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.http import FileResponse, Http404
+import mimetypes
 from django.contrib.auth.hashers import make_password, check_password
 from dashboard.utils import (
     dashboard_login_required,
@@ -37,6 +41,7 @@ from appointments.models import WalletTransaction
 from registration.models import (
     User,
     NGOProfile,
+    UserProfile,
     AdvertiserProfile,
     ClientProfile,
     PharmacyProfile,
@@ -111,6 +116,66 @@ def validate_email_phone(post_data, errors):
     if not re.match(r"^\d{10}$", phone_number):
         errors["phone"] = "Enter a valid 10-digit Indian mobile number."
 
+@require_http_methods(["GET", "HEAD"])
+def serve_document(request, path):
+    """
+    Serve uploaded media files (MEDIA_ROOT / path) with correct headers:
+    - X-Frame-Options: SAMEORIGIN so iframe previews work on the same origin
+    - Cache-Control: no-store, no-cache, must-revalidate so browsers do not cache stale headers
+    - Correct Content-Type derived from file extension
+    - Fallback search by filename across MEDIA_ROOT subfolders
+    """
+    from urllib.parse import unquote
+    unquoted = unquote(path)
+    clean_path = str(unquoted).replace("\\", "/").strip().lstrip("/")
+    while "//" in clean_path:
+        clean_path = clean_path.replace("//", "/")
+
+    if "pharmacy_docs/" in clean_path:
+        idx = clean_path.rfind("pharmacy_docs/")
+        clean_path = clean_path[idx:]
+
+    safe_path = os.path.normpath(clean_path.replace("/", os.sep))
+    full_path = os.path.join(settings.MEDIA_ROOT, safe_path)
+
+    # If full_path does not exist on disk, search anywhere in MEDIA_ROOT for the file by filename
+    if not os.path.isfile(full_path):
+        target_name = os.path.basename(clean_path)
+        found_path = None
+        for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+            if target_name in files:
+                found_path = os.path.join(root, target_name)
+                break
+        if found_path and os.path.isfile(found_path):
+            full_path = found_path
+
+    if not os.path.isfile(full_path):
+        response = HttpResponse(
+            '<!DOCTYPE html><html><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:80vh;margin:0;color:#6b7280;text-align:center;">'
+            '<div><p style="font-size:16px;font-weight:600;margin-bottom:8px;">Document file not found on server</p>'
+            '<p style="font-size:13px;margin:0;">The file has not been uploaded yet or was moved.</p></div>'
+            '</body></html>',
+            content_type="text/html",
+            status=404
+        )
+        response["X-Frame-Options"] = "SAMEORIGIN"
+        return response
+
+    content_type, _ = mimetypes.guess_type(full_path)
+    content_type = content_type or "application/octet-stream"
+
+    if request.method == "HEAD":
+        response = HttpResponse(content_type=content_type)
+        response["Content-Length"] = str(os.path.getsize(full_path))
+    else:
+        response = FileResponse(open(full_path, "rb"), content_type=content_type)
+
+    response["X-Frame-Options"] = "SAMEORIGIN"
+    response["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    response["Content-Disposition"] = f'inline; filename="{os.path.basename(full_path)}"'
+    return response
+
+
 @dashboard_login_required
 def settings_page(request):
     user = request.user_obj
@@ -118,6 +183,9 @@ def settings_page(request):
 
     context = get_common_context(request, user)
     context.update(get_base_context(user))
+    context["admin_profile_photo_path"] = UserProfile.objects.filter(
+        user=user
+    ).values_list("profile_photo_path", flat=True).first() or ""
     context["active_main_tab"] = request.GET.get("tab", "settings")
     
     issue_types = IssueType.objects.filter(
@@ -344,18 +412,58 @@ def handle_pharmacy_profile(user):
             'referral_code': '',
             'incorporation_number': '',
             'incorporation_doc_path': '',
+            'incorporation_doc_filename': '',
             'gst_number': '',
             'gst_doc_path': '',
+            'gst_doc_filename': '',
             'medical_license_number': '',
             'medical_license_doc_path': '',
+            'medical_license_doc_filename': '',
             'pan_number': '',
             'pan_doc_path': '',
+            'pan_doc_filename': '',
             'storefront_image_path': '',
+            'storefront_image_filename': '',
             'tan_number': '',
             'tan_doc_path': '',
+            'tan_doc_filename': '',
         }
         data.update(handle_contact_person(user.user_type, user))
         return data
+
+    def resolve_pharmacy_doc(raw_path, default_subdir):
+        if not raw_path:
+            return "", ""
+        clean = str(raw_path).replace("\\", "/").strip()
+        while "//" in clean:
+            clean = clean.replace("//", "/")
+        media_root_clean = str(settings.MEDIA_ROOT).replace("\\", "/").rstrip("/")
+        while "//" in media_root_clean:
+            media_root_clean = media_root_clean.replace("//", "/")
+        if clean.startswith(media_root_clean):
+            clean = clean[len(media_root_clean):].lstrip("/")
+
+        for prefix in ["/document/", "document/", "/media/", "media/"]:
+            if clean.startswith(prefix):
+                clean = clean[len(prefix):].lstrip("/")
+                break
+
+        if "pharmacy_docs/" in clean:
+            idx = clean.rfind("pharmacy_docs/")
+            clean = clean[idx:]
+
+        filename = clean.split("/")[-1]
+        if "/" not in clean:
+            clean = f"pharmacy_docs/{default_subdir}/{clean}"
+        elif clean.startswith(f"{default_subdir}/"):
+            clean = f"pharmacy_docs/{clean}"
+        return clean, filename
+    incorp_path, incorp_filename = resolve_pharmacy_doc(profile.incorporation_doc_path, 'incorporation')
+    gst_path, gst_filename = resolve_pharmacy_doc(profile.gst_doc_path, 'gst')
+    med_path, med_filename = resolve_pharmacy_doc(profile.medical_license_doc_path, 'medical_license')
+    pan_path, pan_filename = resolve_pharmacy_doc(profile.pan_doc_path, 'pan')
+    storefront_path, storefront_filename = resolve_pharmacy_doc(profile.storefront_image_path, 'store_front')
+    tan_path, tan_filename = resolve_pharmacy_doc(profile.tan_doc_path, 'tan')
 
     data = {
         'company_name': profile.company_name,
@@ -377,18 +485,22 @@ def handle_pharmacy_profile(user):
         # PharmacyProfile stores this value as pharmacy_registration_number;
         # the settings template continues to use the shared context key.
         'incorporation_number': profile.pharmacy_registration_number,
-        'incorporation_doc_path': os.path.basename(profile.incorporation_doc_path) if profile.incorporation_doc_path else "",
+        'incorporation_doc_path': incorp_path,
+        'incorporation_doc_filename': incorp_filename,
         'gst_number': profile.gst_number,
-        'gst_doc_path': os.path.basename(profile.gst_doc_path) if profile.gst_doc_path else "",
+        'gst_doc_path': gst_path,
+        'gst_doc_filename': gst_filename,
         'medical_license_number': profile.medical_license_number,
-        'medical_license_doc_path': os.path.basename(profile.medical_license_doc_path) if profile.medical_license_doc_path else "",
+        'medical_license_doc_path': med_path,
+        'medical_license_doc_filename': med_filename,
         'pan_number': profile.pan_number,
-        'pan_doc_path': os.path.basename(profile.pan_doc_path) if profile.pan_doc_path else "",
-        'storefront_image_path': os.path.basename(profile.storefront_image_path) if profile.storefront_image_path else "",
-        
-        # Clean string extraction to guarantee the file name is captured perfectly
+        'pan_doc_path': pan_path,
+        'pan_doc_filename': pan_filename,
+        'storefront_image_path': storefront_path,
+        'storefront_image_filename': storefront_filename,
         'tan_number': profile.tan_number if profile.tan_number else "",
-        'tan_doc_path': profile.tan_doc_path.split('/')[-1] if profile.tan_doc_path else "",
+        'tan_doc_path': tan_path,
+        'tan_doc_filename': tan_filename,
     }
     data.update(handle_contact_person(user.user_type, user))
     return data
@@ -982,7 +1094,10 @@ def update_user_document(request):
         return JsonResponse({'success': False, 'error': 'Unknown document type.'}, status=400)
 
     # Set paths dynamically and update verification flag fields
-    setattr(profile, doc_fields[0], file_path)
+    saved_doc_path = str(file_path).replace("\\", "/").strip()
+    while "//" in saved_doc_path:
+        saved_doc_path = saved_doc_path.replace("//", "/")
+    setattr(profile, doc_fields[0], saved_doc_path)
     setattr(profile, doc_fields[1], True)
 
     number_field = DOC_NUMBER_FIELD_MAP.get(user_type, {}).get(doc_type)

@@ -699,10 +699,22 @@ window.loadPointsHistoryFilter = function(type) {
 
 
 
-$(document).on("click", ".claim-btn", function () {
+$(document).on("click", ".claim-btn", function (e) {
+    e.preventDefault();
     const $button = $(this);
     const couponId = $button.data('coupon-id');
-    const code = $button.data('code');
+    const code = $button.data('code') || '';
+
+    if (!couponId) {
+        return;
+    }
+
+    // Prevent duplicate clicks / concurrency
+    if ($button.prop('disabled') || $button.data('claiming')) {
+        return;
+    }
+
+    $button.data('claiming', true).prop('disabled', true);
 
     $.ajax({
         url: '/points/claim-coupon/',
@@ -710,28 +722,102 @@ $(document).on("click", ".claim-btn", function () {
         contentType: 'application/json',
         data: JSON.stringify({ coupon_id: couponId }),
         headers: {
-            'X-CSRFToken': getCSRFToken()
+            'X-CSRFToken': typeof getCSRFToken === 'function' ? getCSRFToken() : ''
         },
         success: function (response) {
+            $button.data('claiming', false);
+
             if (response.status === 'success') {
-                toastr.success('Coupon claimed! Code copied: ' + code);
-                navigator.clipboard.writeText(code);
+                const redeemedCode = response.code || code;
+                toastr.success('Coupon claimed! Code copied: ' + redeemedCode);
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(redeemedCode).catch(function () {});
+                }
 
-                // Disable the input and update classes
-                // const $input = $button.closest('.coupon-box').find('button');
-                // $button.prop('disabled', true);
-                $button.removeClass('bg-violet-sky text-white').addClass('bg-pagination text-gray');
+                const newRedeemed = response.redeemed_count;
+                const maxRedemptions = response.max_redemptions;
+                const percentUsed = response.percent_used !== undefined ? response.percent_used : (maxRedemptions ? Math.min(100, Math.round((newRedeemed / maxRedemptions) * 100)) : 0);
 
-                // Optionally disable the button too
-                $button.prop('disabled', true);
+                // 1. Update all redeemed count displays across the All Rewards tab
+                $(`.redeemed-count[data-coupon-id="${couponId}"]`).text(newRedeemed);
+                $(`.max-redemptions[data-coupon-id="${couponId}"]`).text(maxRedemptions);
+                $(`.redeemed-count-text[data-coupon-id="${couponId}"]`).html(
+                    `<span class="redeemed-count" data-coupon-id="${couponId}">${newRedeemed}</span>/<span class="max-redemptions" data-coupon-id="${couponId}">${maxRedemptions}</span>`
+                );
+
+                // 2. Update all progress bars for this coupon
+                $(`.redemption-progress-bar[data-coupon-id="${couponId}"]`).css('width', `${percentUsed}%`);
+
+                // 3. Fallback: update any card elements for this coupon
+                $(`.reward-card[data-coupon-id="${couponId}"], .coupon-card[data-coupon-id="${couponId}"]`).each(function () {
+                    const $card = $(this);
+                    $card.find('.redeemed-count-text').text(`${newRedeemed}/${maxRedemptions}`);
+                    $card.find('.redemption-progress-bar').css('width', `${percentUsed}%`);
+                });
+
+                const $parentCard = $button.closest('.reward-card, .coupon-card');
+                if ($parentCard.length) {
+                    $parentCard.find('p:contains("Redeemed")').each(function () {
+                        $(this).siblings('p').text(`${newRedeemed}/${maxRedemptions}`);
+                    });
+                    $parentCard.find('.rounded-full > .rounded-full').css('width', `${percentUsed}%`);
+                }
+
+                // 4. Update all claim buttons for this coupon ID across the entire page (Featured & Popular)
+                $(`.claim-btn[data-coupon-id="${couponId}"]`).each(function () {
+                    const $btn = $(this);
+                    $btn.prop('disabled', true)
+                        .removeClass('bg-dodger-blue bg-blue-600 bg-living-coral text-white cursor-pointer')
+                        .addClass('bg-gray-400 text-white cursor-not-allowed opacity-75')
+                        .html(`#${redeemedCode} (Claimed) <span class="material-symbols-outlined text-[18px]">check_circle</span>`);
+                });
+
             } else if (response.status === 'already_claimed') {
-                toastr.error('You have already claimed this coupon.');
+                toastr.error(response.message || 'You have already claimed this coupon.');
+
+                if (response.redeemed_count !== undefined) {
+                    $(`.redeemed-count[data-coupon-id="${couponId}"]`).text(response.redeemed_count);
+                    $(`.redeemed-count-text[data-coupon-id="${couponId}"]`).text(`${response.redeemed_count}/${response.max_redemptions}`);
+                }
+
+                $(`.claim-btn[data-coupon-id="${couponId}"]`).each(function () {
+                    const $btn = $(this);
+                    $btn.prop('disabled', true)
+                        .removeClass('bg-dodger-blue bg-blue-600 bg-living-coral cursor-pointer')
+                        .addClass('bg-gray-400 text-white cursor-not-allowed opacity-75')
+                        .html(`#${code} (Claimed) <span class="material-symbols-outlined text-[18px]">check_circle</span>`);
+                });
+
+            } else if (response.status === 'limit_reached') {
+                toastr.warning(response.message || 'Coupon redemption limit reached.');
+
+                if (response.redeemed_count !== undefined) {
+                    $(`.redeemed-count[data-coupon-id="${couponId}"]`).text(response.redeemed_count);
+                    $(`.redeemed-count-text[data-coupon-id="${couponId}"]`).text(`${response.redeemed_count}/${response.max_redemptions}`);
+                    $(`.redemption-progress-bar[data-coupon-id="${couponId}"]`).css('width', '100%');
+                }
+
+                $(`.claim-btn[data-coupon-id="${couponId}"]`).each(function () {
+                    const $btn = $(this);
+                    $btn.prop('disabled', true)
+                        .removeClass('bg-dodger-blue bg-blue-600 bg-living-coral cursor-pointer')
+                        .addClass('bg-gray-400 text-white cursor-not-allowed opacity-75')
+                        .html(`#${code} (Limit Reached) <span class="material-symbols-outlined text-[18px]">block</span>`);
+                });
+
             } else {
-                toastr.error('Something went wrong.');
+                $button.prop('disabled', false);
+                toastr.error(response.message || 'Something went wrong.');
             }
         },
         error: function (xhr, status, error) {
-            toastr.error('Server error.');
+            $button.data('claiming', false).prop('disabled', false);
+            let msg = 'Server error.';
+            try {
+                const res = JSON.parse(xhr.responseText);
+                if (res.message) msg = res.message;
+            } catch (e) {}
+            toastr.error(msg);
         }
     });
 });

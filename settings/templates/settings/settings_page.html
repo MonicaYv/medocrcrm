@@ -104,10 +104,6 @@
             onclick="openPopup('savedDataPopup')">
             Clear Saved Data
           </p>
-          <p class="font-normal text-sm md:text-md text-{{ text }} cursor-pointer toggle-trigger"
-            data-target="password">
-            Change Password
-          </p>
           <p class="font-normal text-sm md:text-md text-{{ text }} cursor-pointer"
             onclick="openPopup('deleteAccountPopup')">
             Account Delete
@@ -267,71 +263,6 @@
     <div class="hidden edit-details">
       <p class="text-{{ text }} pl-4 sm:pl-6">Account Details</p>
       {% include 'settings/partials/edit-account-details.html' %}
-    </div>
-    <!--Change Password -->
-    <div class="hidden toggle-section" data-section="password">
-      <p class="text-gray-950 text-2xl pl-4 sm:pl-6">
-        Setting <span>></span> Account-Details <span>></span>Change
-        Password
-      </p>
-      <p class="text-{{ text }} pl-4 sm:pl-6">Change Password</p>
-
-      <form id="editChangePassword" method="POST" action="{% url 'change_password' %}"
-        class="px-4 sm:px-6 pt-6 text-sm">
-        {% csrf_token %}
-        <!-- Pharmacy Name -->
-        <div class="flex flex-col">
-          <input name="current_password" type="text" class="border rounded mb-5 px-3 py-2"
-            placeholder="Type your current password *" required />
-          <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
-        </div>
-        <div class="flex justify-end mb-4">
-          <p class="text-{{ text }} pl-4 font-bold cursor-pointer sm:pl-6">
-            Forgot Password?
-          </p>
-        </div>
-        <div class="flex flex-col">
-          <input name="new_password" type="text" class="border rounded mb-5 px-3 py-2"
-            placeholder="Type your new password *" required />
-          <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
-        </div>
-        <div class="flex flex-col">
-          <input name="confirm_password" type="text" class="border rounded mb-5 px-3 py-2"
-            placeholder="Retype your new password *" required />
-          <span class="error pharmacyNameError text-red-500 text-sm mt-1 hidden"></span>
-        </div>
-        <!--Send OTP-->
-        <div class="flex items-center justify-end gap-2">
-          <div>
-            <button type="button" class="bg-{{ text }} text-white px-2 py-2.5 rounded w-full cursor-pointer">
-              Send Phone OTP
-            </button>
-            <span class="text-primary-color text-sm mt-2">Didn’t get the code ?
-              <span class="text-black">Resend</span></span>
-          </div>
-          <div>
-            <input name="otp" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6"
-              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" />
-            <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
-            <div class="flex items-center gap-2 justify-end">
-              <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>
-              <p class="font-normal text-xs text-bright-green">Verified</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Buttons -->
-        <div class="md:col-span-2 flex justify-end pt-4 gap-2 flex-wrap">
-          <button type="button"
-            class="px-4 py-2 rounded-md border text-{{ text }} font-normal text-lg border-{{ text }} cancel-btn">
-            Cancel
-          </button>
-          <button type="submit"
-            class="bg-{{ text }} text-white px-6 py-2 rounded-lg font-normal text-lg cursor-pointer save-btn">
-            Save Changes
-          </button>
-        </div>
-      </form>
     </div>
     <!--Terms and Conditions -->
     <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="terms-conditons">
@@ -602,15 +533,15 @@
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
-        <div id="modalContent" class="text-center bg-white rounded-md h-96">
+        <div id="modalContent" class="text-center bg-white rounded-md h-96 flex items-center justify-center overflow-hidden">
 
           <!-- <img src="/static/images/incorp-certificate.svg" alt="" class="object-cover h-96 w-full"> -->
-          <img id="modalImg" class="object-cover h-96 w-full hidden" alt="Document preview">
-          <embed id="modalEmbed" class="w-full h-96 hidden" type="application/pdf" />
+          <img id="modalImg" class="hidden w-full h-full object-contain" alt="Document preview">
+          <iframe id="modalEmbed" class="hidden w-full h-full border-0 rounded-md" src=""></iframe>
           <a id="modalLink" class="block py-8 text-{{ text }}" hidden target="_blank">Download Document</a>
         </div>
         <div class="flex items-center justify-between pt-1">
-          <p class="font-normal text-xs text-dark-gray">Image (JPG, PNG). Maximum file size: 1MB.</p>
+          <p id="modalFormatHint" class="font-normal text-xs text-dark-gray">Supported: PDF, JPG, PNG (Max 5MB)</p>
           <div class="flex items-center gap-2 text-nowrap">
             <p class="font-normal text-sm text-emerald-green">Virus Scan</p>
             <input type="checkbox"
@@ -683,5 +614,10 @@
   <!-- <script src="{% static 'js/countryCodes.js' %}"></script> -->
   <script src="{% static 'js/Purchase.js' %}"></script>
   <script src="{% static 'js/tabs.js' %}"></script>
+<<<<<<< HEAD
+  <script src="{% static 'js/settings.js?v=20261030-doc-preview-v3' %}"></script>
+  {% endblock %}
+=======
   <script src="{% static 'js/settings.js' %}"></script>
   {% endblock %}
+>>>>>>> 3507a0c (bugs)

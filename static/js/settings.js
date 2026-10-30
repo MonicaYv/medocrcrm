@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hospital: "hospital_docs",
     };
     // Mapping doc_type → human title
+        // Mapping doc_type -> human title
     const titleMap = {
         ngo_registration_doc: "NGO Registration Document",
         incorporation_doc:     "Incorporation Certificate",
@@ -53,118 +54,142 @@ document.addEventListener("DOMContentLoaded", () => {
         doc_12a:               "12A Certificate",
         brand_image:           "Brand Image",
         medical_license_doc:   "Medical License",
-        storefront_image: "Storefront Image",
-        hospital_license: "Hospital License",
-        admin_identity_proof: "Admin Identity Proof",
-        pan_doc: "Hospital PAN",
-        hospital_photo: "Hospital Image",
-        lab_certificate: "Lab Registration Certificate",
+        storefront_image:      "Storefront Image",
+        hospital_license:      "Hospital License",
+        admin_identity_proof:  "Admin Identity Proof",
+        hospital_pan:          "Hospital PAN",
+        hospital_photo:        "Hospital Image",
+        lab_certificate:       "Lab Registration Certificate",
         identity_proof_aadhar: "Aadhar Card",
-        identity_proof_pan: "PAN Card",
-        gov_license: "Government License",
-        lab_photo: "Lab Photo",
+        identity_proof_pan:    "PAN Card",
+        gov_license:           "Government License",
+        lab_photo:             "Lab Photo",
     };
 
     // 1) View icons open the modal
     document.querySelectorAll(".view-icon").forEach(icon => {
         icon.addEventListener("click", () => {
-        currentDocType = icon.dataset.docType;
-        console.log("DOC TYPE:", currentDocType);
-        const path     = icon.dataset.docPath || "";
-        const ext      = path.split(".").pop().toLowerCase();
+            currentDocType = icon.dataset.docType;
+            console.log("DOC TYPE:", currentDocType);
+            const path = (icon.dataset.docPath || "").trim();
 
-        const subdirMap = {
-            ngo_registration_doc: 'registration',
-            incorporation_doc:     'incorporation',
-            gst_doc:               'gst',
-            pan_doc:               'pan',
-            tan_doc:               'tan',
-            section8_doc:          'section8',
-            doc_12a:               'doc_12a',
-            brand_image:           'brand_image',
-            medical_license_doc:   'medical_license',
-            storefront_image:      'store_front',
+            // No path stored => document not yet uploaded
+            if (!path || path === "/media/" || path.endsWith("/")) {
+                toastr.error("No document uploaded yet for this field.");
+                return;
+            }
 
+            // Normalise to a /document/... URL
+            let previewURL = path.replace(/\\/g, "/");
+            if (!previewURL.startsWith("/document/") && !previewURL.startsWith("http://") && !previewURL.startsWith("https://")) {
+                if (previewURL.startsWith("document/")) {
+                    previewURL = "/" + previewURL;
+                } else if (!previewURL.startsWith("/")) {
+                    previewURL = "/document/" + previewURL;
+                }
+            }
 
-            hospital_license: "registration",
-            admin_identity_proof: "aadhar",
-            pan_doc: "pan",
-            hospital_photo: "hospital_photo",
+            const cleanURL = previewURL.split("?")[0].split("#")[0];
+            const ext = cleanURL.split(".").pop().toLowerCase();
 
-            lab_certificate: 'lab_certificate',
-            identity_proof_aadhar: 'aadhar',
-            identity_proof_pan: 'pan',
-            gov_license: 'gov_license',
-            lab_photo: 'lab_photo',
-        };
+            console.log("PREVIEW URL:", previewURL);
+            console.log("EXT:", ext);
 
-        const baseFolder = docFolder[userType];   
-        console.log("Basefolder:", baseFolder)           // e.g. "ngo_docs"
-        const subfolder  = subdirMap[currentDocType];  
-        console.log("docType =", currentDocType, "subfolder =", subfolder);      // e.g. "pan"
-        // const fullPath   = `${baseFolder}/${subfolder}/${path}`;  // e.g. "ngo_docs/pan/abc.pdf"
-        // // const previewURL = `/document/${fullPath}`; 
-        // const fullPath = path.replace("/media/", "");
-        // const previewURL = `/document/${fullPath}`;
-        const previewURL = path;
-        // if (!path || path === "/media/" || path.trim() === "") {
+            // Set modal title
+            const displayTitle = (userType === "hospital" && currentDocType === "pan_doc")
+                ? "Hospital PAN"
+                : (titleMap[currentDocType] || "Document Preview");
+            modalTitle.innerHTML = `<span class="material-symbols-outlined">document_scanner</span> ${displayTitle}`;
 
-        //     toastr.error("Document not found");
+            // Reset both preview elements
+            [modalImg, modalEmbed].forEach(el => {
+                if (el) { el.classList.add("hidden"); el.removeAttribute("src"); }
+            });
 
-        //     return;
-        // }
-        console.log("PREVIEW URL:", previewURL);
-        console.log("PATH:", path);
-        // console.log("FULLPATH:", fullPath);
+            const formatHint = document.getElementById("modalFormatHint");
+            const modalContent = document.getElementById("modalContent");
 
-        // Set title
-        modalTitle.innerHTML = `<span class="material-symbols-outlined">document_scanner</span> ${titleMap[currentDocType] || "Document Preview"}`;
+            // Remove any previously injected "file not found" message
+            const prevMsg = modalContent && modalContent.querySelector(".doc-not-found-msg");
+            if (prevMsg) prevMsg.remove();
 
-        // Reset previews
-        [modalImg, modalEmbed].forEach(el => el.classList.add("hidden"));
+            const isImage = ["jpg","jpeg","png","webp","gif","bmp","svg"].includes(ext);
+            const isPdf   = ext === "pdf";
 
-        // Show correct preview
-        if (["jpg","jpeg","png","webp"].includes(ext)) {
-            // modalImg.src    = previewURL;
-        if (previewURL && previewURL !== "/media/") {
+            function showNotFound() {
+                [modalImg, modalEmbed].forEach(el => {
+                    if (el) { el.classList.add("hidden"); el.removeAttribute("src"); }
+                });
+                const existing = modalContent && modalContent.querySelector(".doc-not-found-msg");
+                if (existing) existing.remove();
+                const msg = document.createElement("div");
+                msg.className = "doc-not-found-msg flex flex-col items-center justify-center gap-2 p-6 text-medium-gray";
+                msg.innerHTML = `
+                    <span class="material-symbols-outlined text-4xl">description</span>
+                    <p class="text-sm font-medium">Document not available on server.</p>
+                    <p class="text-xs">The file may not have been uploaded yet, or it may have been moved.</p>`;
+                if (modalContent) modalContent.appendChild(msg);
+                if (formatHint) formatHint.textContent = "";
+            }
 
-            modalImg.src = previewURL;
+            if (isImage) {
+                if (modalImg) {
+                    modalImg.onload = () => {
+                        modalImg.classList.remove("hidden");
+                        const m = modalContent && modalContent.querySelector(".doc-not-found-msg");
+                        if (m) m.remove();
+                        if (formatHint) formatHint.textContent = "Image (JPG, PNG). Maximum file size: 5MB.";
+                    };
+                    modalImg.onerror = () => {
+                        modalImg.classList.add("hidden");
+                        showNotFound();
+                    };
+                    modalImg.src = previewURL;
+                }
+            } else if (isPdf) {
+                if (modalEmbed) {
+                    modalEmbed.src = previewURL;
+                    modalEmbed.classList.remove("hidden");
+                    if (formatHint) formatHint.textContent = "PDF Document. Maximum file size: 5MB.";
+                }
+            } else {
+                if (modalEmbed) {
+                    modalEmbed.src = previewURL;
+                    modalEmbed.classList.remove("hidden");
+                    if (formatHint) formatHint.textContent = "Document file. Maximum file size: 5MB.";
+                }
+            }
 
-            modalImg.classList.remove("hidden");
-        }
-     
-       
-        }
-        else if (ext === "pdf") {
-            modalEmbed.src    = previewURL;
-            modalEmbed.classList.remove("hidden");
-        }
-        
-        // Virus scan status
-        const approved = !!icon.closest("div").querySelector("span.material-filled.text-bright-green");
-        virusCheck.checked = approved;
+            // Virus scan status
+            const approved = !!icon.closest("div")?.querySelector("span.material-filled.text-bright-green");
+            if (virusCheck) virusCheck.checked = approved;
 
-        // Reset replace/save
-        // newFile = null;
-        // replaceBtn && (replaceBtn.disabled = false);
-        // saveBtn    && (saveBtn.disabled    = true);
-        // Reset replace/save
-          replaceBtn && (replaceBtn.disabled = false);
-        //   saveBtn && (saveBtn.disabled = false);
-
-        viewModal.classList.remove("hidden");
-        // modalImg.src = path;
-        // if (path && path !== "/media/") {
-        //     modalImg.src = path;
-        // }
-
-        // modalImg.classList.remove("hidden");
+            // Enable Replace button and open modal immediately
+            replaceBtn && (replaceBtn.disabled = false);
+            viewModal.classList.remove("hidden");
         });
     });
-
     // 2) Close modal
+    const closeModalHandler = () => {
+        viewModal.classList.add("hidden");
+        if (modalImg) {
+            modalImg.src = "";
+            modalImg.classList.add("hidden");
+        }
+        if (modalEmbed) {
+            modalEmbed.src = "";
+            modalEmbed.classList.add("hidden");
+        }
+    };
+
     viewModal.querySelector("#closeModal")
-        .addEventListener("click", () => viewModal.classList.add("hidden"));
+        ?.addEventListener("click", closeModalHandler);
+
+    viewModal.addEventListener("click", (e) => {
+        if (e.target === viewModal) {
+            closeModalHandler();
+        }
+    });
 
     // 3) Replace → file picker
 
@@ -305,18 +330,50 @@ replaceBtn && replaceBtn.addEventListener("click", () => {
     //     previewImage(newFile);
     // });
 const previewImage = (file) => {
-    [modalImg, modalEmbed].forEach(el => el.classList.add("hidden"));
+    if (!file) return;
+    [modalImg, modalEmbed].forEach(el => {
+        if (el) {
+            el.classList.add("hidden");
+            el.src = "";
+        }
+    });
 
-    if (file.type === "application/pdf") {
-        modalEmbed.src = URL.createObjectURL(file);
-        modalEmbed.classList.remove("hidden");
+    const modalContent = document.getElementById("modalContent");
+    const prevMsg = modalContent && modalContent.querySelector(".doc-not-found-msg");
+    if (prevMsg) prevMsg.remove();
+
+    const formatHint = document.getElementById("modalFormatHint");
+    const displayTitle = (userType === "hospital" && currentDocType === "pan_doc")
+        ? "Hospital PAN"
+        : (titleMap[currentDocType] || "Document Preview");
+    if (modalTitle) {
+        modalTitle.innerHTML = `<span class="material-symbols-outlined">document_scanner</span> ${displayTitle}`;
+    }
+
+    const fileName = (file.name || "").toLowerCase();
+    const fileType = (file.type || "").toLowerCase();
+    const isPdf = fileType === "application/pdf" || fileName.endsWith(".pdf");
+
+    if (isPdf) {
+        if (modalEmbed) {
+            modalEmbed.src = URL.createObjectURL(file);
+            modalEmbed.classList.remove("hidden");
+        }
+        if (formatHint) {
+            formatHint.textContent = "PDF Document. Maximum file size: 5MB.";
+        }
         return;
     }
 
     const reader = new FileReader();
     reader.onload = (e) => {
-        modalImg.src = e.target.result;
-        modalImg.classList.remove("hidden");
+        if (modalImg) {
+            modalImg.src = e.target.result;
+            modalImg.classList.remove("hidden");
+        }
+        if (formatHint) {
+            formatHint.textContent = "Image (JPG, PNG). Maximum file size: 5MB.";
+        }
     };
     reader.readAsDataURL(file);
 };
@@ -342,6 +399,9 @@ const previewImage = (file) => {
 
             currentDocType = input.dataset.doc;
             newFile = selectedFile;
+            saveBtns.forEach(btn => {
+                btn.disabled = false;
+            });
             previewImage(newFile);
             viewModal.classList.remove("hidden");
         });

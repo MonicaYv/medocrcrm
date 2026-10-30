@@ -13,7 +13,7 @@
 {% block content %}
     <!-- Main Content -->
     <div class="bg-snow-gray relative transition-all duration-300 text-dark-gray main-content h-full flex-1 flex flex-col gap-8 overflow-y-auto scroll">
-        <div class="show-sidebar-toggle hidden absolute top-24 left-0 z-50 h-10 w-10 bg-{{ secondary_bg }} items-center justify-center rounded-r-md cursor-pointer">
+        <div class="show-sidebar-toggle hidden fixed top-24 left-0 z-[60] h-10 w-10 bg-{{ secondary_bg }} items-center justify-center rounded-r-md cursor-pointer">
             <span class="material-symbols-outlined text-{{ text }} font-bold text-2xl">
             arrow_forward_ios
             </span>
@@ -217,6 +217,16 @@
 {% endblock %}
 
 {% block extra_js %}
+<style>
+@media (max-width: 767px) {
+  .map-view > .absolute.top-5 { left: .5rem; right: .5rem; margin-left: 0; gap: .5rem; }
+  .map-view > .absolute.top-5 > div { max-width: 100%; }
+  .map-view > .absolute.top-5 .map-search-btn { padding: .4rem .55rem; }
+  .listview > .rounded-md > .flex.justify-between { flex-wrap: wrap; gap: .75rem; }
+  .listview input[type="text"] { min-width: 0; }
+  .show-sidebar-toggle { pointer-events: auto; }
+}
+</style>
 <script>
     window.colorData = {
         primary_bg: "{{ primary_bg|escapejs }}",

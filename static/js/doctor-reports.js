@@ -509,6 +509,20 @@ function loadDoctorDashboardData(filterType) {
 $(".download-btn").on("click", function (e) {
     e.stopPropagation();
 
+    if ($(this).data("type") === "excel") {
+        const table = document.querySelector("#consultationTable table") || document.querySelector("#consultationTable");
+        if (!table) return;
+        const csv = Array.from(table.querySelectorAll("tr"), row =>
+            Array.from(row.querySelectorAll("th,td"), cell => '"' + cell.innerText.trim().replace(/"/g, '""') + '"').join(",")
+        ).join("\r\n");
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+        link.download = "consultation-report.csv";
+        link.click();
+        URL.revokeObjectURL(link.href);
+        return;
+    }
+
     const targetId = $(this).data("target");
     const target = document.getElementById(targetId);
 
@@ -518,7 +532,7 @@ $(".download-btn").on("click", function (e) {
     }
 
     html2canvas(target, {
-        scale: 2,
+        scale: 1,
         useCORS: true
     }).then((canvas) => {
 

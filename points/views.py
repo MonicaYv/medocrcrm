@@ -9,8 +9,9 @@ from django.template.loader import render_to_string
 from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
 from django.core.paginator import Paginator
+from django.db import transaction
 
 
 @dashboard_login_required
@@ -63,25 +64,41 @@ def get_coupon_data(request, is_popular=False):
         paginator = Paginator(coupons, limit)
         page_obj = paginator.get_page(page)
 
+        claimed_ids = set()
+        if user:
+            claimed_ids = set(
+                CouponClaimed.objects.filter(user=user, coupon__in=page_obj).values_list('coupon_id', flat=True)
+            )
+
         data_list = []
+        coupons_to_update = []
         for c in page_obj:
-            redeemed = c.redeemed_count or 0
+            claims_count = c.claims.count()
+            redeemed = max(c.redeemed_count or 0, claims_count)
+            if (c.redeemed_count or 0) < redeemed:
+                c.redeemed_count = redeemed
+                coupons_to_update.append(c)
+
             max_redemptions = c.max_redemptions or 100
+            percent_used = min(100, int((redeemed / max_redemptions) * 100)) if max_redemptions else 0
+
             item = {
                 "title": c.title[:20] if is_popular else c.title,
                 "id": c.id,
                 "description": c.description[:120] if is_popular else c.description,
-                # "category": c.category.name if c.category else "N/A",
-                # "brand_name": c.brand_name.name if c.brand_name else "N/A",
                 "category": c.category.name if c.category else "CATEGORY",
                 "brand_name": c.brand_name.name if c.brand_name else "BRAND NAME",
                 "code": c.code,
                 "redeemed_count": redeemed,
                 "max_redemptions": max_redemptions,
+                "percent_used": percent_used,
+                "is_claimed": c.id in claimed_ids,
+                "is_exhausted": redeemed >= max_redemptions,
             }
-            if is_popular:
-                item["percent_used"] = int((redeemed / max_redemptions) * 100)
             data_list.append(item)
+
+        if coupons_to_update:
+            Coupon.objects.bulk_update(coupons_to_update, ['redeemed_count'])
 
         context = {"coupons" if is_popular else "products": data_list}
         context.update(get_common_context(request, user))
@@ -219,21 +236,79 @@ def claim_coupon(request):
     try:
         data = json.loads(request.body)
         coupon_id = data.get('coupon_id')
-        coupon = Coupon.objects.get(id=coupon_id)
-        user = request.user_obj
+        user = getattr(request, 'user_obj', None)
 
-        if CouponClaimed.objects.filter(user=user, coupon=coupon).exists():
-            return JsonResponse({'status': 'already_claimed'})
+        if not user:
+            return JsonResponse({'status': 'unauthorized', 'message': 'Please log in to claim coupons.'}, status=401)
 
-        CouponClaimed.objects.create(
-            user=user,
-            coupon=coupon,
-            expiry_date=coupon.validity
-        )
-        return JsonResponse({'status': 'success'})
+        if not coupon_id:
+            return JsonResponse({'status': 'error', 'message': 'Coupon ID is required.'}, status=400)
+
+        with transaction.atomic():
+            # Lock the coupon row to prevent concurrent race conditions
+            coupon = Coupon.objects.select_for_update().get(id=coupon_id)
+
+            # Prevent duplicate claim by the same user
+            if CouponClaimed.objects.filter(user=user, coupon=coupon).exists():
+                actual_claims = coupon.claims.count()
+                current_redeemed = max(coupon.redeemed_count or 0, actual_claims)
+                if (coupon.redeemed_count or 0) != current_redeemed:
+                    Coupon.objects.filter(id=coupon.id).update(redeemed_count=current_redeemed)
+
+                max_redemptions = coupon.max_redemptions or 100
+                percent_used = min(100, int((current_redeemed / max_redemptions) * 100)) if max_redemptions else 0
+
+                return JsonResponse({
+                    'status': 'already_claimed',
+                    'message': 'You have already claimed this coupon.',
+                    'coupon_id': coupon.id,
+                    'code': coupon.code,
+                    'redeemed_count': current_redeemed,
+                    'max_redemptions': max_redemptions,
+                    'percent_used': percent_used,
+                })
+
+            # Check if coupon has reached maximum redemptions
+            actual_claims = coupon.claims.count()
+            current_redeemed = max(coupon.redeemed_count or 0, actual_claims)
+            max_redemptions = coupon.max_redemptions or 100
+
+            if current_redeemed >= max_redemptions:
+                return JsonResponse({
+                    'status': 'limit_reached',
+                    'message': 'Coupon redemption limit reached.',
+                    'coupon_id': coupon.id,
+                    'code': coupon.code,
+                    'redeemed_count': current_redeemed,
+                    'max_redemptions': max_redemptions,
+                    'percent_used': 100,
+                })
+
+            # Create claim record
+            CouponClaimed.objects.create(
+                user=user,
+                coupon=coupon,
+                expiry_date=coupon.validity
+            )
+
+            # Increment count and keep synchronized
+            new_redeemed = current_redeemed + 1
+            Coupon.objects.filter(id=coupon.id).update(redeemed_count=new_redeemed)
+
+            percent_used = min(100, int((new_redeemed / max_redemptions) * 100)) if max_redemptions else 0
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Coupon claimed successfully!',
+                'coupon_id': coupon.id,
+                'code': coupon.code,
+                'redeemed_count': new_redeemed,
+                'max_redemptions': max_redemptions,
+                'percent_used': percent_used,
+            })
 
     except Coupon.DoesNotExist:
-        return JsonResponse({'status': 'coupon_not_found'}, status=404)
+        return JsonResponse({'status': 'coupon_not_found', 'message': 'Coupon not found.'}, status=404)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
