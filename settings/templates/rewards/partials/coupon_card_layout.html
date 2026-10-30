@@ -1,5 +1,5 @@
 {% for c in coupons %}
-<div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card">
+<div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card" data-coupon-id="{{ c.id }}">
   <!-- <div class="flex lg:justify-between lg:items-stretch flex-col lg:flex-row h-full gap-4"> -->
   <div class="flex flex-col w-full lg:flex-row lg:justify-between lg:items-center gap-4">
     
@@ -24,10 +24,10 @@
     <div class="flex flex-col justify-center lg:w-40">
       <div class="flex justify-between items-center gap-4">
         <p class="font-normal text-base">Redeemed</p>
-        <p class="text-xs font-medium">{{ c.redeemed_count }}/{{ c.max_redemptions }}</p>
+        <p class="text-xs font-medium redeemed-count-text" data-coupon-id="{{ c.id }}"><span class="redeemed-count" data-coupon-id="{{ c.id }}">{{ c.redeemed_count }}</span>/<span class="max-redemptions" data-coupon-id="{{ c.id }}">{{ c.max_redemptions }}</span></p>
       </div>
       <div class="bg-gray-300 h-2 rounded-full w-full mt-2">
-        <div class="bg-green-500 h-2 rounded-full" style="width: {{ c.percent_used }}%;"></div>
+        <div class="bg-green-500 h-2 rounded-full redemption-progress-bar" data-coupon-id="{{ c.id }}" style="width: {{ c.percent_used }}%;"></div>
       </div>
     </div>
 
@@ -39,14 +39,36 @@
     <!-- Right section -->
     <!-- <div class="pt-4 lg:pt-0 lg:w-48 flex items-center lg:items-end"> -->
     <div class="lg:w-36 flex items-center justify-center">
-      <button 
-        data-coupon-id="{{ c.id }}" 
-        data-code="{{ c.code }}"
-        class="bg-blue-600 font-semibold text-white w-full rounded-md p-2 shadow-sm flex items-center gap-2 justify-center cursor-pointer claim-btn"
-      >
-        {{ c.code }}
-        <span class="material-symbols-outlined">content_copy</span>
-      </button>
+      {% if c.is_claimed %}
+        <button 
+          data-coupon-id="{{ c.id }}" 
+          data-code="{{ c.code }}"
+          disabled
+          class="bg-gray-400 font-semibold text-white w-full rounded-md p-2 shadow-sm flex items-center gap-2 justify-center cursor-not-allowed opacity-75 claim-btn"
+        >
+          {{ c.code }} (Claimed)
+          <span class="material-symbols-outlined">check_circle</span>
+        </button>
+      {% elif c.is_exhausted %}
+        <button 
+          data-coupon-id="{{ c.id }}" 
+          data-code="{{ c.code }}"
+          disabled
+          class="bg-gray-400 font-semibold text-white w-full rounded-md p-2 shadow-sm flex items-center gap-2 justify-center cursor-not-allowed opacity-75 claim-btn"
+        >
+          {{ c.code }} (Limit Reached)
+          <span class="material-symbols-outlined">block</span>
+        </button>
+      {% else %}
+        <button 
+          data-coupon-id="{{ c.id }}" 
+          data-code="{{ c.code }}"
+          class="bg-blue-600 font-semibold text-white w-full rounded-md p-2 shadow-sm flex items-center gap-2 justify-center cursor-pointer claim-btn"
+        >
+          {{ c.code }}
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+      {% endif %}
     </div>
 
   </div>
