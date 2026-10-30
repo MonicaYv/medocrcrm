@@ -45,12 +45,20 @@ $(document).ready(function () {
   $(document).on("click", function (e) {
     // Clicks inside the custom date picker must not dismiss the dropdown - this
     // handler is bound before the picker handlers, so it has to opt out here.
-    if ($(e.target).closest("#filterDropdown, .datepicker-container, .ui-datepicker").length) return;
+    if ($(e.target).closest(
+      "#filterDropdown, .datepicker-container, .ui-datepicker, " +
+      ".calendarToggle, .heatmapCalendarToggle, .consolidationCalendarToggle, " +
+      ".calendarPopup, .heatmapCalendarPopup, .consolidationCalendarPopup, " +
+      ".calendar-option, .heatmap-cal-option, .consolidation-cal-option, " +
+      ".chart-range-calendar"
+    ).length) return;
 
     $("#filterDropdown").addClass("hidden");
     $(".datepicker-container").addClass("hidden");
     $(".dropdown-menu").addClass("hidden");
     $(".calendarPopup, .heatmapCalendarPopup, .consolidationCalendarPopup").addClass("hidden");
+    $(".chart-range-picker").addClass("hidden");
+    $(".chart-range-calendar").addClass("hidden");
   });
 
   // Individual card calendar popup triggers
@@ -129,7 +137,9 @@ $(document).ready(function () {
   }
 
   // --------- 3. ASYNCHRONOUS SUBMENU TABS ACTION EVENTS ----------
-  $(document).on("click", "#filterDropdown .option", function (e) {
+  $("#filterDropdown")
+    .off("click.doctorReportOption", ".option")
+    .on("click.doctorReportOption", ".option", function (e) {
     e.stopPropagation();
     const $option = $(this);
     const kind = String($option.data("type") || "date").toLowerCase();
@@ -140,9 +150,14 @@ $(document).ready(function () {
       // intact. Only this menu's options are toggled, so picking a visit type
       // can never overwrite the date filter (or vice versa).
       window.doctorReportVisitType = value;
-      $("#visitMenu .option").removeClass("active");
-      $option.addClass("active");
-      $("#filterDropdown").addClass("hidden");
+      $("#visitMenu .option")
+        .removeClass("active bg-pale-azure text-dodger-blue font-medium")
+        .addClass("text-dark-gray");
+      $option
+        .addClass("active bg-pale-azure text-dodger-blue font-medium")
+        .removeClass("text-dark-gray");
+      $("#visitMenu .option").attr("aria-pressed", "false");
+      $option.attr("aria-pressed", "true");
       loadDoctorDashboardData(currentDoctorReportFilter());
       return;
     }
@@ -280,29 +295,44 @@ $(document).ready(function () {
     $(this).parent().addClass("hidden");
     $(this).closest(".relative").find(".calendar-date-text").text($(this).text().trim().replace("check", ""));
     if (value === "custom") {
-      // Use a native date input attached to this chart. Each chart's calendar
-      // applies the chosen day as soon as a date is selected.
+      // Use the same two-click jQuery UI range calendar as Hospital Reports.
       const $wrapper = $(this).closest(".heatmapCalendar, .consolidationCalendar, .relative");
-      let $dateInput = $wrapper.find(".chart-date-input");
-      if (!$dateInput.length) {
-        $dateInput = $('<input type="date" class="chart-date-input absolute right-0 top-full z-[60] rounded border border-gray-300 bg-white p-2 shadow-md">')
-          .appendTo($wrapper)
-          .on("change", function () {
-            if (!this.value) return;
-            applyDoctorReportChartDate(this.value, this.value, $wrapper);
-            $dateInput.addClass("hidden");
-          });
+      let $rangeCalendar = $wrapper.find(".chart-range-calendar");
+      if (!$rangeCalendar.length) {
+        $rangeCalendar = $('<div class="chart-range-calendar datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-[60] bg-white shadow-md rounded"><p class="chart-range-status mb-2 text-xs text-dark-gray" aria-live="polite">Select start date</p><div class="datepicker-inline"></div></div>').appendTo($wrapper);
+        $rangeCalendar.on("click", function (event) { event.stopPropagation(); });
       }
-      $dateInput.val("").removeClass("hidden");
-      const dateInput = $dateInput.get(0);
-      try {
-        if (dateInput.showPicker) dateInput.showPicker();
-        else dateInput.click();
-      } catch (error) {
-        dateInput.click();
-      }
+      const $inline = $rangeCalendar.find(".datepicker-inline");
+      if ($inline.hasClass("hasDatepicker")) $inline.datepicker("destroy");
+      $inline.empty();
+      $rangeCalendar.removeClass("hidden").find(".chart-range-status").text("Select start date");
+      let pendingStart = "";
+      $inline.datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        defaultDate: new Date(),
+        beforeShowDay: function (date) {
+          if (!pendingStart) return [true, ""];
+          const value = $.datepicker.formatDate("yy-mm-dd", date);
+          return [true, value >= pendingStart ? "ui-state-range" : ""];
+        },
+        onSelect: function (dateText) {
+          if (!pendingStart) {
+            pendingStart = dateText;
+            $inline.datepicker("option", "minDate", dateText);
+            $rangeCalendar.find(".chart-range-status").text("Start: " + dateText + " - Select end date");
+            return;
+          }
+          $rangeCalendar.addClass("hidden");
+          $inline.datepicker("option", "minDate", null);
+          applyDoctorReportChartDate(pendingStart, dateText, $wrapper);
+        }
+      });
       return;
     }
+    $(".chart-range-calendar").addClass("hidden");
+    $(".chart-range-picker").addClass("hidden");
     window.doctorReportStartDate = "";
     window.doctorReportEndDate = "";
     window.doctorReportFilter = value;
@@ -312,6 +342,7 @@ $(document).ready(function () {
   });
 
   function applyDoctorReportChartDate(startDate, endDate, $wrapper) {
+    if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
     window.doctorReportFilter = "custom";
     window.doctorReportStartDate = startDate;
     window.doctorReportEndDate = endDate;
@@ -366,7 +397,8 @@ function loadDoctorDashboardData(filterType) {
         window.doctorReportFilter = String(filterType).toLowerCase();
     }
     const activeFilter = window.doctorReportFilter || filterType || "month";
-    const searchValue = ($("#reportSearch").val() || "").trim();
+    const rawSearchValue = ($("#reportSearch").val() || "").trim();
+    const searchValue = isDoctorReportSectionSearch(rawSearchValue) ? "" : rawSearchValue;
     const range = currentDoctorReportRange();
     if (doctorReportRequest) {
         doctorReportRequest.abort();
@@ -525,6 +557,28 @@ function applyDoctorReportSearch(query, skipReload) {
     const value = (query || "").trim().toLowerCase();
     const hasQuery = value.length > 0;
 
+    const sectionKeywords = {
+        stats: ["patient", "patients", "bids received", "bids", "quarter", "growth", "revenue", "average", "avg"],
+        heatmap: ["heatmap", "map", "state", "location"],
+        bidChart: ["bid", "bids", "win", "loss", "won", "lost"],
+        consultation: ["consultation", "appointment", "appointments", "fee", "earning", "earnings", "day"]
+    };
+    const matchesSection = (keywords) => keywords.some((keyword) => keyword.includes(value) || value.includes(keyword));
+    const isSectionSearch = hasQuery && Object.values(sectionKeywords).some(matchesSection);
+
+    if (isSectionSearch) {
+        const showHeatmap = matchesSection(sectionKeywords.heatmap);
+        const showBidChart = matchesSection(sectionKeywords.bidChart);
+        $("#doctorStatsSection").toggle(matchesSection(sectionKeywords.stats));
+        $("#doctorHeatmapSection").toggle(showHeatmap);
+        $("#doctorBidChartSection").toggle(showBidChart);
+        $("#doctorChartsSection").toggle(showHeatmap || showBidChart);
+        $("#doctorConsultationSection").toggle(matchesSection(sectionKeywords.consultation));
+    } else {
+        $("#doctorStatsSection, #doctorChartsSection, #doctorHeatmapSection, #doctorBidChartSection, #doctorConsultationSection")
+            .show();
+    }
+
     // Day-wise rows of the "Consultation fee and appointments" table. Only
     // narrow them when the query actually matches at least one row, so a
     // search targeting another section doesn't blank out the table.
@@ -535,7 +589,7 @@ function applyDoctorReportSearch(query, skipReload) {
         return $(this).text().toLowerCase().indexOf(value) > -1;
     });
 
-    if (!hasQuery || !$matchingRows.length) {
+    if (!hasQuery || isSectionSearch || !$matchingRows.length) {
         $rows.add($totalRow).show().removeClass("hidden");
     } else {
         $rows.hide().addClass("hidden");
@@ -550,6 +604,18 @@ function applyDoctorReportSearch(query, skipReload) {
             loadDoctorDashboardData(currentDoctorReportFilter());
         }, 350);
     }
+}
+
+function isDoctorReportSectionSearch(query) {
+    const value = (query || "").trim().toLowerCase();
+    if (!value) return false;
+    const terms = [
+        "patient", "patients", "bids received", "bids", "quarter", "growth",
+        "revenue", "average", "avg", "heatmap", "map", "state", "location",
+        "win", "loss", "won", "lost", "consultation", "appointment",
+        "appointments", "fee", "earning", "earnings", "day"
+    ];
+    return terms.some((term) => term.includes(value) || value.includes(term));
 }
 
 $(document).on("input", "#reportSearch", function () {

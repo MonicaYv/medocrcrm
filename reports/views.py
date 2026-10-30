@@ -1651,6 +1651,7 @@ from dashboard.utils import dashboard_login_required
 @dashboard_login_required
 def lab_report_data(request):
     filter_type = request.GET.get("filter", "today").strip().lower()
+    visit_type = request.GET.get("visit_type", "").strip().lower()
     user = request.user_obj
     current_lab = getattr(user, "lab_profile", None)
 
@@ -1659,6 +1660,18 @@ def lab_report_data(request):
         return JsonResponse({"error": "Unauthorized lab profile access."}, status=403)
 
     appointments = LabAppointments.objects.filter(accepted_lab=current_lab)
+    if visit_type == "home":
+        appointments = appointments.filter(
+            Q(preferred_mode__iexact="home")
+            | Q(preferred_mode__iexact="home-service")
+            | Q(preferred_mode__iexact="home_visit")
+        )
+    elif visit_type in {"lab", "visit", "hospital"}:
+        appointments = appointments.filter(
+            Q(preferred_mode__iexact="visit")
+            | Q(preferred_mode__iexact="lab")
+            | Q(preferred_mode__iexact="hospital")
+        )
 
     # =========================================
     # FILTER LOGIC AND RANGE LABEL

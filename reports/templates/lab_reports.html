@@ -30,14 +30,32 @@
               </button>
               <div
                 class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
+                <div class="px-4 py-2">
+                  <p class="text-sm font-medium text-gray-500 mb-2">Visit Type</p>
+                  <select id="labVisitTypeFilter" class="w-full border border-blue-haze rounded-md px-2 py-1 text-sm">
+                    <option value="">All visit types</option>
+                    <option value="home">Home</option>
+                    <option value="lab">Lab</option>
+                  </select>
+                </div>
+                <div class="px-4 py-2 border-b border-blue-haze">
+                  <p class="text-sm text-medium-gray">Date</p>
+                </div>
                 <div
-                  class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray" 
+                  class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
                   data-filter="today"
                 >
                   <span class="material-symbols-outlined !text-lg text-dodger-blue">
                      check
                   </span>
                   Today
+                </div>
+                <div
+                  class="p-2 pl-4 hover:bg-pale-azure rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
+                  data-filter="all"
+                >
+                  <span class="material-symbols-outlined !text-lg text-light-gray">check</span>
+                  All dates
                 </div>
                 <div
                   class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray"
@@ -133,10 +151,11 @@
               <h3 class="font-semibold">Most Requested Test</h3>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-medium-gray lab-report-range-label">Loading…</span>
-                <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer">calendar_today</span>
+                <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer" data-chart-id="most_requested_test">calendar_today</span>
               </div>
               <div
                 class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
+                <p class="labReportDateStatus mb-2 border-b border-gray-200 py-2 text-xs text-dark-gray" aria-live="polite">Start date: — | End date: —</p>
                 <div class="datepicker-inline"></div>
               </div>
             </div>
@@ -154,10 +173,11 @@
               <h3 class="font-semibold">Revenue by Test Type</h3>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-medium-gray lab-report-range-label">Loading…</span>
-                <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer">calendar_today</span>
+                <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer" data-chart-id="revenue_by_test">calendar_today</span>
               </div>
               <div
                 class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
+                <p class="labReportDateStatus mb-2 border-b border-gray-200 py-2 text-xs text-dark-gray" aria-live="polite">Start date: — | End date: —</p>
                 <div class="datepicker-inline"></div>
               </div>
             </div>
@@ -183,10 +203,11 @@
               <h3 class="font-semibold">Heatmap</h3>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-medium-gray lab-report-range-label">Loading…</span>
-                <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer">calendar_today</span>
+                <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer" data-chart-id="heatmap">calendar_today</span>
               </div>
               <div
                 class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
+                <p class="labReportDateStatus mb-2 border-b border-gray-200 py-2 text-xs text-dark-gray" aria-live="polite">Start date: — | End date: —</p>
                 <div class="datepicker-inline"></div>
               </div>
             </div>
@@ -219,10 +240,11 @@
               <h3 class="font-semibold">Bid Trend Price</h3>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-medium-gray lab-report-range-label">Loading…</span>
-                <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer">calendar_today</span>
+                <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer" data-chart-id="bid_trend">calendar_today</span>
               </div>
               <div
                 class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
+                <p class="labReportDateStatus mb-2 border-b border-gray-200 py-2 text-xs text-dark-gray" aria-live="polite">Start date: — | End date: —</p>
                 <div class="datepicker-inline"></div>
               </div>
             </div>
@@ -355,10 +377,11 @@
                 <h3 class="font-semibold">User Rating ⭐</h3>
                 <div class="flex items-center gap-2">
                   <span class="text-sm text-medium-gray lab-report-range-label">Loading…</span>
-                  <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer">calendar_today</span>
+                  <span class="material-symbols-outlined calendar-icon lab-report-chart-calendar cursor-pointer" data-chart-id="ratings">calendar_today</span>
                 </div>
                 <div
                   class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
+                  <p class="labReportDateStatus mb-2 border-b border-gray-200 py-2 text-xs text-dark-gray" aria-live="polite">Start date: — | End date: —</p>
                   <div class="datepicker-inline"></div>
                 </div>
               </div>
@@ -441,7 +464,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <!-- <script src="/static/js/lab-reports.js?v=20261021-1"></script> -->
-<script src="/static/js/lab-reports.js?v=20261028-range-calendar"></script>
+<script src="/static/js/lab-reports.js?v=20261029-per-chart-range-3"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

@@ -142,6 +142,9 @@ $(document).ready(function () {
     if ($(this).closest('.appointment-page').length) return;
     // Lab reports manage a guided two-date inline picker in lab-reports.js.
     if ($(this).closest('.lab-report-filter').length) return;
+    // Lab report chart calendars are handled by the same guided start/end
+    // range picker in lab-reports.js; don't consume their click here.
+    if ($(this).closest('.lab-report-chart-calendar').length) return;
     // The lab dashboard handles its custom range in home.js, including
     // opening the picker and resetting the selected range.
     if ($(this).closest('.lab-home-filter').length) return;
@@ -208,6 +211,10 @@ $(document).ready(function () {
     // Hospital history closes its own menus; inline display styles here would
     // prevent its class-based filter from reopening after an outside click.
     if ($('#historySearch').length) return;
+
+    // Doctor Reports owns its chart calendar popups and outside-click rules.
+    // Shared inline hiding here closes a popup on the same click that opens it.
+    if ($('.doctor-report-page').length) return;
 
     if (!$target.closest('.dropdown, .datepicker-container, .ui-datepicker, .statusDropdown').length) {
       // Appointment pages use class-based visibility; don't inject inline

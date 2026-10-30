@@ -49,6 +49,16 @@
                   </div>
 
                   <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
+                    data-type="date" data-value="Today">
+                    Today
+                  </div>
+
+                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
+                    data-type="date" data-value="All">
+                    All dates
+                  </div>
+
+                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
                     data-type="date" data-value="Week">
                     Week
                   </div>
@@ -106,8 +116,8 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
+        <div id="doctorStatsSection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="doctor-report-stat-card bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Total Patient</h2>
               <p id="totalPatients" class="text-base sm:text-lg font-semibold total-patient-count">
@@ -118,7 +128,7 @@
               <span class="material-symbols-outlined !font-semibold">patient_list</span>
             </div>
           </div>
-          <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
+          <div class="doctor-report-stat-card bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Bids Received</h2>
               <p id="birdsReceived" class="text-base sm:text-lg font-semibold birds-received-count">
@@ -129,7 +139,7 @@
               <span class="material-symbols-outlined !font-semibold">star</span>
             </div>
           </div>
-          <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
+          <div class="doctor-report-stat-card bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Quarter growth</h2>
               <p id="quarterGrowth" class="text-base sm:text-lg font-semibold quarter-growth">
@@ -140,7 +150,7 @@
               <span class="material-symbols-outlined !font-semibold">paid</span>
             </div>
           </div>
-          <div class="bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
+          <div class="doctor-report-stat-card bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
             <div class="flex flex-col justify-between gap-1">
               <h2 class="text-xs sm:text-sm text-medium-gray">Average Revenue/Patient</h2>
               <p id="avgRevenue" class="text-base sm:text-lg font-semibold avg-revenue">
@@ -154,9 +164,9 @@
         </div>
 
         <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-fr">
+        <div id="doctorChartsSection" class="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-fr">
           <!--Heat map-->
-          <div class="bg-cloud-gray p-4 rounded-xl doctor-report-shadow flex flex-col ">
+          <div id="doctorHeatmapSection" class="bg-cloud-gray p-4 rounded-xl doctor-report-shadow flex flex-col ">
             <div class="flex justify-between items-center dropdown relative mb-2">
               <h3 class="font-semibold">Heatmap</h3>
               <div class="relative heatmapCalendar">
@@ -232,7 +242,7 @@
           </div>
 
           <!-- Bid Win/Loss Rate Card -->
-          <div class="bg-white rounded-xl p-4 shadow-sm w-full doctor-report-shadow">
+          <div id="doctorBidChartSection" class="bg-white rounded-xl p-4 shadow-sm w-full doctor-report-shadow">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <h3 class="text-sm sm:text-base font-bold text-jungle-navy">
@@ -344,7 +354,7 @@
         </div>
 
         <!-- Consolation Fee and Appointments -->
-        <div class="bg-white rounded-xl shadow-lg flex flex-col doctor-report-shadow">
+        <div id="doctorConsultationSection" class="bg-white rounded-xl shadow-lg flex flex-col doctor-report-shadow">
           <!-- Header -->
           <div class="flex items-center justify-between p-3">
             <h3 class="text-ebony font-semibold text-base">Consolation fee and appointments</h3>
@@ -522,7 +532,7 @@
 
 {% block extra_js %}
   <script src="/static/js/tabs.js"></script>
-  <script src="/static/js/doctor-reports.js?v=20261028-3"></script>
+  <script src="/static/js/doctor-reports.js?v=20261029-chart-calendar-fix"></script>
   <script src="/static/js/table-pagination.js"></script>
 <!-- heatmap -->
 <script src="https://www.amcharts.com/lib/4/core.js"></script>
