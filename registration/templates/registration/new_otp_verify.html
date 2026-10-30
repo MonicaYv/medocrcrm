@@ -38,6 +38,17 @@
 {% endblock %}
 
 {% block content %}
+<style>
+  #id_otp_form { width: 100%; }
+  .otp-inputs { justify-content: center; width: 100%; }
+  .otp-resend-row { gap: 12px; flex-wrap: wrap; }
+  .otp-alt-actions { flex-wrap: wrap; text-align: center; }
+  @media (max-width: 420px) {
+    .otp-inputs { gap: clamp(8px, 3vw, 12px); }
+    .otp-inputs input { flex: 0 1 52px; min-width: 0; }
+    .otp-resend-row { justify-content: center; }
+  }
+</style>
 <h1>Verify OTP</h1>
 <p class="otp-meta">
   Provided OTP sent to {{ masked_phone }}

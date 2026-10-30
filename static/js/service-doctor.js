@@ -14,6 +14,9 @@ function getCookie(name) {
   return cookieValue;
 }
 
+let doctorSavedServiceRows = [];
+let doctorSavedVisitRows = [];
+
 /* =========================================================
    DROPDOWN UTILS
 ========================================================= */
@@ -83,19 +86,6 @@ $(document).on('blur', '.doctor-price-input', function () {
   this.value = `₹ ${value === '' ? '0.00' : value}`;
 });
 
-$(document).on("click", ".more-btn", function (e) {
-  e.stopPropagation();
-
-  $(".more-dropdown").addClass("hidden");
-
-  $(this)
-    .siblings(".more-dropdown")
-    .toggleClass("hidden");
-});
-
-$(document).on("click", function () {
-  $(".more-dropdown").addClass("hidden");
-});
 /* =========================================================
    CARD TEMPLATES
    ========================================================= */
@@ -515,8 +505,8 @@ $(document).on('click', '#step-2 .step-btn[data-target="3"]', function () {
   const services = collectDoctorServices();
   const visits   = collectVisitCharges();
 
-  if (!services.length) {
-    toastr.error("Please add at least one service");
+  if (!services.length && !visits.length) {
+    toastr.error("Please add at least one service or visit charge");
     return;
   }
 
@@ -559,8 +549,8 @@ $(document).on('click', '#save-doctor-services', function () {
   const services = collectDoctorServices();
   const visits   = collectVisitCharges();
 
-  if (!services.length) {
-    toastr.error("Please add at least one service");
+  if (!services.length && !visits.length) {
+    toastr.error("Please add at least one service or visit charge");
     return;
   }
 
@@ -597,6 +587,9 @@ function fetchDoctorSavedServices() {
       (res.visits && res.visits.length);
 
     if (!hasData) return;
+
+    doctorSavedServiceRows = res.services || [];
+    doctorSavedVisitRows = res.visits || [];
 
     $('.home-section').addClass('hidden');
     $('.services-section').addClass('hidden');
@@ -659,7 +652,7 @@ function doctorCardHtml(title, price, id, type) {
          data-id="${id}"
          data-type="${type}">
       <div class="flex items-start justify-between w-full">
-        <h3 class="text-sm sm:text-base font-semibold text-black">${title}</h3>
+        <h3 class="min-w-0 pr-10 break-words text-sm sm:text-base font-semibold text-black">${title}</h3>
         ${doctorMenuHtml()}
       </div>
       <div class="flex items-center w-full">
@@ -683,7 +676,7 @@ function renderDoctorServiceCards(services) {
   s.id,
   "service"
 );
-    premiumGrid.append(card);
+    premiumGrid.append(card.clone(true));
     nonPremiumGrid.append(card);
   });
 }
@@ -702,37 +695,10 @@ function renderDoctorVisitCards(visits) {
   v.id,
   "visit"
 );
-    premiumGrid.append(card);
+    premiumGrid.append(card.clone(true));
     nonPremiumGrid.append(card);
   });
 }
-
-$(document).on('click', '.home-add-service', function () {
-  $('.home-section').addClass('hidden');
-  $('.premium-section').addClass('hidden');
-  $('.services-without-subscription').addClass('hidden');
-
-  $('.services-section').removeClass('hidden');
-
-  $('#step-1').removeClass('hidden');
-  $('#step-2, #step-3').addClass('hidden');
-});
-
-$(document).on("click", ".more-btn", function (e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const dropdown = $(this).siblings(".more-dropdown");
-
-  $(".more-dropdown").not(dropdown).addClass("hidden");
-  dropdown.toggleClass("hidden");
-});
-
-$(document).on("click", function (e) {
-  if (!$(e.target).closest(".more-btn, .more-dropdown").length) {
-    $(".more-dropdown").addClass("hidden");
-  }
-});
 
 $(document).on("click", ".doctor-edit-btn", function (e) {
   e.preventDefault();
@@ -744,7 +710,13 @@ $(document).on("click", ".doctor-edit-btn", function (e) {
   const id = card.data("id");
   const type = card.data("type");
 
-  console.log("EDIT DOCTOR CARD:", id, type);
+  const editRow = type === "visit"
+    ? doctorSavedVisitRows.find(row => String(row.id) === String(id))
+    : doctorSavedServiceRows.find(row => String(row.id) === String(id));
+  if (!editRow) {
+    toastr.error("This service could not be loaded for editing.");
+    return;
+  }
 
   $(".premium-section").addClass("hidden");
   $(".services-without-subscription").addClass("hidden");
@@ -752,8 +724,22 @@ $(document).on("click", ".doctor-edit-btn", function (e) {
 
   $(".services-section").removeClass("hidden");
 
-  $("#step-1").removeClass("hidden");
-  $("#step-2, #step-3").addClass("hidden");
+  if (type === "visit") {
+    populateDoctorVisitCards([{
+      visitType: { id: editRow.visit_type_id, name: editRow.visit_type },
+      price: editRow.price,
+    }]);
+    $("#step-2").removeClass("hidden");
+    $("#step-1, #step-3").addClass("hidden");
+  } else {
+    populateDoctorServiceCards([{
+      category: { id: editRow.category_id, name: editRow.category },
+      service: { id: editRow.service_id, name: editRow.service },
+      price: editRow.price,
+    }]);
+    $("#step-1").removeClass("hidden");
+    $("#step-2, #step-3").addClass("hidden");
+  }
 
   $(".services-section")
     .attr("data-edit-id", id)

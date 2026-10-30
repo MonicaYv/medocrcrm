@@ -140,7 +140,9 @@ $(document).on('click', '.step-btn', function () {
 $(document).on('click', '.home-add-service', function () {
     $('.services-section').removeClass('hidden');
     $('.home-section').addClass('hidden')
-    goToStep(1);
+    const isDoctorPage = $('.main-section .services-section').length > 0;
+    const activeTab = $('.tabs-home .tab-btn.active, .tabs-inner .tab-btn.active').last().data('type');
+    goToStep(isDoctorPage && ['visit-charges-home', 'visit-charges'].includes(activeTab) ? 2 : 1);
 });
 
 $(document).on('click', '#cancel-steps', function () {
@@ -169,11 +171,14 @@ $(document).on('click', '.more-btn', function (e) {
     card.find('.more-dropdown').toggleClass('hidden');
 });
 
-$(document).on('click', function () {
-    $('.more-dropdown').addClass('hidden');
+$(document).on('click', function (e) {
+    if (!$(e.target).closest('.more-btn, .more-dropdown').length) {
+        $('.more-dropdown').addClass('hidden');
+    }
 });
 
 $(document).on('click', '.delete-btn', function () {
+    if ($('.main-section .services-section').length) return;
     const card = $(this).closest('.service-card');
     card.remove();
 });
@@ -398,6 +403,7 @@ $(document).on('click', '.submit-btn', function () {
 });
 
 $(document).on('click', '.add-service', function () {
+    if ($('.main-section .services-section').length) return;
     // Only handle for pharmacy pages where hospital-categories-data doesn't exist
     if ($("#hospital-categories-data").length > 0) return;
     

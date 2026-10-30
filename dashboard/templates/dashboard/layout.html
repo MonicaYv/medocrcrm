@@ -20,6 +20,29 @@
     {% endblock %}
 </head>
 <body>
+<style>
+  .crm-main-area { min-width: 0; }
+  @media (max-width: 767px) {
+    html, body { max-width: 100%; overflow-x: hidden; }
+    .crm-main-area { min-width: 0; width: 100%; max-width: 100%; padding: .5rem; }
+    .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 100; width: min(84vw, 280px); max-width: 280px; background: #fff; transform: translateX(-105%); }
+    .sidebar.sidebar-mobile-closed { transform: translateX(-105%); }
+    .sidebar.sidebar-mobile-open { transform: translateX(0); }
+    .show-sidebar-toggle { position: fixed; z-index: 99; top: 6rem; left: 0; min-width: 44px; min-height: 52px; box-shadow: 0 2px 8px #0002; }
+    .main-content, .doctor-report-page, .appointment-page { min-width: 0; width: 100%; max-width: 100%; }
+    .doctor-report-page { padding: 1rem; }
+    .appointment-page { padding: .75rem; }
+    table { display: block; max-width: 100%; overflow-x: auto; }
+    .appointment-row { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem .75rem; align-items: center; }
+    .appointment-row > :first-child { grid-column: 1 / -1; width: auto !important; min-width: 0; }
+    .appointment-row > :nth-child(2) { grid-column: 1; min-width: 0; }
+    .appointment-row > :nth-child(3) { grid-column: 2; text-align: right; }
+    .appointment-row > :nth-child(4) { grid-column: 1 / -1; justify-content: flex-end; }
+    #step4-main-content, #step-panel-3 { min-width: 0; max-width: 100%; }
+    #step4-main-content .flex.items-center.gap-3 { width: 100%; flex-wrap: wrap; justify-content: flex-start; align-self: stretch; }
+    #step4-main-content [id^="file-name-"] { max-width: min(45vw, 180px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+</style>
 <main class="h-screen w-full">
     <!-- Header -->
     {% block header %}
@@ -33,7 +56,7 @@
         {% endblock %}
         <!-- Main Content Area -->
         
-        <div class="flex-1 overflow-y-auto scroll px-4 py-2 pb-8">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden scroll px-4 py-2 pb-8 crm-main-area">
             {% block content %}
             {% endblock %}
         </div>
@@ -51,6 +74,12 @@
 <!-- Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="{% static 'js/sidebar.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('img:not([loading])').forEach(function (image) { image.loading = 'lazy'; });
+    document.querySelectorAll('iframe:not([loading])').forEach(function (frame) { frame.loading = 'lazy'; });
+  });
+</script>
 <script src="{% static 'js/common.js' %}?v=20261001-3"></script>
 <script src="/static/js/home.js?v=20261028-2"></script>
 <script src="/static/js/dropdown.js?v=20261029-doctor-calendar"></script>

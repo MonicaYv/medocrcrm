@@ -41,6 +41,7 @@ from appointments.models import WalletTransaction
 from registration.models import (
     User,
     NGOProfile,
+    UserProfile,
     AdvertiserProfile,
     ClientProfile,
     PharmacyProfile,
@@ -182,6 +183,9 @@ def settings_page(request):
 
     context = get_common_context(request, user)
     context.update(get_base_context(user))
+    context["admin_profile_photo_path"] = UserProfile.objects.filter(
+        user=user
+    ).values_list("profile_photo_path", flat=True).first() or ""
     context["active_main_tab"] = request.GET.get("tab", "settings")
     
     issue_types = IssueType.objects.filter(

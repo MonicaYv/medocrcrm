@@ -13,16 +13,37 @@
                     </span>
                 </div>
                 <div class="">
-                    <div class="setting-header">
+                    <div class="setting-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined">history</span>
                             <p class="font-medium text-xl">Appointments History</p>
                         </div>
-
-
+                        <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                            <div class="flex items-center w-full sm:w-[300px] h-10 rounded-[6px] bg-light-white px-2">
+                                <span class="material-symbols-outlined text-dark-gray">search</span>
+                                <input type="text" placeholder="Search by name or categories"
+                                    class="w-full ml-1 border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-medium-gray" />
+                            </div>
+                            <div class="relative dropdown shrink-0">
+                                <button class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer"
+                                    type="button" aria-label="Open history filters" aria-expanded="false">
+                                    <span class="material-symbols-outlined flex justify-center items-center">tune</span>
+                                </button>
+                                <div class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
+                                    <div data-date-filter="custom" class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-dodger-blue hover:text-white rounded">Custom date<span class="material-symbols-outlined calendar-icon">calendar_today</span></div>
+                                    <div data-date-filter="week" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">1 Week</div>
+                                    <div data-date-filter="month" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">1 Month</div>
+                                    <div data-date-filter="year" class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">1 Year</div>
+                                </div>
+                                <div class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
+                                    <p class="history-date-status text-sm p-2 text-dark-gray">Select start date</p>
+                                    <div class="datepicker-inline"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between w-full gap-4 mt-8">
+                    <div class="flex flex-wrap items-center w-full gap-4 mt-4">
 
                         <!-- Tabs -->
                         <div class="flex flex-wrap gap-2 lg:gap-4">
@@ -41,49 +62,6 @@
                                 data-tab="missed">Missed</button>
                         </div>
 
-                        <!-- Search + Filter Section -->
-                        <div class="flex items-center gap-3 sm:gap-4 w-full lg:w-auto">
-                            <!-- Search Input -->
-                            <div class="flex items-center w-full lg:w-[300px] h-10 rounded-[6px] bg-light-white px-2">
-                                <span class="material-symbols-outlined text-dark-gray">search</span>
-                                <input type="text" placeholder="Search by name or categories"
-                                    class="w-full ml-1 border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-medium-gray" />
-                            </div>
-
-                            <!-- Filter Dropdown -->
-                            <div class="relative dropdown">
-                                <button
-                                    class="filterToggle flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer"
-                                    type="button" aria-label="Open history filters" aria-expanded="false">
-                                    <span class="material-symbols-outlined flex justify-center items-center">tune</span>
-                                </button>
-                                <div
-                                    class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                                    <div data-date-filter="custom"
-                                        class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-dodger-blue hover:text-white rounded">
-                                        Custom date<span
-                                            class="material-symbols-outlined calendar-icon">calendar_today</span>
-                                    </div>
-                                    <div data-date-filter="week"
-                                        class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
-                                        1 Week
-                                    </div>
-                                    <div data-date-filter="month"
-                                        class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
-                                        1 Month
-                                    </div>
-                                    <div data-date-filter="year"
-                                        class="p-2 pl-4 hover:bg-dodger-blue hover:text-white rounded cursor-pointer">
-                                        1 Year
-                                    </div>
-                                </div>
-                                <div
-                                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
-                                    <p class="history-date-status text-sm p-2 text-dark-gray">Select start date</p>
-                                    <div class="datepicker-inline"></div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
 

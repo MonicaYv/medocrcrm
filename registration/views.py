@@ -623,7 +623,8 @@ ALLOWED_EXTENSIONS = {'.pdf', '.jpg', '.jpeg', '.png'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 
 def is_file_clean(file_obj):
-    return True
+    safe, _message = file_scan(file_obj)
+    return safe
 
 def validate_and_save_file(file_obj, subdir, field_label, user_type='common',user=None):
     if not file_obj:

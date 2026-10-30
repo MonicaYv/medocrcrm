@@ -1,8 +1,22 @@
 $(document).ready(function () {
+    const mobileSidebar = window.matchMedia("(max-width: 767px)");
+    function setMobileSidebar(open) {
+        const sidebar = $(".sidebar");
+        sidebar.toggleClass("sidebar-mobile-open", open)
+            .toggleClass("sidebar-mobile-closed", !open);
+        $(".show-sidebar-toggle").toggleClass("hidden", open).toggleClass("flex", !open);
+        sidebar.find(".menu-toggle").toggle(open);
+    }
+
+    if (mobileSidebar.matches) setMobileSidebar(false);
     // ----------------------------
     // Sidebar toggle functionality
     // ----------------------------
     $(".menu-toggle").click(function () {
+        if (mobileSidebar.matches) {
+            setMobileSidebar(false);
+            return;
+        }
         const sidebar = $(".sidebar");
 
         sidebar.removeClass("translate-x-0").addClass("absolute -translate-x-full");
@@ -12,12 +26,20 @@ $(document).ready(function () {
     });
 
     $(".show-sidebar-toggle").click(function () {
+        if (mobileSidebar.matches) {
+            setMobileSidebar(true);
+            return;
+        }
         const sidebar = $(".sidebar");
 
         sidebar.removeClass("absolute -translate-x-full").addClass("translate-x-0");
         $(".main-content").removeClass("w-full");
         $(".menu-toggle").show();
         $(".show-sidebar-toggle").removeClass("flex").addClass("hidden");
+    });
+
+    $(document).on("keydown", function (event) {
+        if (event.key === "Escape" && mobileSidebar.matches) setMobileSidebar(false);
     });
 
     // ----------------------------
