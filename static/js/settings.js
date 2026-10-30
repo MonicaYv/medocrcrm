@@ -567,11 +567,43 @@ saveBtns.forEach(saveBtn => {
         // console.error(e);
         // alert("Upload failed.");
         // });
+function normalizeQuietTime(t) {
+    if (!t) return "";
+    const parts = t.trim().split(":");
+    if (parts.length >= 2) {
+        return `${parts[0].padStart(2, "0")}:${parts[1].padStart(2, "0")}`;
+    }
+    return t.trim().slice(0, 5);
+}
+
+function showQuietHoursError($container, msg) {
+    const errorP = $container.querySelector('.quiet-hours-error');
+    if (errorP) {
+        errorP.textContent = msg || "Start Time and End Time cannot be the same.";
+        errorP.classList.remove('hidden');
+    }
+    const startInput = $container.querySelector('input[data-field="quite_mode_start_time"]');
+    const endInput = $container.querySelector('input[data-field="quite_mode_end_time"]');
+    if (startInput) startInput.classList.add('border-red-500');
+    if (endInput) endInput.classList.add('border-red-500');
+}
+
+function clearQuietHoursError($container) {
+    const errorP = $container.querySelector('.quiet-hours-error');
+    if (errorP) {
+        errorP.classList.add('hidden');
+    }
+    const startInput = $container.querySelector('input[data-field="quite_mode_start_time"]');
+    const endInput = $container.querySelector('input[data-field="quite_mode_end_time"]');
+    if (startInput) startInput.classList.remove('border-red-500');
+    if (endInput) endInput.classList.remove('border-red-500');
+}
+
 document.querySelectorAll('[data-field]').forEach(input => {
     const csrftoken = getCookie("csrftoken");
+    input.dataset.lastSavedValue = input.type === "checkbox" ? String(input.checked) : input.value;
 
-    // input.addEventListener('change', () => {
-    input.addEventListener('input', () => {
+    const handleUpdate = () => {
         const field = input.dataset.field;
         let value;
 
@@ -579,6 +611,39 @@ document.querySelectorAll('[data-field]').forEach(input => {
             value = input.checked;
         } else {
             value = input.value;
+        }
+
+        const currentValStr = String(value);
+        if (currentValStr === input.dataset.lastSavedValue) {
+            return;
+        }
+
+        const $container = input.closest('#notification-control, .notification-control') || document;
+        const quietModeInput = $container.querySelector('input[data-field="quite_mode"]');
+        const startTimeInput = $container.querySelector('input[data-field="quite_mode_start_time"]');
+        const endTimeInput = $container.querySelector('input[data-field="quite_mode_end_time"]');
+
+        // Validate Quiet Hours time range:
+        // Start Time and End Time must not be identical when Quiet Mode is enabled.
+        if (field === "quite_mode" || field === "quite_mode_start_time" || field === "quite_mode_end_time") {
+            const isQuiet = field === "quite_mode" ? Boolean(value) : Boolean(quietModeInput?.checked);
+            const stVal = field === "quite_mode_start_time" ? value : startTimeInput?.value;
+            const etVal = field === "quite_mode_end_time" ? value : endTimeInput?.value;
+
+            if (isQuiet && stVal && etVal) {
+                const normSt = normalizeQuietTime(stVal);
+                const normEt = normalizeQuietTime(etVal);
+                if (normSt && normEt && normSt === normEt) {
+                    if (field === "quite_mode") {
+                        input.checked = false;
+                        input.dataset.lastSavedValue = "false";
+                    }
+                    toastr.error("Start Time and End Time cannot be the same.");
+                    showQuietHoursError($container, "Start Time and End Time cannot be the same.");
+                    return; // Prevent saving to backend!
+                }
+            }
+            clearQuietHoursError($container);
         }
 
         fetch("update-notification-field/", {
@@ -589,15 +654,34 @@ document.querySelectorAll('[data-field]').forEach(input => {
             },
             body: JSON.stringify({ field, value })
         })
-        .then(res => {
-            if (!res.ok) throw new Error("Failed to update");
+        .then(async res => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                const errorMsg = data.message || "Failed to update notification settings";
+                throw new Error(errorMsg);
+            }
+            input.dataset.lastSavedValue = currentValStr;
+            clearQuietHoursError($container);
             toastr.success("Updated notification settings");  // ✅ success toast
         })
         .catch(err => {
             console.error("Error:", err);
-            toastr.error("Failed to update notification settings");  // ❌ error toast only on failure
+            const errorMsg = err.message || "Failed to update notification settings";
+            toastr.error(errorMsg);
+            if (field === "quite_mode") {
+                input.checked = !input.checked;
+                input.dataset.lastSavedValue = String(input.checked);
+            }
+            if (errorMsg === "Start Time and End Time cannot be the same.") {
+                showQuietHoursError($container, errorMsg);
+            }
         });
-    });
+    };
+
+    input.addEventListener('change', handleUpdate);
+    if (input.type !== "checkbox") {
+        input.addEventListener('input', handleUpdate);
+    }
 });
 
 $(document).on(
