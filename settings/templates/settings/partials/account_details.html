@@ -1,5 +1,16 @@
 <!-- partials/account_details.html -->
 {% load static %}
+<div class="mb-6 flex flex-wrap items-center gap-4 rounded-lg border border-blue-haze p-4">
+    <img id="admin-profile-photo"
+        src="{{ admin_profile_photo_url|default:'/static/images/admin-profile.svg' }}"
+        alt="Profile photo" class="h-16 w-16 rounded-full object-cover" loading="lazy">
+    <div class="flex flex-col gap-1">
+        <p class="font-semibold text-base text-jet-black">Profile photo</p>
+        <label for="admin-profile-photo-input" class="cursor-pointer text-sm text-dodger-blue">Change profile image</label>
+        <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
+            data-upload-url="{% url 'upload_admin_profile_photo' %}">
+    </div>
+</div>
 {% if user.user_type == 'ngo' %}
     <div class="grid sm:grid-cols-2 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6">
         <!-- Email -->
@@ -947,17 +958,6 @@
     </div>
 {% elif user.user_type == 'doctor' %}
     <div class="grid lg:grid-cols-2 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6">
-        <div class="lg:col-span-2 flex items-center gap-4 rounded-lg border border-blue-haze p-4">
-            <img id="admin-profile-photo"
-                src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
-                alt="Profile photo" class="h-16 w-16 rounded-full object-cover">
-            <div class="flex flex-col gap-1">
-                <p class="font-semibold text-base text-jet-black">Profile photo</p>
-                <label for="admin-profile-photo-input" class="cursor-pointer text-sm text-dodger-blue">Change profile image</label>
-                <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
-                    data-upload-url="{% url 'upload_admin_profile_photo' %}">
-            </div>
-        </div>
         <!-- Email -->
         <div class="flex flex-col">
             <p class="font-semibold text-lg">

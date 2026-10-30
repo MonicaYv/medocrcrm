@@ -1749,13 +1749,13 @@ $(".download-btn").on("click", function () {
 
     html2canvas(target, {
 
-        scale: 2,
+        scale: 1,
         useCORS: true
 
     }).then((canvas) => {
 
         const imageData =
-            canvas.toDataURL("image/png");
+            canvas.toDataURL("image/jpeg", 0.85);
 
         const { jsPDF } =
             window.jspdf;
@@ -1771,7 +1771,7 @@ $(".download-btn").on("click", function () {
 
         pdf.addImage(
             imageData,
-            "PNG",
+            "JPEG",
             10,
             10,
             pdfWidth,

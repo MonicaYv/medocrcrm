@@ -11,7 +11,7 @@
     <img src="{{ logo|default:'/static/images/logo.svg' }}" alt="Logo" loading="lazy" class="w-10"/>
   </div>
 
-  <!-- Right Actions (Notifications & Profile Only) -->
+  <!-- Right Actions -->
   <div class="flex items-center gap-4">
       <!-- Notification Icon -->
       <div class="relative">
@@ -24,8 +24,17 @@
       <!-- User Profile Dropdown -->
       <div class="relative inline-block">
         <button class="profile-btn focus:outline-none">
-          <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8"/>
+          <img src="{{ admin_profile_photo_url|default:'/static/images/user.svg' }}" alt="User" loading="lazy" class="w-8 h-8 rounded-full object-cover"/>
         </button>
+        <div class="profile-dropdown border border-{{ border }}">
+          <a href="/settings/" class="px-4 py-3 flex items-center space-x-3 hover:bg-violet-sky-opacity">
+            <img src="{{ admin_profile_photo_url|default:'/static/images/user.svg' }}" alt="Profile" class="w-8 h-8 rounded-full object-cover" loading="lazy">
+            <span class="text-sm">{{ user_display_name|default:user.email|default:"Profile" }}</span>
+          </a>
+          <a href="{% url 'logout' %}" class="px-4 py-3 text-sm hover:bg-violet-sky-opacity flex items-center space-x-2">
+            <span class="material-symbols-outlined">logout</span><span>Sign out</span>
+          </a>
+        </div>
       </div>
   </div>
 </div>

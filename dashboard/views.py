@@ -258,8 +258,6 @@ def lab_overview_data(request):
 @dashboard_login_required
 def upload_admin_profile_photo(request):
     user = request.user_obj
-    if user.user_type not in {"lab", "hospital", "pharmacy", "doctor"}:
-        return JsonResponse({"error": "Profile photo upload is not available."}, status=403)
 
     contact_person = ContactPerson.objects.filter(
         profile_type=user.user_type,
@@ -319,10 +317,16 @@ def upload_admin_profile_photo(request):
                         pharmacy_profile.last_name,
                     ) if value
                 )
-        else:
+        elif user.user_type == "doctor":
             doctor_profile = DoctorProfile.objects.filter(user=user).first()
             if doctor_profile:
                 admin_name = doctor_profile.full_name or doctor_profile.owner_name
+        elif user.user_type == "ngo":
+            admin_name = NGOProfile.objects.filter(user=user).values_list("ngo_name", flat=True).first()
+        elif user.user_type == "client":
+            admin_name = ClientProfile.objects.filter(user=user).values_list("company_name", flat=True).first()
+        elif user.user_type == "advertiser":
+            admin_name = AdvertiserProfile.objects.filter(user=user).values_list("company_name", flat=True).first()
     admin_name_parts = (admin_name or user.user_type.title()).split()
     first_name = admin_name_parts[0]
     last_name = " ".join(admin_name_parts[1:])

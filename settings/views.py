@@ -782,9 +782,42 @@ def logout_view(request):
 @dashboard_login_required
 def update_notification_field(request):
     user = request.user_obj
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"status": "error", "message": "Invalid JSON."}, status=400)
+
     field = data.get("field")
     value = data.get("value")
+
+    def normalize_time(t):
+        if not t:
+            return None
+        if hasattr(t, "strftime"):
+            return t.strftime("%H:%M")
+        t_str = str(t).strip()
+        parts = t_str.split(":")
+        if len(parts) >= 2:
+            try:
+                return f"{int(parts[0]):02d}:{int(parts[1]):02d}"
+            except ValueError:
+                return t_str[:5]
+        return t_str[:5]
+
+    # Validate Quiet Hours: Start Time and End Time must not be identical when Quiet Mode is enabled.
+    is_quiet_mode = value if field == "quite_mode" else data.get("quite_mode", user.quite_mode)
+    proposed_start = value if field == "quite_mode_start_time" else data.get("quite_mode_start_time", user.quite_mode_start_time)
+    proposed_end = value if field == "quite_mode_end_time" else data.get("quite_mode_end_time", user.quite_mode_end_time)
+
+    if bool(is_quiet_mode) and proposed_start and proposed_end:
+        norm_start = normalize_time(proposed_start)
+        norm_end = normalize_time(proposed_end)
+        if norm_start and norm_end and norm_start == norm_end:
+            return JsonResponse({
+                "status": "error",
+                "message": "Start Time and End Time cannot be the same."
+            }, status=400)
+
     if field in ["inapp_notifications", "email_notifications", "push_notifications", "regulatory_alerts", "promotions_and_offers", "quite_mode", "payment_notifications", "location_notification"]:
         setattr(user, field, value)
     elif field in ["quite_mode_start_time", "quite_mode_end_time"]:
