@@ -910,6 +910,7 @@ def dashboard_home(request):
             context["scheduled_appointments"] = scheduled_appointments
             context.update({
                 'doctor_profile': doctor_profile,
+                'clinic_photo_url': build_media_url(doctor_profile.clinic_photo_path),
                 'contact_person': contact_person,
                 'date_filter': date_filter,
                 'start_date': start_date,
