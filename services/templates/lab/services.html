@@ -31,7 +31,11 @@
                                 <div class="flex items-center gap-2">
                                     <p>Auto Bid </p>
                                     <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
-                                        <input type="checkbox" class="sr-only peer">
+                                        <input
+                                            type="checkbox"
+                                            class="sr-only peer autobid-toggle"
+                                            aria-label="Enable Auto Bid"
+                                        >
                                         <div class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5">
                                         </div>
                                         <div class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal"></div>
@@ -495,4 +499,5 @@
     <script src="/static/js/service-lab.js"></script>
   <script src="/static/js/table-pagination.js"></script>
   <script src="/static/js/common-services.js"></script>
+  <script src="{% static 'js/services-autobid.js' %}"></script>
 {% endblock %}
