@@ -43,5 +43,11 @@
   </div>
 
   {% block extra_js %}{% endblock %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('img:not([loading])').forEach(function (image) { image.loading = 'lazy'; });
+      document.querySelectorAll('iframe:not([loading])').forEach(function (frame) { frame.loading = 'lazy'; });
+    });
+  </script>
 </body>
 </html>

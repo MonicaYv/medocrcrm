@@ -169,13 +169,13 @@ $(document).ready(function () {
         backgroundColor: "#ffffff",
         useCORS: true,
         allowTaint: true,
-        scale: 2,
+        scale: 1,
         logging: false
     }).then(canvas => {
-        const imgData = canvas.toDataURL("image/png");
+        const imgData = canvas.toDataURL("image/jpeg", 0.85);
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
-        pdf.addImage(imgData, "PNG", 10, 10, 190, (canvas.height * 190) / canvas.width);
+        pdf.addImage(imgData, "JPEG", 10, 10, 190, (canvas.height * 190) / canvas.width);
         pdf.save(`${targetId}.pdf`);
     });
   });

@@ -36,7 +36,7 @@
       <!-- User Profile Dropdown -->
       <div class="relative inline-block">
         <button class="profile-btn has-tooltip focus:outline-none">
-          <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8"/>
+          <img src="{{ admin_profile_photo_url|default:'/static/images/user.svg' }}" alt="User" loading="lazy" class="w-8 h-8 rounded-full object-cover"/>
         </button>
         <div class="absolute py-1 px-1.5 text-start text-xs tooltip -bottom-6 right-3 z-10 bg-white border rounded-md border-{{ border }} font-normal">
           Profile
@@ -59,6 +59,7 @@
 
 {% block extra_css %}
 <style>
+    select { appearance: none; -webkit-appearance: none; background-image: none !important; }
     /* Stepper transition animations */
     .step-fade-enter {
         opacity: 0;

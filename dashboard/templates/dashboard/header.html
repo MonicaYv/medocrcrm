@@ -147,7 +147,7 @@
       <!-- User Dropdown -->
       <div class="relative inline-block">
         <button class="profile-btn has-tooltip">
-          <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8"/>
+          <img src="{{ admin_profile_photo_url|default:'/static/images/user.svg' }}" alt="User" loading="lazy" class="w-8 h-8 rounded-full object-cover"/>
         </button>
         <div class="absolute py-1 px-1.5 text-start text-xs tooltip -bottom-6 right-3 z-10 bg-white border rounded-md border-{{ border }} font-normal">
           Profile
@@ -155,7 +155,7 @@
         <!-- Dropdown -->
         <div class="profile-dropdown border border-{{ border }}">
           <a href="/settings/" class="px-4 py-3 flex items-center space-x-3 cursor-pointer hover:bg-violet-sky-opacity">
-            <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8 rounded-full" />
+            <img src="{{ admin_profile_photo_url|default:'/static/images/user.svg' }}" alt="User" loading="lazy" class="w-8 h-8 rounded-full object-cover" />
             <div>
               <p class="text-sm font-normal">
                 {{ user_display_name|default:"User Name" }}
@@ -185,12 +185,12 @@
       <!-- User Dropdown -->
       <div class="relative inline-block">
         <button class="profile-btn">
-          <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" />
+          <img src="{{ admin_profile_photo_url|default:'/static/images/user.svg' }}" alt="User" loading="lazy" class="w-8 h-8 rounded-full object-cover" />
         </button>
         <!-- Dropdown -->
         <div class="profile-dropdown">
           <a href="/settings/" class="px-4 py-3 flex items-center space-x-3 cursor-pointer hover:bg-violet-sky-opacity">
-            <img src="{% static 'images/user.svg' %}" alt="User" loading="lazy" class="w-8 h-8 rounded-full" />
+            <img src="{{ admin_profile_photo_url|default:'/static/images/user.svg' }}" alt="User" loading="lazy" class="w-8 h-8 rounded-full object-cover" />
             <div>
               <p class="text-sm font-normal">
                 {{ user_display_name|default:"User Name" }}

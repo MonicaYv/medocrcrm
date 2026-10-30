@@ -19,8 +19,10 @@ from registration.models import (
     DoctorProfile,
     AdvertiserProfile,
     ClientProfile,
-    NGOProfile
+    NGOProfile,
+    UserProfile,
 )
+from django.core.files.storage import default_storage
 
 POINTS_ACTION_ALIASES = {
     "Donate": ["Donate", "Donation"],
@@ -221,6 +223,13 @@ def get_common_context(request, user):
         "trophy": trophy,
         "all_badges": PointsBadge.objects.all(),
         "logo": logo_map.get(user_type),
+        "admin_profile_photo_url": (
+            default_storage.url(photo_path)
+            if (photo_path := UserProfile.objects.filter(user=user).values_list(
+                "profile_photo_path", flat=True
+            ).first())
+            else None
+        ),
     }
     context.update(get_points_chart_data(user, chart_action_types))
     context["tab_class"] = tab_class_map.get(user_type)

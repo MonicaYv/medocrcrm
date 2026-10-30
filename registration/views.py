@@ -4334,9 +4334,27 @@ def lab_profile_verification(request):
 
 
 def lab_profile_review(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return redirect("login")
+    user = User.objects.filter(id=user_id).first()
+    if not user:
+        request.session.flush()
+        return redirect("login")
     return render(
         request,
-        "registration/kyc_lab_profile_review.html"
+        "registration/kyc_lab_profile_review.html",
+        {
+            "user": user,
+            "user_display_name": user.email,
+            "admin_profile_photo_url": (
+                default_storage.url(photo_path)
+                if (photo_path := UserProfile.objects.filter(user=user).values_list(
+                    "profile_photo_path", flat=True
+                ).first())
+                else None
+            ),
+        },
     )
 
 def save_lab_step_1(request):
