@@ -115,9 +115,9 @@
                     alt="Doctor"
                     class="w-[880px] h-[330px] object-cover rounded-lg"> -->
                    
-                    <img src="{% static 'images/hospital-bg.jpg' %}"
+                    <img src="{% if clinic_photo_url %}{{ clinic_photo_url }}{% else %}{% static 'images/hospital-bg.jpg' %}{% endif %}"
                         alt="Doctor"
-                        class="w-[880px] h-[330px] object-cover rounded-lg">
+                        class="w-[880px] h-[330px] object-cover rounded-lg" loading="lazy">
               <div class="absolute inset-0 flex items-end">
                 <div class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
                   <div class="flex flex-col gap-2">
