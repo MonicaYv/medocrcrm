@@ -259,6 +259,10 @@
   }
   .otp-box.filled{border-color:var(--teal); background:#f4fbfd;}
 
+  /* Keep all six OTP digits visible on narrow phones. */
+  .otp-entry{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(4px,2vw,12px)!important;width:100%;}
+  .otp-entry .otp-box{width:100%;min-width:0;}
+
   .link-edit{color:#d64545; font-weight:600; font-size:13px; text-decoration:none;}
   .link-teal{color:var(--teal); font-weight:600; text-decoration:none;}
   .link-teal:hover{text-decoration:underline;}

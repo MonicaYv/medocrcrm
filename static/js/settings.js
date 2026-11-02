@@ -470,8 +470,8 @@ const previewImage = (file) => {
             saveBtns.forEach(btn => {
                 btn.disabled = false;
             });
-            previewImage(newFile);
-            viewModal.classList.remove("hidden");
+            // Upload directly; use View to open the preview.
+            saveBtns[0]?.click();
         });
     });
 
@@ -527,9 +527,7 @@ saveBtns.forEach(saveBtn => {
                 sessionStorage.setItem("settings.documentUploadReturnTab", "documents");
 
                 setTimeout(() => {
-
                     location.reload();
-
                 }, 1500);
 
             } else {
