@@ -1,626 +1,621 @@
-{% extends 'dashboard/layout.html' %}
-{% load static %}
-{% block title %}Settings{% endblock %}
-{% block content %}
-
-<!-- Main Content -->
-  <div
-  class=" relative transition-all duration-300 main-content h-full flex-1 flex flex-col gap-8 overflow-y-auto scroll p-5">
-  <div
-    class="show-sidebar-toggle hidden fixed top-[100px] left-12 z-50 h-10 w-10 bg-{{  primary_bg   }} items-center justify-center rounded-r-md cursor-pointer">
-    <span class="material-symbols-outlined bold-weight text-{{  text   }}">
-      arrow_forward_ios
-    </span>
-  </div>
-  <div class="shadow p-4 rounded-lg m-2 max-w-full bg-white">
-    <div class="setting-header">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined"> settings </span>
-        <p class="font-medium text-2xl">Settings</p>
-      </div>
-
-      <p class="font-normal text-lg text-jet-black">
-        Make It Perfect—Update Your Settings!
-      </p>
-    </div>
-    <div class="flex items-center">
-      <!--Tabs-->
-      <!--Tabs-->
-      <div class="flex gap-4 sm:gap-5 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar tabs h-[90px] items-center">
-        <button
-          class="{{ tab_class }} {% if active_tab == 'account-details' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
-          data-tab="account-details">
-          Account Details
-        </button>
-        <button
-          class="{{ tab_class }} {% if active_tab == 'documents' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
-          data-tab="documents">
-          Documents
-        </button>
-        <button
-          class="{{ tab_class }} {% if active_tab == 'notification-control' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
-          data-tab="notification-control">
-          Notification Control Center
-        </button>
-      </div>
-      <div
-        class="relative edit-toggle flex items-center gap-4 pl-6 mt-4 sm:mt-7 sm:ml-auto sm:justify-end justify-between w-full sm:w-auto flex-wrap sm:flex-nowrap">
-
-        <div class="flex flex-col items-end gap-1">
-          <p class="font-normal text-base text-dark-gray lastEditMsg hidden lg:!block !hidden">Last Edit on
-            {{updated_at}}</p>
-          <p class="font-normal text-xs text-medium-gray fileLimit hidden">All the image of documents should not
-            exceed the file size limit of 3MB</p>
-        </div>
-
-        <div class="relative inline-block group">
-
-          <span class="material-symbols-outlined cursor-pointer border p-0.5 rounded-sm editIcon" id="editIcon">
-            edit
-          </span>
-
-          <!-- Tooltip for Tablet screens -->
-          <div id="editTooltip" class="absolute right-0 mb-1 px-2 py-1 bg-white border border-{{  primary_bg   }} rounded-md text-xs
-                  whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
-                    md:block lg:hidden">
-            Last Edit on {{updated_at}}
-          </div>
-
-          <!-- Tooltip for Desktop screens -->
-          <div class="absolute  left-1/2 -translate-x-1/2 mb-1 px-2 py-1  bg-white border border-{{  primary_bg   }} rounded-md text-xs
-                whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
-                hidden lg:block">
-            Edit
-          </div>
-
-        </div>
-
-
-      </div>
-    </div>
-
-    <!--Account Details Section -->
-
-    <div
-      class="grid grid-cols-1 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6  pt-7 account-detail account-details tab-content">
-      <p class="font-semibold text-lg text-jet-black ">
-        Account Details
-        <span class="font-normal text-base text-dark-gray">(Account created on {{created_at}} )</span>
-      </p>
-      <!-- <div id="account-details-render"> -->
-      {% include 'settings/partials/account_details.html' %}
-
-      <!-- Account Settings -->
-      <div class="flex flex-col gap-y-3 mt-8">
-        <p class="font-semibold text-base md:text-lg">
-          Account Settings
-        </p>
-        <div class="flex justify-between flex-wrap gap-4">
-          <p class="font-normal text-sm md:text-md text-{{ text }} cursor-pointer"
-            onclick="openPopup('searchHistoryPopup')">
-            Clear Search History
-          </p>
-          <p class="font-normal text-sm md:text-md text-{{ text }} cursor-pointer"
-            onclick="openPopup('savedDataPopup')">
-            Clear Saved Data
-          </p>
-          <p class="font-normal text-sm md:text-md text-{{ text }} cursor-pointer"
-            onclick="openPopup('deleteAccountPopup')">
-            Account Delete
-          </p>
-        </div>
-      </div>
-
-      <!-- Popup Modal Template -->
-      <!-- Search History Popup -->
-      <div id="searchHistoryPopup"
-        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
-          <p class="text-sm font-semibold mb-4">
-            Do you want clear your recent history ?
-          </p>
-          <div class="flex justify-end gap-3">
-            <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('searchHistoryPopup')">
-              No
-            </button>
-            <button class="px-8 py-1 rounded-xl bg-strong-red text-white" onclick="clearSearchHistory()">
-              Yes
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Saved Data Popup -->
-      <div id="savedDataPopup"
-        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
-          <p class="text-sm font-semibold mb-4">
-            Do you want clear your saved data ?
-          </p>
-          <div class="flex justify-end gap-3">
-            <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('savedDataPopup')">
-              No
-            </button>
-            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white" onclick="clearSavedData()">
-              Yes
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Delete Account Popup -->
-      <div id="deleteAccountPopup"
-        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
-          <h2 class="text-lg font-semibold mb-3"></h2>
-          <p class="text-sm font-semibold mb-4">
-            Do you want to delete your profile ?
-          </p>
-          <div class="flex justify-end gap-3">
-            <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('deleteAccountPopup')">
-              No
-            </button>
-            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white" onclick="deleteAccount()">
-              Yes
-            </button>
-          </div>
-          <p class="font-semibold text-lg text-jet-black pt-6">
-            We are sorry you are going, Please select your reason
-          </p>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              I found a better alternative
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              This App is Hard To Use
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              Not Getting Enough Value
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              Just Taking A Break
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <div class="flex justify-between items-center pt-2">
-            <p class="font-normal text-base text-jet-black">
-              Other (Please Specify)
-            </p>
-            <label class="custom-radio">
-              <input type="radio" name="address" />
-              <span class="checkmark"></span>
-            </label>
-          </div>
-          <input type="text" class="mt-2 rounded-sm p-2 focus:ring-0 w-full focus:!outline-none focus:ring-offset-0"
-            placeholder="Specify Your Reason (10 Words)" />
-          <div class="flex justify-end pt-2">
-            <button class="bg-{{  text   }} text-white rounded-md p-2 cursor-pointer submitBtn">
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
-      <!--Success Popup-->
-      <div id="successPopup"
-        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
-          <div class="flex justify-end">
-            <span class="material-symbols-outlined cursor-pointer" onclick="closePopup('successPopup')">
-              close</span>
-          </div>
-          <div class="flex items-center justify-center flex-col">
-            <img src="{% static 'images/successfull.svg' %}" alt="" />
-            <p class="font-normal text-base text-jet-black">
-              Your request has been sent to the administrator. We will
-              update you shortly
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Terms and Conditions-->
-      <div class="flex flex-col bg-[#FFC9D3] p-4 rounded mt-4 border-1">
-        <p class="font-semibold text-lg">
-          Terms and Conditions
-        </p>
-        <div class="flex justify-between mt-3">
-          <p class="font-normal text-base text-{{  text  }} cursor-pointer toggle-trigger"
-            data-target="terms-conditons">
-            Terms of Usage
-          </p>
-          <p class="font-normal text-base text-{{  text  }} cursor-pointer toggle-trigger" data-target="privacy-policy">
-            Privacy Policy
-          </p>
-          <p class="font-normal text-base text-{{  text  }} cursor-pointer toggle-trigger" data-target="disclaimer">
-            Disclaimer
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!--Edit Section-->
-    <div class="hidden edit-details">
-      <p class="text-{{ text }} pl-4 sm:pl-6">Account Details</p>
-      {% include 'settings/partials/edit-account-details.html' %}
-    </div>
-    <!--Terms and Conditions -->
-    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="terms-conditons">
-      <div class="text-white mb-2 items-center p-4 rounded bg-{{  primary_bg   }} flex justify-between">
-        <h1 class="text-3xl">Terms of Usage</h1>
-        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
-          close
-        </span>
-      </div>
-      <h2 class="text-black text-xl mb-2 font-semibold">
-        1. Introduction
-      </h2>
-      <p class="">
-        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
-      </p>
-      <p>
-        Terms of Service (“Terms”, “Terms of Service”) govern your use
-        of our website located at sizaf.com (together or individually
-        “Service”) operated by Sizaf.com. Our Privacy Policy also
-        governs your use of our Service and explains how we collect,
-        safeguard and disclose information that results from your use of
-        our web pages. Your agreement with us includes these Terms and
-        our Privacy Policy (“Agreements”). By visiting our website you
-        acknowledge that you have read and understood Agreements, and
-        agree to be bound by them.
-      </p>
-      <p>
-        you do not agree with (or cannot comply with) these Terms, you
-        may not use the Service. However, please let us know by emailing
-        info@sizaf.com, so we can try to find a solution. These Terms
-        apply to all visitors, users, and others who wish to access or
-        use the Service.
-      </p>
-      <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
-        2. Communications
-      </h2>
-      <p>
-        By using our Service, you agree to subscribe to newsletters,
-        marketing or promotional materials and other information we may
-        send. However, you may opt out of receiving any, or all, of
-        these communications from us by following the unsubscribe link
-        or by emailing at info@sizaf.com.
-      </p>
-    </div>
-    <!--Privacy Policy -->
-    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="privacy-policy">
-      <div class="text-white mb-2 items-center p-4 rounded bg-{{  primary_bg   }} flex justify-between">
-        <h1 class="text-3xl">Privacy Policy</h1>
-        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
-          close
-        </span>
-      </div>
-      <h2 class="text-{{  text   }} text-xl mb-2 font-semibold">
-        1. Introduction
-      </h2>
-      <p class="">
-        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
-      </p>
-      <p>
-        Terms of Service (“Terms”, “Terms of Service”) govern your use
-        of our website located at sizaf.com (together or individually
-        “Service”) operated by Sizaf.com. Our Privacy Policy also
-        governs your use of our Service and explains how we collect,
-        safeguard and disclose information that results from your use of
-        our web pages. Your agreement with us includes these Terms and
-        our Privacy Policy (“Agreements”). By visiting our website you
-        acknowledge that you have read and understood Agreements, and
-        agree to be bound by them.
-      </p>
-      <p>
-        you do not agree with (or cannot comply with) these Terms, you
-        may not use the Service. However, please let us know by emailing
-        info@sizaf.com, so we can try to find a solution. These Terms
-        apply to all visitors, users, and others who wish to access or
-        use the Service.
-      </p>
-      <h2 class="text-{{  text   }} text-xl mb-2 mt-2 font-semibold">
-        2. Communications
-      </h2>
-      <p>
-        By using our Service, you agree to subscribe to newsletters,
-        marketing or promotional materials and other information we may
-        send. However, you may opt out of receiving any, or all, of
-        these communications from us by following the unsubscribe link
-        or by emailing at info@sizaf.com.
-      </p>
-    </div>
-    <!--Disclaimer -->
-    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="disclaimer">
-      <div class="text-white mb-2 items-center p-4 rounded bg-{{  primary_bg   }} flex justify-between">
-        <h1 class="text-3xl">Disclaimer</h1>
-        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
-          close
-        </span>
-      </div>
-      <h2 class="text-{{  text   }} text-xl mb-2 font-semibold">
-        1. Introduction
-      </h2>
-      <p class="">
-        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
-      </p>
-      <p>
-        Terms of Service (“Terms”, “Terms of Service”) govern your use
-        of our website located at sizaf.com (together or individually
-        “Service”) operated by Sizaf.com. Our Privacy Policy also
-        governs your use of our Service and explains how we collect,
-        safeguard and disclose information that results from your use of
-        our web pages. Your agreement with us includes these Terms and
-        our Privacy Policy (“Agreements”). By visiting our website you
-        acknowledge that you have read and understood Agreements, and
-        agree to be bound by them.
-      </p>
-      <p>
-        you do not agree with (or cannot comply with) these Terms, you
-        may not use the Service. However, please let us know by emailing
-        info@sizaf.com, so we can try to find a solution. These Terms
-        apply to all visitors, users, and others who wish to access or
-        use the Service.
-      </p>
-      <h2 class="text-{{  text   }} text-xl mb-2 mt-2 font-semibold">
-        2. Communications
-      </h2>
-      <p>
-        By using our Service, you agree to subscribe to newsletters,
-        marketing or promotional materials and other information we may
-        send. However, you may opt out of receiving any, or all, of
-        these communications from us by following the unsubscribe link
-        or by emailing at info@sizaf.com.
-      </p>
-    </div>
-
-    <!--Documents Section-->
-    {% include 'settings/partials/documents.html' %}
-
-    <!--Notification Control Section-->
-    <div class="hidden tab-content notification-control" id="notification-control">
-      <p class="font-semibold pt-7 text-lg">
-        Notification Channel Management
-      </p>
-
-      <div class="space-y-6">
-        <!-- Reusable Switch Block -->
-        <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
-          <p class="text-base font-normal">In-app Notifications</p>
-          <label class="inline-flex items-center gap-3 cursor-pointer">
-            <p class="font-normal text-sm text-medium-gray mb-0">
-              Manage In-app updates.
-            </p>
-            <input type="checkbox" name="inapp_notifications" data-field="inapp_notifications" class="sr-only peer" {% if inapp_notifications %}checked{% endif %} />
-            <div
-              class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
-            </div>
-          </label>
-        </div>
-
-
-        <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
-          <p class="text-base font-normal">Email Notifications</p>
-          <div class="flex items-center gap-3">
-            <p class="font-normal text-sm text-medium-gray">
-              Manage Email updates.
-            </p>
-            <label class="inline-flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" name="email_notifications" data-field="email_notifications" class="sr-only peer" {% if email_notifications %}checked{% endif %} />
-              <div
-                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
-              </div>
-            </label>
-          </div>
-
-        </div>
-          <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
-          <p class="text-base font-normal">Push Notifications</p>
-          <div class="flex items-center gap-3">
-            <p class="font-normal text-sm text-medium-gray">
-              Enable/Disable App alerts.
-            </p>
-            <label class="inline-flex items-center gap-3 cursor-pointer">
-
-              <input type="checkbox" name="push_notifications" data-field="push_notifications" class="sr-only peer" {% if push_notifications %}checked{% endif %} />
-              <div
-                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
-              </div>
-            </label>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Priority Level Management -->
-      <div class="pt-6 space-y-4">
-        <p class="font-semibold text-lg">Priority Level Management</p>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <p class="text-base font-normal">Regulatory Alerts <span class="font-normal text-sm">(Will Be Sent on
-                Updates)</span></p>
-            <input type="checkbox" name="regulatory_alerts" data-field="regulatory_alerts" {% if regulatory_alerts %}checked{% endif %}
-              class="w-5 h-5 text-{{ text }} text-xl rounded-sm focus:ring-0 focus:outline-none focus:ring-offset-0" />
-          </div>
-          <div class="flex justify-between items-center">
-            <p class="text-base font-normal">Promotions & Offers <span class="font-normal text-sm">(Will Be Sent on
-                Updates)</span></p>
-            <input type="checkbox" name="promotions_and_offers" data-field="promotions_and_offers" {% if promotions_and_offers %}checked{% endif %}
-              class="w-5 h-5 text-{{ text }} text-xl rounded-sm focus:ring-0  focus:ring-offset-0" />
-          </div>
-        </div>
-
-        <!-- Quiet Hours Setting -->
-        <div class="pt-6">
-          <p class="font-semibold text-lg">Quiet Hours Setting</p>
-          <div class="flex flex-col md:flex-row justify-between gap-4">
-            <p class="text-base font-normal">Set Quite Mode</p>
-            <label class="inline-flex gap-3 cursor-pointer">
-              <p class="font-normal mt-0.5 text-sm text-medium-gray">
-                Enable/Disable
-              </p>
-              <input type="checkbox" name="quite_mode" data-field="quite_mode" class="sr-only peer" {% if quite_mode %}checked{% endif %} />
-              <div
-                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
-              </div>
-            </label>
-          </div>
-          <div class="flex flex-col lg:flex-row lg:justify-between gap-4 pt-6">
-            <p class="text-base font-normal">
-              Pick Time to start Quiet Mode
-            </p>
-            <div class="flex flex-col">
-              <div class="flex flex-col sm:flex-row gap-4">
-                <!-- Start Time -->
-                <div class="relative w-full sm:w-40">
-                  <label for="start-time" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                  <input type="time" name="quite_mode_start_time" id="start-time" data-field="quite_mode_start_time"
-                    class="border rounded px-3 py-2 w-full pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-{{ text }}"
-                    value="{{ quite_mode_start_time|time:'H:i' }}" required />
-                  <span
-                    class="material-symbols-outlined absolute right-2 top-11 transform -translate-y-1/2 text-gray-500 pointer-events-none">
-                    timer
-                  </span>
-                </div>
-
-                <!-- End Time -->
-                <div class="relative w-full sm:w-40">
-                  <label for="end-time" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                  <input type="time" id="end-time" name="quite_mode_end_time" data-field="quite_mode_end_time"
-                    class="border rounded px-3 py-2 w-full pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-{{ text }}"
-                    value="{{ quite_mode_end_time|time:'H:i' }}" required />
-                  <span
-                    class="material-symbols-outlined absolute right-2 top-11 transform -translate-y-1/2 text-gray-500 pointer-events-none">
-                    timer
-                  </span>
-                </div>
-              </div>
-              <p class="quiet-hours-error text-xs text-red-500 font-medium mt-1.5 hidden">Start Time and End Time cannot be the same.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!--Document Popup-->
-    <div id="viewModal"
-      class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-      <div class="bg-soft-gray p-6 rounded-xl shadow-lg max-w-md w-full">
-        <div id="userTypeHolder" data-user-type="{{ user_type }}" hidden></div>
-        <div class="flex justify-between items-center">
-          <p class="font-semibold text-xl mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined">document_scanner</span>
-            Document Title
-          </p>
-          <button id="closeModal" class="cursor-pointer text-2xl">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <div id="modalContent" class="text-center bg-white rounded-md h-96 flex items-center justify-center overflow-hidden">
-
-          <!-- <img src="/static/images/incorp-certificate.svg" alt="" class="object-cover h-96 w-full"> -->
-          <img id="modalImg" class="hidden w-full h-full object-contain" alt="Document preview">
-          <iframe id="modalEmbed" class="hidden w-full h-full border-0 rounded-md" src=""></iframe>
-          <a id="modalLink" class="block py-8 text-{{ text }}" hidden target="_blank">Download Document</a>
-        </div>
-        <div class="flex items-center justify-between pt-1">
-          <p id="modalFormatHint" class="font-normal text-xs text-dark-gray">Supported: PDF, JPG, PNG (Max 5MB)</p>
-          <div class="flex items-center gap-2 text-nowrap">
-            <p class="font-normal text-sm text-emerald-green">Virus Scan</p>
-            <input type="checkbox"
-              class="text-emerald-green w-4 h-4 text-lg cursor-pointer rounded-xs focus:ring-0 focus:ring-offset-0"
-              checked>
-          </div>
-        </div>
-
-        <!--Buttons-->
-        <div class="flex justify-between items-center pt-4 w-full">
-          <input type="file" id="replaceInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png" />
-          <button id="replaceBtn" type="button">
-            <p
-              class="flex items-center gap-2 border border-{{ text }} bg-white text-{{ text }} px-4 py-2 rounded-md cursor-pointer">
-              <span class="material-symbols-outlined">upload</span>Replace
-            </p>
-          </button>
-          <button id="saveBtn" type="button" disabled>
-            <p class="px-4 py-2 rounded-md cursor-pointer bg-{{ text }} text-white">Save</p>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="fixed bottom-6 right-8 z-50">
-      <button
-        class="chatTrigger cursor-pointer w-16 h-16 bg-{{  primary_bg   }} text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-        <img src="{% static 'images/avatar.svg' %}" alt="avatar" class="w-full h-full object-contain" />
-      </button>
-    </div>
-    <div class="relative ">
-      <div class="avatar fixed bottom-6 right-8 hidden  z-100">
-        <img src="{% static 'images/avatar.svg' %}" alt="avatar">
-        <img src="{% static 'images/avatar-chatbox.svg' %}" alt="chatbox" class="absolute bottom-0 right-50">
-        <button class="absolute cursor-pointer bottom-65 right-0 close-avatar-btn rounded-full bg-white shadow-[3.93px_5.24px_5.24px_0px_#00000040]
-    ">
-          <span
-            class="material-symbols-outlined flex items-center justify-center p-[0.35rem] text-dark-gray">close</span>
-        </button>
-        <button class="absolute cursor-pointer bottom-6 right-18 bg-{{  primary_bg   }} text-white p-2 rounded-md">
-          Talk
-        </button>
-      </div>
-    </div>
-  </div>
-  <div class="fixed bottom-6 right-8 z-50">
-      <button
-          class="chatTrigger cursor-pointer w-16 h-16 bg-dodger-blue text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-          <img src="{% static 'images/avatar.png' %}" alt="avatar" class="w-full h-full object-contain" />
-      </button>
-  </div>
-  <div class="relative ">
-      <div class="avatar fixed bottom-6 right-8 hidden  z-100">
-          <img src="{% static 'images/avatar.svg' %}" alt="avatar">
-          <img src="{% static 'images/avatar-chatbox.svg' %}" alt="chatbox" class="absolute bottom-0 right-50">
-          <button class="absolute cursor-pointer bottom-65 right-0 close-avatar-btn rounded-full bg-white shadow-[3.93px_5.24px_5.24px_0px_#00000040]">
-              <span class="material-symbols-outlined flex items-center justify-center p-[0.35rem] text-dark-gray">close</span>
-          </button>
-          <button
-              class="absolute cursor-pointer bottom-6 right-18 bg-dodger-blue text-white p-2 rounded-md">
-              Talk
-          </button>
-      </div>
-  </div>
-  </div>
-  {% endblock %}
-
-  {% block extra_js %}
-  <script src="{% static 'js/forms.js' %}"></script>
-  <!-- <script src="{% static 'js/countryCodes.js' %}"></script> -->
-  <script src="{% static 'js/Purchase.js' %}"></script>
-  <script src="{% static 'js/tabs.js' %}"></script>
-<<<<<<< HEAD
-  <script src="{% static 'js/settings.js?v=20261030-doc-preview-v3' %}"></script>
-  {% endblock %}
-=======
-  <script src="{% static 'js/settings.js' %}"></script>
-  {% endblock %}
->>>>>>> 3507a0c (bugs)
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+
+<!-- Main Content -->
+  <div
+  class=" relative transition-all duration-300 main-content h-full flex-1 flex flex-col gap-8 overflow-y-auto scroll p-5">
+  <div
+    class="show-sidebar-toggle hidden fixed top-[100px] left-12 z-50 h-10 w-10 bg-{{  primary_bg   }} items-center justify-center rounded-r-md cursor-pointer">
+    <span class="material-symbols-outlined bold-weight text-{{  text   }}">
+      arrow_forward_ios
+    </span>
+  </div>
+  <div class="shadow p-4 rounded-lg m-2 max-w-full bg-white">
+    <div class="setting-header">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined"> settings </span>
+        <p class="font-medium text-2xl">Settings</p>
+      </div>
+
+      <p class="font-normal text-lg text-jet-black">
+        Make It Perfect—Update Your Settings!
+      </p>
+    </div>
+    <div class="flex items-center">
+      <!--Tabs-->
+      <!--Tabs-->
+      <div class="flex gap-4 sm:gap-5 whitespace-nowrap mt-8 overflow-x-auto no-scrollbar tabs h-[90px] items-center">
+        <button
+          class="{{ tab_class }} {% if active_tab == 'account-details' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+          data-tab="account-details">
+          Account Details
+        </button>
+        <button
+          class="{{ tab_class }} {% if active_tab == 'documents' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+          data-tab="documents">
+          Documents
+        </button>
+        <button
+          class="{{ tab_class }} {% if active_tab == 'notification-control' %}{{ active_tab_class }}{% endif %} px-4 py-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+          data-tab="notification-control">
+          Notification Control Center
+        </button>
+      </div>
+      <div
+        class="relative edit-toggle flex items-center gap-4 pl-6 mt-4 sm:mt-7 sm:ml-auto sm:justify-end justify-between w-full sm:w-auto flex-wrap sm:flex-nowrap">
+
+        <div class="flex flex-col items-end gap-1">
+          <p class="font-normal text-base text-dark-gray lastEditMsg hidden lg:!block !hidden">Last Edit on
+            {{updated_at}}</p>
+          <p class="font-normal text-xs text-medium-gray fileLimit hidden">All the image of documents should not
+            exceed the file size limit of 3MB</p>
+        </div>
+
+        <div class="relative inline-block group">
+
+          <span class="material-symbols-outlined cursor-pointer border p-0.5 rounded-sm editIcon" id="editIcon">
+            edit
+          </span>
+
+          <!-- Tooltip for Tablet screens -->
+          <div id="editTooltip" class="absolute right-0 mb-1 px-2 py-1 bg-white border border-{{  primary_bg   }} rounded-md text-xs
+                  whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
+                    md:block lg:hidden">
+            Last Edit on {{updated_at}}
+          </div>
+
+          <!-- Tooltip for Desktop screens -->
+          <div class="absolute  left-1/2 -translate-x-1/2 mb-1 px-2 py-1  bg-white border border-{{  primary_bg   }} rounded-md text-xs
+                whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
+                hidden lg:block">
+            Edit
+          </div>
+
+        </div>
+
+
+      </div>
+    </div>
+
+    <!--Account Details Section -->
+
+    <div
+      class="grid grid-cols-1 gap-x-6 sm:gap-x-10 lg:gap-x-20 gap-y-6  pt-7 account-detail account-details tab-content">
+      <p class="font-semibold text-lg text-jet-black ">
+        Account Details
+        <span class="font-normal text-base text-dark-gray">(Account created on {{created_at}} )</span>
+      </p>
+      <!-- <div id="account-details-render"> -->
+      {% include 'settings/partials/account_details.html' %}
+
+      <!-- Account Settings -->
+      <div class="flex flex-col gap-y-3 mt-8">
+        <p class="font-semibold text-base md:text-lg">
+          Account Settings
+        </p>
+        <div class="flex justify-between flex-wrap gap-4">
+          <p class="font-normal text-sm md:text-md text-{{ text }} cursor-pointer"
+            onclick="openPopup('searchHistoryPopup')">
+            Clear Search History
+          </p>
+          <p class="font-normal text-sm md:text-md text-{{ text }} cursor-pointer"
+            onclick="openPopup('savedDataPopup')">
+            Clear Saved Data
+          </p>
+          <p class="font-normal text-sm md:text-md text-{{ text }} cursor-pointer"
+            onclick="openPopup('deleteAccountPopup')">
+            Account Delete
+          </p>
+        </div>
+      </div>
+
+      <!-- Popup Modal Template -->
+      <!-- Search History Popup -->
+      <div id="searchHistoryPopup"
+        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+          <p class="text-sm font-semibold mb-4">
+            Do you want clear your recent history ?
+          </p>
+          <div class="flex justify-end gap-3">
+            <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('searchHistoryPopup')">
+              No
+            </button>
+            <button class="px-8 py-1 rounded-xl bg-strong-red text-white" onclick="clearSearchHistory()">
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved Data Popup -->
+      <div id="savedDataPopup"
+        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+          <p class="text-sm font-semibold mb-4">
+            Do you want clear your saved data ?
+          </p>
+          <div class="flex justify-end gap-3">
+            <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('savedDataPopup')">
+              No
+            </button>
+            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white" onclick="clearSavedData()">
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delete Account Popup -->
+      <div id="deleteAccountPopup"
+        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
+          <h2 class="text-lg font-semibold mb-3"></h2>
+          <p class="text-sm font-semibold mb-4">
+            Do you want to delete your profile ?
+          </p>
+          <div class="flex justify-end gap-3">
+            <button class="px-8 py-1 border-1 rounded-xl text-gray-600" onclick="closePopup('deleteAccountPopup')">
+              No
+            </button>
+            <button class="px-8 py-1 border-1 rounded-xl bg-strong-red text-white" onclick="deleteAccount()">
+              Yes
+            </button>
+          </div>
+          <p class="font-semibold text-lg text-jet-black pt-6">
+            We are sorry you are going, Please select your reason
+          </p>
+          <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">
+              I found a better alternative
+            </p>
+            <label class="custom-radio">
+              <input type="radio" name="address" />
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">
+              This App is Hard To Use
+            </p>
+            <label class="custom-radio">
+              <input type="radio" name="address" />
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">
+              Not Getting Enough Value
+            </p>
+            <label class="custom-radio">
+              <input type="radio" name="address" />
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">
+              Just Taking A Break
+            </p>
+            <label class="custom-radio">
+              <input type="radio" name="address" />
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="flex justify-between items-center pt-2">
+            <p class="font-normal text-base text-jet-black">
+              Other (Please Specify)
+            </p>
+            <label class="custom-radio">
+              <input type="radio" name="address" />
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <input type="text" class="mt-2 rounded-sm p-2 focus:ring-0 w-full focus:!outline-none focus:ring-offset-0"
+            placeholder="Specify Your Reason (10 Words)" />
+          <div class="flex justify-end pt-2">
+            <button class="bg-{{  text   }} text-white rounded-md p-2 cursor-pointer submitBtn">
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+      <!--Success Popup-->
+      <div id="successPopup"
+        class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl w-full">
+          <div class="flex justify-end">
+            <span class="material-symbols-outlined cursor-pointer" onclick="closePopup('successPopup')">
+              close</span>
+          </div>
+          <div class="flex items-center justify-center flex-col">
+            <img src="{% static 'images/successfull.svg' %}" alt="" />
+            <p class="font-normal text-base text-jet-black">
+              Your request has been sent to the administrator. We will
+              update you shortly
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms and Conditions-->
+      <div class="flex flex-col bg-[#FFC9D3] p-4 rounded mt-4 border-1">
+        <p class="font-semibold text-lg">
+          Terms and Conditions
+        </p>
+        <div class="flex justify-between mt-3">
+          <p class="font-normal text-base text-{{  text  }} cursor-pointer toggle-trigger"
+            data-target="terms-conditons">
+            Terms of Usage
+          </p>
+          <p class="font-normal text-base text-{{  text  }} cursor-pointer toggle-trigger" data-target="privacy-policy">
+            Privacy Policy
+          </p>
+          <p class="font-normal text-base text-{{  text  }} cursor-pointer toggle-trigger" data-target="disclaimer">
+            Disclaimer
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!--Edit Section-->
+    <div class="hidden edit-details">
+      <p class="text-{{ text }} pl-4 sm:pl-6">Account Details</p>
+      {% include 'settings/partials/edit-account-details.html' %}
+    </div>
+    <!--Terms and Conditions -->
+    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="terms-conditons">
+      <div class="text-white mb-2 items-center p-4 rounded bg-{{  primary_bg   }} flex justify-between">
+        <h1 class="text-3xl">Terms of Usage</h1>
+        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
+          close
+        </span>
+      </div>
+      <h2 class="text-black text-xl mb-2 font-semibold">
+        1. Introduction
+      </h2>
+      <p class="">
+        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
+      </p>
+      <p>
+        Terms of Service (“Terms”, “Terms of Service”) govern your use
+        of our website located at sizaf.com (together or individually
+        “Service”) operated by Sizaf.com. Our Privacy Policy also
+        governs your use of our Service and explains how we collect,
+        safeguard and disclose information that results from your use of
+        our web pages. Your agreement with us includes these Terms and
+        our Privacy Policy (“Agreements”). By visiting our website you
+        acknowledge that you have read and understood Agreements, and
+        agree to be bound by them.
+      </p>
+      <p>
+        you do not agree with (or cannot comply with) these Terms, you
+        may not use the Service. However, please let us know by emailing
+        info@sizaf.com, so we can try to find a solution. These Terms
+        apply to all visitors, users, and others who wish to access or
+        use the Service.
+      </p>
+      <h2 class="text-black text-xl mb-2 mt-2 font-semibold">
+        2. Communications
+      </h2>
+      <p>
+        By using our Service, you agree to subscribe to newsletters,
+        marketing or promotional materials and other information we may
+        send. However, you may opt out of receiving any, or all, of
+        these communications from us by following the unsubscribe link
+        or by emailing at info@sizaf.com.
+      </p>
+    </div>
+    <!--Privacy Policy -->
+    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="privacy-policy">
+      <div class="text-white mb-2 items-center p-4 rounded bg-{{  primary_bg   }} flex justify-between">
+        <h1 class="text-3xl">Privacy Policy</h1>
+        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
+          close
+        </span>
+      </div>
+      <h2 class="text-{{  text   }} text-xl mb-2 font-semibold">
+        1. Introduction
+      </h2>
+      <p class="">
+        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
+      </p>
+      <p>
+        Terms of Service (“Terms”, “Terms of Service”) govern your use
+        of our website located at sizaf.com (together or individually
+        “Service”) operated by Sizaf.com. Our Privacy Policy also
+        governs your use of our Service and explains how we collect,
+        safeguard and disclose information that results from your use of
+        our web pages. Your agreement with us includes these Terms and
+        our Privacy Policy (“Agreements”). By visiting our website you
+        acknowledge that you have read and understood Agreements, and
+        agree to be bound by them.
+      </p>
+      <p>
+        you do not agree with (or cannot comply with) these Terms, you
+        may not use the Service. However, please let us know by emailing
+        info@sizaf.com, so we can try to find a solution. These Terms
+        apply to all visitors, users, and others who wish to access or
+        use the Service.
+      </p>
+      <h2 class="text-{{  text   }} text-xl mb-2 mt-2 font-semibold">
+        2. Communications
+      </h2>
+      <p>
+        By using our Service, you agree to subscribe to newsletters,
+        marketing or promotional materials and other information we may
+        send. However, you may opt out of receiving any, or all, of
+        these communications from us by following the unsubscribe link
+        or by emailing at info@sizaf.com.
+      </p>
+    </div>
+    <!--Disclaimer -->
+    <div class="hidden text-medium-gray letter toggle-section pl-4 sm:pl-6" data-section="disclaimer">
+      <div class="text-white mb-2 items-center p-4 rounded bg-{{  primary_bg   }} flex justify-between">
+        <h1 class="text-3xl">Disclaimer</h1>
+        <span class="material-symbols-outlined close-share-modal cancel-btn cursor-pointer">
+          close
+        </span>
+      </div>
+      <h2 class="text-{{  text   }} text-xl mb-2 font-semibold">
+        1. Introduction
+      </h2>
+      <p class="">
+        Welcome to Sizaf.com (“Company”, “we”, “our”, “us”)!
+      </p>
+      <p>
+        Terms of Service (“Terms”, “Terms of Service”) govern your use
+        of our website located at sizaf.com (together or individually
+        “Service”) operated by Sizaf.com. Our Privacy Policy also
+        governs your use of our Service and explains how we collect,
+        safeguard and disclose information that results from your use of
+        our web pages. Your agreement with us includes these Terms and
+        our Privacy Policy (“Agreements”). By visiting our website you
+        acknowledge that you have read and understood Agreements, and
+        agree to be bound by them.
+      </p>
+      <p>
+        you do not agree with (or cannot comply with) these Terms, you
+        may not use the Service. However, please let us know by emailing
+        info@sizaf.com, so we can try to find a solution. These Terms
+        apply to all visitors, users, and others who wish to access or
+        use the Service.
+      </p>
+      <h2 class="text-{{  text   }} text-xl mb-2 mt-2 font-semibold">
+        2. Communications
+      </h2>
+      <p>
+        By using our Service, you agree to subscribe to newsletters,
+        marketing or promotional materials and other information we may
+        send. However, you may opt out of receiving any, or all, of
+        these communications from us by following the unsubscribe link
+        or by emailing at info@sizaf.com.
+      </p>
+    </div>
+
+    <!--Documents Section-->
+    {% include 'settings/partials/documents.html' %}
+
+    <!--Notification Control Section-->
+    <div class="hidden tab-content notification-control" id="notification-control">
+      <p class="font-semibold pt-7 text-lg">
+        Notification Channel Management
+      </p>
+
+      <div class="space-y-6">
+        <!-- Reusable Switch Block -->
+        <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
+          <p class="text-base font-normal">In-app Notifications</p>
+          <label class="inline-flex items-center gap-3 cursor-pointer">
+            <p class="font-normal text-sm text-medium-gray mb-0">
+              Manage In-app updates.
+            </p>
+            <input type="checkbox" name="inapp_notifications" data-field="inapp_notifications" class="sr-only peer" {% if inapp_notifications %}checked{% endif %} />
+            <div
+              class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
+            </div>
+          </label>
+        </div>
+
+
+        <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
+          <p class="text-base font-normal">Email Notifications</p>
+          <div class="flex items-center gap-3">
+            <p class="font-normal text-sm text-medium-gray">
+              Manage Email updates.
+            </p>
+            <label class="inline-flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" name="email_notifications" data-field="email_notifications" class="sr-only peer" {% if email_notifications %}checked{% endif %} />
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
+              </div>
+            </label>
+          </div>
+
+        </div>
+          <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
+          <p class="text-base font-normal">Push Notifications</p>
+          <div class="flex items-center gap-3">
+            <p class="font-normal text-sm text-medium-gray">
+              Enable/Disable App alerts.
+            </p>
+            <label class="inline-flex items-center gap-3 cursor-pointer">
+
+              <input type="checkbox" name="push_notifications" data-field="push_notifications" class="sr-only peer" {% if push_notifications %}checked{% endif %} />
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
+              </div>
+            </label>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Priority Level Management -->
+      <div class="pt-6 space-y-4">
+        <p class="font-semibold text-lg">Priority Level Management</p>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <p class="text-base font-normal">Regulatory Alerts <span class="font-normal text-sm">(Will Be Sent on
+                Updates)</span></p>
+            <input type="checkbox" name="regulatory_alerts" data-field="regulatory_alerts" {% if regulatory_alerts %}checked{% endif %}
+              class="w-5 h-5 text-{{ text }} text-xl rounded-sm focus:ring-0 focus:outline-none focus:ring-offset-0" />
+          </div>
+          <div class="flex justify-between items-center">
+            <p class="text-base font-normal">Promotions & Offers <span class="font-normal text-sm">(Will Be Sent on
+                Updates)</span></p>
+            <input type="checkbox" name="promotions_and_offers" data-field="promotions_and_offers" {% if promotions_and_offers %}checked{% endif %}
+              class="w-5 h-5 text-{{ text }} text-xl rounded-sm focus:ring-0  focus:ring-offset-0" />
+          </div>
+        </div>
+
+        <!-- Quiet Hours Setting -->
+        <div class="pt-6">
+          <p class="font-semibold text-lg">Quiet Hours Setting</p>
+          <div class="flex flex-col md:flex-row justify-between gap-4">
+            <p class="text-base font-normal">Set Quite Mode</p>
+            <label class="inline-flex gap-3 cursor-pointer">
+              <p class="font-normal mt-0.5 text-sm text-medium-gray">
+                Enable/Disable
+              </p>
+              <input type="checkbox" name="quite_mode" data-field="quite_mode" class="sr-only peer" {% if quite_mode %}checked{% endif %} />
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-{{ text }}">
+              </div>
+            </label>
+          </div>
+          <div class="flex flex-col lg:flex-row lg:justify-between gap-4 pt-6">
+            <p class="text-base font-normal">
+              Pick Time to start Quiet Mode
+            </p>
+            <div class="flex flex-col">
+              <div class="flex flex-col sm:flex-row gap-4">
+                <!-- Start Time -->
+                <div class="relative w-full sm:w-40">
+                  <label for="start-time" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                  <input type="time" name="quite_mode_start_time" id="start-time" data-field="quite_mode_start_time"
+                    class="border rounded px-3 py-2 w-full pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-{{ text }}"
+                    value="{{ quite_mode_start_time|time:'H:i' }}" required />
+                  <span
+                    class="material-symbols-outlined absolute right-2 top-11 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+                    timer
+                  </span>
+                </div>
+
+                <!-- End Time -->
+                <div class="relative w-full sm:w-40">
+                  <label for="end-time" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                  <input type="time" id="end-time" name="quite_mode_end_time" data-field="quite_mode_end_time"
+                    class="border rounded px-3 py-2 w-full pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-{{ text }}"
+                    value="{{ quite_mode_end_time|time:'H:i' }}" required />
+                  <span
+                    class="material-symbols-outlined absolute right-2 top-11 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+                    timer
+                  </span>
+                </div>
+              </div>
+              <p class="quiet-hours-error text-xs text-red-500 font-medium mt-1.5 hidden">Start Time and End Time cannot be the same.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--Document Popup-->
+    <div id="viewModal"
+      class="flex popup fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+      <div class="bg-soft-gray p-6 rounded-xl shadow-lg max-w-md w-full">
+        <div id="userTypeHolder" data-user-type="{{ user_type }}" hidden></div>
+        <div class="flex justify-between items-center">
+          <p class="font-semibold text-xl mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined">document_scanner</span>
+            Document Title
+          </p>
+          <button id="closeModal" class="cursor-pointer text-2xl">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div id="modalContent" class="text-center bg-white rounded-md h-96 flex items-center justify-center overflow-hidden">
+
+          <!-- <img src="/static/images/incorp-certificate.svg" alt="" class="object-cover h-96 w-full"> -->
+          <img id="modalImg" class="hidden w-full h-full object-contain" alt="Document preview">
+          <iframe id="modalEmbed" class="hidden w-full h-full border-0 rounded-md" src=""></iframe>
+          <a id="modalLink" class="block py-8 text-{{ text }}" hidden target="_blank">Download Document</a>
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <p id="modalFormatHint" class="font-normal text-xs text-dark-gray">Supported: PDF, JPG, PNG (Max 5MB)</p>
+          <div class="flex items-center gap-2 text-nowrap">
+            <p class="font-normal text-sm text-emerald-green">Virus Scan</p>
+            <input type="checkbox"
+              class="text-emerald-green w-4 h-4 text-lg cursor-pointer rounded-xs focus:ring-0 focus:ring-offset-0"
+              checked>
+          </div>
+        </div>
+
+        <!--Buttons-->
+        <div class="flex justify-between items-center pt-4 w-full">
+          <input type="file" id="replaceInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+          <button id="replaceBtn" type="button">
+            <p
+              class="flex items-center gap-2 border border-{{ text }} bg-white text-{{ text }} px-4 py-2 rounded-md cursor-pointer">
+              <span class="material-symbols-outlined">upload</span>Replace
+            </p>
+          </button>
+          <button id="saveBtn" type="button" disabled>
+            <p class="px-4 py-2 rounded-md cursor-pointer bg-{{ text }} text-white">Save</p>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fixed bottom-6 right-8 z-50">
+      <button
+        class="chatTrigger cursor-pointer w-16 h-16 bg-{{  primary_bg   }} text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
+        <img src="{% static 'images/avatar.svg' %}" alt="avatar" class="w-full h-full object-contain" />
+      </button>
+    </div>
+    <div class="relative ">
+      <div class="avatar fixed bottom-6 right-8 hidden  z-100">
+        <img src="{% static 'images/avatar.svg' %}" alt="avatar">
+        <img src="{% static 'images/avatar-chatbox.svg' %}" alt="chatbox" class="absolute bottom-0 right-50">
+        <button class="absolute cursor-pointer bottom-65 right-0 close-avatar-btn rounded-full bg-white shadow-[3.93px_5.24px_5.24px_0px_#00000040]
+    ">
+          <span
+            class="material-symbols-outlined flex items-center justify-center p-[0.35rem] text-dark-gray">close</span>
+        </button>
+        <button class="absolute cursor-pointer bottom-6 right-18 bg-{{  primary_bg   }} text-white p-2 rounded-md">
+          Talk
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="fixed bottom-6 right-8 z-50">
+      <button
+          class="chatTrigger cursor-pointer w-16 h-16 bg-dodger-blue text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
+          <img src="{% static 'images/avatar.png' %}" alt="avatar" class="w-full h-full object-contain" />
+      </button>
+  </div>
+  <div class="relative ">
+      <div class="avatar fixed bottom-6 right-8 hidden  z-100">
+          <img src="{% static 'images/avatar.svg' %}" alt="avatar">
+          <img src="{% static 'images/avatar-chatbox.svg' %}" alt="chatbox" class="absolute bottom-0 right-50">
+          <button class="absolute cursor-pointer bottom-65 right-0 close-avatar-btn rounded-full bg-white shadow-[3.93px_5.24px_5.24px_0px_#00000040]">
+              <span class="material-symbols-outlined flex items-center justify-center p-[0.35rem] text-dark-gray">close</span>
+          </button>
+          <button
+              class="absolute cursor-pointer bottom-6 right-18 bg-dodger-blue text-white p-2 rounded-md">
+              Talk
+          </button>
+      </div>
+  </div>
+  </div>
+  {% endblock %}
+
+  {% block extra_js %}
+  <script src="{% static 'js/forms.js' %}"></script>
+  <!-- <script src="{% static 'js/countryCodes.js' %}"></script> -->
+  <script src="{% static 'js/Purchase.js' %}"></script>
+  <script src="{% static 'js/tabs.js' %}"></script>
+  <script src="{% static 'js/settings.js' %}?v=20261102-image-preview-fix"></script>
+  {% endblock %}
