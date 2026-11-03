@@ -234,7 +234,7 @@
             </div>
             <div id="heatmap" class="!h-[60%] mt-1"></div>
             <div class="flex justify-center mt-4">
-              <button class="bg-dodger-blue text-white w-full sm:w-[322px] py-2 rounded-lg download-btn" data-target="heatmap">
+              <button class="bg-dodger-blue text-white w-full sm:w-[322px] py-2 rounded-lg download-btn cursor-pointer hover:bg-cerulean active:scale-[0.99] transition-all duration-150" data-target="heatmap">
                 Download Report
               </button>
             </div>
@@ -345,7 +345,7 @@
             </p>
 
             <div class="flex justify-center mt-4">
-              <button class="bg-dodger-blue text-white w-full sm:w-[322px] py-2 rounded-lg download-btn" data-target="bidChartContainer">
+              <button class="bg-dodger-blue text-white w-full sm:w-[322px] py-2 rounded-lg download-btn cursor-pointer hover:bg-cerulean active:scale-[0.99] transition-all duration-150" data-target="bidChartContainer">
                 Download Report
               </button>
             </div>
@@ -515,31 +515,50 @@
           <!-- FOOTER BUTTONS -->
           <div class="flex flex-col sm:flex-row sm:justify-end gap-3 pb-4 pr-4">
             <button
-              class="w-full sm:w-[157px] flex items-center justify-center gap-2 px-6 py-2 rounded-[10px] bg-bright-royal-blue text-white download-btn" data-target="consultationTable" data-type="pdf">
+              class="w-full sm:w-[157px] flex items-center justify-center gap-2 px-6 py-2 rounded-[10px] bg-bright-royal-blue text-white download-btn cursor-pointer hover:bg-cerulean active:scale-[0.99] transition-all duration-150" data-target="consultationTable" data-type="pdf">
               <span class="material-symbols-outlined text-lg leading-none">picture_as_pdf</span>
               <span class="text-sm leading-none">PDF</span>
             </button>
 
             <button
-              class="w-full sm:w-[157px] flex items-center justify-center gap-2 px-6 py-2 rounded-[10px] bg-shamrock-green text-white download-btn cursor-pointer" data-target="consultationTable" data-type="excel">
+              class="w-full sm:w-[157px] flex items-center justify-center gap-2 px-6 py-2 rounded-[10px] bg-shamrock-green text-white download-btn cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all duration-150" data-target="consultationTable" data-type="excel">
               <span class="material-symbols-outlined text-lg leading-none">download</span>
               <span class="text-sm leading-none">Excel</span>
             </button>
           </div>
 
         </div>
+
+  <style>
+    .download-btn {
+      cursor: pointer !important;
+    }
+    .download-btn:hover {
+      opacity: 0.92;
+      filter: brightness(0.96);
+    }
+    .download-btn:active {
+      transform: scale(0.98);
+    }
+    .download-btn:disabled, .download-btn[disabled] {
+      cursor: not-allowed !important;
+      opacity: 0.65 !important;
+      pointer-events: none !important;
+    }
+  </style>
 {% endblock %}
 
 {% block extra_js %}
-  <script src="/static/js/tabs.js"></script>
-  <script src="/static/js/doctor-reports.js?v=20261029-chart-calendar-fix"></script>
-  <script src="/static/js/table-pagination.js"></script>
-<!-- heatmap -->
+<!-- amCharts 4 for Vector Heatmap -->
 <script src="https://www.amcharts.com/lib/4/core.js"></script>
 <script src="https://www.amcharts.com/lib/4/maps.js"></script>
 <script src="https://www.amcharts.com/lib/4/geodata/india2019High.js"></script>
 <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
-<!-- jsPDF -->
+<!-- jsPDF and html2canvas for instant client-side PDF downloads -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Page Navigation & Interaction Scripts -->
+<script src="/static/js/tabs.js"></script>
+<script src="/static/js/table-pagination.js"></script>
+<script src="/static/js/doctor-reports.js?v=20261103-download-fast-fix"></script>
 {% endblock %}
