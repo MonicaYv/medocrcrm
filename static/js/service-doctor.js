@@ -458,9 +458,9 @@ function collectDoctorServices() {
     const card = $(this);
 
     const categoryId = card.find('.custom-dropdown').eq(0)
-                           .find('.selected-text').data('id');
+                           .find('.selected-text').attr('data-id');
     const serviceId  = card.find('.custom-dropdown').eq(1)
-                           .find('.selected-text').data('id');
+                           .find('.selected-text').attr('data-id');
 
     let price = card.find('input').val() || "0";
     price = price.replace(/[₹,]/g, '').trim();
@@ -483,7 +483,7 @@ function collectVisitCharges() {
   $('.visit-services-list .service-card').each(function () {
     const card = $(this);
 
-    const visitTypeId = card.find('.selected-text').data('id');
+    const visitTypeId = card.find('.selected-text').attr('data-id');
     let price = card.find('input').val() || "0";
     price = price.replace(/[₹,]/g, '').trim();
 
@@ -501,7 +501,21 @@ function collectVisitCharges() {
 /* =========================================================
    STEP 2 → STEP 3 (SUMMARY)
 ========================================================= */
-$(document).on('click', '#step-2 .step-btn[data-target="3"]', function () {
+$(document).on('click', '#step-1 .step-btn[data-target="2"]', function (e) {
+  if (!$('.services-section').attr('data-edit-id')) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  submitDoctorServices();
+});
+
+$(document).on('click', '#step-2 .step-btn[data-target="3"]', function (e) {
+  if ($('.services-section').attr('data-edit-id')) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    submitDoctorServices();
+    return;
+  }
+
   const services = collectDoctorServices();
   const visits   = collectVisitCharges();
 
@@ -545,21 +559,31 @@ function renderDoctorSummary(services, visits) {
 /* =========================================================
    SAVE (SINGLE SUBMIT)
 ========================================================= */
-$(document).on('click', '#save-doctor-services', function () {
+$(document).on('click', '#save-doctor-services', function (e) {
+  e.preventDefault();
+  submitDoctorServices();
+});
+
+function submitDoctorServices() {
   const services = collectDoctorServices();
   const visits   = collectVisitCharges();
+  const $section = $('.services-section');
+  const editId = $section.attr('data-edit-id');
+  const editType = $section.attr('data-edit-type');
 
   if (!services.length && !visits.length) {
     toastr.error("Please add at least one service or visit charge");
     return;
   }
 
+  const $saveButton = $('#save-doctor-services');
+  $saveButton.prop('disabled', true);
   $.ajax({
     url: "/services/services/add-doctor-services/",
     method: "POST",
     headers: { "X-CSRFToken": getCookie("csrftoken") },
     contentType: "application/json",
-    data: JSON.stringify({ services, visits }),
+    data: JSON.stringify({ services, visits, edit_id: editId || null, edit_type: editType || null }),
     success(res) {
       if (res.success) {
         toastr.success("Doctor services saved successfully");
@@ -569,10 +593,11 @@ $(document).on('click', '#save-doctor-services', function () {
       }
     },
     error(xhr) {
-      toastr.error(xhr.responseJSON?.message || "Something went wrong");
+      toastr.error(xhr.responseJSON?.error || xhr.responseJSON?.message || "Something went wrong");
+      $saveButton.prop('disabled', false);
     }
   });
-});
+}
 
 $(document).ready(function () {
   fetchDoctorSavedServices();
@@ -582,14 +607,20 @@ function fetchDoctorSavedServices() {
   $.getJSON("/services/doctor-services/", function (res) {
     if (!res.success) return;
 
-    const hasData =
-      (res.services && res.services.length) ||
-      (res.visits && res.visits.length);
-
-    if (!hasData) return;
-
     doctorSavedServiceRows = res.services || [];
     doctorSavedVisitRows = res.visits || [];
+
+    // Always replace the template's demo cards. They have no database IDs and
+    // must never be offered as editable/deletable doctor records.
+    renderDoctorServiceCards(doctorSavedServiceRows);
+    renderDoctorVisitCards(doctorSavedVisitRows);
+
+    const hasData = doctorSavedServiceRows.length || doctorSavedVisitRows.length;
+    if (!hasData) {
+      $('.premium-section, .services-without-subscription').addClass('hidden');
+      $('.home-section').removeClass('hidden');
+      return;
+    }
 
     $('.home-section').addClass('hidden');
     $('.services-section').addClass('hidden');
@@ -597,8 +628,6 @@ function fetchDoctorSavedServices() {
     $('.premium-section').removeClass('hidden');
     $('.services-without-subscription').addClass('hidden');
 
-    renderDoctorServiceCards(res.services || []);
-    renderDoctorVisitCards(res.visits || []);
     // default services tab open
     const activeBtn = $('.tabs-inner .tab-btn[data-type="services"]');
 
@@ -621,6 +650,8 @@ function fetchDoctorSavedServices() {
       boxShadow: '0 4px 10px rgba(0,0,0,0.18)',
       border: '1px solid #BFDBFE'
     });
+  }).fail(function (xhr) {
+    console.error('Unable to load saved doctor services:', xhr.responseText || xhr.statusText);
   });
 }
 
@@ -670,14 +701,9 @@ function renderDoctorServiceCards(services) {
   nonPremiumGrid.empty();
 
   services.forEach(s => {
-    const card = doctorCardHtml(
-  s.service,
-  s.price,
-  s.id,
-  "service"
-);
-    premiumGrid.append(card.clone(true));
-    nonPremiumGrid.append(card);
+    const $card = $(doctorCardHtml(s.service, s.price, s.id, "service"));
+    premiumGrid.append($card);
+    nonPremiumGrid.append($card.clone());
   });
 }
 
@@ -689,14 +715,9 @@ function renderDoctorVisitCards(visits) {
   nonPremiumGrid.empty();
 
   visits.forEach(v => {
-    const card = doctorCardHtml(
-  v.visit_type,
-  v.price,
-  v.id,
-  "visit"
-);
-    premiumGrid.append(card.clone(true));
-    nonPremiumGrid.append(card);
+    const $card = $(doctorCardHtml(v.visit_type, v.price, v.id, "visit"));
+    premiumGrid.append($card);
+    nonPremiumGrid.append($card.clone());
   });
 }
 
@@ -707,8 +728,8 @@ $(document).on("click", ".doctor-edit-btn", function (e) {
   $(".more-dropdown").addClass("hidden");
 
   const card = $(this).closest(".service-card");
-  const id = card.data("id");
-  const type = card.data("type");
+  const id = card.attr("data-id");
+  const type = card.attr("data-type");
 
   const editRow = type === "visit"
     ? doctorSavedVisitRows.find(row => String(row.id) === String(id))
@@ -731,6 +752,7 @@ $(document).on("click", ".doctor-edit-btn", function (e) {
     }]);
     $("#step-2").removeClass("hidden");
     $("#step-1, #step-3").addClass("hidden");
+    $('#step-2 .step-btn[data-target="3"]').text('Save Changes');
   } else {
     populateDoctorServiceCards([{
       category: { id: editRow.category_id, name: editRow.category },
@@ -739,6 +761,7 @@ $(document).on("click", ".doctor-edit-btn", function (e) {
     }]);
     $("#step-1").removeClass("hidden");
     $("#step-2, #step-3").addClass("hidden");
+    $('#step-1 .step-btn[data-target="2"]').text('Save Changes');
   }
 
   $(".services-section")
@@ -746,13 +769,20 @@ $(document).on("click", ".doctor-edit-btn", function (e) {
     .attr("data-edit-type", type);
 });
 
+$(document).on('click', '#cancel-steps, #step-2 .step-btn[data-target="1"]', function (e) {
+  if (!$('.services-section').attr('data-edit-id')) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  window.location.href = '/services/';
+});
+
 $(document).on('click', '.delete-btn', function (e) {
   e.preventDefault();
   e.stopPropagation();
 
   const card = $(this).closest('.service-card');
-  const serviceId = card.data('id');
-  const serviceType = card.data('type');
+  const serviceId = card.attr('data-id');
+  const serviceType = card.attr('data-type');
 
   if (!serviceId || !serviceType) {
     toastr.error("Service ID not found");
@@ -773,8 +803,8 @@ $(document).on('click', '.delete-btn', function (e) {
         toastr.error("Delete failed");
       }
     },
-    error() {
-      toastr.error("Something went wrong");
+    error(xhr) {
+      toastr.error(xhr.responseJSON?.error || "Unable to delete service. Please try again.");
     }
   });
 });
