@@ -474,8 +474,17 @@ def save_doctor_services(request):
 
     services = data.get("services", [])
     visits   = data.get("visits", [])
+    edit_id = data.get("edit_id")
+    edit_type = data.get("edit_type")
 
-    doctor = request.user_obj.doctor_profile
+    doctor = getattr(request.user_obj, "doctor_profile", None)
+    if doctor is None:
+        return JsonResponse({"success": False, "error": "Doctor profile was not found."}, status=400)
+
+    if not edit_id and not services and not visits:
+        return JsonResponse({"success": False, "error": "Add at least one service or visit charge."}, status=400)
+    if edit_id and edit_type not in {"service", "visit"}:
+        return JsonResponse({"success": False, "error": "Invalid service edit request."}, status=400)
 
     saved_services = []
     saved_visits   = []
@@ -483,21 +492,21 @@ def save_doctor_services(request):
     # ----------------------------
     # SAVE DOCTOR SERVICES
     # ----------------------------
-    for s in services:
+    if edit_id and edit_type == "service":
+        if not services:
+            return JsonResponse({"success": False, "error": "Service details are required."}, status=400)
+        s = services[0]
         try:
             category = ServiceCategory.objects.get(id=s["category_id"])
             service  = ServiceDescription.objects.get(id=s["service_id"])
-        except (ServiceCategory.DoesNotExist, ServiceDescription.DoesNotExist):
-            continue
-
-        obj, created = DoctorServiceRate.objects.update_or_create(
-            doctor=doctor,
-            category=category,
-            service=service,
-            defaults={
-                "price": s.get("price") or 0
-            }
-        )
+            obj = get_object_or_404(DoctorServiceRate, id=edit_id, doctor=doctor)
+            price = float(s.get("price") or 0)
+        except (ServiceCategory.DoesNotExist, ServiceDescription.DoesNotExist, KeyError, ValueError, TypeError):
+            return JsonResponse({"success": False, "error": "Selected service is invalid."}, status=400)
+        if service.category_id != category.id:
+            return JsonResponse({"success": False, "error": "Selected service does not belong to this category."}, status=400)
+        obj.category, obj.service, obj.price = category, service, price
+        obj.save()
 
         saved_services.append({
             "category": category.name,
@@ -508,24 +517,63 @@ def save_doctor_services(request):
     # ----------------------------
     # SAVE VISIT CHARGES
     # ----------------------------
-    for v in visits:
+    elif edit_id and edit_type == "visit":
+        if not visits:
+            return JsonResponse({"success": False, "error": "Visit charge details are required."}, status=400)
+        v = visits[0]
         try:
             visit_type = VisitType.objects.get(id=v["visit_type_id"])
-        except VisitType.DoesNotExist:
-            continue
-
-        obj, created = DoctorVisitCharge.objects.update_or_create(
-            doctor=doctor,
-            visit_type=visit_type,
-            defaults={
-                "price": v.get("price") or 0
-            }
-        )
+            obj = get_object_or_404(DoctorVisitCharge, id=edit_id, doctor=doctor)
+            price = float(v.get("price") or 0)
+        except (VisitType.DoesNotExist, KeyError, ValueError, TypeError):
+            return JsonResponse({"success": False, "error": "Selected visit type is invalid."}, status=400)
+        obj.visit_type, obj.price = visit_type, price
+        obj.save()
 
         saved_visits.append({
             "visit_type": visit_type.name,
             "price": str(obj.price)
         })
+    else:
+        for s in services:
+            try:
+                category = ServiceCategory.objects.get(id=s["category_id"])
+                service  = ServiceDescription.objects.get(id=s["service_id"])
+                price = float(s.get("price") or 0)
+            except (ServiceCategory.DoesNotExist, ServiceDescription.DoesNotExist, KeyError, ValueError, TypeError):
+                return JsonResponse({"success": False, "error": "Choose a valid category, service and price."}, status=400)
+            if service.category_id != category.id:
+                return JsonResponse({"success": False, "error": "Selected service does not belong to this category."}, status=400)
+
+            obj = DoctorServiceRate.objects.filter(
+                doctor=doctor, category=category, service=service
+            ).order_by("id").first()
+            if obj:
+                obj.price = price
+                obj.save(update_fields=["price"])
+            else:
+                obj = DoctorServiceRate.objects.create(
+                    doctor=doctor, category=category, service=service, price=price
+                )
+            saved_services.append({"category": category.name, "service": service.name, "price": str(obj.price)})
+
+        for v in visits:
+            try:
+                visit_type = VisitType.objects.get(id=v["visit_type_id"])
+                price = float(v.get("price") or 0)
+            except (VisitType.DoesNotExist, KeyError, ValueError, TypeError):
+                return JsonResponse({"success": False, "error": "Choose a valid visit type and price."}, status=400)
+            obj = DoctorVisitCharge.objects.filter(
+                doctor=doctor, visit_type=visit_type
+            ).order_by("id").first()
+            if obj:
+                obj.price = price
+                obj.save(update_fields=["price"])
+            else:
+                obj = DoctorVisitCharge.objects.create(
+                    doctor=doctor, visit_type=visit_type, price=price
+                )
+            saved_visits.append({"visit_type": visit_type.name, "price": str(obj.price)})
 
     return JsonResponse({
         "success": True,
@@ -535,7 +583,9 @@ def save_doctor_services(request):
 
 @dashboard_login_required
 def get_doctor_services(request):
-    doctor = request.user_obj.doctor_profile
+    doctor = getattr(request.user_obj, "doctor_profile", None)
+    if doctor is None:
+        return JsonResponse({"success": False, "error": "Doctor profile was not found."}, status=400)
 
     services = DoctorServiceRate.objects.filter(
         doctor=doctor

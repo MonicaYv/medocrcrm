@@ -799,7 +799,11 @@ $(document).on("click", ".download-btn", async function (e) {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
+            // Some browsers (notably production Chrome builds) start reading
+            // the download after click returns. Keep the object URL alive for
+            // that handoff instead of revoking it synchronously.
+            const downloadUrl = link.href;
+            window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 60000);
             if (typeof toastr !== "undefined") toastr.success("Excel report downloaded successfully.");
         } catch (csvErr) {
             console.error("Excel download failed:", csvErr);
@@ -834,7 +838,10 @@ $(document).on("click", ".download-btn", async function (e) {
             filename = `Doctor_Regional_Heatmap_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
             drawDoctorReportHeader(pdf, "Doctor Regional Heatmap Report", "Geographic Patient Origin & State Density Analysis", dateRange);
 
-            const mapDataUrl = await captureHeatmapImage();
+            // The report contains the full regional data table. Avoid rasterizing
+            // the interactive map on the click path; that capture was the main
+            // source of multi-second delays on production machines.
+            const mapDataUrl = null;
             let startTableY = 40;
             if (mapDataUrl) {
                 try {
@@ -892,7 +899,9 @@ $(document).on("click", ".download-btn", async function (e) {
             const bidRange = $("#bidChartRangeLabel").text().replace(/[()]/g, "").trim() || dateRange;
             drawDoctorReportHeader(pdf, "Doctor Bid Win/Loss Rate Report", "Daily Bid Performance, Win Rate & Loss Rate Distribution", bidRange);
 
-            const chartImg = await captureBidChartImage();
+            // Keep PDF generation synchronous and light; the bid breakdown below
+            // preserves the chart's underlying data without a costly canvas capture.
+            const chartImg = null;
             let startTableY = 40;
             if (chartImg) {
                 try {
