@@ -21,6 +21,19 @@
 </head>
 <body>
 <style>
+  #crm-page-loader{position:fixed;inset:0;z-index:9999;background:#f8fafc;padding:clamp(1rem,4vw,3rem);display:grid;place-items:center;transition:opacity .18s ease,visibility .18s ease}
+  #crm-page-loader[hidden]{display:none}
+  .crm-loader-card{width:min(100%,1100px);display:grid;gap:1rem}
+  .crm-loader-line{height:1.1rem;border-radius:.5rem;background:linear-gradient(90deg,#e8edf3 25%,#f5f7fa 50%,#e8edf3 75%);background-size:200% 100%;animation:crm-shimmer 1.2s infinite}
+  .crm-loader-line:nth-child(1){width:38%;height:2rem}.crm-loader-line:nth-child(2){width:72%}.crm-loader-line:nth-child(3){width:100%;height:12rem}.crm-loader-line:nth-child(4){width:84%;height:4rem}
+  .download-btn,.download-report-btn{cursor:pointer!important}
+  @keyframes crm-shimmer{to{background-position:-200% 0}}
+  @media(prefers-reduced-motion:reduce){.crm-loader-line{animation:none}}
+</style>
+<div id="crm-page-loader" role="status" aria-label="Loading page">
+  <div class="crm-loader-card" aria-hidden="true"><div class="crm-loader-line"></div><div class="crm-loader-line"></div><div class="crm-loader-line"></div><div class="crm-loader-line"></div></div>
+</div>
+<style>
   .crm-main-area { min-width: 0; }
   @media (max-width: 767px) {
     html, body { max-width: 100%; overflow-x: hidden; }
@@ -64,6 +77,22 @@
 </main>
 </body>
 <script>
+  (function () {
+    var loader = document.getElementById('crm-page-loader');
+    if (!loader) return;
+    var hidden = false;
+    function hideLoader() {
+      if (hidden) return;
+      hidden = true;
+      loader.style.opacity = '0';
+      loader.style.visibility = 'hidden';
+      window.setTimeout(function () { loader.hidden = true; }, 200);
+    }
+    // Keep the page covered through layout, image and stylesheet loading. The
+    // cap prevents a stalled third party asset from blocking the dashboard.
+    window.addEventListener('load', hideLoader, { once: true });
+    window.setTimeout(hideLoader, 1800);
+  })();
   window.USER_TYPE = "{{ user.user_type }}";
 </script>
 

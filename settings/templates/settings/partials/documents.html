@@ -1466,7 +1466,7 @@
                     <span
                         class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
                     <p class="font-normal text-xs text-strong-red" title="{{ doc_status }}">Rejected</p>
-                    {% else %}
+                    {% elif not registration_certificate_filename %}
                     <span
                         class="material-symbols-outlined material-filled text-dodger-blue">schedule</span>
                     <p class="font-normal text-xs text-dodger-blue">Pending</p>
@@ -1533,7 +1533,7 @@
                     <span
                         class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
                     <p class="font-normal text-xs text-strong-red" title="{{ doc_status }}">Rejected</p>
-                    {% else %}
+                    {% elif not aadhar_doc_filename %}
                     <span
                         class="material-symbols-outlined material-filled text-dodger-blue">schedule</span>
                     <p class="font-normal text-xs text-dodger-blue">Pending</p>
@@ -1601,7 +1601,7 @@
                     <span
                         class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
                     <p class="font-normal text-xs text-strong-red" title="{{ doc_status }}">Rejected</p>
-                    {% else %}
+                    {% elif not pan_doc_filename %}
                     <span
                         class="material-symbols-outlined material-filled text-dodger-blue">schedule</span>
                     <p class="font-normal text-xs text-dodger-blue">Pending</p>
@@ -1670,7 +1670,7 @@
                     <span
                         class="material-symbols-outlined material-filled text-strong-red">disabled_by_default</span>
                     <p class="font-normal text-xs text-strong-red" title="{{ doc_status }}">Rejected</p>
-                    {% else %}
+                    {% elif not clinic_photo_filename %}
                     <span
                         class="material-symbols-outlined material-filled text-dodger-blue">schedule</span>
                     <p class="font-normal text-xs text-dodger-blue">Pending</p>
