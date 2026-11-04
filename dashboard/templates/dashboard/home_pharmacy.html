@@ -5,770 +5,510 @@
 
 {% block content %}
 
+<!-- Skeleton -->
 <div id="pharmacy-page-skeleton" class="flex flex-col gap-5 p-6 animate-pulse" aria-hidden="true">
-    <div class="bg-white rounded-[10px] p-5 space-y-6">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div class="space-y-3">
-                <div class="h-5 w-24 rounded bg-gray-200"></div>
-                <div class="h-4 w-36 rounded bg-gray-200"></div>
-            </div>
-            <div class="space-y-3 sm:w-48">
-                <div class="h-4 w-32 rounded bg-gray-200 sm:ml-auto"></div>
-                <div class="h-4 w-28 rounded bg-gray-200 sm:ml-auto"></div>
-            </div>
+    <div class="space-y-5 rounded-[10px] bg-white p-5">
+        <div class="h-5 w-24 rounded bg-gray-200"></div>
+        <div class="flex gap-3">
+            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[70%]"></div>
+            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[30%]"></div>
         </div>
-
-        <div class="flex flex-col gap-3 lg:flex-row ml-3">
-            <div class="h-[330px] w-full rounded-lg bg-gray-200 lg:w-[80%]"></div>
-            <div class="h-[330px] w-full rounded-lg bg-gray-200 lg:w-[20%]"></div>
+        <div class="h-20 rounded-lg bg-gray-200"></div>
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="h-24 rounded-lg bg-gray-200"></div>
+            <div class="h-24 rounded-lg bg-gray-200"></div>
+            <div class="h-24 rounded-lg bg-gray-200"></div>
         </div>
-
-        <div class="ml-3 space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-28 rounded bg-gray-200"></div>
-                <div class="h-8 w-8 rounded bg-gray-200"></div>
-            </div>
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <div class="h-32 rounded-lg bg-gray-200"></div>
-                <div class="h-32 rounded-lg bg-gray-200"></div>
-                <div class="h-32 rounded-lg bg-gray-200"></div>
-            </div>
-        </div>
-
-        <div class="ml-3 space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-40 rounded bg-gray-200"></div>
-                <div class="h-4 w-16 rounded bg-gray-200"></div>
-            </div>
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-            </div>
-        </div>
-
-        <div class="ml-3 h-44 rounded-lg bg-gray-200"></div>
-        <div class="ml-3 space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-36 rounded bg-gray-200"></div>
-                <div class="h-4 w-16 rounded bg-gray-200"></div>
-            </div>
-            <div class="h-28 rounded-md bg-gray-200"></div>
-        </div>
+        <div class="h-44 rounded-lg bg-gray-200"></div>
     </div>
 </div>
 
 <div id="pharmacy-page-content" class="is-ready">
-<!-- Main Content -->
-            <div
-                class="relative transition-all duration-300 main-content bg-slate-white h-full flex-1 flex flex-col gap-8 p-6 overflow-y-auto scroll">
-                <div
-                    class="show-sidebar-toggle hidden fixed top-[100px] left-0 z-50 h-10 w-10 bg-light-dodger-blue items-center justify-center rounded-r-md cursor-pointer">
-                    <span class="material-symbols-outlined bold-weight text-dodger-blue">
-                        arrow_forward_ios
-                    </span>
+<div class="main-content scroll relative flex h-full flex-1 flex-col gap-4 overflow-y-auto bg-[#FAF9FF] p-6 font-[Inter,sans-serif] text-slate-900 transition-all duration-300">
+
+    <div class="show-sidebar-toggle hidden fixed top-[100px] left-0 z-50 h-10 w-10 cursor-pointer items-center justify-center rounded-r-md bg-light-dodger-blue">
+        <span class="material-symbols-outlined bold-weight text-dodger-blue">arrow_forward_ios</span>
+    </div>
+
+    <!-- Page header -->
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined !text-xl">home</span>
+                <h1 class="text-base font-bold">Home</h1>
+            </div>
+            <div id="date" class="text-xs text-slate-500">{% now "l, F j, Y" %}</div>
+        </div>
+        <div id="infoSection" class="flex items-center gap-4 text-xs text-slate-600">
+            <div id="location" class="flex items-center gap-1">
+                <span class="material-symbols-outlined !text-sm">location_on</span>
+                <span id="location-text">{{ pharmacy_profile.city|default:"Location unavailable" }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <p>Auto Bid</p>
+                <label class="relative inline-block h-5 w-9 cursor-pointer">
+                    <input type="checkbox" id="autobid-toggle" class="peer sr-only" aria-label="Enable Auto Bid">
+                    <span class="absolute inset-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-[#1A73E8]"></span>
+                    <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4"></span>
+                </label>
+                <span class="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-[#1A73E8]">Rx</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Banner + Pharmacy card -->
+    <div class="flex flex-col gap-4 lg:flex-row">
+        <div class="relative h-[180px] w-full overflow-hidden rounded-[14px] border border-[#E8EEF2] bg-[linear-gradient(165deg,#0D9488,#068F95,#038AA2,#0485AE,#087FBA,#0F7AD1,#1A73E8)] lg:w-[60%]">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.2),rgba(255,255,255,0)_60%)]"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0B2A4A]/80"></div>
+            <div class="absolute bottom-0 left-0 p-4 text-[10px] leading-4 text-white">
+                <p class="text-xs font-semibold">🏪 {{ pharmacy_profile.company_name|default:"Pharmacy" }}</p>
+                <p>{{ pharmacy_profile.address|default:"Address not available" }}</p>
+                {% if pharmacy_profile.license_number %}<p>License: {{ pharmacy_profile.license_number }}</p>{% endif %}
+            </div>
+        </div>
+
+        <div class="flex flex-1 items-center gap-4 rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+            <div class="relative shrink-0">
+                <img id="admin-profile-photo"
+                     src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
+                     alt="Admin profile picture"
+                     class="h-[72px] w-[72px] rounded-[10px] border-2 border-[#1A73E8] bg-[#E8F0FE] object-cover">
+                <label for="admin-profile-photo-input" title="Change profile picture"
+                       class="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-[#1A73E8] text-white shadow">
+                    <span class="material-symbols-outlined !text-xs">edit</span>
+                </label>
+                <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
+                       data-upload-url="{% url 'upload_admin_profile_photo' %}">
+            </div>
+            <div class="min-w-0 text-[10px] leading-4 text-slate-500">
+                <p class="text-xs font-bold text-slate-900">{{ pharmacy_profile.company_name|default:"Pharmacy" }}</p>
+                <p class="text-[11px]">{{ contact_person.name|default:"N/A" }} — {{ contact_person.role|default:"N/A" }}</p>
+                <p class="font-medium text-[#1A73E8]">{{ user.phone_country_code|default:"+91" }} {{ pharmacy_profile.contact_number|default:user.phone_number|default:"N/A" }}</p>
+                {% if pharmacy_profile.gstin %}<p>GSTIN: {{ pharmacy_profile.gstin }}</p>{% endif %}
+                {% if pharmacy_profile.license_number %}<p>Reg: {{ pharmacy_profile.license_number }}</p>{% endif %}
+                <a href="{% url 'settings_page' %}" class="font-medium text-[#1A73E8]">Edit Profile →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="grid grid-cols-2 gap-y-3 rounded-[10px] border border-[#E8EEF2] bg-white py-4 lg:grid-cols-5 lg:divide-x lg:divide-[#E8EEF2]">
+        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">💳 Wallet Balance</p><p class="text-lg font-bold">₹8,240</p><a href="#" class="text-[10px] text-[#1A73E8]">Withdraw →</a></div>
+        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">⚡ Active Bids</p><p class="text-lg font-bold">5</p><a href="#" class="text-[10px] text-[#1A73E8]">View all →</a></div>
+        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">📦 Today's Orders</p><p class="text-lg font-bold">12</p><p class="text-[10px] text-[#1A73E8]">4 Pending · 8 Processing</p></div>
+        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">🚚 Out for Delivery</p><p class="text-lg font-bold text-[#1A73E8]">2</p><p class="text-[10px] text-[#1A73E8]">On the way →</p></div>
+        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">⏱ Avg Response Time</p><p class="text-lg font-bold text-green-600">3 min</p></div>
+    </div>
+
+    <!-- Overview -->
+    <div id="pharmacy-overview" data-endpoint="{% url 'pharmacy_overview_data' %}" class="flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-bold">Overview <span id="pharmacy-overview-period" class="ml-2 font-normal text-slate-500">Today</span></p>
+            <div class="relative flex items-center gap-1.5 text-[10px]">
+                <button class="filterOption rounded-full bg-[#1A73E8] px-3 py-1 text-white" data-value="Today">Today</button>
+                <button class="filterOption rounded-full border border-[#E8EEF2] bg-white px-3 py-1 text-slate-600" data-value="Week">This Week</button>
+                <button class="filterOption rounded-full border border-[#E8EEF2] bg-white px-3 py-1 text-slate-600" data-value="Month">This Month</button>
+                <span class="calendar-icon material-symbols-outlined cursor-pointer !text-base text-slate-500">calendar_today</span>
+                <div class="datepicker-container absolute right-0 top-full z-50 hidden rounded bg-white px-4 pb-3 shadow-md">
+                    <div class="datepicker-inline"></div>
                 </div>
-                 <div class="bg-white rounded-[10px] p-5">
-                    <div class="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="flex flex-col  gap-2">
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-xl! font-semibold!">home</span>
-                                <h1 class="text-base font-semibold">Home</h1>
-                                
-                            </div>
-                            <div id="date" class="font-normal text-base"></div>
-                        </div>
-                        <div class="flex flex-col  gap-2 lg:items-center " id="infoSection">
-                            <div class="flex flex-col gap-2">
-                                <div id="location" class="font-normal text-base flex items-center gap-2">
-                                    <span class="material-symbols-outlined !text-base"> location_on </span>
-                                    <span id="location-text">
-                                        {{ pharmacy_profile.city|default:"Location unavailable" }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                <p>Auto Bid</p>
+            </div>
+        </div>
 
-                                <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
-                                    <input
-                                    type="checkbox"
-                                    id="autobid-toggle"
-                                    class="sr-only peer"
-                                    aria-label="Enable Auto Bid"
-                                    >
+        <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <div class="relative rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+                <span class="absolute right-3 top-3 text-[9px]">📦</span>
+                <p class="text-[11px] text-slate-500">Total Orders Today</p>
+                <p id="pharmacy-overview-total-orders" class="text-3xl font-bold">{{ pharmacy_overview.total_orders }}</p>
+                <p class="text-[10px] text-[#1A73E8]">🔵 <span id="pharmacy-overview-pending-orders">{{ pharmacy_overview.pending_orders }}</span> Pending · <span id="pharmacy-overview-confirmed-orders">{{ pharmacy_overview.confirmed_orders }}</span> Confirmed</p>
+            </div>
+            <div class="relative rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+                <span class="absolute right-3 top-3 text-[9px]">▫️</span>
+                <p class="text-[11px] text-slate-500">Pending Requests</p>
+                <p class="text-3xl font-bold">24</p>
+                <p class="text-[10px] text-amber-500">⏰ Respond before timer expires</p>
+            </div>
+            <div class="relative rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+                <span class="absolute right-3 top-3 text-[9px]">👑</span>
+                <p class="text-[11px] text-slate-500">Customer Rating</p>
+                <p class="text-3xl font-bold">4.6</p>
+                <p class="text-[10px] text-amber-500">★★★★½ Based on 218 reviews</p>
+            </div>
+        </div>
+        <!-- Kept hidden so pharmacy-overview.js can still update them -->
+        <div class="hidden"><span id="pharmacy-overview-total-stock">{{ pharmacy_overview.total_stock }}</span><span id="pharmacy-overview-available-stock">{{ pharmacy_overview.available_stock }}</span><span id="pharmacy-overview-low-stock">{{ pharmacy_overview.low_stock_medicines }}</span><span id="pharmacy-overview-revenue">{{ pharmacy_overview.revenue }}</span><span id="pharmacy-overview-prescription-revenue">{{ pharmacy_overview.prescription_revenue }}</span><span id="pharmacy-overview-otc-revenue">{{ pharmacy_overview.otc_revenue }}</span></div>
+    </div>
 
-                                    <div
-                                    class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5">
-                                    </div>
-
-                                    <div
-                                    class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal">
-                                    </div>
-                                </label>
-
-                                <div
-                                    class="bg-gradient-to-r from-caribbean-green to-azure-radiance w-6 h-6 rounded-[7px] text-white text-xs flex items-center justify-center">
-                                    Rx
-                                </div>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Recent Orders + This Week -->
+    <div class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
+        <div class="rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+            <div class="mb-3 flex items-center justify-between">
+                <p class="text-xs font-bold">Recent Orders</p>
+                <a href="{% url 'orders' %}" class="text-[10px] text-[#1A73E8]">View All →</a>
+            </div>
+            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+                {% for order in scheduled_orders %}
+                <div class="order-card popup-btn cursor-pointer rounded-lg border border-[#E8EEF2] bg-white p-3"
+                     data-popup="order-details-popup" data-order-id="{{ order.id }}">
+                    <div class="flex flex-wrap items-center justify-between gap-1 text-[9px] font-medium">
+                        <span class="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-green-700">Home Delivery</span>
+                        <span class="rounded-full px-2 py-0.5
+                            {% if order.order_status|lower == 'pending' %}bg-amber-100 text-amber-600
+                            {% elif order.order_status|lower == 'confirmed' or order.order_status|lower == 'shipped' %}bg-[#E8F0FE] text-[#1A73E8]
+                            {% else %}bg-green-100 text-green-700{% endif %}">{{ order.order_status|title }}</span>
                     </div>
+                    <p class="mt-2 text-xs font-bold text-slate-900">
+                        {% if order.user__userprofile__first_name %}{{ order.user__userprofile__first_name }} {{ order.user__userprofile__last_name|default:'' }}{% else %}Customer{% endif %}
+                    </p>
+                    <p class="text-[10px] text-[#1A73E8]">{{ order.created_at|date:"d/m/Y, h:i A" }}</p>
+                    {# Adjust these 3 field names to whatever your scheduled_orders query returns #}
+                    {% if order.medicines %}<p class="mt-1.5 text-[9px] leading-3 text-slate-500">{{ order.medicines }}</p>{% endif %}
+                    {% if order.total_amount %}
+                    <p class="mt-1.5 text-[10px] font-semibold {% if order.payment_mode == 'Cash on Delivery' %}text-amber-500{% else %}text-green-600{% endif %}">
+                        ₹{{ order.total_amount }} · {{ order.payment_mode|default:"UPI Paid" }}{% if order.payment_mode != 'Cash on Delivery' %} ✅{% endif %}
+                    </p>
+                    {% else %}
+                    <p class="mt-1.5 text-[10px] text-slate-500">Order #{{ order.id }}</p>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="col-span-3 py-6 text-center text-sm text-slate-500">No scheduled orders found.</p>
+                {% endfor %}
+            </div>
+        </div>
 
-                    <!--Map-->
-                    <div class="flex flex-col lg:flex-row items-start gap-3 pt-5 ml-3">
+        <div class="rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+            <div class="mb-3 flex items-center justify-between">
+                <p class="text-xs font-bold">This Week</p>
+                <p class="text-[9px] text-slate-500">16–22 Jul 2025</p>
+            </div>
+            <div class="grid grid-cols-2 border-y border-[#E8EEF2] text-center text-[9px] text-slate-500">
+                <div class="border-b border-r border-[#E8EEF2] py-3"><p class="text-base font-bold text-green-600">48</p>Orders Won</div>
+                <div class="border-b border-[#E8EEF2] py-3"><p class="text-base font-bold text-red-600">2</p>Cancelled</div>
+                <div class="border-r border-[#E8EEF2] py-3"><p class="text-base font-bold text-[#1A73E8]">52</p>Bids Answered</div>
+                <div class="py-3"><p class="text-base font-bold text-slate-700">8</p>Docs Shared</div>
+            </div>
+            <p class="mt-3 text-[10px] font-bold">Target vs Actual</p>
+            <div class="mt-2 space-y-2 text-[9px] text-slate-600">
+                <div><div class="flex justify-between"><span>Avg Delivery Time</span><span>28 min avg</span></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-3/5 rounded-full bg-amber-500"></div></div></div>
+                <div><div class="flex justify-between"><span>Bid Conversion Rate</span><span>72%</span></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-[72%] rounded-full bg-[#1A73E8]"></div></div></div>
+            </div>
+        </div>
+    </div>
 
-                        <!-- LEFT SECTION -->
-                        <div class="relative lg:w-[80%] w-full">
-                            <img
-                                src="/static/images/map-bg.png"
-                                alt="Map"
-                                class="w-full h-[330px] object-cover rounded-lg"
-                            >
+    <!-- Inventory Alerts -->
+    <div class="rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+        <div class="mb-3 flex items-center justify-between">
+            <p class="text-sm font-bold text-amber-700">⚠️ Inventory Alerts</p>
+            <a href="#" class="text-xs text-[#1A73E8]">View All Inventory →</a>
+        </div>
+        <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <div class="rounded-lg border-l-4 border-amber-500 bg-amber-50 p-3 text-xs"><span class="rounded-full bg-white px-2 py-0.5 text-[10px] text-amber-600">Low Stock</span><p class="mt-2 font-bold">Crocin 500mg Tablet</p><p class="text-[10px] text-slate-500">GSK Pharma · Pain Relief</p><p class="mt-1 font-semibold text-amber-600">12 strips remaining</p><a href="#" class="text-amber-600">Reorder Now →</a></div>
+            <div class="rounded-lg border-l-4 border-amber-500 bg-pink-50 p-3 text-xs"><span class="rounded-full bg-white px-2 py-0.5 text-[10px] text-red-600">Critical</span><p class="mt-2 font-bold">Metformin 500mg</p><p class="text-[10px] text-slate-500">Sun Pharma · Diabetes</p><p class="mt-1 font-semibold text-red-600">3 strips remaining</p><a href="#" class="text-red-600">Reorder Now →</a></div>
+            <div class="rounded-lg border-l-4 border-amber-500 bg-pink-50 p-3 text-xs"><span class="rounded-full bg-white px-2 py-0.5 text-[10px] text-red-600">Out of Stock</span><p class="mt-2 font-bold">Insulin Glargine 100IU</p><p class="text-[10px] text-slate-500">Sanofi · Diabetes</p><p class="mt-1 font-semibold text-red-600">0 units</p><a href="#" class="text-red-600">Reorder Now →</a></div>
+        </div>
+    </div>
 
-                            <div class="absolute inset-0 flex items-end">
-                                <div class="bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-4 rounded-b-lg">
+    <!-- Order Requests -->
+    <div class="overflow-hidden rounded-[10px] border border-[#E8EEF2] bg-white">
+        <div class="flex items-center justify-between p-4">
+            <p class="text-sm font-bold">Order Requests</p>
+            <a href="{% url 'orders' %}" class="text-xs text-[#1A73E8]">View All →</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[980px] text-left text-[11px]">
+                <thead class="text-[10px] uppercase text-slate-500">
+                    <tr>
+                        <th class="px-4 py-2 font-medium">Customer</th><th class="px-4 py-2 font-medium">Medicines Requested</th><th class="px-4 py-2 font-medium">Date &amp; Time</th><th class="px-4 py-2 font-medium">Delivery</th><th class="px-4 py-2 font-medium">Prescription</th><th class="px-4 py-2 font-medium">Urgency</th><th class="px-4 py-2 font-medium">Budget</th><th class="px-4 py-2 font-medium">Timer</th><th class="px-4 py-2 font-medium">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-green-500">MS</span><div><p class="font-semibold text-slate-900">Monica Singh</p><p class="text-[10px] text-slate-500">Kidney Stone meds</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Crocin 500mg × 3 + Vitamin C × 2</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 12:30 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹500</td>
+                        <td class="px-4 py-2.5"><span class="font-semibold text-red-600">18m left</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-amber-500">GS</span><div><p class="font-semibold text-slate-900">Gaurav Sharma</p><p class="text-[10px] text-slate-500">Diabetes</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Metformin 500mg × 1 + Pantop 40mg × 1</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 01:00 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹280</td>
+                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">21m left</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-[#1A73E8]">PS</span><div><p class="font-semibold text-slate-900">Priya Sharma</p><p class="text-[10px] text-slate-500">Antibiotic</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Amoxicillin 500mg × 2 + Azithromycin</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 01:30 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Emergency</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹420</td>
+                        <td class="px-4 py-2.5"><span class="font-semibold text-red-600">8m left</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-violet-600">RK</span><div><p class="font-semibold text-slate-900">Rajan Mehta</p><p class="text-[10px] text-slate-500">Cardiac meds</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Atorva 10mg × 1 + Ecosprin 75mg × 1</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 02:00 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-100 px-2 py-0.5 text-[#1A73E8]">Store Pickup</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹180</td>
+                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">34m left</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-teal-600">AN</span><div><p class="font-semibold text-slate-900">Anil Kumar</p><p class="text-[10px] text-slate-500">Pain relief</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Combiflam × 2 + Volini Gel × 1</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 02:30 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹120</td>
+                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">47m left</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-pink-600">DS</span><div><p class="font-semibold text-slate-900">Deepa Shah</p><p class="text-[10px] text-slate-500">Vitamins</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Vitamin D3 60K × 4 + Calcium × 1</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 03:00 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹320</td>
+                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">1h 2m</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-slate-500">VM</span><div><p class="font-semibold text-slate-900">Vijay Mehta</p><p class="text-[10px] text-slate-500">BP medicines</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Amlodipine 5mg × 1 + Losartan 50mg</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 03:30 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-100 px-2 py-0.5 text-[#1A73E8]">Store Pickup</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹200</td>
+                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">1h 18m</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-amber-500">KN</span><div><p class="font-semibold text-slate-900">Kavitha Nair</p><p class="text-[10px] text-slate-500">Allergy</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Cetirizine 10mg × 2 + Montair LC × 1</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 04:00 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹140</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-50 px-2 py-0.5 text-[#1A73E8]">Bid Sent</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-slate-300 px-3 py-1 text-slate-500">View Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-green-500">SP</span><div><p class="font-semibold text-slate-900">Sneha Patil</p><p class="text-[10px] text-slate-500">Gastro</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Pantoprazole 40mg × 1 + Cremaffin × 1</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 04:30 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹180</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-50 px-2 py-0.5 text-[#1A73E8]">Bid Sent</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-slate-300 px-3 py-1 text-slate-500">View Bid</button></div></td>
+                    </tr>
+                    <tr class="border-t border-[#E8EEF2]">
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-red-600">AR</span><div><p class="font-semibold text-slate-900">Anjali Rao</p><p class="text-[10px] text-slate-500">Post-surgical</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Augmentin 625mg × 2 + Dolo 650 × 1</td>
+                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 05:00 PM</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹380</td>
+                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">2d left</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-                                    <div class="flex flex-col gap-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined">home</span>
+    <!-- Market Trends -->
+    <div class="flex flex-col gap-2 rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-bold">📊 Market Trends — Pharmacy Insights</p>
+            <a href="#" class="text-xs font-medium text-[#1A73E8]">₹200 →</a>
+        </div>
+        <ul class="flex flex-col gap-1.5 text-[11px] text-slate-600">
+            <li>✅ Top requested medicines in your area: <b class="text-slate-900">Crocin 500mg · Metformin 500mg · Vitamin D3</b></li>
+            <li>✅ Avg winning bid by Pharmacy: <b class="text-slate-900">₹320 per medicine order</b></li>
+            <li>✅ Most popular delivery mode this week: <b class="text-slate-900">Home Delivery (+24%)</b></li>
+        </ul>
+        <button class="mt-1 w-full rounded-md bg-[#1A73E8] py-2.5 text-xs font-bold text-white">View Full Insights Report →</button>
+    </div>
 
-                                            <p class="text-base font-semibold">
-                                                {{ pharmacy_profile.company_name|default:"Pharmacy" }}
-                                            </p>
-                                        </div>
+    <!-- Order Details Popup (logic/IDs unchanged) -->
+    <div class="order-details-popup popup-overlay fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-3">
+        <div class="popup-content scroll relative max-h-[90vh] w-[680px] overflow-y-auto rounded-lg bg-white p-4 shadow-xl">
+            <div class="flex items-center justify-between px-6 py-3">
+                <h2 class="text-base font-bold">User Information</h2>
+                <div class="flex items-center gap-4">
+                    <button class="pharmacy-open-share cursor-pointer"><span class="material-symbols-outlined !text-xl">share</span></button>
 
-                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                            <p class="font-semibold text-sm">
-                                                {{ pharmacy_profile.address|default:"Address not available" }}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                </div>
+                    <!-- Share popup -->
+                    <div class="pharmacy-share-modal fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+                        <div class="relative w-[520px] rounded-lg bg-white p-6 shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <p class="text-xl font-semibold">Share</p>
+                                <span class="material-symbols-outlined pharmacy-close-share cursor-pointer">close</span>
                             </div>
-                        </div>
-
-                        <!-- RIGHT PROFILE -->
-                        <div class="bg-pale-azure lg:w-[20%] h-[330px] px-4 py-2 rounded-lg">
-
-                            <h1 class="text-center text-lg font-semibold">
-                                Admin Details
-                            </h1>
-
-                            <div class="flex items-center justify-center py-[22.5px]">
-                                <div class="relative">
-                                    <img
-                                        id="admin-profile-photo"
-                                        src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
-                                        alt="Admin profile picture"
-                                        class="w-20 h-20 rounded-full object-cover">
-                                    <label for="admin-profile-photo-input"
-                                        class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-dodger-blue text-white flex items-center justify-center cursor-pointer shadow"
-                                        title="Change profile picture">
-                                        <span class="material-symbols-outlined !text-base">edit</span>
-                                    </label>
-                                    <input id="admin-profile-photo-input" type="file"
-                                        accept="image/jpeg,image/png" class="hidden"
-                                        data-upload-url="{% url 'upload_admin_profile_photo' %}">
-                                </div>
-                            </div>
-
-                            <!-- <div class="flex flex-col items-center gap-2">
-                                <p class="font-semibold text-sm">Jhon Doe</p>
-
-                                <p class="font-semibold text-sm text-dodger-blue">
-                                    +91 7763847590
-                                </p>
-
-                                <p class="font-semibold text-sm">
-                                    Designation: Receptionist
-                                </p> -->
-                                <p class="font-semibold text-sm">
-                                   {{ contact_person.name|default:"N/A" }}
-                                </p>
-
-                                <p class="font-semibold text-sm text-dodger-blue">
-                                    {{ user.phone_country_code|default:"+91" }} {{ pharmacy_profile.contact_number|default:user.phone_number|default:"N/A" }}
-                                </p>
-
-                                <p class="font-semibold text-sm">
-                                    Designation:
-                                    {{ contact_person.role|default:"N/A" }}
-                                </p>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!--Overview-->
-                    <div id="pharmacy-overview" data-endpoint="{% url 'pharmacy_overview_data' %}" class="pt-5 flex flex-col ml-3">
-                        <div class="flex justify-between items-center">
-                        <p class="font-semibold text-lg">Overview</p>
-                        <div class="flex items-center gap-2.5">
-                            <p id="pharmacy-overview-period" class="font-normal text-sm">Today</p>
-                            <div class="relative dropdown">
-                            <button
-                                class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
-                                <span class="material-symbols-outlined flex justify-center items-center">tune</span>
-                            </button>
-                            <div
-                                class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                                <div
-                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray filterOption"data-value="Today" >
-                                <span class="material-symbols-outlined !text-lg text-dodger-blue">
-                                    check
-                                </span>Today
-                                </div>
-                                <div
-                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray filterOption" data-value="Week">
-                                <span class="material-symbols-outlined !text-lg text-light-gray">
-                                    check
-                                </span>Week
-                                </div>
-                                <div
-                                class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray filterOption" data-value="Month">
-                                <span class="material-symbols-outlined !text-lg text-light-gray">
-                                    check
-                                </span>Month
-                                </div>
-                                <div
-                                class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray filterOption" data-value="Custom">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-symbols-outlined !text-lg text-light-gray">
-                                    check
-                                    </span>Custom
-                                </div>
-                                <span class="material-symbols-outlined calendar-icon">calendar_today</span>
-                                </div>
-                            </div>
-                            <div
-                                class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
-                                <div class="datepicker-inline"></div>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-4">
-                        <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                            <div class="flex flex-col gap-2">
-                            <p class="font-normal text-sm">Total Orders</p>
-                            <p id="pharmacy-overview-total-orders" class="font-semibold text-2xl">{{ pharmacy_overview.total_orders }}</p>
-                            <p class="text-green font-normal text-xs">Confirmed: <span id="pharmacy-overview-confirmed-orders">{{ pharmacy_overview.confirmed_orders }}</span></p>
-                            <p class="text-golden-yellow1 font-normal text-xs">Pending: <span id="pharmacy-overview-pending-orders">{{ pharmacy_overview.pending_orders }}</span></p>
-                            </div>
-                            <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                            <img src="/static/images/orders-box.svg" alt="">
-                            </div>
-                        </div>
-
-                        <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                            <div class="flex flex-col gap-2">
-                            <p class="font-normal text-sm">Medicine in Stock</p>
-                            <p id="pharmacy-overview-total-stock" class="font-semibold text-2xl">{{ pharmacy_overview.total_stock }}</p>
-                            <p class="font-normal text-xs text-green">Available: <span id="pharmacy-overview-available-stock">{{ pharmacy_overview.available_stock }}</span></p>
-                            <p class="font-normal text-xs text-crimson-red2">Low Stock: <span id="pharmacy-overview-low-stock">{{ pharmacy_overview.low_stock_medicines }}</span></p>
-                            </div>
-                            <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                            <img src="/static/images/stock-medicine.svg" alt="">
-                            </div>
-                        </div>
-
-                        <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                            <div class="flex flex-col gap-2">
-                            <p class="font-normal text-sm">Revenue</p>
-                            <p class="font-semibold text-2xl">₹<span id="pharmacy-overview-revenue">{{ pharmacy_overview.revenue }}</span></p>
-                            <p class="text-green font-normal text-xs">Prescribe Orders: ₹<span id="pharmacy-overview-prescription-revenue">{{ pharmacy_overview.prescription_revenue }}</span></p>
-                            <p class="text-golden-yellow1 font-normal text-xs">OTC Sales: ₹<span id="pharmacy-overview-otc-revenue">{{ pharmacy_overview.otc_revenue }}</span></p>
-                            </div>
-                            <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                            <img src="/static/images/revenue-wallet.svg" alt="">
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-
-                    <!-- Scheduled Orders -->
-                    <div class="pt-5 flex flex-col ml-3">
-                        <div class="flex justify-between items-center">
-                            <p class="font-semibold text-lg">Scheduled Order</p>
-                            <a href="{% url 'orders' %}"
-                            class="text-dodger-blue text-sm font-normal">
-                                View all
-                            </a>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-3 pt-4 gap-2">
-
-                            {% for order in scheduled_orders %}
-                            <div
-                                class="order-card popup-btn border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4 cursor-pointer"
-                                data-popup="order-details-popup" data-order-id="{{ order.id }}">
-
-                                <!-- Static Image -->
-                                <div>
-                                    <img src="/static/images/patient-1.svg" alt="Patient Profile">
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-
-                                    <!-- Status Badge -->
-                                    <div
-                                        class="rounded-lg px-3 py-2 font-semibold text-xs w-fit
-                                        {% if order.order_status == 'Pending' %}
-                                            bg-pale-azure text-dodger-blue
-                                        {% elif order.order_status == 'Confirmed' %}
-                                            bg-peach text-burnt-orange
-                                        {% elif order.order_status == 'Shipped' %}
-                                            bg-peach text-burnt-orange
-                                        {% else %}
-                                            bg-gray-100 text-gray-600
-                                        {% endif %}">
-                                        <p>{{ order.order_status|title }}</p>
-                                        {% comment %} <p>Status: {{ order.bids__bid_status }}</p>
-                                        <p>Order: {{ order.id }}</p> {% endcomment %}
-                                    </div>
-
-                                    <!-- Dynamic Data -->
-                                    <p class="font-semibold text-sm">
-                                        Pt.
-                                        {% if order.user__userprofile__first_name %}
-                                            {{ order.user__userprofile__first_name }}
-                                            {{ order.user__userprofile__last_name|default:'' }}
-                                        {% else %}
-                                            Customer
-                                        {% endif %}
-                                    </p>
-
-                                    <p class="font-semibold text-sm">
-                                        #{{ order.id }}
-                                    </p>
-
-                                    <p class="font-normal text-sm text-green">
-                                        {{ order.created_at|date:"d/m/Y, h:i A" }}
-                                    </p>
-
-                                </div>
-                            </div>
-                            {% empty %}
-                            <div class="col-span-3 text-center py-6 text-gray-500">
-                                No scheduled orders found.
-                            </div>
-                            {% endfor %}
-
-                        </div>
-                    </div>
-                    <!-- Subscription Details -->
-                    <div class="bg-white border border-cool-ice-gray rounded-sm p-4 flex flex-col gap-4 mt-5 ml-3">
-                        <div class="flex items-center justify-between">
-                        <p class="font-semibold text-lg text-midnight-blue-gray">Subscription Details</p>
-                        <div class="w-[120px] h-10 flex items-center justify-center bg-premium-light-blue rounded-[10px]">
-                            {% if active_subscription %}
-                                <span class="font-semibold text-base text-primary-blue">
-                                    Active
-                                </span>
-                            {% else %}
-                                <span class="font-semibold text-base text-red-500">
-                                    Inactive
-                                </span>
-                            {% endif %}
-                        </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                        <p class="font-normal text-lg text-midnight-blue-gray">Premium Subscription Plan</p>
-                        <p class="font-bold text-[32px] text-blue-charcoal">&#8377;999<span
-                            class="font-normal text-base">/month</span></p>
-                        </div>
-                        <div class="flex flex-col gap-3">
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold text-base text-cool-gray">High-value leads</p>
-                            <p class="font-normal text-sm text-cool-gray text-left">24th May, 2026 (32 days left)</p>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold text-base text-cool-gray">Fewer but richer bids</p>
-                            <p class="font-normal text-sm text-cool-gray text-left! shrink-0">Featured listing</p>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold text-base text-cool-gray">Doctors gain in efficiency</p>
-                            <p class="font-normal text-sm text-cool-gray ">Analytics Dashboard</p>
-                        </div>
-                        </div>
-                        <div class="pt-3.5 flex items-center justify-center">
-                        <a href="{% url 'settings_page' %}?tab=subscription" class="bg-primary-blue w-[322px] h-10 rounded-lg flex items-center justify-center">
-                            <span class="font-semibold text-sm text-white">View Plan Details</span>
-                        </a>
-                        </div>
-                    </div>
-
-                    <!-- Popular Coupons -->
-                    <div class="pt-5 flex flex-col ml-3">
-                        <div class="flex justify-between items-center">
-                        <p class="font-semibold text-lg">Popular Coupons </p>
-                        <a href="{% url 'coupons' %}" class="text-dodger-blue text-sm font-normal">View all</a>
-                        </div>
-
-                        <div id="popular-coupons">
-                        {% if popular_coupons %}
-                            {% for cp in popular_coupons %}
-                                <div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card">
-                                    <div class="flex w-full lg:justify-between lg:items-center flex-col lg:flex-row">
-                                        <div class="flex flex-col">
-                                            <p class="font-bold text-sm text-dodger-blue tracking-[0.25em] uppercase">
-                                                Category : {{ cp.brand_name.name|default:"Brand name" }}
-                                            </p>
-                                            <p class="font-bold text-lg text-jet-black">{{ cp.title }}</p>
-                                            <p class="font-normal text-base text-dark-gray">{{ cp.description|truncatechars:80 }}</p>
-                                        </div>
-                                        <div class="lg:flex">
-                                            <div class="flex flex-col pt-4">
-                                                <div class="flex lg:justify-between lg:items-center gap-6">
-                                                    <p class="font-normal text-base text-jet-black">Redeemed</p>
-                                                    <p class="text-xs font-medium text-jet-black">{{ cp.redeemed_count }}/{{ cp.max_redemptions }}</p>
-                                                </div>
-                                                <div class="w-full max-w-md pt-4">
-                                                    <div class="w-full bg-gray-200 rounded-full h-2">
-                                                        <div class="bg-dodger-blue h-2 rounded-full" style="width: {{ cp.redeemed_count|floatformat:0 }}%"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
-                                            <div class="pt-4">
-                                                <button
-                                                    class="copy-coupon bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer"
-                                                    data-code="{{ cp.code }}">
-                                                    {{ cp.code }}
-                                                    <span class="material-symbols-outlined">content_copy</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-center text-gray-500 mt-6">No coupons available.</p>
-                        {% endif %}
-                        </div>
-
-                    </div>
-
-                    <!-- Order Details Popup -->
-                    <div
-                        class="order-details-popup popup-overlay fixed inset-0 bg-black/40 hidden items-center justify-center z-50 px-3">
-                        <div
-                        class="popup-content rounded-[8px] w-[680px] max-h-[90vh] overflow-y-auto relative shadow-xl bg-white p-4 scroll">
-                        <!-- Header -->
-
-
-                        <div class="flex justify-between items-center px-6 py-3  border-blue-haze z-10">
-                            <h2 class="text-base font-bold">User Information</h2>
-                            <div class="flex items-center gap-4">
-                            <button class="cursor-pointer pharmacy-open-share">
-                                <span class="material-symbols-outlined !text-xl">share</span>
-                            </button>
-
-                            <!-- Pharmacy Share Popup -->
-                            <div class="pharmacy-share-modal hidden fixed inset-0 bg-black/40 z-50 items-center justify-center">
-
-                                <div class="bg-white w-[520px] rounded-lg shadow-lg p-6 relative">
-
-                                <!-- Header -->
-                                <div class="flex justify-between items-center">
-                                    <p class="font-semibold text-xl">Share</p>
-                                    <span class="material-symbols-outlined pharmacy-close-share cursor-pointer">
-                                    close
-                                    </span>
-                                </div>
-
-                                <hr class="mt-4" />
-
-                                <!-- Share Icons -->
+                            <hr class="mt-4" />
                             <div class="flex justify-between pt-4">
-                                <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                    <img id="shareWhatsapp"
-                                        src="/static/images/whatsappicon.svg"
-                                        class="w-10 h-10 cursor-pointer" />
-                                    <p>Whatsapp</p>
-                                </div>
-
-                                <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                    <img id="shareTelegram"
-                                        src="/static/images/telegramicon.svg"
-                                        class="w-10 h-10 cursor-pointer" />
-                                    <p>Telegram</p>
-                                </div>
-
-                                <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                    <img id="shareFacebook"
-                                        src="/static/images/facebookicon.svg"
-                                        class="w-10 h-10 cursor-pointer" />
-                                    <p>Facebook</p>
-                                </div>
-
-                                <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                    <img id="shareSMS"
-                                        src="/static/images/smsicon.svg"
-                                        class="w-10 h-10 cursor-pointer" />
-                                    <p>Message</p>
-                                </div>
-
-                                <div class="flex flex-col items-center gap-2 w-20 text-center">
-                                    <img id="shareEmail"
-                                        src="/static/images/gmailicon.svg"
-                                        class="w-10 h-10 cursor-pointer" />
-                                    <p>E-mail</p>
-                                </div>
+                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareWhatsapp" src="/static/images/whatsappicon.svg" class="h-10 w-10 cursor-pointer" /><p>Whatsapp</p></div>
+                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareTelegram" src="/static/images/telegramicon.svg" class="h-10 w-10 cursor-pointer" /><p>Telegram</p></div>
+                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareFacebook" src="/static/images/facebookicon.svg" class="h-10 w-10 cursor-pointer" /><p>Facebook</p></div>
+                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareSMS" src="/static/images/smsicon.svg" class="h-10 w-10 cursor-pointer" /><p>Message</p></div>
+                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareEmail" src="/static/images/gmailicon.svg" class="h-10 w-10 cursor-pointer" /><p>E-mail</p></div>
                             </div>
-
-                                <!-- Copy Link -->
-                                <div class="pt-4 relative mt-6">
-                                    <input type="text" class="pharmacy-share-link w-full rounded-md p-4 text-sm border"
-                                    value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci" disabled />
-
-                                    <button
-                                    class="pharmacy-copy-btn absolute right-3 top-6 bg-dodger-blue text-white rounded-md p-2">
-                                    Copy
-                                    </button>
-                                </div>
-
-                                </div>
-                            </div>
-
-
-                            <span
-                                class="close-popup material-symbols-outlined close-icon cursor-pointer text-black text-[13.15px]"
-                                data-popup="order-details-popup">close</span>
+                            <div class="relative mt-6 pt-4">
+                                <input type="text" class="pharmacy-share-link w-full rounded-md border p-4 text-sm" value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci" disabled />
+                                <button class="pharmacy-copy-btn absolute right-3 top-6 rounded-md bg-[#1A73E8] p-2 text-white">Copy</button>
                             </div>
                         </div>
-                        <!-- Content -->
-                        <div class="space-y-4">
-                            <div class="rounded-[12px] p-4 space-y-6">
-                            <!-- Customer Info -->
-                            <div class="bg-blue-50 p-4 rounded-md flex gap-4">
-                                <div class="flex flex-col ">
-                                <img id="profileImage" src="/static/images/dolly-paris1.svg" alt="">
-                                <p id="patientName" class="font-normal text-sm text-center pt-4">-</p>
-                                <p id="orderNumber" class="font-normal text-sm text-center pt-2">-</p>
+                    </div>
 
-                                </div>
+                    <span class="close-popup close-icon material-symbols-outlined cursor-pointer text-[13px] text-black" data-popup="order-details-popup">close</span>
+                </div>
+            </div>
 
-                                <div class="flex flex-col gap-4 w-[180px]">
-                                <div class="flex  gap-2">
-                                    <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                                        female
-                                    </span>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                    <p class="font-normal text-xs text-spanish-gray">Gender</p>
-                                    <p id="gender" class="font-normal text-sm">-</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex  gap-2">
-                                    <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                                        hourglass
-                                    </span>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                    <p class="font-normal text-xs text-spanish-gray">Age</p>
-                                    <p id="age" class="font-normal text-sm">-</p>
-                                    </div>
-                                </div>
-
-                                </div>
-
-                                <div class="flex flex-col gap-4">
-                                <div class="flex  gap-2">
-                                    <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                                        call
-                                    </span>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                    <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
-                                    <p id="phoneNumber" class="font-normal text-sm">-</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex  gap-2">
-                                    <div class="border border-light-gray rounded-lg w-6 h-6 flex items-center justify-center">
-                                    <img src="/static/images/address-icon.svg" alt="">
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                    <p class="font-normal text-xs text-spanish-gray">Address</p>
-                                    <p id="addressText" class="font-normal text-sm">-</p>
-                                    </div>
-                                </div>
-
-                                </div>
+            <div class="space-y-4">
+                <div class="space-y-6 rounded-xl p-4">
+                    <!-- Customer info -->
+                    <div class="flex gap-4 rounded-md bg-blue-50 p-4">
+                        <div class="flex flex-col">
+                            <img id="profileImage" src="/static/images/dolly-paris1.svg" alt="">
+                            <p id="patientName" class="pt-4 text-center text-sm">-</p>
+                            <p id="orderNumber" class="pt-2 text-center text-sm">-</p>
+                        </div>
+                        <div class="flex w-[180px] flex-col gap-4">
+                            <div class="flex gap-2">
+                                <div class="flex h-6 w-6 items-center justify-center rounded-lg border border-light-gray"><span class="material-symbols-outlined !text-lg text-[#1A73E8]">female</span></div>
+                                <div class="flex flex-col gap-2"><p class="text-xs text-slate-500">Gender</p><p id="gender" class="text-sm">-</p></div>
                             </div>
-
-                            <hr class="mt-4 text-blue-haze">
-
-
-                            <!-- Delivery Location -->
-                            <div id="openMap"
-                                class="flex items-center justify-between p-[12px] border border-light-gray2 rounded-[8px] cursor-pointer">
-
-                                <div class="flex items-center gap-3">
-                                <img src="/static/images/map_button.svg" alt="map icon" class="w-[33px] h-[30px]" />
-                                <div>
-                                    <p class="text-raisin-black text-sm">Delivering to <span class="font-semibold">Saket
-                                        Enclave</span> </p>
-                                    <p class="text-jet-black text-xs">Chhijarpur, New Delhi</p>
-                                </div>
-                                </div>
-
-                                <span class="material-symbols-outlined text-dark-gray text-[18px]">
-                                chevron_right
-                                </span>
-                            </div>
-
-                            <!-- QR Code Section -->
-                            <div class="p-[12px] border border-light-gray2 rounded-[8px] qr-section">
-
-                                <!-- Header -->
-                                <div class="flex items-center justify-between cursor-pointer qr-toggle">
-                                <div>
-                                    <p class="text-ebony font-bold text-sm">QR Code for Payment</p>
-                                    <p class="text-ebony font-medium text-xs">
-                                    Date: Tue, 25 June 2025 - 11:32 AM
-                                    </p>
-                                </div>
-                                <span class="material-symbols-outlined pl-[6.43px] text-dark-gray qr-icon">
-                                    expand_more
-                                </span>
-                                </div>
-
-                                <!-- QR CONTENT -->
-                                <div class="qr-content hidden mt-4 w-full flex justify-center items-center">
-                                <img src="/static/images/sample-qr.png" alt="Payment QR"
-                                    class="w-[160px] h-[160px] object-contain mx-auto" />
-                                </div>
-
-                            </div>
-
-                            <!-- Progress Bar -->
-                            <div class="enquiredDetail">
-                                <div class="flex flex-col mt-4 py-4 gap-4">
-                                <!-- Progress Bar -->
-                                <div class="flex justify-center items-center gap-1">
-                                    <!-- Enquiry -->
-                                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-
-                                    <!-- Appointment -->
-                                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-
-                                    <!-- Completed -->
-                                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-
-                                    <!-- Cancel/Expired -->
-                                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                                </div>
-
-                                <!-- Labels (text colors unchanged) -->
-                                <div class="flex items-center justify-between mx-10">
-                                    <p class="pl-6 text-ebony font-normal text-sm">Enquiry</p>
-                                    <p class="pl-2 text-ebony font-normal text-sm">Ongoing
-                                    </p>
-                                    <p class="text-arctic-gray font-normal text-sm">Completed</p>
-                                    <p class="text-arctic-gray font-normal text-sm">Cancel/Expired</p>
-                                </div>
-                                </div>
-                            </div>
-                            <!-- Medicine Items -->
-                            <div id="medicineContainer" class="space-y-3"></div>
-                            
-                            <!-- Order Info -->
-                            <div class="pt-4 flex flex-col gap-2">
-                                <div class="flex justify-between items-center">
-                                <p class="font-normal text-sm">Order ID</p>
-                                <p class="font-normal text-sm">6 km</p>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                                <p class="font-normal text-sm">20 mins away</p>
-                                </div>
-                            </div>
-
-                            <div class="flex justify-between items-center mt-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-
-                                <span class="font-normal text-sm">No Show</span>
-                                <input type="checkbox" class="w-4 h-4 accent-dodger-blue rounded cursor-pointer">
-                                </label>
-                                <p class="font-normal text-sm text-spanish-gray">Customer didn’t show up</p>
-                            </div>
-
-                            <div class="mt-2 flex justify-between items-center">
-                                <div class="flex gap-2 items-center">
-                                <p class="font-normal text-sm">Total</p>
-                                <p id="orderTotal" class="font-normal text-sm text-dodger-blue">₹0</p>
-                                </div>
-                                <div
-                                class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
-                                <p class="font-normal text-sm">View Invoice</p>
-                                <span class="material-symbols-outlined !text-lg">visibility</span>
-                                </div>
-                            </div>
-
-
-                            <!-- Action Buttons -->
-                            <div class="flex justify-center gap-3">
-                            <button
-                                class="close-popup w-[160px] px-6 py-3 rounded-[8px] bg-dodger-blue text-white text-[15px] popup-btn"
-                                data-popup="order-details-popup">
-                                Complete
-                            </button>
-
-                            <button
-                                class="close-popup w-[160px] close-popup px-6 py-3 rounded-[8px] border border-strong-red text-strong-red text-[15px] popup-btn"
-                                data-popup="cancel-order-popup">
-                                Cancel Order
-                            </button>
-                            </div>
-                            <!--cancel order Popup-->
-                            <div
-                            class="cancel-order-popup popup-overlay fixed inset-0 bg-black/40 hidden items-center justify-center z-50 px-3">
-                            <div
-                                class="popup-content rounded-[8px] w-[616px] overflow-y-auto relative shadow-xl bg-white p-4 scroll">
-                                <div class="absolute right-4 close-popup" data-popup="cancel-order-popup">
-                                <span class="material-symbols-outlined cursor-pointer">close</span>
-                                </div>
-                                <!-- Icon -->
-                                <div class="flex items-center justify-center mb-4">
-                                <div class="w-[60px] h-[60px] rounded-full bg-rosewater flex items-center justify-center">
-                                    <img src="/static/images/cancelorder-icon.svg" alt="cancelorder icon"
-                                    class="w-[32px] h-[32px] " />
-                                </div>
-                                </div>
-                                <!-- Message -->
-                                <p class="text-center text-dark-gray font-regular text-base mb-6">
-                                Are you sure you want to cancel this order ?
-                                </p>
-                                <!-- Cancel Button -->
-                                <button
-                                class="block mx-auto w-[198px] px-6 py-3 rounded-[6px] bg-rosewater text-error font-semibold text-base"
-                                id="confirmCancelOrder">
-                                Cancel Order
-                                </button>
-                            </div>
+                            <div class="flex gap-2">
+                                <div class="flex h-6 w-6 items-center justify-center rounded-lg border border-light-gray"><span class="material-symbols-outlined !text-lg text-[#1A73E8]">hourglass</span></div>
+                                <div class="flex flex-col gap-2"><p class="text-xs text-slate-500">Age</p><p id="age" class="text-sm">-</p></div>
                             </div>
                         </div>
+                        <div class="flex flex-col gap-4">
+                            <div class="flex gap-2">
+                                <div class="flex h-6 w-6 items-center justify-center rounded-lg border border-light-gray"><span class="material-symbols-outlined !text-lg text-[#1A73E8]">call</span></div>
+                                <div class="flex flex-col gap-2"><p class="text-xs text-slate-500">Phone no.</p><p id="phoneNumber" class="text-sm">-</p></div>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="flex h-6 w-6 items-center justify-center rounded-lg border border-light-gray"><img src="/static/images/address-icon.svg" alt=""></div>
+                                <div class="flex flex-col gap-2"><p class="text-xs text-slate-500">Address</p><p id="addressText" class="text-sm">-</p></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="mt-4 text-blue-haze">
+
+                    <!-- Delivery location -->
+                    <div id="openMap" class="flex cursor-pointer items-center justify-between rounded-lg border border-light-gray2 p-3">
+                        <div class="flex items-center gap-3">
+                            <img src="/static/images/map_button.svg" alt="map icon" class="h-[30px] w-[33px]" />
+                            <div>
+                                <p class="text-sm text-raisin-black">Delivering to <span class="font-semibold">Saket Enclave</span></p>
+                                <p class="text-xs text-jet-black">Chhijarpur, New Delhi</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-[18px] text-dark-gray">chevron_right</span>
+                    </div>
+
+                    <!-- QR -->
+                    <div class="qr-section rounded-lg border border-light-gray2 p-3">
+                        <div class="qr-toggle flex cursor-pointer items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-ebony">QR Code for Payment</p>
+                                <p class="text-xs font-medium text-ebony">Date: Tue, 25 June 2025 - 11:32 AM</p>
+                            </div>
+                            <span class="material-symbols-outlined qr-icon pl-1.5 text-dark-gray">expand_more</span>
+                        </div>
+                        <div class="qr-content mt-4 hidden w-full items-center justify-center">
+                            <img src="/static/images/sample-qr.png" alt="Payment QR" class="mx-auto h-[160px] w-[160px] object-contain" />
+                        </div>
+                    </div>
+
+                    <!-- Progress -->
+                    <div class="enquiredDetail">
+                        <div class="mt-4 flex flex-col gap-4 py-4">
+                            <div class="flex items-center justify-center gap-1">
+                                <div class="h-2 w-2 rounded-full bg-[#1A73E8]"></div><div class="h-0.5 w-[138px] bg-[#1A73E8]"></div>
+                                <div class="h-2 w-2 rounded-full bg-[#1A73E8]"></div><div class="h-0.5 w-[138px] bg-[#1A73E8]"></div>
+                                <div class="h-2 w-2 rounded-full bg-blue-haze"></div><div class="h-0.5 w-[138px] bg-blue-haze"></div>
+                                <div class="h-2 w-2 rounded-full bg-blue-haze"></div>
+                            </div>
+                            <div class="mx-10 flex items-center justify-between text-sm">
+                                <p class="pl-6 text-ebony">Enquiry</p><p class="pl-2 text-ebony">Ongoing</p>
+                                <p class="text-arctic-gray">Completed</p><p class="text-arctic-gray">Cancel/Expired</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="medicineContainer" class="space-y-3"></div>
+
+                    <div class="flex flex-col gap-2 pt-4 text-sm">
+                        <div class="flex justify-between"><p>Order ID</p><p>6 km</p></div>
+                        <div class="flex justify-between"><p class="text-blue-gray">Order #R32512</p><p>20 mins away</p></div>
+                    </div>
+
+                    <div class="mt-4 flex items-center justify-between">
+                        <label class="flex cursor-pointer items-center gap-2 text-sm">No Show
+                            <input type="checkbox" class="h-4 w-4 cursor-pointer rounded accent-blue-600">
+                        </label>
+                        <p class="text-sm text-slate-500">Customer didn’t show up</p>
+                    </div>
+
+                    <div class="mt-2 flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-2"><p>Total</p><p id="orderTotal" class="text-[#1A73E8]">₹0</p></div>
+                        <div class="flex cursor-pointer items-center gap-2 rounded-lg border border-[#1A73E8] bg-blue-50 px-2.5 py-1">
+                            <p>View Invoice</p><span class="material-symbols-outlined !text-lg">visibility</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-3">
+                        <button class="close-popup popup-btn w-[160px] rounded-lg bg-[#1A73E8] px-6 py-3 text-[15px] text-white" data-popup="order-details-popup">Complete</button>
+                        <button class="close-popup popup-btn w-[160px] rounded-lg border border-strong-red px-6 py-3 text-[15px] text-strong-red" data-popup="cancel-order-popup">Cancel Order</button>
+                    </div>
+
+                    <!-- Cancel order popup -->
+                    <div class="cancel-order-popup popup-overlay fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-3">
+                        <div class="popup-content scroll relative w-[616px] overflow-y-auto rounded-lg bg-white p-4 shadow-xl">
+                            <div class="close-popup absolute right-4" data-popup="cancel-order-popup"><span class="material-symbols-outlined cursor-pointer">close</span></div>
+                            <div class="mb-4 flex items-center justify-center">
+                                <div class="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-rosewater"><img src="/static/images/cancelorder-icon.svg" alt="cancelorder icon" class="h-8 w-8" /></div>
+                            </div>
+                            <p class="mb-6 text-center text-base text-dark-gray">Are you sure you want to cancel this order ?</p>
+                            <button id="confirmCancelOrder" class="mx-auto block w-[198px] rounded-md bg-rosewater px-6 py-3 text-base font-semibold text-error">Cancel Order</button>
                         </div>
                     </div>
                 </div>
             </div>
-            </div>
+        </div>
+    </div>
+
+</div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'js/coupons.js' %}"></script>
     <script src="{% static 'js/pharmacy-overview.js' %}?v=20261021-2"></script>
-   <script src="{% static 'js/autobid.js' %}"></script>
+    <script src="{% static 'js/autobid.js' %}"></script>
 {% endblock %}
