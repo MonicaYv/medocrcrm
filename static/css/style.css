@@ -222,6 +222,8 @@
   --color-kyc-light-gray: #646464;
   --color-kyc-green: #34c759;
   --color-kyc-medium-gray: #e2e8f0;
+  --color-pharmaceutical-green:#15803D;
+  --color-cloud-burst: #374151;
   --box-shadow-1: 4px 4px 10px 4px #3aafa926;
   --box-shadow-2: 0px 4px 4px 0px #00000040;
   --box-shadow-3: 4px 4px 10px 4px #00000033;
@@ -349,6 +351,16 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
   /* Hides scrollbar in Chrome, Safari, and Edge */
+}
+
+#sidebar > nav,
+#sidebar > nav ul {
+  scrollbar-width: none;
+}
+
+#sidebar > nav::-webkit-scrollbar,
+#sidebar > nav ul::-webkit-scrollbar {
+  display: none;
 }
 
 .material-symbols-outlined {
