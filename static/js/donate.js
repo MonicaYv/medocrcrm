@@ -381,6 +381,20 @@ function openDonationHistoryDatepicker($container) {
 
   let firstDate = "";
   $datepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+  $datepicker.datepicker("option", "changeMonth", true);
+  $datepicker.datepicker("option", "changeYear", true);
+  $datepicker.datepicker("option", "yearRange", "2000:2035");
+  $datepicker.datepicker("option", "firstDay", 0);
+  $datepicker.datepicker("option", "dayNamesMin", ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]);
+  $datepicker.datepicker("option", "monthNamesShort", ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+  $datepicker.datepicker("option", "beforeShowDay", function (date) {
+    const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+    const classes = [];
+    if (firstDate && dateText === firstDate) {
+      classes.push("hospital-date-range-start");
+    }
+    return [true, classes.join(" "), ""];
+  });
   $datepicker.datepicker("option", "onSelect", function (dateText) {
     if (!firstDate) {
       firstDate = dateText;
@@ -391,6 +405,7 @@ function openDonationHistoryDatepicker($container) {
       } else if (window.showToaster) {
         window.showToaster("info", "Please select an end date.");
       }
+      $datepicker.datepicker("refresh");
       return;
     }
 
@@ -402,12 +417,13 @@ function openDonationHistoryDatepicker($container) {
     $container.data("end-date", endDate);
     $container.data("range-label", "custom");
     loadDonationHistory(1, $container);
-    $datepicker.closest(".datepicker-container").hide();
+    $datepicker.closest(".datepicker-container").addClass("hidden").hide();
     firstDate = "";
+    $datepicker.datepicker("refresh");
   });
 
-  $container.find(".filterDropdown").hide();
-  $datepicker.closest(".datepicker-container").show();
+  $container.find(".filterDropdown").addClass("hidden").hide();
+  $datepicker.closest(".datepicker-container").removeClass("hidden").show();
 }
 
 // Initial tab click to load data
@@ -578,50 +594,208 @@ $(document).on("click", ".donation-history-print-btn", function () {
   printDonationElement(element);
 });
 
-$(document).on("click", ".donation-document-share", async function () {
-  const modal = $(this).closest(".popup");
-  const element = modal.find(".download-container > div[id$='Content']").get(0);
-  if (!element || typeof html2pdf !== "function") {
-    toastr.error("Donation document sharing is unavailable.");
-    return;
-  }
+let currentSharePdfFile = null;
+let currentShareTitle = "";
 
-  const isReceipt = element.id === "donateReceiptContent";
-  const filename = isReceipt ? "donation-receipt.pdf" : "platform-bill.pdf";
-  const title = isReceipt ? "Donation Receipt" : "Platform Bill";
-  const options = {
-    margin: 0.5,
-    filename,
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-  };
+function downloadPdfFile(file) {
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+function openDocumentShareModal(file, title) {
+  currentSharePdfFile = file;
+  currentShareTitle = title;
+  const $modal = $("#sharePopup");
+  if ($modal.length) {
+    $modal.css("z-index", "9999");
+    $modal.removeClass("hidden").addClass("flex");
+  }
+}
+
+$(document).on("click", ".donation-document-share, .view-donation-history-popup .share-btn", async function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const $btn = $(this);
+  if ($btn.hasClass("sharing-active")) return;
+
+  // Immediate visual feedback for instant responsiveness
+  $btn.addClass("sharing-active pointer-events-none opacity-60");
+  const originalText = $btn.text();
+  $btn.text("hourglass_top");
+
+  let cloneToRemove = null;
 
   try {
-    const pdf = await html2pdf().set(options).from(element).toPdf().get("pdf");
+    const modal = $btn.closest(".popup");
+    let element = modal.find(".download-container > div[id$='Content']").get(0);
+    let isExportHistory = false;
+
+    if (!element) {
+      element = modal.find(".download-container").get(0);
+      isExportHistory = true;
+    }
+
+    if (!element || typeof html2pdf !== "function") {
+      toastr.error("Donation document sharing is unavailable.");
+      return;
+    }
+
+    let filename = "donation-history.pdf";
+    let title = "Donation History";
+    if (element.id === "donateReceiptContent") {
+      filename = "donation-receipt.pdf";
+      title = "Donation Receipt";
+    } else if (element.id === "platformReceiptContent") {
+      filename = "platform-bill.pdf";
+      title = "Platform Bill";
+    }
+
+    let targetElement = element;
+    if (isExportHistory) {
+      const clone = element.cloneNode(true);
+      clone.style.position = "fixed";
+      clone.style.left = "-10000px";
+      clone.style.top = "0";
+      clone.style.width = `${$(element).outerWidth()}px`;
+      clone.style.height = "auto";
+      clone.style.maxHeight = "none";
+      clone.style.overflow = "visible";
+      clone.style.visibility = "visible";
+      clone.style.display = "block";
+      clone.style.zIndex = "1";
+      document.body.appendChild(clone);
+      targetElement = clone;
+      cloneToRemove = clone;
+    }
+
+    // High performance html2canvas & jsPDF configuration
+    const options = {
+      margin: isExportHistory ? 0.2 : 0.3,
+      filename: filename,
+      image: { type: "jpeg", quality: 0.95 },
+      html2canvas: {
+        scale: 1.5,
+        useCORS: true,
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+      },
+      jsPDF: { unit: "in", format: isExportHistory ? "letter" : "a4", orientation: "portrait" },
+    };
+
+    const pdf = await html2pdf().set(options).from(targetElement).toPdf().get("pdf");
     const blob = pdf.output("blob");
-    if (typeof File !== "undefined" && navigator.share && navigator.canShare) {
-      const file = new File([blob], filename, { type: "application/pdf" });
-      if (navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title });
-        return;
+
+    if (cloneToRemove) {
+      cloneToRemove.remove();
+      cloneToRemove = null;
+    }
+
+    if (!blob || blob.size === 0) {
+      throw new Error("Generated PDF blob is empty.");
+    }
+
+    const file = new File([blob], filename, { type: "application/pdf" });
+
+    // Try native Web Share API first
+    let sharedNatively = false;
+    if (typeof navigator !== "undefined" && navigator.share && navigator.canShare) {
+      try {
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: title,
+            text: `${title} - MedOCR`,
+          });
+          sharedNatively = true;
+          return;
+        }
+      } catch (shareErr) {
+        if (shareErr.name === "AbortError") {
+          return;
+        }
+        console.warn("Native file sharing unavailable or aborted, opening share modal:", shareErr);
       }
     }
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
-    toastr.info("The PDF was downloaded. You can now attach it to a message.");
+    // If native sharing is not supported or failed, open share popup modal
+    if (!sharedNatively) {
+      openDocumentShareModal(file, title);
+    }
   } catch (error) {
+    if (cloneToRemove) {
+      cloneToRemove.remove();
+    }
     if (error.name !== "AbortError") {
       console.error("Donation document sharing failed:", error);
-      toastr.error("Unable to share this donation document.");
+      toastr.error("Unable to prepare this document for sharing.");
     }
+  } finally {
+    $btn.removeClass("sharing-active pointer-events-none opacity-60");
+    $btn.text(originalText);
+  }
+});
+
+// Handle app clicks in share popup
+$(document).on("click", "#sharePopup .share-pdf", function () {
+  if (!currentSharePdfFile) {
+    toastr.error("Document is not available for sharing.");
+    return;
+  }
+
+  const app = $(this).data("app");
+  const fileName = currentSharePdfFile.name;
+  const docTitle = currentShareTitle || "Document";
+
+  downloadPdfFile(currentSharePdfFile);
+
+  const message = encodeURIComponent(
+    `Here is my ${docTitle} (${fileName}) from MedOCR.`
+  );
+  let shareUrl = "";
+
+  switch (app) {
+    case "whatsapp":
+      shareUrl = `https://api.whatsapp.com/send?text=${message}`;
+      break;
+    case "telegram":
+      shareUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.origin)}&text=${message}`;
+      break;
+    case "facebook":
+      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin)}&quote=${message}`;
+      break;
+    case "sms":
+      shareUrl = `sms:?body=${message}`;
+      break;
+    case "gmail":
+      shareUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${encodeURIComponent(docTitle)}&body=${message}`;
+      break;
+    default:
+      break;
+  }
+
+  if (shareUrl) {
+    window.open(shareUrl, "_blank", "noopener,noreferrer");
+  }
+  toastr.info(`Document downloaded. You can now attach it in ${app ? app.charAt(0).toUpperCase() + app.slice(1) : "the app"}.`);
+  $("#sharePopup").addClass("hidden").removeClass("flex");
+});
+
+// Close share popup on close button or background click
+$(document).on("click", "#sharePopup .close-share-popup, .close-share-popup", function () {
+  $("#sharePopup").addClass("hidden").removeClass("flex");
+});
+
+$(document).on("click", "#sharePopup", function (e) {
+  if (e.target === this) {
+    $(this).addClass("hidden").removeClass("flex");
   }
 });
 
@@ -999,6 +1173,17 @@ $(document).on("click", ".organization-daterange", function (e) {
       changeMonth: true,
       changeYear: true,
       yearRange: "2000:2035",
+      firstDay: 0,
+      dayNamesMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+      monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      beforeShowDay: function (date) {
+        const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+        const classes = [];
+        if (organizationCustomStartDate && dateText === organizationCustomStartDate) {
+          classes.push("hospital-date-range-start");
+        }
+        return [true, classes.join(" "), ""];
+      },
 
       onSelect: function (dateText) {
         console.log("Organization date selected:", dateText);
@@ -1009,7 +1194,8 @@ $(document).on("click", ".organization-daterange", function (e) {
           notifyOrganizationDateRangeIncomplete();
 
           $inline.datepicker("option", "minDate", dateText);
-          $status.text(`Start: ${dateText} — Select end date`);
+          $status.text(`Start: ${dateText} - Select end date`);
+          $inline.datepicker("refresh");
 
           console.log("Start date:", organizationCustomStartDate);
           console.log("Now select the end date.");
@@ -1039,7 +1225,8 @@ $(document).on("click", ".organization-daterange", function (e) {
         organizationCustomStartDate = "";
 
         $inline.datepicker("option", "minDate", null);
-        $calendar.hide();
+        $calendar.addClass("hidden").hide();
+        $inline.datepicker("refresh");
         $(".organization-daterange").removeClass("font-bold");
         $(".organization-daterange[data-range='custom']").addClass("font-bold");
 
@@ -1073,8 +1260,8 @@ $(document).on("click", ".organization-datepicker-back", function (e) {
   }
   organizationCustomStartDate = "";
   clearOrganizationDateRangeToast();
-  $calendar.hide();
-  $calendar.closest(".dropdown").find(".filterDropdown").first().show();
+  $calendar.addClass("hidden").hide();
+  $calendar.closest(".dropdown").find(".filterDropdown").first().removeClass("hidden").show();
 });
 
 

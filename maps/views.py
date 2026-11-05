@@ -428,22 +428,28 @@ def saved_amenity(request):
 def remove_from_saved(request):
     try:
         body = json.loads(request.body)
-        mongo_id = body["mongo_id"]
-        amenity_type = body["amenity_type"]
+        mongo_id = str(body.get("mongo_id", "")).strip()
+        amenity_type = body.get("amenity_type") or body.get("type")
     except (KeyError, json.JSONDecodeError):
         return JsonResponse({"error": "Invalid request"}, status=400)
 
+    if not mongo_id:
+        return JsonResponse({"error": "mongo_id is required"}, status=400)
+
     user = request.user_obj
-    deleted, _ = SavedLocation.objects.filter(
-        user=user,
-        mongo_id=mongo_id,
-        amenity_type=amenity_type
-    ).delete()
+    qs = SavedLocation.objects.filter(user=user, mongo_id=mongo_id)
+    if amenity_type:
+        qs = qs.filter(amenity_type__iexact=str(amenity_type).strip())
+
+    deleted, _ = qs.delete()
 
     if deleted == 0:
-        return JsonResponse({"message": "Not found in saved locations"}, status=404)
+        deleted, _ = SavedLocation.objects.filter(user=user, mongo_id=mongo_id).delete()
+
+    if deleted == 0:
+        return JsonResponse({"message": "Not found in saved locations", "deleted": False}, status=404)
     
-    return JsonResponse({"message": "Removed from saved locations"})
+    return JsonResponse({"message": "Removed from saved locations", "deleted": True, "success": True})
 
 @dashboard_login_required
 def search_history(request):

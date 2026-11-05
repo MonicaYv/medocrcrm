@@ -900,7 +900,7 @@ $(document).ready(function () {
             e.preventDefault();
             const form = document.getElementById("editForm");
             // Require successful OTP verification before saving pharmacy profile
-            if (form && form.querySelector('select[name="countryCodes"]')) {
+            if (form && form.action && form.action.includes('update_pharmacy_profile') && form.querySelector('select[name="countryCodes"]')) {
                 const verifiedStatus = form.querySelector(".otp-verification-status");
 
                 if (!verifiedStatus || verifiedStatus.classList.contains("hidden")) {
@@ -1142,9 +1142,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-// Pharmacy phone OTP only
+// Phone OTP handling (Hospital, Pharmacy, Lab, etc.)
 document.addEventListener("click", async function (event) {
-    const sendButton = event.target.closest(".send-pharmacy-otp-btn");
+    // Modal close handlers
+    if (event.target.closest(".close-otp-modal") || event.target.matches("#otpSuccessModal, #otpErrorModal")) {
+        const sModal = document.getElementById("otpSuccessModal");
+        const eModal = document.getElementById("otpErrorModal");
+        if (sModal) { sModal.classList.add("hidden"); sModal.classList.remove("flex"); }
+        if (eModal) { eModal.classList.add("hidden"); eModal.classList.remove("flex"); }
+        return;
+    }
+
+    const sendButton = event.target.closest(".send-pharmacy-otp-btn, .send-otp-btn");
     const verifyButton = event.target.closest(".verify-otp-btn");
 
     if (!sendButton && !verifyButton) return;
@@ -1152,14 +1161,14 @@ document.addEventListener("click", async function (event) {
     const form = event.target.closest("form") || document.querySelector("#editForm");
     if (!form) return;
 
-    const phoneInput = form.querySelector('input[name="phone"]');
-    const countryInput = form.querySelector('select[name="countryCodes"]');
-    const otpInput = form.querySelector('input[name="otp1"]');
+    const phoneInput = form.querySelector('input[name="phone"], input[name="contact_phone_number"]');
+    const countryInput = form.querySelector('select[name="phone_country_code"], select[name="countryCodes"], select.countryCodes');
+    const otpInput = form.querySelector('input[name="otp1"], input[name="otp"]');
     const errorBox = form.querySelector(".phone-otp-error");
     const statusBox = form.querySelector(".otp-verification-status");
     const verifyBtn = form.querySelector(".verify-otp-btn");
 
-    if (!phoneInput || !countryInput || !otpInput || !verifyBtn) return;
+    if (!phoneInput) return;
 
     const phone = phoneInput.value.trim();
     const countryCode = countryInput.value.trim();
@@ -1190,11 +1199,45 @@ document.addEventListener("click", async function (event) {
         return;
     }
 
+    function showOtpSuccessModal() {
+        const sModal = document.getElementById("otpSuccessModal");
+        if (sModal) {
+            sModal.classList.remove("hidden");
+            sModal.classList.add("flex");
+        } else {
+            alert("OTP Sent Successfully!\nA verification OTP has been sent to your registered mobile number.");
+        }
+    }
+
+    function showOtpErrorModal(msg) {
+        const eModal = document.getElementById("otpErrorModal");
+        if (eModal) {
+            const errorText = eModal.querySelector(".otp-error-text");
+            if (errorText) errorText.textContent = msg || "Unable to send OTP. Please try again.";
+            eModal.classList.remove("hidden");
+            eModal.classList.add("flex");
+        } else {
+            alert(msg || "Unable to send OTP. Please try again.");
+        }
+    }
+
     // Send OTP
     if (sendButton) {
-        resetVerification();
-        otpInput.value = "";
+        if (typeof resetVerification === "function" && verifyBtn) resetVerification();
+        if (otpInput) otpInput.value = "";
+        const cleanDigits = phone.replace(/\D/g, "");
+        if (!cleanDigits || cleanDigits.length < 10) {
+            showOtpErrorModal("Please enter a valid 10-digit phone number.");
+            return;
+        }
         sendButton.disabled = true;
+
+        function getCsrfTokenVal() {
+            const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]*)/);
+            if (match) return decodeURIComponent(match[1]);
+            const input = document.querySelector('[name="csrfmiddlewaretoken"]');
+            return input ? input.value : "";
+        }
 
         try {
             const response = await fetch("/settings/send-phone-otp/", {
@@ -1202,12 +1245,10 @@ document.addEventListener("click", async function (event) {
                 credentials: "same-origin",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRFToken": form.querySelector(
-                        '[name="csrfmiddlewaretoken"]'
-                    )?.value || ""
+                    "X-CSRFToken": getCsrfTokenVal()
                 },
                 body: JSON.stringify({
-                    phone: phone,
+                    phone: cleanDigits,
                     country_code: countryCode
                 })
             });
@@ -1215,17 +1256,15 @@ document.addEventListener("click", async function (event) {
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                showError(data.message || "Could not send OTP.");
+                showOtpErrorModal(data.message || "Could not send OTP.");
                 return;
             }
 
-            // The test OTP in your current backend is 123456.
-           verifyBtn.disabled = false;
+            if (verifyBtn) verifyBtn.disabled = false;
             clearError();
-
-            alert("OTP sent successfully");
+            showOtpSuccessModal();
         } catch (error) {
-            showError("Unable to send OTP. Please try again.");
+            showOtpErrorModal("Unable to send OTP. Please try again.");
             console.error("Send OTP error:", error);
         } finally {
             sendButton.disabled = false;

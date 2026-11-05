@@ -137,7 +137,7 @@
                         <div data-filter="last_year" class="pointsChartFilter p-2 pl-4 hover:bg-{{ secondary_bg }}  rounded cursor-pointer">1 Year</div>
                         
                       </div>
-                      <div class="datepicker-container chart-datepicker hidden px-4 pb-3 absolute  right-43 z-100">
+                      <div class="datepicker-container chart-datepicker hidden absolute top-full right-0 mt-2 z-[100]">
                         <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
                       </div>
                   </div>
@@ -168,7 +168,7 @@
                         <div class="p-2 pl-4 hover:bg-{{ secondary_bg }} hover:text-white rounded cursor-pointer">1 Year</div>
                         
                       </div>
-                      <div class="datepicker-container hidden px-4 pb-3 absolute  right-43 z-100">
+                      <div class="datepicker-container hidden absolute top-full right-0 mt-2 z-[100]">
                         <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
                       </div>
                   </div>
@@ -300,7 +300,7 @@
                           <div data-range="1 Month" class="rewards-filter-option daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Month</div>
                           <div data-range="1 Year" class="rewards-filter-option daterange dateFilter p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Year</div>
                         </div>
-                        <div class="datepicker-container hidden px-4 pb-3 absolute right-43 z-100">
+                        <div class="datepicker-container hidden absolute top-full right-0 mt-2 z-[100]">
                           <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
                         </div>
                       </div>
@@ -363,7 +363,7 @@
                         class="filterDropdown rewardsClaimed absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10"
                       >
                       
-                        <div class="rewards-filter-option p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-dark-gray rounded">
+                        <div data-filter="custom" class="rewards-filter-option rewards-claimed-custom p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-{{ hover_bg }} hover:text-dark-gray rounded">
                           Custom date<span class="material-symbols-outlined calendar-icon"
                             >calendar_today</span
                           >
@@ -374,7 +374,7 @@
                         <div class="rewards-filter-option p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded dateFilter cursor-pointer" data-range="1 Year">1 Year</div>
 
                       </div>
-                      <div class="datepicker-container hidden px-4 pb-3 absolute  right-43 z-100">
+                      <div class="datepicker-container hidden absolute top-full right-0 mt-2 z-[100]">
                         <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
                       </div>
                   </div>
@@ -433,8 +433,7 @@
                     </form>
                   </div>
                   <div class="dropdown filter-dropdown relative z-10">
-                    <button type="button" class="filter-dropdown-btn dropdown-btn flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer"
-                      onclick="event.preventDefault(); event.stopPropagation(); this.closest('.dropdown').querySelector('.filter-dropdown-option').classList.toggle('hidden');">
+                    <button type="button" class="filter-dropdown-btn dropdown-btn flex items-center border border-slate-gray rounded-md p-1 w-8 h-8 cursor-pointer">
                         <span class="material-symbols-outlined">tune</span>
                     </button>
                     <form id="filterForm" method="GET" class="relative">
@@ -454,7 +453,7 @@
 
                       <div onclick="applyDateFilter('last_year')" class="rewards-filter-option p-2 pl-4 hover:bg-{{ hover_bg }} hover:text-dark-gray rounded cursor-pointer">1 Year</div>
                     </div>
-                    <div class="datepicker-container hidden px-4 pb-3 absolute  right-43 z-100">
+                    <div class="datepicker-container hidden absolute top-full right-0 mt-2 z-[100]">
                       <div class="datepicker-inline" inline-datepicker data-date="06/23/2025"></div>
                     </div>
                   </div>

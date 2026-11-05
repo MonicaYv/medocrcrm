@@ -886,13 +886,13 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class="pl-4 lg:w-1/4">
-                    <select name="phone_country_code" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
-                        {% for code in country_codes %}
-                            <option value="{{ code.dial_code }}"
-                                {% if code.dial_code == country_code %}selected{% endif %}>
+                    <select name="phone_country_code" class="lab-country-code border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                        {% for code in lab_country_codes %}
+                            <option value="{{ code.dial_code }}" data-code="{{ code.code }}"
+                                {% if code.dial_code == country_code or code.code == country_code %}selected{% endif %}>
                                 {{ code.name }} ({{ code.dial_code }})
                             </option>
-                        {%endfor%}
+                        {% endfor %}
                     </select>
                     <span class="error countryCodesError text-red-500 text-sm mt-1 hidden"></span>
                 </div>
@@ -1054,13 +1054,13 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class="pl-4 lg:w-1/4">
-                    <select name="countryCodes" size="1" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
-                        {% for code in country_codes %}
-                            <option value="{{ code.dial_code }}"
-                                {% if code.dial_code == country_code %}selected{% endif %}>
+                    <select name="countryCodes" size="1" class="lab-country-code border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                        {% for code in lab_country_codes %}
+                            <option value="{{ code.dial_code }}" data-code="{{ code.code }}"
+                                {% if code.dial_code == country_code or code.code == country_code %}selected{% endif %}>
                                 {{ code.name }} ({{ code.dial_code }})
                             </option>
-                        {%endfor%}
+                        {% endfor %}
                     </select>
                     <span class="error countryCodesError text-red-500 text-sm mt-1 hidden"></span>
                 </div>
@@ -1107,6 +1107,51 @@
                 </button>
             </div>
         </div>
+    <script>
+    (function () {
+        function syncLabPhoneFields() {
+            const form = document.getElementById("editForm");
+            if (!form || !form.action || !form.action.includes("update_lab_profile")) return;
+
+            const countrySelects = form.querySelectorAll(".lab-country-code");
+            const phoneInputs = form.querySelectorAll('input[name="phone"], input[name="contact_number"]');
+
+            countrySelects.forEach(function (sel) {
+                const target = sel.getAttribute("data-selected");
+                if (target) {
+                    for (let i = 0; i < sel.options.length; i++) {
+                        const opt = sel.options[i];
+                        if (opt.value === target || opt.getAttribute("data-code") === target) {
+                            sel.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                sel.addEventListener("change", function () {
+                    const val = this.value;
+                    countrySelects.forEach(function (other) {
+                        if (other !== sel) other.value = val;
+                    });
+                });
+            });
+
+            phoneInputs.forEach(function (inp) {
+                inp.addEventListener("input", function () {
+                    const val = this.value;
+                    phoneInputs.forEach(function (other) {
+                        if (other !== inp) other.value = val;
+                    });
+                });
+            });
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", syncLabPhoneFields);
+        } else {
+            syncLabPhoneFields();
+        }
+    })();
+    </script>
     </form>
 {% elif user.user_type == 'hospital' %}
     <form id="editForm" method="POST" action="{% url 'update_hospital_profile' %}" class="grid grid-cols-1 gap-x-6 md:gap-x-12 gap-y-6  pt-6 text-sm">
@@ -1700,5 +1745,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 </script>
+
+
+<!-- OTP Success Modal -->
+<div id="otpSuccessModal" class="flex fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-[9999]">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full mx-4 flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
+            <span class="material-symbols-outlined text-bright-green text-3xl">check_circle</span>
+        </div>
+        <h3 class="text-base font-bold text-jet-black mb-1">OTP Sent Successfully!</h3>
+        <p class="text-xs text-spanish-gray mb-5">A verification OTP has been sent to your registered mobile number.</p>
+        <button type="button" class="w-full py-2.5 rounded-lg bg-dodger-blue text-white font-semibold text-sm cursor-pointer close-otp-modal">
+            OK
+        </button>
+    </div>
+</div>
+
+<!-- OTP Error Modal -->
+<div id="otpErrorModal" class="flex fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-[9999]">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full mx-4 flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-3">
+            <span class="material-symbols-outlined text-strong-red text-3xl">error</span>
+        </div>
+        <h3 class="text-base font-bold text-jet-black mb-1">Failed to Send OTP</h3>
+        <p class="text-xs text-spanish-gray mb-5 otp-error-text">Unable to send OTP. Please try again.</p>
+        <button type="button" class="w-full py-2.5 rounded-lg bg-strong-red text-white font-semibold text-sm cursor-pointer close-otp-modal">
+            OK
+        </button>
+    </div>
+</div>
 
 {% endblock %}

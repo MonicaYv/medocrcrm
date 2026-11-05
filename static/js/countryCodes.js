@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    const $selectElement = $(".countryCodes");
+    const $selectElement = $(".countryCodes").not(".lab-country-code");
 
     $.getJSON("/static/data/countryCodes.json")
     .done(function (data) {

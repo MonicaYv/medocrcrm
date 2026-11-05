@@ -893,7 +893,7 @@ function loadHospitalDoctors(
     formData.append("home_visit_fee", homeVisitFee);
     formData.append("hospital_visit_fee", hospitalVisitFee);
     formData.append("availability", JSON.stringify(availability));
-    const doctorId = $popup.data("doctor-id");
+    const doctorId = $popup.data("doctor-id") || $popup.attr("data-doctor-id");
     if (doctorId) formData.append("doctor_id", doctorId);
 
     const photoFile = fileInput[0].files[0];
@@ -1089,22 +1089,16 @@ $(document).on("click", ".edit-doctor", function () {
   const d = selectedDoctor;
   const $popup = $(".addDoctorPopup");
   $popup.data("doctor-id", d.id);
-  $popup
-    .find('input[type="text"]')
-    .eq(0)
-    .val((d.name || "").replace(/^Dr\.\s*/, ""));
-  $popup
-    .find('input[type="number"]')
-    .eq(0)
-    .val((d.phone || "").replace(/\D/g, ""));
-  $popup
-    .find('input[type="text"]')
-    .eq(1)
-    .val(d.gender || "");
-  $popup
-    .find('input[type="number"]')
-    .eq(1)
-    .val(d.age || "");
+  $popup.attr("data-doctor-id", d.id);
+  const cleanName = (d.name || "").replace(/^Dr\.?\s*/i, "").trim();
+  $popup.find('input[type="text"]').eq(0).val(cleanName);
+  let cleanPhone = (d.phone_number || d.phone || "").replace(/\D/g, "");
+  if (cleanPhone.length > 10) {
+    cleanPhone = cleanPhone.slice(-10);
+  }
+  $popup.find('input[type="number"]').eq(0).val(cleanPhone);
+  $popup.find('input[type="text"]').eq(1).val(d.gender || "Male");
+  $popup.find('input[type="number"]').eq(1).val(d.age || 30);
   $popup
     .find(".dropdown-text")
     .eq(0)
@@ -1135,6 +1129,7 @@ $(document).on("click", ".edit-doctor", function () {
 function clearAddDoctorForm() {
   const $popup = $(".addDoctorPopup");
   $popup.removeData("doctor-id");
+  $popup.removeAttr("data-doctor-id");
 
   // Clear all text and number inputs
   $popup.find('input[type="text"], input[type="number"]').val("");
@@ -1249,15 +1244,19 @@ function validateAddDoctorForm() {
   // Alphabets + spaces only
   // ==========================================
   const name = $name.val().trim();
+  const cleanNameVal = name.replace(/^Dr\.?\s*/i, "").trim();
 
-  if (name === "") {
+  if (cleanNameVal === "") {
     showError($name, "Name is required.");
+    if (typeof toastr !== "undefined") toastr.error("Name is required.");
     return false;
-  } else if (!/^[A-Za-z\s]+$/.test(name)) {
+  } else if (!/^[A-Za-z\s\.]+$/.test(name)) {
     showError($name, "Name should contain alphabets only.");
+    if (typeof toastr !== "undefined") toastr.error("Name should contain alphabets only.");
     return false;
-  } else if (name.length < 2) {
+  } else if (cleanNameVal.length < 2) {
     showError($name, "Name must contain at least 2 characters.");
+    if (typeof toastr !== "undefined") toastr.error("Name must contain at least 2 characters.");
     return false;
   }
 
@@ -1265,16 +1264,23 @@ function validateAddDoctorForm() {
   // PHONE
   // Exactly 10 digits
   // ==========================================
-  const phone = $phone.val().trim();
+  let phone = $phone.val().trim();
+  if (phone.length > 10) {
+    phone = phone.slice(-10);
+    $phone.val(phone);
+  }
 
   if (phone === "") {
     showError($phone, "Phone number is required.");
+    if (typeof toastr !== "undefined") toastr.error("Phone number is required.");
     return false;
   } else if (!/^\d+$/.test(phone)) {
     showError($phone, "Phone number should contain digits only.");
+    if (typeof toastr !== "undefined") toastr.error("Phone number should contain digits only.");
     return false;
   } else if (phone.length !== 10) {
     showError($phone, "Phone number must contain exactly 10 digits.");
+    if (typeof toastr !== "undefined") toastr.error("Phone number must contain exactly 10 digits.");
     return false;
   }
 

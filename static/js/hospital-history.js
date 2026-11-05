@@ -366,9 +366,47 @@ $(document).on("click", ".view-attachment", function () {
       if ($bedStatus.length) {
         // Availability status dropdown
         $bedStatus.text(selectedText);
-        $parent
-          .closest(".card-equipment")
-          .attr("data-bed-status", selectedText);
+        const $card = $parent.closest(".card-equipment");
+        $card.attr("data-bed-status", selectedText);
+        const $statusBtn = $parent.find(".status-btn");
+        if (selectedText === "Occupied") {
+          $statusBtn.removeClass("text-dodger-blue bg-light-dodger-blue").addClass("text-error bg-rosewater");
+        } else {
+          $statusBtn.removeClass("text-error bg-rosewater").addClass("text-dodger-blue bg-light-dodger-blue");
+          const $wrapper = $card.find(".patient-assigned-wrapper");
+          const defaultAssignHtml = `
+            <button class="assign-btn flex items-center gap-3 text-dodger-blue bg-light-dodger-blue text-sm font-semibold p-2 rounded-md">
+                <span class="status-text">Assign To</span>
+                <span class="material-symbols-outlined">keyboard_arrow_down</span>
+            </button>`;
+          if ($wrapper.length) {
+            $wrapper.html(defaultAssignHtml);
+          } else {
+            const $existingPatient = $card.find(".patient-assigned-info").closest(".relative");
+            if ($existingPatient.length) {
+              $existingPatient.html(defaultAssignHtml);
+            }
+          }
+          const bedId = $card.attr("data-bed-id") || "";
+          const bedNo = $card.attr("data-bed-no") || "";
+          const bedName = $card.attr("data-bed-name") || "";
+          const bedRoomId = $card.attr("data-bed-room-id") || "";
+          function getBedCsrf() {
+            const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]*)/);
+            return match ? decodeURIComponent(match[1]) : "";
+          }
+          $.ajax({
+            url: "/history/hospital/bed/unassign/",
+            type: "POST",
+            headers: { "X-CSRFToken": getBedCsrf() },
+            data: {
+              bed_id: bedId,
+              bed_no: bedNo,
+              bed_name: bedName,
+              bed_room_id: bedRoomId
+            }
+          });
+        }
         applyHistorySearchAndFilter();
       } else {
         // Assignment dropdown
@@ -869,6 +907,16 @@ $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
   // Open assign popup and store reference to clicked button
   $(document).on("click", ".assign-btn", function () {
     currentAssignBtn = $(this);
+    $('.assignPopup input[type="text"]').val("");
+    $(".assignPopup").removeClass("hidden");
+  });
+
+  $(document).on("click", ".patient-assigned-info", function () {
+    currentAssignBtn = $(this);
+    const existingPatient = $(this).find("p").text().trim();
+    const existingDisease = $(this).find("span").text().trim();
+    $('.assignPopup input[placeholder="Enter Patient Name"]').val(existingPatient);
+    $('.assignPopup input[placeholder="Select Disease"]').val(existingDisease);
     $(".assignPopup").removeClass("hidden");
   });
 
@@ -896,33 +944,63 @@ $("#dateSubmenu > div:not(.trigger-custom)").on("click", function (e) {
 
     // Validate inputs
     if (!patientName) {
-      // alert("Please enter patient name");
       return;
     }
 
     if (!selectedDisease) {
-      // alert("Please select a disease");
       return;
     }
 
-    // Update the assign button text with patient name
     if (currentAssignBtn) {
-      currentAssignBtn.find(".status-text").text(patientName);
-
-      // Update the card to show patient info instead of "Assign to" button
       const $card = currentAssignBtn.closest(".card-equipment");
-      const $patientInfoDiv = $card.find(".flex.items-center.gap-3").first();
-
-      // Replace the assign button container with patient info
-      const $assignContainer = currentAssignBtn.closest(".relative");
-      $assignContainer.replaceWith(`
-            <div class="flex items-center gap-3">
+      const patientHtml = `
+            <div class="patient-assigned-info flex items-center gap-3 cursor-pointer" title="Click to change assignment">
                 <div class="flex flex-col">
                     <p class="font-semibold text-sm text-jet-black">${patientName}</p>
                     <span class="text-xs text-spanish-gray">${selectedDisease}</span>
                 </div>
             </div>
+      `;
+      const $wrapper = $card.find(".patient-assigned-wrapper");
+      if ($wrapper.length) {
+        $wrapper.html(patientHtml);
+      } else {
+        const $assignContainer = currentAssignBtn.closest(".relative");
+        $assignContainer.replaceWith(`
+          <div class="patient-assigned-wrapper relative flex flex-col justify-center">
+            ${patientHtml}
+          </div>
         `);
+      }
+
+      // Update card status to Occupied
+      $card.attr("data-bed-status", "Occupied");
+      const $statusBtn = $card.find(".status-btn");
+      $statusBtn.find(".bed-status-text").text("Occupied");
+      $statusBtn.removeClass("text-dodger-blue bg-light-dodger-blue").addClass("text-error bg-rosewater");
+
+      const bedId = $card.attr("data-bed-id") || "";
+      const bedNo = $card.attr("data-bed-no") || "";
+      const bedName = $card.attr("data-bed-name") || "";
+      const bedRoomId = $card.attr("data-bed-room-id") || "";
+      function getBedCsrf() {
+        const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : "";
+      }
+      $.ajax({
+        url: "/history/hospital/bed/assign/",
+        type: "POST",
+        headers: { "X-CSRFToken": getBedCsrf() },
+        data: {
+          bed_id: bedId,
+          bed_no: bedNo,
+          bed_name: bedName,
+          bed_room_id: bedRoomId,
+          patient_name: patientName,
+          disease: selectedDisease,
+          status: "Occupied"
+        }
+      });
     }
 
     // Close popup and clear fields

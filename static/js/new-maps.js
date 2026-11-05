@@ -615,6 +615,30 @@ function generateStars(rating, reviews) {
 }
 
     let bookmarkedPlaceIds = new Set();
+
+    // Pre-populate bookmarkedPlaceIds from server on load
+    fetch("save_location/", {
+        method: "GET",
+        headers: { "X-CSRFToken": getCookie("csrftoken") }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.saved && Array.isArray(data.saved)) {
+            data.saved.forEach(p => {
+                if (p && p.mongo_id) {
+                    bookmarkedPlaceIds.add(String(p.mongo_id));
+                }
+            });
+            $(".bookmark-fill").each(function() {
+                const id = String($(this).data("id"));
+                if (id && bookmarkedPlaceIds.has(id)) {
+                    $(this).addClass(`material-filled text-${selectedColor}`);
+                }
+            });
+        }
+    })
+    .catch(err => console.debug("Bookmark preload note:", err));
+
     // Renders a list of place cards dynamically into the view with relevant info and actions
     function renderListView(places, showingSavedLocations = false) {
         const listContainer = $(".cards");
@@ -1844,7 +1868,7 @@ $(document)
         const type = String($btn.data("type") || "").toLowerCase();
         if (!mongo_id || !type) return;
 
-        const isBookmarked = bookmarkedPlaceIds.has(String(mongo_id));
+        const isBookmarked = bookmarkedPlaceIds.has(String(mongo_id)) || $btn.hasClass("material-filled");
         const endpoint = isBookmarked ? "remove_saved_location/" : "save_location/";
         const payload = isBookmarked
             ? { mongo_id: String(mongo_id), amenity_type: type }
@@ -1867,6 +1891,7 @@ $(document)
                 if (isBookmarked) {
                     bookmarkedPlaceIds.delete(String(mongo_id));
                     $btn.removeClass(`material-filled text-${selectedColor}`).text("bookmark_add");
+                    $(`.bookmark-fill[data-id="${mongo_id}"]`).removeClass(`material-filled text-${selectedColor}`).text("bookmark_add");
 
                     savedPlaces = savedPlaces.filter(place => String(place.mongo_id) !== String(mongo_id));
                     allFetchedPlaces = allFetchedPlaces.filter(place => String(place.mongo_id) !== String(mongo_id));
@@ -1877,6 +1902,7 @@ $(document)
                 } else {
                     bookmarkedPlaceIds.add(String(mongo_id));
                     $btn.text("bookmark").addClass(`material-filled text-${selectedColor}`);
+                    $(`.bookmark-fill[data-id="${mongo_id}"]`).text("bookmark").addClass(`material-filled text-${selectedColor}`);
                     toastr.success("Saved to bookmarks!");
                 }
             })

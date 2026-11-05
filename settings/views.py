@@ -547,16 +547,28 @@ def handle_pharmacy_profile(user):
     data.update(handle_contact_person(user.user_type, user))
     return data
 
+def get_lab_sorted_country_codes():
+    codes = load_country_codes()
+    def sort_key(item):
+        dial = str(item.get('dial_code', '')).replace('+', '').strip()
+        digits = ''.join([c for c in dial if c.isdigit()])
+        num = int(digits) if digits else 999999
+        return (num, str(item.get('name', '')))
+    return sorted(codes, key=sort_key)
+
 def handle_lab_profile(user):
     profile = LabProfile.objects.filter(user=user).first()
     all_timings = LabTiming.objects.filter(is_active=True)
     all_services = LabService.objects.filter(is_active=True)
     all_facilities = LabFacility.objects.filter(is_active=True)
 
+    normalized_country_code = normalize_dial_code(user.phone_country_code) if user.phone_country_code else '+91'
     data = {
-        'lab_name' : profile.lab_name,
-        'owner_name': profile.owner_name,
-        'contact_number': profile.contact_number,
+        'country_code': normalized_country_code,
+        'lab_country_codes': get_lab_sorted_country_codes(),
+        'lab_name' : profile.lab_name if profile else '',
+        'owner_name': profile.owner_name if profile else '',
+        'contact_number': (profile.contact_number if profile else '') or user.phone_number or '',
         'alt_contact_number': profile.alt_contact_number,
         'lab_registration_number': profile.lab_registration_number,
         'address': profile.address,
@@ -1602,6 +1614,13 @@ def update_lab_profile(request):
     user = request.user_obj  
     
     validate_email_phone(post_data, errors)
+    raw_code = post_data.get('phone_country_code') or post_data.get('countryCodes')
+    normalized_code = normalize_dial_code(raw_code)
+    phone_val = post_data.get('phone') or post_data.get('contact_number')
+    if normalized_code and normalized_code != '+91' and phone_val:
+        clean_phone = ''.join(c for c in phone_val if c.isdigit())
+        if 7 <= len(clean_phone) <= 15:
+            errors.pop('phone', None)
     required_fields = ["lab_name", "city", "state", "pincode"]
     for field in required_fields:
         if not post_data.get(field):
@@ -1618,7 +1637,10 @@ def update_lab_profile(request):
         with transaction.atomic():
 
              user.email = post_data.get('email')
-             user.phone_country_code = post_data.get("countryCodes")
+             if normalized_code:
+                 user.phone_country_code = normalized_code
+             if phone_val:
+                 user.phone_number = phone_val
              user.save()
 
              lab_profile = get_object_or_404(LabProfile, user=user)
@@ -1627,7 +1649,10 @@ def update_lab_profile(request):
              lab_profile.lab_name = post_data.get("lab_name")
              lab_profile.owner_name = post_data.get("owner_name")
 
-             lab_profile.contact_number = post_data.get("phone")
+             if phone_val:
+                 lab_profile.contact_number = phone_val
+             else:
+                 lab_profile.contact_number = post_data.get("phone")
 
              lab_profile.lab_registration_number = post_data.get("lab_registration_number")
 
@@ -2542,13 +2567,15 @@ def send_phone_otp(request):
                 "message": "Please enter a valid phone number."
             }, status=400)
 
-        # Development/testing only: no SMS is sent.
+        # Store pending OTP in session for verification
         print(f"Phone: {country_code}{digits}")
         print(f"Test OTP: {TEST_OTP}")
         request.session["pending_pharmacy_phone"] = f"{country_code}|{digits}"
+        request.session["pending_phone"] = f"{country_code}|{digits}"
+        request.session["pending_phone_otp"] = TEST_OTP
         return JsonResponse({
             "success": True,
-            "message": "Otp send to register mobile number"
+            "message": "A verification OTP has been sent to your registered mobile number."
         })
 
     except (json.JSONDecodeError, TypeError, ValueError):

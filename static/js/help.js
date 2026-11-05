@@ -1410,24 +1410,76 @@ function highlightCurrentStatus(currentStatus) {
   });
 }
 
-  document.querySelectorAll(".help-filter-option").forEach((el) => {
-    el.addEventListener("click", function (event) {
-      const filter =
-        this.getAttribute("data-support-filter") ||
-        this.getAttribute("data-filter");
+  function handleSupportCustomDate(dateText) {
+    const $datepicker = $("#inline-datepicker");
+    if (!customStartDate || customEndDate) {
+      customStartDate = dateText;
+      customEndDate = null;
+      notifyIncompleteDateRange();
+      $datepicker.datepicker("refresh");
+      return;
+    }
 
-      event.stopPropagation();
+    customEndDate = dateText;
+    clearIncompleteDateRangeToast();
 
-      if (filter === "custom") {
-        const dropdown = this.closest(".dropdown");
+    if (customStartDate > customEndDate) {
+      [customStartDate, customEndDate] = [
+        customEndDate,
+        customStartDate,
+      ];
+    }
 
-        dropdown.querySelector(".filterDropdown").classList.add("hidden");
-        dropdown
-          .querySelector(".datepicker-container")
-          .classList.remove("hidden");
+    filterTickets(customStartDate, customEndDate);
 
-        return;
+    customStartDate = null;
+    customEndDate = null;
+
+    $(".datepicker-container").addClass("hidden").hide();
+    $datepicker.datepicker("refresh");
+  }
+
+  $(document).on("click", ".help-filter-option", function (event) {
+    const filter = $(this).attr("data-support-filter") || $(this).attr("data-filter");
+    event.stopPropagation();
+
+    if (filter === "custom") {
+      const $dropdown = $(this).closest(".dropdown");
+      $dropdown.find(".filterDropdown").addClass("hidden").hide();
+      const $cont = $dropdown.find(".datepicker-container");
+      const $dp = $dropdown.find(".datepicker-inline");
+      customStartDate = null;
+      customEndDate = null;
+      clearIncompleteDateRangeToast();
+      if ($dp.length && $.fn.datepicker) {
+        if (!$dp.hasClass("hasDatepicker")) {
+          $dp.datepicker();
+        }
+        $dp.datepicker("option", {
+          dateFormat: "yy-mm-dd",
+          changeMonth: true,
+          changeYear: true,
+          yearRange: "2000:2035",
+          firstDay: 0,
+          dayNamesMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+          monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          beforeShowDay: function (date) {
+            const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+            const classes = [];
+            if (customStartDate && dateText === customStartDate) {
+              classes.push("hospital-date-range-start");
+            }
+            return [true, classes.join(" "), ""];
+          },
+          onSelect: function (dateText) {
+            handleSupportCustomDate(dateText);
+          }
+        });
+        $dp.datepicker("refresh");
       }
+      $cont.removeClass("hidden").show();
+      return;
+    }
 
       const today = new Date();
       let fromDate = new Date(today);
@@ -1504,6 +1556,7 @@ function highlightCurrentStatus(currentStatus) {
           customStartDate = dateText;
           customEndDate = null;
           notifyIncompleteDateRange();
+          $datepicker.datepicker("refresh");
           return;
         }
 
@@ -1522,18 +1575,47 @@ function highlightCurrentStatus(currentStatus) {
         customStartDate = null;
         customEndDate = null;
 
-        $(".datepicker-container").addClass("hidden");
+        $(".datepicker-container").addClass("hidden").hide();
+        $datepicker.datepicker("refresh");
       }
 
       if (!$datepicker.hasClass("hasDatepicker")) {
         $datepicker.datepicker({
           dateFormat: "yy-mm-dd",
+          changeMonth: true,
+          changeYear: true,
+          yearRange: "2000:2035",
+          firstDay: 0,
+          dayNamesMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+          monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          beforeShowDay: function (date) {
+            const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+            const classes = [];
+            if (customStartDate && dateText === customStartDate) {
+              classes.push("hospital-date-range-start");
+            }
+            return [true, classes.join(" "), ""];
+          },
           onSelect: function (dateText) {
             handleCustomDate(dateText);
           },
         });
       } else {
         $datepicker.datepicker("option", "dateFormat", "yy-mm-dd");
+        $datepicker.datepicker("option", "changeMonth", true);
+        $datepicker.datepicker("option", "changeYear", true);
+        $datepicker.datepicker("option", "yearRange", "2000:2035");
+        $datepicker.datepicker("option", "firstDay", 0);
+        $datepicker.datepicker("option", "dayNamesMin", ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]);
+        $datepicker.datepicker("option", "monthNamesShort", ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+        $datepicker.datepicker("option", "beforeShowDay", function (date) {
+          const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+          const classes = [];
+          if (customStartDate && dateText === customStartDate) {
+            classes.push("hospital-date-range-start");
+          }
+          return [true, classes.join(" "), ""];
+        });
 
         $datepicker.datepicker("option", "onSelect", function (dateText) {
           handleCustomDate(dateText);
