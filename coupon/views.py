@@ -193,12 +193,15 @@ def get_created_coupons(request):
     paginator = Paginator(coupons_qs, per_page)
     coupons = paginator.get_page(page)
     for coupon in coupons:
-        if coupon.usage_limit:
-            coupon.redeemed_percentage = (
-              coupon.used_count * 100
-            ) / coupon.usage_limit
-        else:
-           coupon.redeemed_percentage = 0
+        usage_limit = max(coupon.usage_limit or 0, 0)
+        used_count = max(coupon.used_count or 0, 0)
+        coupon.display_used_count = min(used_count, usage_limit) if usage_limit else 0
+        coupon.is_exhausted = not usage_limit or used_count >= usage_limit
+        coupon.redeemed_percentage = (
+            min(100, (coupon.display_used_count * 100) / usage_limit)
+            if usage_limit
+            else 0
+        )
 
     html = render_to_string(
         "partials/ajax_created_coupon_list.html",
@@ -534,6 +537,71 @@ def pharmacy_coupon_redeem(request):
                 "message": "Coupon copied and redemption recorded.",
             })
     except Coupon.DoesNotExist:
+        return JsonResponse({"status": "coupon_not_found", "message": "Coupon is unavailable or expired."}, status=404)
+
+
+@require_POST
+@dashboard_login_required
+def created_coupon_redeem(request):
+    user = request.user_obj
+    profile = get_seller_profile(user)
+    if not profile:
+        return JsonResponse({"status": "forbidden", "message": "Seller profile not found."}, status=403)
+
+    try:
+        coupon_id = int(json.loads(request.body or "{}").get("coupon_id"))
+    except (TypeError, ValueError):
+        return JsonResponse({"status": "error", "message": "Invalid request."}, status=400)
+
+    try:
+        with transaction.atomic():
+            coupon = SellerCoupon.objects.select_for_update().get(
+                pk=coupon_id,
+                seller_type=user.user_type,
+                seller_id=profile.id,
+                is_active=True,
+                expiry_date__gte=timezone.now(),
+            )
+            limit = max(coupon.usage_limit or 0, 0)
+            redeemed = max(coupon.used_count or 0, 0)
+            if not limit or redeemed >= limit:
+                return JsonResponse({
+                    "status": "limit_reached",
+                    "coupon_id": coupon.id,
+                    "redeemed_count": min(redeemed, limit),
+                    "max_redemptions": limit,
+                    "percent_used": 100 if limit else 0,
+                    "message": "Coupon redemption limit reached.",
+                }, status=409)
+
+            updated = SellerCoupon.objects.filter(
+                pk=coupon.pk, used_count__lt=F("usage_limit")
+            ).update(used_count=F("used_count") + 1)
+            if not updated:
+                redeemed = SellerCoupon.objects.filter(pk=coupon.pk).values_list(
+                    "used_count", flat=True
+                ).get()
+                return JsonResponse({
+                    "status": "limit_reached",
+                    "coupon_id": coupon.id,
+                    "redeemed_count": min(redeemed, limit),
+                    "max_redemptions": limit,
+                    "percent_used": 100,
+                    "message": "Coupon redemption limit reached.",
+                }, status=409)
+
+            redeemed += 1
+            return JsonResponse({
+                "status": "success",
+                "coupon_id": coupon.id,
+                "code": coupon.coupon_code,
+                "redeemed_count": redeemed,
+                "max_redemptions": limit,
+                "percent_used": min(100, int((redeemed / limit) * 100)),
+                "limit_reached": redeemed >= limit,
+                "message": "Coupon copied and redemption recorded.",
+            })
+    except SellerCoupon.DoesNotExist:
         return JsonResponse({"status": "coupon_not_found", "message": "Coupon is unavailable or expired."}, status=404)
 
 
