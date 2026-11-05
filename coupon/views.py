@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from django.shortcuts import render
@@ -8,18 +9,21 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from datetime import datetime, timedelta, date
 from django.utils import timezone
+from django.db import transaction
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
-from django.db.models import Q
+from django.db.models import F, Q
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from dashboard.utils import dashboard_login_required, get_common_context
 from .models import (
     Coupon, CategoryOption, BrandOption, OfferTypeOption, CountryOption,
-    State, City, PincodeOption, AgeOption, GenderOption, SpendingPowerOption, PaymentStatusEnum
+    State, City, PincodeOption, AgeOption, GenderOption, SpendingPowerOption, PaymentStatusEnum,
+    CouponClaimed,
 )
 from points.models import PointsActionType, PointsHistory
 from registration.models import PharmacyProfile, LabProfile, HospitalProfile, DoctorProfile
 from coupon.models import SellerCoupon
+from settings.models import SellerSubscription, SellerType
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -215,15 +219,51 @@ def coupon_view(request):
     user = request.user_obj
     context = get_common_context(request, user)
     if user.user_type == "pharmacy":
-        coupons = Coupon.objects.filter(
+        pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+        subscription_status = "Inactive"
+        if pharmacy_profile:
+            subscriptions = SellerSubscription.objects.filter(
+                seller_type=SellerType.PHARMACY,
+                seller_profile_id=pharmacy_profile.id,
+            ).order_by("-updated_at")
+            subscription = subscriptions.filter(
+                is_active=True, is_enabled=True
+            ).first()
+            if subscription:
+                expiry_date = subscription.expiry_date
+                if expiry_date and timezone.is_naive(expiry_date):
+                    expiry_date = timezone.make_aware(
+                        expiry_date, timezone.get_current_timezone()
+                    )
+                subscription_status = (
+                    "Expired"
+                    if expiry_date and expiry_date <= timezone.now()
+                    else "Active"
+                )
+            else:
+                latest_subscription = subscriptions.first()
+                expiry_date = latest_subscription.expiry_date if latest_subscription else None
+                if expiry_date and timezone.is_naive(expiry_date):
+                    expiry_date = timezone.make_aware(
+                        expiry_date, timezone.get_current_timezone()
+                    )
+                if expiry_date and expiry_date <= timezone.now():
+                    subscription_status = "Expired"
+
+        coupons = list(Coupon.objects.filter(
             validity__gte=timezone.now().date()
         ).select_related(
             "category",
             "brand_name",
             "offer_type"
-        ).order_by("-created_at")
+        ).order_by("-created_at"))
 
         for coupon in coupons:
+            redeemed_count = max(coupon.redeemed_count or 0, coupon.claims.count())
+            if coupon.redeemed_count != redeemed_count:
+                Coupon.objects.filter(pk=coupon.pk).update(redeemed_count=redeemed_count)
+            coupon.is_exhausted = redeemed_count >= coupon.max_redemptions
+            coupon.redeemed_count = min(redeemed_count, coupon.max_redemptions)
             coupon.redeemed_percentage = (
                 (coupon.redeemed_count * 100) / coupon.max_redemptions
                 if coupon.max_redemptions
@@ -237,7 +277,10 @@ def coupon_view(request):
             )
 
         context["coupons"] = coupons
-        context["popular_coupons"] = coupons.order_by("-redeemed_count")[:4]
+        context["pharmacy_subscription_status"] = subscription_status
+        context["popular_coupons"] = sorted(
+            coupons, key=lambda coupon: coupon.redeemed_count or 0, reverse=True
+        )[:4]
 
         return render(request, "pharmacy/pharmacy_coupon.html", context)
 
@@ -425,6 +468,74 @@ def coupon_view(request):
 
     context.update(get_context_data(user))
     return render(request, "coupon.html", context)
+
+@require_POST
+@dashboard_login_required
+def pharmacy_coupon_redeem(request):
+    user = request.user_obj
+    if user.user_type != "pharmacy":
+        return JsonResponse({"status": "forbidden", "message": "Only pharmacies can redeem these coupons."}, status=403)
+
+    try:
+        coupon_id = int(json.loads(request.body or "{}").get("coupon_id"))
+    except (TypeError, ValueError):
+        return JsonResponse({"status": "error", "message": "Invalid request."}, status=400)
+
+    try:
+        with transaction.atomic():
+            coupon = Coupon.objects.select_for_update().get(
+                pk=coupon_id, validity__gte=timezone.now().date()
+            )
+            limit = coupon.max_redemptions
+            redeemed = max(coupon.redeemed_count or 0, coupon.claims.count())
+            if redeemed >= limit:
+                return JsonResponse({
+                    "status": "limit_reached",
+                    "coupon_id": coupon.id,
+                    "redeemed_count": min(redeemed, limit),
+                    "max_redemptions": limit,
+                    "percent_used": 100,
+                    "message": "Coupon redemption limit reached.",
+                }, status=409)
+
+            if coupon.redeemed_count != redeemed:
+                Coupon.objects.filter(pk=coupon.pk).update(redeemed_count=redeemed)
+            updated = Coupon.objects.filter(
+                pk=coupon.pk, redeemed_count__lt=F("max_redemptions")
+            ).update(redeemed_count=F("redeemed_count") + 1)
+            if not updated:
+                redeemed = Coupon.objects.filter(pk=coupon.pk).values_list(
+                    "redeemed_count", flat=True
+                ).get()
+                return JsonResponse({
+                    "status": "limit_reached",
+                    "coupon_id": coupon.id,
+                    "redeemed_count": min(redeemed, limit),
+                    "max_redemptions": limit,
+                    "percent_used": 100,
+                    "message": "Coupon redemption limit reached.",
+                }, status=409)
+
+            # Each successful copy click represents one redemption. The same user
+            # may redeem again until the coupon's overall limit is reached.
+            CouponClaimed.objects.create(
+                user=user, coupon=coupon, expiry_date=coupon.validity
+            )
+            redeemed += 1
+
+            return JsonResponse({
+                "status": "success",
+                "coupon_id": coupon.id,
+                "code": coupon.code,
+                "redeemed_count": redeemed,
+                "max_redemptions": limit,
+                "percent_used": min(100, int((redeemed / limit) * 100)),
+                "limit_reached": redeemed >= limit,
+                "message": "Coupon copied and redemption recorded.",
+            })
+    except Coupon.DoesNotExist:
+        return JsonResponse({"status": "coupon_not_found", "message": "Coupon is unavailable or expired."}, status=404)
+
 
 @dashboard_login_required
 @require_GET

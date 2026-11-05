@@ -15,12 +15,12 @@
                                                 class="bg-dodger-blue w-[78px] h-[22px] flex items-center justify-center rounded-md">
                                                 <span class="font-bold text-xs text-white">Redeemed</span>
                                             </div>
-                                            <p class="font-normal text-sm text-blue-charcoal">{{ coupon.redeemed_count }}/{{ coupon.max_redemptions }}</p>
+                                            <p class="coupon-redemption-count font-normal text-sm text-blue-charcoal" data-coupon-id="{{ coupon.id }}">{{ coupon.redeemed_count }}/{{ coupon.max_redemptions }}</p>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" data-code="{{ coupon.code }}" aria-label="Copy coupon code {{ coupon.code }}"
-                                    class="copy-coupon h-[48px] w-full bg-ocean-teal rounded-br-xl rounded-bl-xl flex items-center justify-center gap-2 cursor-pointer">
+                                <button type="button" data-code="{{ coupon.code }}" data-coupon-id="{{ coupon.id }}" data-redeem-url="{% url 'pharmacy_coupon_redeem' %}" aria-label="Copy and redeem coupon {{ coupon.code }}"
+                                    {% if coupon.is_exhausted %}disabled{% endif %} class="copy-coupon pharmacy-coupon-redeem h-[48px] w-full bg-ocean-teal rounded-br-xl rounded-bl-xl flex items-center justify-center gap-2 {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}">
                                     <span class="font-semibold text-sm text-dodger-blue">{{ coupon.code }}</span>
                                     <span class="material-symbols-outlined text-dodger-blue">content_copy</span>
                                 </button>
@@ -102,21 +102,23 @@
                                                 Redeemed
                                             </p>
                                             <p class="text-xs font-medium text-jet-black">
-                                                {{ coupon.redeemed_count }}/{{ coupon.max_redemptions }}
+                                                <span class="coupon-redemption-count" data-coupon-id="{{ coupon.id }}">{{ coupon.redeemed_count }}/{{ coupon.max_redemptions }}</span>
                                             </p>
                                         </div>
                                         <div class="w-1/2 max-w-md pt-4">
                                             <div class="w-full bg-pale-ice-blue rounded-full h-2">
                                                 <div
-                                                    class="bg-dodger-blue h-2 rounded-full"
+                                                    class="coupon-redemption-progress bg-dodger-blue h-2 rounded-full" data-coupon-id="{{ coupon.id }}"
                                                     style="width: {{ coupon.redeemed_percentage }}%;">
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="pt-4">
                                             <button
-                                                class="copy-coupon bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer"
+                                                class="copy-coupon pharmacy-coupon-redeem bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
                                                 data-code="{{ coupon.code }}"
+                                                data-coupon-id="{{ coupon.id }}" data-redeem-url="{% url 'pharmacy_coupon_redeem' %}"
+                                                {% if coupon.is_exhausted %}disabled{% endif %}
                                                 aria-label="Copy coupon code {{ coupon.code }}">
                                                 {{ coupon.code }}
                                                 <span class="material-symbols-outlined text-[18px]">
@@ -157,13 +159,13 @@
                                                     Redeemed
                                                 </p>
                                                 <p class="text-xs font-medium text-jet-black">
-                                                    {{ coupon.redeemed_count }}/{{ coupon.max_redemptions }}
+                                                    <span class="coupon-redemption-count" data-coupon-id="{{ coupon.id }}">{{ coupon.redeemed_count }}/{{ coupon.max_redemptions }}</span>
                                                 </p>
                                             </div>
                                             <div class="w-full max-w-md pt-4">
                                                 <div class="w-full bg-pale-ice-blue rounded-full h-2">
                                                     <div
-                                                        class="bg-dodger-blue h-2 rounded-full"
+                                                        class="coupon-redemption-progress bg-dodger-blue h-2 rounded-full" data-coupon-id="{{ coupon.id }}"
                                                         style="width: {{ coupon.redeemed_percentage }}%;">
                                                     </div>
                                                 </div>
@@ -172,8 +174,10 @@
                                         <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
                                         <div class="pt-4">
                                             <button
-                                                class="copy-coupon bg-dodger-blue h-10 w-full rounded-lg flex items-center justify-center gap-1 font-semibold text-sm text-white cursor-pointer"
+                                                class="copy-coupon pharmacy-coupon-redeem bg-dodger-blue h-10 w-full rounded-lg flex items-center justify-center gap-1 font-semibold text-sm text-white {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
                                                 data-code="{{ coupon.code }}"
+                                                data-coupon-id="{{ coupon.id }}" data-redeem-url="{% url 'pharmacy_coupon_redeem' %}"
+                                                {% if coupon.is_exhausted %}disabled{% endif %}
                                                 aria-label="Copy coupon code {{ coupon.code }}">
                                                 {{ coupon.code }}
                                                 <span class="material-symbols-outlined text-[18px]">

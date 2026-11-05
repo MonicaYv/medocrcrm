@@ -25,10 +25,9 @@
                         <div class="mt-5 bg-soft-pastel-mint rounded-2xl p-2.5 flex items-center justify-between">
                             <div class="flex flex-col gap-1.5">
                                 <p class="font-normal text-base text-dark-navy">Subscription Details</p>
-                                <div
-                                    class="border border-dodger-blue  bg-pastel-mint w-[60px] h-[24px] flex items-center justify-center gap-1 rounded-3xl">
-                                    <div class="w-1 h-1 rounded-full bg-light-green"></div>
-                                    <p class="font-normal text-xs text-dark-green">Active</p>
+                                <div class="border {% if pharmacy_subscription_status == 'Active' %}border-dodger-blue bg-pastel-mint{% else %}border-gray-300 bg-gray-100{% endif %} min-w-[60px] h-[24px] px-2 flex items-center justify-center gap-1 rounded-3xl">
+                                    <div class="w-1 h-1 rounded-full {% if pharmacy_subscription_status == 'Active' %}bg-light-green{% else %}bg-gray-400{% endif %}"></div>
+                                    <p class="font-normal text-xs {% if pharmacy_subscription_status == 'Active' %}text-dark-green{% else %}text-gray-600{% endif %}">{{ pharmacy_subscription_status|default:"Inactive" }}</p>
                                 </div>
                             </div>
                             <span class="material-symbols-outlined text-dodger-blue">chevron_right</span>

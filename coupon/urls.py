@@ -11,5 +11,6 @@ urlpatterns = [
     path('export-saved-coupon-history/', views.export_saved_coupon_history, name='export_saved_coupon_history'),
     path("seller/create/", views.create_seller_coupon, name="create-seller-coupon"),
     path("ajax/get-created-coupons/", views.get_created_coupons, name="get_created_coupons"),
+    path("redeem-copy/", views.pharmacy_coupon_redeem, name="pharmacy_coupon_redeem"),
 
-] 
+]

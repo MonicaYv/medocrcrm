@@ -273,6 +273,80 @@ $(document).on("click", "[data-tab='created-coupons']", function () {
 });
 
 $(document).on("click", ".copy-coupon", function () {
+    if (this.classList.contains("pharmacy-coupon-redeem")) {
+        const button = this;
+        const couponId = button.dataset.couponId;
+        const couponButtons = document.querySelectorAll(`.pharmacy-coupon-redeem[data-coupon-id="${couponId}"]`);
+        couponButtons.forEach(item => { item.disabled = true; });
+
+        const csrfToken = (document.cookie.match(/(?:^|; )csrftoken=([^;]+)/) || [])[1] || "";
+        fetch(button.dataset.redeemUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ coupon_id: couponId })
+        }).then(async response => {
+            const data = await response.json();
+            const count = Number(data.redeemed_count || 0);
+            const max = Number(data.max_redemptions || 0);
+            document.querySelectorAll(`.coupon-redemption-count[data-coupon-id="${couponId}"]`).forEach(el => {
+                el.textContent = `${count}/${max}`;
+            });
+            document.querySelectorAll(`.coupon-redemption-progress[data-coupon-id="${couponId}"]`).forEach(el => {
+                el.style.width = `${Math.min(100, Number(data.percent_used || 0))}%`;
+            });
+
+            const exhausted = data.limit_reached === true || count >= max;
+            couponButtons.forEach(item => {
+                item.disabled = exhausted;
+                item.classList.toggle("opacity-50", exhausted);
+                item.classList.toggle("cursor-not-allowed", exhausted);
+                item.classList.toggle("cursor-pointer", !exhausted);
+            });
+
+            if (!response.ok) {
+                throw new Error(data.message || "Coupon redemption limit reached.");
+            }
+
+            const code = String(data.code || button.dataset.code || "");
+            let copied = false;
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(code);
+                    copied = true;
+                } catch (_) {
+                    // Fall back to the legacy copy method if clipboard permissions are denied.
+                }
+            }
+            if (!copied) {
+                const field = document.createElement("textarea");
+                field.value = code;
+                field.setAttribute("readonly", "");
+                field.style.position = "fixed";
+                field.style.opacity = "0";
+                document.body.appendChild(field);
+                field.select();
+                const copied = document.execCommand("copy");
+                field.remove();
+                if (!copied) throw new Error("Redemption recorded, but the code could not be copied.");
+            }
+            if (typeof window.showToaster === "function") window.showToaster("success", "Coupon copied and redemption recorded.");
+            else if (window.toastr) window.toastr.success("Coupon copied and redemption recorded.");
+        }).catch(error => {
+            if (error.message !== "Coupon redemption limit reached.") {
+                couponButtons.forEach(item => {
+                    if (!item.classList.contains("opacity-50")) item.disabled = false;
+                });
+            }
+            if (typeof window.showToaster === "function") window.showToaster("error", error.message);
+            else if (window.toastr) window.toastr.error(error.message);
+        });
+        return;
+    }
+
     const code = String($(this).data("code") || "").trim();
 
     const showCouponCopyStatus = (message, isSuccess) => {
