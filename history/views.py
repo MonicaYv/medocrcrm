@@ -1,4 +1,8 @@
 from datetime import timedelta
+import logging
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -100,8 +104,37 @@ def history(request):
                 bed_room__isnull=False,
             ).values_list("bed_room_id", flat=True)
         )
+        saved_assignments = {}
+        try:
+            if hasattr(settings, "MONGO_DB") and settings.MONGO_DB is not None and hospital:
+                cursor = settings.MONGO_DB["hospital_bed_assignments"].find({
+                    "hospital_id": hospital.id,
+                    "status": "Occupied",
+                })
+                for doc in cursor:
+                    if doc.get("bed_id"):
+                        saved_assignments[str(doc["bed_id"])] = doc
+                    if doc.get("bed_no"):
+                        saved_assignments[f"no_{doc['bed_no']}"] = doc
+        except Exception as e:
+            logger.error(f"Error fetching saved bed assignments: {e}")
+
+        session_assignments = request.session.get("hospital_bed_assignments", {})
+        if isinstance(session_assignments, dict):
+            for k, v in session_assignments.items():
+                if k not in saved_assignments and v.get("status") == "Occupied":
+                    saved_assignments[k] = v
+
         for bed in bed_inventory:
-            bed.is_occupied = bed.bed_room_id in occupied_bed_room_ids
+            assignment = saved_assignments.get(str(bed.id)) or saved_assignments.get(f"no_{bed.bed_no}")
+            if assignment:
+                bed.is_occupied = True
+                bed.assigned_patient = assignment.get("patient_name", "")
+                bed.assigned_disease = assignment.get("disease", "")
+            else:
+                bed.is_occupied = bed.bed_room_id in occupied_bed_room_ids
+                bed.assigned_patient = ""
+                bed.assigned_disease = ""
 
         context.update({
             "bed_inventory": bed_inventory
@@ -1053,3 +1086,111 @@ def no_show_appointment(request):
         return JsonResponse({"success": True, "message": "Appointment marked as no-show"})
 
     return JsonResponse({"success": False, "message": "Invalid user type"})
+
+@require_POST
+@dashboard_login_required
+def assign_bed_patient(request):
+    user = request.user_obj
+    if user.user_type != "hospital":
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=403)
+
+    hospital = HospitalProfile.objects.filter(user=user).first()
+    if not hospital:
+        return JsonResponse({"success": False, "message": "Hospital profile not found"}, status=404)
+
+    bed_id = request.POST.get("bed_id", "").strip()
+    bed_no = request.POST.get("bed_no", "").strip()
+    bed_name = request.POST.get("bed_name", "").strip()
+    bed_room_id = request.POST.get("bed_room_id", "").strip()
+    patient_name = request.POST.get("patient_name", "").strip()
+    disease = request.POST.get("disease", "").strip()
+
+    if not patient_name:
+        return JsonResponse({"success": False, "message": "Patient name is required"}, status=400)
+
+    saved_in_db = False
+    try:
+        if hasattr(settings, "MONGO_DB") and settings.MONGO_DB is not None:
+            coll = settings.MONGO_DB["hospital_bed_assignments"]
+            query_filter = {"hospital_id": hospital.id}
+            if bed_id:
+                query_filter["bed_id"] = str(bed_id)
+            elif bed_no:
+                query_filter["bed_no"] = str(bed_no)
+            else:
+                return JsonResponse({"success": False, "message": "Bed identifier is required"}, status=400)
+
+            update_data = {
+                "hospital_id": hospital.id,
+                "bed_id": str(bed_id) if bed_id else "",
+                "bed_no": str(bed_no) if bed_no else "",
+                "bed_name": str(bed_name) if bed_name else "",
+                "bed_room_id": str(bed_room_id) if bed_room_id else "",
+                "patient_name": patient_name,
+                "disease": disease,
+                "status": "Occupied",
+                "updated_at": timezone.now(),
+            }
+            coll.update_one(query_filter, {"$set": update_data}, upsert=True)
+            saved_in_db = True
+    except Exception as e:
+        logger.error(f"Error saving bed assignment to MongoDB: {e}")
+
+    session_assignments = request.session.get("hospital_bed_assignments", {})
+    if not isinstance(session_assignments, dict):
+        session_assignments = {}
+    key = str(bed_id) if bed_id else f"no_{bed_no}"
+    session_assignments[key] = {
+        "bed_id": str(bed_id),
+        "bed_no": str(bed_no),
+        "bed_name": str(bed_name),
+        "bed_room_id": str(bed_room_id),
+        "patient_name": patient_name,
+        "disease": disease,
+        "status": "Occupied",
+    }
+    request.session["hospital_bed_assignments"] = session_assignments
+    request.session.modified = True
+
+    return JsonResponse({
+        "success": True,
+        "message": "Bed assigned successfully",
+        "saved_in_db": saved_in_db,
+    })
+
+
+@require_POST
+@dashboard_login_required
+def unassign_bed_patient(request):
+    user = request.user_obj
+    if user.user_type != "hospital":
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=403)
+
+    hospital = HospitalProfile.objects.filter(user=user).first()
+    if not hospital:
+        return JsonResponse({"success": False, "message": "Hospital profile not found"}, status=404)
+
+    bed_id = request.POST.get("bed_id", "").strip()
+    bed_no = request.POST.get("bed_no", "").strip()
+
+    try:
+        if hasattr(settings, "MONGO_DB") and settings.MONGO_DB is not None:
+            coll = settings.MONGO_DB["hospital_bed_assignments"]
+            query_filter = {"hospital_id": hospital.id}
+            if bed_id:
+                query_filter["bed_id"] = str(bed_id)
+            elif bed_no:
+                query_filter["bed_no"] = str(bed_no)
+
+            coll.delete_one(query_filter)
+    except Exception as e:
+        logger.error(f"Error unassigning bed from MongoDB: {e}")
+
+    session_assignments = request.session.get("hospital_bed_assignments", {})
+    if isinstance(session_assignments, dict):
+        key = str(bed_id) if bed_id else f"no_{bed_no}"
+        session_assignments.pop(key, None)
+        request.session["hospital_bed_assignments"] = session_assignments
+        request.session.modified = True
+
+    return JsonResponse({"success": True, "message": "Bed unassigned successfully"})

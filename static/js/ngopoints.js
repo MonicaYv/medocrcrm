@@ -228,28 +228,52 @@ $(document).on('click', '.pointsChartFilter', function () {
 $(document).on('click', '.points-chart-custom', function () {
   clearChartDateRangeToast();
   chartCustomStart = '';
-  const $picker = $(this).closest('.dropdown').find('.datepicker-inline');
+  const $dropdown = $(this).closest('.dropdown');
+  const $picker = $dropdown.find('.datepicker-inline');
+  const $container = $dropdown.find('.datepicker-container');
   if ($.fn.datepicker && $picker.length) {
-    $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
-    $picker.datepicker('option', 'onSelect', function (dateText) {
-      if (!chartCustomStart) {
-        chartCustomStart = dateText;
-        if (window.toastr) {
-          window.toastr.info("Please select an end date.");
-        } else if (window.showToaster) {
-          window.showToaster("info", "Please select an end date.");
+    if (!$picker.hasClass('hasDatepicker')) {
+      $picker.datepicker();
+    }
+    $picker.datepicker('option', {
+      dateFormat: 'yy-mm-dd',
+      changeMonth: true,
+      changeYear: true,
+      yearRange: '2000:2035',
+      firstDay: 0,
+      dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+      monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      beforeShowDay: function (date) {
+        const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+        const classes = [];
+        if (chartCustomStart && dateText === chartCustomStart) {
+          classes.push("hospital-date-range-start");
         }
-        return;
+        return [true, classes.join(" "), ""];
+      },
+      onSelect: function (dateText) {
+        if (!chartCustomStart) {
+          chartCustomStart = dateText;
+          if (window.toastr) {
+            window.toastr.info("Please select an end date.");
+          } else if (window.showToaster) {
+            window.showToaster("info", "Please select an end date.");
+          }
+          $picker.datepicker('refresh');
+          return;
+        }
+        clearChartDateRangeToast();
+        let first = chartCustomStart, last = dateText;
+        if (first > last) [first, last] = [last, first];
+        loadChartData('custom', first, last);
+        $container.addClass('hidden').hide();
+        chartCustomStart = '';
+        $picker.datepicker('refresh');
       }
-      clearChartDateRangeToast();
-      let first = chartCustomStart, last = dateText;
-      if (first > last) [first, last] = [last, first];
-      loadChartData('custom', first, last);
-      $(this).closest('.datepicker-container').hide();
-      chartCustomStart = '';
     });
-    $picker.closest('.datepicker-container').show();
-    $(this).closest('.filterDropdown').hide();
+    $picker.datepicker('refresh');
+    $container.removeClass('hidden').show();
+    $(this).closest('.filterDropdown').addClass('hidden').hide();
   }
 });
 
@@ -545,6 +569,20 @@ function truncateDescriptions() {
     rewardsCustomDateToast = null;
     let firstDate = '';
     $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+    $picker.datepicker('option', 'changeMonth', true);
+    $picker.datepicker('option', 'changeYear', true);
+    $picker.datepicker('option', 'yearRange', '2000:2035');
+    $picker.datepicker('option', 'firstDay', 0);
+    $picker.datepicker('option', 'dayNamesMin', ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']);
+    $picker.datepicker('option', 'monthNamesShort', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+    $picker.datepicker('option', 'beforeShowDay', function (date) {
+      const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+      const classes = [];
+      if (rewardsStartDate && dateText === rewardsStartDate) {
+        classes.push("hospital-date-range-start");
+      }
+      return [true, classes.join(" "), ""];
+    });
     $picker.datepicker('option', 'onSelect', function (dateText) {
         if (!firstDate) {
             firstDate = dateText;
@@ -554,6 +592,7 @@ function truncateDescriptions() {
             } else if (window.showToaster) {
               window.showToaster("info", "Please select an end date.");
             }
+            $picker.datepicker('refresh');
             return;
         }
         clearDateRangeToast(rewardsCustomDateToast);
@@ -590,11 +629,12 @@ function truncateDescriptions() {
             '',
             1
         );
-        $datepickerContainer.hide();
+        $datepickerContainer.addClass('hidden').hide();
         firstDate = '';
+        $picker.datepicker('refresh');
     });
-    $filterDropdown.hide();
-    $datepickerContainer.show();
+    $filterDropdown.addClass('hidden').hide();
+    $datepickerContainer.removeClass('hidden').show();
 });
 
   function fetchFilteredData(page = 1) {
@@ -655,29 +695,54 @@ window.loadPointsHistoryFilter = function(type) {
     start.setFullYear(start.getFullYear() - 1);
     $('[onclick="applyDateFilter(\'last_year\')"]').addClass('font-bold');
   } else if (type === "custom") {
-    const $picker = $('.points-history .datepicker-inline');
+    const $dropdown = $('.points-history .filter-dropdown');
+    const $picker = $dropdown.find('.datepicker-inline');
+    const $container = $dropdown.find('.datepicker-container');
     let firstDate = '';
-    $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
-    $picker.datepicker('option', 'onSelect', function(dateText) {
-      if (!firstDate) {
-        firstDate = dateText;
-        if (window.toastr) {
-          window.toastr.info("Please select an end date.");
-        } else if (window.showToaster) {
-          window.showToaster("info", "Please select an end date.");
+    if (!$picker.hasClass('hasDatepicker')) {
+      $picker.datepicker();
+    }
+    $picker.datepicker('option', {
+      dateFormat: 'yy-mm-dd',
+      changeMonth: true,
+      changeYear: true,
+      yearRange: '2000:2035',
+      firstDay: 0,
+      dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+      monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      beforeShowDay: function (date) {
+        const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+        const classes = [];
+        if (firstDate && dateText === firstDate) {
+          classes.push("hospital-date-range-start");
         }
-        return;
+        return [true, classes.join(" "), ""];
+      },
+      onSelect: function(dateText) {
+        if (!firstDate) {
+          firstDate = dateText;
+          if (window.toastr) {
+            window.toastr.info("Please select an end date.");
+          } else if (window.showToaster) {
+            window.showToaster("info", "Please select an end date.");
+          }
+          $picker.datepicker('refresh');
+          return;
+        }
+        clearPointsHistoryDateRangeToast();
+        let startDate = firstDate, endDate = dateText;
+        if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
+        $('#startDateInput').val(startDate);
+        $('#endDateInput').val(endDate);
+        fetchFilteredData(1);
+        $container.addClass('hidden').hide();
+        firstDate = '';
+        $picker.datepicker('refresh');
       }
-      clearPointsHistoryDateRangeToast();
-      let startDate = firstDate, endDate = dateText;
-      if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
-      $('#startDateInput').val(startDate);
-      $('#endDateInput').val(endDate);
-      fetchFilteredData(1);
-      $(this).closest('.datepicker-container').hide();
-      firstDate = '';
     });
-    $picker.closest('.datepicker-container').show();
+    $picker.datepicker('refresh');
+    $('.points-history .dropdown-option, .points-history .filter-dropdown-option').addClass('hidden').hide();
+    $container.removeClass('hidden').show();
     $('[onclick="applyDateFilter(\'custom\')"]').addClass('font-bold');
     return;
   }
@@ -873,7 +938,7 @@ $(document).on("click", ".claim-btn", function (e) {
     rewardClaimed($('#rewards-claimed-search').val().trim() || '', '', '', 1, claimedDateRange);
   });
 
-  $(document).on('click', '.rewardsClaimed .calendar-icon', function () {
+  $(document).on('click', '.rewardsClaimed .calendar-icon, .rewardsClaimed .rewards-claimed-custom', function () {
     const $picker = $(this).closest('.dropdown').find('.datepicker-inline');
     clearDateRangeToast(claimedCustomDateToast);
     claimedCustomDateToast = null;
@@ -881,6 +946,16 @@ $(document).on("click", ".claim-btn", function (e) {
     if ($.fn.datepicker && $picker.length) {
       claimedDateRange = '';
       $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+      $picker.datepicker('option', 'firstDay', 0);
+      $picker.datepicker('option', 'dayNamesMin', ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']);
+      $picker.datepicker('option', 'beforeShowDay', function (date) {
+        const dateText = $.datepicker.formatDate("yy-mm-dd", date);
+        const classes = [];
+        if (firstDate && dateText === firstDate) {
+          classes.push("hospital-date-range-start");
+        }
+        return [true, classes.join(" "), ""];
+      });
       $picker.datepicker('option', 'onSelect', function (dateText) {
         if (!firstDate) {
           firstDate = dateText;
@@ -890,6 +965,7 @@ $(document).on("click", ".claim-btn", function (e) {
           } else if (window.showToaster) {
             window.showToaster("info", "Please select an end date.");
           }
+          $picker.datepicker('refresh');
           return;
         }
         clearDateRangeToast(claimedCustomDateToast);
@@ -897,11 +973,12 @@ $(document).on("click", ".claim-btn", function (e) {
         claimedEndDate = dateText;
         if (claimedEndDate < claimedStartDate) [claimedStartDate, claimedEndDate] = [claimedEndDate, claimedStartDate];
         rewardClaimed($('#rewards-claimed-search').val().trim(), claimedStartDate, claimedEndDate, 1, '');
-        $(this).closest('.datepicker-container').hide();
+        $(this).closest('.datepicker-container').addClass('hidden').hide();
         firstDate = '';
+        $picker.datepicker('refresh');
       });
-      $picker.closest('.datepicker-container').show();
-      $(this).closest('.filterDropdown').hide();
+      $picker.closest('.datepicker-container').removeClass('hidden').show();
+      $(this).closest('.filterDropdown').addClass('hidden').hide();
     }
   });
 
@@ -913,9 +990,21 @@ $(document).on("click", ".claim-btn", function (e) {
   $(document).on('click', '.points-history .dropdown-btn', function (e) {
       e.stopPropagation();
       e.preventDefault();
-      const $option = $(this).closest('.dropdown').find('.dropdown-option');
-      $('.points-history .dropdown-option').not($option).addClass('hidden');
-      $option.toggleClass('hidden');
+      const $dropdown = $(this).closest('.dropdown');
+      const $option = $dropdown.find('.dropdown-option');
+      $('.points-history .dropdown-option').not($option).addClass('hidden').hide();
+      $dropdown.find('.datepicker-container').addClass('hidden').hide();
+      if ($option.is(':visible') && !$option.hasClass('hidden')) {
+          $option.addClass('hidden').hide();
+      } else {
+          $option.removeClass('hidden').show();
+      }
+  });
+
+  $(document).on('click', function (e) {
+      if (!$(e.target).closest('.points-history .dropdown').length) {
+          $('.points-history .dropdown-option').addClass('hidden').hide();
+      }
   });
 
 // $(document).ready(function () {

@@ -18,7 +18,16 @@ $(document).ready(function () {
   const isAppointmentPage = $('.appointment-page').length > 0;
 
   if ($.fn.datepicker && !isAppointmentPage) {
-  $('.datepicker-inline').datepicker();
+    $.datepicker.setDefaults({
+      dateFormat: 'yy-mm-dd',
+      changeMonth: true,
+      changeYear: true,
+      yearRange: '2000:2035',
+      firstDay: 0,
+      dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+      monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    });
+    $('.datepicker-inline').datepicker();
 
   const $hospitalDatepicker = $('.filterDropdown [data-filter="custom"]')
     .not('.points-chart-custom')

@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render
 from dashboard.utils import dashboard_login_required, get_common_context
 import json
@@ -135,7 +136,8 @@ def save_hospital_doctor(request):
     if not name or not phone or not specialty_name:
         return JsonResponse({"success": False, "error": "Required fields missing"}, status=400)
 
-    name_parts = name.split(" ", 1)
+    clean_name = re.sub(r"^Dr\.?\s*", "", name, flags=re.IGNORECASE).strip()
+    name_parts = clean_name.split(" ", 1)
     first_name = name_parts[0]
     last_name = name_parts[1] if len(name_parts) > 1 else ""
 
@@ -160,8 +162,12 @@ def save_hospital_doctor(request):
     doctor_id = data.get("doctor_id")
     if doctor_id:
         doctor = DoctorsProfile.objects.filter(
-            id=doctor_id, user=request.user_obj, created_by_hospital=True, is_active=True
+            id=doctor_id, user=request.user_obj, is_active=True
         ).defer("attendance_details").first()
+        if not doctor:
+            doctor = DoctorsProfile.objects.filter(
+                id=doctor_id, is_active=True
+            ).defer("attendance_details").first()
         if not doctor:
             return JsonResponse({"success": False, "error": "Doctor not found"}, status=404)
         doctor.first_name, doctor.last_name = first_name, last_name
@@ -603,6 +609,7 @@ def doctor_details(request, doctor_id):
             "gender": doctor.gender,
             "age": doctor.age,
             "phone": f"{doctor.phone_country_code or ''} {doctor.phone_number or ''}",
+            "phone_number": doctor.phone_number or "",
             "specialty": doctor.specialization.name if doctor.specialization else "",
             "education": doctor.education.name if doctor.education else "",
             "experience": doctor.experience.years if doctor.experience else 0,

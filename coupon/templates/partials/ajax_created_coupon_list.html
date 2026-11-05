@@ -20,17 +20,19 @@
                 <div class="flex lg:justify-between lg:items-center gap-6">
                     <p class="font-normal text-base text-jet-black">Redeemed</p>
                     <p class="text-xs font-medium text-jet-black">
-                        {{ c.used_count }}/{{ c.usage_limit }}
+                        <span class="seller-coupon-redemption-count" data-coupon-id="{{ c.id }}">{{ c.display_used_count }}/{{ c.usage_limit }}</span>
                     </p>
                 </div>
 
                 <div class="w-full max-w-md pt-4">
                     <div class="w-full bg-pale-ice-blue rounded-full h-2">
-                        {% with percent=c.used_count|floatformat:0 %}
-                        <div class="bg-dodger-blue h-2 rounded-full"
-                             style="width: {{ c.used_count|divisibleby:c.usage_limit }}%">
+                        <div class="seller-coupon-redemption-progress bg-dodger-blue h-2 rounded-full" data-coupon-id="{{ c.id }}"
+                             role="progressbar"
+                             aria-valuenow="{{ c.redeemed_percentage|floatformat:0 }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100"
+                             style="width: {{ c.redeemed_percentage }}%">
                         </div>
-                        {% endwith %}
                     </div>
                 </div>
             </div>
@@ -38,9 +40,12 @@
             <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
 
             <div class="pt-4">
-                <button 
-                    class="copy-coupon bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer"
+                <button
+                    class="copy-coupon seller-coupon-redeem bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center {% if c.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
                     data-code="{{ c.coupon_code }}"
+                    data-coupon-id="{{ c.id }}"
+                    data-redeem-url="{% url 'created_coupon_redeem' %}"
+                    {% if c.is_exhausted %}disabled{% endif %}
                 >
                     {{ c.coupon_code }}
                     <span class="material-symbols-outlined">content_copy</span>

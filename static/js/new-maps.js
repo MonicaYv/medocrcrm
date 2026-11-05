@@ -615,9 +615,34 @@ function generateStars(rating, reviews) {
 }
 
     let bookmarkedPlaceIds = new Set();
+
+    // Pre-populate bookmarkedPlaceIds from server on load
+    fetch("save_location/", {
+        method: "GET",
+        headers: { "X-CSRFToken": getCookie("csrftoken") }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.saved && Array.isArray(data.saved)) {
+            data.saved.forEach(p => {
+                if (p && p.mongo_id) {
+                    bookmarkedPlaceIds.add(String(p.mongo_id));
+                }
+            });
+            $(".bookmark-fill").each(function() {
+                const id = String($(this).data("id"));
+                if (id && bookmarkedPlaceIds.has(id)) {
+                    $(this).addClass(`material-filled text-${selectedColor}`);
+                }
+            });
+        }
+    })
+    .catch(err => console.debug("Bookmark preload note:", err));
+
     // Renders a list of place cards dynamically into the view with relevant info and actions
-    function renderListView(places) {
+    function renderListView(places, showingSavedLocations = false) {
         const listContainer = $(".cards");
+        listContainer.attr("data-showing-saved-locations", String(showingSavedLocations));
         listContainer.empty();
         $("#pagination").removeClass('hidden');
 
@@ -1652,7 +1677,7 @@ $(".bookmark-icon").on("click", function (e) {
             allFetchedPlaces = [...places];        
             const view = $(this).data("view") || "map";
             if (view === "list") {
-                renderListView(places); 
+                renderListView(places, true);
             }
             else {
                 showFilteredSuggestions("Saved Locations", place =>
@@ -1834,35 +1859,56 @@ $(document)
     });
 
     // Handle bookmark toggle: save location on click and update UI with feedback.
-    $(document).on("click", ".bookmark-fill", function () {
+    $(document).on("click", ".bookmark-fill", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
         const $btn = $(this);
         const mongo_id = $btn.data("id");
-        const type = $btn.data("type");
+        const type = String($btn.data("type") || "").toLowerCase();
         if (!mongo_id || !type) return;
-        fetch("save_location/", {
+
+        const isBookmarked = bookmarkedPlaceIds.has(String(mongo_id)) || $btn.hasClass("material-filled");
+        const endpoint = isBookmarked ? "remove_saved_location/" : "save_location/";
+        const payload = isBookmarked
+            ? { mongo_id: String(mongo_id), amenity_type: type }
+            : { mongo_id: String(mongo_id), type };
+
+        fetch(endpoint, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken")
             },
-            body: JSON.stringify({ mongo_id, type })
-            })
-            .then(res => res.json())
-            .then(data => {
-            if (data.created) {
-                $btn.html("bookmark");
-                $btn.addClass(`material-filled text-${selectedColor}`);
-                bookmarkedPlaceIds.add(mongo_id);
-                toastr.success("Saved to bookmarks!");
-            } else {
-                bookmarkedPlaceIds.delete(mongo_id);
-                toastr.info("Already bookmarked.");
-            }
+            body: JSON.stringify(payload)
         })
-        .catch(err => {
-            console.error("Bookmarking error", err);
-            toastr.error("Could not save bookmark.");
+            .then(async (res) => {
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || data.message || "Could not update bookmark.");
+                return data;
+            })
+            .then(data => {
+                if (isBookmarked) {
+                    bookmarkedPlaceIds.delete(String(mongo_id));
+                    $btn.removeClass(`material-filled text-${selectedColor}`).text("bookmark_add");
+                    $(`.bookmark-fill[data-id="${mongo_id}"]`).removeClass(`material-filled text-${selectedColor}`).text("bookmark_add");
+
+                    savedPlaces = savedPlaces.filter(place => String(place.mongo_id) !== String(mongo_id));
+                    allFetchedPlaces = allFetchedPlaces.filter(place => String(place.mongo_id) !== String(mongo_id));
+                    if ($(".cards").attr("data-showing-saved-locations") === "true") {
+                        $btn.closest(".places-card").remove();
+                    }
+                    toastr.success("Removed from bookmarks.");
+                } else {
+                    bookmarkedPlaceIds.add(String(mongo_id));
+                    $btn.text("bookmark").addClass(`material-filled text-${selectedColor}`);
+                    $(`.bookmark-fill[data-id="${mongo_id}"]`).text("bookmark").addClass(`material-filled text-${selectedColor}`);
+                    toastr.success("Saved to bookmarks!");
+                }
+            })
+            .catch(err => {
+                console.error("Bookmarking error", err);
+                toastr.error(err.message || "Could not update bookmark.");
         });
-        $(this).addClass(`material-filled text-${selectedColor}`);
     });
 });

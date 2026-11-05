@@ -9,6 +9,7 @@ from orders.models import PurchaseMedicine, UserPurchase, OrderStatusChoices
 from registration.models import PharmacyProfile
 from django.views.decorators.http import require_POST
 from services.models import PharmacyBidding
+from orders.utils import pharmacy_order_local_time
 
 @dashboard_login_required
 def orders(request):
@@ -94,6 +95,8 @@ def orders(request):
     paginator = Paginator(orders_qs, 5)
     page_number = request.GET.get("page", 1)
     page_obj = paginator.get_page(page_number)
+    for order in page_obj.object_list:
+        order.local_created_at = pharmacy_order_local_time(order.created_at)
 
     context.update({
         "orders": page_obj,

@@ -1,55 +1,93 @@
 {% load static %}
 
-<aside class="sidebar w-[200px] md:w-[280px] h-full transition-all transform duration-300 ease-in-out shadow-lg" id="sidebar">
-    <!-- Badge Section -->
-    <div class="h-40 px-2 py-4 relative border-b border-gray-200">
-        <div class="flex flex-col items-center gap-2">
-            <!-- Badge Icon -->
-            <div class="relative">
-                {% if badge and badge.image_url %}
-                    <img src="{{ badge.image_url }}" alt="{{ badge.name }}" class="w-24 h-24 rounded-full object-cover mx-auto">
-                {% else %}
-                    <img src="{% static 'images/diamond-badge.svg' %}" alt="Default Badge" class="w-12 h-12 rounded-full object-cover">
-                {% endif %}
-            </div>
-            <!-- Badge Name -->
-            <div>
-                <p class="text-18-nr">{{ badge.name|default:"No Badge" }}</p>
-            </div>
+<aside class="sidebar w-[200px] md:w-[280px] h-full max-h-screen transition-all transform duration-300 ease-in-out shadow-lg flex flex-col bg-white" id="sidebar">
+
+    <!-- Profile Section (fixed) -->
+    <div class="relative px-2 pt-6 pb-4 border-b border-gray-200 shrink-0">
+        <div class="menu-toggle absolute right-2 top-3 h-7 w-7 bg-white border border-gray-200 shadow-sm flex items-center justify-center rounded-full cursor-pointer z-10">
+            <span class="material-symbols-outlined text-gray-600 text-[18px] leading-none">chevron_left</span>
         </div>
-        <div class="menu-toggle absolute right-0 top-1/2 -translate-y-1/2 h-[48px] w-[48px] bg-{{ secondary_bg }} flex items-center justify-center rounded-l-md cursor-pointer z-10">
-            <span class="material-symbols-outlined bold-weight text-{{ text }} pl-2.5 font-bold">
-                arrow_back_ios
+
+        <div class="flex flex-col items-center gap-2">
+            <div class="w-20 h-20 rounded-full border-[3px] border-pharmaceutical-green bg-soft-pastel-mint flex items-center justify-center">
+                <span class="text-2xl font-bold text-pharmaceutical-green">{{ seller_initials|default:"MP" }}</span>
+            </div>
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-soft-pastel-mint text-pharmaceutical-green text-xs font-medium">
+                <span>👑</span> {{ seller_tier|default:"Premium Seller" }}
             </span>
+            <p class="text-base font-bold text-charcoal-black text-center">{{ seller_name|default:"MedPlus Pharmacy" }}</p>
         </div>
     </div>
-        
-    <!-- Navigation Menu -->
-    <nav class="h-[calc(100%-160px)] py-4 overflow-y-auto no-scrollbar pb-8">
-        <ul class="flex flex-col gap-1">
-        {% for menu in sidebar_menu %}
-            <li>
-                <a href="{{ menu.url }}" 
-                    class="flex items-center gap-3 px-6 py-3 w-full transition-colors
-                        {% if request.path == menu.url or sidebar_active == menu.name|lower %}
-                            bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }} 
-                        {% else %}
-                            hover:bg-gray-100
-                        {% endif %}">
-                    {% if menu.icon %}
-                        <span class="material-symbols-outlined {% if menu.icon == 'emoji_events' %}material-filled{% endif %}">
-                            {{ menu.icon }}
-                        </span>
-                    {% endif %}
-                    <p>{{ menu.name }}</p>
-                </a>
-            </li>
-        {% endfor %}
-        </ul>
-        <div class="w-full flex flex-col px-6 pb-4 mt-4">
-            <a href="#">
-                <img src="/static/images/Sale.svg" alt="Diamond User" loading="lazy" class="sidebar-image">
-            </a>
+
+    <!-- Scrollable area: menu + Refer & Earn card -->
+    <nav class="flex-1 min-h-0 overflow-y-auto no-scrollbar">
+        <div class="min-h-full flex flex-col">
+
+            <ul class="flex flex-col gap-1 py-4 shrink-0">
+                <li>
+                    <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if sidebar_active == 'home' or request.path == '/dashboard' or request.path == '/dashboard/' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">home</span><p>Home</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'map_view' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'map_view' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">location_on</span><p>Nearby</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'orders' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'orders' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">inventory_2</span><p>Orders</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'coupons' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'coupons' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">sell</span><p>Offers &amp; Bids</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'services' %}#pharmacy-medicines" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'services' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">assignment</span><p>Inventory</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'reports' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'reports' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">bar_chart</span><p>Reports</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'services' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'services' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">build</span><p>Services</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'advance' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'advance' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">paid</span><p>Earnings &amp; Payouts</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'settings_page' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'settings_page' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">settings</span><p>Settings</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'support_view' %}" class="flex items-center gap-3 px-6 py-3 w-full transition-colors {% if request.resolver_match.url_name == 'support_view' %}bg-{{ secondary_bg }} text-{{ text }} font-semibold active-menu pr-5 border-r-4 border-{{ border }}{% else %}text-cloud-burst hover:bg-gray-100{% endif %}">
+                        <span class="material-symbols-outlined">headset_mic</span><p>Support</p>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Refer & Earn card: pushed to bottom, tiny gap below -->
+            <div class="mt-auto px-3 pt-2 pb-6 shrink-0">
+                <div class="rounded-xl p-4 text-white bg-gradient-to-br from-blue-500 to-blue-700">
+                    <span class="material-symbols-outlined text-[22px]">redeem</span>
+                    <p class="mt-2 font-semibold text-sm">Refer &amp; Earn</p>
+                    <p class="mt-1 text-xs text-blue-100 leading-snug">Invite colleagues and earn cashbacks</p>
+                    <a href="#" class="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-white/70 text-xs font-medium hover:bg-white/10 transition-colors">
+                        Invite Now <span>→</span>
+                    </a>
+                </div>
+            </div>
+
         </div>
     </nav>
 </aside>
