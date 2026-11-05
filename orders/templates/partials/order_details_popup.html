@@ -153,7 +153,7 @@
                         <div>
                             <p class="text-ebony font-bold text-sm">QR Code for Payment</p>
                             <p class="text-ebony font-medium text-xs">
-                                Date: {{ order.created_at|date:"D, d M Y - g:i A" }}
+                                Date: {{ order.local_created_at|date:"D, d M Y - g:i A" }}
                             </p>
                         </div>
                         <span class="material-symbols-outlined pl-[6.43px] text-dark-gray qr-icon">expand_more</span>

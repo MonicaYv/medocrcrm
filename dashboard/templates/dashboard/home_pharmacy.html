@@ -161,7 +161,8 @@
                     <p class="mt-2 text-xs font-bold text-slate-900">
                         {% if order.user__userprofile__first_name %}{{ order.user__userprofile__first_name }} {{ order.user__userprofile__last_name|default:'' }}{% else %}Customer{% endif %}
                     </p>
-                    <p class="text-[10px] text-[#1A73E8]">{{ order.created_at|date:"d/m/Y, h:i A" }}</p>
+                    <p class="text-[10px] text-[#1A73E8]">{{ order.local_created_at|date:"d/m/Y, h:i A" }}</p>
+                    <img src="{% static 'images/sample-qr.png' %}" alt="Payment QR code" class="mt-1 h-8 w-8 rounded border border-blue-haze bg-white object-contain" />
                     {# Adjust these 3 field names to whatever your scheduled_orders query returns #}
                     {% if order.medicines %}<p class="mt-1.5 text-[9px] leading-3 text-slate-500">{{ order.medicines }}</p>{% endif %}
                     {% if order.total_amount %}

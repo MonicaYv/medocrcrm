@@ -53,6 +53,7 @@ from appointments.models import AppointmentStatus
 from appointments.models import HospitalAppointments, HospitalAppointmentStatus
 from appointments.models import DoctorAppointment
 from orders.models import UserPurchase, OrderStatusChoices, PurchaseMedicine
+from orders.utils import pharmacy_order_local_time
 from appointments.models import WalletTransaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -507,7 +508,7 @@ def dashboard_home(request):
             ).count()
 
 
-            scheduled_orders = (
+            scheduled_orders = list(
                 UserPurchase.objects
                 .filter(
                     assigned_pharmacy=pharmacy_profile
@@ -527,6 +528,8 @@ def dashboard_home(request):
                 )
                 .order_by('-created_at')[:3]
             )
+            for order in scheduled_orders:
+                order['local_created_at'] = pharmacy_order_local_time(order['created_at'])
 
 
             popular_coupons = Coupon.objects.all().order_by('-redeemed_count')[:5]

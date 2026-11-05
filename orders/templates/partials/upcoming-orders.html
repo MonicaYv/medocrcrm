@@ -43,10 +43,13 @@
                             Upcoming
                         </span>
 
-                        <span class="flex items-center gap-1 text-desaturated-blue">
-                            <img src="{% static 'images/alarm.svg' %}" alt="alarm" class="w-[10px] h-[10px] sm:w-[12px] sm:h-[12px]" />
-                            {{ order.created_at|date:"D, g:i A" }}
-                        </span>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="flex items-center gap-1 text-desaturated-blue">
+                                <img src="{% static 'images/alarm.svg' %}" alt="alarm" class="w-[10px] h-[10px] sm:w-[12px] sm:h-[12px]" />
+                                {{ order.local_created_at|date:"D, g:i A" }}
+                            </span>
+                            <img src="{% static 'images/sample-qr.png' %}" alt="Payment QR code" class="h-10 w-10 rounded border border-blue-haze bg-white object-contain" />
+                        </div>
                     </div>
                 </div>
 
