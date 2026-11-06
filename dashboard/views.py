@@ -19,16 +19,20 @@ from django.template.loader import render_to_string
 from subscription.models import SubscriptionHistory
 from django.views.decorators.http import require_GET, require_POST
 from .utils import dashboard_login_required, get_common_context, get_theme_colors
+from history.views import get_hospital_bed_inventory
 from appointments.utils import filter_appointments_between_dates, parse_filter_date
 from .models import SettingMenu, CouponPerformance,  CalendarEvent, TrendingCoupon
 from django.db.models import (
+    Avg,
     Count,
     DecimalField,
     ExpressionWrapper,
     F,
     Max,
+    OuterRef,
     Q,
     Sum,
+    Subquery,
     Value,
     DurationField,
 )
@@ -45,7 +49,7 @@ from registration.models import (
 )
 from appointments.models import WalletTransaction
 from services.models import LabBidding, LabBidStatus
-from services.models import HospitalBidding, HospitalBidStatus
+from services.models import HospitalBidding, HospitalBidStatus, HospitalServiceRateCard
 from services.models import DoctorBidding, DoctorBidStatus
 from services.models import PharmacyMedicine
 from appointments.models import LabAppointments
@@ -73,7 +77,7 @@ def get_dashboard_appointment_date_range(request, today):
         start_date = today - timedelta(days=6)
         end_date = today
     elif date_filter == "month":
-        start_date = today - timedelta(days=29)
+        start_date = today.replace(day=1)
         end_date = today
     elif date_filter == "custom":
         start_date = parse_filter_date(request.GET.get("start_date"))
@@ -105,6 +109,27 @@ def build_media_url(path):
         path = path[len(media_prefix) + 1:]
 
     return f"{media_url}/{path.lstrip('/')}"
+
+
+def build_image_media_url(path):
+    if not path:
+        return ""
+
+    normalized_path = str(path).replace("\\", "/").split("?", 1)[0]
+    extension = os.path.splitext(normalized_path)[1].lower()
+    if extension not in {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"}:
+        return ""
+
+    return build_media_url(path)
+
+
+def format_hospital_visit_mode(value):
+    normalized = (value or "").strip().lower().replace("_", "-")
+    if normalized in {"home", "home-visit", "home-service"}:
+        return "Home Visit"
+    if normalized in {"hospital", "hospital-visit", "visit"}:
+        return "Hospital Visit"
+    return normalized.replace("-", " ").title() or "Not specified"
 
 
 def parse_pharmacy_overview_range(filter_value, start_value, end_value, today):
@@ -371,8 +396,10 @@ def dashboard_home(request):
     context = get_common_context(request, user)
     context["theme_colors"] = get_theme_colors(user_type)
     admin_user_profile = UserProfile.objects.filter(user=user).first()
-    context["admin_profile_photo_path"] = (
-        admin_user_profile.profile_photo_path if admin_user_profile else ""
+    context["admin_profile_photo_url"] = (
+        build_image_media_url(admin_user_profile.profile_photo_path)
+        if admin_user_profile
+        else ""
     )
     
     context["sidebar_menu"] = menu_items
@@ -947,88 +974,318 @@ def dashboard_home(request):
 
         # ================= HOSPITAL =================
         elif user_type == 'hospital':
-            # hospital_profile = HospitalProfile.objects.get(user=user)
             hospital_profile = HospitalProfile.objects.filter(
                 user=user
+            ).select_related(
+                "city",
+                "state",
+                "hospital_timing",
+                "hospital_type",
+                "hospital_service",
             ).first()
+            if not hospital_profile:
+                return render(request, "dashboard/not_found.html", context)
+
             contact_person = ContactPerson.objects.filter(
                 profile_type="hospital",
                 profile=user
             ).order_by('-id').first()
-            appointment_requests = HospitalAppointments.objects.filter(
-                status="Pending"
+            admin_name = " ".join(
+                part
+                for part in (
+                    admin_user_profile.first_name if admin_user_profile else "",
+                    admin_user_profile.last_name if admin_user_profile else "",
+                )
+                if part
+            )
+            hospital_contact_name = (
+                (contact_person.name or "").strip()
+                or (hospital_profile.owner_name or "").strip()
+                or admin_name
+                or "Administrator not provided"
+            )
+            hospital_contact_initials = "".join(
+                part[0] for part in hospital_contact_name.split()[:2]
+            ).upper()
+            hospital_contact_phone = (
+                (contact_person.phone_number or "").strip()
+                or (hospital_profile.contact_no or "").strip()
+                or (user.phone_number or "").strip()
+            )
+            hospital_contact_country_code = (
+                (contact_person.phone_country_code or "").strip()
+                or (user.phone_country_code or "").strip()
+            )
+            if hospital_contact_phone and hospital_contact_country_code:
+                hospital_contact_phone = (
+                    f"{hospital_contact_country_code} {hospital_contact_phone}"
+                )
+            hospital_hours = ""
+            if hospital_profile.hospital_timing:
+                timing = hospital_profile.hospital_timing
+                hospital_hours = timing.name or ""
+                if timing.open_time and timing.close_time:
+                    time_range = (
+                        f"{timing.open_time.strftime('%I:%M %p').lstrip('0')} – "
+                        f"{timing.close_time.strftime('%I:%M %p').lstrip('0')}"
+                    )
+                    hospital_hours = f"{hospital_hours} · {time_range}".strip(" ·")
+                if timing.days:
+                    hospital_hours = f"{hospital_hours} · {timing.days}".strip(" ·")
+
+            hospital_service_tags = []
+            configured_services = HospitalServiceRateCard.objects.filter(
+                hospital=hospital_profile,
+                is_active=True,
             ).exclude(
-                bids__hospital=hospital_profile,
-                bids__bid_status__in=[HospitalBidStatus.PENDING, HospitalBidStatus.ACCEPTED],
-            ).distinct().select_related(
-                "user__userprofile",
-                "category",
-                "description",
-            ).order_by("-created_at")[:5]
-            scheduled_appointments = HospitalAppointments.objects.filter(
-                accepted_hospital=hospital_profile,
-                status=HospitalAppointmentStatus.ACCEPTED
-            ).select_related(
-                "user__userprofile",
-                "category",
-                "description",
+                category__name__isnull=True,
+            ).exclude(
+                category__name="",
             ).order_by(
-                "preferred_date_from"
-            )[:3]
+                "category__name",
+            ).values_list(
+                "category__name",
+                flat=True,
+            ).distinct()
+            for service_name in (
+                hospital_profile.hospital_type.name if hospital_profile.hospital_type else "",
+                hospital_profile.hospital_service.name if hospital_profile.hospital_service else "",
+                *configured_services,
+            ):
+                if service_name and service_name not in hospital_service_tags:
+                    hospital_service_tags.append(service_name)
 
-            today = timezone.localdate()
+            hospital_photo_url = build_image_media_url(
+                hospital_profile.hospital_photo_path
+            )
+            hospital_logo_url = build_image_media_url(
+                hospital_profile.hospital_logo_path
+            )
+            bed_inventory, bed_inventory_by_room, bed_inventory_warning = (
+                get_hospital_bed_inventory(
+                    hospital_profile,
+                    request.session.get("hospital_bed_assignments", {}),
+                )
+            )
+            bed_capacity = len(bed_inventory)
+            occupied_beds = sum(bed.is_occupied for bed in bed_inventory)
+            available_beds = bed_capacity - occupied_beds
+            bed_occupancy_percent = (
+                round((occupied_beds / bed_capacity) * 100)
+                if bed_capacity
+                else 0
+            )
 
-            date_filter = request.GET.get("date_filter", "today")
+            date_filter, start_date, end_date = (
+                get_dashboard_appointment_date_range(request, timezone.localdate())
+            )
+            latest_hospital_bid = HospitalBidding.objects.filter(
+                appointment=OuterRef("pk"),
+                hospital=hospital_profile,
+            ).order_by("-created_at")
+            request_queryset = HospitalAppointments.objects.filter(
+                status=HospitalAppointmentStatus.PENDING,
+            ).annotate(
+                hospital_bid_status=Subquery(
+                    latest_hospital_bid.values("bid_status")[:1]
+                )
+            ).exclude(
+                hospital_bid_status=HospitalBidStatus.ACCEPTED,
+            )
+            appointment_requests = list(
+                request_queryset.select_related(
+                    "user__userprofile",
+                    "category",
+                    "description",
+                    "service_type",
+                ).order_by("-created_at")[:10]
+            )
+            for appointment in appointment_requests:
+                patient_profile = getattr(appointment.user, "userprofile", None)
+                appointment.patient_name = (
+                    " ".join(
+                        part
+                        for part in (
+                            patient_profile.first_name if patient_profile else "",
+                            patient_profile.last_name if patient_profile else "",
+                        )
+                        if part
+                    )
+                    or appointment.user.email
+                    or f"Customer #{appointment.user_id}"
+                )
+                appointment.patient_initials = "".join(
+                    part[0] for part in appointment.patient_name.split()[:2]
+                ).upper()
+                appointment.visit_mode_display = format_hospital_visit_mode(
+                    appointment.preferred_mode
+                )
+                appointment.request_state = (
+                    "submitted"
+                    if appointment.hospital_bid_status == HospitalBidStatus.PENDING
+                    else "new"
+                )
 
-            if date_filter == "week":
-                start_date = today - timedelta(days=6)
-                end_date = today
-
-            elif date_filter == "month":
-                start_date = today - timedelta(days=29)
-                end_date = today
-
-            elif date_filter == "custom":
-                start = request.GET.get("start_date")
-                end = request.GET.get("end_date")
-
-                start_date = parse_filter_date(start)
-                end_date = parse_filter_date(end)
-                if not start_date or not end_date:
-                    start_date = today
-                    end_date = today
-                elif start_date > end_date:
-                    start_date, end_date = end_date, start_date
-
-            else:
-                start_date = today
-                end_date = today
-
-            today_appointments = filter_appointments_between_dates(
+            appointments_in_range = filter_appointments_between_dates(
                 HospitalAppointments.objects.filter(
                     accepted_hospital=hospital_profile
                 ),
                 "hospital",
                 start_date,
                 end_date,
+            ).filter(
+                status__in=[
+                    HospitalAppointmentStatus.ACCEPTED,
+                    HospitalAppointmentStatus.COMPLETED,
+                ]
             )
+            today = timezone.localdate()
+            today_appointments = filter_appointments_between_dates(
+                HospitalAppointments.objects.filter(
+                    accepted_hospital=hospital_profile,
+                    status__in=[
+                        HospitalAppointmentStatus.ACCEPTED,
+                        HospitalAppointmentStatus.COMPLETED,
+                    ],
+                ),
+                "hospital",
+                today,
+                today,
+            )
+            scheduled_appointments = list(
+                today_appointments.select_related(
+                    "user__userprofile",
+                    "category",
+                    "description",
+                    "service_type",
+                ).order_by("preferred_date_from")
+            )
+            current_time = timezone.now()
+            for appointment in scheduled_appointments:
+                patient_profile = getattr(appointment.user, "userprofile", None)
+                appointment.patient_name = (
+                    " ".join(
+                        part
+                        for part in (
+                            patient_profile.first_name if patient_profile else "",
+                            patient_profile.last_name if patient_profile else "",
+                        )
+                        if part
+                    )
+                    or appointment.user.email
+                    or f"Customer #{appointment.user_id}"
+                )
+                appointment.patient_initials = "".join(
+                    part[0] for part in appointment.patient_name.split()[:2]
+                ).upper()
+                appointment.service_name = (
+                    appointment.category.name
+                    if appointment.category
+                    else appointment.description.description
+                    if appointment.description
+                    else appointment.service_type.name
+                    if appointment.service_type
+                    else "Service not specified"
+                )
+                appointment.visit_mode_display = format_hospital_visit_mode(
+                    appointment.preferred_mode
+                )
+                if appointment.status == HospitalAppointmentStatus.COMPLETED:
+                    appointment.schedule_state = "completed"
+                elif appointment.preferred_date_from and appointment.preferred_date_from < current_time:
+                    appointment.schedule_state = "past"
+                else:
+                    appointment.schedule_state = "upcoming"
+
+            upcoming_count = appointments_in_range.filter(
+                status=HospitalAppointmentStatus.ACCEPTED,
+                preferred_date_from__gte=current_time,
+            ).count()
+            completed_count = appointments_in_range.filter(
+                status=HospitalAppointmentStatus.COMPLETED,
+            ).count()
+            past_count = appointments_in_range.filter(
+                status=HospitalAppointmentStatus.ACCEPTED,
+                preferred_date_from__lt=current_time,
+            ).count()
+            total_appointments = appointments_in_range.count()
+            today_upcoming_count = today_appointments.filter(
+                status=HospitalAppointmentStatus.ACCEPTED,
+                preferred_date_from__gte=current_time,
+            ).count()
+            today_past_count = today_appointments.filter(
+                status=HospitalAppointmentStatus.ACCEPTED,
+                preferred_date_from__lt=current_time,
+            ).count()
+            today_completed_count = today_appointments.filter(
+                status=HospitalAppointmentStatus.COMPLETED,
+            ).count()
             total_appointments_today = today_appointments.count()
-            confirmed_count = today_appointments.filter(
-                status=HospitalAppointmentStatus.ACCEPTED
+
+            request_count = request_queryset.count()
+            new_requests = request_queryset.filter(
+                Q(hospital_bid_status__isnull=True)
+                | Q(hospital_bid_status__in=[
+                    HospitalBidStatus.REJECTED,
+                    HospitalBidStatus.CANCELLED,
+                ])
             ).count()
-            pending_count = today_appointments.filter(
-                status=HospitalAppointmentStatus.PENDING
+            submitted_requests = request_queryset.filter(
+                hospital_bid_status=HospitalBidStatus.PENDING,
             ).count()
 
-            # total_doctors = DoctorProfile.objects.filter(
-            #     hospital=hospital_profile
-            # ).count()
-            total_doctors = 0
-
-            bed_capacity = getattr(hospital_profile, 'bed_capacity', 20) or 20
-            icu_beds = getattr(hospital_profile, 'icu_beds', 4) or 4
-            private_beds = getattr(hospital_profile, 'private_beds', 4) or 4
-            general_beds = bed_capacity - icu_beds - private_beds
+            week_start = timezone.localdate() - timedelta(days=6)
+            answered_bids = HospitalBidding.objects.filter(
+                hospital=hospital_profile,
+                bid_status__in=[
+                    HospitalBidStatus.ACCEPTED,
+                    HospitalBidStatus.REJECTED,
+                    HospitalBidStatus.COMPLETED,
+                ],
+                updated_at__date__gte=week_start,
+                updated_at__date__lte=timezone.localdate(),
+            )
+            bids_won = answered_bids.filter(
+                bid_status__in=[
+                    HospitalBidStatus.ACCEPTED,
+                    HospitalBidStatus.COMPLETED,
+                ]
+            ).count()
+            bids_lost = answered_bids.filter(
+                bid_status=HospitalBidStatus.REJECTED
+            ).count()
+            bids_answered = answered_bids.count()
+            win_rate = round((bids_won / bids_answered) * 100) if bids_answered else None
+            response_bids = answered_bids.filter(
+                bid_status__in=[
+                    HospitalBidStatus.ACCEPTED,
+                    HospitalBidStatus.REJECTED,
+                ]
+            )
+            average_response = response_bids.aggregate(
+                average=Avg(
+                    ExpressionWrapper(
+                        F("updated_at") - F("appointment__created_at"),
+                        output_field=DurationField(),
+                    )
+                )
+            )["average"]
+            avg_response_minutes = (
+                round(average_response.total_seconds() / 60, 1)
+                if average_response is not None
+                else None
+            )
+            top_service_row = (
+                HospitalAppointments.objects.filter(
+                    created_at__date__gte=week_start,
+                    created_at__date__lte=timezone.localdate(),
+                )
+                .exclude(category__isnull=True)
+                .values("category__name")
+                .annotate(total=Count("id"))
+                .order_by("-total", "category__name")
+                .first()
+            )
 
             active_subscription = (
                 SubscriptionHistory.objects.select_related("plan")
@@ -1043,36 +1300,54 @@ def dashboard_home(request):
                 'logo': '/static/images/hospital-logo.svg',
                 'hospital_profile': hospital_profile,
                 'contact_person': contact_person,
+                'hospital_contact_name': hospital_contact_name,
+                'hospital_contact_initials': hospital_contact_initials,
+                'hospital_contact_phone': (
+                    hospital_contact_phone or "Not provided"
+                ),
+                'hospital_service_tags': hospital_service_tags,
+                'hospital_photo_url': hospital_photo_url,
+                'hospital_logo_url': hospital_logo_url,
+                'hospital_hours': hospital_hours,
                 'date_filter': date_filter,
                 'start_date': start_date,
                 'end_date': end_date,
-                'user_display_name': hospital_profile.hospital_name,
-                'quotes_given': HospitalBidding.objects.filter(hospital=hospital_profile).count(),
+                'user_display_name': hospital_profile.hospital_name or "Hospital",
                 'active_bids': HospitalBidding.objects.filter(
                     hospital=hospital_profile,
-                    bid_status__in=[
-                        HospitalBidStatus.PENDING,
-                        HospitalBidStatus.ACCEPTED
-                    ]
-                ).count(),
-                'orders_won': HospitalAppointments.objects.filter(
-                    accepted_hospital=hospital_profile,
-                    status="Accepted"
-                ).count(),
-                'pending_orders': HospitalAppointments.objects.filter(
-                    accepted_hospital=hospital_profile,
-                    status="Pending"
+                    bid_status=HospitalBidStatus.PENDING,
                 ).count(),
                 'events': CalendarEvent.objects.all().order_by('date'),
                 'user': user,
                 'total_appointments_today': total_appointments_today,
-                'confirmed_count': confirmed_count,
-                'pending_count': pending_count,
-                'total_doctors': total_doctors,
+                'overview_appointment_count': total_appointments,
+                'upcoming_count': upcoming_count,
+                'past_count': past_count,
+                'completed_count': completed_count,
+                'today_upcoming_count': today_upcoming_count,
+                'today_past_count': today_past_count,
+                'today_completed_count': today_completed_count,
+                'new_requests': new_requests,
+                'request_count': request_count,
+                'submitted_requests': submitted_requests,
+                'attention_count': new_requests,
+                'bed_inventory_configured': bed_capacity > 0,
+                'bed_inventory_by_room': bed_inventory_by_room,
+                'bed_inventory_warning': bed_inventory_warning,
                 'bed_capacity': bed_capacity,
-                'icu_beds': icu_beds,
-                'private_beds': private_beds,
-                'general_beds': general_beds,
+                'occupied_beds': occupied_beds,
+                'available_beds': available_beds,
+                'bed_occupancy_percent': bed_occupancy_percent,
+                'bids_won': bids_won,
+                'bids_lost': bids_lost,
+                'bids_answered': bids_answered,
+                'win_rate': win_rate,
+                'win_rate_available': bids_answered > 0,
+                'avg_response_minutes': avg_response_minutes,
+                'week_range': f"{week_start:%d %b} – {timezone.localdate():%d %b %Y}",
+                'top_service': (
+                    top_service_row["category__name"] if top_service_row else "—"
+                ),
                 'active_subscription': active_subscription,
             })
             return render(request, "dashboard/home_hospital.html", context)

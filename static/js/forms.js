@@ -20,6 +20,14 @@ $(document).ready(function () {
       return;
     }
 
+    const form = $input.closest("form")[0];
+    const isLab = form && form.action && form.action.includes("update_lab_profile");
+    if (isLab && form.dataset.otpRequested !== "true") {
+      $icon.text("cancel").removeClass("text-bright-green").addClass("text-red-500");
+      $label.text("Request OTP first").removeClass("text-bright-green").addClass("text-red-500");
+      return;
+    }
+
     if (code === "123456") {
       $icon.text("check_box").removeClass("text-red-500").addClass("text-bright-green");
       $label.text("Verified").removeClass("text-red-500").addClass("text-bright-green");
@@ -44,7 +52,14 @@ $(document).ready(function () {
     $(".tabs").hide();
     $(".edit-toggle").hide();
     $(".tcBox").hide();
-    
+    const labForm = document.getElementById("editForm");
+    if (labForm && labForm.action && labForm.action.includes("update_lab_profile")) {
+      labForm.dataset.otpRequested = "false";
+      const otpInput = labForm.querySelector('input[name="otp1"], input[name="otp"]');
+      if (otpInput) otpInput.value = "";
+      const statusBox = labForm.querySelector(".otp-verification-status");
+      if (statusBox) statusBox.classList.add("hidden");
+    }
   });
 
   // Cancel button

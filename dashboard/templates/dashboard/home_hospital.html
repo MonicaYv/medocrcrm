@@ -1,17 +1,12 @@
-{% extends "dashboard/layout.html" %} {% load static %} {% block title %}Home{%
-endblock %} {% block content %}
+{% extends "dashboard/layout.html" %}
+{% load static %}
+{% block title %}Home{% endblock %}
+{% block content %}
 
 <!-- ================= SKELETON (unchanged) ================= -->
-<div
-  id="pharmacy-page-skeleton"
-  class="hidden flex flex-col gap-5 p-6 animate-pulse"
-  style="display: none"
-  aria-hidden="true"
->
+<div id="pharmacy-page-skeleton" class="hidden flex flex-col gap-5 p-6 animate-pulse" style="display: none" aria-hidden="true">
   <div class="bg-white rounded-[10px] p-5 space-y-6">
-    <div
-      class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-    >
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="space-y-3">
         <div class="h-5 w-24 rounded bg-gray-200"></div>
         <div class="h-4 w-36 rounded bg-gray-200"></div>
@@ -41,15 +36,9 @@ endblock %} {% block content %}
 </div>
 
 <!--Main Content (container classes unchanged)-->
-<div
-  class="relative transition-all duration-300 main-content h-full flex-1 flex flex-col p-6 overflow-y-auto scroll"
->
-  <div
-    class="show-sidebar-toggle hidden fixed top-34 left-0 z-50 h-10 w-10 bg-transparent-dodger-blue items-center justify-center rounded-r-md cursor-pointer"
-  >
-    <span class="material-symbols-outlined bold-weight text-dodger-blue"
-      >arrow_forward_ios</span
-    >
+<div class="relative transition-all duration-300 main-content h-full flex-1 flex flex-col p-6 overflow-y-auto scroll">
+  <div class="show-sidebar-toggle hidden fixed top-34 left-0 z-50 h-10 w-10 bg-transparent-dodger-blue items-center justify-center rounded-r-md cursor-pointer">
+    <span class="material-symbols-outlined bold-weight text-dodger-blue">arrow_forward_ios</span>
   </div>
 
   <div class="bg-white px-2 sm:px-4 py-4 hh">
@@ -61,48 +50,20 @@ endblock %} {% block content %}
           <h1 style="margin: 0; font-size: 20px; font-weight: 500">Home</h1>
         </div>
         <div id="date" class="hh-date"></div>
-        <p class="hh-welcome">Welcome back,</p>
+        <p class="hh-welcome">Welcome back, {{ hospital_profile.hospital_name|default:"Hospital" }}</p>
       </div>
-      <div
-        id="infoSection"
-        style="display: flex; align-items: center; gap: 18px"
-      >
-        <div
-          id="location"
-          style="
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 11px;
-            color: #6b7280;
-          "
-        >
-          <span class="material-symbols-outlined" style="font-size: 15px"
-            >location_on</span
-          ><span id="location-text">Fetching location...</span>
+      <div id="infoSection" style="display: flex; align-items: center; gap: 18px">
+        <div id="location" style="display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6b7280;">
+          <span class="material-symbols-outlined" style="font-size: 15px">location_on</span><span id="location-text" data-profile-location="true">{% if hospital_profile.city %}{{ hospital_profile.city.name }}{% endif %}{% if hospital_profile.state %}{% if hospital_profile.city %}, {% endif %}{{ hospital_profile.state.name }}{% endif %}{% if not hospital_profile.city and not hospital_profile.state %}{% if hospital_profile.address %}{{ hospital_profile.address|truncatechars:50 }}{% else %}Location not provided{% endif %}{% endif %}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
           <p style="font-size: 11px; font-weight: 500">Auto Bid</p>
           <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
-            <input
-              type="checkbox"
-              id="autobid-toggle"
-              class="sr-only peer"
-              aria-label="Enable Auto Bid"
-            />
-            <div
-              class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5"
-            ></div>
-            <div
-              class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal"
-            ></div>
+            <input type="checkbox" id="autobid-toggle" class="sr-only peer" aria-label="Enable Auto Bid" />
+            <div class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5"></div>
+            <div class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal"></div>
           </label>
-          <a
-            href="{% url 'settings_page' %}"
-            class="hh-link"
-            style="font-size: 11px"
-            >Configure</a
-          >
+          <a href="{% url 'settings_page' %}" class="hh-link" style="font-size: 11px">Configure</a>
         </div>
       </div>
     </div>
@@ -110,42 +71,24 @@ endblock %} {% block content %}
     <!-- 2. BANNER + ADMIN -->
     <div class="hh-hero">
       <div class="hh-banner">
-        {% if hospital_profile.hospital_photo_path %}<img
-          src="/document/{{ hospital_profile.hospital_photo_path }}"
-          alt=""
-          onerror="this.style.display = 'none'"
-        />{% endif %}
+        {% if hospital_photo_url %}<img src="{{ hospital_photo_url }}" alt="" onerror="this.style.display = 'none'" />{% endif %}
         <div class="hh-banner-in">
           <div>
             <h2>
-              <span class="material-symbols-outlined" style="font-size: 18px"
-                >domain</span
-              >{{ hospital_profile.hospital_name }}
+              {% if hospital_logo_url %}<img src="{{ hospital_logo_url }}" alt="" onerror="this.style.display = 'none'; this.nextElementSibling.style.display = 'inline-flex'" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px" /><span class="material-symbols-outlined" style="font-size: 18px; display: none">domain</span>{% else %}<span class="material-symbols-outlined" style="font-size: 18px">domain</span>{% endif %}{{ hospital_profile.hospital_name|default:"Hospital" }}
             </h2>
             <p class="addr">
-              {% if hospital_profile.address %}{{ hospital_profile.address }}{%
-              endif %}{% if hospital_profile.city %}{% if
-              hospital_profile.address %}, {% endif %}{{
-              hospital_profile.city.name }}{% endif %}{% if
-              hospital_profile.state %}{% if hospital_profile.city or
-              hospital_profile.address %}, {% endif %}{{
-              hospital_profile.state.name }}{% endif %}{% if
-              hospital_profile.pincode %}{% if hospital_profile.city or
-              hospital_profile.address or hospital_profile.state %} — {% endif
-              %}{{ hospital_profile.pincode }}{% endif %}
+              {% if hospital_profile.address %}{{ hospital_profile.address }}{% endif %}
+              {% if hospital_profile.city %}{% if hospital_profile.address %}, {% endif %}{{ hospital_profile.city.name }}{% endif %}
+              {% if hospital_profile.state %}{% if hospital_profile.city or hospital_profile.address %}, {% endif %}{{ hospital_profile.state.name }}{% endif %}
+              {% if hospital_profile.pincode %}{% if hospital_profile.city or hospital_profile.address or hospital_profile.state %} — {% endif %}{{ hospital_profile.pincode }}{% endif %}
+              {% if not hospital_profile.address and not hospital_profile.city and not hospital_profile.state and not hospital_profile.pincode %}Address not provided{% endif %}
             </p>
-            <p class="hid">
-              Hospital ID {{
-              hospital_profile.hospital_code|default:hospital_profile.id }}
-            </p>
+            <p class="hid">{% if hospital_profile.registration_no %}Registration No. {{ hospital_profile.registration_no }}{% else %}Hospital ID {{ hospital_profile.id }}{% endif %}</p>
           </div>
           <div class="hh-btns">
-            <a href="{% url 'settings_page' %}" class="hh-btn-w"
-              >View Hospital Profile</a
-            >
-            <a href="{% url 'settings_page' %}" class="hh-btn-w"
-              >Edit Profile</a
-            >
+            <a href="{% url 'settings_page' %}" class="hh-btn-w">View Hospital Profile</a>
+            <a href="{% url 'settings_page' %}" class="hh-btn-w">Edit Profile</a>
           </div>
         </div>
       </div>
@@ -153,98 +96,30 @@ endblock %} {% block content %}
       <div class="hh-card hh-admin">
         <div class="hh-admin-top">
           <div style="position: relative; flex-shrink: 0">
-            {% if admin_profile_photo_path %}
-            <img
-              id="admin-profile-photo"
-              src="/document/{{ admin_profile_photo_path }}"
-              alt=""
-              onerror="this.style.display = 'none'"
-              style="
-                width: 48px;
-                height: 48px;
-                border-radius: 8px;
-                object-fit: cover;
-                border: 2px solid #1d6fe8;
-              "
-            />
-            {% else %}
-            <div id="admin-profile-photo-fallback" class="hh-initials">
-              {{ hospital_profile.hospital_name|slice:":2"|upper }}
-            </div>
-            {% endif %}
-            <label
-              for="admin-profile-photo-input"
-              title="Change profile picture"
-              style="
-                position: absolute;
-                right: -6px;
-                bottom: -6px;
-                width: 18px;
-                height: 18px;
-                border-radius: 999px;
-                background: #1d6fe8;
-                color: #fff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-              "
-            >
-              <span class="material-symbols-outlined" style="font-size: 11px"
-                >edit</span
-              >
+            {% if admin_profile_photo_url %}<img id="admin-profile-photo" src="{{ admin_profile_photo_url }}" alt="" onerror="this.style.display = 'none'; document.getElementById('admin-profile-photo-fallback').style.display = 'flex'" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 2px solid #1d6fe8;" />{% endif %}
+            <div id="admin-profile-photo-fallback" class="hh-initials" {% if admin_profile_photo_url %}style="display: none"{% endif %}>{{ hospital_contact_initials|default:"?" }}</div>
+            <label for="admin-profile-photo-input" title="Change profile picture" style="position: absolute; right: -6px; bottom: -6px; width: 18px; height: 18px; border-radius: 999px; background: #1d6fe8; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              <span class="material-symbols-outlined" style="font-size: 11px">edit</span>
             </label>
-            <input
-              id="admin-profile-photo-input"
-              type="file"
-              accept="image/jpeg,image/png"
-              class="hidden"
-              data-upload-url="{% url 'upload_admin_profile_photo' %}"
-            />
+            <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden" data-upload-url="{% url 'upload_admin_profile_photo' %}" />
           </div>
           <div style="min-width: 0">
             <p class="hh-admin-name">{{ hospital_profile.hospital_name }}</p>
-            <p class="hh-admin-sub">
-              {{ contact_person.name|default:"N/A" }} · {{
-              contact_person.role|default:"Hospital Administrator" }}
-            </p>
-            <p class="hh-admin-sub">
-              {{ user.phone_country_code|default:"+91" }} {{
-              hospital_profile.contact_no|default:user.phone_number|default:"N/A"
-              }}
-            </p>
+            <p class="hh-admin-sub">{{ hospital_contact_name }} · {{ contact_person.role|default:"Hospital Administrator" }}</p>
+            <p class="hh-admin-sub">{{ hospital_contact_phone }}</p>
           </div>
         </div>
         <div class="hh-tags">
-          {% for spec in specializations|slice:":3" %}<span
-            class="hh-tag hh-blue"
-            >{{ spec.name }}</span
-          >{% empty %}
-          <span class="hh-tag" style="background: #e0edff; color: #1d6fe8"
-            >General Medicine</span
-          >
-          <span class="hh-tag" style="background: #f3e8ff; color: #7e22ce"
-            >Orthopaedics</span
-          >
-          <span class="hh-tag" style="background: #dcfce7; color: #15803d"
-            >Cardiology</span
-          >{% endfor %} {% if specializations|length > 3 %}<span
-            class="hh-tag hh-gray"
-            >+{{ specializations|length|add:"-3" }} More</span
-          >{% endif %}
+          {% for service_tag in hospital_service_tags|slice:":3" %}<span class="hh-tag hh-blue">{{ service_tag }}</span>{% empty %}
+          <span class="hh-tag hh-gray">Services not configured</span>{% endfor %}
+          {% if hospital_service_tags|length > 3 %}<span class="hh-tag hh-gray">+{{ hospital_service_tags|length|add:"-3" }} more</span>{% endif %}
         </div>
         <p class="hh-hours">
-          <span class="hh-muted">OPD</span>
-          <b>{{ hospital_profile.opd_timing|default:"9:00 AM – 9:00 PM" }}</b>
-          <span class="hh-muted" style="margin-left: 14px">Emergency</span>
-          <b>{{ hospital_profile.emergency_timing|default:"24/7" }}</b>
+          <span class="hh-muted">Hours</span>
+          <b>{{ hospital_hours|default:"Not provided" }}</b>
         </p>
         <div class="hh-links">
-          <a href="{% url 'settings_page' %}" class="hh-link"
-            >View Hospital Profile →</a
-          ><a href="{% url 'settings_page' %}" class="hh-link"
-            >Edit Profile →</a
-          >
+          <a href="{% url 'settings_page' %}" class="hh-link">View Hospital Profile →</a><a href="{% url 'settings_page' %}" class="hh-link">Edit Profile →</a>
         </div>
       </div>
     </div>
@@ -252,13 +127,11 @@ endblock %} {% block content %}
     <!-- 3. KPI STRIP -->
     <div class="hh-card hh-kpi">
       <div>
-        <span class="material-symbols-outlined ico"
-          >account_balance_wallet</span
-        >
+        <span class="material-symbols-outlined ico">account_balance_wallet</span>
         <div>
           <p class="lbl">Available Balance</p>
-          <p class="val">&#8377;{{ available_balance|default:"0" }}</p>
-          <a href="#" class="sub hh-link">View earnings →</a>
+          <p class="val">&#8377;{{ wallet_balance|default:"0" }}</p>
+          <p class="sub">Current wallet balance</p>
         </div>
       </div>
       <div>
@@ -274,30 +147,23 @@ endblock %} {% block content %}
         <div>
           <p class="lbl">Today Bookings</p>
           <p class="val">{{ total_appointments_today|default:0 }}</p>
-          <p class="sub">
-            {{ upcoming_count|default:0 }} Upcoming · {{
-            checked_in_count|default:0 }} Checked In · {{
-            in_progress_count|default:0 }} In Progress · {{
-            completed_count|default:0 }} Completed
-          </p>
+          <p class="sub">{{ today_upcoming_count|default:0 }} Upcoming · {{ today_past_count|default:0 }} Past · {{ today_completed_count|default:0 }} Completed</p>
         </div>
       </div>
       <div>
         <span class="material-symbols-outlined ico">bed</span>
         <div>
           <p class="lbl">Available Beds</p>
-          <p class="val">
-            {{ available_beds|default:0 }}/{{ bed_capacity|default:0 }}
-          </p>
-          <p class="sub">Last updated {{ beds_updated_at|default:"—" }}</p>
+          <p class="val">{{ available_beds|default:0 }}/{{ bed_capacity|default:0 }}</p>
+          <p class="sub">From active room inventory</p>
         </div>
       </div>
       <div>
         <span class="material-symbols-outlined ico">schedule</span>
         <div>
-          <p class="lbl">Avg Response</p>
-          <p class="val">{{ avg_response_minutes|default:"—" }} min</p>
-          <p class="sub">Based on answered bids this week</p>
+          <p class="lbl">Avg Decision Time</p>
+          <p class="val">{% if avg_response_minutes != None %}{{ avg_response_minutes }} min{% else %}—{% endif %}</p>
+          <p class="sub">Accepted/rejected bids this week</p>
         </div>
       </div>
     </div>
@@ -306,29 +172,10 @@ endblock %} {% block content %}
     <div class="hh-ov-head">
       <p class="hh-h">Overview</p>
       <div class="hh-seg" id="hh-date-pills">
-        <button
-          type="button"
-          data-filter="today"
-          class="{% if date_filter == 'today' or not date_filter %}active{% endif %}"
-        >
-          Today
-        </button>
-        <button
-          type="button"
-          data-filter="week"
-          class="{% if date_filter == 'week' %}active{% endif %}"
-        >
-          Last 7 Days
-        </button>
-        <button
-          type="button"
-          data-filter="month"
-          class="{% if date_filter == 'month' %}active{% endif %}"
-        >
-          This Month
-        </button>
+        <button type="button" data-filter="today" class="{% if date_filter == 'today' or not date_filter %}active{% endif %}">Today</button>
+        <button type="button" data-filter="week" class="{% if date_filter == 'week' %}active{% endif %}">Last 7 Days</button>
+        <button type="button" data-filter="month" class="{% if date_filter == 'month' %}active{% endif %}">This Month</button>
       </div>
-      <!-- original filter markup kept (hidden) so your existing JS handlers keep working -->
       <div class="relative dropdown hh-hidden-filter">
         <p id="hospital-home-filter-label"></p>
         <button class="filterToggle" type="button"></button>
@@ -347,95 +194,52 @@ endblock %} {% block content %}
     <div class="hh-ov">
       <div class="hh-card">
         <div class="hh-iconbox" style="background: #e8f0fe">
-          <span class="material-symbols-outlined" style="color: #1d6fe8"
-            >event_available</span
-          >
+          <span class="material-symbols-outlined" style="color: #1d6fe8">event_available</span>
         </div>
         <div>
-          <p class="lbl">
-            Today Bookings <span class="material-symbols-outlined">info</span>
-          </p>
-          <p class="val">{{ total_appointments_today|default:0 }}</p>
-          <p class="sub">
-            {{ upcoming_count|default:0 }} Upcoming · {{
-            checked_in_count|default:0 }} Checked In · {{
-            in_progress_count|default:0 }} In Progress · {{
-            completed_count|default:0 }} Completed
-          </p>
+          <p class="lbl">{% if date_filter == "today" %}Appointments Today{% elif date_filter == "week" %}Appointments · Last 7 Days{% elif date_filter == "month" %}Appointments · This Month{% else %}Appointments · Selected Dates{% endif %}</p>
+          <p class="val">{{ overview_appointment_count|default:0 }}</p>
+          <p class="sub">{{ upcoming_count|default:0 }} Upcoming · {{ past_count|default:0 }} Past · {{ completed_count|default:0 }} Completed</p>
         </div>
       </div>
       <div class="hh-card">
         <div class="hh-iconbox" style="background: #e8f0fe">
-          <span class="material-symbols-outlined" style="color: #1d6fe8"
-            >description</span
-          >
+          <span class="material-symbols-outlined" style="color: #1d6fe8">description</span>
         </div>
         <div>
-          <p class="lbl">
-            Open Service Requests
-            <span class="material-symbols-outlined">info</span>
-          </p>
-          <p class="val">{{ appointment_requests|length }}</p>
-          <p class="sub">
-            {{ new_requests|default:0 }} New · {{ draft_requests|default:0 }}
-            Drafts · {{ submitted_requests|default:0 }} Bids Submitted
-          </p>
+          <p class="lbl">Open Service Requests <span class="material-symbols-outlined">info</span></p>
+          <p class="val">{{ request_count|default:0 }}</p>
+          <p class="sub">{{ new_requests|default:0 }} New · {{ submitted_requests|default:0 }} Bids Submitted</p>
         </div>
       </div>
       <div class="hh-card">
         <div class="hh-iconbox" style="background: #f3e8ff">
-          <span class="material-symbols-outlined" style="color: #9333ea"
-            >bed</span
-          >
+          <span class="material-symbols-outlined" style="color: #9333ea">bed</span>
         </div>
         <div>
-          <p class="lbl">
-            Bed Occupancy <span class="material-symbols-outlined">info</span>
-          </p>
+          <p class="lbl">Bed Occupancy <span class="material-symbols-outlined">info</span></p>
           <p class="val">{{ bed_occupancy_percent|default:0 }}%</p>
-          <p class="sub">
-            {{ occupied_beds|default:0 }} occupied of {{ bed_capacity|default:0
-            }} beds
-          </p>
+          <p class="sub">{{ occupied_beds|default:0 }} occupied of {{ bed_capacity|default:0 }} beds</p>
         </div>
       </div>
       <div class="hh-card">
         <div class="hh-iconbox" style="background: #fef3c7">
-          <span class="material-symbols-outlined" style="color: #b45309"
-            >star</span
-          >
+          <span class="material-symbols-outlined" style="color: #b45309">star</span>
         </div>
         <div>
-          <p class="lbl">
-            Customer Rating <span class="material-symbols-outlined">info</span>
-          </p>
-          <p class="val">{{ avg_rating|default:"0" }}/5</p>
-          <p class="sub">★★★★☆ · {{ review_count|default:0 }} reviews</p>
+          <p class="lbl">Resolved Bid Win Rate</p>
+          <p class="val">{% if win_rate_available %}{{ win_rate }}%{% else %}—{% endif %}</p>
+          <p class="sub">{{ bids_won|default:0 }} wins from {{ bids_answered|default:0 }} resolved bids this week</p>
         </div>
       </div>
     </div>
 
     <!-- 5. ATTENTION -->
     <div class="hh-attn">
-      <span class="material-symbols-outlined" style="font-size: 18px"
-        >warning</span
-      >
-      <p style="font-size: 12px; font-weight: 600">
-        {{ attention_count|default:0 }} items need attention
-      </p>
-      <span class="hh-pill hh-red" style="padding: 3px 10px"
-        >{{ expiring_requests|default:0 }} requests expire within 15 min</span
-      >
-      <span style="font-size: 10px; color: #c2410c"
-        >{{ availability_pending|default:0 }} service needs availability
-        confirmation</span
-      >
-      <a
-        href="{% url 'appointment' %}"
-        class="hh-link"
-        style="margin-left: auto; font-size: 11px"
-        >Review →</a
-      >
+      <span class="material-symbols-outlined" style="font-size: 18px">warning</span>
+      <p style="font-size: 12px; font-weight: 600">{{ attention_count|default:0 }} new service requests need review</p>
+      <span class="hh-pill hh-red" style="padding: 3px 10px">{{ submitted_requests|default:0 }} bids awaiting customer response</span>
+      <a href="{% url 'appointment' %}" class="hh-link" style="margin-left: auto; font-size: 11px">Review →</a>
     </div>
 
     <!-- 6. SCHEDULE + PERFORMANCE -->
@@ -444,124 +248,33 @@ endblock %} {% block content %}
         <div class="hh-flexbetween">
           <div>
             <p class="hh-h" style="font-size: 14px">Today Schedule</p>
-            <p class="hh-subhead">
-              {% now "d F Y" %} · {{ total_appointments_today|default:0 }}
-              bookings
-            </p>
+            <p class="hh-subhead">{% now "d F Y" %} · {{ total_appointments_today|default:0 }} bookings</p>
           </div>
-          <a href="{% url 'history' %}" class="hh-link" style="font-size: 11px"
-            >View All Bookings →</a
-          >
+          <a href="{% url 'history' %}" class="hh-link" style="font-size: 11px">View All Bookings →</a>
         </div>
         <div class="hh-tabs" id="schedule-tabs">
-          <button
-            type="button"
-            data-tab="upcoming"
-            class="hh-tab schedule-tab active"
-          >
-            Upcoming<span class="hh-count">0</span>
-          </button>
-          <button
-            type="button"
-            data-tab="checked_in"
-            class="hh-tab schedule-tab"
-          >
-            Checked In<span class="hh-count">0</span>
-          </button>
-          <button
-            type="button"
-            data-tab="in_progress"
-            class="hh-tab schedule-tab"
-          >
-            In Progress<span class="hh-count">0</span>
-          </button>
-          <button
-            type="button"
-            data-tab="completed"
-            class="hh-tab schedule-tab"
-          >
-            Completed<span class="hh-count">0</span>
-          </button>
+          <button type="button" data-tab="upcoming" class="hh-tab schedule-tab active">Upcoming<span class="hh-count">{{ today_upcoming_count }}</span></button>
+          <button type="button" data-tab="past" class="hh-tab schedule-tab">Past<span class="hh-count">{{ today_past_count }}</span></button>
+          <button type="button" data-tab="completed" class="hh-tab schedule-tab">Completed<span class="hh-count">{{ today_completed_count }}</span></button>
         </div>
         <div>
           {% for appointment in scheduled_appointments %}
-          <div
-            class="schedule-row hh-row"
-            data-state="{{ appointment.schedule_state|default:'upcoming' }}"
-          >
-            <span class="hh-time"
-              >{{ appointment.preferred_date_from|date:"h:i A" }}</span
-            >
-            <span class="hh-avatar-lg" style="background: #2563eb"
-              >{{ appointment.user.full_name|slice:":2"|upper }}</span
-            >
+          <div class="schedule-row hh-row" data-state="{{ appointment.schedule_state|default:'upcoming' }}">
+            <span class="hh-time">{{ appointment.preferred_date_from|date:"h:i A" }}</span>
+            <span class="hh-avatar-lg" style="background: #2563eb">{{ appointment.patient_initials|default:"?" }}</span>
             <div class="hh-grow">
-              <p class="hh-name">{{ appointment.user.full_name }}</p>
-              <p class="hh-sub">
-                {{ appointment.category.name }} · {% if
-                appointment.preferred_mode == "home_visit" %}Home Visit{% else
-                %}Hospital Visit{% endif %}
-              </p>
+              <p class="hh-name">{{ appointment.patient_name }}</p>
+              <p class="hh-sub">{{ appointment.service_name }} · {{ appointment.visit_mode_display }}</p>
             </div>
-            <span class="hh-pill hh-green">Confirmed</span>
-            <span
-              class="material-symbols-outlined hh-eye popup-btn appointment-detail-btn"
-              data-id="{{ appointment.id }}"
-              >visibility</span
-            >
+            <span class="hh-pill {% if appointment.schedule_state == 'completed' %}hh-blue{% elif appointment.schedule_state == 'past' %}hh-yellow{% else %}hh-green{% endif %}">{{ appointment.schedule_state|title }}</span>
+            <span class="material-symbols-outlined hh-eye popup-btn appointment-detail-btn" data-id="{{ appointment.id }}">visibility</span>
           </div>
-          {% empty %}{% if hide_demo %}
-          <p
-            style="
-              padding: 32px 0;
-              text-align: center;
-              font-size: 12px;
-              color: #6b7280;
-            "
-          >
-            No scheduled appointments
-          </p>
-          {% else %}
-          <div class="schedule-row hh-row" data-state="upcoming">
-            <span class="hh-time">10:30–11:00 AM</span>
-            <span class="hh-avatar-lg" style="background: #2563eb">RK</span>
-            <div class="hh-grow">
-              <p class="hh-name">Rachel Kate</p>
-              <p class="hh-sub">
-                General Medicine OPD · Outpatient Block · Desk 2
-              </p>
-            </div>
-            <span class="hh-pill hh-green">Confirmed</span>
-            <span class="material-symbols-outlined hh-eye">visibility</span>
-          </div>
-          <div class="schedule-row hh-row" data-state="upcoming">
-            <span class="hh-time">11:00–11:30 AM</span>
-            <span class="hh-avatar-lg" style="background: #0f766e">KC</span>
-            <div class="hh-grow">
-              <p class="hh-name">Karen Cooper</p>
-              <p class="hh-sub">Wound Dressing · Procedure Room 1</p>
-            </div>
-            <span class="hh-pill hh-green">Confirmed</span>
-            <span class="material-symbols-outlined hh-eye">visibility</span>
-          </div>
-          <div class="schedule-row hh-row" data-state="upcoming">
-            <span class="hh-time">11:30 AM–12:30 PM</span>
-            <span class="hh-avatar-lg" style="background: #7c3aed">JK</span>
-            <div class="hh-grow">
-              <p class="hh-name">Josh Kerr</p>
-              <p class="hh-sub">Day-care Service · Day-care Unit</p>
-            </div>
-            <span class="hh-pill hh-green">Confirmed</span>
-            <span class="material-symbols-outlined hh-eye">visibility</span>
-          </div>
-          {% endif %}{% endfor %}
+          {% empty %}
+          <p style="padding: 32px 0; text-align: center; font-size: 12px; color: #6b7280;">No scheduled appointments</p>
+          {% endfor %}
+          <p id="schedule-filter-empty" style="display: none; padding: 24px 0; text-align: center; font-size: 12px; color: #6b7280;">No appointments in this schedule category</p>
         </div>
-        <a
-          href="{% url 'history' %}"
-          class="hh-link"
-          style="display: inline-block; margin-top: 14px; font-size: 11px"
-          >View all bookings →</a
-        >
+        <a href="{% url 'history' %}" class="hh-link" style="display: inline-block; margin-top: 14px; font-size: 11px">View all bookings →</a>
       </div>
 
       <div class="hh-card hh-pad">
@@ -570,45 +283,22 @@ endblock %} {% block content %}
             <p class="hh-h" style="font-size: 14px">This Week Performance</p>
             <p class="hh-subhead">{{ week_range|default:"" }}</p>
           </div>
-          <span
-            class="material-symbols-outlined hh-muted"
-            style="font-size: 18px"
-            >bar_chart</span
-          >
+          <span class="material-symbols-outlined hh-muted" style="font-size: 18px">bar_chart</span>
         </div>
         <div class="hh-tiles">
-          <div class="hh-tile">
-            <b style="color: #15803d">{{ bids_won|default:0 }}</b
-            ><span>Bids Won</span>
-          </div>
-          <div class="hh-tile">
-            <b style="color: #dc2626">{{ bids_lost|default:0 }}</b
-            ><span>Bids Lost</span>
-          </div>
-          <div class="hh-tile">
-            <b>{{ bids_answered|default:0 }}</b><span>Bids Answered</span>
-          </div>
-          <div class="hh-tile">
-            <b>{{ docs_shared|default:0 }}</b><span>Docs Shared</span>
-          </div>
+          <div class="hh-tile"><b style="color: #15803d">{{ bids_won|default:0 }}</b><span>Bids Won</span></div>
+          <div class="hh-tile"><b style="color: #dc2626">{{ bids_lost|default:0 }}</b><span>Bids Lost</span></div>
+          <div class="hh-tile"><b>{{ bids_answered|default:0 }}</b><span>Bids Resolved</span></div>
+          <div class="hh-tile"><b>{% if win_rate_available %}{{ win_rate }}%{% else %}—{% endif %}</b><span>Win Rate</span></div>
         </div>
         <div style="margin-top: 18px">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              font-size: 11px;
-            "
-          >
-            <span>Resolved Bid Win Rate</span><b>{{ win_rate|default:"0" }}%</b>
+          <div style="display: flex; justify-content: space-between; font-size: 11px;">
+            <span>Resolved Bid Win Rate</span><b>{% if win_rate_available %}{{ win_rate }}%{% else %}—{% endif %}</b>
           </div>
-          <div class="hh-bar">
-            <i style="width:{{ win_rate|default:0 }}%"></i>
-          </div>
+          <div class="hh-bar"><i style="width:{% if win_rate_available %}{{ win_rate }}{% else %}0{% endif %}%"></i></div>
           <p class="hh-subhead" style="margin-top: 10px">
-            {{ bids_won|default:0 }} wins divided by {{ bids_answered|default:0
-            }} answered bids · Average response
-            <b>{{ avg_response_minutes|default:"—" }} min</b>
+            {{ bids_won|default:0 }} wins divided by {{ bids_answered|default:0 }} resolved bids · Average decision time
+            <b>{% if avg_response_minutes != None %}{{ avg_response_minutes }} min{% else %}—{% endif %}</b>
           </p>
         </div>
       </div>
@@ -619,87 +309,43 @@ endblock %} {% block content %}
       <div class="hh-flexbetween">
         <div>
           <p class="hh-h" style="font-size: 14px">Beds and Facilities</p>
-          <p class="hh-subhead">
-            Operational availability · Updated {{ beds_updated_at|default:"—" }}
-          </p>
+          <p class="hh-subhead">Active bed capacity and current occupancy</p>
         </div>
-        <a href="#" class="hh-link" style="font-size: 11px"
-          >View Beds and Facilities →</a
-        >
+        <a href="{% url 'history' %}" class="hh-link" style="font-size: 11px">View Occupancy History →</a>
       </div>
       <div class="hh-bedstats">
-        <div>
-          <p class="l hh-muted">Total</p>
-          <p class="v">{{ bed_capacity|default:0 }}</p>
-        </div>
-        <div>
-          <p class="l" style="color: #1d6fe8">Occupied</p>
-          <p class="v">{{ occupied_beds|default:0 }}</p>
-        </div>
-        <div>
-          <p class="l" style="color: #15803d">Available</p>
-          <p class="v">{{ available_beds|default:0 }}</p>
-        </div>
-        <div>
-          <p class="l" style="color: #c2410c">Cleaning</p>
-          <p class="v">{{ cleaning_beds|default:0 }}</p>
-        </div>
-        <div style="text-align: right">
-          <p class="l hh-muted">Maintenance</p>
-          <p class="v">{{ maintenance_beds|default:0 }}</p>
-        </div>
+        <div><p class="l hh-muted">Total</p><p class="v">{{ bed_capacity|default:0 }}</p></div>
+        <div><p class="l" style="color: #1d6fe8">Occupied</p><p class="v">{{ occupied_beds|default:0 }}</p></div>
+        <div><p class="l" style="color: #15803d">Available</p><p class="v">{{ available_beds|default:0 }}</p></div>
       </div>
       <div class="hh-table-wrap">
         <table class="hh-table" style="min-width: 560px">
           <thead>
             <tr>
-              <th>Category</th>
+              <th>Room Type</th>
               <th>Total</th>
               <th>Occupied</th>
               <th>Available</th>
-              <th>Cleaning</th>
-              <th>Maintenance</th>
             </tr>
           </thead>
           <tbody>
+            {% for room in bed_inventory_by_room %}
             <tr>
-              <td><b>General Ward</b></td>
-              <td>{{ general_beds|default:0 }}</td>
-              <td>{{ general_occupied|default:0 }}</td>
-              <td style="color: #15803d">{{ general_available|default:0 }}</td>
-              <td style="color: #c2410c">{{ general_cleaning|default:0 }}</td>
-              <td>{{ general_maintenance|default:0 }}</td>
+              <td><b>{{ room.name }}</b></td>
+              <td>{{ room.total }}</td>
+              <td>{{ room.occupied }}</td>
+              <td style="color: #15803d">{{ room.available }}</td>
             </tr>
-            <tr>
-              <td><b>Private Rooms</b></td>
-              <td>{{ private_beds|default:0 }}</td>
-              <td>{{ private_occupied|default:0 }}</td>
-              <td style="color: #15803d">{{ private_available|default:0 }}</td>
-              <td style="color: #c2410c">{{ private_cleaning|default:0 }}</td>
-              <td>{{ private_maintenance|default:0 }}</td>
-            </tr>
-            <tr>
-              <td><b>ICU</b></td>
-              <td>{{ icu_beds|default:0 }}</td>
-              <td>{{ icu_occupied|default:0 }}</td>
-              <td style="color: #15803d">{{ icu_available|default:0 }}</td>
-              <td style="color: #c2410c">{{ icu_cleaning|default:0 }}</td>
-              <td>{{ icu_maintenance|default:0 }}</td>
-            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align: center; padding: 24px; color: #6b7280">No active bed inventory configured</td></tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
       <div class="hh-footrow">
-        <p class="hh-subhead" style="margin: 0">
-          Capacity is subject to staff confirmation.
-        </p>
+        {% if bed_inventory_warning %}<p class="hh-subhead" style="margin: 0">{{ bed_inventory_warning }}</p>{% else %}<p class="hh-subhead" style="margin: 0">Occupancy includes manual assignments and confirmed appointments.</p>{% endif %}
         <div class="hh-chips">
-          <span class="hh-pill hh-green">Emergency Desk · Open</span
-          ><span class="hh-pill hh-green">Day-care · Available</span
-          ><span class="hh-pill hh-yellow"
-            >Procedure Room · Confirmation Required</span
-          >
-          <button type="button" class="hh-outbtn">Update Snapshot</button>
+          <span class="hh-pill hh-blue">Bed occupancy {{ bed_occupancy_percent|default:0 }}%</span>
         </div>
       </div>
     </div>
@@ -709,56 +355,20 @@ endblock %} {% block content %}
       <div class="hh-flexbetween">
         <div>
           <p class="hh-h" style="font-size: 14px">Service Requests</p>
-          <p class="hh-subhead">New opportunities from customers</p>
+          <p class="hh-subhead">Showing latest {{ appointment_requests|length }} of {{ request_count }} open requests</p>
         </div>
-        <a
-          href="{% url 'appointment' %}"
-          class="hh-link"
-          style="font-size: 11px"
-          >View All Offers and Bids →</a
-        >
+        <a href="{% url 'appointment' %}" class="hh-link" style="font-size: 11px">View All Offers and Bids →</a>
       </div>
       <div class="hh-tabs" id="request-tabs">
-        <button type="button" data-tab="all" class="hh-tab request-tab active">
-          All<span class="hh-count">0</span>
-        </button>
-        <button type="button" data-tab="new" class="hh-tab request-tab">
-          New<span class="hh-count">0</span>
-        </button>
-        <button type="button" data-tab="draft" class="hh-tab request-tab">
-          Draft<span class="hh-count">0</span>
-        </button>
-        <button type="button" data-tab="submitted" class="hh-tab request-tab">
-          Bid Submitted<span class="hh-count">0</span>
-        </button>
+        <button type="button" data-tab="all" class="hh-tab request-tab active">All<span class="hh-count">0</span></button>
+        <button type="button" data-tab="new" class="hh-tab request-tab">New<span class="hh-count">0</span></button>
+        <button type="button" data-tab="submitted" class="hh-tab request-tab">Bid Submitted<span class="hh-count">0</span></button>
       </div>
       <div class="hh-filters">
         <div class="hh-search">
-          <span
-            class="material-symbols-outlined"
-            style="font-size: 18px; color: #6b7280"
-            >search</span
-          ><input
-            id="request-search"
-            type="text"
-            placeholder="Search request ID, customer or service"
-          />
+          <span class="material-symbols-outlined" style="font-size: 18px; color: #6b7280">search</span><input id="request-search" type="text" placeholder="Search request ID, customer or service" />
         </div>
-        <select class="hh-select">
-          <option>All</option></select
-        ><select class="hh-select">
-          <option>All</option></select
-        ><select class="hh-select">
-          <option>All</option>
-        </select>
-        <button
-          type="button"
-          id="request-reset"
-          class="hh-link"
-          style="background: none; border: 0; font-size: 11px; cursor: pointer"
-        >
-          Reset Filters
-        </button>
+        <button type="button" id="request-reset" class="hh-link" style="background: none; border: 0; font-size: 11px; cursor: pointer">Reset Filters</button>
       </div>
       <div class="hh-table-wrap" style="margin-top: 12px">
         <table class="hh-table">
@@ -768,270 +378,45 @@ endblock %} {% block content %}
               <th>Service</th>
               <th>Preferred Date/Time</th>
               <th>Visit Type</th>
-              <th>Priority</th>
               <th>Budget</th>
-              <th>Time Left</th>
               <th>Bid Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for appointment in appointment_requests %}
-            <tr
-              class="appointment-row request-row"
-              data-status="{{ appointment.bid_status|default:'new' }}"
-            >
+            <tr class="appointment-row request-row" data-status="{{ appointment.request_state }}">
               <td>
-                <a href="#" class="hh-link">REQ-{{ appointment.id }}</a>
+                <span class="hh-link">REQ-{{ appointment.id }}</span>
                 <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #2563eb"
-                    >{{ appointment.user.userprofile.first_name|slice:":1"|upper
-                    }}{{ appointment.user.userprofile.last_name|slice:":1"|upper
-                    }}</span
-                  ><b
-                    >{{ appointment.user.userprofile.first_name }} {{
-                    appointment.user.userprofile.last_name }}</b
-                  >
+                  <span class="hh-avatar" style="background: #2563eb">{{ appointment.patient_initials|default:"?" }}</span>
+                  <b>{{ appointment.patient_name }}</b>
                 </div>
               </td>
+              <td><b>{% if appointment.category %}{{ appointment.category.name }}{% elif appointment.description %}{{ appointment.description.description|truncatechars:30 }}{% elif appointment.service_type %}{{ appointment.service_type.name }}{% else %}Service not specified{% endif %}</b></td>
               <td>
-                <b
-                  >{{
-                  appointment.category.name|default:appointment.description.description|truncatechars:30
-                  }}</b
-                >
+                {% if appointment.preferred_date_from %}{{ appointment.preferred_date_from|date:"d M" }}<span class="hh-sub2">{{ appointment.preferred_date_from|date:"h:i A" }}</span>{% else %}Not specified{% endif %}
               </td>
-              <td>
-                {{ appointment.preferred_date_from|date:"d M" }}<span
-                  class="hh-sub2"
-                  >{{ appointment.preferred_date_from|date:"h:i A" }}</span
-                >
-              </td>
-              <td>{{ appointment.preferred_mode|title }}</td>
-              <td>
-                <span class="hh-pill hh-gray"
-                  >{{ appointment.priority|default:"Standard" }}</span
-                >
-              </td>
-              <td class="hh-budget">
-                {% if appointment.budget %}&#8377;{{ appointment.budget }}{%
-                else %}—{% endif %}
-              </td>
-              <td class="hh-left-g">{{ appointment.time_left|default:"—" }}</td>
-              <td>
-                <span class="hh-pill hh-blue"
-                  >{{ appointment.bid_status|default:"New"|title }}</span
-                >
-              </td>
+              <td>{{ appointment.visit_mode_display }}</td>
+              <td class="hh-budget">{% if appointment.budget %}&#8377;{{ appointment.budget }}{% else %}—{% endif %}</td>
+              <td><span class="hh-pill {% if appointment.request_state == 'submitted' %}hh-purple{% else %}hh-blue{% endif %}">{% if appointment.request_state == "submitted" %}Bid Submitted{% else %}New{% endif %}</span></td>
               <td>
                 <div class="hh-actions">
-                  <span
-                    class="material-symbols-outlined popup-btn appointment-detail-btn"
-                    data-id="{{ appointment.id }}"
-                    >visibility</span
-                  >
-                  <span
-                    class="material-symbols-outlined place-bid-btn"
-                    data-id="{{ appointment.id }}"
-                    style="color: #1d6fe8"
-                    >check_circle</span
-                  >
+                  <span class="material-symbols-outlined popup-btn appointment-detail-btn" data-id="{{ appointment.id }}">visibility</span>
+                  {% if appointment.request_state == "new" %}
+                  <span class="material-symbols-outlined place-bid-btn" data-id="{{ appointment.id }}" style="color: #1d6fe8">check_circle</span>
+                  {% endif %}
                 </div>
               </td>
             </tr>
-            {% empty %}{% if hide_demo %}
+            {% empty %}
             <tr>
-              <td
-                colspan="9"
-                style="text-align: center; padding: 28px; color: #6b7280"
-              >
-                No pending appointments available
-              </td>
+              <td id="request-empty-state" colspan="7" style="text-align: center; padding: 28px; color: #6b7280">No open service requests</td>
             </tr>
-            {% else %}
-            <tr class="request-row" data-status="new">
-              <td>
-                <a href="#" class="hh-link">REQ-H5501</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #2563eb">DP</span
-                  ><b>Dolly Paris</b>
-                </div>
-              </td>
-              <td><b>General Medicine OPD</b></td>
-              <td>29 Sep<span class="hh-sub2">11:00 AM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹700</td>
-              <td class="hh-left-g">18m</td>
-              <td><span class="hh-pill hh-blue">New</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
+            {% endfor %}
+            <tr id="request-filter-empty" style="display: none">
+              <td colspan="7" style="text-align: center; padding: 28px; color: #6b7280">No requests match these filters</td>
             </tr>
-            <tr class="request-row" data-status="new">
-              <td>
-                <a href="#" class="hh-link">REQ-H5502</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #ea580c">SL</span
-                  ><b>Steve Lamark</b>
-                </div>
-              </td>
-              <td><b>Wound Dressing</b></td>
-              <td>29 Sep<span class="hh-sub2">12:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹1,200</td>
-              <td class="hh-left-r">12m</td>
-              <td><span class="hh-pill hh-blue">New</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="new">
-              <td>
-                <a href="#" class="hh-link">REQ-H5503</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #7c3aed">PS</span
-                  ><b>Priya Sharma</b>
-                </div>
-              </td>
-              <td><b>Orthopaedic OPD</b></td>
-              <td>29 Sep<span class="hh-sub2">1:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-red">Priority</span></td>
-              <td class="hh-budget">₹900</td>
-              <td class="hh-left-r">8m</td>
-              <td><span class="hh-pill hh-blue">New</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="new">
-              <td>
-                <a href="#" class="hh-link">REQ-H5504</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #0f766e">RM</span
-                  ><b>Rajan Mehta</b>
-                </div>
-              </td>
-              <td>
-                <b>Day-care Service</b
-                ><span class="hh-note">Availability required</span>
-              </td>
-              <td>30 Sep<span class="hh-sub2">10:00 AM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹3,500</td>
-              <td class="hh-left-g">45m</td>
-              <td><span class="hh-pill hh-blue">New</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="draft">
-              <td>
-                <a href="#" class="hh-link">REQ-H5505</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #15803d">AK</span
-                  ><b>Anil Kumar</b>
-                </div>
-              </td>
-              <td><b>General Medicine OPD</b></td>
-              <td>29 Sep<span class="hh-sub2">3:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹700</td>
-              <td class="hh-left-g">55m</td>
-              <td><span class="hh-pill hh-yellow">Draft</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="draft">
-              <td>
-                <a href="#" class="hh-link">REQ-H5506</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #db2777">DS</span
-                  ><b>Deepa Shah</b>
-                </div>
-              </td>
-              <td>
-                <b>Planned Admission</b
-                ><span class="hh-note">Scope confirmation</span>
-              </td>
-              <td>30 Sep<span class="hh-sub2">11:00 AM</span></td>
-              <td>Planned Admission</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹5,000</td>
-              <td class="hh-left-r">1h 10m</td>
-              <td><span class="hh-pill hh-yellow">Draft</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="submitted">
-              <td>
-                <a href="#" class="hh-link">REQ-H5507</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #475569">VM</span
-                  ><b>Vijay Mehta</b>
-                </div>
-              </td>
-              <td><b>Orthopaedic OPD</b></td>
-              <td>29 Sep<span class="hh-sub2">4:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹900</td>
-              <td class="hh-left-r">1h 20m</td>
-              <td><span class="hh-pill hh-purple">Bid Submitted</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="submitted">
-              <td>
-                <a href="#" class="hh-link">REQ-H5508</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #0891b2">KN</span
-                  ><b>Kavitha Nair</b>
-                </div>
-              </td>
-              <td><b>Wound Dressing</b></td>
-              <td>29 Sep<span class="hh-sub2">5:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹1,200</td>
-              <td class="hh-left-r">1h 35m</td>
-              <td><span class="hh-pill hh-purple">Bid Submitted</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            {% endif %}{% endfor %}
           </tbody>
         </table>
       </div>
@@ -1039,64 +424,27 @@ endblock %} {% block content %}
 
     <!-- 9. SUBSCRIPTION (logic unchanged) -->
     {% if active_subscription %}
-    <div
-      class="hh-card hh-pad"
-      style="margin-top: 18px; display: flex; flex-direction: column; gap: 14px"
-    >
+    <div class="hh-card hh-pad" style="margin-top: 18px; display: flex; flex-direction: column; gap: 14px">
       <div class="hh-flexbetween">
         <p class="hh-h">Subscription Details</p>
-        {% if active_subscription.status == "active" %}<span
-          class="hh-pill hh-blue"
-          style="padding: 6px 16px; font-size: 12px"
-          >Active</span
-        >{% endif %}
+        {% if active_subscription.status == "active" %}<span class="hh-pill hh-blue" style="padding: 6px 16px; font-size: 12px">Active</span>{% endif %}
       </div>
       <div class="hh-flexbetween" style="align-items: center">
         <p style="font-size: 14px">{{ active_subscription.plan.name }}</p>
         <p style="font-size: 24px; font-weight: 700">
-          &#8377;{{ active_subscription.plan.price }}<span
-            style="font-size: 13px; font-weight: 400"
-            >/{{ active_subscription.plan.billing_cycle }}</span
-          >
+          &#8377;{{ active_subscription.plan.price }}<span style="font-size: 13px; font-weight: 400">/{{ active_subscription.plan.billing_cycle }}</span>
         </p>
       </div>
       <div>
         {% if active_subscription.plan.discount_text %}
-        <p style="font-size: 12px; font-weight: 600; color: #6b7280">
-          {{ active_subscription.plan.discount_text }}
-        </p>
-        {% endif %} {% for feature in
-        active_subscription.plan.features.all|slice:":3" %}
-        <p
-          style="
-            font-size: 12px;
-            font-weight: 600;
-            color: #6b7280;
-            margin-top: 6px;
-          "
-        >
-          {{ feature.text }}
-        </p>
+        <p style="font-size: 12px; font-weight: 600; color: #6b7280">{{ active_subscription.plan.discount_text }}</p>
+        {% endif %}
+        {% for feature in active_subscription.plan.features.all|slice:":3" %}
+        <p style="font-size: 12px; font-weight: 600; color: #6b7280; margin-top: 6px;">{{ feature.text }}</p>
         {% endfor %}
       </div>
       <div style="text-align: center">
-        <a
-          href="{% url 'settings_page' %}?tab=subscription"
-          class="bg-primary-blue"
-          style="
-            display: inline-flex;
-            width: 322px;
-            max-width: 100%;
-            height: 40px;
-            border-radius: 8px;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-          "
-          >View Plan Details</a
-        >
+        <a href="{% url 'settings_page' %}?tab=subscription" class="bg-primary-blue" style="display: inline-flex; width: 322px; max-width: 100%; height: 40px; border-radius: 8px; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600;">View Plan Details</a>
       </div>
     </div>
     {% endif %}
@@ -1104,247 +452,129 @@ endblock %} {% block content %}
     <!-- 10. MARKET TRENDS -->
     <div class="hh-card hh-pad hh-flexbetween" style="margin-top: 18px">
       <div>
-        <p class="hh-h" style="font-size: 14px">
-          Market Trends — Hospital Insights
+        <p class="hh-h" style="font-size: 14px">Market Trends — Hospital Insights</p>
+        <p class="hh-check">
+          <span class="material-symbols-outlined">check_circle</span>Most requested service across the platform this week: <b>{{ top_service|default:"—" }}</b>
         </p>
         <p class="hh-check">
-          <span class="material-symbols-outlined">check_circle</span>Most
-          requested service this week: <b>{{ top_service|default:"—" }}</b>
-        </p>
-        <p class="hh-check">
-          <span class="material-symbols-outlined">check_circle</span>Preferred
-          visit window: <b>{{ preferred_window|default:"—" }}</b>
-        </p>
-        <p class="hh-check">
-          <span class="material-symbols-outlined">check_circle</span>Resolved
-          bid win rate: <b>{{ win_rate|default:"0" }}%</b>
-          <span class="hh-muted" style="font-size: 10px">(Demo Insight)</span>
+          <span class="material-symbols-outlined">check_circle</span>Resolved bid win rate: <b>{% if win_rate_available %}{{ win_rate }}%{% else %}Not enough data{% endif %}</b>
         </p>
       </div>
-      <a href="#" class="hh-outbtn" style="color: #111827">View Reports</a>
+      <a href="{% url 'reports' %}" class="hh-outbtn" style="color: #111827">View Reports</a>
     </div>
 
     <!-- ============ APPOINTMENT DETAIL POPUP (unchanged: JS depends on these classes/ids) ============ -->
-    <div
-      class="fixed inset-0 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden"
-    >
+    <div class="fixed inset-0 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden">
       <div class="bg-white w-[680px] p-4 rounded-lg">
         <div class="flex items-center justify-between">
           <p class="font-semibold text-sm">Appointment Details</p>
           <div class="flex items-center gap-4">
             <div class="relative">
-              <button
-                type="button"
-                class="cursor-pointer popup-btn"
-                data-popup="sharePopup"
-              >
+              <button type="button" class="cursor-pointer popup-btn" data-popup="sharePopup">
                 <span class="material-symbols-outlined !text-xl">share</span>
               </button>
               <div class="sharePopup hidden absolute right-0">
-                <div
-                  class="bg-white w-130 rounded-lg shadow-lg p-6 relative border border-dodger-blue"
-                >
+                <div class="bg-white w-130 rounded-lg shadow-lg p-6 relative border border-dodger-blue">
                   <div class="flex justify-between items-center">
                     <p class="font-semibold text-xl">Share</p>
-                    <span
-                      class="material-symbols-outlined close-popup cursor-pointer"
-                      data-popup="sharePopup"
-                      >close</span
-                    >
+                    <span class="material-symbols-outlined close-popup cursor-pointer" data-popup="sharePopup">close</span>
                   </div>
                   <hr class="text-dodger-blue mt-4" />
                   <div class="flex justify-between pt-4">
-                    <div
-                      class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                      data-app="whatsapp"
-                    >
-                      <img
-                        src="/static/images/whatsappicon.svg"
-                        alt="whatsapp logo"
-                        class="w-10 h-10"
-                      />
-                      <p class="font-normal text-base text-dark-gray">
-                        Whatsapp
-                      </p>
+                    <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="whatsapp">
+                      <img src="/static/images/whatsappicon.svg" alt="whatsapp logo" class="w-10 h-10" />
+                      <p class="font-normal text-base text-dark-gray">Whatsapp</p>
                     </div>
-                    <div
-                      class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                      data-app="telegram"
-                    >
-                      <img
-                        src="/static/images/telegramicon.svg"
-                        alt="telegram logo"
-                        class="w-10 h-10"
-                      />
-                      <p class="font-normal text-base text-dark-gray">
-                        Telegram
-                      </p>
+                    <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="telegram">
+                      <img src="/static/images/telegramicon.svg" alt="telegram logo" class="w-10 h-10" />
+                      <p class="font-normal text-base text-dark-gray">Telegram</p>
                     </div>
-                    <div
-                      class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                      data-app="facebook"
-                    >
-                      <img
-                        src="/static/images/facebookicon.svg"
-                        alt="facebook logo"
-                        class="w-10 h-10"
-                      />
-                      <p class="font-normal text-base text-dark-gray">
-                        Facebook
-                      </p>
+                    <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="facebook">
+                      <img src="/static/images/facebookicon.svg" alt="facebook logo" class="w-10 h-10" />
+                      <p class="font-normal text-base text-dark-gray">Facebook</p>
                     </div>
-                    <div
-                      class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                      data-app="sms"
-                    >
-                      <img
-                        src="/static/images/smsicon.svg"
-                        alt="sms logo"
-                        class="w-10 h-10"
-                      />
-                      <p class="font-normal text-base text-dark-gray">
-                        Message
-                      </p>
+                    <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="sms">
+                      <img src="/static/images/smsicon.svg" alt="sms logo" class="w-10 h-10" />
+                      <p class="font-normal text-base text-dark-gray">Message</p>
                     </div>
-                    <div
-                      class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                      data-app="gmail"
-                    >
-                      <img
-                        src="/static/images/gmailicon.svg"
-                        alt="gmail logo"
-                        class="w-10 h-10"
-                      />
+                    <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="gmail">
+                      <img src="/static/images/gmailicon.svg" alt="gmail logo" class="w-10 h-10" />
                       <p class="font-normal text-base text-dark-gray">E-mail</p>
                     </div>
                   </div>
                   <div class="pt-4 relative mt-6">
-                    <input
-                      type="text"
-                      id="share-link"
-                      value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci"
-                      class="w-full rounded-md p-4 font-normal text-sm border"
-                      disabled
-                    />
-                    <button
-                      type="button"
-                      class="copy-btn absolute right-3 top-6 bg-dodger-blue text-white rounded-md p-2 cursor-pointer"
-                      data-target="#share-link"
-                    >
-                      Copy
-                    </button>
+                    <input type="text" id="share-link" value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci" class="w-full rounded-md p-4 font-normal text-sm border" disabled />
+                    <button type="button" class="copy-btn absolute right-3 top-6 bg-dodger-blue text-white rounded-md p-2 cursor-pointer" data-target="#share-link">Copy</button>
                   </div>
                 </div>
               </div>
             </div>
-            <button
-              class="close-popup cursor-pointer"
-              data-popup="appointmentRequestDetail"
-            >
+            <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail">
               <span class="material-symbols-outlined !text-2xl">close</span>
             </button>
           </div>
         </div>
         <hr class="mt-4 text-blue-haze" />
-        <div
-          class="mt-4 bg-pale-azure p-4 w-[648px] h-[196px] flex items-center gap-4"
-        >
+        <div class="mt-4 bg-pale-azure p-4 w-[648px] h-[196px] flex items-center gap-4">
           <div class="flex flex-col">
             <img src="/static/images/patient-7.svg" alt="" />
-            <p
-              id="popup-patient-name"
-              class="font-normal text-sm text-center pt-4"
-            >
-              Dolly Paris
-            </p>
+            <p id="popup-patient-name" class="font-normal text-sm text-center pt-4">—</p>
           </div>
           <div class="flex flex-col gap-4 w-[180px]">
             <div class="flex gap-2">
-              <div
-                class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"
-              >
-                <span
-                  class="material-symbols-outlined text-dodger-blue !text-lg"
-                  >female</span
-                >
+              <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                <span class="material-symbols-outlined text-dodger-blue !text-lg">female</span>
               </div>
               <div class="flex flex-col gap-2">
                 <p class="font-normal text-xs text-spanish-gray">Gender</p>
-                <p id="popup-gender" class="font-normal text-sm">Female</p>
+                <p id="popup-gender" class="font-normal text-sm">—</p>
               </div>
             </div>
             <div class="flex gap-2">
-              <div
-                class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"
-              >
-                <span
-                  class="material-symbols-outlined text-dodger-blue !text-lg"
-                  >hourglass</span
-                >
+              <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                <span class="material-symbols-outlined text-dodger-blue !text-lg">hourglass</span>
               </div>
               <div class="flex flex-col gap-2">
                 <p class="font-normal text-xs text-spanish-gray">Age</p>
-                <p id="popup-age" class="font-normal text-sm">25</p>
+                <p id="popup-age" class="font-normal text-sm">—</p>
               </div>
             </div>
             <div class="flex gap-2">
-              <div
-                class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"
-              >
+              <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
                 <img src="/static/images/visit-icon.svg" alt="" />
               </div>
               <div class="flex flex-col gap-2">
                 <p class="font-normal text-xs text-spanish-gray">Visit Type</p>
-                <p id="popup-visit-type" class="font-normal text-sm">
-                  Hospital Visit
-                </p>
+                <p id="popup-visit-type" class="font-normal text-sm">—</p>
               </div>
             </div>
           </div>
           <div class="flex flex-col gap-4">
             <div class="flex gap-2">
-              <div
-                class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"
-              >
-                <span
-                  class="material-symbols-outlined text-dodger-blue !text-lg"
-                  >call</span
-                >
+              <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                <span class="material-symbols-outlined text-dodger-blue !text-lg">call</span>
               </div>
               <div class="flex flex-col gap-2">
                 <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
-                <p id="popup-phone" class="font-normal text-sm">
-                  +91 9999999999
-                </p>
+                <p id="popup-phone" class="font-normal text-sm">—</p>
               </div>
             </div>
             <div class="flex gap-2">
-              <div
-                class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"
-              >
-                <span
-                  class="material-symbols-outlined text-dodger-blue !text-lg"
-                  >calendar_today</span
-                >
+              <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                <span class="material-symbols-outlined text-dodger-blue !text-lg">calendar_today</span>
               </div>
               <div class="flex flex-col gap-2">
-                <p class="font-normal text-xs text-spanish-gray">
-                  Appointment date
-                </p>
-                <p id="popup-date" class="font-normal text-sm">
-                  22/07/2025,12:30 PM
-                </p>
+                <p class="font-normal text-xs text-spanish-gray">Appointment date</p>
+                <p id="popup-date" class="font-normal text-sm">—</p>
               </div>
             </div>
             <div class="flex gap-2">
-              <div
-                class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"
-              >
+              <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
                 <img src="/static/images/address-icon.svg" alt="" />
               </div>
               <div class="flex flex-col gap-2">
                 <p class="font-normal text-xs text-spanish-gray">Address</p>
-                <p id="popup-address" class="font-normal text-sm">Address</p>
+                <p id="popup-address" class="font-normal text-sm">—</p>
               </div>
             </div>
           </div>
@@ -1354,39 +584,21 @@ endblock %} {% block content %}
           <p class="font-semibold text-sm">Medical Information</p>
           <div class="pt-4 flex gap-4">
             <div class="flex gap-2">
-              <div
-                class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"
-              >
-                <span
-                  class="material-symbols-outlined text-dodger-blue !text-lg"
-                  >medical_services</span
-                >
+              <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                <span class="material-symbols-outlined text-dodger-blue !text-lg">medical_services</span>
               </div>
               <div class="flex flex-col gap-2">
-                <p
-                  class="font-normal text-xs text-spanish-gray whitespace-nowrap"
-                >
-                  Medical Requirement
-                </p>
-                <p id="popup-medical-requirement" class="font-normal text-sm">
-                  Kidney Stone
-                </p>
+                <p class="font-normal text-xs text-spanish-gray whitespace-nowrap">Medical Requirement</p>
+                <p id="popup-medical-requirement" class="font-normal text-sm">—</p>
               </div>
             </div>
             <div class="flex gap-2">
-              <div
-                class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"
-              >
-                <span
-                  class="material-symbols-outlined text-dodger-blue !text-lg p-2"
-                  >details</span
-                >
+              <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
+                <span class="material-symbols-outlined text-dodger-blue !text-lg p-2">details</span>
               </div>
               <div class="flex flex-col gap-2">
                 <p class="font-normal text-xs text-spanish-gray">Details</p>
-                <p id="popup-details" class="font-normal text-sm">
-                  Severe lower back pain
-                </p>
+                <p id="popup-details" class="font-normal text-sm">—</p>
               </div>
             </div>
           </div>
@@ -1408,13 +620,9 @@ endblock %} {% block content %}
             </div>
             <div class="flex items-center justify-between mx-10">
               <p class="pl-6 font-normal text-sm">Enquiry</p>
-              <p class="pl-2 text-spanish-gray font-normal text-sm">
-                Appointment
-              </p>
+              <p class="pl-2 text-spanish-gray font-normal text-sm">Appointment</p>
               <p class="text-spanish-gray font-normal text-sm">Completed</p>
-              <p class="text-spanish-gray font-normal text-sm">
-                Cancel/Expired
-              </p>
+              <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
             </div>
           </div>
           <div class="pt-4 flex flex-col gap-2">
@@ -1423,20 +631,12 @@ endblock %} {% block content %}
               <p class="font-normal text-sm">Budget</p>
             </div>
             <div class="flex justify-between items-center">
-              <p id="popup-order-id" class="font-normal text-sm text-blue-gray">
-                Order #R32512
-              </p>
-              <p id="popup-budget" class="text-dodger-blue font-normal text-sm">
-                ₹500
-              </p>
+              <p id="popup-order-id" class="font-normal text-sm text-blue-gray">Order #R32512</p>
+              <p id="popup-budget" class="text-dodger-blue font-normal text-sm">₹500</p>
             </div>
           </div>
           <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-            <button
-              class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button"
-            >
-              Accept
-            </button>
+            <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">Accept</button>
           </div>
         </div>
 
@@ -1455,9 +655,7 @@ endblock %} {% block content %}
               <p class="pl-6 font-normal text-sm">Enquiry</p>
               <p class="pl-2 font-normal text-sm">Appointment</p>
               <p class="text-spanish-gray font-normal text-sm">Completed</p>
-              <p class="text-spanish-gray font-normal text-sm">
-                Cancel/Expired
-              </p>
+              <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
             </div>
           </div>
           <div class="pt-4 flex flex-col gap-2">
@@ -1475,60 +673,32 @@ endblock %} {% block content %}
               <p class="font-normal text-sm">No Show</p>
               <input type="checkbox" class="w-4 h-4 border-2" />
             </div>
-            <p class="font-normal text-sm text-spanish-gray">
-              Patient didn’t show up
-            </p>
+            <p class="font-normal text-sm text-spanish-gray">Patient didn’t show up</p>
           </div>
           <div class="pt-4 flex justify-between items-center">
             <div class="flex gap-2 items-center">
               <p class="font-normal text-sm">Home Visit</p>
               <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
             </div>
-            <div
-              class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer"
-            >
+            <div class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
               <p class="font-normal text-sm">Proforma Bill</p>
               <span class="material-symbols-outlined !text-lg">visibility</span>
             </div>
           </div>
           <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-            <button
-              class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer complete-btn"
-            >
-              Complete
-            </button>
-            <button
-              class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap popup-btn"
-              data-popup="cancelAppointmentPopup"
-            >
-              Cancel Appointment
-            </button>
+            <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer complete-btn">Complete</button>
+            <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap popup-btn" data-popup="cancelAppointmentPopup">Cancel Appointment</button>
           </div>
-          <div
-            class="cancelAppointmentPopup fixed inset-0 flex items-center justify-center hidden bg-semi-transparent-black"
-          >
-            <div
-              class="bg-white w-[452px] h-[213px] p-5 rounded-[10px] flex flex-col gap-4 relative items-center"
-            >
-              <button
-                class="close-popup absolute right-4 top-8 cursor-pointer"
-                data-popup="cancelAppointmentPopup"
-              >
+          <div class="cancelAppointmentPopup fixed inset-0 flex items-center justify-center hidden bg-semi-transparent-black">
+            <div class="bg-white w-[452px] h-[213px] p-5 rounded-[10px] flex flex-col gap-4 relative items-center">
+              <button class="close-popup absolute right-4 top-8 cursor-pointer" data-popup="cancelAppointmentPopup">
                 <span class="material-symbols-outlined">close</span>
               </button>
-              <div
-                class="w-15 h-15 rounded-full bg-rosewater p-3 flex items-center justify-center"
-              >
+              <div class="w-15 h-15 rounded-full bg-rosewater p-3 flex items-center justify-center">
                 <img src="/static/images/appointment.svg" alt="" />
               </div>
-              <p class="font-normal text-base">
-                Are you sure you want to cancel this appointment ?
-              </p>
-              <div
-                class="bg-rosewater text-error w-[198px] h-12 rounded-md p-2.5 cursor-pointer cancelAppointmentBtn flex items-center justify-center font-semibold"
-              >
-                Cancel Appointment
-              </div>
+              <p class="font-normal text-base">Are you sure you want to cancel this appointment ?</p>
+              <div class="bg-rosewater text-error w-[198px] h-12 rounded-md p-2.5 cursor-pointer cancelAppointmentBtn flex items-center justify-center font-semibold">Cancel Appointment</div>
             </div>
           </div>
         </div>
@@ -1548,9 +718,7 @@ endblock %} {% block content %}
               <p class="pl-6 font-normal text-sm">Enquiry</p>
               <p class="pl-2 font-normal text-sm">Appointment</p>
               <p class="text-spanish-gray font-normal text-sm">Completed</p>
-              <p class="text-spanish-gray font-normal text-sm">
-                Cancel/Expired
-              </p>
+              <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
             </div>
           </div>
           <div class="pt-4 flex flex-col gap-2">
@@ -1568,34 +736,21 @@ endblock %} {% block content %}
               <p class="font-normal text-sm">No Show</p>
               <input type="checkbox" class="w-4 h-4 border-2" checked />
             </div>
-            <p class="font-normal text-sm text-strong-red">
-              Patient didn’t show up
-            </p>
+            <p class="font-normal text-sm text-strong-red">Patient didn’t show up</p>
           </div>
           <div class="pt-4 flex justify-between items-center">
             <div class="flex gap-2 items-center">
               <p class="font-normal text-sm">Home Visit</p>
               <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
             </div>
-            <div
-              class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer"
-            >
+            <div class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
               <p class="font-normal text-sm">Proforma Bill</p>
               <span class="material-symbols-outlined !text-lg">visibility</span>
             </div>
           </div>
           <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-            <button
-              class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer save-btn"
-            >
-              Save
-            </button>
-            <button
-              class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap"
-              data-popup="appointmentRequestDetail"
-            >
-              Cancel
-            </button>
+            <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer save-btn">Save</button>
+            <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap" data-popup="appointmentRequestDetail">Cancel</button>
           </div>
         </div>
 
@@ -1621,9 +776,7 @@ endblock %} {% block content %}
             </div>
             <div class="flex justify-between items-center">
               <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-              <p class="font-normal text-sm text-strong-red">
-                Patient didn’t show up
-              </p>
+              <p class="font-normal text-sm text-strong-red">Patient didn’t show up</p>
             </div>
           </div>
         </div>
@@ -1658,7 +811,9 @@ endblock %} {% block content %}
     </div>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block extra_js %}
 <script>
   /* datalabels plugin throws "Chart is not defined" if Chart.js isn't loaded yet.
      If layout.html already loads Chart.js this does nothing. */

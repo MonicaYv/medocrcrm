@@ -10,8 +10,8 @@
     <div class="space-y-5 rounded-[10px] bg-white p-5">
         <div class="h-5 w-24 rounded bg-gray-200"></div>
         <div class="flex gap-3">
-            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[70%]"></div>
-            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[30%]"></div>
+            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[62%]"></div>
+            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[38%]"></div>
         </div>
         <div class="h-20 rounded-lg bg-gray-200"></div>
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -24,28 +24,28 @@
 </div>
 
 <div id="pharmacy-page-content" class="is-ready">
-<div class="main-content scroll relative flex h-full flex-1 flex-col gap-4 overflow-y-auto bg-[#FAF9FF] p-6 font-[Inter,sans-serif] text-slate-900 transition-all duration-300">
+<div class="main-content scroll relative flex h-full flex-1 flex-col gap-5 overflow-y-auto bg-[#FAF9FF] p-6 font-[Inter,sans-serif] text-slate-900 transition-all duration-300">
 
     <div class="show-sidebar-toggle hidden fixed top-[100px] left-0 z-50 h-10 w-10 cursor-pointer items-center justify-center rounded-r-md bg-light-dodger-blue">
         <span class="material-symbols-outlined bold-weight text-dodger-blue">arrow_forward_ios</span>
     </div>
 
-    <!-- Page header -->
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <!-- 1. Page header -->
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined !text-xl">home</span>
                 <h1 class="text-base font-bold">Home</h1>
             </div>
-            <div id="date" class="text-xs text-slate-500">{% now "l, F j, Y" %}</div>
+            <div id="date" class="mt-0.5 text-[11px] text-slate-500">{% now "l, F j, Y" %}</div>
         </div>
-        <div id="infoSection" class="flex items-center gap-4 text-xs text-slate-600">
+        <div id="infoSection" class="flex items-center gap-4 text-[11px] text-slate-600">
             <div id="location" class="flex items-center gap-1">
                 <span class="material-symbols-outlined !text-sm">location_on</span>
                 <span id="location-text">{{ pharmacy_profile.city|default:"Location unavailable" }}</span>
             </div>
             <div class="flex items-center gap-2">
-                <p>Auto Bid</p>
+                <p class="font-medium">Auto Bid</p>
                 <label class="relative inline-block h-5 w-9 cursor-pointer">
                     <input type="checkbox" id="autobid-toggle" class="peer sr-only" aria-label="Enable Auto Bid">
                     <span class="absolute inset-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-[#1A73E8]"></span>
@@ -56,24 +56,24 @@
         </div>
     </div>
 
-    <!-- Banner + Pharmacy card -->
+    <!-- 2. Banner + Pharmacy profile card -->
     <div class="flex flex-col gap-4 lg:flex-row">
-        <div class="relative h-[180px] w-full overflow-hidden rounded-[14px] border border-[#E8EEF2] bg-[linear-gradient(165deg,#0D9488,#068F95,#038AA2,#0485AE,#087FBA,#0F7AD1,#1A73E8)] lg:w-[60%]">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.2),rgba(255,255,255,0)_60%)]"></div>
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0B2A4A]/80"></div>
+        <div class="relative h-[180px] w-full overflow-hidden rounded-[14px] bg-[linear-gradient(135deg,#14A38B_0%,#2E9FB5_45%,#1A73E8_100%)] lg:w-[62%]">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_60%_30%,rgba(255,255,255,0.22),rgba(255,255,255,0)_55%)]"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent from-40% via-[#0B2A4A]/40 to-[#0B2A4A]/95"></div>
             <div class="absolute bottom-0 left-0 p-4 text-[10px] leading-4 text-white">
                 <p class="text-xs font-semibold">🏪 {{ pharmacy_profile.company_name|default:"Pharmacy" }}</p>
-                <p>{{ pharmacy_profile.address|default:"Address not available" }}</p>
-                {% if pharmacy_profile.license_number %}<p>License: {{ pharmacy_profile.license_number }}</p>{% endif %}
+                <p class="text-white/85">{{ pharmacy_profile.address|default:"Address not available" }}</p>
+                {% if pharmacy_profile.license_number %}<p class="text-white/85">License: {{ pharmacy_profile.license_number }}</p>{% endif %}
             </div>
         </div>
 
-        <div class="flex flex-1 items-center gap-4 rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+        <div class="flex flex-1 items-start gap-4 rounded-[14px] border border-[#E8EEF2] bg-white p-4">
             <div class="relative shrink-0">
                 <img id="admin-profile-photo"
                      src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
                      alt="Admin profile picture"
-                     class="h-[72px] w-[72px] rounded-[10px] border-2 border-[#1A73E8] bg-[#E8F0FE] object-cover">
+                     class="h-16 w-16 rounded-[10px] border-2 border-[#1A73E8] bg-[#E8F0FE] object-cover">
                 <label for="admin-profile-photo-input" title="Change profile picture"
                        class="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-[#1A73E8] text-white shadow">
                     <span class="material-symbols-outlined !text-xs">edit</span>
@@ -81,7 +81,7 @@
                 <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
                        data-upload-url="{% url 'upload_admin_profile_photo' %}">
             </div>
-            <div class="min-w-0 text-[10px] leading-4 text-slate-500">
+            <div class="min-w-0 text-[10px] leading-[18px] text-slate-500">
                 <p class="text-xs font-bold text-slate-900">{{ pharmacy_profile.company_name|default:"Pharmacy" }}</p>
                 <p class="text-[11px]">{{ contact_person.name|default:"N/A" }} — {{ contact_person.role|default:"N/A" }}</p>
                 <p class="font-medium text-[#1A73E8]">{{ user.phone_country_code|default:"+91" }} {{ pharmacy_profile.contact_number|default:user.phone_number|default:"N/A" }}</p>
@@ -92,19 +92,33 @@
         </div>
     </div>
 
-    <!-- Quick stats -->
-    <div class="grid grid-cols-2 gap-y-3 rounded-[10px] border border-[#E8EEF2] bg-white py-4 lg:grid-cols-5 lg:divide-x lg:divide-[#E8EEF2]">
-        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">💳 Wallet Balance</p><p class="text-lg font-bold">₹8,240</p><a href="#" class="text-[10px] text-[#1A73E8]">Withdraw →</a></div>
-        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">⚡ Active Bids</p><p class="text-lg font-bold">5</p><a href="#" class="text-[10px] text-[#1A73E8]">View all →</a></div>
-        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">📦 Today's Orders</p><p class="text-lg font-bold">12</p><p class="text-[10px] text-[#1A73E8]">4 Pending · 8 Processing</p></div>
-        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">🚚 Out for Delivery</p><p class="text-lg font-bold text-[#1A73E8]">2</p><p class="text-[10px] text-[#1A73E8]">On the way →</p></div>
-        <div class="px-6"><p class="text-[9px] font-medium uppercase text-slate-500">⏱ Avg Response Time</p><p class="text-lg font-bold text-green-600">3 min</p></div>
+    <!-- 3. Quick stats (4 columns, no card box) -->
+    <div class="grid grid-cols-2 gap-y-4 py-2 lg:grid-cols-4 lg:divide-x lg:divide-[#E8EEF2]">
+        <div class="px-6">
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500"><span class="material-symbols-outlined !text-xl text-[#1A73E8]">bolt</span>Active Bids</p>
+            <p class="mt-1 text-xl font-bold">5</p>
+            <a href="#" class="text-[10px] text-[#1A73E8]">View all →</a>
+        </div>
+        <div class="px-6">
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500"><span class="material-symbols-outlined !text-xl text-[#1A73E8]">package_2</span>Today's Orders</p>
+            <p class="mt-1 text-xl font-bold">12</p>
+            <p class="text-[10px] text-[#1A73E8]">4 Pending · 8 Processing</p>
+        </div>
+        <div class="px-6">
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500"><span class="material-symbols-outlined !text-xl text-[#1A73E8]">local_shipping</span>Out for Delivery</p>
+            <p class="mt-1 text-xl font-bold text-[#1A73E8]">2</p>
+            <a href="#" class="text-[10px] text-[#1A73E8]">On the way →</a>
+        </div>
+        <div class="px-6">
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500"><span class="material-symbols-outlined !text-xl text-green-500">schedule</span>Avg Response Time</p>
+            <p class="mt-1 text-xl font-bold text-green-600">3 min</p>
+        </div>
     </div>
 
-    <!-- Overview -->
+    <!-- 4. Overview -->
     <div id="pharmacy-overview" data-endpoint="{% url 'pharmacy_overview_data' %}" class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
-            <p class="text-xs font-bold">Overview <span id="pharmacy-overview-period" class="ml-2 font-normal text-slate-500">Today</span></p>
+            <p class="text-sm font-bold">Overview <span id="pharmacy-overview-period" class="ml-2 text-[11px] font-normal text-slate-500">Today</span></p>
             <div class="relative flex items-center gap-1.5 text-[10px]">
                 <button class="filterOption rounded-full bg-[#1A73E8] px-3 py-1 text-white" data-value="Today">Today</button>
                 <button class="filterOption rounded-full border border-[#E8EEF2] bg-white px-3 py-1 text-slate-600" data-value="Week">This Week</button>
@@ -116,61 +130,52 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-            <div class="relative rounded-[10px] border border-[#E8EEF2] bg-white p-4">
-                <span class="absolute right-3 top-3 text-[9px]">📦</span>
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="relative rounded-[12px] border border-[#E8EEF2] bg-white p-4">
+                <span class="material-symbols-outlined absolute right-4 top-4 !text-lg text-[#1A73E8]">package_2</span>
                 <p class="text-[11px] text-slate-500">Total Orders Today</p>
-                <p id="pharmacy-overview-total-orders" class="text-3xl font-bold">{{ pharmacy_overview.total_orders }}</p>
-                <p class="text-[10px] text-[#1A73E8]">🔵 <span id="pharmacy-overview-pending-orders">{{ pharmacy_overview.pending_orders }}</span> Pending · <span id="pharmacy-overview-confirmed-orders">{{ pharmacy_overview.confirmed_orders }}</span> Confirmed</p>
+                <p id="pharmacy-overview-total-orders" class="mt-1 text-3xl font-bold">{{ pharmacy_overview.total_orders }}</p>
+                <p class="mt-1 text-[10px] text-[#1A73E8]">🔵 <span id="pharmacy-overview-pending-orders">{{ pharmacy_overview.pending_orders }}</span> Pending · <span id="pharmacy-overview-confirmed-orders">{{ pharmacy_overview.confirmed_orders }}</span> Confirmed</p>
             </div>
-            <div class="relative rounded-[10px] border border-[#E8EEF2] bg-white p-4">
-                <span class="absolute right-3 top-3 text-[9px]">▫️</span>
+            <div class="relative rounded-[12px] border border-[#E8EEF2] bg-white p-4">
+                <span class="material-symbols-outlined absolute right-4 top-4 !text-lg text-amber-500">pending_actions</span>
                 <p class="text-[11px] text-slate-500">Pending Requests</p>
-                <p class="text-3xl font-bold">24</p>
-                <p class="text-[10px] text-amber-500">⏰ Respond before timer expires</p>
+                <p class="mt-1 text-3xl font-bold">24</p>
+                <p class="mt-1 flex items-center gap-1 text-[10px] text-amber-500"><span class="material-symbols-outlined !text-sm">schedule</span>Respond before timer expires</p>
             </div>
-            <div class="relative rounded-[10px] border border-[#E8EEF2] bg-white p-4">
-                <span class="absolute right-3 top-3 text-[9px]">👑</span>
+            <div class="relative rounded-[12px] border border-[#E8EEF2] bg-white p-4">
+                <span class="material-symbols-outlined absolute right-4 top-4 !text-lg text-amber-400">star</span>
                 <p class="text-[11px] text-slate-500">Customer Rating</p>
-                <p class="text-3xl font-bold">4.6</p>
-                <p class="text-[10px] text-amber-500">★★★★½ Based on 218 reviews</p>
+                <p class="mt-1 text-3xl font-bold">4.6</p>
+                <p class="mt-1 text-[10px] text-amber-500">★★★★½ Based on 218 reviews</p>
             </div>
         </div>
         <!-- Kept hidden so pharmacy-overview.js can still update them -->
         <div class="hidden"><span id="pharmacy-overview-total-stock">{{ pharmacy_overview.total_stock }}</span><span id="pharmacy-overview-available-stock">{{ pharmacy_overview.available_stock }}</span><span id="pharmacy-overview-low-stock">{{ pharmacy_overview.low_stock_medicines }}</span><span id="pharmacy-overview-revenue">{{ pharmacy_overview.revenue }}</span><span id="pharmacy-overview-prescription-revenue">{{ pharmacy_overview.prescription_revenue }}</span><span id="pharmacy-overview-otc-revenue">{{ pharmacy_overview.otc_revenue }}</span></div>
     </div>
 
-    <!-- Recent Orders + This Week -->
-    <div class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_300px]">
-        <div class="rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+    <!-- 5. Recent Orders + This Week -->
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
+        <div class="rounded-[12px] border border-[#E8EEF2] bg-white p-4">
             <div class="mb-3 flex items-center justify-between">
-                <p class="text-xs font-bold">Recent Orders</p>
-                <a href="{% url 'orders' %}" class="text-[10px] text-[#1A73E8]">View All →</a>
+                <p class="text-sm font-bold">Recent Orders</p>
+                <a href="{% url 'orders' %}" class="text-[11px] text-[#1A73E8]">View all →</a>
             </div>
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
                 {% for order in scheduled_orders %}
-                <div class="order-card popup-btn cursor-pointer rounded-lg border border-[#E8EEF2] bg-white p-3"
-                     data-popup="order-details-popup" data-order-id="{{ order.id }}">
+                <div class="order-card popup-btn cursor-pointer rounded-lg border border-[#E8EEF2] bg-white p-3" data-popup="order-details-popup" data-order-id="{{ order.id }}">
                     <div class="flex flex-wrap items-center justify-between gap-1 text-[9px] font-medium">
-                        <span class="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-green-700">Home Delivery</span>
-                        <span class="rounded-full px-2 py-0.5
-                            {% if order.order_status|lower == 'pending' %}bg-amber-100 text-amber-600
-                            {% elif order.order_status|lower == 'confirmed' or order.order_status|lower == 'shipped' %}bg-[#E8F0FE] text-[#1A73E8]
-                            {% else %}bg-green-100 text-green-700{% endif %}">{{ order.order_status|title }}</span>
+                        <span class="rounded-full bg-green-50 px-2 py-0.5 text-green-600">Home Delivery</span>
+                        <span class="rounded-full px-2 py-0.5 {% if order.order_status|lower == 'pending' %}bg-amber-100 text-amber-600{% elif order.order_status|lower == 'confirmed' or order.order_status|lower == 'shipped' %}bg-[#E8F0FE] text-[#1A73E8]{% else %}bg-green-100 text-green-700{% endif %}">{{ order.order_status|title }}</span>
                     </div>
-                    <p class="mt-2 text-xs font-bold text-slate-900">
-                        {% if order.user__userprofile__first_name %}{{ order.user__userprofile__first_name }} {{ order.user__userprofile__last_name|default:'' }}{% else %}Customer{% endif %}
-                    </p>
-                    <p class="text-[10px] text-[#1A73E8]">{{ order.local_created_at|date:"d/m/Y, h:i A" }}</p>
-                    <img src="{% static 'images/sample-qr.png' %}" alt="Payment QR code" class="mt-1 h-8 w-8 rounded border border-blue-haze bg-white object-contain" />
-                    {# Adjust these 3 field names to whatever your scheduled_orders query returns #}
-                    {% if order.medicines %}<p class="mt-1.5 text-[9px] leading-3 text-slate-500">{{ order.medicines }}</p>{% endif %}
+                    <p class="mt-2.5 text-xs font-bold text-slate-900">{% if order.user__userprofile__first_name %}{{ order.user__userprofile__first_name }} {{ order.user__userprofile__last_name|default:'' }}{% else %}Customer{% endif %}</p>
+                    <p class="mt-0.5 text-[10px] text-[#1A73E8]">{{ order.local_created_at|date:"d/m/Y, h:i A" }}</p>
+                    {# Adjust these field names to whatever your scheduled_orders query returns #}
+                    {% if order.medicines %}<p class="mt-2 text-[10px] leading-4 text-slate-500">{{ order.medicines }}</p>{% endif %}
                     {% if order.total_amount %}
-                    <p class="mt-1.5 text-[10px] font-semibold {% if order.payment_mode == 'Cash on Delivery' %}text-amber-500{% else %}text-green-600{% endif %}">
-                        ₹{{ order.total_amount }} · {{ order.payment_mode|default:"UPI Paid" }}{% if order.payment_mode != 'Cash on Delivery' %} ✅{% endif %}
-                    </p>
+                    <p class="mt-2 text-[10px] font-semibold {% if order.payment_mode == 'Cash on Delivery' %}text-amber-500{% else %}text-green-600{% endif %}">₹{{ order.total_amount }} · {{ order.payment_mode|default:"UPI Paid" }}{% if order.payment_mode != 'Cash on Delivery' %} ✅{% endif %}</p>
                     {% else %}
-                    <p class="mt-1.5 text-[10px] text-slate-500">Order #{{ order.id }}</p>
+                    <p class="mt-2 text-[10px] text-slate-500">Order #{{ order.id }}</p>
                     {% endif %}
                 </div>
                 {% empty %}
@@ -179,179 +184,205 @@
             </div>
         </div>
 
-        <div class="rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+        <div class="rounded-[12px] border border-[#E8EEF2] bg-white p-4">
             <div class="mb-3 flex items-center justify-between">
-                <p class="text-xs font-bold">This Week</p>
+                <p class="text-sm font-bold">This Week</p>
                 <p class="text-[9px] text-slate-500">16–22 Jul 2025</p>
             </div>
-            <div class="grid grid-cols-2 border-y border-[#E8EEF2] text-center text-[9px] text-slate-500">
-                <div class="border-b border-r border-[#E8EEF2] py-3"><p class="text-base font-bold text-green-600">48</p>Orders Won</div>
-                <div class="border-b border-[#E8EEF2] py-3"><p class="text-base font-bold text-red-600">2</p>Cancelled</div>
-                <div class="border-r border-[#E8EEF2] py-3"><p class="text-base font-bold text-[#1A73E8]">52</p>Bids Answered</div>
-                <div class="py-3"><p class="text-base font-bold text-slate-700">8</p>Docs Shared</div>
+            <div class="grid grid-cols-2 text-[9px] text-slate-500">
+                <div class="border-b border-r border-[#E8EEF2] py-3 pl-2"><p class="text-lg font-bold text-green-600">48</p>Orders Won</div>
+                <div class="border-b border-[#E8EEF2] py-3 pl-4"><p class="text-lg font-bold text-red-600">2</p>Cancelled</div>
+                <div class="border-r border-[#E8EEF2] py-3 pl-2"><p class="text-lg font-bold text-[#1A73E8]">52</p>Bids Answered</div>
+                <div class="py-3 pl-4"><p class="text-lg font-bold text-slate-700">8</p>Docs Shared</div>
             </div>
-            <p class="mt-3 text-[10px] font-bold">Target vs Actual</p>
-            <div class="mt-2 space-y-2 text-[9px] text-slate-600">
-                <div><div class="flex justify-between"><span>Avg Delivery Time</span><span>28 min avg</span></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-3/5 rounded-full bg-amber-500"></div></div></div>
-                <div><div class="flex justify-between"><span>Bid Conversion Rate</span><span>72%</span></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-[72%] rounded-full bg-[#1A73E8]"></div></div></div>
+            <p class="mt-3 text-[11px] font-bold">Target vs Actual</p>
+            <div class="mt-2 space-y-2.5 text-[9px] text-slate-600">
+                <div><div class="mb-1 flex justify-between"><span>Avg Delivery Time</span><span>28 min avg</span></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-3/5 rounded-full bg-amber-500"></div></div></div>
+                <div><div class="mb-1 flex justify-between"><span>Bid Conversion Rate</span><span>72%</span></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-[72%] rounded-full bg-[#1A73E8]"></div></div></div>
             </div>
         </div>
     </div>
 
-    <!-- Inventory Alerts -->
-    <div class="rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+    <!-- 6. Inventory Alerts -->
+    <div class="rounded-[12px] border border-[#E8EEF2] bg-white p-4">
         <div class="mb-3 flex items-center justify-between">
-            <p class="text-sm font-bold text-amber-700">⚠️ Inventory Alerts</p>
-            <a href="#" class="text-xs text-[#1A73E8]">View All Inventory →</a>
+            <p class="flex items-center gap-2 text-xs font-bold text-amber-800"><span class="material-symbols-outlined !text-base">info</span>Inventory Alerts</p>
+            <a href="#" class="text-[11px] text-[#1A73E8]">View all inventory →</a>
         </div>
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-            <div class="rounded-lg border-l-4 border-amber-500 bg-amber-50 p-3 text-xs"><span class="rounded-full bg-white px-2 py-0.5 text-[10px] text-amber-600">Low Stock</span><p class="mt-2 font-bold">Crocin 500mg Tablet</p><p class="text-[10px] text-slate-500">GSK Pharma · Pain Relief</p><p class="mt-1 font-semibold text-amber-600">12 strips remaining</p><a href="#" class="text-amber-600">Reorder Now →</a></div>
-            <div class="rounded-lg border-l-4 border-amber-500 bg-pink-50 p-3 text-xs"><span class="rounded-full bg-white px-2 py-0.5 text-[10px] text-red-600">Critical</span><p class="mt-2 font-bold">Metformin 500mg</p><p class="text-[10px] text-slate-500">Sun Pharma · Diabetes</p><p class="mt-1 font-semibold text-red-600">3 strips remaining</p><a href="#" class="text-red-600">Reorder Now →</a></div>
-            <div class="rounded-lg border-l-4 border-amber-500 bg-pink-50 p-3 text-xs"><span class="rounded-full bg-white px-2 py-0.5 text-[10px] text-red-600">Out of Stock</span><p class="mt-2 font-bold">Insulin Glargine 100IU</p><p class="text-[10px] text-slate-500">Sanofi · Diabetes</p><p class="mt-1 font-semibold text-red-600">0 units</p><a href="#" class="text-red-600">Reorder Now →</a></div>
+            <div class="rounded-lg border-l-[3px] border-amber-500 bg-[#FFF9E8] p-3 text-xs">
+                <span class="rounded-full bg-white px-2 py-0.5 text-[9px] text-amber-600">Low Stock</span>
+                <p class="mt-2 font-bold">Crocin 500mg Tablet</p>
+                <p class="text-[10px] text-slate-500">GSK Pharma · Pain Relief</p>
+                <p class="mt-2 text-[11px] font-semibold text-amber-600">12 strips remaining</p>
+                <a href="#" class="text-[10px] text-amber-600">Reorder Now →</a>
+            </div>
+            <div class="rounded-lg border-l-[3px] border-red-500 bg-[#FFEFF2] p-3 text-xs">
+                <span class="rounded-full bg-white px-2 py-0.5 text-[9px] text-red-600">Critical</span>
+                <p class="mt-2 font-bold">Metformin 500mg</p>
+                <p class="text-[10px] text-slate-500">Sun Pharma · Diabetes</p>
+                <p class="mt-2 text-[11px] font-semibold text-red-600">3 strips remaining</p>
+                <a href="#" class="text-[10px] text-red-600">Reorder Now →</a>
+            </div>
+            <div class="rounded-lg border-l-[3px] border-red-500 bg-[#FFEFF2] p-3 text-xs">
+                <span class="rounded-full bg-white px-2 py-0.5 text-[9px] text-red-600">Out of Stock</span>
+                <p class="mt-2 font-bold">Insulin Glargine 100IU</p>
+                <p class="text-[10px] text-slate-500">Sanofi · Diabetes</p>
+                <p class="mt-2 text-[11px] font-semibold text-red-600">0 units</p>
+                <a href="#" class="text-[10px] text-red-600">Reorder Now →</a>
+            </div>
         </div>
     </div>
 
-    <!-- Order Requests -->
-    <div class="overflow-hidden rounded-[10px] border border-[#E8EEF2] bg-white">
-        <div class="flex items-center justify-between p-4">
+    <!-- 7. Order Requests -->
+    <div class="overflow-hidden rounded-[12px] border border-[#E8EEF2] bg-white">
+        <div class="flex items-center justify-between px-4 py-4">
             <p class="text-sm font-bold">Order Requests</p>
-            <a href="{% url 'orders' %}" class="text-xs text-[#1A73E8]">View All →</a>
+            <a href="{% url 'orders' %}" class="text-[11px] text-[#1A73E8]">View all →</a>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[980px] text-left text-[11px]">
-                <thead class="text-[10px] uppercase text-slate-500">
+            <table class="w-full min-w-[1020px] text-center text-[11px]">
+                <thead class="bg-[#0D8CFF] text-[10px] uppercase text-white">
                     <tr>
-                        <th class="px-4 py-2 font-medium">Customer</th><th class="px-4 py-2 font-medium">Medicines Requested</th><th class="px-4 py-2 font-medium">Date &amp; Time</th><th class="px-4 py-2 font-medium">Delivery</th><th class="px-4 py-2 font-medium">Prescription</th><th class="px-4 py-2 font-medium">Urgency</th><th class="px-4 py-2 font-medium">Budget</th><th class="px-4 py-2 font-medium">Timer</th><th class="px-4 py-2 font-medium">Actions</th>
+                        <th class="px-4 py-3 text-left font-medium">Customer</th>
+                        <th class="px-4 py-3 font-medium">Medicines Requested</th>
+                        <th class="px-4 py-3 font-medium">Date &amp; Time</th>
+                        <th class="px-4 py-3 font-medium">Delivery</th>
+                        <th class="px-4 py-3 font-medium">Prescription</th>
+                        <th class="px-4 py-3 font-medium">Urgency</th>
+                        <th class="px-4 py-3 font-medium">Budget</th>
+                        <th class="px-4 py-3 font-medium">Timer</th>
+                        <th class="px-4 py-3 font-medium">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-green-500">MS</span><div><p class="font-semibold text-slate-900">Monica Singh</p><p class="text-[10px] text-slate-500">Kidney Stone meds</p></div></div></td>
+                <tbody class="divide-y divide-[#EEF2F6]">
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500 text-[10px] font-semibold text-white">MS</span><div><p class="font-semibold text-slate-900">Monica Singh</p><p class="text-[9px] text-slate-500">Kidney Stone meds</p></div></div></td>
                         <td class="px-4 py-2.5 text-slate-500">Crocin 500mg × 3 + Vitamin C × 2</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 12:30 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹500</td>
-                        <td class="px-4 py-2.5"><span class="font-semibold text-red-600">18m left</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 12:30 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">12 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹500</td>
+                        <td class="px-4 py-2.5 font-semibold text-red-600">18m left</td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-amber-500">GS</span><div><p class="font-semibold text-slate-900">Gaurav Sharma</p><p class="text-[10px] text-slate-500">Diabetes</p></div></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-[10px] font-semibold text-white">GS</span><div><p class="font-semibold text-slate-900">Gaurav Sharma</p><p class="text-[9px] text-slate-500">Diabetes</p></div></div></td>
                         <td class="px-4 py-2.5 text-slate-500">Metformin 500mg × 1 + Pantop 40mg × 1</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 01:00 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹280</td>
-                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">21m left</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 01:00 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">3.2 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹280</td>
+                        <td class="px-4 py-2.5 font-semibold text-green-600">21m left</td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-[#1A73E8]">PS</span><div><p class="font-semibold text-slate-900">Priya Sharma</p><p class="text-[10px] text-slate-500">Antibiotic</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Amoxicillin 500mg × 2 + Azithromycin</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 01:30 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Emergency</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹420</td>
-                        <td class="px-4 py-2.5"><span class="font-semibold text-red-600">8m left</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1A73E8] text-[10px] font-semibold text-white">PS</span><div><p class="font-semibold text-slate-900">Priya Sharma</p><p class="text-[9px] text-slate-500">Antibiotic</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Amoxicillin 500mg × 2 + Azithromycin × 1</td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 01:30 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">3.2 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Emergency</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹420</td>
+                        <td class="px-4 py-2.5 font-semibold text-red-600">8m left</td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-violet-600">RK</span><div><p class="font-semibold text-slate-900">Rajan Mehta</p><p class="text-[10px] text-slate-500">Cardiac meds</p></div></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-[10px] font-semibold text-white">RK</span><div><p class="font-semibold text-slate-900">Rajan Mehta</p><p class="text-[9px] text-slate-500">Cardiac meds</p></div></div></td>
                         <td class="px-4 py-2.5 text-slate-500">Atorva 10mg × 1 + Ecosprin 75mg × 1</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 02:00 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-100 px-2 py-0.5 text-[#1A73E8]">Store Pickup</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹180</td>
-                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">34m left</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 02:00 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-[#1A73E8]">Store Pickup</p><p class="text-[9px] text-slate-500">1.1 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹180</td>
+                        <td class="px-4 py-2.5 font-semibold text-green-600">34m left</td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-teal-600">AN</span><div><p class="font-semibold text-slate-900">Anil Kumar</p><p class="text-[10px] text-slate-500">Pain relief</p></div></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-600 text-[10px] font-semibold text-white">AN</span><div><p class="font-semibold text-slate-900">Anil Kumar</p><p class="text-[9px] text-slate-500">Pain relief</p></div></div></td>
                         <td class="px-4 py-2.5 text-slate-500">Combiflam × 2 + Volini Gel × 1</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 02:30 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹120</td>
-                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">47m left</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 02:30 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">2.4 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹120</td>
+                        <td class="px-4 py-2.5 font-semibold text-green-600">47m left</td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-pink-600">DS</span><div><p class="font-semibold text-slate-900">Deepa Shah</p><p class="text-[10px] text-slate-500">Vitamins</p></div></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pink-600 text-[10px] font-semibold text-white">DS</span><div><p class="font-semibold text-slate-900">Deepa Shah</p><p class="text-[9px] text-slate-500">Vitamins</p></div></div></td>
                         <td class="px-4 py-2.5 text-slate-500">Vitamin D3 60K × 4 + Calcium × 1</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 03:00 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹320</td>
-                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">1h 2m</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 03:00 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">4.0 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹320</td>
+                        <td class="px-4 py-2.5 font-semibold text-green-600">1h 2m</td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-slate-500">VM</span><div><p class="font-semibold text-slate-900">Vijay Mehta</p><p class="text-[10px] text-slate-500">BP medicines</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Amlodipine 5mg × 1 + Losartan 50mg</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 03:30 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-100 px-2 py-0.5 text-[#1A73E8]">Store Pickup</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹200</td>
-                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">1h 18m</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-500 text-[10px] font-semibold text-white">VM</span><div><p class="font-semibold text-slate-900">Vijay Mehta</p><p class="text-[9px] text-slate-500">BP medicines</p></div></div></td>
+                        <td class="px-4 py-2.5 text-slate-500">Amlodipine 5mg × 1 + Losartan 50mg × 1</td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 03:30 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-[#1A73E8]">Store Pickup</p><p class="text-[9px] text-slate-500">0.8 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹200</td>
+                        <td class="px-4 py-2.5 font-semibold text-green-600">1h 18m</td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-amber-500">KN</span><div><p class="font-semibold text-slate-900">Kavitha Nair</p><p class="text-[10px] text-slate-500">Allergy</p></div></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-[10px] font-semibold text-white">KN</span><div><p class="font-semibold text-slate-900">Kavitha Nair</p><p class="text-[9px] text-slate-500">Allergy</p></div></div></td>
                         <td class="px-4 py-2.5 text-slate-500">Cetirizine 10mg × 2 + Montair LC × 1</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 04:00 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹140</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-50 px-2 py-0.5 text-[#1A73E8]">Bid Sent</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-slate-300 px-3 py-1 text-slate-500">View Bid</button></div></td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 04:00 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">5.1 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹140</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-[#1A73E8]">Bid Sent</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-slate-300 px-3 py-1 text-slate-500">View Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-green-500">SP</span><div><p class="font-semibold text-slate-900">Sneha Patil</p><p class="text-[10px] text-slate-500">Gastro</p></div></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500 text-[10px] font-semibold text-white">SP</span><div><p class="font-semibold text-slate-900">Sneha Patil</p><p class="text-[9px] text-slate-500">Gastro</p></div></div></td>
                         <td class="px-4 py-2.5 text-slate-500">Pantoprazole 40mg × 1 + Cremaffin × 1</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 04:30 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹180</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-50 px-2 py-0.5 text-[#1A73E8]">Bid Sent</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-slate-300 px-3 py-1 text-slate-500">View Bid</button></div></td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 04:30 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">2.9 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹180</td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-[#1A73E8]">Bid Sent</span></td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-slate-300 px-3 py-1 text-slate-500">View Bid</button></div></td>
                     </tr>
-                    <tr class="border-t border-[#E8EEF2]">
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white bg-red-600">AR</span><div><p class="font-semibold text-slate-900">Anjali Rao</p><p class="text-[10px] text-slate-500">Post-surgical</p></div></div></td>
+                    <tr>
+                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-600 text-[10px] font-semibold text-white">AR</span><div><p class="font-semibold text-slate-900">Anjali Rao</p><p class="text-[9px] text-slate-500">Post-surgical</p></div></div></td>
                         <td class="px-4 py-2.5 text-slate-500">Augmentin 625mg × 2 + Dolo 650 × 1</td>
-                        <td class="px-4 py-2.5 font-medium text-slate-900 whitespace-nowrap">22/07 05:00 PM</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-green-100 px-2 py-0.5 text-green-600">Home Delivery</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-semibold text-[#1A73E8]">₹380</td>
-                        <td class="px-4 py-2.5"><span class="font-semibold text-green-600">2d left</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 05:00 PM</td>
+                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">6.3 km</p></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
+                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Emergency</span></td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹380</td>
+                        <td class="px-4 py-2.5 font-semibold text-green-600">2d left</td>
+                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Market Trends -->
-    <div class="flex flex-col gap-2 rounded-[10px] border border-[#E8EEF2] bg-white p-4">
+    <!-- 8. Market Trends -->
+    <div class="flex flex-col gap-3 rounded-[12px] border border-[#E8EEF2] bg-white p-4">
         <div class="flex items-center justify-between">
-            <p class="text-xs font-bold">📊 Market Trends — Pharmacy Insights</p>
-            <a href="#" class="text-xs font-medium text-[#1A73E8]">₹200 →</a>
+            <p class="flex items-center gap-2 text-xs font-bold"><span class="material-symbols-outlined !text-base text-[#1A73E8]">bar_chart</span>Market Trends — Pharmacy Insights</p>
+            <a href="#" class="text-[11px] font-medium text-[#1A73E8]">₹200 →</a>
         </div>
-        <ul class="flex flex-col gap-1.5 text-[11px] text-slate-600">
-            <li>✅ Top requested medicines in your area: <b class="text-slate-900">Crocin 500mg · Metformin 500mg · Vitamin D3</b></li>
-            <li>✅ Avg winning bid by Pharmacy: <b class="text-slate-900">₹320 per medicine order</b></li>
-            <li>✅ Most popular delivery mode this week: <b class="text-slate-900">Home Delivery (+24%)</b></li>
+        <ul class="flex flex-col gap-2 text-[11px] text-slate-600">
+            <li class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-green-600">check_circle</span><span>Top requested medicines in your area: <b class="text-slate-900">Crocin 500mg · Metformin 500mg · Vitamin D3</b></span></li>
+            <li class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-green-600">check_circle</span><span>Avg winning bid by Pharmacy: <b class="text-slate-900">₹320 per medicine order</b></span></li>
+            <li class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-green-600">check_circle</span><span>Most popular delivery mode this week: <b class="text-slate-900">Home Delivery (+24%)</b></span></li>
         </ul>
-        <button class="mt-1 w-full rounded-md bg-[#1A73E8] py-2.5 text-xs font-bold text-white">View Full Insights Report →</button>
+        <button class="w-full rounded-md bg-[#1A73E8] py-2.5 text-xs font-bold text-white">View Full Insights Report →</button>
     </div>
 
     <!-- Order Details Popup (logic/IDs unchanged) -->

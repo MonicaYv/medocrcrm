@@ -242,7 +242,7 @@ $(document).on('click', '.points-chart-custom', function () {
       yearRange: '2000:2035',
       firstDay: 0,
       dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-      monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      monthNamesShort: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       beforeShowDay: function (date) {
         const dateText = $.datepicker.formatDate("yy-mm-dd", date);
         const classes = [];
@@ -574,7 +574,7 @@ function truncateDescriptions() {
     $picker.datepicker('option', 'yearRange', '2000:2035');
     $picker.datepicker('option', 'firstDay', 0);
     $picker.datepicker('option', 'dayNamesMin', ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']);
-    $picker.datepicker('option', 'monthNamesShort', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+    $picker.datepicker('option', 'monthNamesShort', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
     $picker.datepicker('option', 'beforeShowDay', function (date) {
       const dateText = $.datepicker.formatDate("yy-mm-dd", date);
       const classes = [];
@@ -709,7 +709,7 @@ window.loadPointsHistoryFilter = function(type) {
       yearRange: '2000:2035',
       firstDay: 0,
       dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-      monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      monthNamesShort: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       beforeShowDay: function (date) {
         const dateText = $.datepicker.formatDate("yy-mm-dd", date);
         const classes = [];
@@ -946,8 +946,12 @@ $(document).on("click", ".claim-btn", function (e) {
     if ($.fn.datepicker && $picker.length) {
       claimedDateRange = '';
       $picker.datepicker('option', 'dateFormat', 'yy-mm-dd');
+      $picker.datepicker('option', 'changeMonth', true);
+      $picker.datepicker('option', 'changeYear', true);
+      $picker.datepicker('option', 'yearRange', '2000:2035');
       $picker.datepicker('option', 'firstDay', 0);
       $picker.datepicker('option', 'dayNamesMin', ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']);
+      $picker.datepicker('option', 'monthNamesShort', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
       $picker.datepicker('option', 'beforeShowDay', function (date) {
         const dateText = $.datepicker.formatDate("yy-mm-dd", date);
         const classes = [];

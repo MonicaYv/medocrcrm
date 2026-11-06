@@ -55,7 +55,7 @@ def orders(request):
         .prefetch_related(
             Prefetch(
                 "medicines",
-                queryset=PurchaseMedicine.objects.defer("mongo_snapshot"),
+                queryset=PurchaseMedicine.objects.all(),
             ),
             "bids",
         )
@@ -97,6 +97,11 @@ def orders(request):
     page_obj = paginator.get_page(page_number)
     for order in page_obj.object_list:
         order.local_created_at = pharmacy_order_local_time(order.created_at)
+        for medicine in order.medicines.all():
+            snapshot = medicine.mongo_snapshot
+            medicine.display_image = ""
+            if isinstance(snapshot, dict):
+                medicine.display_image = snapshot.get("image_url") or snapshot.get("image") or ""
 
     context.update({
         "orders": page_obj,

@@ -19,8 +19,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" data-code="{{ coupon.code }}" data-coupon-id="{{ coupon.id }}" data-redeem-url="{% url 'pharmacy_coupon_redeem' %}" aria-label="Copy and redeem coupon {{ coupon.code }}"
-                                    {% if coupon.is_exhausted %}disabled{% endif %} class="copy-coupon pharmacy-coupon-redeem h-[48px] w-full bg-ocean-teal rounded-br-xl rounded-bl-xl flex items-center justify-center gap-2 {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}">
+                                <button type="button" data-code="{{ coupon.code }}" aria-label="Copy coupon code {{ coupon.code }}"
+                                    {% if coupon.is_exhausted %}disabled{% endif %} class="copy-coupon h-[48px] w-full bg-ocean-teal rounded-br-xl rounded-bl-xl flex items-center justify-center gap-2 {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}">
                                     <span class="font-semibold text-sm text-dodger-blue">{{ coupon.code }}</span>
                                     <span class="material-symbols-outlined text-dodger-blue">content_copy</span>
                                 </button>
@@ -115,9 +115,8 @@
                                         </div>
                                         <div class="pt-4">
                                             <button
-                                                class="copy-coupon pharmacy-coupon-redeem bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                                                class="copy-coupon bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
                                                 data-code="{{ coupon.code }}"
-                                                data-coupon-id="{{ coupon.id }}" data-redeem-url="{% url 'pharmacy_coupon_redeem' %}"
                                                 {% if coupon.is_exhausted %}disabled{% endif %}
                                                 aria-label="Copy coupon code {{ coupon.code }}">
                                                 {{ coupon.code }}
@@ -174,9 +173,8 @@
                                         <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
                                         <div class="pt-4">
                                             <button
-                                                class="copy-coupon pharmacy-coupon-redeem bg-dodger-blue h-10 w-full rounded-lg flex items-center justify-center gap-1 font-semibold text-sm text-white {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                                                class="copy-coupon bg-dodger-blue h-10 w-full rounded-lg flex items-center justify-center gap-1 font-semibold text-sm text-white {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
                                                 data-code="{{ coupon.code }}"
-                                                data-coupon-id="{{ coupon.id }}" data-redeem-url="{% url 'pharmacy_coupon_redeem' %}"
                                                 {% if coupon.is_exhausted %}disabled{% endif %}
                                                 aria-label="Copy coupon code {{ coupon.code }}">
                                                 {{ coupon.code }}

@@ -659,7 +659,8 @@
 <div class="flex flex-col lg:flex-row gap-4">
     <div class="pl-4 lg:w-1/4">
         <select name="countryCodes"
-                class="countryCodes border rounded px-3 py-2 w-full">
+                class="countryCodes border px-3 py-2 w-full"
+                data-selected="{{ country_code }}">
             {% for code in country_codes %}
                 <option value="{{ code.dial_code }}"
                     {% if code.dial_code == country_code %}selected{% endif %}>
@@ -823,7 +824,7 @@
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Country Code -->
                 <div class="pl-4 lg:w-1/4">
-                    <select name="contact_countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{country_code}}">
+                    <select name="contact_countryCodes" class="countryCodes border rounded px-3 py-2 w-full" data-selected="{{contact_phone_country_code}}">
                         {% for code in country_codes %}
                             <option value="{{ code.dial_code }}"
                                 {% if code.dial_code == country_code %}selected{% endif %}>
@@ -844,15 +845,16 @@
             <div class="flex items-center gap-2">
                 <div class="flex-1">
                     <button type="button" 
-                       class="send-otp-btn bg-living-coral text-white px-2 py-2.5 rounded w-full cursor-pointer">
+                       class="send-otp-btn send-contact-phone-otp-btn bg-living-coral text-white px-2 py-2.5 rounded w-full cursor-pointer">
                        Send Contact Phone OTP
                     </button>
                     <span class="text-primary-color text-sm mt-2">Didn't get the code ?
                         <span class="text-black">Resend</span></span>
                 </div>
                 <div class="flex-1">
-                    <input id="otp2" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
+                    <input name="contact_otp" type="text" class="border rounded px-2 py-2 w-full" placeholder="224584" maxlength="6" 
                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);"/>
+                    <button type="button" class="verify-contact-phone-otp-btn bg-living-coral text-white px-3 py-2 rounded mt-2 w-full cursor-pointer">Verify Contact Phone OTP</button>
                     <span class="error phoneError text-red-500 text-sm mt-1 hidden"></span>
                     <div class="otp-verification-status flex items-center gap-2 justify-end hidden">
                         <span class="material-symbols-outlined material-filled text-bright-green">check_box</span>

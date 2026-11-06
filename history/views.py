@@ -1,4 +1,5 @@
 from datetime import timedelta
+from collections import defaultdict
 import logging
 from django.conf import settings
 
@@ -6,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Prefetch, Q
+from django.db.models import Count, Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -26,10 +27,148 @@ from services.models import (
     LabBidding,
     LabBidStatus,
 )
+from pymongo.errors import PyMongoError
 from datetime import datetime, timedelta
 from django.utils import timezone
 
 # Create your views here.
+
+
+def get_hospital_bed_inventory(hospital, session_assignments=None):
+    if not hospital:
+        return [], [], ""
+
+    beds = list(
+        HospitalRoomRateCard.objects.filter(
+            hospital=hospital,
+            is_active=True,
+        ).select_related("bed_room").order_by("bed_room__name", "bed_no", "id")
+    )
+    saved_assignments = {}
+    beds_by_number = defaultdict(list)
+    for bed in beds:
+        beds_by_number[str(bed.bed_no)].append(bed)
+
+    ambiguous_assignment_number = [False]
+
+    def save_assignment(assignment):
+        if not isinstance(assignment, dict):
+            return
+
+        bed_id = assignment.get("bed_id")
+        if bed_id:
+            saved_assignments.setdefault(str(bed_id), assignment)
+
+        bed_no = assignment.get("bed_no")
+        if not bed_no:
+            return
+
+        room_id = assignment.get("bed_room_id")
+        if room_id:
+            saved_assignments.setdefault(f"no_{room_id}_{bed_no}", assignment)
+        elif len(beds_by_number[str(bed_no)]) == 1:
+            saved_assignments.setdefault(f"no_{bed_no}", assignment)
+        else:
+            ambiguous_assignment_number[0] = True
+
+    assignment_database_available = False
+    mongo_db = getattr(settings, "MONGO_DB", None)
+    if mongo_db is not None:
+        try:
+            assignments = mongo_db["hospital_bed_assignments"].find(
+                {
+                    "hospital_id": hospital.id,
+                    "status": "Occupied",
+                },
+                {
+                    "bed_id": 1,
+                    "bed_no": 1,
+                    "bed_room_id": 1,
+                    "patient_name": 1,
+                    "disease": 1,
+                },
+            )
+            for assignment in assignments:
+                save_assignment(assignment)
+            assignment_database_available = True
+        except PyMongoError:
+            logger.exception(
+                "Unable to load hospital bed assignments for hospital %s",
+                hospital.id,
+            )
+
+    if isinstance(session_assignments, dict):
+        for assignment in session_assignments.values():
+            if (
+                isinstance(assignment, dict)
+                and assignment.get("status") == "Occupied"
+            ):
+                save_assignment(assignment)
+
+    appointment_counts = dict(
+        HospitalAppointments.objects.filter(
+            accepted_hospital=hospital,
+            status=HospitalAppointmentStatus.ACCEPTED,
+            bed_room__isnull=False,
+        )
+        .values("bed_room_id")
+        .annotate(total=Count("id"))
+        .values_list("bed_room_id", "total")
+    )
+    grouped_beds = defaultdict(list)
+    for bed in beds:
+        assignment = (
+            saved_assignments.get(str(bed.id))
+            or saved_assignments.get(f"no_{bed.bed_room_id}_{bed.bed_no}")
+            or (
+                saved_assignments.get(f"no_{bed.bed_no}")
+                if len(beds_by_number[str(bed.bed_no)]) == 1
+                else None
+            )
+        )
+        bed.assignment = assignment
+        bed.is_occupied = bool(assignment)
+        bed.assigned_patient = assignment.get("patient_name", "") if assignment else ""
+        bed.assigned_disease = assignment.get("disease", "") if assignment else ""
+        grouped_beds[bed.bed_room_id].append(bed)
+
+    room_summaries = []
+    for bed_room_id, room_beds in grouped_beds.items():
+        booked_count = appointment_counts.get(bed_room_id, 0)
+        occupied_count = min(
+            len(room_beds),
+            max(sum(bed.is_occupied for bed in room_beds), booked_count),
+        )
+        remaining_to_mark = occupied_count - sum(
+            bed.is_occupied for bed in room_beds
+        )
+        for bed in room_beds:
+            if remaining_to_mark and not bed.is_occupied:
+                bed.is_occupied = True
+                remaining_to_mark -= 1
+
+        room = room_beds[0].bed_room
+        room_summaries.append({
+            "name": room.name,
+            "total": len(room_beds),
+            "occupied": occupied_count,
+            "available": len(room_beds) - occupied_count,
+        })
+
+    room_summaries.sort(key=lambda room: room["name"].lower())
+    warnings = []
+    if not assignment_database_available:
+        warnings.append(
+            "Manual assignment data may be unavailable; occupancy also includes "
+            "confirmed appointments."
+        )
+    if ambiguous_assignment_number[0]:
+        warnings.append(
+            "Some manual assignments could not be matched because bed numbers "
+            "are shared across room types."
+        )
+    return beds, room_summaries, " ".join(warnings)
+
 
 @dashboard_login_required
 def history(request):
@@ -90,54 +229,14 @@ def history(request):
             user=user
         ).first()
 
-        bed_inventory = HospitalRoomRateCard.objects.filter(
-            hospital=hospital,
-            is_active=True,
-        ).select_related(
-            "bed_room"
+        bed_inventory, _, bed_inventory_warning = get_hospital_bed_inventory(
+            hospital,
+            request.session.get("hospital_bed_assignments", {}),
         )
-
-        occupied_bed_room_ids = set(
-            HospitalAppointments.objects.filter(
-                accepted_hospital=hospital,
-                status=HospitalAppointmentStatus.ACCEPTED,
-                bed_room__isnull=False,
-            ).values_list("bed_room_id", flat=True)
-        )
-        saved_assignments = {}
-        try:
-            if hasattr(settings, "MONGO_DB") and settings.MONGO_DB is not None and hospital:
-                cursor = settings.MONGO_DB["hospital_bed_assignments"].find({
-                    "hospital_id": hospital.id,
-                    "status": "Occupied",
-                })
-                for doc in cursor:
-                    if doc.get("bed_id"):
-                        saved_assignments[str(doc["bed_id"])] = doc
-                    if doc.get("bed_no"):
-                        saved_assignments[f"no_{doc['bed_no']}"] = doc
-        except Exception as e:
-            logger.error(f"Error fetching saved bed assignments: {e}")
-
-        session_assignments = request.session.get("hospital_bed_assignments", {})
-        if isinstance(session_assignments, dict):
-            for k, v in session_assignments.items():
-                if k not in saved_assignments and v.get("status") == "Occupied":
-                    saved_assignments[k] = v
-
-        for bed in bed_inventory:
-            assignment = saved_assignments.get(str(bed.id)) or saved_assignments.get(f"no_{bed.bed_no}")
-            if assignment:
-                bed.is_occupied = True
-                bed.assigned_patient = assignment.get("patient_name", "")
-                bed.assigned_disease = assignment.get("disease", "")
-            else:
-                bed.is_occupied = bed.bed_room_id in occupied_bed_room_ids
-                bed.assigned_patient = ""
-                bed.assigned_disease = ""
 
         context.update({
-            "bed_inventory": bed_inventory
+            "bed_inventory": bed_inventory,
+            "bed_inventory_warning": bed_inventory_warning,
         })
 
         return render(

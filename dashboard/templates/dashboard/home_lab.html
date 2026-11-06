@@ -4,969 +4,691 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-      <!--Main Content-->
-
-      <div id="pharmacy-page-skeleton" class="flex flex-col gap-5 p-6 animate-pulse" aria-hidden="true">
-      <style>
-        #pharmacy-page-skeleton {
-          display: none !important;
-        }
-      </style>
-    <div class="bg-white rounded-[10px] p-5 space-y-6">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div class="space-y-3">
-                <div class="h-5 w-24 rounded bg-gray-200"></div>
-                <div class="h-4 w-36 rounded bg-gray-200"></div>
-            </div>
-            <div class="space-y-3 sm:w-48">
-                <div class="h-4 w-32 rounded bg-gray-200 sm:ml-auto"></div>
-                <div class="h-4 w-28 rounded bg-gray-200 sm:ml-auto"></div>
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-3 lg:flex-row ml-3">
-            <div class="h-[330px] w-full rounded-lg bg-gray-200 lg:w-[80%]"></div>
-            <div class="h-[330px] w-full rounded-lg bg-gray-200 lg:w-[20%]"></div>
-        </div>
-
-        <div class="ml-3 space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-28 rounded bg-gray-200"></div>
-                <div class="h-8 w-8 rounded bg-gray-200"></div>
-            </div>
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <div class="h-32 rounded-lg bg-gray-200"></div>
-                <div class="h-32 rounded-lg bg-gray-200"></div>
-                <div class="h-32 rounded-lg bg-gray-200"></div>
-            </div>
-        </div>
-
-        <div class="ml-3 space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-40 rounded bg-gray-200"></div>
-                <div class="h-4 w-16 rounded bg-gray-200"></div>
-            </div>
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-            </div>
-        </div>
-
-        <div class="ml-3 h-44 rounded-lg bg-gray-200"></div>
-        <div class="ml-3 space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-36 rounded bg-gray-200"></div>
-                <div class="h-4 w-16 rounded bg-gray-200"></div>
-            </div>
-            <div class="h-28 rounded-md bg-gray-200"></div>
-        </div>
-    </div>
+<!-- Page skeleton (kept hidden, same as before) -->
+<div id="pharmacy-page-skeleton" class="flex flex-col gap-5 p-6 animate-pulse" aria-hidden="true">
+  <style>#pharmacy-page-skeleton{display:none!important;}</style>
+  <div class="bg-white rounded-[10px] p-5 space-y-6">
+    <div class="h-5 w-24 rounded bg-gray-200"></div>
+    <div class="flex gap-3"><div class="h-[200px] w-[70%] rounded-lg bg-gray-200"></div><div class="h-[200px] w-[30%] rounded-lg bg-gray-200"></div></div>
+    <div class="grid grid-cols-5 gap-4"><div class="h-24 rounded-lg bg-gray-200"></div><div class="h-24 rounded-lg bg-gray-200"></div><div class="h-24 rounded-lg bg-gray-200"></div><div class="h-24 rounded-lg bg-gray-200"></div><div class="h-24 rounded-lg bg-gray-200"></div></div>
+  </div>
 </div>
-      <div
-        class=" relative transition-all duration-300   main-content h-full flex-1 flex flex-col  p-6 overflow-y-auto scroll">
-        <div
-          class="show-sidebar-toggle hidden fixed top-24 left-0 z-50 h-10 w-10 bg-light-sky-blue-tint items-center justify-center rounded-r-md cursor-pointer">
-          <span class="material-symbols-outlined bold-weight text-dodger-blue">
-            arrow_forward_ios
-          </span>
+
+<!--Main Content-->
+<div class="relative transition-all duration-300 main-content h-full flex-1 flex flex-col p-6 overflow-y-auto scroll bg-[#F8FAFD]">
+
+  <div class="show-sidebar-toggle hidden fixed top-24 left-0 z-50 h-10 w-10 bg-light-sky-blue-tint items-center justify-center rounded-r-md cursor-pointer">
+    <span class="material-symbols-outlined bold-weight text-dodger-blue">arrow_forward_ios</span>
+  </div>
+
+  <div class="flex flex-col gap-5 max-w-[1440px] w-full mx-auto">
+
+    <!-- ===== Page header ===== -->
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined !text-[22px] text-[#111827]">home</span>
+          <h1 class="text-[22px] font-semibold text-[#111827] leading-none">Home</h1>
         </div>
-        <div class="bg-white px-2 sm:px-4 py-4">
-          <div class="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-col  gap-2">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined">home</span>
-                <h1 class="text-xl font-medium">Home</h1>
+        <p id="date" class="text-[11px] font-normal text-[#8A94A6] mt-3">{% now "l, d F Y" %}</p>
+        <p class="text-[11px] font-normal text-[#8A94A6] mt-1">Welcome back, {{ contact_person.name|default:"there"|truncatewords:1 }}.</p>
+      </div>
+
+      <div id="infoSection" class="flex items-center gap-4 text-[11px] text-[#4B5563]">
+        <div id="location" class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined !text-[14px]">location_on</span>
+          <span id="location-text">Fetching location...</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>Auto Bid</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="autobid-toggle" class="sr-only peer" aria-label="Enable Auto Bid">
+            <div class="w-8 h-[18px] rounded-full bg-[#D5DAE3] peer-checked:bg-[#2F6FED] transition-colors"></div>
+            <div class="absolute left-0.5 top-0.5 w-[14px] h-[14px] bg-white rounded-full shadow transition-transform peer-checked:translate-x-[14px]"></div>
+          </label>
+          <a href="#" class="text-[#2F6FED]">Configure</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Hero + Profile card ===== -->
+    <div class="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-4">
+
+      <!-- Hero -->
+      <div class="relative overflow-hidden rounded-2xl text-white p-6 min-h-[172px] flex flex-col justify-between bg-gradient-to-br from-[#1F7A7A] via-[#1A5666] to-[#131D3A]"
+           {% if lab_profile.lab_photo_path %}style="background-image:linear-gradient(135deg,rgba(31,122,122,.93),rgba(19,29,58,.96)),url('/document/{{ lab_profile.lab_photo_path }}');background-size:cover;background-position:center;"{% endif %}>
+        <div>
+          <span class="material-symbols-outlined !text-[18px] text-white/90">science</span>
+          <h2 class="text-[15px] font-semibold mt-2">{{ lab_profile.lab_name|default:"Your Lab Name" }}</h2>
+          <p class="text-[11px] text-white/80 mt-2">
+            {{ lab_profile.address|default:"Address not available" }}{% if lab_profile.city %}, {{ lab_profile.city }}{% endif %}{% if lab_profile.state %}, {{ lab_profile.state }}{% endif %}{% if lab_profile.pincode %} — {{ lab_profile.pincode }}{% endif %}
+          </p>
+          <p class="text-[10px] text-white/60 mt-1.5">Lab ID {{ lab_profile.lab_id|default:"—" }} &nbsp;·&nbsp; {{ lab_profile.services_summary|default:"Pathology & diagnostic services" }}</p>
+        </div>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mt-6">
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2.5 py-1 rounded-md bg-white/10 border border-white/15 text-[9px]">Home collection</span>
+            <span class="px-2.5 py-1 rounded-md bg-white/10 border border-white/15 text-[9px]">Lab visits</span>
+            <span class="px-2.5 py-1 rounded-md bg-white/10 border border-white/15 text-[9px]">Digital reports</span>
+          </div>
+          <div class="flex gap-2">
+            <a href="#" class="px-3.5 py-2 rounded-lg border border-white/60 text-[10px] leading-none hover:bg-white/10 transition">View Lab Profile</a>
+            <a href="#" class="px-3.5 py-2 rounded-lg border border-white/60 text-[10px] leading-none hover:bg-white/10 transition">Edit Profile</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile card -->
+      <div class="bg-white border border-[#E5ECF4] rounded-2xl p-5 flex flex-col">
+        <div class="flex items-start gap-3">
+          <div class="relative shrink-0">
+            <img id="admin-profile-photo"
+                 src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
+                 alt="Admin profile picture" class="w-11 h-11 rounded-xl object-cover bg-[#EAF0FB] border border-[#C9D8F5]">
+            <label for="admin-profile-photo-input" title="Change profile picture"
+                   class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#2F6FED] text-white flex items-center justify-center cursor-pointer shadow">
+              <span class="material-symbols-outlined !text-[12px]">edit</span>
+            </label>
+            <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
+                   data-upload-url="{% url 'upload_admin_profile_photo' %}">
+          </div>
+          <div class="min-w-0 leading-snug">
+            <p class="text-xs font-semibold text-[#111827] truncate">{{ lab_profile.lab_name|default:"Your Lab Name" }}</p>
+            <p class="text-[10px] text-[#8A94A6] mt-0.5">{{ contact_person.name|default:"N/A" }} · {{ contact_person.role|default:"Lab Administrator" }}</p>
+            <p class="text-[10px] text-[#8A94A6]">{{ user.phone_country_code|default:"+91" }} {{ lab_profile.contact_number|default:user.phone_number|default:"N/A" }}{% if lab_profile.lab_id %} · {{ lab_profile.lab_id }}{% endif %}</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5 mt-4">
+          {% for tag in lab_tags|default:"" %}
+            <span class="px-2 py-0.5 rounded-full bg-[#EAF0FB] text-[#2F6FED] text-[9px]">{{ tag }}</span>
+          {% empty %}
+            <span class="px-2 py-0.5 rounded-full bg-[#EAF0FB] text-[#2F6FED] text-[9px]">Pathology</span>
+            <span class="px-2 py-0.5 rounded-full bg-[#F1E9FD] text-[#8B3FE0] text-[9px]">Biochemistry</span>
+            <span class="px-2 py-0.5 rounded-full bg-[#E3F5EC] text-[#1F9D6B] text-[9px]">Haematology</span>
+          {% endfor %}
+        </div>
+
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-[#8A94A6] mt-4">
+          <span>Lab <b class="text-[#111827] font-semibold">{{ lab_profile.lab_hours|default:"7:00 AM–9:00 PM" }}</b></span>
+          <span>Home collection <b class="text-[#111827] font-semibold">{{ home_collection_hours|default:"7:00 AM–6:00 PM" }}</b></span>
+          <span class="px-2 py-0.5 rounded-md bg-[#E3F5EC] text-[#1F9D6B] text-[9px]">Open</span>
+        </div>
+
+        <div class="flex gap-5 text-[10px] text-[#2F6FED] mt-auto pt-4">
+          <a href="#">View Lab Profile →</a>
+          <a href="#">Manage hours →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== KPI strip ===== -->
+    <div class="bg-white border border-[#E5ECF4] rounded-2xl grid grid-cols-2 lg:grid-cols-5 divide-x divide-[#EEF1F6]">
+      <div class="px-5 py-4">
+        <p class="flex items-center gap-2 text-[10px] text-[#8A94A6]"><span class="material-symbols-outlined !text-[15px] text-[#2F6FED]">account_balance_wallet</span>Earnings This Month</p>
+        <p class="text-[22px] font-semibold text-[#111827] mt-2 leading-none">&#8377;{{ earnings_this_month|default:"0" }}</p>
+        <p class="text-[9px] text-[#8A94A6] mt-2">Recorded revenue · View details</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="flex items-center gap-2 text-[10px] text-[#8A94A6]"><span class="material-symbols-outlined !text-[15px] text-[#2F6FED]">sell</span>Active Bids</p>
+        <p class="text-[22px] font-semibold text-[#111827] mt-2 leading-none">{{ active_bids|default:0 }}</p>
+        <p class="text-[9px] text-[#8A94A6] mt-2">Awaiting customer response</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="flex items-center gap-2 text-[10px] text-[#8A94A6]"><span class="material-symbols-outlined !text-[15px] text-[#2F6FED]">event</span>Today's Orders</p>
+        <p id="lab-home-total-appointments" class="text-[22px] font-semibold text-[#111827] mt-2 leading-none">{{ today_appointments|default:0 }}</p>
+        <p class="text-[9px] text-[#8A94A6] mt-2"><span id="lab-home-confirmed-count">{{ confirmed_count|default:0 }}</span> confirmed · <span id="lab-home-pending-count">{{ pending_count|default:0 }}</span> pending</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="flex items-center gap-2 text-[10px] text-[#8A94A6]"><span class="material-symbols-outlined !text-[15px] text-[#2F6FED]">description</span>Reports Due Today</p>
+        <p class="text-[22px] font-semibold text-[#111827] mt-2 leading-none">{{ reports_due|length }}</p>
+        <p class="text-[9px] text-[#8A94A6] mt-2">Processing · review · ready</p>
+      </div>
+      <div class="px-5 py-4 col-span-2 lg:col-span-1">
+        <p class="flex items-center gap-2 text-[10px] text-[#8A94A6]"><span class="material-symbols-outlined !text-[15px] text-[#2F6FED]">schedule</span>Avg Bid Response</p>
+        <p class="text-[22px] font-semibold text-[#111827] mt-2 leading-none">{{ avg_bid_response|default:"—" }}</p>
+        <p class="text-[9px] text-[#8A94A6] mt-2">Based on answered bids</p>
+      </div>
+    </div>
+
+    <!-- ===== Overview ===== -->
+    <div class="flex flex-col gap-3">
+      <div class="flex justify-between items-center">
+        <p class="text-xs font-medium text-[#111827]">Overview</p>
+        <div class="flex items-center gap-2">
+          <p id="lab-home-filter-label" class="text-[10px] px-3 py-1.5 rounded-full bg-[#EAF0FB] text-[#2F6FED] font-normal leading-none"
+             data-endpoint="{% url 'lab_overview_data' %}">
+            {% if date_filter == "week" %}Last 7 Days
+            {% elif date_filter == "month" %}This Month
+            {% elif date_filter == "custom" and start_date and end_date %}{{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}
+            {% elif date_filter == "custom" %}Custom
+            {% else %}Today{% endif %}
+          </p>
+          <div class="relative dropdown">
+            <button id="lab-home-filter-toggle" type="button" aria-label="Open overview date filters" aria-expanded="false"
+                    class="filterToggle flex items-center justify-center border border-[#E5ECF4] bg-white rounded-full w-7 h-7 cursor-pointer">
+              <span class="material-symbols-outlined !text-[16px] text-[#8A94A6]">tune</span>
+            </button>
+            <div class="filterDropdown lab-home-filter absolute right-0 mt-1 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
+              <div data-filter="today" class="p-2 pl-4 hover:bg-pale-azure rounded cursor-pointer flex items-center gap-2 text-sm"><span class="material-symbols-outlined !text-lg text-dodger-blue">check</span>Today</div>
+              <div data-filter="week" class="p-2 pl-4 hover:bg-pale-azure rounded cursor-pointer flex items-center gap-2 text-sm"><span class="material-symbols-outlined !text-lg text-light-gray">check</span>Last 7 Days</div>
+              <div data-filter="month" class="p-2 pl-4 hover:bg-pale-azure rounded cursor-pointer flex items-center gap-2 text-sm"><span class="material-symbols-outlined !text-lg text-light-gray">check</span>This Month</div>
+              <div data-filter="custom" class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure rounded text-sm">
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined !text-lg text-light-gray">check</span>Custom</div>
+                <span class="material-symbols-outlined calendar-icon">calendar_today</span>
               </div>
-              <div id="date" class="font-normal text-base"></div>
             </div>
-            <div class="flex flex-col  gap-2 lg:items-center " id="infoSection">
-              <div class="flex flex-col gap-2">
-                <div id="location" class="font-normal text-base flex items-center gap-2">
-                  <span class="material-symbols-outlined !text-base"> location_on </span>
-                  <span id="location-text">Fetching location...</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <p>Auto Bid</p>
-
-                  <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
-                    <input
-                      type="checkbox"
-                      id="autobid-toggle"
-                      class="sr-only peer"
-                      aria-label="Enable Auto Bid"
-                    >
-
-                    <div
-                      class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5">
-                    </div>
-
-                    <div
-                      class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal">
-                    </div>
-                  </label>
-
-                  <div
-                    class="bg-gradient-to-r from-caribbean-green to-azure-radiance w-6 h-6 rounded-[7px] text-white text-xs flex items-center justify-center">
-                    Rx
-                  </div>
-                </div>
-              </div>
+            <div class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
+              <div class="datepicker-inline"></div>
             </div>
           </div>
-          <!--Hospital Image and Admin Details-->
-          <!-- <div class="flex flex-col lg:flex-row gap-2  pt-5 ml-3"> -->
-          <div class="flex flex-col lg:flex-row gap-2 pt-5 ml-3 w-full">
-            <!-- <div class="relative"> -->
-            <div class="relative w-full lg:w-[80%] h-[330px]">
-              <img src="{% if lab_profile.lab_photo_path %}/document/{{ lab_profile.lab_photo_path }}{% else %}/static/images/lab-bg.png{% endif %}" alt="Lab" class="w-[880px] h-[330px] object-cover rounded-lg">
-              <div class="absolute inset-0 flex items-end">
-                <div class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
-                  <div class="flex flex-col gap-2">
-                    <div class="flex items-center gap-2">
-                      <span class="material-symbols-outlined">home</span>
-                      <p class="text-base font-semibold">{{ lab_profile.lab_name|default:"Your Lab Name" }}</p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <p class="font-semibold text-sm">
-                        {{ lab_profile.address|default:"Address not available" }},
-                        {{ lab_profile.city|default:"" }},
-                        {{ lab_profile.state|default:"" }} –
-                        {{ lab_profile.pincode|default:"" }}
-                      </p>
-                      <div class="bg-pale-azure rounded-lg p-2 flex items-center justify-center">
-                        <span class="font-semibold text-xs text-dodger-blue">Active Bids: {{ active_bids }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="bg-pale-azure flex-1 h-[330px] px-4 py-2 rounded-lg">
-              <h1 class="text-center text-lg font-semibold">Admin Details</h1>
-              <div class="flex items-center justify-center py-[22.5px]">
-                <div class="relative">
-                  <img
-                    id="admin-profile-photo"
-                    src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
-                    alt="Admin profile picture"
-                    class="w-20 h-20 rounded-full object-cover">
-                  <label for="admin-profile-photo-input"
-                    class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-dodger-blue text-white flex items-center justify-center cursor-pointer shadow"
-                    title="Change profile picture">
-                    <span class="material-symbols-outlined !text-base">edit</span>
-                  </label>
-                  <input id="admin-profile-photo-input" type="file"
-                    accept="image/jpeg,image/png" class="hidden"
-                    data-upload-url="{% url 'upload_admin_profile_photo' %}">
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-2">
-                <!-- <p class="font-semibold text-sm">Jhon Doe</p> -->
-                <p class="font-semibold text-sm">
-                  {{ contact_person.name|default:"N/A" }}
-                </p>
+        </div>
+      </div>
 
-                <p class="font-semibold text-sm text-dodger-blue">
-                    {{ user.phone_country_code|default:"+91" }}
-                    {{ lab_profile.contact_number|default:user.phone_number|default:"N/A" }}
-                </p>
-
-                <p class="font-semibold text-sm">
-                  Designation:
-                  {{ contact_person.role|default:"N/A" }}
-                </p>
-                <!-- <p class="font-semibold text-sm text-dodger-blue">+91 7763847590</p>
-                <p class="font-semibold text-sm">Designation: Receptionist</p> -->
-              </div>
-            </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white border border-[#E5ECF4] rounded-2xl px-5 py-5 flex items-start gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#EAF0FB] text-[#2F6FED] flex items-center justify-center shrink-0"><span class="material-symbols-outlined !text-[18px]">local_shipping</span></div>
+          <div><p class="text-[10px] text-[#8A94A6]">Home Collections</p><p class="text-[22px] font-semibold text-[#111827] leading-none mt-2">{{ home_collections|default:0 }}</p><p class="text-[9px] text-[#8A94A6] mt-3">{{ total_technicians|default:0 }} collectors available today</p></div>
+        </div>
+        <div class="bg-white border border-[#E5ECF4] rounded-2xl px-5 py-5 flex items-start gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#E3F5EC] text-[#1F9D6B] flex items-center justify-center shrink-0"><span class="material-symbols-outlined !text-[18px]">location_on</span></div>
+          <div><p class="text-[10px] text-[#8A94A6]">Lab Visits</p><p class="text-[22px] font-semibold text-[#111827] leading-none mt-2">{{ lab_visits|default:0 }}</p><p class="text-[9px] text-[#8A94A6] mt-3">{{ lab_profile.city|default:"Your location" }} · {{ lab_profile.lab_hours|default:"7:00 AM–9:00 PM" }}</p></div>
+        </div>
+        <div class="bg-white border border-[#E5ECF4] rounded-2xl px-5 py-5 flex items-start gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#F1E9FD] text-[#8B3FE0] flex items-center justify-center shrink-0"><span class="material-symbols-outlined !text-[18px]">verified_user</span></div>
+          <div><p class="text-[10px] text-[#8A94A6]">Awaiting Review</p><p class="text-[22px] font-semibold text-[#111827] leading-none mt-2">{{ awaiting_review|default:0 }}</p><p class="text-[9px] text-[#8A94A6] mt-3">Reports requiring lab verification</p></div>
+        </div>
+        <div class="bg-white border border-[#E5ECF4] rounded-2xl px-5 py-5 flex items-start gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#FFF4D6] text-[#E8A317] flex items-center justify-center shrink-0"><span class="material-symbols-outlined !text-[18px]">star</span></div>
+          <div>
+            <p class="text-[10px] text-[#8A94A6]">Customer Rating</p>
+            <p class="text-[22px] font-semibold text-[#111827] leading-none mt-2">{{ customer_rating|default:"—" }}{% if customer_rating %}/5{% endif %}</p>
+            <p class="text-[9px] text-[#8A94A6] mt-3 flex items-center gap-1.5">
+              <span class="relative inline-block text-[#D9DEE8] tracking-widest leading-none">★★★★★<span class="absolute left-0 top-0 overflow-hidden whitespace-nowrap text-[#F5B731]" style="width: {% widthratio customer_rating 5 100 %}%">★★★★★</span></span>
+              <span>{{ review_count|default:0 }} sample reviews</span>
+            </p>
           </div>
+        </div>
+      </div>
+    </div>
 
-          <!--Overview-->
-          <div class="pt-5 flex flex-col ml-3">
-            <div class="flex justify-between items-center">
-              <p class="font-semibold text-lg">Overview</p>
-              <div class="flex items-center gap-2.5">
-                <p id="lab-home-filter-label" class="font-normal text-sm"
-                  data-endpoint="{% url 'lab_overview_data' %}">
-                    {% if date_filter == "week" %}Week
-                    {% elif date_filter == "month" %}Month
-                    {% elif date_filter == "custom" and start_date and end_date %}{{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}
-                    {% elif date_filter == "custom" %}Custom
-                    {% else %}Today{% endif %}
-                </p>
-                <div class="relative dropdown">
-                  <button
-                    id="lab-home-filter-toggle"
-                    class="filterToggle flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer"
-                    type="button" aria-label="Open overview date filters" aria-expanded="false">
-                    <span class="material-symbols-outlined flex justify-center items-center">tune</span>
-                  </button>
-                  <div
-                    class="filterDropdown lab-home-filter absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                    <div data-filter="today"
-                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                      <span class="material-symbols-outlined !text-lg text-dodger-blue">
-                        check
-                      </span>Today
-                    </div>
-                    <div data-filter="week"
-                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                      <span class="material-symbols-outlined !text-lg text-light-gray">
-                        check
-                      </span>Week
-                    </div>
-                    <div data-filter="month"
-                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                      <span class="material-symbols-outlined !text-lg text-light-gray">
-                        check
-                      </span>Month
-                    </div>
-                    <div data-filter="custom"
-                      class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray">
-                      <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined !text-lg text-light-gray">
-                          check
-                        </span>Custom
-                      </div>
-                      <span class="material-symbols-outlined calendar-icon">calendar_today</span>
-                    </div>
-                  </div>
-                  <div
-                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
-                    <div class="datepicker-inline"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-4">
-              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">Total Appointments</p>
-                  <!-- <p class="font-semibold text-2xl">12</p> -->
-                  <p id="lab-home-total-appointments" class="font-semibold text-2xl">
-                      {{ today_appointments }}
-                  </p>
-                  <p class="text-green font-normal text-xs"><span id="lab-home-confirmed-count">{{ confirmed_count }}</span> Confirmed, <span id="lab-home-pending-count">{{ pending_count }}</span> Pending</p>
-                </div>
-                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                  <img src="/static/images/book.svg" alt="">
-                </div>
-              </div>
+    <!-- ===== Attention banner ===== -->
+    <div class="flex flex-wrap items-center gap-3 rounded-xl border border-[#F6E3A6] bg-[#FFF9E6] px-4 py-3 text-[10px]">
+      <span class="material-symbols-outlined !text-[16px] text-[#C98A00]">warning</span>
+      <span class="font-semibold text-[#111827]">{{ pending_count|default:0 }} items need attention</span>
+      <span class="px-2.5 py-1 rounded-full bg-[#FFE1E6] text-[#D6455D] leading-none">{{ pending_count|default:0 }} requests expire within 15 min</span>
+      <span class="text-[#B7791F]">{{ awaiting_review|default:0 }} report awaiting lab verification</span>
+      <a href="{% url 'appointment' %}" class="ml-auto text-[#2F6FED]">Review →</a>
+    </div>
 
-              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">Total Technician Registered</p>
-                  <!-- <p class="font-semibold text-2xl">24</p> -->
-                  <p class="font-semibold text-2xl">
-                      {{ total_technicians }}
-                  </p>
-                  <p class="font-normal text-xs"><span class="text-dodger-blue">Day Shift: 16</span> | <span
-                      class="text-electric-indigo">Night Shift: 8</span> </p>
-                </div>
-                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                  <img src="/static/images/user-community.svg" alt="">
-                </div>
-              </div>
+    <!-- ===== Schedule + Weekly performance ===== -->
+    <div class="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-4">
 
-              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">Most Requested Test</p>
-                  <!-- <p class="font-semibold text-2xl">20</p> -->
-                  <p class="font-semibold text-2xl">
-                    {{ most_requested_count }}
-                  </p>
-                  <!-- <p class="text-nautical-blue font-normal text-xs"></p> -->
-                  <p class="text-nautical-blue font-normal text-xs">
-                      {{ most_requested_test }}
-                  </p>
-                </div>
-                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                  <img src="/static/images/user-group.svg" alt="">
-                </div>
-              </div>
-            </div>
+      <!-- Today's Schedule -->
+      <div class="bg-white border border-[#E5ECF4] rounded-2xl px-6 pt-6 pb-5 flex flex-col">
+        <div class="flex justify-between items-start">
+          <div>
+            <h2 class="text-[15px] font-medium text-[#111827] leading-tight">Today’s Schedule</h2>
+            <p class="text-[11px] font-normal text-[#8A94A6] mt-2">{% now "d M Y" %} · {{ today_appointments|default:0 }} orders</p>
           </div>
+          <a href="{% url 'history' %}" class="text-[11px] font-normal text-[#2F6FED]">View All Orders →</a>
+        </div>
 
-          <!--Scheduled Appointments-->
-          <!-- <div class="pt-5 flex flex-col ml-3">
-            <div class="flex justify-between items-center">
-              <p class="font-semibold text-lg">Scheduled Appointments</p>
-              <a href="#" class="text-dodger-blue text-sm font-normal">View all</a>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 pt-4 gap-2">
-              <div class=" border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
-                <div>
-                  <img src="/static/images/patient-1.svg" alt="Patient Profile">
-                </div>
-                <div class="flex flex-col gap-2">
-                  <div class="w-[110px] h-[30px] rounded-lg p-2 bg-peach text-burnt-orange font-semibold text-xs">
-                    <p class="text-nowrap">Home Collection</p>
-                  </div>
-                  <p class="font-semibold text-sm">Pt. Rachel Kate</p>
-                  <p class="font-normal text-sm text-green">22/07/2025, 10:30 AM</p>
-                  <p class="font-semibold text-sm">To be attended by Mr. Smith</p>
-                </div>
-              </div>
+        <div class="hs-tabs flex justify-start gap-5 mt-6 border-b border-[#E5ECF4] flex-wrap" data-row=".sched-row" data-empty="#sched-empty">
+          <span data-filter="all" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-medium border-b-2 border-[#2F6FED] text-[#2F6FED]">All <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+          <span data-filter="scheduled" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-normal border-b-2 border-transparent text-[#8A94A6]">Scheduled <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+          <span data-filter="sample" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-normal border-b-2 border-transparent text-[#8A94A6]">Sample Collected <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+          <span data-filter="processing" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-normal border-b-2 border-transparent text-[#8A94A6]">Processing <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+          <span data-filter="completed" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-normal border-b-2 border-transparent text-[#8A94A6]">Completed <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+        </div>
 
-              <div class=" border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
-                <div>
-                  <img src="/static/images/patient-2.svg" alt="Patient Profile">
-                </div>
-                <div class="flex flex-col gap-2">
-                  <div class="w-[89px] h-[30px] rounded-lg p-2 bg-pale-azure text-dodger-blue font-semibold text-xs">
-                    <p>Lab Walk-in</p>
-                  </div>
-                  <p class="font-semibold text-sm">Pt. Karen cooper</p>
-                  <p class="font-normal text-sm text-green">22/07/2025, 11:30 AM</p>
-                  <p class="font-semibold text-sm">To be attended by Mr. Smith</p>
-                </div>
-              </div>
-
-              <div class=" border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
-                <div>
-                  <img src="/static/images/patient-3.svg" alt="Patient Profile">
-                </div>
-                <div class="flex flex-col gap-2">
-                  <div class="w-[89px] h-[30px] rounded-lg p-2 bg-pale-azure text-dodger-blue font-semibold text-xs">
-                    <p>Lab Walk-in</p>
-                  </div>
-                  <p class="font-semibold text-sm">Pt. Josh Kerr</p>
-                  <p class="font-normal text-sm text-green">22/07/2025, 11:30 AM</p>
-                  <p class="font-semibold text-sm">To be attended by Mr. Kate</p>
-                </div>
-              </div>
-            </div>
-          </div> -->
-          <div class="pt-5 flex flex-col ml-3">
-
-            <div class="flex justify-between items-center">
-              <p class="font-semibold text-lg">Scheduled Appointments</p>
-              <a href="{% url 'history' %}" class="text-dodger-blue text-sm font-normal">View all</a>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 pt-4 gap-2">
-            
-
+        <div id="schedule-list" class="divide-y divide-[#E5ECF4] flex-1">
           {% for appointment in scheduled_appointments %}
-
-          <!-- <div class="border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4"> -->
-          <div class="border border-snow rounded-xl bg-white shadow-sm p-3 flex items-center gap-3">
-            <div>
-              <!-- <img src="/static/images/patient-1.svg" alt="Patient Profile"> -->
-               <!-- {% if forloop.counter == 1 %}
-               <img src="/static/images/patient-4.svg"
-                  class="w-20 h-20 rounded-lg object-cover">
-
-               {% elif forloop.counter == 2 %}
-               <img src="/static/images/patient-7.svg"
-                    class="w-20 h-20 rounded-lg object-cover">
-
-               {% else %}
-               <img src="/static/images/admin-profile.svg"
-                  class="w-20 h-20 rounded-lg object-cover">
-               {% endif %} -->
-               {% if appointment.user.userprofile.profile_photo_path %}
-                <img
-              
-                  src="/media/{{ appointment.user.userprofile.profile_photo_path }}"
-                  onerror="this.onerror=null;this.src='/static/images/patient-4.svg';"
-                  class="w-20 h-20 rounded-lg object-cover">
-                {% else %}
-                <img
-                  src="/static/images/patient-4.svg"
-                  class="w-20 h-20 rounded-lg object-cover">
-                {% endif %}
+          <div class="sched-row flex items-center py-4" data-status="{{ appointment.status|default:'scheduled'|lower }}">
+            <div class="w-[106px] shrink-0 text-[11px] font-normal text-[#8A94A6] leading-5">
+              <span class="block text-[#8A94A6]">{{ appointment.preferred_date_time|date:"h:i A" }}</span>
+              <span class="block text-[#8A94A6]">{% if appointment.order_id %}{{ appointment.order_id }}{% else %}LAB-{{ appointment.id }}{% endif %}</span>
             </div>
-
-            <!-- <div class="flex flex-col gap-2"> -->
-
-              <!-- <div class="w-[110px] h-[30px] rounded-lg p-2 bg-pale-azure text-dodger-blue font-semibold text-xs"> -->
-                   <!-- {% if appointment.service_type == "Home Collection" %}
-
-                   <div class="px-2 py-1 rounded bg-orange-100 text-orange-500 text-xs font-semibold inline-block">
-
-                   {% else %}
-
-                   <div class="px-2 py-1 rounded bg-blue-100 text-blue-500 text-xs font-semibold inline-block">
-
-                   {% endif %}
-
-                   {{ appointment.service_type }}
-
-                   </div>
-                <p> -->
-                    <!-- {% if appointment.collection_type %}
-                      {{ appointment.collection_type }}
-                    {% else %}
-                      Appointment
-                   {% endif %} -->
-                    <!-- {% if appointment.service_type %}
-                      {{ appointment.service_type }}
-                    {% else %}
-                      Lab Walk-in
-                    {% endif %}
-                </p>
-               </div> -->
-               <div class="flex flex-col gap-2">
-
-                <!-- {% if appointment.service_type == "Home Collection" %} -->
-                
-                <!-- <div class="px-2 py-1 rounded bg-orange-100 text-orange-500 text-[10px] font-semibold"> -->
-                <!-- <div class="inline-block w-fit px-2 py-1 rounded bg-orange-100 text-orange-500 text-[10px] font-semibold">
-                  Home Collection
-                </div>
-
-                {% else %}
-                <div class="inline-block w-fit px-2 py-1 rounded bg-blue-100 text-blue-500 text-[10px] font-semibold">
-                  Lab Walk-in
-                </div>
-  
-                {% endif %} -->
-                <div class="inline-block w-fit px-2 py-1 rounded bg-blue-100 text-blue-500 text-[10px] font-semibold">
-                    {{ appointment.service_type }} 
-                </div>
-                <!-- <p class="font-semibold text-xs">
-                  Pt. {{ appointment.user.first_name }}
-                  {{ appointment.user.last_name }}
-                </p> -->
-                <p class="font-semibold text-xs">
-                  Pt. {{ appointment.user.userprofile.first_name }}
-                  {{ appointment.user.userprofile.last_name }}
-                </p>
-
-                  <p class="text-green-500 text-xs">
-                    {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
-                  </p>
-
-                  <p class="text-xs font-semibold">
-                    To be attended by Technician
-                  </p>
-
-                </div>
-         </div>
-
-      {% empty %}
-
-      <div class="col-span-3 text-center py-6">
-        No Scheduled Appointments Found
-      </div>
-
-     {% endfor %}
-
-     </div>
-
-           
-
-
-          <!--Appointment Requests-->
-          <div class="mt-6">
-
-              <!-- Header -->
-              <div class="flex items-center justify-between mb-4">
-                  <h2 class="text-lg font-semibold">
-                      Appointment Requests
-                  </h2>
-
-                  <a href="{% url 'appointment' %}" class="text-dodger-blue text-sm font-medium">
-                      View All
-                  </a>
-              </div>
-
-              {% for appointment in appointment_requests %}
-
-              <div
-                  class="bg-white border border-snow rounded-xl px-5 py-4 mb-3
-                        shadow-sm hover:shadow-md transition-all">
-
-                  <div class="grid grid-cols-12 items-center gap-4">
-
-                      <!-- Patient -->
-                      <div class="col-span-5 flex items-center gap-3">
-
-                          {% if appointment.user.userprofile.profile_photo_path %}
-                          <img
-                              src="/media/{{ appointment.user.userprofile.profile_photo_path }}"
-                              class="w-12 h-12 rounded-full object-cover"
-                              onerror="this.src='/static/images/patient-4.svg'">
-                          {% else %}
-                          <img
-                              src="/static/images/patient-4.svg"
-                              class="w-12 h-12 rounded-full object-cover">
-                          {% endif %}
-
-                          <div>
-                              <p class="font-semibold text-sm">
-                                  {{ appointment.user.userprofile.first_name }}
-                                  {{ appointment.user.userprofile.last_name }}
-                              </p>
-
-                              <p class="text-xs text-spanish-gray">
-                                  {{ appointment.test_type.name }}
-                              </p>
-                          </div>
-
-                      </div>
-
-                      <!-- Date -->
-                      <div class="col-span-3">
-
-                          <p class="text-sm text-gray-700">
-                              {{ appointment.preferred_date_time|date:"d/m/Y" }}
-                          </p>
-
-                          <p class="text-xs text-gray-500">
-                              {{ appointment.preferred_date_time|date:"h:i A" }}
-                          </p>
-
-                      </div>
-
-                      <!-- Service -->
-                      <div class="col-span-2">
-
-                          {% if appointment.service_type == "Home Collection" %}
-                          <span
-                              class="px-3 py-1 rounded-full bg-orange-100 text-orange-600 text-xs font-medium">
-                              Home Collection
-                          </span>
-                          {% else %}
-                          <span
-                              class="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-xs font-medium">
-                              Lab Walk-in
-                          </span>
-                          {% endif %}
-
-                      </div>
-
-                      <!-- Actions -->
-                      <div class="col-span-2 flex justify-end items-center gap-3">
-
-                          <button type="button"
-                              class="appointment-detail-btn"
-                              data-id="{{ appointment.id }}">
-
-                              <span
-                                  class="material-symbols-outlined popup-btn text-gray-500 hover:text-dodger-blue">
-                                  visibility
-                              </span>
-
-                          </button>
-
-                          {% if appointment.status == "Pending" %}
-                          <button
-                              class="accept-button"
-                              data-id="{{ appointment.id }}">
-
-                              <span
-                                  class="material-symbols-outlined text-green-600 hover:scale-110 transition">
-                                  check_circle
-                              </span>
-
-                          </button>
-                          {% endif %}
-
-                      </div>
-
-                  </div>
-
-              </div>
-
-              {% empty %}
-
-              <div class="bg-white rounded-xl p-8 text-center text-gray-500">
-                  No Appointment Requests Found
-              </div>
-
-              {% endfor %}
-
+            <div class="w-8 h-8 mr-3.5 shrink-0 rounded-full flex items-center justify-center text-white text-[10px] font-semibold {% cycle 'bg-[#2F6FED]' 'bg-[#13857F]' 'bg-[#8B3FE0]' 'bg-[#E8932F]' %}">{{ appointment.user.userprofile.first_name|slice:":1"|upper }}{{ appointment.user.userprofile.last_name|slice:":1"|upper }}</div>
+            <div class="min-w-0 flex-1 leading-5">
+              <p class="text-xs font-semibold text-[#111827] truncate">{{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}</p>
+              <p class="text-[10px] font-normal text-[#8A94A6] truncate">{{ appointment.test_type.name|default:"" }}</p>
+              <p class="text-[10px] font-normal text-[#8A94A6] truncate">{{ appointment.service_type }}{% if appointment.technician %} · {{ appointment.technician }}{% else %} · {{ appointment.preferred_date_time|date:"d/m/Y" }}{% endif %}</p>
+            </div>
+            <span class="px-2.5 py-1.5 rounded-md bg-[#EAF0FB] text-[#2F6FED] text-[10px] font-normal leading-none">{{ appointment.status|default:"Scheduled" }}</span>
+            <button type="button" class="appointment-detail-btn ml-3 flex items-center" data-id="{{ appointment.id }}" aria-label="View details">
+              <span class="material-symbols-outlined !text-[18px] text-[#2F6FED]">visibility</span>
+            </button>
           </div>
-         
+          {% empty %}
+          <div class="text-center text-sm text-[#8A94A6] py-8">No Scheduled Appointments Found</div>
+          {% endfor %}
+          <div id="sched-empty" class="hidden text-center text-sm text-[#8A94A6] py-8">No orders in this status</div>
+        </div>
 
-          <!--Appointment Request Detail Popup-->
-          <div
-            class="fixed inset-0 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden">
-            <div class="bg-white h-[500px] md:h-[650px] lg:h-[720px] mx-2 md:mx-0 overflow-y-auto no-scrollbar p-4 rounded-lg">
-              <div class="flex items-center justify-between">
-                <p class="font-semibold text-sm">Appointment Details</p>
-                <div class="flex items-center gap-4">
-                  <button type="button" class="cursor-pointer lab-appointment-share">
-                    <span class="material-symbols-outlined !text-xl">share</span>
-                  </button>
-                  <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail">
-                    <span class="material-symbols-outlined !text-2xl">close</span>
-                  </button>
-                </div>
-              </div>
-              <hr class="mt-4 text-blue-haze">
-              <div class="mt-4 bg-pale-azure p-4 w-[648px] h-[196px] flex items-center gap-4">
-                <div class="flex flex-col ">
-                  <img src="/static/images/patient-7.svg" alt="">
-                  <!-- <p class="font-normal text-sm text-center pt-4">Dolly Paris</p> -->
-                  <p id="popup-name"></p>
-                </div>
-                <div class="flex flex-col gap-4 w-[180px]">
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        female
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Gender</p>
-                      <!-- <p class="font-normal text-sm">Female</p> -->
-                      <p id="popup-gender"></p>
-                    </div>
-                  </div>
-
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        hourglass
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Age</p>
-                      <!-- <p class="font-normal text-sm">25</p> -->
-                      <p id="popup-age"></p>
-                    </div>
-                  </div>
-
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <img src="/static/images/visit-icon.svg" alt="">
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Visit Type</p>
-                      <!-- <p class="font-normal text-sm">Lab Walk-in</p> -->
-                      <p id="popup-service"></p>
-                    </div>
-                  </div>
-                </div>
-                <!-- <div class="flex flex-col gap-4"> -->
-                <div class="grid grid-cols-3 gap-4">
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        call
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
-                      <!-- <p class="font-normal text-sm">+91 7737533456</p> -->
-                      <p id="popup-phone"></p>
-                    </div>
-                  </div>
-
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        calendar_today
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Appointment date</p>
-                      <!-- <p class="font-normal text-sm">22/07/2025,12:30 PM</p> -->
-                      <p id="popup-date"></p>
-                    </div>
-                  </div>
-
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <img src="/static/images/address-icon.svg" alt="">
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Address</p>
-                      <!-- <p class="font-normal text-sm">123 maple los Angeles, CA 90001 usa</p> -->
-                      <p id="popup-address"></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <hr class="mt-4 text-blue-haze">
-              <div class="pt-4">
-                <p class="font-semibold text-sm">Medical Information</p>
-                <div class="pt-4 flex gap-4">
-                  <div class="flex gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        medical_services
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray whitespace-nowrap">Medical Requirement</p>
-                      <p class="font-normal text-sm">RT-PCR</p>
-                    </div>
-                  </div>
-
-                  <div class="flex gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg p-2">
-                        details
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Details</p>
-                      <p class="font-normal text-sm">Experiencing mild fever, sore throat, and body ache — <br>
-                        requesting
-                        RT-PCR to rule out viral infection.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="my-6 flex items-center justify-between">
-                <p class="font-normal text-sm">Attachment</p>
-                <div class="flex items-center gap-2 text-dodger-blue">
-                  <p>image.pdf</p>
-                  <span class="material-symbols-outlined cursor-pointer view-attachment">visibility</span>
-                </div>
-              </div>
-              <div class="enquiredDetail">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 flex">
-                      <div class="w-1/2 h-full bg-dodger-blue"></div>
-                      <div class="w-1/2 h-full bg-blue-haze"></div>
-                    </div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-10">
-                    <p class="pl-6  font-normal text-sm">Enquiry</p>
-                    <p class="pl-2 text-spanish-gray font-normal text-sm">Appointment</p>
-                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
-                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">Budget</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class="text-dodger-blue font-normal text-sm">&#8377;500</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-                  <button
-                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">
-                    Accept
-                  </button>
-                  {% comment %} <button
-                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer reject-button">
-                    Reject
-                  </button> {% endcomment %}
-                </div>
-              </div>
-
-              <!--When Clicked on Accept Button-->
-              <div class="acceptedDetail hidden">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-10">
-                    <p class="pl-6  font-normal text-sm">Enquiry</p>
-                    <p class="pl-2  font-normal text-sm">Appointment</p>
-                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
-                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">6 km</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class=" font-normal text-sm">20 mins away</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <p class="font-normal text-sm">No Show</p>
-                    <input type="checkbox" class="w-4 h-4 border-2">
-                  </div>
-                  <p class="font-normal text-sm text-spanish-gray">Patient didn’t show up</p>
-                </div>
-                <div class="pt-4 flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <p class="font-normal text-sm">Home Visit</p>
-                    <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
-                  </div>
-                  <div
-                    class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
-                    <p class="font-normal text-sm">Proforma Bill</p>
-                    <span class="material-symbols-outlined !text-lg">visibility</span>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-                  <button
-                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer complete-btn">Complete</button>
-                  <button
-                     class="cancel-appointment-btn border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap"
-                     data-popup="cancelAppointmentPopup">
-                     Cancel Appointment
-                  </button>
-                </div>
-                <div
-                  class="cancelAppointmentPopup fixed inset-0 flex items-center justify-center hidden bg-semi-transparent-black">
-                  <div
-                    class="bg-white w-[452px] h-[213px] p-5 rounded-[10px] flex flex-col gap-4 relative items-center">
-                    <button class="close-popup absolute right-4 top-8 cursor-pointer"
-                      data-popup="cancelAppointmentPopup">
-                      <span class="material-symbols-outlined">close</span>
-                    </button>
-                    <div class="w-15 h-15 rounded-full bg-rosewater p-3 flex items-center justify-center">
-                      <img src="/static/images/appointment.svg" alt="">
-                    </div>
-                    <p class="font-normal text-base">Are you sure you want to cancel this appointment ?</p>
-                    <div
-                      class="bg-rosewater text-error w-[198px] h-12 rounded-md p-2.5 cursor-pointer cancelAppointmentBtn flex items-center justify-center font-semibold">
-                      Cancel Appointment</div>
-                  </div>
-                </div>
-              </div>
-
-              <!--Clicked on Complete button in accepted details popup-->
-              <div class="completeDetail hidden">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-10">
-                    <p class="pl-6  font-normal text-sm">Enquiry</p>
-                    <p class="pl-2  font-normal text-sm">Appointment</p>
-                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
-                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">6 km</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class=" font-normal text-sm">20 mins away</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <p class="font-normal text-sm">No Show</p>
-                    <input type="checkbox" class="w-4 h-4 border-2" checked>
-                  </div>
-                  <p class="font-normal text-sm  text-strong-red">Patient didn’t show up</p>
-                </div>
-                <div class="pt-4 flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <p class="font-normal text-sm">Home Visit</p>
-                    <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
-                  </div>
-                  <div
-                    class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
-                    <p class="font-normal text-sm">Proforma Bill</p>
-                    <span class="material-symbols-outlined !text-lg">visibility</span>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-                  <button
-                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer save-btn">Save</button>
-                  <button
-                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap">Cancel</button>
-                </div>
-              </div>
-
-              <!--Clicked on Save btn after completing-->
-              <div class="missingDetails hidden">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-20">
-                    <p class="font-normal text-sm">Enquiry</p>
-                    <p class="font-normal text-sm">Appointment</p>
-                    <p class="font-normal text-sm">No Show</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">Missing Reason</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class="font-normal text-sm  text-strong-red">Patient didn’t show up</p>
-                  </div>
-                </div>
-              </div>
-
-              <!--Clicked on cancel Appointment-->
-              <div class="cancelDetails hidden">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-20">
-                    <p class="font-normal text-sm">Enquiry</p>
-                    <p class="font-normal text-sm">Appointment</p>
-                    <p class="font-normal text-sm">Cancelled</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">Cancelled by</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class="font-normal text-sm  text-strong-red">Technician</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!--Attachment Popup-->
-            <div
-              class="attachmentPopup hidden fixed inset-0 flex items-center justify-center bg-semi-transparent-black">
-              <div class="bg-white p-5 rounded-[10px] w-[600px] h-[699px]">
-                <div class="flex items-center justify-between">
-                  <p class="font-normal text-sm">Attachment</p>
-                  <span class="material-symbols-outlined cursor-pointer close-attachment">close</span>
-                </div>
-                <img src="/static/images/attachment.png" alt="attachment" class="w-full h-full">
-              </div>
-            </div>
-          </div>
-
-
+        <div class="flex justify-between items-center mt-3 text-[11px] font-normal">
+          <a href="{% url 'history' %}" class="text-[#2F6FED]">View all orders →</a>
+          <span class="text-[#8A94A6]">Showing up to 4 orders</span>
         </div>
       </div>
+
+      <!-- This Week's Performance -->
+      <div class="bg-white border border-[#E5ECF4] rounded-2xl px-6 pt-6 pb-5 flex flex-col">
+        <div class="flex justify-between items-start">
+          <div>
+            <h2 class="text-[15px] font-medium text-[#111827] leading-tight">This Week’s Performance</h2>
+            <p class="text-[11px] font-normal text-[#8A94A6] mt-2">{{ week_range|default:"Last 7 days" }}</p>
+          </div>
+          <span class="material-symbols-outlined !text-[18px] text-[#2F6FED]">ssid_chart</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mt-5">
+          <div class="rounded-xl bg-[#F8F9FD] px-4 py-5"><p class="text-[22px] font-semibold text-[#1F9D6B] leading-none">{{ bids_won|default:0 }}</p><p class="text-[10px] text-[#8A94A6] mt-3">Bids Won</p></div>
+          <div class="rounded-xl bg-[#F8F9FD] px-4 py-5"><p class="text-[22px] font-semibold text-[#D6455D] leading-none">{{ bids_lost|default:0 }}</p><p class="text-[10px] text-[#8A94A6] mt-3">Bids Lost</p></div>
+          <div class="rounded-xl bg-[#F8F9FD] px-4 py-5"><p class="text-[22px] font-semibold text-[#111827] leading-none">{{ bids_answered|default:0 }}</p><p class="text-[10px] text-[#8A94A6] mt-3">Bids Answered</p></div>
+          <div class="rounded-xl bg-[#F8F9FD] px-4 py-5"><p class="text-[22px] font-semibold text-[#111827] leading-none">{{ orders_completed_today|default:0 }}</p><p class="text-[10px] text-[#8A94A6] mt-3">Orders Completed Today</p></div>
+        </div>
+
+        <div class="mt-6">
+          <div class="flex justify-between text-[11px]"><span class="text-[#111827]">Resolved Bid Win Rate</span><b class="font-semibold text-[#111827]">{{ win_rate|default:0 }}%</b></div>
+          <div class="h-1.5 mt-2.5 rounded-full bg-[#EEF1F6] overflow-hidden"><div class="h-full bg-[#1F9D6B] rounded-full" style="width: {{ win_rate|default:0 }}%"></div></div>
+          <p class="text-[9px] text-[#8A94A6] mt-3">{{ bids_won|default:0 }} wins from {{ bids_answered|default:0 }} resolved bids. Active bids are excluded.</p>
+          <p class="text-[9px] text-[#8A94A6] mt-1">Average response time <b class="font-semibold text-[#111827]">{{ avg_bid_response|default:"—" }}</b></p>
+        </div>
+
+        <div class="mt-auto pt-4 border-t border-[#EEF1F6] flex justify-between text-[9px] text-[#8A94A6]">
+          <span>Previous 7 days</span><span class="text-[#111827]">{{ week_trend|default:"—" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Reports Due Today ===== -->
+    <div class="bg-white border border-[#E5ECF4] rounded-2xl px-6 pt-6 pb-5">
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="text-[15px] font-medium text-[#111827] leading-tight">Reports Due Today</h2>
+          <p class="text-[11px] font-normal text-[#8A94A6] mt-2">{{ reports_due|length }} reports from current and earlier orders</p>
+        </div>
+        <a href="#" class="text-[11px] font-normal text-[#2F6FED]">View All Lab Reports →</a>
+      </div>
+
+      <div class="hs-pills flex flex-wrap justify-start gap-2 mt-5" data-row=".report-row" data-empty="#report-empty">
+        <span data-filter="all" class="hs-pill px-3 py-1.5 rounded-full cursor-pointer select-none text-[11px] bg-[#EAF0FB] text-[#2F6FED] font-medium">All reports (<span class="tab-count">0</span>)</span>
+        <span data-filter="processing" class="hs-pill px-3 py-1.5 rounded-full cursor-pointer select-none text-[11px] bg-[#F1F4F9] text-[#8A94A6] font-normal">Processing (<span class="tab-count">0</span>)</span>
+        <span data-filter="awaiting" class="hs-pill px-3 py-1.5 rounded-full cursor-pointer select-none text-[11px] bg-[#F1F4F9] text-[#8A94A6] font-normal">Awaiting review (<span class="tab-count">0</span>)</span>
+        <span data-filter="ready" class="hs-pill px-3 py-1.5 rounded-full cursor-pointer select-none text-[11px] bg-[#F1F4F9] text-[#8A94A6] font-normal">Ready to share (<span class="tab-count">0</span>)</span>
+      </div>
+
+      <div class="overflow-x-auto mt-5">
+        <table class="w-full min-w-[680px] text-[11px] text-[#111827]">
+          <thead>
+            <tr class="bg-[#F8F9FD] text-[10px] uppercase tracking-wide text-[#8A94A6] text-left">
+              <th class="px-4 py-3.5 font-normal rounded-l-lg">Order ID</th>
+              <th class="px-4 py-3.5 font-normal">Patient</th>
+              <th class="px-4 py-3.5 font-normal">Test / Package</th>
+              <th class="px-4 py-3.5 font-normal">Due By</th>
+              <th class="px-4 py-3.5 font-normal">Status</th>
+              <th class="px-4 py-3.5 font-normal rounded-r-lg">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#EEF1F6]">
+            {% for r in reports_due %}
+            <tr class="report-row" data-status="{{ r.status|lower }}">
+              <td class="px-4 py-5 text-[10px] text-[#8A94A6]">{{ r.order_id }}</td>
+              <td class="px-4 py-5">{{ r.patient_name }}</td>
+              <td class="px-4 py-5">{{ r.test_name }}</td>
+              <td class="px-4 py-5">{{ r.due_by }}</td>
+              <td class="px-4 py-5"><span class="inline-block px-2.5 py-1 rounded-md bg-[#F1E9FD] text-[#8B3FE0] text-[10px] leading-none">{{ r.status }}</span></td>
+              <td class="px-4 py-5"><a href="{{ r.url|default:'#' }}" class="text-[#2F6FED]">{% if r.status == "Awaiting review" %}Upload Report{% else %}View Order{% endif %}</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="px-4 py-8 text-center text-[#8A94A6]">No reports due today</td></tr>
+            {% endfor %}
+            <tr id="report-empty" class="hidden"><td colspan="6" class="px-4 py-8 text-center text-[#8A94A6]">No reports in this status</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== New Test Requests ===== -->
+    <div class="bg-white border border-[#E5ECF4] rounded-2xl px-6 pt-6 pb-5">
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="text-[15px] font-medium text-[#111827] leading-tight">New Test Requests</h2>
+          <p class="text-[11px] font-normal text-[#8A94A6] mt-2">Nearby customers looking for diagnostic services</p>
+        </div>
+        <a href="{% url 'appointment' %}" class="text-[11px] font-normal text-[#2F6FED]">View All Offers &amp; Bids →</a>
+      </div>
+
+      <div class="hs-tabs flex justify-start gap-5 mt-6 border-b border-[#E5ECF4] flex-wrap" data-row=".req-row" data-empty="#req-empty">
+        <span data-filter="all" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-medium border-b-2 border-[#2F6FED] text-[#2F6FED]">All <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+        <span data-filter="new" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-normal border-b-2 border-transparent text-[#8A94A6]">New <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+        <span data-filter="draft" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-normal border-b-2 border-transparent text-[#8A94A6]">Draft <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+        <span data-filter="bid" class="hs-tab pb-2.5 -mb-px whitespace-nowrap cursor-pointer select-none text-[11px] font-normal border-b-2 border-transparent text-[#8A94A6]">Bid Submitted <span class="tab-count ml-1 px-1.5 py-px rounded bg-[#EAF0FB] text-[#5B6B84] text-[9px] font-normal">0</span></span>
+      </div>
+
+      <!-- Search + filters -->
+      <div class="flex flex-wrap items-center gap-3 mt-5">
+        <div class="relative flex-1 min-w-[220px]">
+          <span class="material-symbols-outlined !text-base text-[#8A94A6] absolute left-3 top-1/2 -translate-y-1/2">search</span>
+          <input id="req-search" type="text" placeholder="Search request ID, customer or test"
+                 class="w-full h-10 pl-9 pr-3 rounded-lg border border-[#E5ECF4] bg-white text-[11px] text-[#111827] placeholder:text-[#8A94A6] outline-none focus:border-[#2F6FED]">
+        </div>
+        <select id="req-visit" class="h-10 px-3 rounded-lg border border-[#E5ECF4] bg-white text-[11px] text-[#4B5563] outline-none">
+          <option value="">All visit types</option>
+          <option value="home collection">Home Collection</option>
+          <option value="lab visit">Lab Visit</option>
+          <option value="lab walk-in">Lab Walk-in</option>
+        </select>
+        <select id="req-test" class="h-10 px-3 rounded-lg border border-[#E5ECF4] bg-white text-[11px] text-[#4B5563] outline-none">
+          <option value="">All tests</option>
+        </select>
+        <button type="button" id="req-reset" class="text-[11px] text-[#2F6FED]">Reset filters</button>
+      </div>
+
+      <div class="overflow-x-auto mt-4">
+        <table class="w-full min-w-[860px] text-[11px] text-[#111827]">
+          <thead>
+            <tr class="bg-[#F8F9FD] text-[10px] uppercase tracking-wide text-[#8A94A6] text-left">
+              <th class="px-4 py-3.5 font-normal rounded-l-lg">Request / Customer</th>
+              <th class="px-4 py-3.5 font-normal">Test / Package</th>
+              <th class="px-4 py-3.5 font-normal">Visit Type</th>
+              <th class="px-4 py-3.5 font-normal">Preferred Slot</th>
+              <th class="px-4 py-3.5 font-normal">Budget</th>
+              <th class="px-4 py-3.5 font-normal">Time Left</th>
+              <th class="px-4 py-3.5 font-normal">Bid Status</th>
+              <th class="px-4 py-3.5 font-normal rounded-r-lg">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#EEF1F6]">
+            {% for appointment in appointment_requests %}
+            <tr class="req-row" data-status="{% if appointment.status == 'Pending' %}new{% else %}{{ appointment.status|lower }}{% endif %}"
+                data-search="req-{{ appointment.id }} {{ appointment.user.userprofile.first_name|lower }} {{ appointment.user.userprofile.last_name|lower }} {{ appointment.test_type.name|lower }}"
+                data-visit="{{ appointment.service_type|lower }}" data-test="{{ appointment.test_type.name }}">
+              <td class="px-4 py-4">
+                <span class="appointment-detail-btn block text-[10px] text-[#2F6FED] cursor-pointer" data-id="{{ appointment.id }}">REQ-{{ appointment.id }}</span>
+                <span class="flex items-center gap-2 mt-1.5">
+                  <span class="w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-semibold {% cycle 'bg-[#2F6FED]' 'bg-[#E8932F]' 'bg-[#8B3FE0]' 'bg-[#13857F]' %}">{{ appointment.user.userprofile.first_name|slice:":1"|upper }}{{ appointment.user.userprofile.last_name|slice:":1"|upper }}</span>
+                  <span>{{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}</span>
+                </span>
+              </td>
+              <td class="px-4 py-4">{{ appointment.test_type.name }}</td>
+              <td class="px-4 py-4">{{ appointment.service_type|default:"Lab Visit" }}</td>
+              <td class="px-4 py-4">
+                <span class="block">{{ appointment.preferred_date_time|date:"d/m/Y" }}</span>
+                <span class="block text-[9px] text-[#8A94A6] mt-0.5">{{ appointment.preferred_date_time|date:"h:i A" }}</span>
+              </td>
+              <td class="px-4 py-4 font-semibold text-[#2F6FED]">{% if appointment.budget %}&#8377;{{ appointment.budget }}{% else %}—{% endif %}</td>
+              <td class="px-4 py-4 text-[#1F9D6B]">{{ appointment.time_left|default:"—" }}</td>
+              <td class="px-4 py-4"><span class="inline-block px-2 py-1 rounded-md bg-[#EEF1F8] text-[#5B6B84] text-[9px] leading-none">{% if appointment.status == "Pending" %}New{% else %}{{ appointment.status|default:"New" }}{% endif %}</span></td>
+              <td class="px-4 py-4">
+                {% if appointment.status == "Pending" %}
+                <button type="button" class="accept-button px-3.5 py-2 rounded-md bg-[#2F63D6] text-white text-[10px] font-normal leading-none whitespace-nowrap" data-id="{{ appointment.id }}">Submit Bid</button>
+                {% else %}
+                <button type="button" class="appointment-detail-btn flex items-center" data-id="{{ appointment.id }}" aria-label="View details"><span class="material-symbols-outlined !text-[18px] text-[#2F6FED]">visibility</span></button>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="px-4 py-10 text-center text-[#8A94A6]">No Appointment Requests Found</td></tr>
+            {% endfor %}
+            <tr id="req-empty" class="hidden"><td colspan="8" class="px-4 py-10 text-center text-[#8A94A6]">No requests match</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-between items-center mt-4 text-[11px] font-normal">
+        <span class="text-[#8A94A6]">Showing {{ appointment_requests|length }} requests</span>
+        <a href="{% url 'appointment' %}" class="text-[#2F6FED]">View all requests →</a>
+      </div>
+    </div>
+
+    <!-- ===== Readiness + Insights ===== -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-4">
+
+      <!-- Test & Collection Readiness -->
+      <div class="bg-white border border-[#E5ECF4] rounded-2xl px-6 pt-6 pb-5 flex flex-col">
+        <div class="flex justify-between items-start">
+          <div>
+            <h2 class="text-[15px] font-medium text-[#111827] leading-tight">Test &amp; Collection Readiness</h2>
+            <p class="text-[11px] font-normal text-[#8A94A6] mt-2">Operational availability · {{ lab_profile.city|default:"Your" }} branch</p>
+          </div>
+          <a href="#" class="text-[11px] font-normal text-[#2F6FED]">Manage →</a>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mt-6">
+          <div><p class="text-[10px] text-[#8A94A6]">Published tests</p><p class="text-2xl font-semibold text-[#111827] mt-1">{{ total_tests|default:0 }}</p></div>
+          <div><p class="text-[10px] text-[#8A94A6]">Accepting</p><p class="text-2xl font-semibold text-[#1F9D6B] mt-1">{{ accepting_tests|default:0 }}</p></div>
+          <div><p class="text-[10px] text-[#8A94A6]">Unavailable</p><p class="text-2xl font-semibold text-[#E8932F] mt-1">{{ unavailable_tests|default:0 }}</p></div>
+          <div><p class="text-[10px] text-[#8A94A6]">Coverage</p><p class="text-2xl font-semibold text-[#111827] mt-1">{{ coverage_km|default:"—" }}{% if coverage_km %} km{% endif %}</p></div>
+        </div>
+
+        <div class="mt-5 pt-4 border-t border-[#EEF1F6] flex flex-col gap-4 text-[11px]">
+          <div class="flex justify-between items-center">
+            <span class="flex items-center gap-2 text-[#8A94A6]"><span class="material-symbols-outlined !text-base text-[#2F6FED]">local_shipping</span>Home collection</span>
+            <span class="font-semibold text-[#111827]">{{ home_collection_hours|default:"7:00 AM–6:00 PM" }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="flex items-center gap-2 text-[#8A94A6]"><span class="material-symbols-outlined !text-base text-[#2F6FED]">person</span>Collectors available</span>
+            <span class="font-semibold text-[#111827]">{{ available_collectors|default:0 }} of {{ total_technicians|default:0 }}</span>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <a href="#" class="inline-block px-3.5 py-2 rounded-lg border border-[#E5ECF4] text-[11px] font-medium text-[#111827] hover:bg-[#F8F9FD] transition">Manage Tests &amp; Packages</a>
+        </div>
+      </div>
+
+      <!-- Lab Insights -->
+      <div class="bg-white border border-[#E5ECF4] rounded-2xl px-6 pt-6 pb-5 flex flex-col">
+        <div class="flex justify-between items-start">
+          <h2 class="text-[15px] font-medium text-[#111827] leading-tight">Lab Insights</h2>
+          <a href="#" class="text-[11px] font-normal text-[#2F6FED]">View Analytics →</a>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-5">
+          <div class="flex gap-3">
+            <span class="material-symbols-outlined !text-base text-[#1F9D6B]">check</span>
+            <div><p class="text-[10px] text-[#8A94A6]">Most requested test this week</p><p class="text-[11px] font-semibold text-[#111827] mt-1">{{ most_requested_test|default:"—" }}</p></div>
+          </div>
+          <div class="flex gap-3">
+            <span class="material-symbols-outlined !text-base text-[#1F9D6B]">schedule</span>
+            <div><p class="text-[10px] text-[#8A94A6]">Preferred collection window</p><p class="text-[11px] font-semibold text-[#111827] mt-1">{{ collection_window|default:"7:00 AM–10:00 AM" }}</p></div>
+          </div>
+          <div class="flex gap-3">
+            <span class="material-symbols-outlined !text-base text-[#1F9D6B]">ssid_chart</span>
+            <div><p class="text-[10px] text-[#8A94A6]">Resolved bid win rate</p><p class="text-[11px] font-semibold text-[#111827] mt-1">{{ win_rate|default:0 }}% · {{ bids_won|default:0 }} of {{ bids_answered|default:0 }} bids</p></div>
+          </div>
+        </div>
+
+        <p class="mt-auto pt-4 border-t border-[#EEF1F6] text-[10px] text-[#8A94A6]">Updated {% now "d M Y" %}</p>
+      </div>
+    </div>
+
+    <!-- ===== Appointment Request Detail Popup (unchanged hooks) ===== -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden">
+      <div class="bg-white h-[500px] md:h-[650px] lg:h-[720px] mx-2 md:mx-0 overflow-y-auto no-scrollbar p-4 rounded-lg">
+        <div class="flex items-center justify-between">
+          <p class="font-semibold text-sm">Appointment Details</p>
+          <div class="flex items-center gap-4">
+            <button type="button" class="cursor-pointer lab-appointment-share"><span class="material-symbols-outlined !text-xl">share</span></button>
+            <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail"><span class="material-symbols-outlined !text-2xl">close</span></button>
+          </div>
+        </div>
+        <hr class="mt-4 text-blue-haze">
+
+        <div class="mt-4 bg-pale-azure p-4 w-[648px] max-w-full min-h-[196px] flex items-center gap-4 rounded-lg">
+          <div class="flex flex-col">
+            <img src="/static/images/patient-7.svg" alt="">
+            <p id="popup-name"></p>
+          </div>
+          <div class="flex flex-col gap-4 w-[180px]">
+            <div class="flex gap-2"><div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"><span class="material-symbols-outlined text-dodger-blue !text-lg">female</span></div><div class="flex flex-col gap-2"><p class="text-xs text-spanish-gray">Gender</p><p id="popup-gender"></p></div></div>
+            <div class="flex gap-2"><div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"><span class="material-symbols-outlined text-dodger-blue !text-lg">hourglass</span></div><div class="flex flex-col gap-2"><p class="text-xs text-spanish-gray">Age</p><p id="popup-age"></p></div></div>
+            <div class="flex gap-2"><div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"><img src="/static/images/visit-icon.svg" alt=""></div><div class="flex flex-col gap-2"><p class="text-xs text-spanish-gray">Visit Type</p><p id="popup-service"></p></div></div>
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="flex gap-2"><div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"><span class="material-symbols-outlined text-dodger-blue !text-lg">call</span></div><div class="flex flex-col gap-2"><p class="text-xs text-spanish-gray">Phone no.</p><p id="popup-phone"></p></div></div>
+            <div class="flex gap-2"><div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"><span class="material-symbols-outlined text-dodger-blue !text-lg">calendar_today</span></div><div class="flex flex-col gap-2"><p class="text-xs text-spanish-gray">Appointment date</p><p id="popup-date"></p></div></div>
+            <div class="flex gap-2"><div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"><img src="/static/images/address-icon.svg" alt=""></div><div class="flex flex-col gap-2"><p class="text-xs text-spanish-gray">Address</p><p id="popup-address"></p></div></div>
+          </div>
+        </div>
+        <hr class="mt-4 text-blue-haze">
+
+        <div class="pt-4">
+          <p class="font-semibold text-sm">Medical Information</p>
+          <div class="pt-4 flex gap-4">
+            <div class="flex gap-2"><div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"><span class="material-symbols-outlined text-dodger-blue !text-lg">medical_services</span></div><div class="flex flex-col gap-2"><p class="text-xs text-spanish-gray whitespace-nowrap">Medical Requirement</p><p class="text-sm">RT-PCR</p></div></div>
+            <div class="flex gap-2"><div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center"><span class="material-symbols-outlined text-dodger-blue !text-lg">details</span></div><div class="flex flex-col gap-2"><p class="text-xs text-spanish-gray">Details</p><p class="text-sm">Experiencing mild fever, sore throat, and body ache — requesting RT-PCR to rule out viral infection.</p></div></div>
+          </div>
+        </div>
+        <div class="my-6 flex items-center justify-between">
+          <p class="text-sm">Attachment</p>
+          <div class="flex items-center gap-2 text-dodger-blue"><p>image.pdf</p><span class="material-symbols-outlined cursor-pointer view-attachment">visibility</span></div>
+        </div>
+
+        <!-- Enquiry state -->
+        <div class="enquiredDetail">
+          <div class="flex flex-col mt-4 py-4 gap-4">
+            <div class="flex justify-center items-center gap-1">
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+              <div class="w-[138px] h-0.5 flex"><div class="w-1/2 h-full bg-dodger-blue"></div><div class="w-1/2 h-full bg-blue-haze"></div></div>
+              <div class="w-2 h-2 bg-blue-haze rounded-full"></div><div class="w-[138px] h-0.5 bg-blue-haze"></div>
+              <div class="w-2 h-2 bg-blue-haze rounded-full"></div><div class="w-[138px] h-0.5 bg-blue-haze"></div>
+              <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+            </div>
+            <div class="flex items-center justify-between mx-10 text-sm">
+              <p class="pl-6">Enquiry</p><p class="pl-2 text-spanish-gray">Appointment</p><p class="text-spanish-gray">Completed</p><p class="text-spanish-gray">Cancel/Expired</p>
+            </div>
+          </div>
+          <div class="pt-4 flex flex-col gap-2 text-sm">
+            <div class="flex justify-between"><p>Order ID</p><p>Budget</p></div>
+            <div class="flex justify-between"><p class="text-blue-gray">Order #R32512</p><p class="text-dodger-blue">&#8377;500</p></div>
+          </div>
+          <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+            <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">Accept</button>
+          </div>
+        </div>
+
+        <!-- Accepted state -->
+        <div class="acceptedDetail hidden">
+          <div class="flex flex-col mt-4 py-4 gap-4">
+            <div class="flex justify-center items-center gap-1">
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div><div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div><div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+              <div class="w-2 h-2 bg-blue-haze rounded-full"></div><div class="w-[138px] h-0.5 bg-blue-haze"></div>
+              <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+            </div>
+            <div class="flex items-center justify-between mx-10 text-sm">
+              <p class="pl-6">Enquiry</p><p class="pl-2">Appointment</p><p class="text-spanish-gray">Completed</p><p class="text-spanish-gray">Cancel/Expired</p>
+            </div>
+          </div>
+          <div class="pt-4 flex flex-col gap-2 text-sm">
+            <div class="flex justify-between"><p>Order ID</p><p>6 km</p></div>
+            <div class="flex justify-between"><p class="text-blue-gray">Order #R32512</p><p>20 mins away</p></div>
+          </div>
+          <div class="pt-4 flex justify-between items-center text-sm">
+            <div class="flex gap-2 items-center"><p>No Show</p><input type="checkbox" class="w-4 h-4 border-2"></div>
+            <p class="text-spanish-gray">Patient didn’t show up</p>
+          </div>
+          <div class="pt-4 flex justify-between items-center text-sm">
+            <div class="flex gap-2 items-center"><p>Home Visit</p><p class="text-dodger-blue">&#8377;500</p></div>
+            <div class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer"><p>Proforma Bill</p><span class="material-symbols-outlined !text-lg">visibility</span></div>
+          </div>
+          <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+            <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer complete-btn">Complete</button>
+            <button class="cancel-appointment-btn border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap" data-popup="cancelAppointmentPopup">Cancel Appointment</button>
+          </div>
+          <div class="cancelAppointmentPopup fixed inset-0 flex items-center justify-center hidden bg-semi-transparent-black">
+            <div class="bg-white w-[452px] h-[213px] p-5 rounded-[10px] flex flex-col gap-4 relative items-center">
+              <button class="close-popup absolute right-4 top-8 cursor-pointer" data-popup="cancelAppointmentPopup"><span class="material-symbols-outlined">close</span></button>
+              <div class="w-15 h-15 rounded-full bg-rosewater p-3 flex items-center justify-center"><img src="/static/images/appointment.svg" alt=""></div>
+              <p class="text-base">Are you sure you want to cancel this appointment ?</p>
+              <div class="bg-rosewater text-error w-[198px] h-12 rounded-md p-2.5 cursor-pointer cancelAppointmentBtn flex items-center justify-center font-semibold">Cancel Appointment</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Complete state -->
+        <div class="completeDetail hidden">
+          <div class="flex flex-col mt-4 py-4 gap-4">
+            <div class="flex justify-center items-center gap-1">
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div><div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div><div class="w-[138px] h-0.5 bg-dodger-blue"></div>
+              <div class="w-2 h-2 bg-blue-haze rounded-full"></div><div class="w-[138px] h-0.5 bg-blue-haze"></div>
+              <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
+            </div>
+            <div class="flex items-center justify-between mx-10 text-sm">
+              <p class="pl-6">Enquiry</p><p class="pl-2">Appointment</p><p class="text-spanish-gray">Completed</p><p class="text-spanish-gray">Cancel/Expired</p>
+            </div>
+          </div>
+          <div class="pt-4 flex flex-col gap-2 text-sm">
+            <div class="flex justify-between"><p>Order ID</p><p>6 km</p></div>
+            <div class="flex justify-between"><p class="text-blue-gray">Order #R32512</p><p>20 mins away</p></div>
+          </div>
+          <div class="pt-4 flex justify-between items-center text-sm">
+            <div class="flex gap-2 items-center"><p>No Show</p><input type="checkbox" class="w-4 h-4 border-2" checked></div>
+            <p class="text-strong-red">Patient didn’t show up</p>
+          </div>
+          <div class="pt-4 flex justify-between items-center text-sm">
+            <div class="flex gap-2 items-center"><p>Home Visit</p><p class="text-dodger-blue">&#8377;500</p></div>
+            <div class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer"><p>Proforma Bill</p><span class="material-symbols-outlined !text-lg">visibility</span></div>
+          </div>
+          <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+            <button class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer save-btn">Save</button>
+            <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Missing (No Show) state -->
+        <div class="missingDetails hidden">
+          <div class="flex flex-col mt-4 py-4 gap-4">
+            <div class="flex justify-center items-center gap-1">
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div><div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div><div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+            </div>
+            <div class="flex items-center justify-between mx-20 text-sm"><p>Enquiry</p><p>Appointment</p><p>No Show</p></div>
+          </div>
+          <div class="pt-4 flex flex-col gap-2 text-sm">
+            <div class="flex justify-between"><p>Order ID</p><p>Missing Reason</p></div>
+            <div class="flex justify-between"><p class="text-blue-gray">Order #R32512</p><p class="text-strong-red">Patient didn’t show up</p></div>
+          </div>
+        </div>
+
+        <!-- Cancelled state -->
+        <div class="cancelDetails hidden">
+          <div class="flex flex-col mt-4 py-4 gap-4">
+            <div class="flex justify-center items-center gap-1">
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div><div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div><div class="w-[192px] h-0.5 bg-dodger-blue"></div>
+              <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
+            </div>
+            <div class="flex items-center justify-between mx-20 text-sm"><p>Enquiry</p><p>Appointment</p><p>Cancelled</p></div>
+          </div>
+          <div class="pt-4 flex flex-col gap-2 text-sm">
+            <div class="flex justify-between"><p>Order ID</p><p>Cancelled by</p></div>
+            <div class="flex justify-between"><p class="text-blue-gray">Order #R32512</p><p class="text-strong-red">Technician</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attachment Popup -->
+      <div class="attachmentPopup hidden fixed inset-0 flex items-center justify-center bg-semi-transparent-black">
+        <div class="bg-white p-5 rounded-[10px] w-[600px] h-[699px]">
+          <div class="flex items-center justify-between">
+            <p class="text-sm">Attachment</p>
+            <span class="material-symbols-outlined cursor-pointer close-attachment">close</span>
+          </div>
+          <img src="/static/images/attachment.png" alt="attachment" class="w-full h-full">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 {% endblock %}
+
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
