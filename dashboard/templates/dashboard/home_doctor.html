@@ -4,8 +4,9 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+{# ===== Skeleton (shown by your existing JS while page loads) ===== #}
 <div id="pharmacy-page-skeleton" class="hidden flex flex-col gap-5 p-6 animate-pulse" style="display: none" aria-hidden="true">
-    <div class="bg-white rounded-[10px] p-5 space-y-6">
+    <div class="bg-white rounded-2xl p-5 space-y-6">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-3">
                 <div class="h-5 w-24 rounded bg-gray-200"></div>
@@ -16,936 +17,897 @@
                 <div class="h-4 w-28 rounded bg-gray-200 sm:ml-auto"></div>
             </div>
         </div>
-
-        <div class="flex flex-col gap-3 lg:flex-row ml-3">
-            <div class="h-[330px] w-full rounded-lg bg-gray-200 lg:w-[80%]"></div>
-            <div class="h-[330px] w-full rounded-lg bg-gray-200 lg:w-[20%]"></div>
+        <div class="flex flex-col gap-3 lg:flex-row">
+            <div class="h-[300px] w-full rounded-2xl bg-gray-200 lg:w-[72%]"></div>
+            <div class="h-[300px] w-full rounded-2xl bg-gray-200 lg:w-[28%]"></div>
         </div>
-
-        <div class="ml-3 space-y-4">
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div class="h-20 rounded-2xl bg-gray-200"></div>
+            <div class="h-20 rounded-2xl bg-gray-200"></div>
+            <div class="h-20 rounded-2xl bg-gray-200"></div>
+            <div class="h-20 rounded-2xl bg-gray-200"></div>
+        </div>
+        <div class="space-y-4">
             <div class="flex justify-between">
                 <div class="h-5 w-28 rounded bg-gray-200"></div>
-                <div class="h-8 w-8 rounded bg-gray-200"></div>
+                <div class="h-8 w-20 rounded bg-gray-200"></div>
             </div>
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <div class="h-32 rounded-lg bg-gray-200"></div>
-                <div class="h-32 rounded-lg bg-gray-200"></div>
-                <div class="h-32 rounded-lg bg-gray-200"></div>
+                <div class="h-32 rounded-2xl bg-gray-200"></div>
+                <div class="h-32 rounded-2xl bg-gray-200"></div>
+                <div class="h-32 rounded-2xl bg-gray-200"></div>
             </div>
         </div>
-
-        <div class="ml-3 space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-40 rounded bg-gray-200"></div>
-                <div class="h-4 w-16 rounded bg-gray-200"></div>
-            </div>
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-                <div class="h-28 rounded-lg bg-gray-200"></div>
-            </div>
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="h-64 rounded-2xl bg-gray-200 lg:col-span-2"></div>
+            <div class="h-64 rounded-2xl bg-gray-200"></div>
         </div>
-
-        <div class="ml-3 h-44 rounded-lg bg-gray-200"></div>
-        <div class="ml-3 space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-36 rounded bg-gray-200"></div>
-                <div class="h-4 w-16 rounded bg-gray-200"></div>
-            </div>
-            <div class="h-28 rounded-md bg-gray-200"></div>
-        </div>
+        <div class="h-56 rounded-2xl bg-gray-200"></div>
     </div>
 </div>
-      <div
-        class=" relative transition-all duration-300   main-content h-full flex-1 flex flex-col  p-6 overflow-y-auto scroll">
-        <div
-          class="show-sidebar-toggle hidden fixed top-24 left-0 z-50 h-10 w-10 bg-light-sky-blue-tint items-center justify-center rounded-r-md cursor-pointer">
-          <span class="material-symbols-outlined bold-weight text-dodger-blue">
-            arrow_forward_ios
-          </span>
-        </div>
-        <div class="bg-white px-2 sm:px-4 py-4">
-          <div class="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-col  gap-2">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined">home</span>
-                <h1 class="text-xl font-medium">Home</h1>
-              </div>
-              <div id="date" class="font-normal text-base"></div>
-            </div>
-            <div class="flex flex-col  gap-2 lg:items-center " id="infoSection">
-              <div class="flex flex-col gap-2">
-                <div id="location" class="font-normal text-base flex items-center gap-2">
-                  <span class="material-symbols-outlined !text-base"> location_on </span>
-                  <span id="location-text">Fetching location...</span>
-                </div>
+
+<div class="relative transition-all duration-300 main-content h-full flex-1 flex flex-col p-6 overflow-y-auto scroll bg-[#F8FAFF]">
+
+    <div class="show-sidebar-toggle hidden fixed top-24 left-0 z-50 h-10 w-10 bg-light-sky-blue-tint items-center justify-center rounded-r-md cursor-pointer">
+        <span class="material-symbols-outlined bold-weight text-[#0088FF]">arrow_forward_ios</span>
+    </div>
+
+    <div class="flex flex-col gap-5">
+
+        {# ===================== PAGE HEADER ===================== #}
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex flex-col gap-1">
                 <div class="flex items-center gap-2">
-                  <p>Auto Bid</p>
-
-                  <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
-                    <input
-                      type="checkbox"
-                      id="autobid-toggle"
-                      class="sr-only peer"
-                      aria-label="Enable Auto Bid"
-                    >
-
-                    <div
-                      class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5">
-                    </div>
-
-                    <div
-                      class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal">
-                    </div>
-                  </label>
-
-                  <div
-                    class="bg-gradient-to-r from-caribbean-green to-azure-radiance w-6 h-6 rounded-[7px] text-white text-xs flex items-center justify-center">
-                    Rx
-                  </div>
+                    <span class="material-symbols-outlined text-[#0F172A]">home</span>
+                    <h1 class="text-2xl font-bold text-[#0F172A]">Home</h1>
                 </div>
-              </div>
+                <div id="date" class="font-normal text-sm text-[#64748B]"></div>
             </div>
-          </div>
-          <!--Hospital Image and Admin Details-->
-          <div class="flex flex-col lg:flex-row gap-2  pt-5 ml-3">
-            <div class="relative">
-              <!-- <img src="{% if doctor_profile.clinic_photo_path %}/document/{{ doctor_profile.clinic_photo_path }}{% else %}/static/images/doctor-bg.png{% endif %}" alt="Doctor" class="w-[880px] h-[330px] object-cover rounded-lg"> -->
-                <!-- <img src="{% if doctor_profile.clinic_photo %}{{ doctor_profile.clinic_photo.url }}{% else %}/static/images/doctor-bg.png{% endif %}"
-                    alt="Doctor"
-                    class="w-[880px] h-[330px] object-cover rounded-lg"> -->
-                   
-                    <img src="{% if clinic_photo_url %}{{ clinic_photo_url }}{% else %}{% static 'images/hospital-bg.jpg' %}{% endif %}"
-                        alt="Doctor"
-                        class="w-[880px] h-[330px] object-cover rounded-lg" loading="lazy">
-              <div class="absolute inset-0 flex items-end">
-                <div class=" bg-semi-transparent-black backdrop-blur-sm w-full text-white px-6 py-3 rounded-lg">
-                  <div class="flex flex-col gap-2">
-                    <div class="flex items-center gap-2">
-                      <span class="material-symbols-outlined">home</span>
-                      <p class="text-base font-semibold">{{ doctor_profile.clinic_name }}</p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <p class="font-semibold text-sm">
-                        {{ doctor_profile.full_address|default:"Address not available" }},
-                        {{ doctor_profile.city|default:"" }},
-                        {{ doctor_profile.state|default:"" }} –
-                        {{ doctor_profile.pincode|default:"" }}
-                      </p>
-                    </div>
-                  </div>
+
+            <div class="flex items-center gap-4" id="infoSection">
+                <div id="location" class="font-normal text-sm text-[#64748B] flex items-center gap-1.5">
+                    <span class="material-symbols-outlined !text-base">location_on</span>
+                    <span id="location-text">Fetching location...</span>
                 </div>
-              </div>
+
+                <div class="flex items-center gap-2">
+                    <p class="text-sm text-[#0F172A]">Auto Bid</p>
+                    <label class="relative inline-block w-10 h-5 cursor-pointer">
+                        <input type="checkbox" id="autobid-toggle" class="sr-only peer" aria-label="Enable Auto Bid">
+                        <div class="absolute inset-0 rounded-full bg-[#CBD5E1] peer-checked:bg-[#0088FF] transition-colors"></div>
+                        <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+                    </label>
+                    <div class="w-7 h-7 rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] text-[#0088FF] text-xs font-semibold flex items-center justify-center">
+                        Rx
+                    </div>
+                </div>
             </div>
-            <div class="bg-pale-azure flex-1 h-[330px] px-4 py-2 rounded-lg">
-              <h1 class="text-center text-lg font-semibold">Admin Details</h1>
-              <div class="flex items-center justify-center py-[22.5px]">
-                <div class="relative">
-                  <img
-                    id="admin-profile-photo"
-                    src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
-                    alt="Admin profile picture"
-                    class="w-20 h-20 rounded-full object-cover">
-                  <label for="admin-profile-photo-input"
-                    class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-dodger-blue text-white flex items-center justify-center cursor-pointer shadow"
-                    title="Change profile picture">
-                    <span class="material-symbols-outlined !text-base">edit</span>
-                  </label>
-                  <input id="admin-profile-photo-input" type="file"
-                    accept="image/jpeg,image/png" class="hidden"
-                    data-upload-url="{% url 'upload_admin_profile_photo' %}">
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-2">
-                <p class="font-semibold text-sm">{{ contact_person.name|default:doctor_profile.owner_name|default:"N/A" }}</p>
-                <p class="font-semibold text-sm text-dodger-blue">
-                  {{ user.phone_country_code|default:"+91" }}
-                  {{ doctor_profile.contact_number|default:user.phone_number|default:"N/A" }}
-                </p>
-                <p class="font-semibold text-sm">
-                  Designation: {{ contact_person.role|default:"N/A" }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!--Overview-->
-          <div class="pt-5 flex flex-col ml-3">
-            <div class="flex justify-between items-center">
-              <p class="font-semibold text-lg">Overview</p>
-              <div class="flex items-center gap-2.5">
-                <p class="font-normal text-sm">
-                    {% if date_filter == "week" %}
-                        Week
-                    {% elif date_filter == "month" %}
-                        Month
-                    {% elif date_filter == "custom" %}
-                        Custom
-                    {% else %}
-                        Today
-                    {% endif %}
-                </p>
-                <div class="relative dropdown">
-                  <button
-                    class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
-                    <span class="material-symbols-outlined flex justify-center items-center">tune</span>
-                  </button>
-                  <div
-                    class="filterDropdown doctor-home-filter absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-                    <div data-filter="today"
-                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                      <span class="material-symbols-outlined !text-lg {% if date_filter == 'today' or not date_filter %}text-dodger-blue{% else %}text-light-gray{% endif %}">
-                        check
-                      </span>Today
-                    </div>
-                    <div data-filter="week"
-                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                      <span class="material-symbols-outlined !text-lg {% if date_filter == 'week' %}text-dodger-blue{% else %}text-light-gray{% endif %}">
-                        check
-                      </span>Week
-                    </div>
-                    <div data-filter="month"
-                      class="p-2 pl-4 hover:bg-pale-azure  rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-                      <span class="material-symbols-outlined !text-lg {% if date_filter == 'month' %}text-dodger-blue{% else %}text-light-gray{% endif %}">
-                        check
-                      </span>Month
-                    </div>
-                    <div data-filter="custom"
-                      class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-pale-azure  rounded font-normal text-base text-dark-gray">
-                      <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined !text-lg {% if date_filter == 'custom' %}text-dodger-blue{% else %}text-light-gray{% endif %}">
-                          check
-                        </span>Custom
-                      </div>
-                      <span class="material-symbols-outlined calendar-icon">calendar_today</span>
-                    </div>
-                  </div>
-                  <div
-                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
-                    <div class="datepicker-inline"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-4">
-              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">
-                    {% if date_filter == "week" %}Total Appointments This Week
-                    {% elif date_filter == "month" %}Total Appointments This Month
-                    {% elif date_filter == "custom" %}Total Appointments{% if start_date and end_date %} ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}){% else %} (Custom Range){% endif %}
-                    {% else %}Total Appointments Today{% endif %}
-                  </p>
-                  <!-- <p class="font-semibold text-2xl">12</p>
-                  <p class="text-green font-normal text-xs">7 Confirmed,5 Pending</p> -->
-                  <p class="font-semibold text-2xl">
-                    {{ total_appointments_today }}
-                  </p>
-
-                  <p class="text-green font-normal text-xs">
-                      {{ confirmed_count }} Confirmed,
-                      {{ pending_count }} Pending
-                  </p>
-                </div>
-                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                  <img src="/static/images/book.svg" alt="">
-                </div>
-              </div>
-
-              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">Pending Request</p>
-                  <!-- <p class="font-semibold text-2xl">24</p> -->
-                  <p class="font-semibold text-2xl">
-                      {{ pending_requests_count }}
-                  </p>
-                  <p class="font-normal text-xs text-dodger-blue">Today</p>
-                </div>
-                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                  <img src="/static/images/user-community.svg" alt="">
-                </div>
-              </div>
-
-              <div class="bg-ghost-white  p-4 flex justify-between rounded-lg items-center">
-                <div class="flex flex-col gap-2">
-                  <p class="font-normal text-sm">Ratings</p>
-                  <!-- <p class="font-semibold text-2xl">78.2%</p>
-                  <p class="text-burnt-orange font-normal text-xs">3/5 Patient are satisfied with service</p> -->
-                  <p class="font-semibold text-2xl">
-                    {{ rating_percentage|default:"0" }}%
-                  </p>
-
-                  <p class="text-burnt-orange font-normal text-xs">
-                    {{ satisfied_patients|default:"0" }}/{{ total_reviews|default:"0" }}
-                    Patient are satisfied with service
-                  </p>
-                </div>
-                <div class="bg-pale-azure w-15 h-15 rounded-full p-3.5 flex items-center justify-center">
-                  <img src="/static/images/user-group.svg" alt="">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!--Scheduled Appointments-->
-          <div class="pt-5 flex flex-col ml-3">
-
-              <div class="flex justify-between items-center">
-                  <p class="font-semibold text-lg">Scheduled Appointments</p>
-                  <a href="{% url 'history' %}"
-                    class="text-dodger-blue text-sm font-normal">
-                      View all
-                  </a>
-              </div>
-
-              <div class="grid grid-cols-1 lg:grid-cols-3 pt-4 gap-2">
-
-                  {% for appointment in scheduled_appointments %}
-
-                  <div class="border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
-
-                      <div>
-                          <img src="/static/images/patient-1.svg"
-                              alt="Patient Profile">
-                      </div>
-
-                      <div class="flex flex-col gap-2">
-
-                          <div class="w-fit rounded-lg px-3 py-2
-                              {% if appointment.consultation_type == 'home_visit' %}
-                                  bg-peach text-burnt-orange
-                              {% else %}
-                                  bg-pale-azure text-dodger-blue
-                              {% endif %}
-                              font-semibold text-xs">
-
-                              {{ appointment.consultation_type|title }}
-
-                          </div>
-
-                          <p class="font-semibold text-sm">
-                              Pt.
-                              {{ appointment.user.userprofile.first_name }}
-                              {{ appointment.user.userprofile.last_name }}
-                          </p>
-
-                          <p class="font-normal text-sm text-green">
-                              {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
-                          </p>
-
-                          {% comment %} <p class="font-semibold text-sm">
-                              To be attended by
-                              Dr. {{ doctor_profile.first_name }}
-                              {{ doctor_profile.last_name }}
-                          </p> {% endcomment %}
-                          <p class="font-semibold text-sm">
-                            To be attended by
-                            {{ doctor_profile.full_name }}
-                          </p>
-
-                      </div>
-
-                  </div>
-
-                  {% empty %}
-
-                  <div class="col-span-3 bg-white rounded-lg shadow-lg p-6 text-center">
-                      No scheduled appointments
-                  </div>
-
-                  {% endfor %}
-
-              </div>
-
-          </div>
-          {% comment %} <div class="pt-5 flex flex-col ml-3">
-            <div class="flex justify-between items-center">
-              <p class="font-semibold text-lg">Scheduled Appointments</p>
-              <a href="{% url 'history' %}" class="text-dodger-blue text-sm font-normal">View all</a>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 pt-4 gap-2">
-              <div class=" border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
-                <div>
-                  <img src="/static/images/patient-1.svg" alt="Patient Profile">
-                </div>
-                <div class="flex flex-col gap-2">
-                  <div class="w-[110px] h-[30px] rounded-lg p-2 bg-peach text-burnt-orange font-semibold text-xs">
-                    <p class="text-nowrap">Home Collection</p>
-                  </div>
-                  <p class="font-semibold text-sm">Pt. Rachel Kate</p>
-                  <p class="font-normal text-sm text-green">22/07/2025, 10:30 AM</p>
-                  <p class="font-semibold text-sm">To be attended by Mr. Smith</p>
-                </div>
-              </div>
-
-              <div class=" border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
-                <div>
-                  <img src="/static/images/patient-2.svg" alt="Patient Profile">
-                </div>
-                <div class="flex flex-col gap-2">
-                  <div class="w-[89px] h-[30px] rounded-lg p-2 bg-pale-azure text-dodger-blue font-semibold text-xs">
-                    <p>Lab Walk-in</p>
-                  </div>
-                  <p class="font-semibold text-sm">Pt. Karen cooper</p>
-                  <p class="font-normal text-sm text-green">22/07/2025, 11:30 AM</p>
-                  <p class="font-semibold text-sm">To be attended by Mr. Smith</p>
-                </div>
-              </div>
-
-              <div class=" border border-snow rounded-lg bg-white shadow-lg p-4 flex items-center gap-4">
-                <div>
-                  <img src="/static/images/patient-3.svg" alt="Patient Profile">
-                </div>
-                <div class="flex flex-col gap-2">
-                  <div class="w-[89px] h-[30px] rounded-lg p-2 bg-pale-azure text-dodger-blue font-semibold text-xs">
-                    <p>Lab Walk-in</p>
-                  </div>
-                  <p class="font-semibold text-sm">Pt. Josh Kerr</p>
-                  <p class="font-normal text-sm text-green">22/07/2025, 11:30 AM</p>
-                  <p class="font-semibold text-sm">To be attended by Mr. Kate</p>
-                </div>
-              </div>
-            </div>
-          </div> {% endcomment %}
-
-          <!--Appointment Requests-->
-          <div class="pt-5 flex flex-col ml-3">
-
-              <div class="flex justify-between items-center">
-                  <p class="font-semibold text-lg">Appointment Request</p>
-
-                  <a href="{% url 'appointment' %}"
-                    class="text-dodger-blue text-sm font-normal">
-                      View all
-                  </a>
-              </div>
-
-              {% for appointment in appointment_requests %}
-
-              <div
-                  id="appointment-row-{{ appointment.id }}"
-                  class="appointment-row bg-white shadow-md w-full mt-4 border-snow border rounded-lg p-3 flex items-center justify-between hover:bg-pale-azure hover:shadow-lg">
-
-                  <!-- Patient -->
-
-                  <div class="flex items-center gap-2 w-[220px]">
-
-                      <img
-                          src="/static/images/patient-4.svg"
-                          alt="Patient Profile"
-                          class="w-10 h-10 rounded-full">
-
-                      <div class="flex flex-col gap-1">
-
-                          <p class="font-semibold text-sm">
-                              Pt.
-                              {{ appointment.user.userprofile.first_name }}
-                              {{ appointment.user.userprofile.last_name }}
-                          </p>
-                          {% comment %} <p class="font-semibold text-sm">
-                              Pt.
-                              {{ appointment.user.first_name }}
-                              {{ appointment.user.last_name }}
-                          </p> {% endcomment %}
-
-                          <p class="font-normal text-xs text-spanish-gray">
-                              {{ appointment.description|truncatechars:30 }}
-                          </p>
-
-                      </div>
-
-                  </div>
-
-                  <!-- Date -->
-
-                  <p class="font-normal text-sm">
-                      {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
-                  </p>
-
-                  <!-- Consultation Type -->
-
-                  <p class="font-normal text-sm">
-                      {{ appointment.consultation_type|title }}
-                  </p>
-
-                  <!-- Actions -->
-
-                  <div class="flex items-center gap-4">
-
-                      <!-- Eye -->
-
-                      <span
-                          class="material-symbols-outlined cursor-pointer popup-btn appointment-detail-btn text-gray-700"
-                          data-id="{{ appointment.id }}">
-                          visibility
-                      </span>
-
-                      <!-- Place Bid -->
-
-                      <span
-                          class="material-symbols-outlined text-dodger-blue cursor-pointer place-bid-btn"
-                          data-id="{{ appointment.id }}">
-                          check_circle
-                      </span>
-
-                      <!-- Reject -->
-
-                      {% comment %} <span
-                          class="material-symbols-outlined text-strong-red cursor-pointer reject-bid-btn"
-                          data-id="{{ appointment.id }}">
-                          cancel
-                      </span> {% endcomment %}
-
-                  </div>
-
-              </div>
-
-              {% empty %}
-
-              <div class="bg-white shadow-md rounded-lg p-6 mt-4 text-center">
-                  No pending appointments available
-              </div>
-
-              {% endfor %}
-
-          </div>
-
-          <!--Appointment Request Detail Popup-->
-          <div
-            class="fixed inset-0 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden">
-            <div class="bg-white h-[500px] md:h-[650px] lg:h-[720px] mx-2 md:mx-0 overflow-y-auto no-scrollbar p-4 rounded-lg">
-              <div class="flex items-center justify-between">
-                <p class="font-semibold text-sm">Appointment Details</p>
-                <div class="flex items-center gap-4">
-                  <div class="relative">
-                    <button type="button" class="cursor-pointer popup-btn" data-popup="sharePopup">
-                      <span class="material-symbols-outlined !text-xl">share</span>
-                    </button>
-                    <!--Share Popup-->
-                    <div class="sharePopup hidden absolute right-0">
-                      <div class="bg-white w-130 rounded-lg shadow-lg p-6 relative border border-dodger-blue">
-                        <div class="flex justify-between items-center">
-                          <p class="font-semibold text-xl">Share</p>
-                          <span class="material-symbols-outlined close-popup cursor-pointer" data-popup="sharePopup">
-                            close
-                          </span>
-                        </div>
-                        <hr class="text-dodger-blue mt-4" />
-                        <div class="flex justify-between pt-4">
-
-                          <!-- Whatsapp -->
-                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                            data-app="whatsapp">
-                            <img src="/static/images/whatsappicon.svg" alt="whatsapp logo"
-                              class="w-10 h-10 cursor-pointer" />
-                            <p class="font-normal text-base text-dark-gray">Whatsapp</p>
-                          </div>
-
-                          <!-- Telegram -->
-                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                            data-app="telegram">
-                            <img src="/static/images/telegramicon.svg" alt="telegram logo"
-                              class="w-10 h-10 cursor-pointer" />
-                            <p class="font-normal text-base text-dark-gray">Telegram</p>
-                          </div>
-
-                          <!-- Facebook -->
-                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                            data-app="facebook">
-                            <img src="/static/images/facebookicon.svg" alt="facebook logo"
-                              class="w-10 h-10 cursor-pointer" />
-                            <p class="font-normal text-base text-dark-gray">Facebook</p>
-                          </div>
-
-                          <!-- SMS -->
-                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                            data-app="sms">
-                            <img src="/static/images/smsicon.svg" alt="sms logo" class="w-10 h-10 cursor-pointer" />
-                            <p class="font-normal text-base text-dark-gray">Message</p>
-                          </div>
-
-                          <!-- Gmail -->
-                          <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer"
-                            data-app="gmail">
-                            <img src="/static/images/gmailicon.svg" alt="gmail logo" class="w-10 h-10 cursor-pointer" />
-                            <p class="font-normal text-base text-dark-gray">E-mail</p>
-                          </div>
-                        </div>
-                        <div class="pt-4 relative mt-6">
-                          <input type="text" id="share-link" value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci"
-                            class="w-full rounded-md p-4 font-normal text-sm border" disabled />
-                          <button type="button"
-                            class="copy-btn absolute right-3 top-6 bg-dodger-blue text-white rounded-md p-2 cursor-pointer"
-                            data-target="#share-link">
-                            Copy
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail">
-                    <span class="material-symbols-outlined !text-2xl">close</span>
-                  </button>
-                </div>
-              </div>
-              <hr class="mt-4 text-blue-haze">
-              <div class="mt-4 bg-pale-azure p-4 w-[648px] h-[196px] flex items-center gap-4">
-                <div class="flex flex-col ">
-                  <img src="/static/images/patient-7.svg" alt="">
-                  <p id="popup-patient-name" class="font-normal text-sm text-center pt-4">Dolly Paris</p>
-                </div>
-                <div class="flex flex-col gap-4 w-[180px]">
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        female
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Gender</p>
-                      <p id="popup-gender" class="font-normal text-sm">Female</p>
-                    </div>
-                  </div>
-
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        hourglass
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Age</p>
-                      <p id="popup-age" class="font-normal text-sm">25</p>
-                    </div>
-                  </div>
-
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <img src="/static/images/visit-icon.svg" alt="">
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Visit Type</p>
-                      <p id="popup-visit-type" class="font-normal text-sm">Lab Walk-in</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col gap-4">
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        call
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Phone no.</p>
-                      <p id="popup-phone" class="font-normal text-sm">+91 7737533456</p>
-                    </div>
-                  </div>
-
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        calendar_today
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Appointment date</p>
-                      <p id="popup-date" class="font-normal text-sm">22/07/2025,12:30 PM</p>
-                    </div>
-                  </div>
-
-                  <div class="flex  gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <img src="/static/images/address-icon.svg" alt="">
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Address</p>
-                      <p id="popup-address" class="font-normal text-sm">123 maple los Angeles, CA 90001 usa</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <hr class="mt-4 text-blue-haze">
-              <div class="pt-4">
-                <p class="font-semibold text-sm">Medical Information</p>
-                <div class="pt-4 flex gap-4">
-                  <div class="flex gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg">
-                        medical_services
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray whitespace-nowrap">Medical Requirement</p>
-                      <p id="popup-medical-requirement" class="font-normal text-sm">RT-PCR</p>
-                    </div>
-                  </div>
-
-                  <div class="flex gap-2">
-                    <div class="border border-blue-haze rounded-lg w-6 h-6 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-dodger-blue !text-lg p-2">
-                        details
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                      <p class="font-normal text-xs text-spanish-gray">Details</p>
-                      <p id="popup-details" class="font-normal text-sm">Experiencing mild fever, sore throat, and body ache — <br>
-                        requesting
-                        RT-PCR to rule out viral infection.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="my-6 flex items-center justify-between">
-                <p class="font-normal text-sm">Attachment</p>
-                <div class="flex items-center gap-2 text-dodger-blue cursor-pointer view-attachment">
-                  <p>image.pdf</p>
-                  <span class="material-symbols-outlined">visibility</span>
-                </div>
-              </div>
-              <div class="enquiredDetail">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 flex">
-                      <div class="w-1/2 h-full bg-dodger-blue"></div>
-                      <div class="w-1/2 h-full bg-blue-haze"></div>
-                    </div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-10">
-                    <p class="pl-6  font-normal text-sm">Enquiry</p>
-                    <p class="pl-2 text-spanish-gray font-normal text-sm">Appointment</p>
-                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
-                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">Budget</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p id="popup-order-id" class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p id="popup-budget" class="text-dodger-blue font-normal text-sm">&#8377;500</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-                  <button
-                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">Accept</button>
-                  {% comment %} <button
-                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup"
-                    data-popup="appointmentRequestDetail">Reject</button> {% endcomment %}
-                </div>
-              </div>
-
-              <!--When Clicked on Accept Button-->
-              <div class="acceptedDetail hidden">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-10">
-                    <p class="pl-6  font-normal text-sm">Enquiry</p>
-                    <p class="pl-2  font-normal text-sm">Appointment</p>
-                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
-                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">6 km</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class=" font-normal text-sm">20 mins away</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <p class="font-normal text-sm">No Show</p>
-                    <input type="checkbox" class="w-4 h-4 border-2">
-                  </div>
-                  <p class="font-normal text-sm text-spanish-gray">Patient didn’t show up</p>
-                </div>
-                <div class="pt-4 flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <p class="font-normal text-sm">Home Visit</p>
-                    <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
-                  </div>
-                  <div
-                    class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
-                    <p class="font-normal text-sm">Proforma Bill</p>
-                    <span class="material-symbols-outlined !text-lg">visibility</span>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-                  <button
-                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer complete-btn">Complete</button>
-                  <button
-                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap popup-btn"
-                    data-popup="cancelAppointmentPopup">Cancel Appointment</button>
-                </div>
-                <div
-                  class="cancelAppointmentPopup fixed inset-0 flex items-center justify-center hidden bg-semi-transparent-black">
-                  <div
-                    class="bg-white w-[452px] h-[213px] p-5 rounded-[10px] flex flex-col gap-4 relative items-center">
-                    <button class="close-popup absolute right-4 top-8 cursor-pointer"
-                      data-popup="cancelAppointmentPopup">
-                      <span class="material-symbols-outlined">close</span>
-                    </button>
-                    <div class="w-15 h-15 rounded-full bg-rosewater p-3 flex items-center justify-center">
-                      <img src="/static/images/appointment.svg" alt="">
-                    </div>
-                    <p class="font-normal text-base">Are you sure you want to cancel this appointment ?</p>
-                    <div
-                      class="bg-rosewater text-error w-[198px] h-12 rounded-md p-2.5 cursor-pointer cancelAppointmentBtn flex items-center justify-center font-semibold">
-                      Cancel Appointment</div>
-                  </div>
-                </div>
-              </div>
-
-              <!--Clicked on Complete button in accepted details popup-->
-              <div class="completeDetail hidden">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                    <div class="w-[138px] h-0.5 bg-blue-haze"></div>
-                    <div class="w-2 h-2 bg-blue-haze rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-10">
-                    <p class="pl-6  font-normal text-sm">Enquiry</p>
-                    <p class="pl-2  font-normal text-sm">Appointment</p>
-                    <p class="text-spanish-gray font-normal text-sm">Completed</p>
-                    <p class="text-spanish-gray font-normal text-sm">Cancel/Expired</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">6 km</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class=" font-normal text-sm">20 mins away</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <p class="font-normal text-sm">No Show</p>
-                    <input type="checkbox" class="w-4 h-4 border-2" checked>
-                  </div>
-                  <p class="font-normal text-sm  text-strong-red">Patient didn’t show up</p>
-                </div>
-                <div class="pt-4 flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <p class="font-normal text-sm">Home Visit</p>
-                    <p class="font-normal text-sm text-dodger-blue">&#8377;500</p>
-                  </div>
-                  <div
-                    class="border border-dodger-blue bg-pale-azure px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
-                    <p class="font-normal text-sm">Proforma Bill</p>
-                    <span class="material-symbols-outlined !text-lg">visibility</span>
-                  </div>
-                </div>
-                <div class="pt-4 flex justify-center items-center gap-2 mb-2">
-                  <button
-                    class="bg-dodger-blue text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer save-btn">Save</button>
-                  <button
-                    class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap"
-                    data-popup="appointmentRequestDetail">Cancel</button>
-                </div>
-              </div>
-
-              <!--Clicked on Save btn after completing-->
-              <div class="missingDetails hidden">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-20">
-                    <p class="font-normal text-sm">Enquiry</p>
-                    <p class="font-normal text-sm">Appointment</p>
-                    <p class="font-normal text-sm">No Show</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">Missing Reason</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class="font-normal text-sm  text-strong-red">Patient didn’t show up</p>
-                  </div>
-                </div>
-              </div>
-
-              <!--Clicked on cancel Appointment-->
-              <div class="cancelDetails hidden">
-                <div class="flex flex-col mt-4 py-4 gap-4">
-                  <div class=" flex justify-center items-center gap-1">
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                    <div class="w-[192px] h-0.5 bg-dodger-blue"></div>
-                    <div class="w-2 h-2 bg-dodger-blue rounded-full"></div>
-                  </div>
-                  <div class="flex items-center justify-between mx-20">
-                    <p class="font-normal text-sm">Enquiry</p>
-                    <p class="font-normal text-sm">Appointment</p>
-                    <p class="font-normal text-sm">Cancelled</p>
-                  </div>
-                </div>
-                <div class="pt-4 flex flex-col gap-2">
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm">Order ID</p>
-                    <p class="font-normal text-sm">Cancelled by</p>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
-                    <p class="font-normal text-sm  text-strong-red">Technician</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!--Attachment Popup-->
-            <div
-              class="attachmentPopup hidden fixed inset-0 flex items-center justify-center bg-semi-transparent-black">
-              <div class="bg-white p-5 rounded-[10px] w-[600px] h-[699px]">
-                <div class="flex items-center justify-between">
-                  <p class="font-normal text-sm">Attachment</p>
-                  <span class="material-symbols-outlined cursor-pointer close-attachment">close</span>
-                </div>
-                <img src="/static/images/attachment.png" alt="attachment" class="w-full h-full">
-              </div>
-            </div>
-          </div>
-
-
         </div>
-      </div>
+
+        {# ===================== HOSPITAL BANNER + ADMIN CARD ===================== #}
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
+
+            {# --- Hospital / clinic banner --- #}
+            <div class="relative overflow-hidden rounded-2xl bg-[#0088FF] text-white min-h-[300px] p-6 flex flex-col justify-between">
+                {# optional clinic photo as a soft background #}
+                {% if clinic_photo_url %}
+                <img src="{{ clinic_photo_url }}" alt="" aria-hidden="true"
+                     class="absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-luminosity" loading="lazy">
+                {% endif %}
+
+                <div class="relative flex items-start justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined">apartment</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <p class="text-xl font-semibold leading-tight">{{ doctor_profile.clinic_name|default:"Clinic" }}</p>
+                            <p class="text-xs text-white/80">
+                                {{ doctor_profile.full_address|default:"Address not available" }}{% if doctor_profile.city %}, {{ doctor_profile.city }}{% endif %}{% if doctor_profile.state %}, {{ doctor_profile.state }}{% endif %}{% if doctor_profile.pincode %} – {{ doctor_profile.pincode }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <span class="shrink-0 rounded-full bg-white text-[#0088FF] text-[10px] font-semibold px-3 py-1 tracking-wide">
+                        VERIFIED CLINIC
+                    </span>
+                </div>
+
+                <div class="relative border-t border-white/30 pt-4 flex items-end justify-between gap-4">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-[11px] font-medium text-white/80 uppercase tracking-wide">Scheduled Appointments</p>
+                        <p class="text-sm font-medium">{{ scheduled_appointments|length }} Patient{{ scheduled_appointments|length|pluralize }} currently in queue</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex -space-x-2">
+                            {% for appointment in scheduled_appointments|slice:":3" %}
+                            <div class="w-7 h-7 rounded-full border-2 border-[#0088FF] bg-white text-[#0088FF] text-[10px] font-semibold flex items-center justify-center">
+                                {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <p class="hidden sm:block text-xs text-white/90">
+                            {% for appointment in scheduled_appointments|slice:":3" %}Pt. {{ appointment.user.userprofile.first_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+{# --- Admin / profile card --- #}
+            <div class="rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_2px_8px_rgba(15,23,42,0.04)] p-6 flex flex-col items-center justify-center text-center">
+                <div class="relative group">
+                    {% if admin_profile_photo_path %}
+                    <img id="admin-profile-photo"
+                         src="/document/{{ admin_profile_photo_path }}"
+                         alt="Admin profile picture"
+                         class="w-20 h-20 rounded-full object-cover">
+                    {% else %}
+                    <div class="w-20 h-20 rounded-full bg-[#0088FF] text-white text-2xl font-bold flex items-center justify-center">
+                        {% if doctor_profile.first_name %}{{ doctor_profile.first_name|slice:":1" }}{{ doctor_profile.last_name|slice:":1" }}{% else %}{{ doctor_profile.full_name|default:contact_person.name|default:"A"|slice:":1" }}{% endif %}
+                    </div>
+                    <img id="admin-profile-photo" alt="" class="hidden w-20 h-20 rounded-full object-cover">
+                    {% endif %}
+
+                    {# upload trigger: appears on hover, keeps your existing upload JS working #}
+                    <label for="admin-profile-photo-input"
+                           class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white border border-[#E2E8F0] text-[#0088FF] flex items-center justify-center cursor-pointer shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                           title="Change profile picture">
+                        <span class="material-symbols-outlined !text-sm">edit</span>
+                    </label>
+                    <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
+                           data-upload-url="{% url 'upload_admin_profile_photo' %}">
+                </div>
+
+                <p class="mt-4 font-bold text-base text-[#0F172A]">
+                    {{ doctor_profile.full_name|default:contact_person.name|default:doctor_profile.owner_name|default:"N/A" }}
+                </p>
+                <p class="mt-1 font-medium text-xs text-[#0088FF]">
+                    {{ user.phone_country_code|default:"+91" }}
+                    {{ doctor_profile.contact_number|default:user.phone_number|default:"N/A" }}
+                </p>
+                <p class="mt-2 text-sm font-medium text-[#0F172A]">{{ doctor_profile.specialization|default:contact_person.role|default:"N/A" }}</p>
+                {% if doctor_profile.qualification %}<p class="mt-1 text-[11px] text-[#64748B]">{{ doctor_profile.qualification }}</p>{% endif %}
+                {% if doctor_profile.registration_number %}<p class="text-[10px] text-[#94A3B8]">Reg. No: {{ doctor_profile.registration_number }}</p>{% endif %}
+
+                <a href="#" class="mt-3 text-xs font-semibold text-[#0088FF] inline-flex items-center gap-1">
+                    Edit Profile <span class="material-symbols-outlined !text-sm">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+
+        {# ===================== QUICK STATS ROW ===================== #}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#0088FF] flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined !text-xl">bolt</span>
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-xs text-[#64748B]">Active Bids</p>
+                    <p class="text-xl font-bold text-[#0F172A] leading-tight">{{ active_bids_count|default:"0" }}</p>
+                    <a href="{% url 'appointment' %}" class="text-xs text-[#0088FF]">View all →</a>
+                </div>
+            </div>
+
+            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#F3F0FF] text-[#7C3AED] flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined !text-xl">deployed_code</span>
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-xs text-[#64748B]">Ongoing Orders</p>
+                    <p class="text-xl font-bold text-[#0F172A] leading-tight">{{ ongoing_orders_count|default:"0" }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#FEFCE8] text-[#EAB308] flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined !text-xl">schedule</span>
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-xs text-[#64748B]">Avg Response Time</p>
+                    <p class="text-xl font-bold text-[#EAB308] leading-tight">{{ avg_response_time|default:"0 min" }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#F3F0FF] text-[#7C3AED] flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined !text-xl">calendar_today</span>
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-xs text-[#64748B]">Today's Appointments</p>
+                    <p class="text-xl font-bold text-[#0F172A] leading-tight">{{ total_appointments_today }}</p>
+                </div>
+            </div>
+        </div>
+
+        {# ===================== OVERVIEW ===================== #}
+        <div class="flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <p class="font-semibold text-xl text-[#0F172A]">Overview</p>
+
+                <div class="relative dropdown">
+                    <button class="filterToggle flex items-center gap-1 bg-white border border-[#E2E8F0] rounded-lg px-3 py-1.5 cursor-pointer text-sm text-[#0F172A]">
+                        <span>
+                            {% if date_filter == "week" %}Week{% elif date_filter == "month" %}Month{% elif date_filter == "custom" %}Custom{% else %}Today{% endif %}
+                        </span>
+                        <span class="material-symbols-outlined !text-lg">keyboard_arrow_down</span>
+                    </button>
+
+                    <div class="filterDropdown doctor-home-filter absolute right-0 mt-1 bg-white text-[#0F172A] shadow-[4px_4px_10px_2px_#00000026] hidden rounded-lg w-44 z-10">
+                        <div data-filter="today" class="p-2 pl-4 hover:bg-[#EFF6FF] rounded cursor-pointer flex items-center gap-2 text-sm">
+                            <span class="material-symbols-outlined !text-lg {% if date_filter == 'today' or not date_filter %}text-[#0088FF]{% else %}text-light-gray{% endif %}">check</span>Today
+                        </div>
+                        <div data-filter="week" class="p-2 pl-4 hover:bg-[#EFF6FF] rounded cursor-pointer flex items-center gap-2 text-sm">
+                            <span class="material-symbols-outlined !text-lg {% if date_filter == 'week' %}text-[#0088FF]{% else %}text-light-gray{% endif %}">check</span>Week
+                        </div>
+                        <div data-filter="month" class="p-2 pl-4 hover:bg-[#EFF6FF] rounded cursor-pointer flex items-center gap-2 text-sm">
+                            <span class="material-symbols-outlined !text-lg {% if date_filter == 'month' %}text-[#0088FF]{% else %}text-light-gray{% endif %}">check</span>Month
+                        </div>
+                        <div data-filter="custom" class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-[#EFF6FF] rounded text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined !text-lg {% if date_filter == 'custom' %}text-[#0088FF]{% else %}text-light-gray{% endif %}">check</span>Custom
+                            </div>
+                            <span class="material-symbols-outlined calendar-icon">calendar_today</span>
+                        </div>
+                    </div>
+
+                    <div class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
+                        <div class="datepicker-inline"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {# Total appointments #}
+                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col gap-2">
+                    <div class="flex items-start justify-between">
+                        <p class="text-sm text-[#475569]">
+                            {% if date_filter == "week" %}Total Appointments This Week
+                            {% elif date_filter == "month" %}Total Appointments This Month
+                            {% elif date_filter == "custom" %}Total Appointments{% if start_date and end_date %} ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}){% else %} (Custom Range){% endif %}
+                            {% else %}Total Appointments Today{% endif %}
+                        </p>
+                        <span class="material-symbols-outlined text-[#0088FF] !text-xl">assignment_turned_in</span>
+                    </div>
+                    <p class="font-bold text-3xl text-[#0F172A]">{{ total_appointments_today }}</p>
+                    <p class="text-[#0088FF] font-medium text-xs">{{ confirmed_count }} Confirmed · {{ pending_count }} Pending</p>
+                </div>
+
+                {# Pending bid requests #}
+                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col gap-2">
+                    <div class="flex items-start justify-between">
+                        <p class="text-sm text-[#475569]">Pending Bid Requests</p>
+                        <span class="material-symbols-outlined text-[#0088FF] !text-xl">groups</span>
+                    </div>
+                    <p class="font-bold text-3xl text-[#0F172A]">{{ pending_requests_count }}</p>
+                    <p class="text-[#0088FF] font-medium text-xs">Today</p>
+                </div>
+
+                {# Customer rating #}
+                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col gap-2">
+                    <div class="flex items-start justify-between">
+                        <p class="text-sm text-[#475569]">Customer Rating</p>
+                        <span class="material-symbols-outlined text-[#FACC15] !text-xl">star</span>
+                    </div>
+                    <p class="font-bold text-3xl text-[#0F172A]">{{ rating_percentage|default:"0" }}%</p>
+                    <p class="text-xs text-[#64748B]">
+                        {{ satisfied_patients|default:"0" }}/{{ total_reviews|default:"0" }} patients are satisfied with service
+                    </p>
+                </div>
+            </div>
+        </div>
+
+                {# ===================== SCHEDULED APPOINTMENTS + WEEK PERFORMANCE ===================== #}
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 items-stretch">
+
+            {# --- Scheduled appointments --- #}
+            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col">
+                <div class="flex justify-between items-center">
+                    <p class="font-semibold text-base text-[#0F172A]">Scheduled Appointments</p>
+                    <a href="{% url 'history' %}" class="text-[#0088FF] text-xs font-medium">View all →</a>
+                </div>
+
+                <div class="mt-3 flex-1 flex flex-col divide-y divide-[#F1F5F9]">
+                    {% for appointment in scheduled_appointments %}
+                    <div class="py-4 flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-[#0088FF] text-white font-semibold text-xs flex items-center justify-center shrink-0">
+                            {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
+                        </div>
+                        <div class="flex flex-col gap-1 min-w-0">
+                            <span class="w-fit rounded-full px-2 py-px border text-[9px] font-medium
+                                {% if appointment.consultation_type == 'home_visit' %}border-[#0088FF] text-[#0088FF]
+                                {% elif appointment.consultation_type == 'video_call' %}border-[#14B8A6] text-[#14B8A6]
+                                {% else %}border-[#22C55E] text-[#22C55E]{% endif %}">
+                                {{ appointment.consultation_type|title }}
+                            </span>
+                            <p class="text-[13px] leading-tight">
+                                <span class="font-bold text-[#0F172A]">{{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}</span>
+                                <span class="ml-2 text-xs font-medium text-[#0088FF]">{{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}</span>
+                            </p>
+                            <p class="text-[11px] text-[#64748B] truncate">{{ appointment.description|truncatechars:40 }}</p>
+                            <p class="text-[10px] text-[#94A3B8]">{{ doctor_profile.full_name }} attending</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
+                        <div class="w-12 h-12 rounded-full bg-[#EFF6FF] text-[#0088FF] flex items-center justify-center">
+                            <span class="material-symbols-outlined">event_available</span>
+                        </div>
+                        <p class="text-sm font-medium text-[#0F172A]">No scheduled appointments</p>
+                        <p class="text-xs text-[#94A3B8]">Accepted appointments will appear here.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# --- This week performance --- #}
+            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col gap-5">
+                <div class="flex justify-between items-center">
+                    <p class="font-semibold text-base text-[#0F172A]">This Week Performance</p>
+                    <span class="text-[11px] text-[#94A3B8]">{{ week_range|default:"" }}</span>
+                </div>
+
+                <div class="grid grid-cols-2 border border-[#F1F5F9] text-center">
+                    <div class="py-4 border-r border-b border-[#F1F5F9]">
+                        <p class="text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ consults_won|default:"0" }}</p>
+                        <p class="text-[10px] text-[#94A3B8]">Consults Won</p>
+                    </div>
+                    <div class="py-4 border-b border-[#F1F5F9]">
+                        <p class="text-[26px] leading-8 font-extrabold text-[#E11D48]">{{ no_shows|default:"0" }}</p>
+                        <p class="text-[10px] text-[#94A3B8]">No Shows</p>
+                    </div>
+                    <div class="py-4 border-r border-[#F1F5F9]">
+                        <p class="text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ bids_answered|default:"0" }}</p>
+                        <p class="text-[10px] text-[#94A3B8]">Bids Answered</p>
+                    </div>
+                    <div class="py-4">
+                        <p class="text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ docs_shared|default:"0" }}</p>
+                        <p class="text-[10px] text-[#94A3B8]">Docs Shared</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <p class="text-[11px] font-bold text-[#0F172A] uppercase">Target vs Actual</p>
+                    <div>
+                        <div class="flex justify-between text-xs text-[#475569] mb-1.5">
+                            <span>Median Start Delay</span>
+                            <span class="font-bold text-[#0F172A]">{{ median_start_delay|default:"0" }} min</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-[#F1F5F9] overflow-hidden">
+                            <div class="h-full rounded-full bg-[#0088FF]" style="width: {{ median_delay_percent|default:0 }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs text-[#475569] mb-1.5">
+                            <span>Bid Conversion Rate</span>
+                            <span class="font-bold text-[#0F172A]">{{ bid_conversion_rate|default:"0" }}%</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-[#F1F5F9] overflow-hidden">
+                            <div class="h-full rounded-full bg-[#0088FF]" style="width: {{ bid_conversion_rate|default:0 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ===================== APPOINTMENT REQUESTS TABLE ===================== #}
+        <div class="bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden">
+            <div class="flex justify-between items-center px-6 py-4">
+                <p class="font-semibold text-lg text-[#0F172A]">Appointment Requests</p>
+                <a href="{% url 'appointment' %}" class="text-[#0088FF] text-sm font-medium">View all →</a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[760px] text-sm">
+                    <thead>
+                        <tr class="bg-[#0088FF] text-white text-[11px] font-medium tracking-wide">
+                            <th class="py-3 px-6 text-left">PATIENT</th>
+                            <th class="py-3 px-3 text-center">DATE &amp; TIME</th>
+                            <th class="py-3 px-3 text-center">MODE</th>
+                            <th class="py-3 px-3 text-center">URGENCY</th>
+                            <th class="py-3 px-3 text-center">BUDGET</th>
+                            <th class="py-3 px-6 text-center">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#F1F5F9]">
+                        {% for appointment in appointment_requests %}
+                        <tr id="appointment-row-{{ appointment.id }}" class="appointment-row hover:bg-[#EFF6FF] transition-colors">
+                            {# Patient #}
+                            <td class="py-3 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-[#0088FF] text-white text-xs font-semibold flex items-center justify-center shrink-0">
+                                        {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <p class="font-semibold text-[13px] text-[#0F172A]">
+                                            Pt. {{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}
+                                        </p>
+                                        <p class="text-[11px] text-[#94A3B8]">{{ appointment.description|truncatechars:30 }}</p>
+                                    </div>
+                                </div>
+                            </td>
+
+                            {# Date #}
+                            <td class="py-3 px-3 text-center text-[#475569] text-xs">
+                                {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
+                            </td>
+
+                            {# Mode #}
+                            <td class="py-3 px-3 text-center">
+                                <span class="inline-block rounded-full px-2.5 py-0.5 border text-[10px] font-medium
+                                    {% if appointment.consultation_type == 'home_visit' %}border-[#0088FF] text-[#0088FF] bg-[#EFF6FF]
+                                    {% elif appointment.consultation_type == 'video_call' %}border-[#14B8A6] text-[#14B8A6] bg-[#F0FDFA]
+                                    {% elif appointment.consultation_type == 'audio_call' %}border-[#A855F7] text-[#A855F7] bg-[#FAF5FF]
+                                    {% elif appointment.consultation_type == 'hospital_visit' %}border-[#7C3AED] text-[#7C3AED] bg-[#F5F3FF]
+                                    {% else %}border-[#22C55E] text-[#22C55E] bg-[#F0FDF4]{% endif %}">
+                                    {{ appointment.consultation_type|title }}
+                                </span>
+                            </td>
+
+                            {# Urgency #}
+                            <td class="py-3 px-3 text-center">
+                                {% if appointment.urgency == 'emergency' or appointment.urgency == 'Emergency' %}
+                                <span class="inline-block rounded-full px-3 py-0.5 text-[10px] font-medium bg-[#FFE4E6] text-[#E11D48]">Emergency</span>
+                                {% else %}
+                                <span class="inline-block rounded-full px-3 py-0.5 text-[10px] font-medium bg-[#F1F5F9] text-[#64748B]">Normal</span>
+                                {% endif %}
+                            </td>
+
+                            {# Budget #}
+                            <td class="py-3 px-3 text-center font-semibold text-[#0088FF]">
+                                {% if appointment.budget %}&#8377;{{ appointment.budget }}{% else %}&ndash;{% endif %}
+                            </td>
+
+                            {# Actions #}
+                            <td class="py-3 px-6">
+                                <div class="flex items-center justify-center gap-3">
+                                    <span class="material-symbols-outlined !text-xl cursor-pointer popup-btn appointment-detail-btn text-[#0088FF]"
+                                          data-id="{{ appointment.id }}" title="View details">visibility</span>
+
+                                    <span class="material-symbols-outlined !text-xl cursor-pointer place-bid-btn text-[#22C55E]"
+                                          data-id="{{ appointment.id }}" title="Place bid">check_circle</span>
+
+                                    {% comment %}
+                                    <span class="material-symbols-outlined !text-xl cursor-pointer reject-bid-btn text-[#E11D48]"
+                                          data-id="{{ appointment.id }}" title="Reject">cancel</span>
+                                    {% endcomment %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="py-10 text-center text-sm text-[#64748B]">No pending appointments available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# ===================== MARKET TRENDS ===================== #}
+        <div class="bg-white border border-[#0088FF] rounded-2xl p-6 flex flex-col gap-4">
+            <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-[#EFF6FF] text-[#0088FF] flex items-center justify-center">
+                        <span class="material-symbols-outlined !text-xl">bar_chart</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-base text-[#0F172A]">Market Trends — Doctor Insights</p>
+                        <p class="text-xs text-[#64748B]">Real-time localized demand patterns in your specialty jurisdiction</p>
+                    </div>
+                </div>
+                <span class="text-sm font-semibold text-[#0088FF]">&#8377;{{ avg_winning_bid|default:"0" }} →</span>
+            </div>
+
+            <ul class="flex flex-col gap-3 text-sm text-[#0F172A]">
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined !text-lg text-[#22C55E]">check_circle</span>
+                    <span>Most common complaints in your area: <strong>{{ common_complaints|default:"—" }}</strong></span>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined !text-lg text-[#22C55E]">check_circle</span>
+                    <span>Avg winning bid by General Physician: <strong>&#8377;{{ avg_winning_bid|default:"0" }} per consultation</strong></span>
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="material-symbols-outlined !text-lg text-[#22C55E]">check_circle</span>
+                    <span>Most requested consultation mode this week: <strong>{{ top_mode|default:"—" }}</strong></span>
+                </li>
+            </ul>
+
+            <a href="{% url 'appointment' %}"
+               class="w-full rounded-lg bg-[#0088FF] hover:bg-[#0077E6] text-white text-sm font-semibold py-3 flex items-center justify-center gap-1 transition-colors">
+                View Full Insights Report →
+            </a>
+        </div>
+
+        {# ===================== APPOINTMENT REQUEST DETAIL POPUP ===================== #}
+        <div class="fixed inset-0 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden z-40">
+            <div class="bg-white h-[500px] md:h-[650px] lg:h-[720px] mx-2 md:mx-0 overflow-y-auto no-scrollbar p-5 rounded-2xl">
+                <div class="flex items-center justify-between">
+                    <p class="font-semibold text-base text-[#0F172A]">Appointment Details</p>
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <button type="button" class="cursor-pointer popup-btn" data-popup="sharePopup">
+                                <span class="material-symbols-outlined !text-xl">share</span>
+                            </button>
+                            <!-- Share popup -->
+                            <div class="sharePopup hidden absolute right-0">
+                                <div class="bg-white w-130 rounded-2xl shadow-lg p-6 relative border border-[#0088FF]">
+                                    <div class="flex justify-between items-center">
+                                        <p class="font-semibold text-xl">Share</p>
+                                        <span class="material-symbols-outlined close-popup cursor-pointer" data-popup="sharePopup">close</span>
+                                    </div>
+                                    <hr class="border-[#0088FF] mt-4" />
+                                    <div class="flex justify-between pt-4">
+                                        <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="whatsapp">
+                                            <img src="/static/images/whatsappicon.svg" alt="whatsapp logo" class="w-10 h-10 cursor-pointer" />
+                                            <p class="font-normal text-base text-dark-gray">Whatsapp</p>
+                                        </div>
+                                        <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="telegram">
+                                            <img src="/static/images/telegramicon.svg" alt="telegram logo" class="w-10 h-10 cursor-pointer" />
+                                            <p class="font-normal text-base text-dark-gray">Telegram</p>
+                                        </div>
+                                        <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="facebook">
+                                            <img src="/static/images/facebookicon.svg" alt="facebook logo" class="w-10 h-10 cursor-pointer" />
+                                            <p class="font-normal text-base text-dark-gray">Facebook</p>
+                                        </div>
+                                        <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="sms">
+                                            <img src="/static/images/smsicon.svg" alt="sms logo" class="w-10 h-10 cursor-pointer" />
+                                            <p class="font-normal text-base text-dark-gray">Message</p>
+                                        </div>
+                                        <div class="flex flex-col items-center gap-2 w-20 text-center share-app cursor-pointer" data-app="gmail">
+                                            <img src="/static/images/gmailicon.svg" alt="gmail logo" class="w-10 h-10 cursor-pointer" />
+                                            <p class="font-normal text-base text-dark-gray">E-mail</p>
+                                        </div>
+                                    </div>
+                                    <div class="pt-4 relative mt-6">
+                                        <input type="text" id="share-link" value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci"
+                                               class="w-full rounded-md p-4 font-normal text-sm border" disabled />
+                                        <button type="button"
+                                                class="copy-btn absolute right-3 top-6 bg-[#0088FF] text-white rounded-md p-2 cursor-pointer"
+                                                data-target="#share-link">Copy</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="close-popup cursor-pointer" data-popup="appointmentRequestDetail">
+                            <span class="material-symbols-outlined !text-2xl">close</span>
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="mt-4 border-[#E2E8F0]">
+
+                <div class="mt-4 bg-[#EFF6FF] rounded-xl p-4 w-[648px] max-w-full h-[196px] flex items-center gap-4">
+                    <div class="flex flex-col">
+                        <img src="/static/images/patient-7.svg" alt="">
+                        <p id="popup-patient-name" class="font-normal text-sm text-center pt-4">Dolly Paris</p>
+                    </div>
+                    <div class="flex flex-col gap-4 w-[180px]">
+                        <div class="flex gap-2">
+                            <div class="border border-[#E2E8F0] bg-white rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[#0088FF] !text-lg">female</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-[#64748B]">Gender</p>
+                                <p id="popup-gender" class="font-normal text-sm">Female</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="border border-[#E2E8F0] bg-white rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[#0088FF] !text-lg">hourglass</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-[#64748B]">Age</p>
+                                <p id="popup-age" class="font-normal text-sm">25</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="border border-[#E2E8F0] bg-white rounded-lg w-6 h-6 flex items-center justify-center">
+                                <img src="/static/images/visit-icon.svg" alt="">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-[#64748B]">Visit Type</p>
+                                <p id="popup-visit-type" class="font-normal text-sm">Lab Walk-in</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="flex gap-2">
+                            <div class="border border-[#E2E8F0] bg-white rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[#0088FF] !text-lg">call</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-[#64748B]">Phone no.</p>
+                                <p id="popup-phone" class="font-normal text-sm">+91 7737533456</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="border border-[#E2E8F0] bg-white rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[#0088FF] !text-lg">calendar_today</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-[#64748B]">Appointment date</p>
+                                <p id="popup-date" class="font-normal text-sm">22/07/2025,12:30 PM</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="border border-[#E2E8F0] bg-white rounded-lg w-6 h-6 flex items-center justify-center">
+                                <img src="/static/images/address-icon.svg" alt="">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-[#64748B]">Address</p>
+                                <p id="popup-address" class="font-normal text-sm">123 maple los Angeles, CA 90001 usa</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="mt-4 border-[#E2E8F0]">
+
+                <div class="pt-4">
+                    <p class="font-semibold text-sm">Medical Information</p>
+                    <div class="pt-4 flex gap-4">
+                        <div class="flex gap-2">
+                            <div class="border border-[#E2E8F0] rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[#0088FF] !text-lg">medical_services</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-[#64748B] whitespace-nowrap">Medical Requirement</p>
+                                <p id="popup-medical-requirement" class="font-normal text-sm">RT-PCR</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="border border-[#E2E8F0] rounded-lg w-6 h-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[#0088FF] !text-lg p-2">details</span>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <p class="font-normal text-xs text-[#64748B]">Details</p>
+                                <p id="popup-details" class="font-normal text-sm">Experiencing mild fever, sore throat, and body ache — <br>
+                                    requesting RT-PCR to rule out viral infection.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-6 flex items-center justify-between">
+                    <p class="font-normal text-sm">Attachment</p>
+                    <div class="flex items-center gap-2 text-[#0088FF] cursor-pointer view-attachment">
+                        <p>image.pdf</p>
+                        <span class="material-symbols-outlined">visibility</span>
+                    </div>
+                </div>
+
+                {# ---- Step 1: Enquiry ---- #}
+                <div class="enquiredDetail">
+                    <div class="flex flex-col mt-4 py-4 gap-4">
+                        <div class="flex justify-center items-center gap-1">
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 flex">
+                                <div class="w-1/2 h-full bg-[#0088FF]"></div>
+                                <div class="w-1/2 h-full bg-[#E2E8F0]"></div>
+                            </div>
+                            <div class="w-2 h-2 bg-[#E2E8F0] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-[#E2E8F0]"></div>
+                            <div class="w-2 h-2 bg-[#E2E8F0] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-[#E2E8F0]"></div>
+                            <div class="w-2 h-2 bg-[#E2E8F0] rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between mx-10">
+                            <p class="pl-6 font-normal text-sm">Enquiry</p>
+                            <p class="pl-2 text-[#64748B] font-normal text-sm">Appointment</p>
+                            <p class="text-[#64748B] font-normal text-sm">Completed</p>
+                            <p class="text-[#64748B] font-normal text-sm">Cancel/Expired</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm">Order ID</p>
+                            <p class="font-normal text-sm">Budget</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p id="popup-order-id" class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                            <p id="popup-budget" class="text-[#0088FF] font-medium text-sm">&#8377;500</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+                        <button class="bg-[#0088FF] hover:bg-[#0077E6] text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer accept-button">Accept</button>
+                        {% comment %} <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup" data-popup="appointmentRequestDetail">Reject</button> {% endcomment %}
+                    </div>
+                </div>
+
+                {# ---- Step 2: Accepted ---- #}
+                <div class="acceptedDetail hidden">
+                    <div class="flex flex-col mt-4 py-4 gap-4">
+                        <div class="flex justify-center items-center gap-1">
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-[#0088FF]"></div>
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-[#0088FF]"></div>
+                            <div class="w-2 h-2 bg-[#E2E8F0] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-[#E2E8F0]"></div>
+                            <div class="w-2 h-2 bg-[#E2E8F0] rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between mx-10">
+                            <p class="pl-6 font-normal text-sm">Enquiry</p>
+                            <p class="pl-2 font-normal text-sm">Appointment</p>
+                            <p class="text-[#64748B] font-normal text-sm">Completed</p>
+                            <p class="text-[#64748B] font-normal text-sm">Cancel/Expired</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm">Order ID</p>
+                            <p class="font-normal text-sm">6 km</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                            <p class="font-normal text-sm">20 mins away</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex justify-between items-center">
+                        <div class="flex gap-2 items-center">
+                            <p class="font-normal text-sm">No Show</p>
+                            <input type="checkbox" class="w-4 h-4 border-2 accent-[#0088FF]">
+                        </div>
+                        <p class="font-normal text-sm text-[#64748B]">Patient didn’t show up</p>
+                    </div>
+                    <div class="pt-4 flex justify-between items-center">
+                        <div class="flex gap-2 items-center">
+                            <p class="font-normal text-sm">Home Visit</p>
+                            <p class="font-normal text-sm text-[#0088FF]">&#8377;500</p>
+                        </div>
+                        <div class="border border-[#0088FF] bg-[#EFF6FF] px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
+                            <p class="font-normal text-sm">Proforma Bill</p>
+                            <span class="material-symbols-outlined !text-lg">visibility</span>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+                        <button class="bg-[#0088FF] hover:bg-[#0077E6] text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer complete-btn">Complete</button>
+                        <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer text-nowrap popup-btn"
+                                data-popup="cancelAppointmentPopup">Cancel Appointment</button>
+                    </div>
+
+                    <div class="cancelAppointmentPopup fixed inset-0 flex items-center justify-center hidden bg-semi-transparent-black">
+                        <div class="bg-white w-[452px] h-[213px] p-5 rounded-2xl flex flex-col gap-4 relative items-center">
+                            <button class="close-popup absolute right-4 top-8 cursor-pointer" data-popup="cancelAppointmentPopup">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                            <div class="w-15 h-15 rounded-full bg-rosewater p-3 flex items-center justify-center">
+                                <img src="/static/images/appointment.svg" alt="">
+                            </div>
+                            <p class="font-normal text-base">Are you sure you want to cancel this appointment ?</p>
+                            <div class="bg-rosewater text-error w-[198px] h-12 rounded-md p-2.5 cursor-pointer cancelAppointmentBtn flex items-center justify-center font-semibold">
+                                Cancel Appointment
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# ---- Step 3: Complete ---- #}
+                <div class="completeDetail hidden">
+                    <div class="flex flex-col mt-4 py-4 gap-4">
+                        <div class="flex justify-center items-center gap-1">
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-[#0088FF]"></div>
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-[#0088FF]"></div>
+                            <div class="w-2 h-2 bg-[#E2E8F0] rounded-full"></div>
+                            <div class="w-[138px] h-0.5 bg-[#E2E8F0]"></div>
+                            <div class="w-2 h-2 bg-[#E2E8F0] rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between mx-10">
+                            <p class="pl-6 font-normal text-sm">Enquiry</p>
+                            <p class="pl-2 font-normal text-sm">Appointment</p>
+                            <p class="text-[#64748B] font-normal text-sm">Completed</p>
+                            <p class="text-[#64748B] font-normal text-sm">Cancel/Expired</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm">Order ID</p>
+                            <p class="font-normal text-sm">6 km</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                            <p class="font-normal text-sm">20 mins away</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex justify-between items-center">
+                        <div class="flex gap-2 items-center">
+                            <p class="font-normal text-sm">No Show</p>
+                            <input type="checkbox" class="w-4 h-4 border-2 accent-[#0088FF]" checked>
+                        </div>
+                        <p class="font-normal text-sm text-strong-red">Patient didn’t show up</p>
+                    </div>
+                    <div class="pt-4 flex justify-between items-center">
+                        <div class="flex gap-2 items-center">
+                            <p class="font-normal text-sm">Home Visit</p>
+                            <p class="font-normal text-sm text-[#0088FF]">&#8377;500</p>
+                        </div>
+                        <div class="border border-[#0088FF] bg-[#EFF6FF] px-2.5 py-1 rounded-lg flex items-center gap-2 cursor-pointer">
+                            <p class="font-normal text-sm">Proforma Bill</p>
+                            <span class="material-symbols-outlined !text-lg">visibility</span>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex justify-center items-center gap-2 mb-2">
+                        <button class="bg-[#0088FF] hover:bg-[#0077E6] text-white rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer save-btn">Save</button>
+                        <button class="border border-strong-red text-strong-red rounded-lg w-[180px] h-10 px-4 py-2 cursor-pointer close-popup text-nowrap"
+                                data-popup="appointmentRequestDetail">Cancel</button>
+                    </div>
+                </div>
+
+                {# ---- Step 4: Missing / No show ---- #}
+                <div class="missingDetails hidden">
+                    <div class="flex flex-col mt-4 py-4 gap-4">
+                        <div class="flex justify-center items-center gap-1">
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[192px] h-0.5 bg-[#0088FF]"></div>
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[192px] h-0.5 bg-[#0088FF]"></div>
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between mx-20">
+                            <p class="font-normal text-sm">Enquiry</p>
+                            <p class="font-normal text-sm">Appointment</p>
+                            <p class="font-normal text-sm">No Show</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm">Order ID</p>
+                            <p class="font-normal text-sm">Missing Reason</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                            <p class="font-normal text-sm text-strong-red">Patient didn’t show up</p>
+                        </div>
+                    </div>
+                </div>
+
+                {# ---- Step 5: Cancelled ---- #}
+                <div class="cancelDetails hidden">
+                    <div class="flex flex-col mt-4 py-4 gap-4">
+                        <div class="flex justify-center items-center gap-1">
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[192px] h-0.5 bg-[#0088FF]"></div>
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                            <div class="w-[192px] h-0.5 bg-[#0088FF]"></div>
+                            <div class="w-2 h-2 bg-[#0088FF] rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between mx-20">
+                            <p class="font-normal text-sm">Enquiry</p>
+                            <p class="font-normal text-sm">Appointment</p>
+                            <p class="font-normal text-sm">Cancelled</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm">Order ID</p>
+                            <p class="font-normal text-sm">Cancelled by</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="font-normal text-sm text-blue-gray">Order #R32512</p>
+                            <p class="font-normal text-sm text-strong-red">Technician</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# ---- Attachment popup ---- #}
+            <div class="attachmentPopup hidden fixed inset-0 flex items-center justify-center bg-semi-transparent-black">
+                <div class="bg-white p-5 rounded-2xl w-[600px] h-[699px]">
+                    <div class="flex items-center justify-between">
+                        <p class="font-normal text-sm">Attachment</p>
+                        <span class="material-symbols-outlined cursor-pointer close-attachment">close</span>
+                    </div>
+                    <img src="/static/images/attachment.png" alt="attachment" class="w-full h-full">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 {% endblock %}
+
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
