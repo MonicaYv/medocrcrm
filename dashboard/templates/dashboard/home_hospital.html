@@ -1,4 +1,7 @@
-{% extends "dashboard/layout.html" %} {% load static %} {% block title %}Home{% endblock %} {% block content %}
+{% extends "dashboard/layout.html" %}
+{% load static %}
+{% block title %}Home{% endblock %}
+{% block content %}
 
 <!-- ================= SKELETON (unchanged) ================= -->
 <div
@@ -122,10 +125,24 @@
               >{{ hospital_profile.hospital_name }}
             </h2>
             <p class="addr">
-              {% if hospital_profile.address %}{{ hospital_profile.address }}{% endif %}
-              {% if hospital_profile.city %}{% if hospital_profile.address %}, {% endif %}{{ hospital_profile.city.name }}{% endif %}
-              {% if hospital_profile.state %}{% if hospital_profile.city or hospital_profile.address %}, {% endif %}{{ hospital_profile.state.name }}{% endif %}
-              {% if hospital_profile.pincode %}{% if hospital_profile.city or hospital_profile.address or hospital_profile.state %} — {% endif %}{{ hospital_profile.pincode }}{% endif %}
+              {% if hospital_profile.address %}
+                {{ hospital_profile.address }}
+              {% endif %}
+
+              {% if hospital_profile.city %}
+                {% if hospital_profile.address %}, {% endif %}
+                {{ hospital_profile.city.name }}
+              {% endif %}
+
+              {% if hospital_profile.state %}
+                {% if hospital_profile.city or hospital_profile.address %}, {% endif %}
+                {{ hospital_profile.state.name }}
+              {% endif %}
+
+              {% if hospital_profile.pincode %}
+                {% if hospital_profile.city or hospital_profile.address or hospital_profile.state %} — {% endif %}
+                {{ hospital_profile.pincode }}
+              {% endif %}
             </p>
             <p class="hid">
               Hospital ID {{
@@ -478,74 +495,81 @@
         </div>
         <div>
           {% for appointment in scheduled_appointments %}
-          <div
-            class="schedule-row hh-row"
-            data-state="{{ appointment.schedule_state|default:'upcoming' }}"
-          >
-            <span class="hh-time"
-              >{{ appointment.preferred_date_from|date:"h:i A" }}</span
+            <div
+              class="schedule-row hh-row"
+              data-state="{{ appointment.schedule_state|default:'upcoming' }}"
             >
-            <span class="hh-avatar-lg" style="background: #2563eb"
-              >{{ appointment.user.full_name|slice:":2"|upper }}</span
-            >
-            <div class="hh-grow">
-              <p class="hh-name">{{ appointment.user.full_name }}</p>
-              <p class="hh-sub">
-                {{ appointment.category.name }} · {% if appointment.preferred_mode == "home_visit" %}Home Visit{% else %}Hospital Visit{% endif %}
+              <span class="hh-time"
+                >{{ appointment.preferred_date_from|date:"h:i A" }}</span
+              >
+              <span class="hh-avatar-lg" style="background: #2563eb"
+                >{{ appointment.user.full_name|slice:":2"|upper }}</span
+              >
+              <div class="hh-grow">
+                <p class="hh-name">{{ appointment.user.full_name }}</p>
+                <p class="hh-sub">
+                  {{ appointment.category.name }} ·
+                  {% if appointment.preferred_mode == "home_visit" %}
+                    Home Visit
+                  {% else %}
+                    Hospital Visit
+                  {% endif %}
+                </p>
+              </div>
+              <span class="hh-pill hh-green">Confirmed</span>
+              <span
+                class="material-symbols-outlined hh-eye popup-btn appointment-detail-btn"
+                data-id="{{ appointment.id }}"
+                >visibility</span
+              >
+            </div>
+          {% empty %}
+            {% if hide_demo %}
+              <p
+                style="
+                  padding: 32px 0;
+                  text-align: center;
+                  font-size: 12px;
+                  color: #6b7280;
+                "
+              >
+                No scheduled appointments
               </p>
-            </div>
-            <span class="hh-pill hh-green">Confirmed</span>
-            <span
-              class="material-symbols-outlined hh-eye popup-btn appointment-detail-btn"
-              data-id="{{ appointment.id }}"
-              >visibility</span
-            >
-          </div>
-          {% empty %}{% if hide_demo %}
-          <p
-            style="
-              padding: 32px 0;
-              text-align: center;
-              font-size: 12px;
-              color: #6b7280;
-            "
-          >
-            No scheduled appointments
-          </p>
-          {% else %}
-          <div class="schedule-row hh-row" data-state="upcoming">
-            <span class="hh-time">10:30–11:00 AM</span>
-            <span class="hh-avatar-lg" style="background: #2563eb">RK</span>
-            <div class="hh-grow">
-              <p class="hh-name">Rachel Kate</p>
-              <p class="hh-sub">
-                General Medicine OPD · Outpatient Block · Desk 2
-              </p>
-            </div>
-            <span class="hh-pill hh-green">Confirmed</span>
-            <span class="material-symbols-outlined hh-eye">visibility</span>
-          </div>
-          <div class="schedule-row hh-row" data-state="upcoming">
-            <span class="hh-time">11:00–11:30 AM</span>
-            <span class="hh-avatar-lg" style="background: #0f766e">KC</span>
-            <div class="hh-grow">
-              <p class="hh-name">Karen Cooper</p>
-              <p class="hh-sub">Wound Dressing · Procedure Room 1</p>
-            </div>
-            <span class="hh-pill hh-green">Confirmed</span>
-            <span class="material-symbols-outlined hh-eye">visibility</span>
-          </div>
-          <div class="schedule-row hh-row" data-state="upcoming">
-            <span class="hh-time">11:30 AM–12:30 PM</span>
-            <span class="hh-avatar-lg" style="background: #7c3aed">JK</span>
-            <div class="hh-grow">
-              <p class="hh-name">Josh Kerr</p>
-              <p class="hh-sub">Day-care Service · Day-care Unit</p>
-            </div>
-            <span class="hh-pill hh-green">Confirmed</span>
-            <span class="material-symbols-outlined hh-eye">visibility</span>
-          </div>
-          {% endif %}{% endfor %}
+            {% else %}
+              <div class="schedule-row hh-row" data-state="upcoming">
+                <span class="hh-time">10:30–11:00 AM</span>
+                <span class="hh-avatar-lg" style="background: #2563eb">RK</span>
+                <div class="hh-grow">
+                  <p class="hh-name">Rachel Kate</p>
+                  <p class="hh-sub">
+                    General Medicine OPD · Outpatient Block · Desk 2
+                  </p>
+                </div>
+                <span class="hh-pill hh-green">Confirmed</span>
+                <span class="material-symbols-outlined hh-eye">visibility</span>
+              </div>
+              <div class="schedule-row hh-row" data-state="upcoming">
+                <span class="hh-time">11:00–11:30 AM</span>
+                <span class="hh-avatar-lg" style="background: #0f766e">KC</span>
+                <div class="hh-grow">
+                  <p class="hh-name">Karen Cooper</p>
+                  <p class="hh-sub">Wound Dressing · Procedure Room 1</p>
+                </div>
+                <span class="hh-pill hh-green">Confirmed</span>
+                <span class="material-symbols-outlined hh-eye">visibility</span>
+              </div>
+              <div class="schedule-row hh-row" data-state="upcoming">
+                <span class="hh-time">11:30 AM–12:30 PM</span>
+                <span class="hh-avatar-lg" style="background: #7c3aed">JK</span>
+                <div class="hh-grow">
+                  <p class="hh-name">Josh Kerr</p>
+                  <p class="hh-sub">Day-care Service · Day-care Unit</p>
+                </div>
+                <span class="hh-pill hh-green">Confirmed</span>
+                <span class="material-symbols-outlined hh-eye">visibility</span>
+              </div>
+            {% endif %}
+          {% endfor %}
         </div>
         <a
           href="{% url 'history' %}"
@@ -829,199 +853,201 @@
                 </div>
               </td>
             </tr>
-            {% empty %}{% if hide_demo %}
-            <tr>
-              <td
-                colspan="9"
-                style="text-align: center; padding: 28px; color: #6b7280"
-              >
-                No pending appointments available
-              </td>
-            </tr>
-            {% else %}
-            <tr class="request-row" data-status="new">
-              <td>
-                <a href="#" class="hh-link">REQ-H5501</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #2563eb">DP</span
-                  ><b>Dolly Paris</b>
-                </div>
-              </td>
-              <td><b>General Medicine OPD</b></td>
-              <td>29 Sep<span class="hh-sub2">11:00 AM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹700</td>
-              <td class="hh-left-g">18m</td>
-              <td><span class="hh-pill hh-blue">New</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="new">
-              <td>
-                <a href="#" class="hh-link">REQ-H5502</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #ea580c">SL</span
-                  ><b>Steve Lamark</b>
-                </div>
-              </td>
-              <td><b>Wound Dressing</b></td>
-              <td>29 Sep<span class="hh-sub2">12:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹1,200</td>
-              <td class="hh-left-r">12m</td>
-              <td><span class="hh-pill hh-blue">New</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="new">
-              <td>
-                <a href="#" class="hh-link">REQ-H5503</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #7c3aed">PS</span
-                  ><b>Priya Sharma</b>
-                </div>
-              </td>
-              <td><b>Orthopaedic OPD</b></td>
-              <td>29 Sep<span class="hh-sub2">1:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-red">Priority</span></td>
-              <td class="hh-budget">₹900</td>
-              <td class="hh-left-r">8m</td>
-              <td><span class="hh-pill hh-blue">New</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="new">
-              <td>
-                <a href="#" class="hh-link">REQ-H5504</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #0f766e">RM</span
-                  ><b>Rajan Mehta</b>
-                </div>
-              </td>
-              <td>
-                <b>Day-care Service</b
-                ><span class="hh-note">Availability required</span>
-              </td>
-              <td>30 Sep<span class="hh-sub2">10:00 AM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹3,500</td>
-              <td class="hh-left-g">45m</td>
-              <td><span class="hh-pill hh-blue">New</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="draft">
-              <td>
-                <a href="#" class="hh-link">REQ-H5505</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #15803d">AK</span
-                  ><b>Anil Kumar</b>
-                </div>
-              </td>
-              <td><b>General Medicine OPD</b></td>
-              <td>29 Sep<span class="hh-sub2">3:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹700</td>
-              <td class="hh-left-g">55m</td>
-              <td><span class="hh-pill hh-yellow">Draft</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="draft">
-              <td>
-                <a href="#" class="hh-link">REQ-H5506</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #db2777">DS</span
-                  ><b>Deepa Shah</b>
-                </div>
-              </td>
-              <td>
-                <b>Planned Admission</b
-                ><span class="hh-note">Scope confirmation</span>
-              </td>
-              <td>30 Sep<span class="hh-sub2">11:00 AM</span></td>
-              <td>Planned Admission</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹5,000</td>
-              <td class="hh-left-r">1h 10m</td>
-              <td><span class="hh-pill hh-yellow">Draft</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="submitted">
-              <td>
-                <a href="#" class="hh-link">REQ-H5507</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #475569">VM</span
-                  ><b>Vijay Mehta</b>
-                </div>
-              </td>
-              <td><b>Orthopaedic OPD</b></td>
-              <td>29 Sep<span class="hh-sub2">4:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹900</td>
-              <td class="hh-left-r">1h 20m</td>
-              <td><span class="hh-pill hh-purple">Bid Submitted</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            <tr class="request-row" data-status="submitted">
-              <td>
-                <a href="#" class="hh-link">REQ-H5508</a>
-                <div class="hh-cust">
-                  <span class="hh-avatar" style="background: #0891b2">KN</span
-                  ><b>Kavitha Nair</b>
-                </div>
-              </td>
-              <td><b>Wound Dressing</b></td>
-              <td>29 Sep<span class="hh-sub2">5:00 PM</span></td>
-              <td>Hospital Visit</td>
-              <td><span class="hh-pill hh-gray">Standard</span></td>
-              <td class="hh-budget">₹1,200</td>
-              <td class="hh-left-r">1h 35m</td>
-              <td><span class="hh-pill hh-purple">Bid Submitted</span></td>
-              <td>
-                <div class="hh-actions">
-                  <span class="material-symbols-outlined">visibility</span
-                  ><span class="material-symbols-outlined">more_vert</span>
-                </div>
-              </td>
-            </tr>
-            {% endif %}{% endfor %}
+            {% empty %}
+              {% if hide_demo %}
+                <tr>
+                  <td
+                    colspan="9"
+                    style="text-align: center; padding: 28px; color: #6b7280"
+                  >
+                    No pending appointments available
+                  </td>
+                </tr>
+              {% else %}
+                <tr class="request-row" data-status="new">
+                  <td>
+                    <a href="#" class="hh-link">REQ-H5501</a>
+                    <div class="hh-cust">
+                      <span class="hh-avatar" style="background: #2563eb">DP</span
+                      ><b>Dolly Paris</b>
+                    </div>
+                  </td>
+                  <td><b>General Medicine OPD</b></td>
+                  <td>29 Sep<span class="hh-sub2">11:00 AM</span></td>
+                  <td>Hospital Visit</td>
+                  <td><span class="hh-pill hh-gray">Standard</span></td>
+                  <td class="hh-budget">₹700</td>
+                  <td class="hh-left-g">18m</td>
+                  <td><span class="hh-pill hh-blue">New</span></td>
+                  <td>
+                    <div class="hh-actions">
+                      <span class="material-symbols-outlined">visibility</span
+                      ><span class="material-symbols-outlined">more_vert</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="request-row" data-status="new">
+                  <td>
+                    <a href="#" class="hh-link">REQ-H5502</a>
+                    <div class="hh-cust">
+                      <span class="hh-avatar" style="background: #ea580c">SL</span
+                      ><b>Steve Lamark</b>
+                    </div>
+                  </td>
+                  <td><b>Wound Dressing</b></td>
+                  <td>29 Sep<span class="hh-sub2">12:00 PM</span></td>
+                  <td>Hospital Visit</td>
+                  <td><span class="hh-pill hh-gray">Standard</span></td>
+                  <td class="hh-budget">₹1,200</td>
+                  <td class="hh-left-r">12m</td>
+                  <td><span class="hh-pill hh-blue">New</span></td>
+                  <td>
+                    <div class="hh-actions">
+                      <span class="material-symbols-outlined">visibility</span
+                      ><span class="material-symbols-outlined">more_vert</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="request-row" data-status="new">
+                  <td>
+                    <a href="#" class="hh-link">REQ-H5503</a>
+                    <div class="hh-cust">
+                      <span class="hh-avatar" style="background: #7c3aed">PS</span
+                      ><b>Priya Sharma</b>
+                    </div>
+                  </td>
+                  <td><b>Orthopaedic OPD</b></td>
+                  <td>29 Sep<span class="hh-sub2">1:00 PM</span></td>
+                  <td>Hospital Visit</td>
+                  <td><span class="hh-pill hh-red">Priority</span></td>
+                  <td class="hh-budget">₹900</td>
+                  <td class="hh-left-r">8m</td>
+                  <td><span class="hh-pill hh-blue">New</span></td>
+                  <td>
+                    <div class="hh-actions">
+                      <span class="material-symbols-outlined">visibility</span
+                      ><span class="material-symbols-outlined">more_vert</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="request-row" data-status="new">
+                  <td>
+                    <a href="#" class="hh-link">REQ-H5504</a>
+                    <div class="hh-cust">
+                      <span class="hh-avatar" style="background: #0f766e">RM</span
+                      ><b>Rajan Mehta</b>
+                    </div>
+                  </td>
+                  <td>
+                    <b>Day-care Service</b
+                    ><span class="hh-note">Availability required</span>
+                  </td>
+                  <td>30 Sep<span class="hh-sub2">10:00 AM</span></td>
+                  <td>Hospital Visit</td>
+                  <td><span class="hh-pill hh-gray">Standard</span></td>
+                  <td class="hh-budget">₹3,500</td>
+                  <td class="hh-left-g">45m</td>
+                  <td><span class="hh-pill hh-blue">New</span></td>
+                  <td>
+                    <div class="hh-actions">
+                      <span class="material-symbols-outlined">visibility</span
+                      ><span class="material-symbols-outlined">more_vert</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="request-row" data-status="draft">
+                  <td>
+                    <a href="#" class="hh-link">REQ-H5505</a>
+                    <div class="hh-cust">
+                      <span class="hh-avatar" style="background: #15803d">AK</span
+                      ><b>Anil Kumar</b>
+                    </div>
+                  </td>
+                  <td><b>General Medicine OPD</b></td>
+                  <td>29 Sep<span class="hh-sub2">3:00 PM</span></td>
+                  <td>Hospital Visit</td>
+                  <td><span class="hh-pill hh-gray">Standard</span></td>
+                  <td class="hh-budget">₹700</td>
+                  <td class="hh-left-g">55m</td>
+                  <td><span class="hh-pill hh-yellow">Draft</span></td>
+                  <td>
+                    <div class="hh-actions">
+                      <span class="material-symbols-outlined">visibility</span
+                      ><span class="material-symbols-outlined">more_vert</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="request-row" data-status="draft">
+                  <td>
+                    <a href="#" class="hh-link">REQ-H5506</a>
+                    <div class="hh-cust">
+                      <span class="hh-avatar" style="background: #db2777">DS</span
+                      ><b>Deepa Shah</b>
+                    </div>
+                  </td>
+                  <td>
+                    <b>Planned Admission</b
+                    ><span class="hh-note">Scope confirmation</span>
+                  </td>
+                  <td>30 Sep<span class="hh-sub2">11:00 AM</span></td>
+                  <td>Planned Admission</td>
+                  <td><span class="hh-pill hh-gray">Standard</span></td>
+                  <td class="hh-budget">₹5,000</td>
+                  <td class="hh-left-r">1h 10m</td>
+                  <td><span class="hh-pill hh-yellow">Draft</span></td>
+                  <td>
+                    <div class="hh-actions">
+                      <span class="material-symbols-outlined">visibility</span
+                      ><span class="material-symbols-outlined">more_vert</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="request-row" data-status="submitted">
+                  <td>
+                    <a href="#" class="hh-link">REQ-H5507</a>
+                    <div class="hh-cust">
+                      <span class="hh-avatar" style="background: #475569">VM</span
+                      ><b>Vijay Mehta</b>
+                    </div>
+                  </td>
+                  <td><b>Orthopaedic OPD</b></td>
+                  <td>29 Sep<span class="hh-sub2">4:00 PM</span></td>
+                  <td>Hospital Visit</td>
+                  <td><span class="hh-pill hh-gray">Standard</span></td>
+                  <td class="hh-budget">₹900</td>
+                  <td class="hh-left-r">1h 20m</td>
+                  <td><span class="hh-pill hh-purple">Bid Submitted</span></td>
+                  <td>
+                    <div class="hh-actions">
+                      <span class="material-symbols-outlined">visibility</span
+                      ><span class="material-symbols-outlined">more_vert</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="request-row" data-status="submitted">
+                  <td>
+                    <a href="#" class="hh-link">REQ-H5508</a>
+                    <div class="hh-cust">
+                      <span class="hh-avatar" style="background: #0891b2">KN</span
+                      ><b>Kavitha Nair</b>
+                    </div>
+                  </td>
+                  <td><b>Wound Dressing</b></td>
+                  <td>29 Sep<span class="hh-sub2">5:00 PM</span></td>
+                  <td>Hospital Visit</td>
+                  <td><span class="hh-pill hh-gray">Standard</span></td>
+                  <td class="hh-budget">₹1,200</td>
+                  <td class="hh-left-r">1h 35m</td>
+                  <td><span class="hh-pill hh-purple">Bid Submitted</span></td>
+                  <td>
+                    <div class="hh-actions">
+                      <span class="material-symbols-outlined">visibility</span
+                      ><span class="material-symbols-outlined">more_vert</span>
+                    </div>
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -1029,65 +1055,72 @@
 
     <!-- 9. SUBSCRIPTION (logic unchanged) -->
     {% if active_subscription %}
-    <div
-      class="hh-card hh-pad"
-      style="margin-top: 18px; display: flex; flex-direction: column; gap: 14px"
-    >
-      <div class="hh-flexbetween">
-        <p class="hh-h">Subscription Details</p>
-        {% if active_subscription.status == "active" %}<span
-          class="hh-pill hh-blue"
-          style="padding: 6px 16px; font-size: 12px"
-          >Active</span
-        >{% endif %}
-      </div>
-      <div class="hh-flexbetween" style="align-items: center">
-        <p style="font-size: 14px">{{ active_subscription.plan.name }}</p>
-        <p style="font-size: 24px; font-weight: 700">
-          &#8377;{{ active_subscription.plan.price }}<span
-            style="font-size: 13px; font-weight: 400"
-            >/{{ active_subscription.plan.billing_cycle }}</span
+      <div
+        class="hh-card hh-pad"
+        style="margin-top: 18px; display: flex; flex-direction: column; gap: 14px"
+      >
+        <div class="hh-flexbetween">
+          <p class="hh-h">Subscription Details</p>
+          {% if active_subscription.status == "active" %}
+            <span
+              class="hh-pill hh-blue"
+              style="padding: 6px 16px; font-size: 12px"
+            >Active</span>
+          {% endif %}
+        </div>
+
+        <div class="hh-flexbetween" style="align-items: center">
+          <p style="font-size: 14px">{{ active_subscription.plan.name }}</p>
+          <p style="font-size: 24px; font-weight: 700">
+            &#8377;{{ active_subscription.plan.price }}
+            <span style="font-size: 13px; font-weight: 400">
+              /{{ active_subscription.plan.billing_cycle }}
+            </span>
+          </p>
+        </div>
+
+        <div>
+          {% if active_subscription.plan.discount_text %}
+            <p style="font-size: 12px; font-weight: 600; color: #6b7280">
+              {{ active_subscription.plan.discount_text }}
+            </p>
+          {% endif %}
+
+          {% for feature in active_subscription.plan.features.all|slice:":3" %}
+            <p
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                color: #6b7280;
+                margin-top: 6px;
+              "
+            >
+              {{ feature.text }}
+            </p>
+          {% endfor %}
+        </div>
+
+        <div style="text-align: center">
+          <a
+            href="{% url 'settings_page' %}?tab=subscription"
+            class="bg-primary-blue"
+            style="
+              display: inline-flex;
+              width: 322px;
+              max-width: 100%;
+              height: 40px;
+              border-radius: 8px;
+              align-items: center;
+              justify-content: center;
+              color: #fff;
+              font-size: 13px;
+              font-weight: 600;
+            "
           >
-        </p>
+            View Plan Details
+          </a>
+        </div>
       </div>
-      <div>
-        {% if active_subscription.plan.discount_text %}
-        <p style="font-size: 12px; font-weight: 600; color: #6b7280">
-          {{ active_subscription.plan.discount_text }}
-        </p>
-        {% endif %} {% for feature in active_subscription.plan.features.all|slice:":3" %}
-        <p
-          style="
-            font-size: 12px;
-            font-weight: 600;
-            color: #6b7280;
-            margin-top: 6px;
-          "
-        >
-          {{ feature.text }}
-        </p>
-        {% endfor %}
-      </div>
-      <div style="text-align: center">
-        <a
-          href="{% url 'settings_page' %}?tab=subscription"
-          class="bg-primary-blue"
-          style="
-            display: inline-flex;
-            width: 322px;
-            max-width: 100%;
-            height: 40px;
-            border-radius: 8px;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-          "
-          >View Plan Details</a
-        >
-      </div>
-    </div>
     {% endif %}
 
     <!-- 10. MARKET TRENDS -->
