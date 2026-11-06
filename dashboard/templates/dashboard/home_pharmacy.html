@@ -10,8 +10,8 @@
     <div class="space-y-5 rounded-[10px] bg-white p-5">
         <div class="h-5 w-24 rounded bg-gray-200"></div>
         <div class="flex gap-3">
-            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[62%]"></div>
-            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[38%]"></div>
+            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[65%]"></div>
+            <div class="h-[170px] w-full rounded-lg bg-gray-200 lg:w-[35%]"></div>
         </div>
         <div class="h-20 rounded-lg bg-gray-200"></div>
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -24,22 +24,22 @@
 </div>
 
 <div id="pharmacy-page-content" class="is-ready">
-<div class="main-content scroll relative flex h-full flex-1 flex-col gap-5 overflow-y-auto bg-[#FAF9FF] p-6 font-[Inter,sans-serif] text-slate-900 transition-all duration-300">
+<div class="main-content scroll relative flex h-full flex-1 flex-col gap-4 overflow-y-auto bg-[#FAF9FF] p-6 font-[Inter,sans-serif] text-slate-900 transition-all duration-300">
 
     <div class="show-sidebar-toggle hidden fixed top-[100px] left-0 z-50 h-10 w-10 cursor-pointer items-center justify-center rounded-r-md bg-light-dodger-blue">
         <span class="material-symbols-outlined bold-weight text-dodger-blue">arrow_forward_ios</span>
     </div>
 
     <!-- 1. Page header -->
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined !text-xl">home</span>
                 <h1 class="text-base font-bold">Home</h1>
             </div>
-            <div id="date" class="mt-0.5 text-[11px] text-slate-500">{% now "l, F j, Y" %}</div>
+            <div id="date" class="text-xs text-slate-500">{% now "l, F j, Y" %}</div>
         </div>
-        <div id="infoSection" class="flex items-center gap-4 text-[11px] text-slate-600">
+        <div id="infoSection" class="flex items-center gap-4 text-xs text-slate-600">
             <div id="location" class="flex items-center gap-1">
                 <span class="material-symbols-outlined !text-sm">location_on</span>
                 <span id="location-text">{{ pharmacy_profile.city|default:"Location unavailable" }}</span>
@@ -57,61 +57,104 @@
     </div>
 
     <!-- 2. Banner + Pharmacy profile card -->
-    <div class="flex flex-col gap-4 lg:flex-row">
-        <div class="relative h-[180px] w-full overflow-hidden rounded-[14px] bg-[linear-gradient(135deg,#14A38B_0%,#2E9FB5_45%,#1A73E8_100%)] lg:w-[62%]">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_60%_30%,rgba(255,255,255,0.22),rgba(255,255,255,0)_55%)]"></div>
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent from-40% via-[#0B2A4A]/40 to-[#0B2A4A]/95"></div>
-            <div class="absolute bottom-0 left-0 p-4 text-[10px] leading-4 text-white">
+    <div class="flex flex-col lg:flex-row gap-4 items-stretch w-full">
+        <!-- Banner (approx 65%) -->
+        <div class="relative min-h-[170px] w-full lg:w-[65%] overflow-hidden rounded-[14px] border border-[#E8EEF2] bg-[linear-gradient(165deg,#0D9488,#068F95,#038AA2,#0485AE,#087FBA,#0F7AD1,#1A73E8)] p-5 flex flex-col justify-end" style="flex: 1 1 65%; min-width: 0;">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.2),rgba(255,255,255,0)_60%)] pointer-events-none"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0B2A4A]/80 pointer-events-none"></div>
+            <div class="relative z-10 text-[10px] leading-4 text-white">
                 <p class="text-xs font-semibold">🏪 {{ pharmacy_profile.company_name|default:"Pharmacy" }}</p>
-                <p class="text-white/85">{{ pharmacy_profile.address|default:"Address not available" }}</p>
-                {% if pharmacy_profile.license_number %}<p class="text-white/85">License: {{ pharmacy_profile.license_number }}</p>{% endif %}
+                <p class="truncate max-w-full text-white/90">{{ pharmacy_profile.address|default:"Address not available" }}</p>
+                {% if pharmacy_profile.license_number %}<p class="text-white/90">License: {{ pharmacy_profile.license_number }}</p>{% endif %}
             </div>
         </div>
 
-        <div class="flex flex-1 items-start gap-4 rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+        <!-- Pharmacy Profile Card (approx 35%, min-width 320px) -->
+        <div class="w-full lg:w-[35%] rounded-[14px] border border-[#E8EEF2] bg-white p-4 sm:p-5 flex items-center gap-4 shrink-0 shadow-sm" style="flex: 0 0 35%; min-width: 320px;">
             <div class="relative shrink-0">
+                {% if admin_profile_photo_path %}
                 <img id="admin-profile-photo"
-                     src="{% if admin_profile_photo_path %}/document/{{ admin_profile_photo_path }}{% else %}/static/images/admin-profile.svg{% endif %}"
+                     src="/document/{{ admin_profile_photo_path }}"
                      alt="Admin profile picture"
-                     class="h-16 w-16 rounded-[10px] border-2 border-[#1A73E8] bg-[#E8F0FE] object-cover">
+                     class="h-14 w-14 sm:h-16 sm:w-16 rounded-xl border border-[#1A73E8] bg-[#EBF3FE] object-cover">
+                {% else %}
+                <div id="admin-profile-photo-fallback"
+                     class="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-xl border border-[#1A73E8] bg-[#EBF3FE] text-base sm:text-lg font-bold text-[#1A73E8]">
+                    {{ seller_initials|default:"MP" }}
+                </div>
+                <img id="admin-profile-photo"
+                     src=""
+                     alt="Admin profile picture"
+                     onload="this.classList.remove('hidden'); var fb = document.getElementById('admin-profile-photo-fallback'); if(fb) fb.classList.add('hidden');"
+                     class="hidden h-14 w-14 sm:h-16 sm:w-16 rounded-xl border border-[#1A73E8] bg-[#EBF3FE] object-cover">
+                {% endif %}
                 <label for="admin-profile-photo-input" title="Change profile picture"
-                       class="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-[#1A73E8] text-white shadow">
+                       class="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-[#1A73E8] text-white shadow hover:bg-blue-600 transition-colors">
                     <span class="material-symbols-outlined !text-xs">edit</span>
                 </label>
                 <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
                        data-upload-url="{% url 'upload_admin_profile_photo' %}">
             </div>
-            <div class="min-w-0 text-[10px] leading-[18px] text-slate-500">
-                <p class="text-xs font-bold text-slate-900">{{ pharmacy_profile.company_name|default:"Pharmacy" }}</p>
-                <p class="text-[11px]">{{ contact_person.name|default:"N/A" }} — {{ contact_person.role|default:"N/A" }}</p>
-                <p class="font-medium text-[#1A73E8]">{{ user.phone_country_code|default:"+91" }} {{ pharmacy_profile.contact_number|default:user.phone_number|default:"N/A" }}</p>
-                {% if pharmacy_profile.gstin %}<p>GSTIN: {{ pharmacy_profile.gstin }}</p>{% endif %}
-                {% if pharmacy_profile.license_number %}<p>Reg: {{ pharmacy_profile.license_number }}</p>{% endif %}
-                <a href="{% url 'settings_page' %}" class="font-medium text-[#1A73E8]">Edit Profile →</a>
+            <div class="min-w-0 flex-1 text-[11px] leading-tight text-slate-500 space-y-1">
+                <p class="text-sm font-bold text-slate-900 leading-snug truncate" title="{{ pharmacy_profile.company_name|default:'Pharmacy' }}">
+                    {{ pharmacy_profile.company_name|default:"Pharmacy" }}
+                </p>
+                <p class="text-[11px] text-slate-500 leading-none truncate">
+                    {{ contact_person.name|default:"N/A" }} — {{ contact_person.role|default:"Owner" }}
+                </p>
+                <p class="text-[11px] font-semibold text-[#1A73E8] leading-none whitespace-nowrap">
+                    {{ user.phone_country_code|default:"+91" }} {{ pharmacy_profile.contact_number|default:user.phone_number|default:"N/A" }}
+                </p>
+                {% if pharmacy_profile.gstin %}
+                <p class="text-[10px] text-slate-400 leading-none whitespace-nowrap">GSTIN: {{ pharmacy_profile.gstin }}</p>
+                {% endif %}
+                {% if pharmacy_profile.license_number %}
+                <p class="text-[10px] text-slate-400 leading-none whitespace-nowrap">Reg: {{ pharmacy_profile.license_number }}</p>
+                {% endif %}
+                <div class="pt-0.5">
+                    <a href="{% url 'settings_page' %}" class="inline-flex items-center text-[11px] font-semibold text-[#1A73E8] hover:underline whitespace-nowrap">
+                        Edit Profile →
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. Quick stats (4 columns, no card box) -->
-    <div class="grid grid-cols-2 gap-y-4 py-2 lg:grid-cols-4 lg:divide-x lg:divide-[#E8EEF2]">
+    <!-- 3. Quick stats (5 columns with Wallet Balance) -->
+    <div class="grid grid-cols-2 gap-y-3 rounded-[12px] border border-[#E8EEF2] bg-white py-4 lg:grid-cols-5 lg:divide-x lg:divide-[#E8EEF2]">
         <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500"><span class="material-symbols-outlined !text-xl text-[#1A73E8]">bolt</span>Active Bids</p>
-            <p class="mt-1 text-xl font-bold">5</p>
-            <a href="#" class="text-[10px] text-[#1A73E8]">View all →</a>
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                <span class="material-symbols-outlined !text-lg text-[#1A73E8]">account_balance_wallet</span>Wallet Balance
+            </p>
+            <p class="mt-1 text-lg font-bold" id="pharmacy-wallet-balance">₹{{ wallet_balance|default:"0.00" }}</p>
+            <a href="{% url 'advance' %}" class="text-[10px] text-[#1A73E8] hover:underline">Withdraw →</a>
         </div>
         <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500"><span class="material-symbols-outlined !text-xl text-[#1A73E8]">package_2</span>Today's Orders</p>
-            <p class="mt-1 text-xl font-bold">12</p>
-            <p class="text-[10px] text-[#1A73E8]">4 Pending · 8 Processing</p>
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                <span class="material-symbols-outlined !text-lg text-[#1A73E8]">bolt</span>Active Bids
+            </p>
+            <p class="mt-1 text-lg font-bold" id="pharmacy-active-bids-count">{{ active_bids|default:"0" }}</p>
+            <a href="{% url 'coupons' %}" class="text-[10px] text-[#1A73E8] hover:underline">View all →</a>
         </div>
         <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500"><span class="material-symbols-outlined !text-xl text-[#1A73E8]">local_shipping</span>Out for Delivery</p>
-            <p class="mt-1 text-xl font-bold text-[#1A73E8]">2</p>
-            <a href="#" class="text-[10px] text-[#1A73E8]">On the way →</a>
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                <span class="material-symbols-outlined !text-lg text-[#1A73E8]">package_2</span>Today's Orders
+            </p>
+            <p class="mt-1 text-lg font-bold" id="pharmacy-today-orders-count">{{ today_orders_count|default:"0" }}</p>
+            <p class="text-[10px] text-[#1A73E8]" id="pharmacy-today-orders-subtext">{{ today_pending_count|default:"0" }} Pending · {{ today_processing_count|default:"0" }} Processing</p>
         </div>
         <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500"><span class="material-symbols-outlined !text-xl text-green-500">schedule</span>Avg Response Time</p>
-            <p class="mt-1 text-xl font-bold text-green-600">3 min</p>
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                <span class="material-symbols-outlined !text-lg text-[#1A73E8]">local_shipping</span>Out for Delivery
+            </p>
+            <p class="mt-1 text-lg font-bold text-[#1A73E8]" id="pharmacy-out-for-delivery-count">{{ ongoing_orders_count|default:"0" }}</p>
+            <p class="text-[10px] text-[#1A73E8]"><a href="{% url 'orders' %}?status=confirmed" class="hover:underline">On the way →</a></p>
+        </div>
+        <div class="px-6">
+            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                <span class="material-symbols-outlined !text-lg text-green-500">schedule</span>Avg Response Time
+            </p>
+            <p class="mt-1 text-lg font-bold text-green-600">3 min</p>
         </div>
     </div>
 
@@ -159,27 +202,35 @@
         <div class="rounded-[12px] border border-[#E8EEF2] bg-white p-4">
             <div class="mb-3 flex items-center justify-between">
                 <p class="text-sm font-bold">Recent Orders</p>
-                <a href="{% url 'orders' %}" class="text-[11px] text-[#1A73E8]">View all →</a>
+                <a href="{% url 'orders' %}" class="text-[11px] text-[#1A73E8] hover:underline">View All →</a>
             </div>
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
                 {% for order in scheduled_orders %}
-                <div class="order-card popup-btn cursor-pointer rounded-lg border border-[#E8EEF2] bg-white p-3" data-popup="order-details-popup" data-order-id="{{ order.id }}">
+                <div class="order-card popup-btn cursor-pointer rounded-lg border border-[#E8EEF2] bg-white p-3 hover:shadow-sm transition-shadow"
+                     data-popup="order-details-popup" data-order-id="{{ order.id }}">
                     <div class="flex flex-wrap items-center justify-between gap-1 text-[9px] font-medium">
-                        <span class="rounded-full bg-green-50 px-2 py-0.5 text-green-600">Home Delivery</span>
-                        <span class="rounded-full px-2 py-0.5 {% if order.order_status|lower == 'pending' %}bg-amber-100 text-amber-600{% elif order.order_status|lower == 'confirmed' or order.order_status|lower == 'shipped' %}bg-[#E8F0FE] text-[#1A73E8]{% else %}bg-green-100 text-green-700{% endif %}">{{ order.order_status|title }}</span>
+                        <span class="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-green-700">{{ order.delivery_label|default:"Home Delivery" }}</span>
+                        <span class="rounded-full px-2 py-0.5 bg-green-100 text-green-700 font-semibold">Completed</span>
                     </div>
-                    <p class="mt-2.5 text-xs font-bold text-slate-900">{% if order.user__userprofile__first_name %}{{ order.user__userprofile__first_name }} {{ order.user__userprofile__last_name|default:'' }}{% else %}Customer{% endif %}</p>
-                    <p class="mt-0.5 text-[10px] text-[#1A73E8]">{{ order.local_created_at|date:"d/m/Y, h:i A" }}</p>
-                    {# Adjust these field names to whatever your scheduled_orders query returns #}
-                    {% if order.medicines %}<p class="mt-2 text-[10px] leading-4 text-slate-500">{{ order.medicines }}</p>{% endif %}
+                    <div class="mt-2 flex items-center justify-between">
+                        <p class="text-xs font-bold text-slate-900 truncate" title="{{ order.customer_name }}">
+                            {{ order.customer_name|default:"Customer" }}
+                        </p>
+                        <span class="text-[10px] font-semibold text-slate-400">Order #{{ order.id }}</span>
+                    </div>
+                    <p class="text-[10px] text-[#1A73E8] mt-0.5">{{ order.local_created_at|date:"d/m/Y, h:i A" }}</p>
+                    <img src="{% static 'images/sample-qr.png' %}" alt="Payment QR code" class="mt-1 h-8 w-8 rounded border border-blue-haze bg-white object-contain" />
+                    {% if order.medicines %}<p class="mt-1.5 text-[9px] leading-3 text-slate-500 truncate" title="{{ order.medicines }}">{{ order.medicines }}</p>{% endif %}
                     {% if order.total_amount %}
-                    <p class="mt-2 text-[10px] font-semibold {% if order.payment_mode == 'Cash on Delivery' %}text-amber-500{% else %}text-green-600{% endif %}">₹{{ order.total_amount }} · {{ order.payment_mode|default:"UPI Paid" }}{% if order.payment_mode != 'Cash on Delivery' %} ✅{% endif %}</p>
+                    <p class="mt-1.5 text-[10px] font-semibold {% if order.payment_mode == 'Cash on Delivery' %}text-amber-500{% else %}text-green-600{% endif %}">
+                        ₹{{ order.total_amount }} · {{ order.payment_mode|default:"UPI Paid" }}{% if order.payment_mode != 'Cash on Delivery' %} ✅{% endif %}
+                    </p>
                     {% else %}
-                    <p class="mt-2 text-[10px] text-slate-500">Order #{{ order.id }}</p>
+                    <p class="mt-1.5 text-[10px] text-slate-500">Order #{{ order.id }}</p>
                     {% endif %}
                 </div>
                 {% empty %}
-                <p class="col-span-3 py-6 text-center text-sm text-slate-500">No scheduled orders found.</p>
+                <p class="col-span-3 py-6 text-center text-sm text-slate-500">No completed orders found.</p>
                 {% endfor %}
             </div>
         </div>
@@ -206,166 +257,132 @@
     <!-- 6. Inventory Alerts -->
     <div class="rounded-[12px] border border-[#E8EEF2] bg-white p-4">
         <div class="mb-3 flex items-center justify-between">
-            <p class="flex items-center gap-2 text-xs font-bold text-amber-800"><span class="material-symbols-outlined !text-base">info</span>Inventory Alerts</p>
-            <a href="#" class="text-[11px] text-[#1A73E8]">View all inventory →</a>
+            <p class="flex items-center gap-2 text-sm font-bold text-amber-800">
+                <span class="material-symbols-outlined !text-base text-amber-600">warning</span>Inventory Alerts
+            </p>
+            <a href="{% url 'services' %}" class="text-xs text-[#1A73E8] hover:underline">View All Inventory →</a>
         </div>
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-            <div class="rounded-lg border-l-[3px] border-amber-500 bg-[#FFF9E8] p-3 text-xs">
-                <span class="rounded-full bg-white px-2 py-0.5 text-[9px] text-amber-600">Low Stock</span>
-                <p class="mt-2 font-bold">Crocin 500mg Tablet</p>
-                <p class="text-[10px] text-slate-500">GSK Pharma · Pain Relief</p>
-                <p class="mt-2 text-[11px] font-semibold text-amber-600">12 strips remaining</p>
-                <a href="#" class="text-[10px] text-amber-600">Reorder Now →</a>
+            {% for alert in inventory_alerts %}
+            <div class="rounded-lg border-l-4 border-amber-500 {{ alert.card_bg }} p-3 text-xs flex flex-col justify-between">
+                <div>
+                    <span class="rounded-full bg-white px-2 py-0.5 text-[10px] {{ alert.badge_color }} font-semibold">{{ alert.status_badge }}</span>
+                    <p class="mt-2 font-bold text-slate-900 truncate" title="{{ alert.name }}">{{ alert.name }}</p>
+                    <p class="text-[10px] text-slate-500 truncate" title="{{ alert.details }}">{{ alert.details }}</p>
+                </div>
+                <div class="mt-2 pt-1">
+                    <p class="mt-1 font-semibold {{ alert.badge_color }}">{{ alert.remaining_text }}</p>
+                    <a href="{% url 'services' %}" class="mt-1 inline-block text-[11px] {{ alert.badge_color }} hover:underline">Reorder Now →</a>
+                </div>
             </div>
-            <div class="rounded-lg border-l-[3px] border-red-500 bg-[#FFEFF2] p-3 text-xs">
-                <span class="rounded-full bg-white px-2 py-0.5 text-[9px] text-red-600">Critical</span>
-                <p class="mt-2 font-bold">Metformin 500mg</p>
-                <p class="text-[10px] text-slate-500">Sun Pharma · Diabetes</p>
-                <p class="mt-2 text-[11px] font-semibold text-red-600">3 strips remaining</p>
-                <a href="#" class="text-[10px] text-red-600">Reorder Now →</a>
+            {% empty %}
+            <div class="col-span-1 lg:col-span-3 py-6 text-center text-xs text-slate-500 bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
+                <p class="font-semibold text-slate-700">No Inventory Alerts</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">All medicines currently have sufficient stock levels.</p>
             </div>
-            <div class="rounded-lg border-l-[3px] border-red-500 bg-[#FFEFF2] p-3 text-xs">
-                <span class="rounded-full bg-white px-2 py-0.5 text-[9px] text-red-600">Out of Stock</span>
-                <p class="mt-2 font-bold">Insulin Glargine 100IU</p>
-                <p class="text-[10px] text-slate-500">Sanofi · Diabetes</p>
-                <p class="mt-2 text-[11px] font-semibold text-red-600">0 units</p>
-                <a href="#" class="text-[10px] text-red-600">Reorder Now →</a>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
     <!-- 7. Order Requests -->
     <div class="overflow-hidden rounded-[12px] border border-[#E8EEF2] bg-white">
-        <div class="flex items-center justify-between px-4 py-4">
+        <div class="flex items-center justify-between p-4">
             <p class="text-sm font-bold">Order Requests</p>
-            <a href="{% url 'orders' %}" class="text-[11px] text-[#1A73E8]">View all →</a>
+            <a href="{% url 'orders' %}" class="text-xs text-[#1A73E8] hover:underline">View All →</a>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1020px] text-center text-[11px]">
-                <thead class="bg-[#0D8CFF] text-[10px] uppercase text-white">
+            <table class="w-full min-w-[980px] text-left text-[11px]">
+                <thead class="text-[10px] uppercase text-slate-500 bg-slate-50/70 border-b border-[#E8EEF2]">
                     <tr>
-                        <th class="px-4 py-3 text-left font-medium">Customer</th>
-                        <th class="px-4 py-3 font-medium">Medicines Requested</th>
-                        <th class="px-4 py-3 font-medium">Date &amp; Time</th>
-                        <th class="px-4 py-3 font-medium">Delivery</th>
-                        <th class="px-4 py-3 font-medium">Prescription</th>
-                        <th class="px-4 py-3 font-medium">Urgency</th>
-                        <th class="px-4 py-3 font-medium">Budget</th>
-                        <th class="px-4 py-3 font-medium">Timer</th>
-                        <th class="px-4 py-3 font-medium">Actions</th>
+                        <th class="px-4 py-2.5 font-medium">Customer</th>
+                        <th class="px-4 py-2.5 font-medium">Medicines Requested</th>
+                        <th class="px-4 py-2.5 font-medium">Date &amp; Time</th>
+                        <th class="px-4 py-2.5 font-medium">Delivery</th>
+                        <th class="px-4 py-2.5 font-medium">Prescription</th>
+                        <th class="px-4 py-2.5 font-medium">Urgency</th>
+                        <th class="px-4 py-2.5 font-medium">Budget</th>
+                        <th class="px-4 py-2.5 font-medium">Timer</th>
+                        <th class="px-4 py-2.5 font-medium">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-[#EEF2F6]">
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500 text-[10px] font-semibold text-white">MS</span><div><p class="font-semibold text-slate-900">Monica Singh</p><p class="text-[9px] text-slate-500">Kidney Stone meds</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Crocin 500mg × 3 + Vitamin C × 2</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 12:30 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">12 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹500</td>
-                        <td class="px-4 py-2.5 font-semibold text-red-600">18m left</td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                <tbody id="pharmacy-order-requests-tbody" class="divide-y divide-[#E8EEF2]">
+                    {% for order in order_requests %}
+                    <tr class="hover:bg-slate-50/60 transition-colors" id="order-row-{{ order.id }}" data-order-id="{{ order.id }}">
+                        <td class="px-4 py-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white {{ order.avatar_color }}">{{ order.customer_initials }}</span>
+                                <div>
+                                    <p class="font-semibold text-slate-900">{{ order.customer_name }}</p>
+                                    <p class="text-[10px] text-slate-500">Order #{{ order.id }}{% if order.notes %} · {{ order.notes|truncatechars:18 }}{% endif %}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-2.5 text-slate-600 font-medium">{{ order.medicines_summary }}</td>
+                        <td class="whitespace-nowrap px-4 py-2.5 text-slate-500">{{ order.local_created_at|date:"d/m h:i A" }}</td>
+                        <td class="px-4 py-2.5">
+                            <span class="rounded-full px-2 py-0.5 text-[10px] font-medium
+                                {% if order.delivery_label == 'Store Pickup' %}bg-blue-50 text-[#1A73E8]{% else %}bg-green-50 text-green-700{% endif %}">
+                                {{ order.delivery_label }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-2.5">
+                            {% if order.has_prescription %}
+                            <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">Required</span>
+                            {% else %}
+                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Not Req</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2.5">
+                            {% if order.urgency == 'Emergency' %}
+                            <span class="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-600">Emergency</span>
+                            {% else %}
+                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">Normal</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2.5 font-bold text-slate-900">₹{{ order.budget }}</td>
+                        <td class="px-4 py-2.5 timer-col">
+                            {% if order.is_bid_placed %}
+                            <span class="rounded-full bg-blue-50 px-2 py-0.5 text-[#1A73E8] font-medium whitespace-nowrap">Bid Sent</span>
+                            {% else %}
+                            <span class="flex items-center gap-1 font-semibold text-amber-600">
+                                <span class="material-symbols-outlined !text-xs">timer</span> 14m left
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2.5 actions-col">
+                            <div class="flex items-center gap-2">
+                                <button type="button"
+                                        class="pharmacy-view-order-btn flex items-center justify-center p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-[#1A73E8] transition-colors cursor-pointer"
+                                        data-order-id="{{ order.id }}"
+                                        title="View Order Details">
+                                    <span class="material-symbols-outlined !text-base">visibility</span>
+                                </button>
+                                {% if order.is_bid_placed %}
+                                <button type="button"
+                                        class="rounded-md border border-slate-300 bg-slate-50 px-3 py-1 text-slate-400 cursor-not-allowed text-[11px] font-medium"
+                                        disabled>
+                                    Bid Sent
+                                </button>
+                                {% else %}
+                                <button type="button"
+                                        class="pharmacy-bid-btn rounded-md border border-[#1A73E8] bg-white px-3 py-1 text-[#1A73E8] hover:bg-[#1A73E8] hover:text-white transition-colors cursor-pointer text-[11px] font-semibold"
+                                        data-order-id="{{ order.id }}"
+                                        data-customer-name="{{ order.customer_name }}"
+                                        data-budget="{{ order.budget }}"
+                                        data-medicines="{{ order.medicines_summary }}">
+                                    Submit Bid
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
                     </tr>
+                    {% empty %}
                     <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-[10px] font-semibold text-white">GS</span><div><p class="font-semibold text-slate-900">Gaurav Sharma</p><p class="text-[9px] text-slate-500">Diabetes</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Metformin 500mg × 1 + Pantop 40mg × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 01:00 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">3.2 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹280</td>
-                        <td class="px-4 py-2.5 font-semibold text-green-600">21m left</td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
+                        <td colspan="9" class="py-8 text-center text-xs text-slate-400">
+                            No pending order requests found.
+                        </td>
                     </tr>
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1A73E8] text-[10px] font-semibold text-white">PS</span><div><p class="font-semibold text-slate-900">Priya Sharma</p><p class="text-[9px] text-slate-500">Antibiotic</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Amoxicillin 500mg × 2 + Azithromycin × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 01:30 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">3.2 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Emergency</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹420</td>
-                        <td class="px-4 py-2.5 font-semibold text-red-600">8m left</td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-[10px] font-semibold text-white">RK</span><div><p class="font-semibold text-slate-900">Rajan Mehta</p><p class="text-[9px] text-slate-500">Cardiac meds</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Atorva 10mg × 1 + Ecosprin 75mg × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 02:00 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-[#1A73E8]">Store Pickup</p><p class="text-[9px] text-slate-500">1.1 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹180</td>
-                        <td class="px-4 py-2.5 font-semibold text-green-600">34m left</td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-600 text-[10px] font-semibold text-white">AN</span><div><p class="font-semibold text-slate-900">Anil Kumar</p><p class="text-[9px] text-slate-500">Pain relief</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Combiflam × 2 + Volini Gel × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 02:30 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">2.4 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹120</td>
-                        <td class="px-4 py-2.5 font-semibold text-green-600">47m left</td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pink-600 text-[10px] font-semibold text-white">DS</span><div><p class="font-semibold text-slate-900">Deepa Shah</p><p class="text-[9px] text-slate-500">Vitamins</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Vitamin D3 60K × 4 + Calcium × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 03:00 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">4.0 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹320</td>
-                        <td class="px-4 py-2.5 font-semibold text-green-600">1h 2m</td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-500 text-[10px] font-semibold text-white">VM</span><div><p class="font-semibold text-slate-900">Vijay Mehta</p><p class="text-[9px] text-slate-500">BP medicines</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Amlodipine 5mg × 1 + Losartan 50mg × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 03:30 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-[#1A73E8]">Store Pickup</p><p class="text-[9px] text-slate-500">0.8 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹200</td>
-                        <td class="px-4 py-2.5 font-semibold text-green-600">1h 18m</td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-[10px] font-semibold text-white">KN</span><div><p class="font-semibold text-slate-900">Kavitha Nair</p><p class="text-[9px] text-slate-500">Allergy</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Cetirizine 10mg × 2 + Montair LC × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 04:00 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">5.1 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹140</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-[#1A73E8]">Bid Sent</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-slate-300 px-3 py-1 text-slate-500">View Bid</button></div></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500 text-[10px] font-semibold text-white">SP</span><div><p class="font-semibold text-slate-900">Sneha Patil</p><p class="text-[9px] text-slate-500">Gastro</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Pantoprazole 40mg × 1 + Cremaffin × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 04:30 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">2.9 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Normal</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹180</td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-[#1A73E8]">Bid Sent</span></td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-slate-300 px-3 py-1 text-slate-500">View Bid</button></div></td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2.5 text-left"><div class="flex items-center gap-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-600 text-[10px] font-semibold text-white">AR</span><div><p class="font-semibold text-slate-900">Anjali Rao</p><p class="text-[9px] text-slate-500">Post-surgical</p></div></div></td>
-                        <td class="px-4 py-2.5 text-slate-500">Augmentin 625mg × 2 + Dolo 650 × 1</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 font-medium text-slate-900">22/07 05:00 PM</td>
-                        <td class="px-4 py-2.5"><p class="font-medium text-green-600">Home Delivery</p><p class="text-[9px] text-slate-500">6.3 km</p></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-500">Not Required</span></td>
-                        <td class="px-4 py-2.5"><span class="rounded-full bg-red-100 px-2.5 py-0.5 text-red-600">Emergency</span></td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹380</td>
-                        <td class="px-4 py-2.5 font-semibold text-green-600">2d left</td>
-                        <td class="px-4 py-2.5"><div class="flex items-center justify-center gap-2"><span class="material-symbols-outlined !text-base text-slate-500">visibility</span><button class="rounded-md border border-[#1A73E8] px-3 py-1 text-[#1A73E8]">Submit Bid</button></div></td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -374,173 +391,570 @@
     <!-- 8. Market Trends -->
     <div class="flex flex-col gap-3 rounded-[12px] border border-[#E8EEF2] bg-white p-4">
         <div class="flex items-center justify-between">
-            <p class="flex items-center gap-2 text-xs font-bold"><span class="material-symbols-outlined !text-base text-[#1A73E8]">bar_chart</span>Market Trends — Pharmacy Insights</p>
+            <p class="flex items-center gap-2 text-xs font-bold">
+                <span class="material-symbols-outlined !text-base text-[#1A73E8]">bar_chart</span>Market Trends — Pharmacy Insights
+            </p>
             <a href="#" class="text-[11px] font-medium text-[#1A73E8]">₹200 →</a>
         </div>
         <ul class="flex flex-col gap-2 text-[11px] text-slate-600">
-            <li class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-green-600">check_circle</span><span>Top requested medicines in your area: <b class="text-slate-900">Crocin 500mg · Metformin 500mg · Vitamin D3</b></span></li>
-            <li class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-green-600">check_circle</span><span>Avg winning bid by Pharmacy: <b class="text-slate-900">₹320 per medicine order</b></span></li>
-            <li class="flex items-center gap-2"><span class="material-symbols-outlined !text-base text-green-600">check_circle</span><span>Most popular delivery mode this week: <b class="text-slate-900">Home Delivery (+24%)</b></span></li>
+            <li class="flex items-center gap-2">
+                <span class="material-symbols-outlined !text-base text-green-600">check_circle</span>
+                <span>Top requested medicines in your area: <b class="text-slate-900">Crocin 500mg · Metformin 500mg · Vitamin D3</b></span>
+            </li>
+            <li class="flex items-center gap-2">
+                <span class="material-symbols-outlined !text-base text-green-600">check_circle</span>
+                <span>Avg winning bid by Pharmacy: <b class="text-slate-900">₹320 per medicine order</b></span>
+            </li>
+            <li class="flex items-center gap-2">
+                <span class="material-symbols-outlined !text-base text-green-600">check_circle</span>
+                <span>Most popular delivery mode this week: <b class="text-slate-900">Home Delivery (+24%)</b></span>
+            </li>
         </ul>
-        <button class="w-full rounded-md bg-[#1A73E8] py-2.5 text-xs font-bold text-white">View Full Insights Report →</button>
+        <a href="{% url 'reports' %}" class="mt-1 flex items-center justify-center w-full rounded-md bg-[#1A73E8] hover:bg-blue-600 py-2.5 text-xs font-bold text-white transition-colors">
+            View Full Insights Report →
+        </a>
     </div>
 
     <!-- Order Details Popup (logic/IDs unchanged) -->
-    <div class="order-details-popup popup-overlay fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-3">
-        <div class="popup-content scroll relative max-h-[90vh] w-[680px] overflow-y-auto rounded-lg bg-white p-4 shadow-xl">
-            <div class="flex items-center justify-between px-6 py-3">
-                <h2 class="text-base font-bold">User Information</h2>
-                <div class="flex items-center gap-4">
-                    <button class="pharmacy-open-share cursor-pointer"><span class="material-symbols-outlined !text-xl">share</span></button>
-
+    <div class="popup-overlay fixed inset-0 z-50 flex hidden items-center justify-center bg-black/40 px-3"
+        data-popup="order-details-popup" id="pharmacy-order-details-modal">
+        <div
+            class="popup-content scroll relative max-h-[90vh] w-full max-w-[620px] overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Order Details</h3>
+                    <p class="text-xs text-slate-500" id="order-id-label">Order #--</p>
+                </div>
+                <div class="flex items-center gap-2">
                     <!-- Share popup -->
-                    <div class="pharmacy-share-modal fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
-                        <div class="relative w-[520px] rounded-lg bg-white p-6 shadow-lg">
-                            <div class="flex items-center justify-between">
-                                <p class="text-xl font-semibold">Share</p>
-                                <span class="material-symbols-outlined pharmacy-close-share cursor-pointer">close</span>
-                            </div>
-                            <hr class="mt-4" />
-                            <div class="flex justify-between pt-4">
-                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareWhatsapp" src="/static/images/whatsappicon.svg" class="h-10 w-10 cursor-pointer" /><p>Whatsapp</p></div>
-                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareTelegram" src="/static/images/telegramicon.svg" class="h-10 w-10 cursor-pointer" /><p>Telegram</p></div>
-                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareFacebook" src="/static/images/facebookicon.svg" class="h-10 w-10 cursor-pointer" /><p>Facebook</p></div>
-                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareSMS" src="/static/images/smsicon.svg" class="h-10 w-10 cursor-pointer" /><p>Message</p></div>
-                                <div class="flex w-20 flex-col items-center gap-2 text-center"><img id="shareEmail" src="/static/images/gmailicon.svg" class="h-10 w-10 cursor-pointer" /><p>E-mail</p></div>
-                            </div>
-                            <div class="relative mt-6 pt-4">
-                                <input type="text" class="pharmacy-share-link w-full rounded-md border p-4 text-sm" value="https://avatar.com/shorts/cZKr0CtLuYU?si=RHci" disabled />
-                                <button class="pharmacy-copy-btn absolute right-3 top-6 rounded-md bg-[#1A73E8] p-2 text-white">Copy</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <span class="close-popup close-icon material-symbols-outlined cursor-pointer text-[13px] text-black" data-popup="order-details-popup">close</span>
+                    <button class="popup-btn flex items-center gap-1 rounded border border-[#E8EEF2] px-2 py-1 text-xs"
+                        data-popup="share-order-popup">
+                        <span class="material-symbols-outlined !text-sm">share</span>Share
+                    </button>
+                    <button class="close-popup text-slate-400 hover:text-slate-600">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="space-y-4">
-                <div class="space-y-6 rounded-xl p-4">
-                    <!-- Customer info -->
-                    <div class="flex gap-4 rounded-md bg-blue-50 p-4">
-                        <div class="flex flex-col">
-                            <img id="profileImage" src="/static/images/dolly-paris1.svg" alt="">
-                            <p id="patientName" class="pt-4 text-center text-sm">-</p>
-                            <p id="orderNumber" class="pt-2 text-center text-sm">-</p>
-                        </div>
-                        <div class="flex w-[180px] flex-col gap-4">
-                            <div class="flex gap-2">
-                                <div class="flex h-6 w-6 items-center justify-center rounded-lg border border-light-gray"><span class="material-symbols-outlined !text-lg text-[#1A73E8]">female</span></div>
-                                <div class="flex flex-col gap-2"><p class="text-xs text-slate-500">Gender</p><p id="gender" class="text-sm">-</p></div>
-                            </div>
-                            <div class="flex gap-2">
-                                <div class="flex h-6 w-6 items-center justify-center rounded-lg border border-light-gray"><span class="material-symbols-outlined !text-lg text-[#1A73E8]">hourglass</span></div>
-                                <div class="flex flex-col gap-2"><p class="text-xs text-slate-500">Age</p><p id="age" class="text-sm">-</p></div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-4">
-                            <div class="flex gap-2">
-                                <div class="flex h-6 w-6 items-center justify-center rounded-lg border border-light-gray"><span class="material-symbols-outlined !text-lg text-[#1A73E8]">call</span></div>
-                                <div class="flex flex-col gap-2"><p class="text-xs text-slate-500">Phone no.</p><p id="phoneNumber" class="text-sm">-</p></div>
-                            </div>
-                            <div class="flex gap-2">
-                                <div class="flex h-6 w-6 items-center justify-center rounded-lg border border-light-gray"><img src="/static/images/address-icon.svg" alt=""></div>
-                                <div class="flex flex-col gap-2"><p class="text-xs text-slate-500">Address</p><p id="addressText" class="text-sm">-</p></div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Medicines list -->
+            <div class="mt-4 rounded-lg bg-slate-50 p-3">
+                <p class="text-[11px] font-semibold uppercase text-slate-500">Medicines requested</p>
+                <div class="mt-2 space-y-2 text-xs" id="medicines-container"></div>
+                <div class="mt-3 flex justify-between border-t border-slate-200 pt-2 font-bold text-slate-900">
+                    <span>Total Amount</span>
+                    <span id="order-total-amount">₹--</span>
+                </div>
+            </div>
 
-                    <hr class="mt-4 text-blue-haze">
+            <!-- Customer info -->
+            <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <p class="text-slate-400">Customer Name</p>
+                    <p class="font-semibold text-slate-800" id="customer-name">--</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Phone</p>
+                    <p class="font-semibold text-slate-800" id="customer-phone">--</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Delivery Type</p>
+                    <p class="font-semibold text-slate-800" id="delivery-type">--</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Payment Status</p>
+                    <p class="font-semibold text-green-600" id="payment-status">--</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Created At</p>
+                    <p class="font-semibold text-slate-800" id="order-created-at">--</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Order Status</p>
+                    <p class="font-semibold text-[#1A73E8]" id="order-status-badge">--</p>
+                </div>
+            </div>
 
-                    <!-- Delivery location -->
-                    <div id="openMap" class="flex cursor-pointer items-center justify-between rounded-lg border border-light-gray2 p-3">
-                        <div class="flex items-center gap-3">
-                            <img src="/static/images/map_button.svg" alt="map icon" class="h-[30px] w-[33px]" />
-                            <div>
-                                <p class="text-sm text-raisin-black">Delivering to <span class="font-semibold">Saket Enclave</span></p>
-                                <p class="text-xs text-jet-black">Chhijarpur, New Delhi</p>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined text-[18px] text-dark-gray">chevron_right</span>
-                    </div>
-
-                    <!-- QR -->
-                    <div class="qr-section rounded-lg border border-light-gray2 p-3">
-                        <div class="qr-toggle flex cursor-pointer items-center justify-between">
-                            <div>
-                                <p class="text-sm font-bold text-ebony">QR Code for Payment</p>
-                                <p class="text-xs font-medium text-ebony">Date: Tue, 25 June 2025 - 11:32 AM</p>
-                            </div>
-                            <span class="material-symbols-outlined qr-icon pl-1.5 text-dark-gray">expand_more</span>
-                        </div>
-                        <div class="qr-content mt-4 hidden w-full items-center justify-center">
-                            <img src="/static/images/sample-qr.png" alt="Payment QR" class="mx-auto h-[160px] w-[160px] object-contain" />
-                        </div>
-                    </div>
-
-                    <!-- Progress -->
-                    <div class="enquiredDetail">
-                        <div class="mt-4 flex flex-col gap-4 py-4">
-                            <div class="flex items-center justify-center gap-1">
-                                <div class="h-2 w-2 rounded-full bg-[#1A73E8]"></div><div class="h-0.5 w-[138px] bg-[#1A73E8]"></div>
-                                <div class="h-2 w-2 rounded-full bg-[#1A73E8]"></div><div class="h-0.5 w-[138px] bg-[#1A73E8]"></div>
-                                <div class="h-2 w-2 rounded-full bg-blue-haze"></div><div class="h-0.5 w-[138px] bg-blue-haze"></div>
-                                <div class="h-2 w-2 rounded-full bg-blue-haze"></div>
-                            </div>
-                            <div class="mx-10 flex items-center justify-between text-sm">
-                                <p class="pl-6 text-ebony">Enquiry</p><p class="pl-2 text-ebony">Ongoing</p>
-                                <p class="text-arctic-gray">Completed</p><p class="text-arctic-gray">Cancel/Expired</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="medicineContainer" class="space-y-3"></div>
-
-                    <div class="flex flex-col gap-2 pt-4 text-sm">
-                        <div class="flex justify-between"><p>Order ID</p><p>6 km</p></div>
-                        <div class="flex justify-between"><p class="text-blue-gray">Order #R32512</p><p>20 mins away</p></div>
-                    </div>
-
-                    <div class="mt-4 flex items-center justify-between">
-                        <label class="flex cursor-pointer items-center gap-2 text-sm">No Show
-                            <input type="checkbox" class="h-4 w-4 cursor-pointer rounded accent-blue-600">
-                        </label>
-                        <p class="text-sm text-slate-500">Customer didn’t show up</p>
-                    </div>
-
-                    <div class="mt-2 flex items-center justify-between text-sm">
-                        <div class="flex items-center gap-2"><p>Total</p><p id="orderTotal" class="text-[#1A73E8]">₹0</p></div>
-                        <div class="flex cursor-pointer items-center gap-2 rounded-lg border border-[#1A73E8] bg-blue-50 px-2.5 py-1">
-                            <p>View Invoice</p><span class="material-symbols-outlined !text-lg">visibility</span>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-center gap-3">
-                        <button class="close-popup popup-btn w-[160px] rounded-lg bg-[#1A73E8] px-6 py-3 text-[15px] text-white" data-popup="order-details-popup">Complete</button>
-                        <button class="close-popup popup-btn w-[160px] rounded-lg border border-strong-red px-6 py-3 text-[15px] text-strong-red" data-popup="cancel-order-popup">Cancel Order</button>
-                    </div>
-
-                    <!-- Cancel order popup -->
-                    <div class="cancel-order-popup popup-overlay fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-3">
-                        <div class="popup-content scroll relative w-[616px] overflow-y-auto rounded-lg bg-white p-4 shadow-xl">
-                            <div class="close-popup absolute right-4" data-popup="cancel-order-popup"><span class="material-symbols-outlined cursor-pointer">close</span></div>
-                            <div class="mb-4 flex items-center justify-center">
-                                <div class="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-rosewater"><img src="/static/images/cancelorder-icon.svg" alt="cancelorder icon" class="h-8 w-8" /></div>
-                            </div>
-                            <p class="mb-6 text-center text-base text-dark-gray">Are you sure you want to cancel this order ?</p>
-                            <button id="confirmCancelOrder" class="mx-auto block w-[198px] rounded-md bg-rosewater px-6 py-3 text-base font-semibold text-error">Cancel Order</button>
-                        </div>
+            <!-- Delivery location -->
+            <div class="mt-4 rounded-lg border border-[#E8EEF2] p-3 text-xs">
+                <p class="font-semibold text-slate-700">Delivery Location</p>
+                <div class="mt-2 flex items-start gap-2 text-slate-600">
+                    <span class="material-symbols-outlined !text-base text-red-500">location_on</span>
+                    <div>
+                        <p id="delivery-address" class="font-medium">--</p>
+                        <p class="text-[11px] text-slate-400" id="delivery-subtext"></p>
                     </div>
                 </div>
+            </div>
+
+            <!-- QR -->
+            <div class="mt-4 flex items-center justify-between rounded-lg bg-blue-50 p-3">
+                <div class="flex items-center gap-3">
+                    <img src="{% static 'images/sample-qr.png' %}" alt="Payment QR" class="h-12 w-12 rounded bg-white p-1">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-800">Scan & Pay</p>
+                        <p class="text-[11px] text-slate-500">UPI payment on delivery available</p>
+                    </div>
+                </div>
+                <span class="rounded bg-white px-2 py-1 text-xs font-bold text-[#1A73E8]">₹ verified</span>
+            </div>
+
+            <!-- Progress -->
+            <div class="mt-4">
+                <p class="text-xs font-semibold text-slate-700">Order Progress</p>
+                <div class="mt-2 flex items-center justify-between text-[10px] text-slate-500">
+                    <span class="font-semibold text-[#1A73E8]">Placed</span>
+                    <span class="h-0.5 flex-1 bg-[#1A73E8]"></span>
+                    <span class="font-semibold text-[#1A73E8]">Processing</span>
+                    <span class="h-0.5 flex-1 bg-slate-200"></span>
+                    <span>Delivered</span>
+                </div>
+            </div>
+
+            <div class="mt-5 flex gap-2">
+                <button
+                    class="flex-1 rounded-lg bg-[#1A73E8] py-2 text-xs font-bold text-white hover:bg-blue-600 close-popup">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share popup -->
+    <div class="popup-overlay fixed inset-0 z-50 flex hidden items-center justify-center bg-black/40 px-3"
+        data-popup="share-order-popup">
+        <div class="popup-content relative w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold">Share Order</h4>
+                <button class="close-popup text-slate-400"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Share this order details with your delivery partner.</p>
+            <div class="mt-4 flex gap-2">
+                <button class="flex flex-1 items-center justify-center gap-1 rounded-lg bg-green-500 py-2 text-xs font-semibold text-white">
+                    <span class="material-symbols-outlined !text-sm">chat</span> WhatsApp
+                </button>
+                <button class="flex flex-1 items-center justify-center gap-1 rounded-lg bg-blue-500 py-2 text-xs font-semibold text-white">
+                    <span class="material-symbols-outlined !text-sm">content_copy</span> Copy Link
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel order popup -->
+    <div class="popup-overlay fixed inset-0 z-50 flex hidden items-center justify-center bg-black/40 px-3"
+        data-popup="cancel-order-popup">
+        <div class="popup-content relative w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold text-red-600">Cancel Order</h4>
+                <button class="close-popup text-slate-400"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Are you sure you want to cancel this order? This action cannot be undone.</p>
+            <div class="mt-4 flex gap-2">
+                <button class="flex-1 rounded-lg border border-[#E8EEF2] py-2 text-xs font-semibold text-slate-600 close-popup">Keep Order</button>
+                <button class="flex-1 rounded-lg bg-red-600 py-2 text-xs font-semibold text-white">Yes, Cancel</button>
             </div>
         </div>
     </div>
 
 </div>
 </div>
+
+    <!-- Submit Bid Modal -->
+    <div id="pharmacy-bid-modal" class="popup-overlay fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-3">
+        <div class="popup-content relative w-full max-w-[480px] rounded-xl bg-white p-6 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-[#1A73E8]">
+                        <span class="material-symbols-outlined !text-xl">gavel</span>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Submit Bid</h3>
+                        <p class="text-[11px] text-slate-500" id="bid-modal-order-subtitle">Order #--</p>
+                    </div>
+                </div>
+                <button type="button" class="close-bid-modal text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined !text-xl">close</span>
+                </button>
+            </div>
+
+            <!-- Order Brief Card -->
+            <div class="my-4 rounded-lg bg-slate-50 p-3 text-xs space-y-1.5 border border-slate-100">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500">Customer:</span>
+                    <span class="font-semibold text-slate-800" id="bid-modal-customer">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500">Medicines:</span>
+                    <span class="font-semibold text-slate-800 text-right max-w-[260px] truncate" id="bid-modal-medicines">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500">Customer Budget:</span>
+                    <span class="font-bold text-[#1A73E8]" id="bid-modal-budget">₹-</span>
+                </div>
+            </div>
+
+            <form id="pharmacyBidForm" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="order_id" id="bid-form-order-id" value="">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="bid_amount">
+                        Your Bid Amount (₹) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₹</span>
+                        <input type="number"
+                               name="bid_amount"
+                               id="bid_amount"
+                               step="0.01"
+                               min="1"
+                               required
+                               placeholder="e.g. 450"
+                               class="w-full pl-7 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-[#1A73E8] focus:ring-1 focus:ring-[#1A73E8]">
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Enter base price before 18% GST</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="bid_gst">GST (18%)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₹</span>
+                            <input type="text"
+                                   id="bid_gst"
+                                   readonly
+                                   value="0.00"
+                                   class="w-full pl-7 pr-3 py-2 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1" for="bid_total">Total Amount</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₹</span>
+                            <input type="text"
+                                   id="bid_total"
+                                   readonly
+                                   value="0.00"
+                                   class="w-full pl-7 pr-3 py-2 text-xs rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-900 cursor-not-allowed">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="delivery_time">
+                        Estimated Delivery Time (minutes) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="number"
+                               name="delivery_time"
+                               id="delivery_time"
+                               min="5"
+                               max="1440"
+                               required
+                               placeholder="e.g. 30"
+                               class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-[#1A73E8] focus:ring-1 focus:ring-[#1A73E8]">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">mins</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="bid_remarks">
+                        Remarks / Notes <span class="text-slate-400 text-[10px]">(Optional)</span>
+                    </label>
+                    <textarea name="remarks"
+                              id="bid_remarks"
+                              rows="2"
+                              maxlength="250"
+                              placeholder="e.g. All brand medicines available in stock. Fresh batch."
+                              class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-[#1A73E8] focus:ring-1 focus:ring-[#1A73E8] resize-none"></textarea>
+                </div>
+
+                <div id="bidModalError" class="hidden rounded-lg bg-red-50 p-2 text-xs text-red-600 border border-red-200"></div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button"
+                            class="close-bid-modal flex-1 rounded-lg border border-slate-200 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            id="submitBidBtn"
+                            class="flex-1 rounded-lg bg-[#1A73E8] py-2 text-xs font-bold text-white hover:bg-blue-600 transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span class="bid-btn-text">Confirm & Place Bid</span>
+                        <span class="bid-btn-spinner hidden animate-spin">⏳</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
     <script src="{% static 'js/pharmacy-overview.js' %}?v=20261021-2"></script>
     <script src="{% static 'js/autobid.js' %}"></script>
+
+    <!-- Dashboard stats live updater -->
+    <script>
+        (function () {
+            const walletEl = document.getElementById("pharmacy-wallet-balance");
+            const todayOrdersEl = document.getElementById("pharmacy-today-orders-count");
+            const todayOrdersSubEl = document.getElementById("pharmacy-today-orders-subtext");
+            const outForDeliveryEl = document.getElementById("pharmacy-out-for-delivery-count");
+
+            function updateStats() {
+                const endpoint = document.getElementById("pharmacy-overview")?.dataset?.endpoint;
+                if (!endpoint) return;
+
+                fetch(endpoint + "?filter=Today", {
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data && !data.error) {
+                        if (todayOrdersEl && typeof data.total_orders !== "undefined") {
+                            todayOrdersEl.textContent = data.total_orders;
+                        }
+                        if (todayOrdersSubEl && typeof data.pending_orders !== "undefined" && typeof data.confirmed_orders !== "undefined") {
+                            todayOrdersSubEl.textContent = `${data.pending_orders} Pending · ${data.confirmed_orders} Processing`;
+                        }
+                        if (outForDeliveryEl && typeof data.confirmed_orders !== "undefined") {
+                            outForDeliveryEl.textContent = data.confirmed_orders;
+                        }
+                    }
+                })
+                .catch(err => console.debug("Home stats poll error:", err));
+            }
+
+            setInterval(updateStats, 10000);
+        })();
+    </script>
+
+    <!-- Order Requests & Bidding Actions -->
+    <script>
+        $(document).ready(function () {
+            // View Order Details
+            $(document).on("click", ".pharmacy-view-order-btn", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const orderId = $(this).data("order-id");
+                if (!orderId) return;
+
+                const modal = $("#pharmacy-order-details-modal");
+                modal.removeClass("hidden").addClass("flex");
+
+                // Show loading state
+                $("#order-id-label").text(`Order #${orderId} (Loading...)`);
+                $("#customer-name").text("Loading...");
+                $("#customer-phone").text("Loading...");
+                $("#delivery-type").text("Loading...");
+                $("#payment-status").text("Loading...");
+                $("#order-created-at").text("Loading...");
+                $("#order-status-badge").text("Loading...");
+                $("#delivery-address").text("Loading...");
+                $("#delivery-subtext").text("");
+                $("#order-total-amount").text("₹--");
+                $("#medicines-container").html('<p class="text-xs text-slate-400">Fetching order details...</p>');
+
+                $.ajax({
+                    url: `/dashboard/pharmacy-order-details/${orderId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data && data.id) {
+                            $("#order-id-label").text(`Order #${data.id}`);
+                            $("#customer-name").text(data.customer.name || "Customer");
+                            $("#customer-phone").text(data.customer.phone || "N/A");
+                            $("#delivery-type").text(data.delivery_type || "Standard");
+                            $("#payment-status").text(data.payment_status || "Pending");
+                            $("#order-created-at").text(data.created_at || "N/A");
+                            $("#order-status-badge").text(data.status || "Pending");
+
+                            const addr = data.address;
+                            let addrStr = [addr.address_line1, addr.address_line2, addr.city, addr.state, addr.pincode].filter(Boolean).join(", ");
+                            $("#delivery-address").text(addrStr || "No address specified");
+                            $("#delivery-subtext").text(addr.landmark ? `Landmark: ${addr.landmark}` : "");
+
+                            $("#order-total-amount").text(`₹${parseFloat(data.total || 0).toFixed(2)}`);
+
+                            if (data.medicines && data.medicines.length > 0) {
+                                let medHtml = "";
+                                data.medicines.forEach(function (m) {
+                                    medHtml += `
+                                        <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 last:border-b-0">
+                                            <div>
+                                                <p class="font-medium text-slate-800">${m.name}</p>
+                                                <p class="text-[10px] text-slate-400">Qty: ${m.qty} ${m.requires_prescription ? '· <span class="text-amber-600 font-semibold">Rx Required</span>' : ''}</p>
+                                            </div>
+                                            <p class="font-semibold text-slate-700">₹${parseFloat(m.price || 0).toFixed(2)}</p>
+                                        </div>
+                                    `;
+                                });
+                                $("#medicines-container").html(medHtml);
+                            } else {
+                                $("#medicines-container").html('<p class="text-xs text-slate-400">No medicine items found.</p>');
+                            }
+                        } else {
+                            $("#medicines-container").html('<p class="text-xs text-red-500">Failed to load order details.</p>');
+                        }
+                    },
+                    error: function () {
+                        $("#medicines-container").html('<p class="text-xs text-red-500">Error connecting to server. Please try again.</p>');
+                    }
+                });
+            });
+
+            // Close Popups
+            $(document).on("click", ".close-popup", function () {
+                $(this).closest(".popup-overlay").addClass("hidden").removeClass("flex");
+            });
+
+            // Open Bid Modal
+            $(document).on("click", ".pharmacy-bid-btn", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const btn = $(this);
+                const orderId = btn.data("order-id");
+                const customer = btn.data("customer-name") || "Customer";
+                const budget = btn.data("budget") || "-";
+                const medicines = btn.data("medicines") || "Medicines";
+
+                $("#bid-form-order-id").val(orderId);
+                $("#bid-modal-order-subtitle").text(`Order #${orderId}`);
+                $("#bid-modal-customer").text(customer);
+                $("#bid-modal-budget").text(`₹${budget}`);
+                $("#bid-modal-medicines").text(medicines);
+
+                // Reset form
+                $("#pharmacyBidForm")[0].reset();
+                $("#bid-form-order-id").val(orderId);
+                $("#bid_gst").val("0.00");
+                $("#bid_total").val("0.00");
+                $("#bidModalError").addClass("hidden").text("");
+
+                $("#pharmacy-bid-modal").removeClass("hidden").addClass("flex");
+            });
+
+            // Close Bid Modal
+            $(document).on("click", ".close-bid-modal", function () {
+                $("#pharmacy-bid-modal").addClass("hidden").removeClass("flex");
+            });
+
+            // Calculate GST & Total Amount Live
+            $("#bid_amount").on("input", function () {
+                const amt = parseFloat($(this).val()) || 0;
+                if (amt > 0) {
+                    const gst = amt * 0.18;
+                    const total = amt + gst;
+                    $("#bid_gst").val(gst.toFixed(2));
+                    $("#bid_total").val(total.toFixed(2));
+                } else {
+                    $("#bid_gst").val("0.00");
+                    $("#bid_total").val("0.00");
+                }
+            });
+
+            // Submit Bid AJAX
+            $("#pharmacyBidForm").on("submit", function (e) {
+                e.preventDefault();
+
+                const form = $(this);
+                const orderId = $("#bid-form-order-id").val();
+                const bidAmount = parseFloat($("#bid_amount").val()) || 0;
+                const deliveryTime = parseInt($("#delivery_time").val()) || 0;
+                const errorBox = $("#bidModalError");
+
+                errorBox.addClass("hidden").text("");
+
+                if (bidAmount <= 0) {
+                    errorBox.removeClass("hidden").text("Please enter a valid bid amount greater than ₹0.");
+                    return;
+                }
+                if (deliveryTime <= 0) {
+                    errorBox.removeClass("hidden").text("Please enter a valid delivery time in minutes.");
+                    return;
+                }
+
+                const submitBtn = $("#submitBidBtn");
+                const spinner = submitBtn.find(".bid-btn-spinner");
+                const btnText = submitBtn.find(".bid-btn-text");
+
+                submitBtn.prop("disabled", true);
+                spinner.removeClass("hidden");
+                btnText.text("Submitting...");
+
+                $.ajax({
+                    url: "{% url 'pharmacy_submit_bid' %}",
+                    type: "POST",
+                    data: form.serialize(),
+                    dataType: "json",
+                    success: function (res) {
+                        if (res && res.success) {
+                            $("#pharmacy-bid-modal").addClass("hidden").removeClass("flex");
+
+                            if (typeof toastr !== "undefined") {
+                                toastr.success(res.message || "Bid submitted successfully!");
+                            } else {
+                                alert(res.message || "Bid submitted successfully!");
+                            }
+
+                            // Update Table Row
+                            const row = $("#order-row-" + orderId);
+                            if (row.length) {
+                                row.find(".timer-col").html('<span class="rounded-full bg-blue-50 px-2 py-0.5 text-[#1A73E8] font-medium whitespace-nowrap">Bid Sent</span>');
+                                row.find(".actions-col").html(`
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" class="pharmacy-view-order-btn flex items-center justify-center p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-[#1A73E8] transition-colors cursor-pointer" data-order-id="${orderId}" title="View Order Details">
+                                            <span class="material-symbols-outlined !text-base">visibility</span>
+                                        </button>
+                                        <button type="button" class="rounded-md border border-slate-300 bg-slate-50 px-3 py-1 text-slate-400 cursor-not-allowed text-[11px] font-medium" disabled>Bid Sent</button>
+                                    </div>
+                                `);
+                            }
+
+                            // Update Active Bids count on top card
+                            const activeBidsEl = document.getElementById("pharmacy-active-bids-count");
+                            if (activeBidsEl && typeof res.active_bids_count !== "undefined") {
+                                activeBidsEl.textContent = res.active_bids_count;
+                            }
+                        } else {
+                            errorBox.removeClass("hidden").text(res.message || "Failed to submit bid.");
+                            if (typeof toastr !== "undefined") {
+                                toastr.error(res.message || "Failed to submit bid.");
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        let msg = "Failed to submit bid. Please try again.";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        errorBox.removeClass("hidden").text(msg);
+                        if (typeof toastr !== "undefined") {
+                            toastr.error(msg);
+                        }
+                        if (xhr.responseJSON && xhr.responseJSON.is_duplicate) {
+                            const row = $("#order-row-" + orderId);
+                            if (row.length) {
+                                row.find(".timer-col").html('<span class="rounded-full bg-blue-50 px-2 py-0.5 text-[#1A73E8] font-medium whitespace-nowrap">Bid Sent</span>');
+                                row.find(".actions-col").html(`
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" class="pharmacy-view-order-btn flex items-center justify-center p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-[#1A73E8] transition-colors cursor-pointer" data-order-id="${orderId}" title="View Order Details">
+                                            <span class="material-symbols-outlined !text-base">visibility</span>
+                                        </button>
+                                        <button type="button" class="rounded-md border border-slate-300 bg-slate-50 px-3 py-1 text-slate-400 cursor-not-allowed text-[11px] font-medium" disabled>Bid Sent</button>
+                                    </div>
+                                `);
+                            }
+                        }
+                    },
+                    complete: function () {
+                        submitBtn.prop("disabled", false);
+                        spinner.addClass("hidden");
+                        btnText.text("Confirm & Place Bid");
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}
