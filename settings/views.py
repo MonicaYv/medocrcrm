@@ -1,2655 +1,5327 @@
-import os
-import re
-import json
-import uuid
-import traceback
-import requests
-from decimal import Decimal
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_protect
-
-from django.core.cache import cache
-from django.core.files.storage import default_storage
-from django.utils import timezone
-from asgiref.sync import async_to_sync
-from registration.models import State, City, LabTiming
-from registration.models import State, City
-from registration.views import verify_otp_token, async_send_otp_email
-from django.utils import timezone
-from datetime import timedelta
-from django.conf import settings
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
-from django.db import IntegrityError, transaction
-from django.views.decorators.http import (
-    require_http_methods,
-    require_POST,
-    require_GET,
-)
-from django.views.decorators.clickjacking import xframe_options_sameorigin
-from django.http import FileResponse, Http404
-import mimetypes
-from django.contrib.auth.hashers import make_password, check_password
-from dashboard.utils import (
-    dashboard_login_required,
-    get_common_context,
-)
-from settings.models import SellerSubscription
-from appointments.models import WalletTransaction
-from registration.models import (
-    User,
-    NGOProfile,
-    UserProfile,
-    AdvertiserProfile,
-    ClientProfile,
-    PharmacyProfile,
-    ContactPerson,
-    LabProfile,
-    DoctorProfile,
-    HospitalProfile,
-    DoctorEducation,
-    DoctorSpeciality,
-    DoctorExperience,
-    PharmacyServices,
-    PharmacyType,
-    PharmacyTiming,
-    LabService,
-    LabFacility,
-    LabTiming,
-    AdServiceReq,
-    AdvertiserType,
-    ClientType,
-    ClientService,
-    NGOService,
-)
-from registration.views import (
-    validate_and_save_file,
-)
-from support.models import (
-    IssueType,
-    IssueOption,
-)
-from maps.models import SearchHistory, SavedLocation
-from coupon.models import Coupon
-from donate.models import Donation
-from ngopost.models import NGOPost
-from services.models import DoctorServiceRate, ServiceDescription
-
-## Settings
-def load_country_codes():
-    json_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'countryCodes.json')
-    with open(json_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-def normalize_dial_code(value):
-    """Return a dial code (e.g. "+91") for the posted country phone code.
-
-    `countryCodes.js` fills the selects with the ISO country code ("IN") while
-    the templates render the dial code ("+91") when JS is unavailable, so both
-    shapes can reach the server. Storing the ISO code as `phone_country_code`
-    corrupted the profile, so map it back to the dial code before saving.
-    """
-    if not value:
-        return value
-    value = str(value).strip()
-    if value.startswith("+"):
-        return value
-    for country in load_country_codes():
-        if str(country.get("code", "")).upper() == value.upper():
-            return country.get("dial_code") or value
-    return value
-
-
-def validate_email_phone(post_data, errors):
-    email = post_data.get("email", "").strip()
-    if not email:
-        errors["email"] = "Email is required."
-    else:
-        try:
-            validate_email(email)
-        except ValidationError:
-            errors["email"] = "Enter a valid email address."
-
-    phone_number = post_data.get("phone", "").strip()
-    if not re.match(r"^\d{10}$", phone_number):
-        errors["phone"] = "Enter a valid 10-digit Indian mobile number."
-
-@require_http_methods(["GET", "HEAD"])
-def serve_document(request, path):
-    """
-    Serve uploaded media files (MEDIA_ROOT / path) with correct headers:
-    - X-Frame-Options: SAMEORIGIN so iframe previews work on the same origin
-    - Cache-Control: no-store, no-cache, must-revalidate so browsers do not cache stale headers
-    - Correct Content-Type derived from file extension
-    - Fallback search by filename across MEDIA_ROOT subfolders
-    """
-    from urllib.parse import unquote
-    unquoted = unquote(path)
-    clean_path = str(unquoted).replace("\\", "/").strip().lstrip("/")
-    while "//" in clean_path:
-        clean_path = clean_path.replace("//", "/")
-
-    if "pharmacy_docs/" in clean_path:
-        idx = clean_path.rfind("pharmacy_docs/")
-        clean_path = clean_path[idx:]
-
-    safe_path = os.path.normpath(clean_path.replace("/", os.sep))
-    full_path = os.path.join(settings.MEDIA_ROOT, safe_path)
-
-    # If full_path does not exist on disk, search anywhere in MEDIA_ROOT for the file by filename
-    if not os.path.isfile(full_path):
-        target_name = os.path.basename(clean_path).lower()
-        found_path = None
-        for root, dirs, files in os.walk(settings.MEDIA_ROOT):
-            for f in files:
-                if f.lower() == target_name:
-                    found_path = os.path.join(root, f)
-                    break
-            if found_path:
-                break
-        if found_path and os.path.isfile(found_path):
-            full_path = found_path
-
-    if not os.path.isfile(full_path):
-        response = HttpResponse(
-            '<!DOCTYPE html><html><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:80vh;margin:0;color:#6b7280;text-align:center;">'
-            '<div><p style="font-size:16px;font-weight:600;margin-bottom:8px;">Document file not found on server</p>'
-            '<p style="font-size:13px;margin:0;">The file has not been uploaded yet or was moved.</p></div>'
-            '</body></html>',
-            content_type="text/html",
-            status=404
-        )
-        response["X-Frame-Options"] = "SAMEORIGIN"
-        return response
-
-    ext = os.path.splitext(full_path)[1].lower()
-    custom_types = {
-        '.png': 'image/png',
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.webp': 'image/webp',
-        '.gif': 'image/gif',
-        '.svg': 'image/svg+xml',
-        '.bmp': 'image/bmp',
-        '.pdf': 'application/pdf',
-    }
-    content_type = custom_types.get(ext)
-    if not content_type:
-        content_type, _ = mimetypes.guess_type(full_path)
-    content_type = content_type or "application/octet-stream"
-
-    if request.method == "HEAD":
-        response = HttpResponse(content_type=content_type)
-        response["Content-Length"] = str(os.path.getsize(full_path))
-    else:
-        response = FileResponse(open(full_path, "rb"), content_type=content_type)
-
-    response["X-Frame-Options"] = "SAMEORIGIN"
-    response["Cache-Control"] = "no-store, no-cache, must-revalidate"
-    response["Content-Disposition"] = f'inline; filename="{os.path.basename(full_path)}"'
-    return response
-
-
-@dashboard_login_required
-def settings_page(request):
-    user = request.user_obj
-    user_type = user.user_type
-
-    context = get_common_context(request, user)
-    context.update(get_base_context(user))
-    context["admin_profile_photo_path"] = UserProfile.objects.filter(
-        user=user
-    ).values_list("profile_photo_path", flat=True).first() or ""
-    context["active_main_tab"] = request.GET.get("tab", "settings")
-    
-    issue_types = IssueType.objects.filter(
-        user_types__contains=[user_type]
-    )
-
-    issue_options = IssueOption.objects.filter(
-        issue_type__in=issue_types,
-        user_types__contains=[user_type]
-    ).select_related("issue_type")
-
-    context.update({
-        "issue_types": issue_types,
-        "issue_options": issue_options,
-    })
-
-
-    user_type_handlers = {
-        'ngo': handle_ngo_profile,
-        'client': handle_client_profile,
-        'advertiser': handle_advertiser_profile,
-        'pharmacy': handle_pharmacy_profile,
-        'lab': handle_lab_profile,
-        'hospital': handle_hospital_profile,
-        'doctor': handle_doctor_profile,
-    }
-
-    handler_func = user_type_handlers.get(user.user_type)
-    if handler_func:
-        context.update(handler_func(user))
-
-    context['country_codes'] = load_country_codes()
-
-    # The Subscription tab settles the plan fee from the Advance (prepaid
-    # wallet), so render the live balance server-side. The status API refreshes
-    # it afterwards, but this avoids flashing a stale/hardcoded value.
-    context.update({
-        "advance_balance": get_advance_balance(user),
-        "subscription_price": SUBSCRIPTION_PRICE,
-        "subscription_gst": SUBSCRIPTION_GST,
-        "subscription_total": SUBSCRIPTION_TOTAL,
-    })
-
-    template_map = {
-        "pharmacy": "settings/seller_settings.html",
-        "lab": "settings/seller_settings.html",
-        "hospital": "settings/seller_settings.html",
-        "doctor": "settings/seller_settings.html",
-    }
-
-    template_name = template_map.get(
-        user.user_type,
-        "settings/settings_page.html"
-    )
-
-    return render(request, template_name, context)
-
-
-def get_base_context(user):
-
-    context = {
-        
-        'email': user.email,
-        'country_code': user.phone_country_code,
-        'phone_no': user.phone_number,
-        'user_type': user.user_type,
-        'created_at': user.created_at,
-        'updated_at': (
-            timezone.localtime(user.updated_at).strftime("%b. %d, %Y, %I:%M %p")
-            if user.updated_at else ""
-        ),
-        'inapp_notifications': user.inapp_notifications,
-        'email_notifications': user.email_notifications,
-        'push_notifications': user.push_notifications,
-        'regulatory_alerts': user.regulatory_alerts,
-        'promotions_and_offers': user.promotions_and_offers,
-        'payment_notifications': user.payment_notifications,
-        'location_notification': user.location_notification,
-        'quite_mode': user.quite_mode,
-        'quite_mode_start_time': user.quite_mode_start_time,
-        'quite_mode_end_time': user.quite_mode_end_time,
-        
-        
-    }
-    return context
-
-
-def get_related_location_name(profile, field_name):
-    """Return a location name without failing on a stale foreign-key value."""
-    try:
-        location = getattr(profile, field_name)
-    except (City.DoesNotExist, State.DoesNotExist):
-        return ""
-
-    return location.name if location else ""
-
-def handle_contact_person(profile_type, profile):
-    contact = ContactPerson.objects.filter(profile_type=profile_type, profile=profile).first()
-    return {
-        'contact_name': contact.name if contact else '',
-        'contact_phone_country_code': contact.phone_country_code if contact else '',
-        'contact_phone_number': contact.phone_number if contact else '',
-        'contact_role': contact.role if contact else ''
-    }
-
-def handle_advertiser_profile(user):
-    profile = AdvertiserProfile.objects.filter(user=user).first()
-    all_types = AdvertiserType.objects.filter(is_active=True)
-    all_services = AdServiceReq.objects.filter(is_active=True)
-    data = {
-        'company_name': profile.company_name,
-        'advertiser_type': profile.advertiser_type,
-        'all_types': all_types,
-        'services_interested': profile.ad_services_required,
-        'all_services': all_services,
-        'website_url': profile.website_url,
-        'address': profile.address,
-        'city': get_related_location_name(profile, 'city'),
-        'state': get_related_location_name(profile, 'state'),
-        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
-        'pincode': profile.pincode,
-        'brand_description': profile.brand_description,
-        'brand_image_path': os.path.basename(profile.brand_image_path),
-        'referral_code': profile.referral_code,
-        'incorporation_number': profile.incorporation_number,
-        'incorporation_doc_path': os.path.basename(profile.incorporation_doc_path),
-        'gst_number': profile.gst_number,
-        'gst_doc_path': os.path.basename(profile.gst_doc_path),
-        'pan_number': profile.pan_number,
-        'pan_doc_path': os.path.basename(profile.pan_doc_path),
-        'tan_number': profile.tan_number,
-        'tan_doc_path': os.path.basename(profile.tan_doc_path),
-    }
-    data.update(handle_contact_person(user.user_type, user))
-    return data
-
-def handle_client_profile(user):
-    profile = ClientProfile.objects.filter(user=user).first()
-    all_types = ClientType.objects.filter(is_active=True)
-    all_services = ClientService.objects.filter(is_active=True)
-
-    data = {
-        'company_name': profile.company_name,
-        'company_type': profile.company_type,
-        'all_types': all_types,
-        'services_interested': profile.services_interested,
-        'all_services': all_services,
-        'website_url': profile.website_url,
-        'address': profile.address,
-        'city': get_related_location_name(profile, 'city'),
-        'state': get_related_location_name(profile, 'state'),
-        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
-        'country_options': load_country_codes(),
-        'pincode': profile.pincode,
-        'referral_code': profile.referral_code,
-        'incorporation_number': profile.incorporation_number,
-        'incorporation_doc_path': os.path.basename(profile.incorporation_doc_path),
-        'gst_number': profile.gst_number,
-        'gst_doc_path': os.path.basename(profile.gst_doc_path),
-        'pan_number': profile.pan_number,
-        'pan_doc_path': os.path.basename(profile.pan_doc_path),
-        'tan_number': profile.tan_number,
-        'tan_doc_path': os.path.basename(profile.tan_doc_path),
-    }
-    data.update(handle_contact_person(user.user_type, user))
-    return data
-
-def handle_ngo_profile(user):
-    profile = NGOProfile.objects.filter(user=user).first()
-    all_services = NGOService.objects.filter(is_active=True)
-    data = {
-        'ngo_name': profile.ngo_name,
-        'ngo_services': profile.ngo_services,
-        'all_services': all_services,
-        'website_url': profile.website_url,
-        'address': profile.address,
-        'city': get_related_location_name(profile, 'city'),
-        'state': get_related_location_name(profile, 'state'),
-        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
-        'pincode': profile.pincode,
-        'ngo_registration_number': profile.ngo_registration_number,
-        'ngo_registration_doc_path': os.path.basename(profile.ngo_registration_doc_path),
-        'pan_number': profile.pan_number,
-        'pan_doc_path': os.path.basename(profile.pan_doc_path),
-        'gst_number': profile.gst_number,
-        'gst_doc_path': os.path.basename(profile.gst_doc_path),
-        'tan_number': profile.tan_number,
-        'tan_doc_path': os.path.basename(profile.tan_doc_path),
-        'section8_number': profile.section8_number,
-        'section8_doc_path': os.path.basename(profile.section8_doc_path),
-        'doc_12a_number': profile.doc_12a_number,
-        'doc_12a_path': os.path.basename(profile.doc_12a_path),
-        'brand_description': profile.brand_description,
-        'brand_image_path': os.path.basename(profile.brand_image_path),
-        'referral_code': profile.referral_code,
-    }
-    data.update(handle_contact_person(user.user_type, user))
-    return data
-
-def handle_pharmacy_profile(user):
-    profile = PharmacyProfile.objects.filter(user=user).first()
-    all_types = PharmacyType.objects.filter(is_active=True)
-    all_services = PharmacyServices.objects.filter(is_active=True)
-    all_workingdays = PharmacyTiming.objects.filter(is_active=True)
-
-    # A pharmacy user can reach Settings before a profile has been completed.
-    # Keep the page available in that state instead of dereferencing a missing
-    # profile and returning a server error.
-    if not profile:
-        data = {
-            'company_name': '',
-            'pharmacy_types': PharmacyType.objects.none(),
-            'all_types': all_types,
-            'services_offered': PharmacyServices.objects.none(),
-            'all_services': all_services,
-            'all_workingdays': all_workingdays,
-            'website_url': '',
-            'country': '',
-            'working_days': None,
-            'address': '',
-            'city': '',
-            'state': '',
-            'pincode': '',
-            'referral_code': '',
-            'incorporation_number': '',
-            'incorporation_doc_path': '',
-            'incorporation_doc_filename': '',
-            'gst_number': '',
-            'gst_doc_path': '',
-            'gst_doc_filename': '',
-            'medical_license_number': '',
-            'medical_license_doc_path': '',
-            'medical_license_doc_filename': '',
-            'pan_number': '',
-            'pan_doc_path': '',
-            'pan_doc_filename': '',
-            'storefront_image_path': '',
-            'storefront_image_filename': '',
-            'tan_number': '',
-            'tan_doc_path': '',
-            'tan_doc_filename': '',
-        }
-        data.update(handle_contact_person(user.user_type, user))
-        return data
-
-    def resolve_pharmacy_doc(raw_path, default_subdir):
-        if not raw_path:
-            return "", ""
-        clean = str(raw_path).replace("\\", "/").strip()
-        while "//" in clean:
-            clean = clean.replace("//", "/")
-        media_root_clean = str(settings.MEDIA_ROOT).replace("\\", "/").rstrip("/")
-        while "//" in media_root_clean:
-            media_root_clean = media_root_clean.replace("//", "/")
-        if clean.startswith(media_root_clean):
-            clean = clean[len(media_root_clean):].lstrip("/")
-
-        for prefix in ["/document/", "document/", "/media/", "media/"]:
-            if clean.startswith(prefix):
-                clean = clean[len(prefix):].lstrip("/")
-                break
-
-        if "pharmacy_docs/" in clean:
-            idx = clean.rfind("pharmacy_docs/")
-            clean = clean[idx:]
-
-        filename = clean.split("/")[-1]
-
-        # Handle storefront / photo alias
-        if default_subdir == 'store_front':
-            if clean.startswith("photo/"):
-                clean = f"store_front/{clean[len('photo/'):].lstrip('/')}"
-            elif clean.startswith("pharmacy_docs/photo/"):
-                clean = f"pharmacy_docs/store_front/{clean[len('pharmacy_docs/photo/'):].lstrip('/')}"
-
-        if "/" not in clean:
-            clean = f"pharmacy_docs/{default_subdir}/{clean}"
-        elif clean.startswith(f"{default_subdir}/"):
-            clean = f"pharmacy_docs/{clean}"
-
-        # Disk verification and fallback to ensure the path actually points to an existing file
-        full_candidate = os.path.join(settings.MEDIA_ROOT, clean.replace("/", os.sep))
-        if not os.path.isfile(full_candidate):
-            preferred = os.path.join(settings.MEDIA_ROOT, "pharmacy_docs", default_subdir, filename)
-            if os.path.isfile(preferred):
-                clean = f"pharmacy_docs/{default_subdir}/{filename}"
-            else:
-                for root, dirs, files in os.walk(settings.MEDIA_ROOT):
-                    for f in files:
-                        if f.lower() == filename.lower():
-                            rel = os.path.relpath(os.path.join(root, f), settings.MEDIA_ROOT).replace("\\", "/")
-                            clean = rel
-                            filename = f
-                            break
-                    if os.path.isfile(os.path.join(settings.MEDIA_ROOT, clean.replace("/", os.sep))):
-                        break
-
-        return clean, filename
-    incorp_path, incorp_filename = resolve_pharmacy_doc(profile.incorporation_doc_path, 'incorporation')
-    gst_path, gst_filename = resolve_pharmacy_doc(profile.gst_doc_path, 'gst')
-    med_path, med_filename = resolve_pharmacy_doc(profile.medical_license_doc_path, 'medical_license')
-    pan_path, pan_filename = resolve_pharmacy_doc(profile.pan_doc_path, 'pan')
-    storefront_path, storefront_filename = resolve_pharmacy_doc(profile.storefront_image_path, 'store_front')
-    tan_path, tan_filename = resolve_pharmacy_doc(profile.tan_doc_path, 'tan')
-
-    data = {
-        'company_name': profile.company_name,
-        'pharmacy_types': profile.pharmacy_types.all(),
-        'all_types': all_types,
-        'services_offered': profile.services.all(),
-        'all_services': all_services,
-        'all_workingdays': all_workingdays,
-        'website_url': profile.website,
-        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
-        'working_days': profile.pharmacy_timing,
-        'address': profile.address,
-        # 'city': profile.city,
-        # 'state': profile.state,
-        'city': get_related_location_name(profile, 'city'),
-        'state': get_related_location_name(profile, 'state'),
-        'pincode': profile.pincode,
-        'referral_code': profile.referral_code or '',
-        # PharmacyProfile stores this value as pharmacy_registration_number;
-        # the settings template continues to use the shared context key.
-        'incorporation_number': profile.pharmacy_registration_number,
-        'incorporation_doc_path': incorp_path,
-        'incorporation_doc_filename': incorp_filename,
-        'gst_number': profile.gst_number,
-        'gst_doc_path': gst_path,
-        'gst_doc_filename': gst_filename,
-        'medical_license_number': profile.medical_license_number,
-        'medical_license_doc_path': med_path,
-        'medical_license_doc_filename': med_filename,
-        'pan_number': profile.pan_number,
-        'pan_doc_path': pan_path,
-        'pan_doc_filename': pan_filename,
-        'storefront_image_path': storefront_path,
-        'storefront_image_filename': storefront_filename,
-        'tan_number': profile.tan_number if profile.tan_number else "",
-        'tan_doc_path': tan_path,
-        'tan_doc_filename': tan_filename,
-    }
-    data.update(handle_contact_person(user.user_type, user))
-    return data
-
-def get_lab_sorted_country_codes():
-    codes = load_country_codes()
-    def sort_key(item):
-        dial = str(item.get('dial_code', '')).replace('+', '').strip()
-        digits = ''.join([c for c in dial if c.isdigit()])
-        num = int(digits) if digits else 999999
-        return (num, str(item.get('name', '')))
-    return sorted(codes, key=sort_key)
-
-def handle_lab_profile(user):
-    profile = LabProfile.objects.filter(user=user).first()
-    all_timings = LabTiming.objects.filter(is_active=True)
-    all_services = LabService.objects.filter(is_active=True)
-    all_facilities = LabFacility.objects.filter(is_active=True)
-
-    normalized_country_code = normalize_dial_code(user.phone_country_code) if user.phone_country_code else '+91'
-    data = {
-        'country_code': normalized_country_code,
-        'lab_country_codes': get_lab_sorted_country_codes(),
-        'lab_name' : profile.lab_name if profile else '',
-        'owner_name': profile.owner_name if profile else '',
-        'contact_number': (profile.contact_number if profile else '') or user.phone_number or '',
-        'alt_contact_number': profile.alt_contact_number,
-        'lab_registration_number': profile.lab_registration_number,
-        'address': profile.address,
-        # 'city': profile.city,
-        # 'state': profile.state,
-        # 'lab_timing': profile.lab_timing,
-        'lab_timing': profile.lab_timing,
-        'city': get_related_location_name(profile, 'city'),
-        'state': get_related_location_name(profile, 'state'),
-        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
-        'pincode': profile.pincode,
-        'all_timings': all_timings,
-        # 'lab_timing': profile.lab_timing,
-        'services_selected': profile.services.all(),
-        'all_services': all_services,
-        'facilities_selected': profile.facilities.all(),
-        'all_facilities': all_facilities,
-        'lab_certificate_path': profile.lab_certificate_path or '',
-        'lab_certificate_filename': (
-            os.path.basename(str(profile.lab_certificate_path).replace("\\", "/"))
-            if profile.lab_certificate_path else ""
-        ),
-        'identity_proof_aadhar_number': profile.identity_proof_aadhar_number,
-        'identity_proof_aadhar_path': profile.identity_proof_aadhar_path or '',
-        'identity_proof_aadhar_filename': (
-            os.path.basename(str(profile.identity_proof_aadhar_path).replace("\\", "/"))
-            if profile.identity_proof_aadhar_path else ""
-        ),
-        'identity_proof_pan_number': profile.identity_proof_pan_number,
-        'identity_proof_pan_path': profile.identity_proof_pan_path or '',
-        'identity_proof_pan_filename': (
-            os.path.basename(str(profile.identity_proof_pan_path).replace("\\", "/"))
-            if profile.identity_proof_pan_path else ""
-        ),
-        'gov_license_number': profile.gov_license_number,
-        'gov_license_path': profile.gov_license_path or '',
-        'gov_license_filename': (
-            os.path.basename(str(profile.gov_license_path).replace("\\", "/"))
-            if profile.gov_license_path else ""
-        ),
-        'lab_photo_path': profile.lab_photo_path or '',
-        'lab_photo_filename': (
-            os.path.basename(str(profile.lab_photo_path).replace("\\", "/"))
-            if profile.lab_photo_path else ""
-        ),
-        'is_verified': profile.is_verified,
-        'verification_status': profile.verification_status,
-        'rejection_reason': profile.rejection_reason,
-        'verified_at': profile.verified_at,
-        'referral_code': profile.referral_code or '',
-    }
-    return data
-
-def handle_hospital_profile(user):
-    profile = HospitalProfile.objects.filter(user=user).first()
-    data = {
-        'registration_certificate_path': profile.registration_certificate_path if profile.registration_certificate_path else "",
-
-        'aadhar_doc_path': profile.aadhar_doc_path if profile.aadhar_doc_path else "",
-
-        'pan_doc_path': profile.pan_doc_path if profile.pan_doc_path else "",
-
-        'hospital_photo_path': profile.hospital_photo_path if profile.hospital_photo_path else "",
-        'hospital_name' : profile.hospital_name,
-        'owner_name': profile.owner_name,
-        'contact_no': profile.contact_no,
-        'contact_number': profile.contact_no,
-        'alternate_contact_no': profile.alternate_contact_no,
-        'alt_contact_number': profile.alternate_contact_no,
-        'address': profile.address,
-        # 'country': profile.country,
-        # 'city': profile.city,
-        # 'state': profile.state,
-        # 'pincode': profile.pincode,
-        # 'hospital_timing': profile.hospital_timing,
-        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
-        'city': get_related_location_name(profile, 'city'),
-        'state': get_related_location_name(profile, 'state'),
-        'pincode': profile.pincode or "",
-        'hospital_timing': profile.hospital_timing,
-        'home_visit': profile.home_visit,
-        'registration_no': profile.registration_no,
-        # 'registration_certificate_path': os.path.basename(profile.registration_certificate_path) if profile.registration_certificate_path else "",
-       'registration_certificate_path': profile.registration_certificate_path if profile.registration_certificate_path else "",
-        'aadhar_card_no': profile.aadhar_card_no,
-        # 'aadhar_doc_path': os.path.basename(profile.aadhar_doc_path) if profile.aadhar_doc_path else "",
-        'aadhar_doc_path': profile.aadhar_doc_path if profile.aadhar_doc_path else "",
-        'pan_card_no': profile.pan_card_no,
-        # 'pan_doc_path': os.path.basename(profile.pan_doc_path) if profile.pan_doc_path else "",
-        'pan_doc_path': profile.pan_doc_path if profile.pan_doc_path else "",
-        # 'hospital_logo_path': os.path.basename(profile.hospital_logo_path) if profile.hospital_logo_path else "",
-        'hospital_logo_path': profile.hospital_logo_path if profile.hospital_logo_path else "",
-        # 'hospital_photo_path': os.path.basename(profile.hospital_photo_path) if profile.hospital_photo_path else "",
-        'hospital_photo_path': profile.hospital_photo_path if profile.hospital_photo_path else "",
-        'phone_for_otp': profile.phone_for_otp,
-        'is_verified': profile.is_verified,
-        'verification_status': profile.verification_status,
-        'rejection_reason': profile.rejection_reason,
-        'verified_at': profile.verified_at,
-        'referral_code': profile.referral_code or '',
-    }
-    return data
-
-def handle_doctor_profile(user):
-    profile = DoctorProfile.objects.filter(user=user).first()
-    all_speciality = DoctorSpeciality.objects.filter(is_active=True)
-    all_education = DoctorEducation.objects.filter(is_active=True)
-    all_experience = DoctorExperience.objects.filter(is_active=True)
-    all_services = ServiceDescription.objects.select_related("category").order_by("name")
-    all_facilities = LabFacility.objects.filter(is_active=True)
-
-    # The Documents tab renders the stored file name, the virus-scan result and
-    # the review status for each document. `validate_and_save_file` stores the
-    # path as "<user_type>_docs/<subdir>/<file name>", so the display name is the
-    # last segment while the viewer needs the full relative path.
-    def doc_name(path):
-        if not path:
-            return ""
-        return str(path).replace("\\", "/").split("/")[-1]
-
-    # `validate_and_save_file` refreshes user.updated_on every upload, so it is
-    # the closest available "last edited" timestamp for the documents list.
-    last_edited = (
-        user.updated_at.strftime("%d %b %Y, %I:%M %p")
-        if user.updated_at else "Not yet uploaded"
-    )
-
-    def document_last_edited(path):
-        if not path:
-            return "Not uploaded"
-        try:
-            modified_at = default_storage.get_modified_time(path)
-            if timezone.is_naive(modified_at):
-                modified_at = timezone.make_aware(modified_at)
-            return timezone.localtime(modified_at).strftime("%d %b %Y, %I:%M %p")
-        except (OSError, NotImplementedError, ValueError):
-            return last_edited
-
-    # A doctor can reach Settings before the KYC profile has been created.
-    # Keep the page available in that state (like the pharmacy handler) instead
-    # of dereferencing a missing profile and returning a server error.
-    if not profile:
-        return {
-            'full_name': '', 'gender': '', 'age': None, 'specialty': None,
-            'all_speciality': all_speciality,
-            'education': None, 'all_education': all_education,
-            'experience': None, 'all_experience': all_experience,
-            'services_selected': ServiceDescription.objects.none(),
-            'all_services': all_services,
-            'facilities_selected': LabFacility.objects.none(),
-            'all_facilities': all_facilities,
-            'profile_photo_path': '',
-            'clinic_name': '', 'owner_name': '', 'contact_number': '',
-            'alt_contact_number': '', 'address': '', 'city': '', 'state': '',
-            'pincode': '', 'country': '',
-            'clinic_timing_from': '', 'clinic_timing_to': '',
-            'home_visit_available': False, 'registration_number': '',
-            'registration_certificate_path': '',
-            'registration_certificate_filename': '',
-            'registration_certificate_virus_scanned': False,
-            'registration_certificate_last_edited': 'Not uploaded',
-            'aadhar_number': '', 'aadhar_doc_path': '',
-            'aadhar_doc_filename': '', 'aadhar_doc_virus_scanned': False,
-            'aadhar_doc_last_edited': 'Not uploaded',
-            'pan_number': '', 'pan_doc_path': '',
-            'pan_doc_filename': '', 'pan_doc_virus_scanned': False,
-            'pan_doc_last_edited': 'Not uploaded',
-            'clinic_logo_path': '', 'clinic_logo_filename': '',
-            'clinic_logo_virus_scanned': False,
-            'clinic_photo_path': '', 'clinic_photo_filename': '',
-            'clinic_photo_virus_scanned': False,
-            'clinic_photo_last_edited': 'Not uploaded',
-            'doc_status': 'Pending', 'doc_status_is_approved': False,
-            'doc_last_edited': last_edited,
-            'is_verified': False, 'verification_status': 'pending',
-            'rejection_reason': None, 'verified_at': None,
-            'referral_code': '',
-        }
-
-    # A rejected document keeps the reviewer's reason, so show it instead of a
-    # generic label. `verification_status` is one of pending/approved/rejected.
-    status_label = (profile.verification_status or "pending").strip().lower()
-    if status_label == "approved":
-        doc_status = "Approved"
-    elif status_label == "rejected":
-        doc_status = profile.rejection_reason or "Rejected"
-    else:
-        doc_status = "Pending"
-
-    data = {
-        'full_name': profile.full_name,
-        'gender': profile.gender,
-        'age': profile.age,
-        'specialty': profile.specialty,
-        'all_speciality': all_speciality,
-        'education': profile.education,
-        'all_education': all_education,
-        'experience': profile.experience,
-        'all_experience': all_experience,
-        'services_selected': ServiceDescription.objects.filter(
-            id__in=DoctorServiceRate.objects.filter(
-                doctor=profile
-            ).values_list("service_id", flat=True)
-        ),
-        'all_services': all_services,
-        'facilities_selected': LabFacility.objects.none(),
-        'all_facilities': all_facilities,
-        'profile_photo_path': profile.profile_photo_path,
-        'clinic_name': profile.clinic_name,
-        'owner_name': profile.owner_name,
-        'contact_number': profile.contact_number,
-        'alt_contact_number': profile.alt_contact_number,
-        'address': profile.full_address,
-        # 'city': profile.city,
-        # 'state': profile.state,
-        'city': get_related_location_name(profile, 'city'),
-        'state': get_related_location_name(profile, 'state'),
-        'pincode': profile.pincode,
-        # Older records stored "1" for India, so show the country name like the
-        # other profile handlers do. The edit form prefills this value so saving
-        # no longer wipes the stored country.
-        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else ''),
-        'clinic_timing_from': profile.clinic_timing_from,
-        'clinic_timing_to': profile.clinic_timing_to,
-        'home_visit_available': profile.home_visit_available,
-        'registration_number': profile.registration_number,
-        'registration_certificate_path': profile.registration_certificate_path or "",
-        'registration_certificate_filename': doc_name(profile.registration_certificate_path),
-        'registration_certificate_virus_scanned': profile.registration_certificate_virus_scanned,
-        'registration_certificate_last_edited': document_last_edited(profile.registration_certificate_path),
-        'aadhar_number': profile.aadhar_number,
-        'aadhar_doc_path': profile.aadhar_doc_path or "",
-        'aadhar_doc_filename': doc_name(profile.aadhar_doc_path),
-        'aadhar_doc_virus_scanned': profile.aadhar_doc_virus_scanned,
-        'aadhar_doc_last_edited': document_last_edited(profile.aadhar_doc_path),
-        'pan_number': profile.pan_number,
-        'pan_doc_path': profile.pan_doc_path or "",
-        'pan_doc_filename': doc_name(profile.pan_doc_path),
-        'pan_doc_virus_scanned': profile.pan_doc_virus_scanned,
-        'pan_doc_last_edited': document_last_edited(profile.pan_doc_path),
-        'clinic_logo_path': profile.clinic_logo_path or "",
-        'clinic_logo_filename': doc_name(profile.clinic_logo_path),
-        'clinic_logo_virus_scanned': profile.clinic_logo_virus_scanned,
-        'clinic_photo_path': profile.clinic_photo_path or "",
-        'clinic_photo_filename': doc_name(profile.clinic_photo_path),
-        'clinic_photo_virus_scanned': profile.clinic_photo_virus_scanned,
-        'clinic_photo_last_edited': document_last_edited(profile.clinic_photo_path),
-        'doc_status': doc_status,
-        'doc_status_is_approved': status_label == "approved",
-        'doc_status_is_rejected': status_label == "rejected",
-        'doc_last_edited': last_edited,
-        'is_verified': profile.is_verified,
-        'verification_status': profile.verification_status,
-        'rejection_reason': profile.rejection_reason,
-        'verified_at': profile.verified_at,
-        'referral_code': profile.referral_code or '',
-    }
-    return data
-
-def logout_view(request):
-    request.session.flush()  # clears all session data
-    return redirect('/login/')
-
-@require_POST
-@dashboard_login_required
-def update_notification_field(request):
-    user = request.user_obj
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({"status": "error", "message": "Invalid JSON."}, status=400)
-
-    field = data.get("field")
-    value = data.get("value")
-
-    def normalize_time(t):
-        if not t:
-            return None
-        if hasattr(t, "strftime"):
-            return t.strftime("%H:%M")
-        t_str = str(t).strip()
-        parts = t_str.split(":")
-        if len(parts) >= 2:
-            try:
-                return f"{int(parts[0]):02d}:{int(parts[1]):02d}"
-            except ValueError:
-                return t_str[:5]
-        return t_str[:5]
-
-    # Validate Quiet Hours: Start Time and End Time must not be identical when Quiet Mode is enabled.
-    is_quiet_mode = value if field == "quite_mode" else data.get("quite_mode", user.quite_mode)
-    proposed_start = value if field == "quite_mode_start_time" else data.get("quite_mode_start_time", user.quite_mode_start_time)
-    proposed_end = value if field == "quite_mode_end_time" else data.get("quite_mode_end_time", user.quite_mode_end_time)
-
-    if bool(is_quiet_mode) and proposed_start and proposed_end:
-        norm_start = normalize_time(proposed_start)
-        norm_end = normalize_time(proposed_end)
-        if norm_start and norm_end and norm_start == norm_end:
-            return JsonResponse({
-                "status": "error",
-                "message": "Start Time and End Time cannot be the same."
-            }, status=400)
-
-    if field in ["inapp_notifications", "email_notifications", "push_notifications", "regulatory_alerts", "promotions_and_offers", "quite_mode", "payment_notifications", "location_notification"]:
-        setattr(user, field, value)
-    elif field in ["quite_mode_start_time", "quite_mode_end_time"]:
-        setattr(user, field, value if value else None)
-    user.save()
-    return JsonResponse({"status": "success"})
-
-# @dashboard_login_required
-# @require_POST
-# def update_user_document(request):
-#     user = request.user_obj
-#     user_type = user.user_type
-#     doc_type = request.POST.get('doc_type')
-#     file = request.FILES.get('document')
-
-#     print(file)
-
-#     if not doc_type or not file:
-#         return JsonResponse({'success': False, 'error': 'Missing document or type.'}, status=400)
-
-#     subdir_map = {
-#         'hospital_license': 'registration',
-#         'admin_identity_proof': 'aadhar',      
-#         'pan_doc': 'pan',
-#         'hospital_image': 'hospital_image',
-#         'ngo_registration_doc': 'registration',
-#         'lab_certificate': 'lab_certificate',
-#         'identity_proof_aadhar': 'aadhar',
-#         'identity_proof_pan': 'pan',
-#         'gov_license': 'gov_license',
-#         'lab_photo': 'lab_photo',
-#         'incorporation_doc': 'incorporation',
-#         'gst_doc': 'gst',
-#         'pan_doc': 'pan',
-#         'tan_doc': 'tan',
-#         'section8_doc': 'section8',
-#         'doc_12a': 'doc_12a',
-#         'brand_image': 'brand_image',
-#         'medical_license_doc': 'medical_license',
-#         'storefront_image': 'store_front',
-#         'clinic_registration': 'registration',
-#         'aadhar_doc': 'aadhar',
-#         'doctor_pan': 'pan',
-#         'clinic_logo': 'clinic_logo',
-#         'clinic_photo': 'clinic_photo',
-#     }
-        
-#     upload_subdir = subdir_map.get(doc_type)
-#     if not upload_subdir:
-#         return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
-
-#     file_path, error = validate_and_save_file(file, upload_subdir, doc_type.replace('_', ' ').title(), user_type=user_type)
-#     if error:
-#         return JsonResponse({'success': False, 'error': error}, status=400)
-
-#     # profile_model = {
-#     #     'ngo': NGOProfile,
-#     #     'advertiser': AdvertiserProfile,
-#     #     'client': ClientProfile,
-#     #     'pharmacy': PharmacyProfile,
-#     # }.get(user_type)
-    
-
-#     profile_model = {
-#         'ngo': NGOProfile,
-#         'advertiser': AdvertiserProfile,
-#         'client': ClientProfile,
-#         'pharmacy': PharmacyProfile,
-#         'lab': LabProfile,
-#         'hospital': HospitalProfile,
-#         'doctor': DoctorProfile,
-#     }.get(user_type)
-#     if not profile_model:
-#         return JsonResponse({'success': False, 'error': 'Invalid user type for document upload.'}, status=400)
-
-#     profile = profile_model.objects.filter(user=user).first()
-#     print("PROFILE =", profile)
-#     print("DOC TYPE =", doc_type)
-#     print("FILE =", file)
-#     if not profile:
-#         return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
-
-#     doc_field_map = {
-#         'hospital_license': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
-#         'admin_identity_proof': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
-#         'hospital_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
-#         'hospital_image': ('hospital_photo_path', 'hospital_photo_virus_scanned'),
-#         'ngo_registration_doc': ('ngo_registration_doc_path', 'ngo_registration_doc_virus_scanned'),
-#         'lab_certificate': ('lab_certificate_path', 'lab_certificate_virus_scanned'),
-#         'identity_proof_aadhar': ('identity_proof_aadhar_path', 'identity_proof_aadhar_virus_scanned'),
-#         'identity_proof_pan': ('identity_proof_pan_path', 'identity_proof_pan_virus_scanned'),
-#         'gov_license': ('gov_license_path', 'gov_license_virus_scanned'),
-#         'lab_photo': ('lab_photo_path', 'lab_photo_virus_scanned'),
-#         'incorporation_doc': ('incorporation_doc_path', 'incorporation_doc_virus_scanned'),
-#         'gst_doc': ('gst_doc_path', 'gst_doc_virus_scanned'),
-#         'pan_doc': ('pan_doc_path', 'pan_doc_virus_scanned'),
-#         'tan_doc': ('tan_doc_path', 'tan_doc_virus_scanned'),
-#         'section8_doc': ('section8_doc_path', 'section8_doc_virus_scanned'),
-#         'doc_12a': ('doc_12a_path', 'doc_12a_virus_scanned'),
-#         'brand_image': ('brand_image_path', 'brand_image_virus_scanned'),
-#         'medical_license_doc': ('medical_license_doc_path', 'medical_license_doc_virus_scanned'),
-#         'storefront_image': ('storefront_image_path', 'storefront_image_virus_scanned'),
-#         'clinic_registration': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
-#         'aadhar_doc': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
-#         'doctor_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
-#         'clinic_logo': ('clinic_logo_path', 'clinic_logo_virus_scanned'),
-#         'clinic_photo': ('clinic_photo_path', 'clinic_photo_virus_scanned'),
-#     }
-
-#     doc_fields = doc_field_map.get(doc_type)
-#     if not doc_fields:
-#         return JsonResponse({'success': False, 'error': 'Unknown document type.'}, status=400)
-
-#     setattr(profile, doc_fields[0], file_path)
-#     print("SETTING:", doc_fields[0], "=", file_path)
-#     setattr(profile, doc_fields[1], True)
-#     print("FILE PATH =", file_path)
-#     print("DOC FIELD =", doc_fields[0])
-#     profile.save()
-
-#     return JsonResponse({'success': True, 'message': 'Document updated successfully.'})
-
-def _extract_number_from_ocr(ocr_result, field_name):
-    """Return a confidently recognizable ID number from OCR response data."""
-    text_values = []
-
-    def collect(value, key=""):
-        if isinstance(value, dict):
-            for child_key, child_value in value.items():
-                collect(child_value, str(child_key).lower())
-        elif isinstance(value, (list, tuple)):
-            for child in value:
-                collect(child, key)
-        elif isinstance(value, str):
-            text_values.append(value)
-
-    collect(ocr_result)
-    full_text = "\n".join(text_values).upper()
-    normalized_field = field_name.lower()
-
-    patterns = []
-    if "pan" in normalized_field:
-        patterns = [r"\b[A-Z]{5}\d{4}[A-Z]\b"]
-    elif "gst" in normalized_field:
-        patterns = [r"\b\d{2}[A-Z]{5}\d{4}[A-Z][A-Z\d]Z[A-Z\d]\b"]
-    elif "tan" in normalized_field:
-        patterns = [r"\b[A-Z]{4}\d{5}[A-Z]\b"]
-    elif "aadhar" in normalized_field or "aadhaar" in normalized_field:
-        patterns = [r"\b\d{4}[ -]?\d{4}[ -]?\d{4}\b"]
-
-    for pattern in patterns:
-        match = re.search(pattern, full_text)
-        if match:
-            return re.sub(r"[ -]", "", match.group(0))
-
-    # Registration and license IDs vary by issuing authority. Only accept a
-    # value found next to an explicit identifying label in the OCR text.
-    label = r"(?:REGISTRATION|LICENSE|LICENCE|CERTIFICATE)"
-    match = re.search(
-        rf"{label}(?:\s+(?:NO|NUMBER|#))?\s*[:#-]?\s*([A-Z0-9][A-Z0-9/-]{{3,29}})",
-        full_text,
-    )
-    return match.group(1).strip("/-") if match else ""
-
-
-def _read_document_number_with_ocr(file_path, model_field):
-    """Ask the configured OCR service to read a newly uploaded document."""
-    ocr_url = os.getenv("OCR_SERVICE_URL")
-    if not ocr_url:
-        return ""
-    try:
-        with default_storage.open(file_path, "rb") as document:
-            response = requests.post(
-                ocr_url,
-                files={"file": (os.path.basename(file_path), document)},
-                timeout=25,
-            )
-        response.raise_for_status()
-        return _extract_number_from_ocr(response.json(), model_field)
-    except (OSError, requests.RequestException, ValueError, TypeError):
-        # Document upload should still succeed if OCR is temporarily unavailable.
-        traceback.print_exc()
-        return ""
-
-
-@dashboard_login_required
-@require_POST
-def update_user_document(request):
-    user = request.user_obj
-    user_type = user.user_type
-    doc_type = request.POST.get('doc_type')
-    
-    # Check for a generic 'document' key first; fall back to the dynamic doc_type name 
-    file = request.FILES.get('document') or request.FILES.get(doc_type)
-
-    # ==================== DEBUGGING BLOCK 1 ====================
-    print("\n--- [DEBUG TAN START] ---")
-    print(f"USER TYPE: {user_type}")
-    print(f"INCOMING DOC TYPE: '{doc_type}'")
-    print(f"FILES IN REQUEST: {list(request.FILES.keys())}")
-    print(f"POST FIELDS IN REQUEST: {list(request.POST.keys())}")
-    print(f"RESOLVED FILE OBJECT: {file}")
-    # ===========================================================
-
-    if not doc_type or not file:
-        print("[DEBUG ERROR] Short-circuited: Missing doc_type or file object!")
-        print("--- [DEBUG TAN END] ---\n")
-        return JsonResponse({'success': False, 'error': 'Missing document or type.'}, status=400)
-
-    subdir_map = {
-        'hospital_license': 'registration',
-        'admin_identity_proof': 'aadhar',      
-        'pan_doc': 'pan',
-        'hospital_pan': 'pan',
-        'hospital_image': 'hospital_image',
-        'ngo_registration_doc': 'registration',
-        'lab_certificate': 'lab_certificate',
-        'identity_proof_aadhar': 'aadhar',
-        'identity_proof_pan': 'pan',
-        'gov_license': 'gov_license',
-        'lab_photo': 'lab_photo',
-        'incorporation_doc': 'incorporation',
-        'gst_doc': 'gst',
-        'tan_doc': 'tan',
-        'section8_doc': 'section8',
-        'doc_12a': 'doc_12a',
-        'brand_image': 'brand_image',
-        'medical_license_doc': 'medical_license',
-        'storefront_image': 'store_front',
-        'clinic_registration': 'registration',
-        'aadhar_doc': 'aadhar',
-        'doctor_pan': 'pan',
-        'clinic_logo': 'clinic_logo',
-        'clinic_photo': 'clinic_photo',
-    }
-        
-    upload_subdir = subdir_map.get(doc_type)
-    print(f"MAPPED SUBDIRECTORY: '{upload_subdir}'")
-    
-    if not upload_subdir:
-        print(f"[DEBUG ERROR] Short-circuited: '{doc_type}' not found in subdir_map!")
-        print("--- [DEBUG TAN END] ---\n")
-        return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
-
-    file_path, error = validate_and_save_file(file, upload_subdir, doc_type.replace('_', ' ').title(), user_type=user_type,user=user)
-    print(f"VALIDATE & SAVE RESULT - Path: '{file_path}', Error: '{error}'")
-    
-    if error:
-        print("--- [DEBUG TAN END] ---\n")
-        return JsonResponse({'success': False, 'error': error}, status=400)
-
-    profile_model = {
-        'ngo': NGOProfile,
-        'advertiser': AdvertiserProfile,
-        'client': ClientProfile,
-        'pharmacy': PharmacyProfile,
-        'lab': LabProfile,
-        'hospital': HospitalProfile,
-        'doctor': DoctorProfile,
-    }.get(user_type)
-    
-    if not profile_model:
-        print(f"[DEBUG ERROR] Short-circuited: No profile model mapped for user type '{user_type}'")
-        print("--- [DEBUG TAN END] ---\n")
-        return JsonResponse({'success': False, 'error': 'Invalid user type for document upload.'}, status=400)
-
-    profile = profile_model.objects.filter(user=user).first()
-    print(f"TARGET PROFILE OBJECT FOUND: {profile}")
-    
-    if not profile:
-        print("--- [DEBUG TAN END] ---\n")
-        return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
-
-    doc_field_map = {
-        'hospital_license': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
-        'admin_identity_proof': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
-        'hospital_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
-        'hospital_image': ('hospital_photo_path', 'hospital_photo_virus_scanned'),
-        'ngo_registration_doc': ('ngo_registration_doc_path', 'ngo_registration_doc_virus_scanned'),
-        'lab_certificate': ('lab_certificate_path', 'lab_certificate_virus_scanned'),
-        'identity_proof_aadhar': ('identity_proof_aadhar_path', 'identity_proof_aadhar_virus_scanned'),
-        'identity_proof_pan': ('identity_proof_pan_path', 'identity_proof_pan_virus_scanned'),
-        'gov_license': ('gov_license_path', 'gov_license_virus_scanned'),
-        'lab_photo': ('lab_photo_path', 'lab_photo_virus_scanned'),
-        'incorporation_doc': ('incorporation_doc_path', 'incorporation_doc_virus_scanned'),
-        'gst_doc': ('gst_doc_path', 'gst_doc_virus_scanned'),
-        'pan_doc': ('pan_doc_path', 'pan_doc_virus_scanned'),
-        'tan_doc': ('tan_doc_path', 'tan_doc_virus_scanned'),
-        'section8_doc': ('section8_doc_path', 'section8_doc_virus_scanned'),
-        'doc_12a': ('doc_12a_path', 'doc_12a_virus_scanned'),
-        'brand_image': ('brand_image_path', 'brand_image_virus_scanned'),
-        'medical_license_doc': ('medical_license_doc_path', 'medical_license_doc_virus_scanned'),
-        'storefront_image': ('storefront_image_path', 'storefront_image_virus_scanned'),
-        'clinic_registration': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
-        'aadhar_doc': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
-        'doctor_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
-        'clinic_logo': ('clinic_logo_path', 'clinic_logo_virus_scanned'),
-        'clinic_photo': ('clinic_photo_path', 'clinic_photo_virus_scanned'),
-    }
-
-    doc_fields = doc_field_map.get(doc_type)
-    print(f"MAPPED MODEL FIELDS TO SAVE: {doc_fields}")
-    
-    if not doc_fields:
-        print(f"[DEBUG ERROR] Short-circuited: '{doc_type}' not found in doc_field_map!")
-        print("--- [DEBUG TAN END] ---\n")
-        return JsonResponse({'success': False, 'error': 'Unknown document type.'}, status=400)
-
-    # Set paths dynamically and update verification flag fields
-    saved_doc_path = str(file_path).replace("\\", "/").strip()
-    while "//" in saved_doc_path:
-        saved_doc_path = saved_doc_path.replace("//", "/")
-    setattr(profile, doc_fields[0], saved_doc_path)
-    setattr(profile, doc_fields[1], True)
-
-    number_field = DOC_NUMBER_FIELD_MAP.get(user_type, {}).get(doc_type)
-    extracted_number = (
-        _read_document_number_with_ocr(file_path, number_field)
-        if number_field else ""
-    )
-    if extracted_number:
-        max_length = profile_model._meta.get_field(number_field).max_length
-        if not max_length or len(extracted_number) <= max_length:
-            setattr(profile, number_field, extracted_number)
-
-    if user_type == "doctor":
-        profile.verification_status = "pending"
-        profile.is_verified = False
-        profile.verified_at = None
-        profile.rejection_reason = None
-    
-    # Extra check before saving to confirm fields were changed in memory
-    print(f"CONFIRMING PROPERTY ATTR VALUE SET ON INSTANCE: '{getattr(profile, doc_fields[0])}'")
-    
-    profile.save()
-    print("[DEBUG SUCCESS] profile.save() executed smoothly without an exception crash.")
-    print("--- [DEBUG TAN END] ---\n")
-
-    return JsonResponse({
-        'success': True,
-        'message': 'Document updated successfully.',
-        'number': extracted_number,
-    })
-
-
-## Update document number (Settings -> Documents tab)
-# Whitelisted doc_type -> model field mapping per user type so only known
-# document number fields can be written from the settings page.
-DOC_NUMBER_FIELD_MAP = {
-    'ngo': {
-        'ngo_registration_doc': 'ngo_registration_number',
-        'pan_doc': 'pan_number',
-        'gst_doc': 'gst_number',
-        'tan_doc': 'tan_number',
-        'section8_doc': 'section8_number',
-        'doc_12a': 'doc_12a_number',
-    },
-    'advertiser': {
-        'incorporation_doc': 'incorporation_number',
-        'gst_doc': 'gst_number',
-        'pan_doc': 'pan_number',
-        'tan_doc': 'tan_number',
-    },
-    'client': {
-        'incorporation_doc': 'incorporation_number',
-        'gst_doc': 'gst_number',
-        'pan_doc': 'pan_number',
-        'tan_doc': 'tan_number',
-    },
-    'pharmacy': {
-        'incorporation_doc': 'pharmacy_registration_number',
-        'gst_doc': 'gst_number',
-        'medical_license_doc': 'medical_license_number',
-        'pan_doc': 'pan_number',
-        'tan_doc': 'tan_number',
-    },
-    'lab': {
-        'lab_certificate': 'lab_registration_number',
-        'identity_proof_aadhar': 'identity_proof_aadhar_number',
-        'identity_proof_pan': 'identity_proof_pan_number',
-        'gov_license': 'gov_license_number',
-    },
-    'hospital': {
-        'hospital_license': 'registration_no',
-        'admin_identity_proof': 'aadhar_card_no',
-        'hospital_pan': 'pan_card_no',
-    },
-    'doctor': {
-        'clinic_registration': 'registration_number',
-        'aadhar_doc': 'aadhar_number',
-        'doctor_pan': 'pan_number',
-    },
-}
-
-
-@require_POST
-@dashboard_login_required
-def update_ngo_profile(request):
-    data = request.POST
-    errors={}
-    user = request.user_obj
-    
-    validate_email_phone(data, errors)
-    
-    ngo_services = request.POST.get("ngo_services")
-    if not ngo_services:
-        errors["services"] = "Select at least one NGO service."
-        
-    # Validate address fields
-    for field in ["ngo_name","address", "city", "state", "pincode", "country", "contact_name", "contact_phone_number"]:
-        if not data.get(field):
-            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-    
-    if errors:
-        return JsonResponse({
-            "success": False,
-            "message": next(iter(errors.values()))
-        }, status=400)
-        
-    with transaction.atomic():
-    # Update User model
-        user.email = request.POST.get('email')
-        user.phone_country_code = request.POST.get('countryCodes')
-        user.phone_number = request.POST.get('phone')
-        user.save()
-
-    # Update NGOProfile
-        ngo_profile = NGOProfile.objects.filter(user=user).first()
-        if ngo_profile:
-            for field in ["ngo_name", "website_url", "address", "city", "state", "country", "pincode", "referral_code"]:
-                setattr(ngo_profile, field, data.get(field))
-            ngo_profile.ngo_services = NGOService.objects.get(name=data.get("ngo_services"))
-            ngo_profile.save()
-        contact_person = ContactPerson.objects.filter(profile_type='ngo', profile=user).first()
-
-        if contact_person:
-            contact_person.name = request.POST.get('contact_name')
-            contact_person.phone_country_code = request.POST.get('contact_countryCodes')
-            contact_person.phone_number = request.POST.get('contact_phone_number')
-            contact_person.role = request.POST.get('contact_role')
-            contact_person.save()
-
-    return JsonResponse({"success": True, "message": "NGO profile updated successfully."})
-    
-@require_POST
-@dashboard_login_required
-def update_advertiser_profile(request):
-    post_data = request.POST
-    errors = {}
-    user = request.user_obj  
-    
-    validate_email_phone(post_data, errors)
-    
-    required_fields = ["company_name", "phone","address", "city", "state", "country", "pincode", "contact_name", "contact_phone_number", "contact_role"]
-    for field in required_fields:
-        if not post_data.get(field):
-            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-    if errors:
-        return JsonResponse({
-            "success": False,
-            "message": next(iter(errors.values()))
-        }, status=400)
-
-    try:
-        with transaction.atomic():
-            # --- Update User ---
-            # user.email = post_data.get('email')
-            user.phone_country_code = post_data.get("countryCodes")
-            user.phone_number = post_data.get("phone")
-            user.save()
-
-            # --- Update AdvertiserProfile ---
-            advertiser_profile = get_object_or_404(AdvertiserProfile, user=user)
-            advertiser_profile.company_name = post_data.get("company_name")
-            advertiser_profile.advertiser_type = AdvertiserType.objects.get(name=post_data.get("advertiser_type"))
-            advertiser_profile.ad_services_required = AdServiceReq.objects.get(name=post_data.get("company_services") )
-            advertiser_profile.website_url = post_data.get("website_url")
-            advertiser_profile.address = post_data.get("address")
-            advertiser_profile.city = post_data.get("city")
-            advertiser_profile.state = post_data.get("state")
-            advertiser_profile.country = post_data.get("country")
-            advertiser_profile.pincode = post_data.get("pincode")
-            advertiser_profile.save()
-
-            # --- Update or Create ContactPerson ---
-            contact_name = post_data.get("contact_name")
-            contact_phone = post_data.get("contact_phone_number")
-            if contact_name or contact_phone:
-                contact, _ = ContactPerson.objects.get_or_create(
-                    profile_type="advertiser",
-                    profile=user
-                )
-                contact.name = contact_name
-                contact.role = post_data.get("contact_role")
-                contact.phone_country_code = post_data.get("contact_countryCodes")
-                contact.phone_number = contact_phone
-                contact.save()
-
-        return JsonResponse({'success': True, 'message': 'Advertiser profile updated successfully'})
-    
-    except Exception as e:
-        return JsonResponse({"success": False, "message": str(e)}, status=500)
-
-@require_POST
-@dashboard_login_required
-def update_client_profile(request):
-    post_data = request.POST
-    errors = {}
-    user = request.user_obj
-    validate_email_phone(post_data, errors)
-
-    # Required fields
-    required_fields = ["company_name", "company_type", "address", "city", "state", "pincode", "country"]
-    for field in required_fields:
-        if not post_data.get(field):
-            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-    if errors:
-        return JsonResponse({
-            "success": False,
-            "message": next(iter(errors.values()))
-        }, status=400)
-    try:
-        with transaction.atomic():
-            # Update User model
-            user.email = post_data.get('email')
-            user.phone_country_code = post_data.get('countryCodes', "+91")
-            user.phone_number = post_data.get('phone')
-            user.save()
-            
-            # --- Update ClientProfile ---
-            profile = get_object_or_404(ClientProfile, user=user)
-            profile.company_name = post_data.get("company_name")
-            profile.company_type = ClientType.objects.get(name=post_data.get("company_type"))
-            profile.website_url = post_data.get("website_url")
-            profile.address = post_data.get("address")
-            profile.city = post_data.get("city")
-            profile.state = post_data.get("state")
-            profile.pincode = post_data.get("pincode")
-            profile.country = post_data.get("country")
-            profile.services_interested = ClientService.objects.get(name=post_data.get("company_services")) 
-            profile.phone = post_data.get("phone")
-            profile.phone_country_code = post_data.get("countryCodes")
-            profile.save()
-            
-            contact_name = post_data.get("contact_name")
-            contact_phone = post_data.get("contact_phone_number")
-            if contact_name or contact_phone:
-                contact, _ = ContactPerson.objects.get_or_create(
-                    profile_type="advertiser",
-                    profile=user
-                )
-                contact.name = contact_name
-                contact.role = post_data.get("contact_role")
-                contact.phone_country_code = post_data.get("contact_countryCodes")
-                contact.phone_number = contact_phone
-                contact.save()
-
-        return JsonResponse({'success': True, 'message': 'Client profile updated successfully.'})
-    except Exception as e:
-        import traceback
-        print(traceback)
-        return JsonResponse({'success': False, 'message': f'Error updating profile: {str(e)}'})
-
-@require_POST
-@dashboard_login_required
-def update_pharmacy_profile(request):
-    post_data = request.POST
-    errors = {}
-    user = request.user_obj  
-
-    # Require OTP verification for the submitted pharmacy phone number.
-    submitted_phone = "".join(
-        filter(str.isdigit, post_data.get("phone", "").strip())
-    )
-    submitted_country_code = post_data.get("countryCodes", "").strip()
-
-    expected_verification = f"{submitted_country_code}|{submitted_phone}"
-    verified_phone = request.session.get("verified_pharmacy_phone")
-    print("SAVE expected verification:", repr(expected_verification))
-    print(
-        "SAVE verified session phone:",
-        repr(request.session.get("verified_pharmacy_phone"))
-    )
-
-    if verified_phone != expected_verification:
-        return JsonResponse({
-            "success": False,
-            "message": "Please verify your phone number with OTP before saving."
-        }, status=400)
-
-    validate_email_phone(post_data, errors)
-    # required_fields = ["company_name", "city", "state", "pincode"]
-    required_fields = ["company_name", "pincode"]
-    for field in required_fields:
-        if not post_data.get(field):
-            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-    if errors:
-        return JsonResponse({
-            "success": False,
-            "message": next(iter(errors.values()))
-        }, status=400)
-
-    try:
-        with transaction.atomic():
-            # --- Update User ---
-            user.email = post_data.get('email')
-            user.phone_country_code = post_data.get("countryCodes")
-            user.phone_number = post_data.get("phone")
-            user.save()
-
-            # --- Update Pharmacy Profile ---
-            pharmacy_profile = get_object_or_404(PharmacyProfile, user=user)
-            pharmacy_profile.company_name = post_data.get("company_name")
-            pharmacy_profile.website = post_data.get("website_url")
-            pharmacy_profile.address = post_data.get("address")
-            
-            # -------- STATE --------
-            state_raw = post_data.get("state", "").strip()
-            # Remove extra spaces and normalize
-            state_name = ' '.join(state_raw.split())
-            
-            state_obj = None
-            if state_name:
-                # Try exact match first (case-insensitive)
-                state_obj = State.objects.filter(
-                   name__iexact=state_name
-                ).first()
-                
-                # If not found, try partial match
-                if not state_obj:
-                    state_obj = State.objects.filter(
-                       name__icontains=state_name
-                    ).first()
-                
-                if state_obj:
-                    pharmacy_profile.state = state_obj
-                    print(f"State found: '{state_obj.name}' for input: '{state_raw}'")
-                else:
-                    print(f"State NOT found for: '{state_name}' (raw: '{state_raw}')")
-
-            # -------- CITY --------
-            city_name = post_data.get("city", "").split(",")[0].strip()
-
-            if city_name and state_obj:
-                # Try to find existing city (case-insensitive)
-                city = City.objects.filter(
-                    name__iexact=city_name,
-                    state=state_obj
-                ).first()
-                
-                # If city doesn't exist, create it
-                if not city:
-                    city = City.objects.create(
-                        name=city_name.title(),  # Title case for consistency
-                        state=state_obj
-                    )
-                    print(f"Created new city: {city_name} in {state_obj.name}")
-                
-                pharmacy_profile.city = city
-
-            # ---------- Update Working Hours ----------
-            timing_id = post_data.get("working_days") or post_data.get("pharmacy_timing")
-
-            if timing_id:
-                pharmacy_profile.pharmacy_timing_id = int(timing_id)
-
-            pharmacy_profile.owner_name = post_data.get("owner_name", "")
-            pharmacy_profile.country = post_data.get("country", "")
-            pharmacy_profile.pincode = post_data.get("pincode")
-            
-            print("POST =", post_data.dict())
-            print("State POST =", post_data.get("state"))
-            print("City POST =", post_data.get("city"))
-            print("Country POST =", post_data.get("country"))
-            print("Working =", post_data.get("working_days"))
-
-            print("Before save")
-            print("pharmacy_profile.state =", pharmacy_profile.state)
-            print("pharmacy_profile.city =", pharmacy_profile.city)
-            print("pharmacy_profile.country =", pharmacy_profile.country)
-            print("pharmacy_profile.pincode =", pharmacy_profile.pincode)
-
-            pharmacy_profile.save()
-
-            pharmacy_profile.referral_code = post_data.get("referral_code", "")
-
-            pharmacy_type_name = post_data.get("pharmacy_type", "").strip()
-
-            if pharmacy_type_name:
-                type_obj = PharmacyType.objects.filter(name__iexact=pharmacy_type_name).first()
-
-            if type_obj:
-                pharmacy_profile.pharmacy_types.set([type_obj])
-
-            service_name = post_data.get("services_offered", "").strip()
-
-            if service_name:
-                service_obj = PharmacyServices.objects.filter(name__iexact=service_name).first()
-
-            if service_obj:
-                pharmacy_profile.services.set([service_obj])
-
-            pharmacy_profile.save()
-
-        # --- Update or Create ContactPerson ---
-        contact_name = post_data.get("contact_name")
-        contact_phone = post_data.get("contact_phone_number")
-        if contact_name or contact_phone:
-            contact, _ = ContactPerson.objects.get_or_create(
-                profile_type="pharmacy",
-                profile=user
-            )
-            contact.name = contact_name
-            contact.role = post_data.get("contact_role")
-            contact.phone_country_code = post_data.get("contact_countryCodes")
-            contact.phone_number = contact_phone
-            contact.save()
-
-        return JsonResponse({'success': True, 'message': 'Pharmacy profile updated successfully'})
-    
-    # except Exception as e:
-    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
-    except Exception as e:
-        traceback.print_exc()
-        print("PHARMACY SAVE ERROR:", e)
-
-        return JsonResponse({
-            "success": False,
-            "message": str(e)
-        }, status=500)
-
-@require_POST
-@dashboard_login_required
-def update_lab_profile(request):
-    post_data = request.POST
-    errors = {}
-    user = request.user_obj  
-    
-    validate_email_phone(post_data, errors)
-    raw_code = post_data.get('phone_country_code') or post_data.get('countryCodes')
-    normalized_code = normalize_dial_code(raw_code)
-    phone_val = post_data.get('phone') or post_data.get('contact_number')
-    if normalized_code and normalized_code != '+91' and phone_val:
-        clean_phone = ''.join(c for c in phone_val if c.isdigit())
-        if 7 <= len(clean_phone) <= 15:
-            errors.pop('phone', None)
-    required_fields = ["lab_name", "city", "state", "pincode"]
-    for field in required_fields:
-        if not post_data.get(field):
-            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-    # Require OTP verification for Lab profile save
-    pending_lab_phone = request.session.get("pending_lab_phone") or request.session.get("pending_phone")
-    pending_lab_otp = request.session.get("pending_lab_otp") or request.session.get("pending_phone_otp") or TEST_OTP
-    phone_digits = "".join(filter(str.isdigit, phone_val or ""))
-    pending_digits = "".join(filter(str.isdigit, pending_lab_phone.split("|")[-1])) if pending_lab_phone else ""
-
-    if not pending_lab_phone:
-        errors["otp1"] = "Please request an OTP before saving profile changes."
-    elif phone_digits != pending_digits:
-        errors["otp1"] = "Phone number has changed. Please request a new OTP."
-    else:
-        otp1 = (post_data.get("otp1") or post_data.get("otp") or "").strip()
-        if not otp1:
-            errors["otp1"] = "Please enter the OTP before saving."
-        elif otp1 != pending_lab_otp and otp1 != TEST_OTP:
-            errors["otp1"] = "Invalid OTP. Please enter the correct OTP."
-
-    if errors:
-        return JsonResponse({
-            "success": False,
-            "message": next(iter(errors.values()))
-        }, status=400)
-    
-    try:
-    
-        with transaction.atomic():
-
-             user.email = post_data.get('email')
-             if normalized_code:
-                 user.phone_country_code = normalized_code
-             if phone_val:
-                 user.phone_number = phone_val
-             user.save()
-
-             lab_profile = get_object_or_404(LabProfile, user=user)
-
-             # Update fields
-             lab_profile.lab_name = post_data.get("lab_name")
-             lab_profile.owner_name = post_data.get("owner_name")
-
-             if phone_val:
-                 lab_profile.contact_number = phone_val
-             else:
-                 lab_profile.contact_number = post_data.get("phone")
-
-             lab_profile.lab_registration_number = post_data.get("lab_registration_number")
-
-             lab_profile.address = post_data.get("address")
-             lab_profile.country = post_data.get("country")
-
-             lab_profile.pincode = post_data.get("pincode")
-            # ---------------- STATE ----------------
-
-             state_name = post_data.get("state", "").strip()
-
-             state = State.objects.filter(
-                name__iexact=state_name
-            ).first()
-
-             if state:
-                lab_profile.state = state
-
-
-            # ---------------- CITY ----------------
-
-             city_name = post_data.get("city", "").split(",")[0].strip()
-
-             city = City.objects.filter(
-                name__iexact=city_name,
-                state=state
-            ).first()
-
-             if city:
-              lab_profile.city = city
-
-
-            # ---------------- WORKING HOURS ----------------
-
-             timing_id = post_data.get("lab_timing_id")
-
-             if timing_id:
-                lab_profile.lab_timing_id = int(timing_id)
-
-    # DO NOT TOUCH city/state for now
-    # because they are ForeignKeys
-             print("State =", lab_profile.state)
-             print("City =", lab_profile.city)
-             print("Timing =", lab_profile.lab_timing)
-
-             lab_profile.save()
-             request.session.pop("pending_lab_phone", None)
-             request.session.pop("pending_lab_otp", None)
-             request.session.modified = True
-     
-             return JsonResponse({
-                 'success': True,
-                 'message': 'Lab profile updated successfully'
-              })
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc())
-
-        return JsonResponse({
-            "success": False,
-            "message": str(e)
-        }, status=500)
-
-    
-    
-    #         return JsonResponse({'success': True, 'message': 'Lab profile updated successfully'})
-
-    # except Exception as e:
-    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
-
-# @require_POST
-# @dashboard_login_required
-# def update_hospital_profile(request):
-
-#     if request.method == "POST":
-
-#         print(request.POST)
-
-#         post_data = request.POST
-#         errors = {}
-
-#         user = request.user_obj
-
-#         validate_email_phone(post_data, errors)
-
-#         required_fields = ["hospital_name", "city", "state", "pincode"]
-
-#         for field in required_fields:
-#             if not post_data.get(field):
-#                 errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-#         if errors:
-#             return JsonResponse({
-#                 "success": False,
-#                 "message": next(iter(errors.values()))
-#             }, status=400)
-
-#         try:
-
-#             with transaction.atomic():
-
-#                 user.email = post_data.get('email')
-#                 # user.phone_country_code = post_data.get("countryCodes")
-#                 # user.phone_number = post_data.get("contact_number")
-#                 user.phone_country_code = post_data.get("phone_country_code")
-#                 user.phone_number = post_data.get("phone")
-#                 user.save()
-
-#                 hospital_profile = get_object_or_404(
-#                     HospitalProfile,
-#                     user=user
-#                 )
-
-#                 hospital_profile.hospital_name = post_data.get("hospital_name")
-#                 hospital_profile.address = post_data.get("address")
-#                 # hospital_profile.city = post_data.get("city")
-#                 # hospital_profile.state = post_data.get("state")
-#                 # hospital_profile.city_name = post_data.get("city")
-#                 # hospital_profile.state_id = None
-#                 hospital_profile.owner_name = post_data.get("owner_name")
-#                 user.phone_country_code = post_data.get("phone_country_code")
-#                 user.phone_number = post_data.get("phone")
-#                 # hospital_profile.country = post_data.get("country")
-#                 # hospital_profile.pincode = post_data.get("pincode")
-#                 hospital_profile.owner_name = post_data.get("owner_name")
-
-#                 state_name = post_data.get("state", "").strip()
-#                 # city_name = post_data.get("city", "").strip()
-#                 city_name = post_data.get("city", "").split(",")[0].strip()
-
-#                 state = State.objects.filter(
-#                    name__iexact=state_name
-#                 ).first()
-
-#                 if state:
-#                     hospital_profile.state = state
-
-#                     city = City.objects.filter(
-#                         name__iexact=city_name,
-#                         state=state
-#                     ).first()
-
-#                     if city:
-#                         hospital_profile.city = city
-
-#                 hospital_profile.country = post_data.get("country")
-#                 hospital_profile.pincode = post_data.get("pincode")
-
-#                 hospital_profile.save()
-
-#                 print("DATA SAVED SUCCESSFULLY")
-
-#                 return JsonResponse({
-#                     "success": True,
-#                     "message": "Hospital profile updated successfully"
-#                 })
-
-#         except Exception as e:
-
-#             print("SAVE ERROR:", e)
-
-#             return JsonResponse({
-#                 "success": False,
-#                 "message": str(e)
-#             }, status=500)
-
-@require_POST
-@dashboard_login_required
-def update_hospital_profile(request):
-
-    post_data = request.POST
-    errors = {}
-
-    user = request.user_obj
-
-    # Existing email and phone validation
-    validate_email_phone(post_data, errors)
-
-    # Required fields validation
-    required_fields = [
-        "hospital_name",
-        "address",
-        "city",
-        "state",
-        "country",
-        "pincode",
-        "owner_name",
-    ]
-
-    for field in required_fields:
-        value = (post_data.get(field) or "").strip()
-
-        if not value:
-            errors[field] = (
-                f"{field.replace('_', ' ').capitalize()} is required."
-            )
-
-    # Existing OTP logic: do not save if OTP is missing or invalid
-    otp1 = (post_data.get("otp1") or "").strip()
-
-    if not otp1:
-        errors["otp1"] = "OTP is required."
-    elif otp1 != "123456":
-        errors["otp1"] = "Not verified."
-
-    # Stop before any database changes if validation fails
-    if errors:
-        return JsonResponse({
-            "success": False,
-            "message": next(iter(errors.values())),
-            "errors": errors,
-        }, status=400)
-
-    try:
-        with transaction.atomic():
-
-            hospital_profile = get_object_or_404(
-                HospitalProfile,
-                user=user
-            )
-
-            # Update user details
-            user.email = post_data.get("email")
-            user.phone_country_code = normalize_dial_code(
-                post_data.get("phone_country_code")
-            )
-            user.phone_number = post_data.get("phone", "").strip()
-
-            # Update hospital details
-            hospital_profile.hospital_name = post_data.get(
-                "hospital_name"
-            )
-            hospital_profile.address = post_data.get("address")
-            hospital_profile.owner_name = post_data.get("owner_name")
-            hospital_profile.contact_no = user.phone_number
-            hospital_profile.alternate_contact_no = (
-                post_data.get("alt_contact_number") or ""
-            ).strip() or None
-            hospital_profile.country = post_data.get("country")
-            hospital_profile.pincode = post_data.get("pincode")
-
-            # Update state and city
-            state_name = (post_data.get("state") or "").strip()
-            city_name = (
-                (post_data.get("city") or "")
-                .split(",")[0]
-                .strip()
-            )
-
-            state = State.objects.filter(
-                name__iexact=state_name
-            ).first()
-
-            if state:
-                hospital_profile.state = state
-
-                city = City.objects.filter(
-                    name__iexact=city_name,
-                    state=state
-                ).first()
-
-                if city:
-                    hospital_profile.city = city
-
-            # Save only after validation succeeds
-            user.save()
-            hospital_profile.save()
-
-            print("DATA SAVED SUCCESSFULLY")
-
-            return JsonResponse({
-                "success": True,
-                "message": "Hospital profile updated successfully"
-            })
-
-    except IntegrityError:
-        return JsonResponse({
-            "success": False,
-            "message": "This phone number or email is already in use.",
-        }, status=400)
-    except Exception as e:
-        print("SAVE ERROR:", e)
-
-        return JsonResponse({
-            "success": False,
-            "message": "Unable to update hospital profile."
-        }, status=500)
-
-# def update_hospital_profile(request):
-#     if request.method == "POST":
-#         print(request.POST)
-#     post_data = request.POST
-#     errors = {}
-#     user = request.user_obj  
-#     validate_email_phone(post_data, errors)
-#     required_fields = ["hospital_name", "city", "state", "pincode"]
-#     for field in required_fields:
-#         if not post_data.get(field):
-#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-#     if errors:
-#         return JsonResponse({"success": False, "errors": errors}, status=400)
-    
-#     try:
-#         with transaction.atomic():
-#             user.email = post_data.get('email')
-#             user.phone_country_code = post_data.get("countryCodes")
-#             user.phone_number = post_data.get("contact_number")
-#             user.save()
-            
-#             hospital_profile = get_object_or_404(HospitalProfile, user=user)
-#             hospital_profile.hospital_name = post_data.get("hospital_name")
-#             hospital_profile.address = post_data.get("address")
-#             hospital_profile.city = post_data.get("city")
-#             hospital_profile.state = post_data.get("state")
-#             hospital_profile.country = post_data.get("country")
-#             hospital_profile.pincode = post_data.get("pincode")
-#             try:
-#                hospital.save()
-#                print("DATA SAVED SUCCESSFULLY")
-
-#                return JsonResponse({
-#                "status": "success"
-#             })
-
-#             except Exception as e:
-#                 print("SAVE ERROR:", e)
-
-#                 return JsonResponse({
-#                 "status": "error",
-#                 "message": str(e)
-#             })
-#             # hospital_profile.save()
-        
-            
-    #         return JsonResponse({'success': True, 'message': 'Hospital profile updated successfully'})
-
-    # except Exception as e:
-    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
-
-
-@require_POST
-@dashboard_login_required
-def update_doctor_profile(request):
-
-    post_data = request.POST
-    errors = {}
-    user = request.user_obj
-
-    validate_email_phone(post_data, errors)
-
-    required_fields = ["clinic_name", "city", "state", "pincode"]
-
-    for field in required_fields:
-        if not post_data.get(field):
-            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-    if errors:
-        # The edit form posts through fetch() and shows `message` in the error
-        # toast, so return a readable sentence next to the per-field errors
-        # (previously the toast displayed a raw JSON blob of `errors`).
-        return JsonResponse({
-            "success": False,
-            "message": next(iter(errors.values()))
-        }, status=400)
-
-    try:
-
-        with transaction.atomic():
-
-            # USER UPDATE
-            user.email = post_data.get('email')
-            user.phone_country_code = normalize_dial_code(post_data.get("countryCodes"))
-            user.phone_number = post_data.get("phone")
-            user.save()
-
-            # DOCTOR PROFILE
-            doctor_profile = get_object_or_404(
-                DoctorProfile,
-                user=user
-            )
-
-            doctor_profile.clinic_name = post_data.get("clinic_name")
-
-            doctor_profile.registration_number = post_data.get(
-                "registration_number"
-            )
-
-            doctor_profile.full_address = post_data.get("address")
-            # ---------------- STATE ----------------
-
-            state_name = post_data.get("state", "").strip()
-
-            state = State.objects.filter(
-                name__iexact=state_name
-            ).first()
-
-            if state:
-               doctor_profile.state = state
-
-
-            # ---------------- CITY ----------------
-
-            city_name = post_data.get("city", "").split(",")[0].strip()
-
-            if state:
-                city = City.objects.filter(
-                  name__iexact=city_name,
-                  state=state
-                ).first()
-
-                if city:
-                  doctor_profile.city = city
-
-            # doctor_profile.city = post_data.get("city")
-
-            # doctor_profile.state = post_data.get("state")
-
-            # The account details screen shows the profile contact numbers, so
-            # persist them here as well (only `user.phone_number` was saved
-            # before, which left the displayed numbers unchanged after saving).
-            doctor_profile.contact_number = post_data.get("phone")
-
-            doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
-
-            # Only overwrite the country when the form actually submits one.
-            # The input used to render empty, and saving wiped the stored value.
-            country = (post_data.get("country") or "").strip()
-
-            if country:
-                doctor_profile.country = country
-
-            doctor_profile.pincode = post_data.get("pincode")
-
-            doctor_profile.owner_name = post_data.get("owner_name")
-
-            doctor_profile.save()
-
-            return JsonResponse({
-                "success": True,
-                "message": "Doctor profile updated successfully"
-            })
-
-    except Exception as e:
-
-        import traceback
-
-        print(traceback.format_exc())
-
-        print("DOCTOR SAVE ERROR:", str(e))
-
-        return JsonResponse({
-            "success": False,
-            "message": str(e)
-        }, status=500)
-# def update_doctor_profile(request):
-#     post_data = request.POST
-#     errors = {}
-#     user = request.user_obj
-
-#     validate_email_phone(post_data, errors)
-
-#     required_fields = ["clinic_name", "city", "state", "pincode"]
-
-#     for field in required_fields:
-#         if not post_data.get(field):
-#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-#     if errors:
-#         return JsonResponse({"success": False, "errors": errors}, status=400)
-
-#     try:
-#         with transaction.atomic():
-
-#             user.email = post_data.get('email')
-#             user.phone_country_code = post_data.get("countryCodes")
-#             user.phone_number = post_data.get("phone")
-#             user.save()
-
-#             doctor_profile = get_object_or_404(DoctorProfile, user=user)
-            
-
-            # doctor_profile.clinic_name = post_data.get("clinic_name")
-            # doctor_profile.registration_number = post_data.get("registration_number")
-
-        #    doctor_profile.full_address = post_data.get("address")
-        #    doctor_profile.city = post_data.get("city")
-        #    doctor_profile.state = post_data.get("state")
-        #    doctor_profile.pincode = post_data.get("pincode")
-        
-# def update_doctor_profile(request):
-#     post_data = request.POST
-#     errors = {}
-#     user = request.user_obj  
-#     validate_email_phone(post_data, errors)
-#     required_fields = ["clinic_name", "city", "state", "pincode"]
-#     for field in required_fields:
-#         if not post_data.get(field):
-#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
-
-#     if errors:
-#         return JsonResponse({"success": False, "errors": errors}, status=400)
-#     try:
-#     with transaction.atomic():
-
-#         user.email = post_data.get('email')
-#         user.phone_country_code = post_data.get("countryCodes")
-#         user.phone_number = post_data.get("phone")
-#         user.save()
-
-#         doctor_profile = get_object_or_404(DoctorProfile, user=user)
-
-#         doctor_profile.clinic_name = post_data.get("clinic_name")
-#         doctor_profile.registration_number = post_data.get("registration_number")
-
-#         doctor_profile.address = post_data.get("address")
-
-#         doctor_profile.city = post_data.get("city")
-#         doctor_profile.state = post_data.get("state")
-#         doctor_profile.pincode = post_data.get("pincode")
-
-#         doctor_profile.owner_name = post_data.get("owner_name")
-
-#         doctor_profile.contact_number = post_data.get("phone")
-#         doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
-
-#         doctor_profile.save()
-
-#         return JsonResponse({
-#             'success': True,
-#             'message': 'Doctor profile updated successfully'
-#         })
-  
-    # try:
-    #     with transaction.atomic():
-    #         user.email = post_data.get('email')
-    #         user.phone_country_code = post_data.get("countryCodes")
-    #         user.save()
-            
-    #         # doctor_profile = get_object_or_404(DoctorProfile, user=user)
-    #         # doctor_profile.save()
-    #         doctor_profile = get_object_or_404(DoctorProfile, user=user)
-    #         doctor_profile.clinic_name = post_data.get("clinic_name")
-    #         doctor_profile.registration_number = post_data.get("registration_number")
-    #         # doctor_profile.full_address = post_data.get("address")
-    #         doctor_profile.address = post_data.get("address")
-    #         doctor_profile.city = post_data.get("city")
-    #         doctor_profile.state = post_data.get("state")
-    #         doctor_profile.pincode = post_data.get("pincode")
-    #         doctor_profile.owner_name = post_data.get("owner_name")
-    #         doctor_profile.contact_number = post_data.get("phone")
-    #         doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
-
-    #         doctor_profile.save()
-            
-    #         return JsonResponse({'success': True, 'message': 'Doctor profile updated successfully'})
-
-    # except Exception as e:
-    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
-# 
-@require_POST
-@dashboard_login_required
-def delete_account(request):
-    user = request.user_obj
-    data = json.loads(request.body)
-    reason = data.get("reason", "No reason provided")
-
-    # Soft delete: deactivate user
-    user.is_active = False
-    user.save(update_fields=["is_active"])
-    # user.delete()
-    request.session.flush()
-
-    return JsonResponse({'status': 'account deleted'})
-
-@require_POST
-@dashboard_login_required
-def clear_search_history(request):
-    user = request.user_obj
-    SearchHistory.objects.filter(user=user).delete()
-    return JsonResponse({'status': 'search history cleared'})
-
-@require_POST
-@dashboard_login_required
-def clear_saved_data(request):
-    user = request.user_obj
-    SavedLocation.objects.filter(user=user).delete()
-
-    if user.user_type == 'advertiser':
-        Coupon.objects.filter(user=user, saved=True).update(saved=False)
-        Donation.objects.filter(user=user, saved=True).update(saved=False)
-
-    elif user.user_type == 'ngo':
-        NGOPost.objects.filter(user=user, saved=True).update(saved=False)
-
-    elif user.user_type == "pharmacy":
-        Donation.objects.filter(user=user, saved=True).update(saved=False)
-
-    return JsonResponse({'status': 'saved data cleared'})
-
-@dashboard_login_required
-@require_POST
-def send_change_password_otp(request):
-    user = request.user_obj
-
-    token_data = async_to_sync(async_send_otp_email)(user)
-
-    if not token_data.get("success"):
-        return JsonResponse({
-            "success": False,
-            "message": "Failed to send OTP."
-        })
-
-    secret = token_data["otp_token"]
-
-    cache.set(
-        f"otp:{secret}",
-        {
-            "email": user.email,
-            "secret": secret,
-            "created_at": timezone.now().isoformat(),
-        },
-        timeout=600,
-    )
-
-    return JsonResponse({
-        "success": True,
-        "token": secret,
-        "message": "OTP sent successfully."
-    })
-
-@dashboard_login_required
-@require_POST
-def change_password(request):
-    try:
-        user = request.user_obj
-        current_password = request.POST.get('current_password')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-        otp = request.POST.get("otp")
-        token = request.POST.get("token")
-        otp_result = verify_otp_token(user.email, otp, token)
-        
-        if not otp_result["success"]: return JsonResponse({
-            "success": False,
-            "message": otp_result["message"]
-        })
-        errors={}
-        error=''
-        if not current_password or len(current_password) <= 8:
-            errors["new_password"] = "Password is required (min 8 chars)."
-            error = "Password is required (min 8 chars)."
-        if not check_password(current_password, user.password):
-            errors["current_password"] = "Current password is incorrect."
-            error = "Current password is incorrect."
-        elif new_password != confirm_password:
-            errors["confirm_password"] = "Passwords do not match."
-            error = "Passwords do not match."
-            
-        if errors:
-            return JsonResponse({
-                "success": False,
-                "message": next(iter(errors.values()))
-            }, status=400)
-        
-        user.password = make_password(new_password)
-        user.save()
-        return JsonResponse({'success': True, 'message': 'Password changed successfully', "errors" : ''})
-    except Exception as e:
-        return JsonResponse({'success': False, 'errors': f'Error updating password: {str(e)}', "message" : ''})
-
-def get_seller_profile_id(user):
-    profile_map = {
-        "pharmacy": PharmacyProfile,
-        "lab": LabProfile,
-        "hospital": HospitalProfile,
-        "doctor": DoctorProfile,
-    }
-    model = profile_map.get(user.user_type)
-    if not model:
-        return None
-
-    profile = model.objects.filter(user=user).only("id").first()
-    return profile.id if profile else None
-
-
-# Subscription pricing (kept in sync with the Payment Details popup in
-# settings/templates/subscription/subscription.html)
-SUBSCRIPTION_PRICE = Decimal("999.00")
-SUBSCRIPTION_GST = Decimal("180.00")
-SUBSCRIPTION_TOTAL = SUBSCRIPTION_PRICE + SUBSCRIPTION_GST
-SUBSCRIPTION_VALIDITY_DAYS = 30
-
-
-def get_advance_balance(user):
-    """Current Advance (prepaid wallet) balance for a user.
-
-    The wallet keeps a running ``current_balance`` on every transaction, so the
-    balance is the latest row's value. Mirrors the logic used by the Advance
-    screens in dashboard/views.py.
-    """
-    last_txn = (
-        WalletTransaction.objects
-        .filter(user=user)
-        .order_by("-created_at")
-        .first()
-    )
-    return last_txn.current_balance if last_txn else Decimal("0.00")
-
-
-@dashboard_login_required
-def seller_subscription_status(request):
-    """
-    Returns current subscription status for logged-in seller
-    """
-    user = request.user_obj  # assuming custom auth
-
-    seller_type = user.user_type           # pharmacy / lab / hospital / doctor
-    seller_profile_id = get_seller_profile_id(user)  # adapt this to your project
-
-    sub = SellerSubscription.objects.filter(
-        seller_type=seller_type,
-        seller_profile_id=seller_profile_id,
-        is_active=True,
-        is_enabled=True
-    ).first()
-
-    # The subscription is paid out of the Advance (prepaid wallet), so the
-    # section has to show the live balance alongside the plan state.
-    advance_balance = get_advance_balance(user)
-
-    if not sub:
-        return JsonResponse({
-            "has_subscription": False,
-            "plan": "Free",
-            "price": float(SUBSCRIPTION_PRICE),
-            "gst": float(SUBSCRIPTION_GST),
-            "total": float(SUBSCRIPTION_TOTAL),
-            "advance_balance": float(advance_balance),
-        })
-
-    days_left = None
-    if sub.expiry_date:
-        days_left = (sub.expiry_date.date() - timezone.now().date()).days
-
-    return JsonResponse({
-        "has_subscription": True,
-        "plan": sub.plan_name,
-        "price": float(sub.price),
-        "expiry_date": sub.expiry_date.strftime("%d/%m/%Y") if sub.expiry_date else None,
-        "days_left": days_left,
-        "total": float(SUBSCRIPTION_TOTAL),
-        "advance_balance": float(advance_balance),
-    })
-
-@require_POST
-@dashboard_login_required
-def subscribe_subscription(request):
-    user = request.user_obj
-
-    seller_profile_id = get_seller_profile_id(user)
-    if not seller_profile_id:
-        return JsonResponse({"success": False, "message": "Seller profile not found"}, status=400)
-
-    # The plan fee is settled from the Advance (prepaid wallet). Reject when the
-    # balance can't cover it instead of granting a subscription for free, and
-    # write the debit so the Advance balance actually updates.
-    with transaction.atomic():
-        last_txn = (
-            WalletTransaction.objects
-            .select_for_update()
-            .filter(user=user)
-            .order_by("-created_at")
-            .first()
-        )
-        current_balance = last_txn.current_balance if last_txn else Decimal("0.00")
-
-        if current_balance < SUBSCRIPTION_TOTAL:
-            return JsonResponse({
-                "success": False,
-                "insufficient": True,
-                "required": float(SUBSCRIPTION_TOTAL),
-                "advance_balance": float(current_balance),
-                "message": "Insufficient advance balance",
-            }, status=400)
-
-        new_balance = current_balance - SUBSCRIPTION_TOTAL
-        WalletTransaction.objects.create(
-            user=user,
-            order_id=f"SUB-{uuid.uuid4().hex[:12].upper()}",
-            tranx_id=str(uuid.uuid4()),
-            amount=SUBSCRIPTION_TOTAL,
-            transaction_type="DEBIT",
-            points_earned=Decimal("0.00"),
-            current_balance=new_balance,
-            created_at=timezone.now(),
-        )
-
-        # deactivate old
-        SellerSubscription.objects.filter(
-            seller_type=user.user_type,
-            seller_profile_id=seller_profile_id,
-            is_active=True
-        ).update(is_active=False)
-
-        # create new subscription
-        SellerSubscription.objects.create(
-            seller_type=user.user_type,
-            seller_profile_id=seller_profile_id,
-            plan_name="Premium",
-            price=SUBSCRIPTION_PRICE,
-            is_active=True,
-            is_enabled=True,
-            expiry_date=timezone.now() + timedelta(days=SUBSCRIPTION_VALIDITY_DAYS),
-        )
-
-    return JsonResponse({
-        "success": True,
-        "charged": float(SUBSCRIPTION_TOTAL),
-        "advance_balance": float(new_balance),
-        # Spending the balance is a DEBIT, so no points are granted here
-        # (points are awarded on Advance recharge, see add_advance_amount).
-        "points_earned": 0,
-    })
-
-@dashboard_login_required
-@require_POST
-def cancel_subscription(request):
-    user = request.user_obj
-
-    SellerSubscription.objects.filter(
-        seller_type=user.user_type,
-        seller_profile_id=get_seller_profile_id(user),
-        is_active=True
-    ).update(is_active=False)
-
-    return JsonResponse({"success": True})
-
-@dashboard_login_required
-def terms_conditions(request):
-    user = request.user_obj
-    user_type = user.user_type
-    context = get_common_context(request, user)
-    context.update(get_base_context(user))
-    context["active_main_tab"] = request.GET.get("tab", "settings")
-    return render(request, 'settings/partials/terms-conditions.html',context)
-
-@dashboard_login_required
-def privacy_policy(request):
-    user = request.user_obj
-    user_type = user.user_type
-    context = get_common_context(request, user)
-    context.update(get_base_context(user))
-    context["active_main_tab"] = request.GET.get("tab", "settings")
-    return render(request, 'settings/partials/privacy-policy.html',context)
-
-@dashboard_login_required
-def disclaimer(request):
-    user = request.user_obj
-    user_type = user.user_type
-    context = get_common_context(request, user)
-    context.update(get_base_context(user))
-    context["active_main_tab"] = request.GET.get("tab", "settings")
-    return render(request, 'settings/partials/disclaimer.html',context)
-
-@require_POST
-@dashboard_login_required
-def get_cities_by_state(request):
-    """API endpoint to fetch cities for a given state"""
-    try:
-        data = json.loads(request.body)
-        state_name = data.get('state', '').strip()
-        
-        if not state_name:
-            return JsonResponse({'cities': []})
-        
-        # Get state object
-        state = State.objects.filter(name__iexact=state_name).first()
-        
-        if not state:
-            return JsonResponse({'cities': []})
-        
-        # Fetch cities for this state
-        cities = City.objects.filter(state=state).order_by('name').values_list('name', flat=True)
-        
-        return JsonResponse({'cities': list(cities)})
-        
-    except Exception as e:
-        print("Error fetching cities:", e)
-        return JsonResponse({'cities': []}, status=500)
-
-TEST_OTP = "123456"
-
-
-@csrf_protect
-@require_POST
-def send_phone_otp(request):
-    try:
-        data = json.loads(request.body)
-
-        phone = str(data.get("phone", "")).strip()
-        country_code = str(data.get("country_code", "")).strip()
-
-        if not phone:
-            return JsonResponse({
-                "success": False,
-                "message": "Phone number is required."
-            }, status=400)
-
-        digits = "".join(filter(str.isdigit, phone))
-
-        if len(digits) < 10 or len(digits) > 15:
-            return JsonResponse({
-                "success": False,
-                "message": "Please enter a valid phone number."
-            }, status=400)
-
-        # Store pending OTP in session for verification
-        print(f"Phone: {country_code}{digits}")
-        print(f"Test OTP: {TEST_OTP}")
-        request.session["pending_pharmacy_phone"] = f"{country_code}|{digits}"
-        request.session["pending_lab_phone"] = f"{country_code}|{digits}"
-        request.session["pending_phone"] = f"{country_code}|{digits}"
-        request.session["pending_lab_otp"] = TEST_OTP
-        request.session["pending_phone_otp"] = TEST_OTP
-        request.session.modified = True
-        return JsonResponse({
-            "success": True,
-            "message": "A verification OTP has been sent to your registered mobile number."
-        })
-
-    except (json.JSONDecodeError, TypeError, ValueError):
-        return JsonResponse({
-            "success": False,
-            "message": "Invalid request data."
-        }, status=400)
-
-@csrf_protect
-@require_POST
-@dashboard_login_required
-def verify_phone_otp(request):
-    try:
-        data = json.loads(request.body)
-
-        entered_otp = str(data.get("otp", "")).strip()
-        phone = "".join(filter(str.isdigit, str(data.get("phone", "")).strip()))
-        country_code = str(data.get("country_code", "")).strip()
-
-        submitted_phone = f"{country_code}|{phone}"
-        pending_phone = request.session.get("pending_pharmacy_phone")
-        print("OTP submitted phone:", repr(submitted_phone))
-        print("Pending session phone:", repr(pending_phone))
-
-        if pending_phone != submitted_phone:
-            return JsonResponse({
-                "success": False,
-                "message": "Please request OTP for this phone number first."
-            }, status=400)
-
-        if entered_otp != TEST_OTP:
-            return JsonResponse({
-                "success": False,
-                "message": "Invalid OTP."
-            }, status=400)
-
-        request.session["verified_pharmacy_phone"] = submitted_phone
-        request.session.pop("pending_pharmacy_phone", None)
-        request.session.modified = True
-
-        print(
-            "VERIFIED PHONE SAVED:",
-            repr(request.session.get("verified_pharmacy_phone"))
-        )
-
-        return JsonResponse({
-            "success": True,
-            "message": "OTP verified successfully."
-        })
-    except (json.JSONDecodeError, TypeError, ValueError):
-        return JsonResponse({
-            "success": False,
-            "message": "Invalid request data."
-        }, status=400)
+import os
+
+import re
+
+import json
+
+import uuid
+
+import traceback
+
+import requests
+
+from decimal import Decimal
+
+from django.contrib.auth.decorators import login_required
+
+from django.views.decorators.csrf import csrf_protect
+
+
+
+from django.core.cache import cache
+
+from django.core.files.storage import default_storage
+
+from django.utils import timezone
+
+from asgiref.sync import async_to_sync
+
+from registration.models import State, City, LabTiming
+
+from registration.models import State, City
+
+from registration.views import verify_otp_token, async_send_otp_email
+
+from django.utils import timezone
+
+from datetime import timedelta
+
+from django.conf import settings
+
+from django.http import HttpResponse, JsonResponse
+
+from django.shortcuts import render, redirect, get_object_or_404
+
+from django.core.exceptions import ValidationError
+
+from django.core.validators import validate_email
+
+from django.db import IntegrityError, transaction
+
+from django.views.decorators.http import (
+
+    require_http_methods,
+
+    require_POST,
+
+    require_GET,
+
+)
+
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+
+from django.http import FileResponse, Http404
+
+import mimetypes
+
+from django.contrib.auth.hashers import make_password, check_password
+
+from dashboard.utils import (
+
+    dashboard_login_required,
+
+    get_common_context,
+
+)
+
+from settings.models import SellerSubscription
+
+from appointments.models import WalletTransaction
+
+from registration.models import (
+
+    User,
+
+    NGOProfile,
+
+    UserProfile,
+
+    AdvertiserProfile,
+
+    ClientProfile,
+
+    PharmacyProfile,
+
+    ContactPerson,
+
+    LabProfile,
+
+    DoctorProfile,
+
+    HospitalProfile,
+
+    DoctorEducation,
+
+    DoctorSpeciality,
+
+    DoctorExperience,
+
+    PharmacyServices,
+
+    PharmacyType,
+
+    PharmacyTiming,
+
+    LabService,
+
+    LabFacility,
+
+    LabTiming,
+
+    AdServiceReq,
+
+    AdvertiserType,
+
+    ClientType,
+
+    ClientService,
+
+    NGOService,
+
+)
+
+from registration.views import (
+
+    validate_and_save_file,
+
+)
+
+from support.models import (
+
+    IssueType,
+
+    IssueOption,
+
+)
+
+from maps.models import SearchHistory, SavedLocation
+
+from coupon.models import Coupon
+
+from donate.models import Donation
+
+from ngopost.models import NGOPost
+
+from services.models import DoctorServiceRate, ServiceDescription
+
+
+
+## Settings
+
+def load_country_codes():
+
+    json_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'countryCodes.json')
+
+    with open(json_path, 'r', encoding='utf-8') as f:
+
+        return json.load(f)
+
+
+
+def normalize_dial_code(value):
+
+    """Return a dial code (e.g. "+91") for the posted country phone code.
+
+
+
+    `countryCodes.js` fills the selects with the ISO country code ("IN") while
+
+    the templates render the dial code ("+91") when JS is unavailable, so both
+
+    shapes can reach the server. Storing the ISO code as `phone_country_code`
+
+    corrupted the profile, so map it back to the dial code before saving.
+
+    """
+
+    if not value:
+
+        return value
+
+    value = str(value).strip()
+
+    if value.startswith("+"):
+
+        return value
+
+    for country in load_country_codes():
+
+        if str(country.get("code", "")).upper() == value.upper():
+
+            return country.get("dial_code") or value
+
+    return value
+
+
+
+
+
+def validate_email_phone(post_data, errors):
+
+    email = post_data.get("email", "").strip()
+
+    if not email:
+
+        errors["email"] = "Email is required."
+
+    else:
+
+        try:
+
+            validate_email(email)
+
+        except ValidationError:
+
+            errors["email"] = "Enter a valid email address."
+
+
+
+    phone_number = post_data.get("phone", "").strip()
+
+    if not re.match(r"^\d{10}$", phone_number):
+
+        errors["phone"] = "Enter a valid 10-digit Indian mobile number."
+
+
+
+@require_http_methods(["GET", "HEAD"])
+
+def serve_document(request, path):
+
+    """
+
+    Serve uploaded media files (MEDIA_ROOT / path) with correct headers:
+
+    - X-Frame-Options: SAMEORIGIN so iframe previews work on the same origin
+
+    - Cache-Control: no-store, no-cache, must-revalidate so browsers do not cache stale headers
+
+    - Correct Content-Type derived from file extension
+
+    - Fallback search by filename across MEDIA_ROOT subfolders
+
+    """
+
+    from urllib.parse import unquote
+
+    unquoted = unquote(path)
+
+    clean_path = str(unquoted).replace("\\", "/").strip().lstrip("/")
+
+    while "//" in clean_path:
+
+        clean_path = clean_path.replace("//", "/")
+
+
+
+    if "pharmacy_docs/" in clean_path:
+
+        idx = clean_path.rfind("pharmacy_docs/")
+
+        clean_path = clean_path[idx:]
+
+
+
+    safe_path = os.path.normpath(clean_path.replace("/", os.sep))
+
+    full_path = os.path.join(settings.MEDIA_ROOT, safe_path)
+
+
+
+    # If full_path does not exist on disk, search anywhere in MEDIA_ROOT for the file by filename
+
+    if not os.path.isfile(full_path):
+
+        target_name = os.path.basename(clean_path).lower()
+
+        found_path = None
+
+        for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+
+            for f in files:
+
+                if f.lower() == target_name:
+
+                    found_path = os.path.join(root, f)
+
+                    break
+
+            if found_path:
+
+                break
+
+        if found_path and os.path.isfile(found_path):
+
+            full_path = found_path
+
+
+
+    if not os.path.isfile(full_path):
+
+        response = HttpResponse(
+
+            '<!DOCTYPE html><html><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:80vh;margin:0;color:#6b7280;text-align:center;">'
+
+            '<div><p style="font-size:16px;font-weight:600;margin-bottom:8px;">Document file not found on server</p>'
+
+            '<p style="font-size:13px;margin:0;">The file has not been uploaded yet or was moved.</p></div>'
+
+            '</body></html>',
+
+            content_type="text/html",
+
+            status=404
+
+        )
+
+        response["X-Frame-Options"] = "SAMEORIGIN"
+
+        return response
+
+
+
+    ext = os.path.splitext(full_path)[1].lower()
+
+    custom_types = {
+
+        '.png': 'image/png',
+
+        '.jpg': 'image/jpeg',
+
+        '.jpeg': 'image/jpeg',
+
+        '.webp': 'image/webp',
+
+        '.gif': 'image/gif',
+
+        '.svg': 'image/svg+xml',
+
+        '.bmp': 'image/bmp',
+
+        '.pdf': 'application/pdf',
+
+    }
+
+    content_type = custom_types.get(ext)
+
+    if not content_type:
+
+        content_type, _ = mimetypes.guess_type(full_path)
+
+    content_type = content_type or "application/octet-stream"
+
+
+
+    if request.method == "HEAD":
+
+        response = HttpResponse(content_type=content_type)
+
+        response["Content-Length"] = str(os.path.getsize(full_path))
+
+    else:
+
+        response = FileResponse(open(full_path, "rb"), content_type=content_type)
+
+
+
+    response["X-Frame-Options"] = "SAMEORIGIN"
+
+    response["Cache-Control"] = "no-store, no-cache, must-revalidate"
+
+    response["Content-Disposition"] = f'inline; filename="{os.path.basename(full_path)}"'
+
+    return response
+
+
+
+
+
+@dashboard_login_required
+
+def settings_page(request):
+
+    user = request.user_obj
+
+    user_type = user.user_type
+
+
+
+    context = get_common_context(request, user)
+
+    context.update(get_base_context(user))
+
+    context["admin_profile_photo_path"] = UserProfile.objects.filter(
+
+        user=user
+
+    ).values_list("profile_photo_path", flat=True).first() or ""
+
+    context["active_main_tab"] = request.GET.get("tab", "settings")
+
+    
+
+    issue_types = IssueType.objects.filter(
+
+        user_types__contains=[user_type]
+
+    )
+
+
+
+    issue_options = IssueOption.objects.filter(
+
+        issue_type__in=issue_types,
+
+        user_types__contains=[user_type]
+
+    ).select_related("issue_type")
+
+
+
+    context.update({
+
+        "issue_types": issue_types,
+
+        "issue_options": issue_options,
+
+    })
+
+
+
+
+
+    user_type_handlers = {
+
+        'ngo': handle_ngo_profile,
+
+        'client': handle_client_profile,
+
+        'advertiser': handle_advertiser_profile,
+
+        'pharmacy': handle_pharmacy_profile,
+
+        'lab': handle_lab_profile,
+
+        'hospital': handle_hospital_profile,
+
+        'doctor': handle_doctor_profile,
+
+    }
+
+
+
+    handler_func = user_type_handlers.get(user.user_type)
+
+    if handler_func:
+
+        context.update(handler_func(user))
+
+
+
+    context['country_codes'] = load_country_codes()
+
+
+
+    # The Subscription tab settles the plan fee from the Advance (prepaid
+
+    # wallet), so render the live balance server-side. The status API refreshes
+
+    # it afterwards, but this avoids flashing a stale/hardcoded value.
+
+    context.update({
+
+        "advance_balance": get_advance_balance(user),
+
+        "subscription_price": SUBSCRIPTION_PRICE,
+
+        "subscription_gst": SUBSCRIPTION_GST,
+
+        "subscription_total": SUBSCRIPTION_TOTAL,
+
+    })
+
+
+
+    template_map = {
+
+        "pharmacy": "settings/seller_settings.html",
+
+        "lab": "settings/seller_settings.html",
+
+        "hospital": "settings/seller_settings.html",
+
+        "doctor": "settings/seller_settings.html",
+
+    }
+
+
+
+    template_name = template_map.get(
+
+        user.user_type,
+
+        "settings/settings_page.html"
+
+    )
+
+
+
+    return render(request, template_name, context)
+
+
+
+
+
+def get_base_context(user):
+
+
+
+    context = {
+
+        
+
+        'email': user.email,
+
+        'country_code': user.phone_country_code,
+
+        'phone_no': user.phone_number,
+
+        'user_type': user.user_type,
+
+        'created_at': user.created_at,
+
+        'updated_at': (
+
+            timezone.localtime(user.updated_at).strftime("%b. %d, %Y, %I:%M %p")
+
+            if user.updated_at else ""
+
+        ),
+
+        'inapp_notifications': user.inapp_notifications,
+
+        'email_notifications': user.email_notifications,
+
+        'push_notifications': user.push_notifications,
+
+        'regulatory_alerts': user.regulatory_alerts,
+
+        'promotions_and_offers': user.promotions_and_offers,
+
+        'payment_notifications': user.payment_notifications,
+
+        'location_notification': user.location_notification,
+
+        'quite_mode': user.quite_mode,
+
+        'quite_mode_start_time': user.quite_mode_start_time,
+
+        'quite_mode_end_time': user.quite_mode_end_time,
+
+        
+
+        
+
+    }
+
+    return context
+
+
+
+
+
+def get_related_location_name(profile, field_name):
+
+    """Return a location name without failing on a stale foreign-key value."""
+
+    try:
+
+        location = getattr(profile, field_name)
+
+    except (City.DoesNotExist, State.DoesNotExist):
+
+        return ""
+
+
+
+    return location.name if location else ""
+
+
+
+def handle_contact_person(profile_type, profile):
+
+    contact = ContactPerson.objects.filter(profile_type=profile_type, profile=profile).first()
+
+    return {
+
+        'contact_name': contact.name if contact else '',
+
+        'contact_phone_country_code': contact.phone_country_code if contact else '',
+
+        'contact_phone_number': contact.phone_number if contact else '',
+
+        'contact_role': contact.role if contact else ''
+
+    }
+
+
+
+def handle_advertiser_profile(user):
+
+    profile = AdvertiserProfile.objects.filter(user=user).first()
+
+    all_types = AdvertiserType.objects.filter(is_active=True)
+
+    all_services = AdServiceReq.objects.filter(is_active=True)
+
+    data = {
+
+        'company_name': profile.company_name,
+
+        'advertiser_type': profile.advertiser_type,
+
+        'all_types': all_types,
+
+        'services_interested': profile.ad_services_required,
+
+        'all_services': all_services,
+
+        'website_url': profile.website_url,
+
+        'address': profile.address,
+
+        'city': get_related_location_name(profile, 'city'),
+
+        'state': get_related_location_name(profile, 'state'),
+
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
+
+        'pincode': profile.pincode,
+
+        'brand_description': profile.brand_description,
+
+        'brand_image_path': os.path.basename(profile.brand_image_path),
+
+        'referral_code': profile.referral_code,
+
+        'incorporation_number': profile.incorporation_number,
+
+        'incorporation_doc_path': os.path.basename(profile.incorporation_doc_path),
+
+        'gst_number': profile.gst_number,
+
+        'gst_doc_path': os.path.basename(profile.gst_doc_path),
+
+        'pan_number': profile.pan_number,
+
+        'pan_doc_path': os.path.basename(profile.pan_doc_path),
+
+        'tan_number': profile.tan_number,
+
+        'tan_doc_path': os.path.basename(profile.tan_doc_path),
+
+    }
+
+    data.update(handle_contact_person(user.user_type, user))
+
+    return data
+
+
+
+def handle_client_profile(user):
+
+    profile = ClientProfile.objects.filter(user=user).first()
+
+    all_types = ClientType.objects.filter(is_active=True)
+
+    all_services = ClientService.objects.filter(is_active=True)
+
+
+
+    data = {
+
+        'company_name': profile.company_name,
+
+        'company_type': profile.company_type,
+
+        'all_types': all_types,
+
+        'services_interested': profile.services_interested,
+
+        'all_services': all_services,
+
+        'website_url': profile.website_url,
+
+        'address': profile.address,
+
+        'city': get_related_location_name(profile, 'city'),
+
+        'state': get_related_location_name(profile, 'state'),
+
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
+
+        'country_options': load_country_codes(),
+
+        'pincode': profile.pincode,
+
+        'referral_code': profile.referral_code,
+
+        'incorporation_number': profile.incorporation_number,
+
+        'incorporation_doc_path': os.path.basename(profile.incorporation_doc_path),
+
+        'gst_number': profile.gst_number,
+
+        'gst_doc_path': os.path.basename(profile.gst_doc_path),
+
+        'pan_number': profile.pan_number,
+
+        'pan_doc_path': os.path.basename(profile.pan_doc_path),
+
+        'tan_number': profile.tan_number,
+
+        'tan_doc_path': os.path.basename(profile.tan_doc_path),
+
+    }
+
+    data.update(handle_contact_person(user.user_type, user))
+
+    return data
+
+
+
+def handle_ngo_profile(user):
+
+    profile = NGOProfile.objects.filter(user=user).first()
+
+    all_services = NGOService.objects.filter(is_active=True)
+
+    data = {
+
+        'ngo_name': profile.ngo_name,
+
+        'ngo_services': profile.ngo_services,
+
+        'all_services': all_services,
+
+        'website_url': profile.website_url,
+
+        'address': profile.address,
+
+        'city': get_related_location_name(profile, 'city'),
+
+        'state': get_related_location_name(profile, 'state'),
+
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
+
+        'pincode': profile.pincode,
+
+        'ngo_registration_number': profile.ngo_registration_number,
+
+        'ngo_registration_doc_path': os.path.basename(profile.ngo_registration_doc_path),
+
+        'pan_number': profile.pan_number,
+
+        'pan_doc_path': os.path.basename(profile.pan_doc_path),
+
+        'gst_number': profile.gst_number,
+
+        'gst_doc_path': os.path.basename(profile.gst_doc_path),
+
+        'tan_number': profile.tan_number,
+
+        'tan_doc_path': os.path.basename(profile.tan_doc_path),
+
+        'section8_number': profile.section8_number,
+
+        'section8_doc_path': os.path.basename(profile.section8_doc_path),
+
+        'doc_12a_number': profile.doc_12a_number,
+
+        'doc_12a_path': os.path.basename(profile.doc_12a_path),
+
+        'brand_description': profile.brand_description,
+
+        'brand_image_path': os.path.basename(profile.brand_image_path),
+
+        'referral_code': profile.referral_code,
+
+    }
+
+    data.update(handle_contact_person(user.user_type, user))
+
+    return data
+
+
+
+def handle_pharmacy_profile(user):
+
+    profile = PharmacyProfile.objects.filter(user=user).first()
+
+    all_types = PharmacyType.objects.filter(is_active=True)
+
+    all_services = PharmacyServices.objects.filter(is_active=True)
+
+    all_workingdays = PharmacyTiming.objects.filter(is_active=True)
+
+
+
+    # A pharmacy user can reach Settings before a profile has been completed.
+
+    # Keep the page available in that state instead of dereferencing a missing
+
+    # profile and returning a server error.
+
+    if not profile:
+
+        data = {
+
+            'company_name': '',
+
+            'pharmacy_types': PharmacyType.objects.none(),
+
+            'all_types': all_types,
+
+            'services_offered': PharmacyServices.objects.none(),
+
+            'all_services': all_services,
+
+            'all_workingdays': all_workingdays,
+
+            'website_url': '',
+
+            'country': '',
+
+            'working_days': None,
+
+            'address': '',
+
+            'city': '',
+
+            'state': '',
+
+            'pincode': '',
+
+            'referral_code': '',
+
+            'incorporation_number': '',
+
+            'incorporation_doc_path': '',
+
+            'incorporation_doc_filename': '',
+
+            'gst_number': '',
+
+            'gst_doc_path': '',
+
+            'gst_doc_filename': '',
+
+            'medical_license_number': '',
+
+            'medical_license_doc_path': '',
+
+            'medical_license_doc_filename': '',
+
+            'pan_number': '',
+
+            'pan_doc_path': '',
+
+            'pan_doc_filename': '',
+
+            'storefront_image_path': '',
+
+            'storefront_image_filename': '',
+
+            'tan_number': '',
+
+            'tan_doc_path': '',
+
+            'tan_doc_filename': '',
+
+        }
+
+        data.update(handle_contact_person(user.user_type, user))
+
+        return data
+
+
+
+    def resolve_pharmacy_doc(raw_path, default_subdir):
+
+        if not raw_path:
+
+            return "", ""
+
+        clean = str(raw_path).replace("\\", "/").strip()
+
+        while "//" in clean:
+
+            clean = clean.replace("//", "/")
+
+        media_root_clean = str(settings.MEDIA_ROOT).replace("\\", "/").rstrip("/")
+
+        while "//" in media_root_clean:
+
+            media_root_clean = media_root_clean.replace("//", "/")
+
+        if clean.startswith(media_root_clean):
+
+            clean = clean[len(media_root_clean):].lstrip("/")
+
+
+
+        for prefix in ["/document/", "document/", "/media/", "media/"]:
+
+            if clean.startswith(prefix):
+
+                clean = clean[len(prefix):].lstrip("/")
+
+                break
+
+
+
+        if "pharmacy_docs/" in clean:
+
+            idx = clean.rfind("pharmacy_docs/")
+
+            clean = clean[idx:]
+
+
+
+        filename = clean.split("/")[-1]
+
+
+
+        # Handle storefront / photo alias
+
+        if default_subdir == 'store_front':
+
+            if clean.startswith("photo/"):
+
+                clean = f"store_front/{clean[len('photo/'):].lstrip('/')}"
+
+            elif clean.startswith("pharmacy_docs/photo/"):
+
+                clean = f"pharmacy_docs/store_front/{clean[len('pharmacy_docs/photo/'):].lstrip('/')}"
+
+
+
+        if "/" not in clean:
+
+            clean = f"pharmacy_docs/{default_subdir}/{clean}"
+
+        elif clean.startswith(f"{default_subdir}/"):
+
+            clean = f"pharmacy_docs/{clean}"
+
+
+
+        # Disk verification and fallback to ensure the path actually points to an existing file
+
+        full_candidate = os.path.join(settings.MEDIA_ROOT, clean.replace("/", os.sep))
+
+        if not os.path.isfile(full_candidate):
+
+            preferred = os.path.join(settings.MEDIA_ROOT, "pharmacy_docs", default_subdir, filename)
+
+            if os.path.isfile(preferred):
+
+                clean = f"pharmacy_docs/{default_subdir}/{filename}"
+
+            else:
+
+                for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+
+                    for f in files:
+
+                        if f.lower() == filename.lower():
+
+                            rel = os.path.relpath(os.path.join(root, f), settings.MEDIA_ROOT).replace("\\", "/")
+
+                            clean = rel
+
+                            filename = f
+
+                            break
+
+                    if os.path.isfile(os.path.join(settings.MEDIA_ROOT, clean.replace("/", os.sep))):
+
+                        break
+
+
+
+        return clean, filename
+
+    incorp_path, incorp_filename = resolve_pharmacy_doc(profile.incorporation_doc_path, 'incorporation')
+
+    gst_path, gst_filename = resolve_pharmacy_doc(profile.gst_doc_path, 'gst')
+
+    med_path, med_filename = resolve_pharmacy_doc(profile.medical_license_doc_path, 'medical_license')
+
+    pan_path, pan_filename = resolve_pharmacy_doc(profile.pan_doc_path, 'pan')
+
+    storefront_path, storefront_filename = resolve_pharmacy_doc(profile.storefront_image_path, 'store_front')
+
+    tan_path, tan_filename = resolve_pharmacy_doc(profile.tan_doc_path, 'tan')
+
+
+
+    data = {
+
+        'company_name': profile.company_name,
+
+        'pharmacy_types': profile.pharmacy_types.all(),
+
+        'all_types': all_types,
+
+        'services_offered': profile.services.all(),
+
+        'all_services': all_services,
+
+        'all_workingdays': all_workingdays,
+
+        'website_url': profile.website,
+
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
+
+        'working_days': profile.pharmacy_timing,
+
+        'address': profile.address,
+
+        # 'city': profile.city,
+
+        # 'state': profile.state,
+
+        'city': get_related_location_name(profile, 'city'),
+
+        'state': get_related_location_name(profile, 'state'),
+
+        'pincode': profile.pincode,
+
+        'referral_code': profile.referral_code or '',
+
+        # PharmacyProfile stores this value as pharmacy_registration_number;
+
+        # the settings template continues to use the shared context key.
+
+        'incorporation_number': profile.pharmacy_registration_number,
+
+        'incorporation_doc_path': incorp_path,
+
+        'incorporation_doc_filename': incorp_filename,
+
+        'gst_number': profile.gst_number,
+
+        'gst_doc_path': gst_path,
+
+        'gst_doc_filename': gst_filename,
+
+        'medical_license_number': profile.medical_license_number,
+
+        'medical_license_doc_path': med_path,
+
+        'medical_license_doc_filename': med_filename,
+
+        'pan_number': profile.pan_number,
+
+        'pan_doc_path': pan_path,
+
+        'pan_doc_filename': pan_filename,
+
+        'storefront_image_path': storefront_path,
+
+        'storefront_image_filename': storefront_filename,
+
+        'tan_number': profile.tan_number if profile.tan_number else "",
+
+        'tan_doc_path': tan_path,
+
+        'tan_doc_filename': tan_filename,
+
+    }
+
+    data.update(handle_contact_person(user.user_type, user))
+
+    return data
+
+
+
+def get_lab_sorted_country_codes():
+
+    codes = load_country_codes()
+
+    def sort_key(item):
+
+        dial = str(item.get('dial_code', '')).replace('+', '').strip()
+
+        digits = ''.join([c for c in dial if c.isdigit()])
+
+        num = int(digits) if digits else 999999
+
+        return (num, str(item.get('name', '')))
+
+    return sorted(codes, key=sort_key)
+
+
+
+def handle_lab_profile(user):
+
+    profile = LabProfile.objects.filter(user=user).first()
+
+    all_timings = LabTiming.objects.filter(is_active=True)
+
+    all_services = LabService.objects.filter(is_active=True)
+
+    all_facilities = LabFacility.objects.filter(is_active=True)
+
+
+
+    normalized_country_code = normalize_dial_code(user.phone_country_code) if user.phone_country_code else '+91'
+
+    data = {
+
+        'country_code': normalized_country_code,
+
+        'lab_country_codes': get_lab_sorted_country_codes(),
+
+        'lab_name' : profile.lab_name if profile else '',
+
+        'owner_name': profile.owner_name if profile else '',
+
+        'contact_number': (profile.contact_number if profile else '') or user.phone_number or '',
+
+        'alt_contact_number': profile.alt_contact_number,
+
+        'lab_registration_number': profile.lab_registration_number,
+
+        'address': profile.address,
+
+        # 'city': profile.city,
+
+        # 'state': profile.state,
+
+        # 'lab_timing': profile.lab_timing,
+
+        'lab_timing': profile.lab_timing,
+
+        'city': get_related_location_name(profile, 'city'),
+
+        'state': get_related_location_name(profile, 'state'),
+
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
+
+        'pincode': profile.pincode,
+
+        'all_timings': all_timings,
+
+        # 'lab_timing': profile.lab_timing,
+
+        'services_selected': profile.services.all(),
+
+        'all_services': all_services,
+
+        'facilities_selected': profile.facilities.all(),
+
+        'all_facilities': all_facilities,
+
+        'lab_certificate_path': profile.lab_certificate_path or '',
+
+        'lab_certificate_filename': (
+
+            os.path.basename(str(profile.lab_certificate_path).replace("\\", "/"))
+
+            if profile.lab_certificate_path else ""
+
+        ),
+
+        'identity_proof_aadhar_number': profile.identity_proof_aadhar_number,
+
+        'identity_proof_aadhar_path': profile.identity_proof_aadhar_path or '',
+
+        'identity_proof_aadhar_filename': (
+
+            os.path.basename(str(profile.identity_proof_aadhar_path).replace("\\", "/"))
+
+            if profile.identity_proof_aadhar_path else ""
+
+        ),
+
+        'identity_proof_pan_number': profile.identity_proof_pan_number,
+
+        'identity_proof_pan_path': profile.identity_proof_pan_path or '',
+
+        'identity_proof_pan_filename': (
+
+            os.path.basename(str(profile.identity_proof_pan_path).replace("\\", "/"))
+
+            if profile.identity_proof_pan_path else ""
+
+        ),
+
+        'gov_license_number': profile.gov_license_number,
+
+        'gov_license_path': profile.gov_license_path or '',
+
+        'gov_license_filename': (
+
+            os.path.basename(str(profile.gov_license_path).replace("\\", "/"))
+
+            if profile.gov_license_path else ""
+
+        ),
+
+        'lab_photo_path': profile.lab_photo_path or '',
+
+        'lab_photo_filename': (
+
+            os.path.basename(str(profile.lab_photo_path).replace("\\", "/"))
+
+            if profile.lab_photo_path else ""
+
+        ),
+
+        'is_verified': profile.is_verified,
+
+        'verification_status': profile.verification_status,
+
+        'rejection_reason': profile.rejection_reason,
+
+        'verified_at': profile.verified_at,
+
+        'referral_code': profile.referral_code or '',
+
+    }
+
+    return data
+
+
+
+def handle_hospital_profile(user):
+
+    profile = HospitalProfile.objects.filter(user=user).first()
+
+    data = {
+
+        'registration_certificate_path': profile.registration_certificate_path if profile.registration_certificate_path else "",
+
+
+
+        'aadhar_doc_path': profile.aadhar_doc_path if profile.aadhar_doc_path else "",
+
+
+
+        'pan_doc_path': profile.pan_doc_path if profile.pan_doc_path else "",
+
+
+
+        'hospital_photo_path': profile.hospital_photo_path if profile.hospital_photo_path else "",
+
+        'hospital_name' : profile.hospital_name,
+
+        'owner_name': profile.owner_name,
+
+        'contact_no': profile.contact_no,
+
+        'contact_number': profile.contact_no,
+
+        'alternate_contact_no': profile.alternate_contact_no,
+
+        'alt_contact_number': profile.alternate_contact_no,
+
+        'address': profile.address,
+
+        # 'country': profile.country,
+
+        # 'city': profile.city,
+
+        # 'state': profile.state,
+
+        # 'pincode': profile.pincode,
+
+        # 'hospital_timing': profile.hospital_timing,
+
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else 'NA'),
+
+        'city': get_related_location_name(profile, 'city'),
+
+        'state': get_related_location_name(profile, 'state'),
+
+        'pincode': profile.pincode or "",
+
+        'hospital_timing': profile.hospital_timing,
+
+        'home_visit': profile.home_visit,
+
+        'registration_no': profile.registration_no,
+
+        # 'registration_certificate_path': os.path.basename(profile.registration_certificate_path) if profile.registration_certificate_path else "",
+
+       'registration_certificate_path': profile.registration_certificate_path if profile.registration_certificate_path else "",
+
+        'aadhar_card_no': profile.aadhar_card_no,
+
+        # 'aadhar_doc_path': os.path.basename(profile.aadhar_doc_path) if profile.aadhar_doc_path else "",
+
+        'aadhar_doc_path': profile.aadhar_doc_path if profile.aadhar_doc_path else "",
+
+        'pan_card_no': profile.pan_card_no,
+
+        # 'pan_doc_path': os.path.basename(profile.pan_doc_path) if profile.pan_doc_path else "",
+
+        'pan_doc_path': profile.pan_doc_path if profile.pan_doc_path else "",
+
+        # 'hospital_logo_path': os.path.basename(profile.hospital_logo_path) if profile.hospital_logo_path else "",
+
+        'hospital_logo_path': profile.hospital_logo_path if profile.hospital_logo_path else "",
+
+        # 'hospital_photo_path': os.path.basename(profile.hospital_photo_path) if profile.hospital_photo_path else "",
+
+        'hospital_photo_path': profile.hospital_photo_path if profile.hospital_photo_path else "",
+
+        'phone_for_otp': profile.phone_for_otp,
+
+        'is_verified': profile.is_verified,
+
+        'verification_status': profile.verification_status,
+
+        'rejection_reason': profile.rejection_reason,
+
+        'verified_at': profile.verified_at,
+
+        'referral_code': profile.referral_code or '',
+
+    }
+
+    return data
+
+
+
+def handle_doctor_profile(user):
+
+    profile = DoctorProfile.objects.filter(user=user).first()
+
+    all_speciality = DoctorSpeciality.objects.filter(is_active=True)
+
+    all_education = DoctorEducation.objects.filter(is_active=True)
+
+    all_experience = DoctorExperience.objects.filter(is_active=True)
+
+    all_services = ServiceDescription.objects.select_related("category").order_by("name")
+
+    all_facilities = LabFacility.objects.filter(is_active=True)
+
+
+
+    # The Documents tab renders the stored file name, the virus-scan result and
+
+    # the review status for each document. `validate_and_save_file` stores the
+
+    # path as "<user_type>_docs/<subdir>/<file name>", so the display name is the
+
+    # last segment while the viewer needs the full relative path.
+
+    def doc_name(path):
+
+        if not path:
+
+            return ""
+
+        return str(path).replace("\\", "/").split("/")[-1]
+
+
+
+    # `validate_and_save_file` refreshes user.updated_on every upload, so it is
+
+    # the closest available "last edited" timestamp for the documents list.
+
+    last_edited = (
+
+        user.updated_at.strftime("%d %b %Y, %I:%M %p")
+
+        if user.updated_at else "Not yet uploaded"
+
+    )
+
+
+
+    def document_last_edited(path):
+
+        if not path:
+
+            return "Not uploaded"
+
+        try:
+
+            modified_at = default_storage.get_modified_time(path)
+
+            if timezone.is_naive(modified_at):
+
+                modified_at = timezone.make_aware(modified_at)
+
+            return timezone.localtime(modified_at).strftime("%d %b %Y, %I:%M %p")
+
+        except (OSError, NotImplementedError, ValueError):
+
+            return last_edited
+
+
+
+    # A doctor can reach Settings before the KYC profile has been created.
+
+    # Keep the page available in that state (like the pharmacy handler) instead
+
+    # of dereferencing a missing profile and returning a server error.
+
+    if not profile:
+
+        return {
+
+            'full_name': '', 'gender': '', 'age': None, 'specialty': None,
+
+            'all_speciality': all_speciality,
+
+            'education': None, 'all_education': all_education,
+
+            'experience': None, 'all_experience': all_experience,
+
+            'services_selected': ServiceDescription.objects.none(),
+
+            'all_services': all_services,
+
+            'facilities_selected': LabFacility.objects.none(),
+
+            'all_facilities': all_facilities,
+
+            'profile_photo_path': '',
+
+            'clinic_name': '', 'owner_name': '', 'contact_number': '',
+
+            'alt_contact_number': '', 'address': '', 'city': '', 'state': '',
+
+            'pincode': '', 'country': '',
+
+            'clinic_timing_from': '', 'clinic_timing_to': '',
+
+            'home_visit_available': False, 'registration_number': '',
+
+            'registration_certificate_path': '',
+
+            'registration_certificate_filename': '',
+
+            'registration_certificate_virus_scanned': False,
+
+            'registration_certificate_last_edited': 'Not uploaded',
+
+            'aadhar_number': '', 'aadhar_doc_path': '',
+
+            'aadhar_doc_filename': '', 'aadhar_doc_virus_scanned': False,
+
+            'aadhar_doc_last_edited': 'Not uploaded',
+
+            'pan_number': '', 'pan_doc_path': '',
+
+            'pan_doc_filename': '', 'pan_doc_virus_scanned': False,
+
+            'pan_doc_last_edited': 'Not uploaded',
+
+            'clinic_logo_path': '', 'clinic_logo_filename': '',
+
+            'clinic_logo_virus_scanned': False,
+
+            'clinic_photo_path': '', 'clinic_photo_filename': '',
+
+            'clinic_photo_virus_scanned': False,
+
+            'clinic_photo_last_edited': 'Not uploaded',
+
+            'doc_status': 'Pending', 'doc_status_is_approved': False,
+
+            'doc_last_edited': last_edited,
+
+            'is_verified': False, 'verification_status': 'pending',
+
+            'rejection_reason': None, 'verified_at': None,
+
+            'referral_code': '',
+
+        }
+
+
+
+    # A rejected document keeps the reviewer's reason, so show it instead of a
+
+    # generic label. `verification_status` is one of pending/approved/rejected.
+
+    status_label = (profile.verification_status or "pending").strip().lower()
+
+    if status_label == "approved":
+
+        doc_status = "Approved"
+
+    elif status_label == "rejected":
+
+        doc_status = profile.rejection_reason or "Rejected"
+
+    else:
+
+        doc_status = "Pending"
+
+
+
+    data = {
+
+        'full_name': profile.full_name,
+
+        'gender': profile.gender,
+
+        'age': profile.age,
+
+        'specialty': profile.specialty,
+
+        'all_speciality': all_speciality,
+
+        'education': profile.education,
+
+        'all_education': all_education,
+
+        'experience': profile.experience,
+
+        'all_experience': all_experience,
+
+        'services_selected': ServiceDescription.objects.filter(
+
+            id__in=DoctorServiceRate.objects.filter(
+
+                doctor=profile
+
+            ).values_list("service_id", flat=True)
+
+        ),
+
+        'all_services': all_services,
+
+        'facilities_selected': LabFacility.objects.none(),
+
+        'all_facilities': all_facilities,
+
+        'profile_photo_path': profile.profile_photo_path,
+
+        'clinic_name': profile.clinic_name,
+
+        'owner_name': profile.owner_name,
+
+        'contact_number': profile.contact_number,
+
+        'alt_contact_number': profile.alt_contact_number,
+
+        'address': profile.full_address,
+
+        # 'city': profile.city,
+
+        # 'state': profile.state,
+
+        'city': get_related_location_name(profile, 'city'),
+
+        'state': get_related_location_name(profile, 'state'),
+
+        'pincode': profile.pincode,
+
+        # Older records stored "1" for India, so show the country name like the
+
+        # other profile handlers do. The edit form prefills this value so saving
+
+        # no longer wipes the stored country.
+
+        'country': 'India' if str(profile.country) == '1' else (str(profile.country) if profile.country else ''),
+
+        'clinic_timing_from': profile.clinic_timing_from,
+
+        'clinic_timing_to': profile.clinic_timing_to,
+
+        'home_visit_available': profile.home_visit_available,
+
+        'registration_number': profile.registration_number,
+
+        'registration_certificate_path': profile.registration_certificate_path or "",
+
+        'registration_certificate_filename': doc_name(profile.registration_certificate_path),
+
+        'registration_certificate_virus_scanned': profile.registration_certificate_virus_scanned,
+
+        'registration_certificate_last_edited': document_last_edited(profile.registration_certificate_path),
+
+        'aadhar_number': profile.aadhar_number,
+
+        'aadhar_doc_path': profile.aadhar_doc_path or "",
+
+        'aadhar_doc_filename': doc_name(profile.aadhar_doc_path),
+
+        'aadhar_doc_virus_scanned': profile.aadhar_doc_virus_scanned,
+
+        'aadhar_doc_last_edited': document_last_edited(profile.aadhar_doc_path),
+
+        'pan_number': profile.pan_number,
+
+        'pan_doc_path': profile.pan_doc_path or "",
+
+        'pan_doc_filename': doc_name(profile.pan_doc_path),
+
+        'pan_doc_virus_scanned': profile.pan_doc_virus_scanned,
+
+        'pan_doc_last_edited': document_last_edited(profile.pan_doc_path),
+
+        'clinic_logo_path': profile.clinic_logo_path or "",
+
+        'clinic_logo_filename': doc_name(profile.clinic_logo_path),
+
+        'clinic_logo_virus_scanned': profile.clinic_logo_virus_scanned,
+
+        'clinic_photo_path': profile.clinic_photo_path or "",
+
+        'clinic_photo_filename': doc_name(profile.clinic_photo_path),
+
+        'clinic_photo_virus_scanned': profile.clinic_photo_virus_scanned,
+
+        'clinic_photo_last_edited': document_last_edited(profile.clinic_photo_path),
+
+        'doc_status': doc_status,
+
+        'doc_status_is_approved': status_label == "approved",
+
+        'doc_status_is_rejected': status_label == "rejected",
+
+        'doc_last_edited': last_edited,
+
+        'is_verified': profile.is_verified,
+
+        'verification_status': profile.verification_status,
+
+        'rejection_reason': profile.rejection_reason,
+
+        'verified_at': profile.verified_at,
+
+        'referral_code': profile.referral_code or '',
+
+    }
+
+    return data
+
+
+
+def logout_view(request):
+
+    request.session.flush()  # clears all session data
+
+    return redirect('/login/')
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def update_notification_field(request):
+
+    user = request.user_obj
+
+    try:
+
+        data = json.loads(request.body)
+
+    except Exception:
+
+        return JsonResponse({"status": "error", "message": "Invalid JSON."}, status=400)
+
+
+
+    field = data.get("field")
+
+    value = data.get("value")
+
+
+
+    def normalize_time(t):
+
+        if not t:
+
+            return None
+
+        if hasattr(t, "strftime"):
+
+            return t.strftime("%H:%M")
+
+        t_str = str(t).strip()
+
+        parts = t_str.split(":")
+
+        if len(parts) >= 2:
+
+            try:
+
+                return f"{int(parts[0]):02d}:{int(parts[1]):02d}"
+
+            except ValueError:
+
+                return t_str[:5]
+
+        return t_str[:5]
+
+
+
+    # Validate Quiet Hours: Start Time and End Time must not be identical when Quiet Mode is enabled.
+
+    is_quiet_mode = value if field == "quite_mode" else data.get("quite_mode", user.quite_mode)
+
+    proposed_start = value if field == "quite_mode_start_time" else data.get("quite_mode_start_time", user.quite_mode_start_time)
+
+    proposed_end = value if field == "quite_mode_end_time" else data.get("quite_mode_end_time", user.quite_mode_end_time)
+
+
+
+    if bool(is_quiet_mode) and proposed_start and proposed_end:
+
+        norm_start = normalize_time(proposed_start)
+
+        norm_end = normalize_time(proposed_end)
+
+        if norm_start and norm_end and norm_start == norm_end:
+
+            return JsonResponse({
+
+                "status": "error",
+
+                "message": "Start Time and End Time cannot be the same."
+
+            }, status=400)
+
+
+
+    if field in ["inapp_notifications", "email_notifications", "push_notifications", "regulatory_alerts", "promotions_and_offers", "quite_mode", "payment_notifications", "location_notification"]:
+
+        setattr(user, field, value)
+
+    elif field in ["quite_mode_start_time", "quite_mode_end_time"]:
+
+        setattr(user, field, value if value else None)
+
+    user.save()
+
+    return JsonResponse({"status": "success"})
+
+
+
+# @dashboard_login_required
+
+# @require_POST
+
+# def update_user_document(request):
+
+#     user = request.user_obj
+
+#     user_type = user.user_type
+
+#     doc_type = request.POST.get('doc_type')
+
+#     file = request.FILES.get('document')
+
+
+
+#     print(file)
+
+
+
+#     if not doc_type or not file:
+
+#         return JsonResponse({'success': False, 'error': 'Missing document or type.'}, status=400)
+
+
+
+#     subdir_map = {
+
+#         'hospital_license': 'registration',
+
+#         'admin_identity_proof': 'aadhar',      
+
+#         'pan_doc': 'pan',
+
+#         'hospital_image': 'hospital_image',
+
+#         'ngo_registration_doc': 'registration',
+
+#         'lab_certificate': 'lab_certificate',
+
+#         'identity_proof_aadhar': 'aadhar',
+
+#         'identity_proof_pan': 'pan',
+
+#         'gov_license': 'gov_license',
+
+#         'lab_photo': 'lab_photo',
+
+#         'incorporation_doc': 'incorporation',
+
+#         'gst_doc': 'gst',
+
+#         'pan_doc': 'pan',
+
+#         'tan_doc': 'tan',
+
+#         'section8_doc': 'section8',
+
+#         'doc_12a': 'doc_12a',
+
+#         'brand_image': 'brand_image',
+
+#         'medical_license_doc': 'medical_license',
+
+#         'storefront_image': 'store_front',
+
+#         'clinic_registration': 'registration',
+
+#         'aadhar_doc': 'aadhar',
+
+#         'doctor_pan': 'pan',
+
+#         'clinic_logo': 'clinic_logo',
+
+#         'clinic_photo': 'clinic_photo',
+
+#     }
+
+        
+
+#     upload_subdir = subdir_map.get(doc_type)
+
+#     if not upload_subdir:
+
+#         return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
+
+
+
+#     file_path, error = validate_and_save_file(file, upload_subdir, doc_type.replace('_', ' ').title(), user_type=user_type)
+
+#     if error:
+
+#         return JsonResponse({'success': False, 'error': error}, status=400)
+
+
+
+#     # profile_model = {
+
+#     #     'ngo': NGOProfile,
+
+#     #     'advertiser': AdvertiserProfile,
+
+#     #     'client': ClientProfile,
+
+#     #     'pharmacy': PharmacyProfile,
+
+#     # }.get(user_type)
+
+    
+
+
+
+#     profile_model = {
+
+#         'ngo': NGOProfile,
+
+#         'advertiser': AdvertiserProfile,
+
+#         'client': ClientProfile,
+
+#         'pharmacy': PharmacyProfile,
+
+#         'lab': LabProfile,
+
+#         'hospital': HospitalProfile,
+
+#         'doctor': DoctorProfile,
+
+#     }.get(user_type)
+
+#     if not profile_model:
+
+#         return JsonResponse({'success': False, 'error': 'Invalid user type for document upload.'}, status=400)
+
+
+
+#     profile = profile_model.objects.filter(user=user).first()
+
+#     print("PROFILE =", profile)
+
+#     print("DOC TYPE =", doc_type)
+
+#     print("FILE =", file)
+
+#     if not profile:
+
+#         return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
+
+
+
+#     doc_field_map = {
+
+#         'hospital_license': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
+
+#         'admin_identity_proof': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
+
+#         'hospital_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
+
+#         'hospital_image': ('hospital_photo_path', 'hospital_photo_virus_scanned'),
+
+#         'ngo_registration_doc': ('ngo_registration_doc_path', 'ngo_registration_doc_virus_scanned'),
+
+#         'lab_certificate': ('lab_certificate_path', 'lab_certificate_virus_scanned'),
+
+#         'identity_proof_aadhar': ('identity_proof_aadhar_path', 'identity_proof_aadhar_virus_scanned'),
+
+#         'identity_proof_pan': ('identity_proof_pan_path', 'identity_proof_pan_virus_scanned'),
+
+#         'gov_license': ('gov_license_path', 'gov_license_virus_scanned'),
+
+#         'lab_photo': ('lab_photo_path', 'lab_photo_virus_scanned'),
+
+#         'incorporation_doc': ('incorporation_doc_path', 'incorporation_doc_virus_scanned'),
+
+#         'gst_doc': ('gst_doc_path', 'gst_doc_virus_scanned'),
+
+#         'pan_doc': ('pan_doc_path', 'pan_doc_virus_scanned'),
+
+#         'tan_doc': ('tan_doc_path', 'tan_doc_virus_scanned'),
+
+#         'section8_doc': ('section8_doc_path', 'section8_doc_virus_scanned'),
+
+#         'doc_12a': ('doc_12a_path', 'doc_12a_virus_scanned'),
+
+#         'brand_image': ('brand_image_path', 'brand_image_virus_scanned'),
+
+#         'medical_license_doc': ('medical_license_doc_path', 'medical_license_doc_virus_scanned'),
+
+#         'storefront_image': ('storefront_image_path', 'storefront_image_virus_scanned'),
+
+#         'clinic_registration': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
+
+#         'aadhar_doc': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
+
+#         'doctor_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
+
+#         'clinic_logo': ('clinic_logo_path', 'clinic_logo_virus_scanned'),
+
+#         'clinic_photo': ('clinic_photo_path', 'clinic_photo_virus_scanned'),
+
+#     }
+
+
+
+#     doc_fields = doc_field_map.get(doc_type)
+
+#     if not doc_fields:
+
+#         return JsonResponse({'success': False, 'error': 'Unknown document type.'}, status=400)
+
+
+
+#     setattr(profile, doc_fields[0], file_path)
+
+#     print("SETTING:", doc_fields[0], "=", file_path)
+
+#     setattr(profile, doc_fields[1], True)
+
+#     print("FILE PATH =", file_path)
+
+#     print("DOC FIELD =", doc_fields[0])
+
+#     profile.save()
+
+
+
+#     return JsonResponse({'success': True, 'message': 'Document updated successfully.'})
+
+
+
+def _extract_number_from_ocr(ocr_result, field_name):
+
+    """Return a confidently recognizable ID number from OCR response data."""
+
+    text_values = []
+
+
+
+    def collect(value, key=""):
+
+        if isinstance(value, dict):
+
+            for child_key, child_value in value.items():
+
+                collect(child_value, str(child_key).lower())
+
+        elif isinstance(value, (list, tuple)):
+
+            for child in value:
+
+                collect(child, key)
+
+        elif isinstance(value, str):
+
+            text_values.append(value)
+
+
+
+    collect(ocr_result)
+
+    full_text = "\n".join(text_values).upper()
+
+    normalized_field = field_name.lower()
+
+
+
+    patterns = []
+
+    if "pan" in normalized_field:
+
+        patterns = [r"\b[A-Z]{5}\d{4}[A-Z]\b"]
+
+    elif "gst" in normalized_field:
+
+        patterns = [r"\b\d{2}[A-Z]{5}\d{4}[A-Z][A-Z\d]Z[A-Z\d]\b"]
+
+    elif "tan" in normalized_field:
+
+        patterns = [r"\b[A-Z]{4}\d{5}[A-Z]\b"]
+
+    elif "aadhar" in normalized_field or "aadhaar" in normalized_field:
+
+        patterns = [r"\b\d{4}[ -]?\d{4}[ -]?\d{4}\b"]
+
+
+
+    for pattern in patterns:
+
+        match = re.search(pattern, full_text)
+
+        if match:
+
+            return re.sub(r"[ -]", "", match.group(0))
+
+
+
+    # Registration and license IDs vary by issuing authority. Only accept a
+
+    # value found next to an explicit identifying label in the OCR text.
+
+    label = r"(?:REGISTRATION|LICENSE|LICENCE|CERTIFICATE)"
+
+    match = re.search(
+
+        rf"{label}(?:\s+(?:NO|NUMBER|#))?\s*[:#-]?\s*([A-Z0-9][A-Z0-9/-]{{3,29}})",
+
+        full_text,
+
+    )
+
+    return match.group(1).strip("/-") if match else ""
+
+
+
+
+
+def _read_document_number_with_ocr(file_path, model_field):
+
+    """Ask the configured OCR service to read a newly uploaded document."""
+
+    ocr_url = os.getenv("OCR_SERVICE_URL")
+
+    if not ocr_url:
+
+        return ""
+
+    try:
+
+        with default_storage.open(file_path, "rb") as document:
+
+            response = requests.post(
+
+                ocr_url,
+
+                files={"file": (os.path.basename(file_path), document)},
+
+                timeout=25,
+
+            )
+
+        response.raise_for_status()
+
+        return _extract_number_from_ocr(response.json(), model_field)
+
+    except (OSError, requests.RequestException, ValueError, TypeError):
+
+        # Document upload should still succeed if OCR is temporarily unavailable.
+
+        traceback.print_exc()
+
+        return ""
+
+
+
+
+
+@dashboard_login_required
+
+@require_POST
+
+def update_user_document(request):
+
+    user = request.user_obj
+
+    user_type = user.user_type
+
+    doc_type = request.POST.get('doc_type')
+
+    
+
+    # Check for a generic 'document' key first; fall back to the dynamic doc_type name 
+
+    file = request.FILES.get('document') or request.FILES.get(doc_type)
+
+
+
+    # ==================== DEBUGGING BLOCK 1 ====================
+
+    print("\n--- [DEBUG TAN START] ---")
+
+    print(f"USER TYPE: {user_type}")
+
+    print(f"INCOMING DOC TYPE: '{doc_type}'")
+
+    print(f"FILES IN REQUEST: {list(request.FILES.keys())}")
+
+    print(f"POST FIELDS IN REQUEST: {list(request.POST.keys())}")
+
+    print(f"RESOLVED FILE OBJECT: {file}")
+
+    # ===========================================================
+
+
+
+    if not doc_type or not file:
+
+        print("[DEBUG ERROR] Short-circuited: Missing doc_type or file object!")
+
+        print("--- [DEBUG TAN END] ---\n")
+
+        return JsonResponse({'success': False, 'error': 'Missing document or type.'}, status=400)
+
+
+
+    subdir_map = {
+
+        'hospital_license': 'registration',
+
+        'admin_identity_proof': 'aadhar',      
+
+        'pan_doc': 'pan',
+
+        'hospital_pan': 'pan',
+
+        'hospital_image': 'hospital_image',
+
+        'ngo_registration_doc': 'registration',
+
+        'lab_certificate': 'lab_certificate',
+
+        'identity_proof_aadhar': 'aadhar',
+
+        'identity_proof_pan': 'pan',
+
+        'gov_license': 'gov_license',
+
+        'lab_photo': 'lab_photo',
+
+        'incorporation_doc': 'incorporation',
+
+        'gst_doc': 'gst',
+
+        'tan_doc': 'tan',
+
+        'section8_doc': 'section8',
+
+        'doc_12a': 'doc_12a',
+
+        'brand_image': 'brand_image',
+
+        'medical_license_doc': 'medical_license',
+
+        'storefront_image': 'store_front',
+
+        'clinic_registration': 'registration',
+
+        'aadhar_doc': 'aadhar',
+
+        'doctor_pan': 'pan',
+
+        'clinic_logo': 'clinic_logo',
+
+        'clinic_photo': 'clinic_photo',
+
+    }
+
+        
+
+    upload_subdir = subdir_map.get(doc_type)
+
+    print(f"MAPPED SUBDIRECTORY: '{upload_subdir}'")
+
+    
+
+    if not upload_subdir:
+
+        print(f"[DEBUG ERROR] Short-circuited: '{doc_type}' not found in subdir_map!")
+
+        print("--- [DEBUG TAN END] ---\n")
+
+        return JsonResponse({'success': False, 'error': 'Invalid document type.'}, status=400)
+
+
+
+    file_path, error = validate_and_save_file(file, upload_subdir, doc_type.replace('_', ' ').title(), user_type=user_type,user=user)
+
+    print(f"VALIDATE & SAVE RESULT - Path: '{file_path}', Error: '{error}'")
+
+    
+
+    if error:
+
+        print("--- [DEBUG TAN END] ---\n")
+
+        return JsonResponse({'success': False, 'error': error}, status=400)
+
+
+
+    profile_model = {
+
+        'ngo': NGOProfile,
+
+        'advertiser': AdvertiserProfile,
+
+        'client': ClientProfile,
+
+        'pharmacy': PharmacyProfile,
+
+        'lab': LabProfile,
+
+        'hospital': HospitalProfile,
+
+        'doctor': DoctorProfile,
+
+    }.get(user_type)
+
+    
+
+    if not profile_model:
+
+        print(f"[DEBUG ERROR] Short-circuited: No profile model mapped for user type '{user_type}'")
+
+        print("--- [DEBUG TAN END] ---\n")
+
+        return JsonResponse({'success': False, 'error': 'Invalid user type for document upload.'}, status=400)
+
+
+
+    profile = profile_model.objects.filter(user=user).first()
+
+    print(f"TARGET PROFILE OBJECT FOUND: {profile}")
+
+    
+
+    if not profile:
+
+        print("--- [DEBUG TAN END] ---\n")
+
+        return JsonResponse({'success': False, 'error': 'Profile not found.'}, status=404)
+
+
+
+    doc_field_map = {
+
+        'hospital_license': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
+
+        'admin_identity_proof': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
+
+        'hospital_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
+
+        'hospital_image': ('hospital_photo_path', 'hospital_photo_virus_scanned'),
+
+        'ngo_registration_doc': ('ngo_registration_doc_path', 'ngo_registration_doc_virus_scanned'),
+
+        'lab_certificate': ('lab_certificate_path', 'lab_certificate_virus_scanned'),
+
+        'identity_proof_aadhar': ('identity_proof_aadhar_path', 'identity_proof_aadhar_virus_scanned'),
+
+        'identity_proof_pan': ('identity_proof_pan_path', 'identity_proof_pan_virus_scanned'),
+
+        'gov_license': ('gov_license_path', 'gov_license_virus_scanned'),
+
+        'lab_photo': ('lab_photo_path', 'lab_photo_virus_scanned'),
+
+        'incorporation_doc': ('incorporation_doc_path', 'incorporation_doc_virus_scanned'),
+
+        'gst_doc': ('gst_doc_path', 'gst_doc_virus_scanned'),
+
+        'pan_doc': ('pan_doc_path', 'pan_doc_virus_scanned'),
+
+        'tan_doc': ('tan_doc_path', 'tan_doc_virus_scanned'),
+
+        'section8_doc': ('section8_doc_path', 'section8_doc_virus_scanned'),
+
+        'doc_12a': ('doc_12a_path', 'doc_12a_virus_scanned'),
+
+        'brand_image': ('brand_image_path', 'brand_image_virus_scanned'),
+
+        'medical_license_doc': ('medical_license_doc_path', 'medical_license_doc_virus_scanned'),
+
+        'storefront_image': ('storefront_image_path', 'storefront_image_virus_scanned'),
+
+        'clinic_registration': ('registration_certificate_path', 'registration_certificate_virus_scanned'),
+
+        'aadhar_doc': ('aadhar_doc_path', 'aadhar_doc_virus_scanned'),
+
+        'doctor_pan': ('pan_doc_path', 'pan_doc_virus_scanned'),
+
+        'clinic_logo': ('clinic_logo_path', 'clinic_logo_virus_scanned'),
+
+        'clinic_photo': ('clinic_photo_path', 'clinic_photo_virus_scanned'),
+
+    }
+
+
+
+    doc_fields = doc_field_map.get(doc_type)
+
+    print(f"MAPPED MODEL FIELDS TO SAVE: {doc_fields}")
+
+    
+
+    if not doc_fields:
+
+        print(f"[DEBUG ERROR] Short-circuited: '{doc_type}' not found in doc_field_map!")
+
+        print("--- [DEBUG TAN END] ---\n")
+
+        return JsonResponse({'success': False, 'error': 'Unknown document type.'}, status=400)
+
+
+
+    # Set paths dynamically and update verification flag fields
+
+    saved_doc_path = str(file_path).replace("\\", "/").strip()
+
+    while "//" in saved_doc_path:
+
+        saved_doc_path = saved_doc_path.replace("//", "/")
+
+    setattr(profile, doc_fields[0], saved_doc_path)
+
+    setattr(profile, doc_fields[1], True)
+
+
+
+    number_field = DOC_NUMBER_FIELD_MAP.get(user_type, {}).get(doc_type)
+
+    extracted_number = (
+
+        _read_document_number_with_ocr(file_path, number_field)
+
+        if number_field else ""
+
+    )
+
+    if extracted_number:
+
+        max_length = profile_model._meta.get_field(number_field).max_length
+
+        if not max_length or len(extracted_number) <= max_length:
+
+            setattr(profile, number_field, extracted_number)
+
+
+
+    if user_type == "doctor":
+
+        profile.verification_status = "pending"
+
+        profile.is_verified = False
+
+        profile.verified_at = None
+
+        profile.rejection_reason = None
+
+    
+
+    # Extra check before saving to confirm fields were changed in memory
+
+    print(f"CONFIRMING PROPERTY ATTR VALUE SET ON INSTANCE: '{getattr(profile, doc_fields[0])}'")
+
+    
+
+    profile.save()
+
+    print("[DEBUG SUCCESS] profile.save() executed smoothly without an exception crash.")
+
+    print("--- [DEBUG TAN END] ---\n")
+
+
+
+    return JsonResponse({
+
+        'success': True,
+
+        'message': 'Document updated successfully.',
+
+        'number': extracted_number,
+
+    })
+
+
+
+
+
+## Update document number (Settings -> Documents tab)
+
+# Whitelisted doc_type -> model field mapping per user type so only known
+
+# document number fields can be written from the settings page.
+
+DOC_NUMBER_FIELD_MAP = {
+
+    'ngo': {
+
+        'ngo_registration_doc': 'ngo_registration_number',
+
+        'pan_doc': 'pan_number',
+
+        'gst_doc': 'gst_number',
+
+        'tan_doc': 'tan_number',
+
+        'section8_doc': 'section8_number',
+
+        'doc_12a': 'doc_12a_number',
+
+    },
+
+    'advertiser': {
+
+        'incorporation_doc': 'incorporation_number',
+
+        'gst_doc': 'gst_number',
+
+        'pan_doc': 'pan_number',
+
+        'tan_doc': 'tan_number',
+
+    },
+
+    'client': {
+
+        'incorporation_doc': 'incorporation_number',
+
+        'gst_doc': 'gst_number',
+
+        'pan_doc': 'pan_number',
+
+        'tan_doc': 'tan_number',
+
+    },
+
+    'pharmacy': {
+
+        'incorporation_doc': 'pharmacy_registration_number',
+
+        'gst_doc': 'gst_number',
+
+        'medical_license_doc': 'medical_license_number',
+
+        'pan_doc': 'pan_number',
+
+        'tan_doc': 'tan_number',
+
+    },
+
+    'lab': {
+
+        'lab_certificate': 'lab_registration_number',
+
+        'identity_proof_aadhar': 'identity_proof_aadhar_number',
+
+        'identity_proof_pan': 'identity_proof_pan_number',
+
+        'gov_license': 'gov_license_number',
+
+    },
+
+    'hospital': {
+
+        'hospital_license': 'registration_no',
+
+        'admin_identity_proof': 'aadhar_card_no',
+
+        'hospital_pan': 'pan_card_no',
+
+    },
+
+    'doctor': {
+
+        'clinic_registration': 'registration_number',
+
+        'aadhar_doc': 'aadhar_number',
+
+        'doctor_pan': 'pan_number',
+
+    },
+
+}
+
+
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def update_ngo_profile(request):
+
+    data = request.POST
+
+    errors={}
+
+    user = request.user_obj
+
+    
+
+    validate_email_phone(data, errors)
+
+    
+
+    ngo_services = request.POST.get("ngo_services")
+
+    if not ngo_services:
+
+        errors["services"] = "Select at least one NGO service."
+
+        
+
+    # Validate address fields
+
+    for field in ["ngo_name","address", "city", "state", "pincode", "country", "contact_name", "contact_phone_number"]:
+
+        if not data.get(field):
+
+            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+    
+
+    if errors:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": next(iter(errors.values()))
+
+        }, status=400)
+
+        
+
+    with transaction.atomic():
+
+    # Update User model
+
+        user.email = request.POST.get('email')
+
+        user.phone_country_code = request.POST.get('countryCodes')
+
+        user.phone_number = request.POST.get('phone')
+
+        user.save()
+
+
+
+    # Update NGOProfile
+
+        ngo_profile = NGOProfile.objects.filter(user=user).first()
+
+        if ngo_profile:
+
+            for field in ["ngo_name", "website_url", "address", "city", "state", "country", "pincode", "referral_code"]:
+
+                setattr(ngo_profile, field, data.get(field))
+
+            ngo_profile.ngo_services = NGOService.objects.get(name=data.get("ngo_services"))
+
+            ngo_profile.save()
+
+        contact_person = ContactPerson.objects.filter(profile_type='ngo', profile=user).first()
+
+
+
+        if contact_person:
+
+            contact_person.name = request.POST.get('contact_name')
+
+            contact_person.phone_country_code = request.POST.get('contact_countryCodes')
+
+            contact_person.phone_number = request.POST.get('contact_phone_number')
+
+            contact_person.role = request.POST.get('contact_role')
+
+            contact_person.save()
+
+
+
+    return JsonResponse({"success": True, "message": "NGO profile updated successfully."})
+
+    
+
+@require_POST
+
+@dashboard_login_required
+
+def update_advertiser_profile(request):
+
+    post_data = request.POST
+
+    errors = {}
+
+    user = request.user_obj  
+
+    
+
+    validate_email_phone(post_data, errors)
+
+    
+
+    required_fields = ["company_name", "phone","address", "city", "state", "country", "pincode", "contact_name", "contact_phone_number", "contact_role"]
+
+    for field in required_fields:
+
+        if not post_data.get(field):
+
+            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+
+
+    if errors:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": next(iter(errors.values()))
+
+        }, status=400)
+
+
+
+    try:
+
+        with transaction.atomic():
+
+            # --- Update User ---
+
+            # user.email = post_data.get('email')
+
+            user.phone_country_code = post_data.get("countryCodes")
+
+            user.phone_number = post_data.get("phone")
+
+            user.save()
+
+
+
+            # --- Update AdvertiserProfile ---
+
+            advertiser_profile = get_object_or_404(AdvertiserProfile, user=user)
+
+            advertiser_profile.company_name = post_data.get("company_name")
+
+            advertiser_profile.advertiser_type = AdvertiserType.objects.get(name=post_data.get("advertiser_type"))
+
+            advertiser_profile.ad_services_required = AdServiceReq.objects.get(name=post_data.get("company_services") )
+
+            advertiser_profile.website_url = post_data.get("website_url")
+
+            advertiser_profile.address = post_data.get("address")
+
+            advertiser_profile.city = post_data.get("city")
+
+            advertiser_profile.state = post_data.get("state")
+
+            advertiser_profile.country = post_data.get("country")
+
+            advertiser_profile.pincode = post_data.get("pincode")
+
+            advertiser_profile.save()
+
+
+
+            # --- Update or Create ContactPerson ---
+
+            contact_name = post_data.get("contact_name")
+
+            contact_phone = post_data.get("contact_phone_number")
+
+            if contact_name or contact_phone:
+
+                contact, _ = ContactPerson.objects.get_or_create(
+
+                    profile_type="advertiser",
+
+                    profile=user
+
+                )
+
+                contact.name = contact_name
+
+                contact.role = post_data.get("contact_role")
+
+                contact.phone_country_code = post_data.get("contact_countryCodes")
+
+                contact.phone_number = contact_phone
+
+                contact.save()
+
+
+
+        return JsonResponse({'success': True, 'message': 'Advertiser profile updated successfully'})
+
+    
+
+    except Exception as e:
+
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def update_client_profile(request):
+
+    post_data = request.POST
+
+    errors = {}
+
+    user = request.user_obj
+
+    validate_email_phone(post_data, errors)
+
+
+
+    # Required fields
+
+    required_fields = ["company_name", "company_type", "address", "city", "state", "pincode", "country"]
+
+    for field in required_fields:
+
+        if not post_data.get(field):
+
+            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+
+
+    if errors:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": next(iter(errors.values()))
+
+        }, status=400)
+
+    try:
+
+        with transaction.atomic():
+
+            # Update User model
+
+            user.email = post_data.get('email')
+
+            user.phone_country_code = post_data.get('countryCodes', "+91")
+
+            user.phone_number = post_data.get('phone')
+
+            user.save()
+
+            
+
+            # --- Update ClientProfile ---
+
+            profile = get_object_or_404(ClientProfile, user=user)
+
+            profile.company_name = post_data.get("company_name")
+
+            profile.company_type = ClientType.objects.get(name=post_data.get("company_type"))
+
+            profile.website_url = post_data.get("website_url")
+
+            profile.address = post_data.get("address")
+
+            profile.city = post_data.get("city")
+
+            profile.state = post_data.get("state")
+
+            profile.pincode = post_data.get("pincode")
+
+            profile.country = post_data.get("country")
+
+            profile.services_interested = ClientService.objects.get(name=post_data.get("company_services")) 
+
+            profile.phone = post_data.get("phone")
+
+            profile.phone_country_code = post_data.get("countryCodes")
+
+            profile.save()
+
+            
+
+            contact_name = post_data.get("contact_name")
+
+            contact_phone = post_data.get("contact_phone_number")
+
+            if contact_name or contact_phone:
+
+                contact, _ = ContactPerson.objects.get_or_create(
+
+                    profile_type="advertiser",
+
+                    profile=user
+
+                )
+
+                contact.name = contact_name
+
+                contact.role = post_data.get("contact_role")
+
+                contact.phone_country_code = post_data.get("contact_countryCodes")
+
+                contact.phone_number = contact_phone
+
+                contact.save()
+
+
+
+        return JsonResponse({'success': True, 'message': 'Client profile updated successfully.'})
+
+    except Exception as e:
+
+        import traceback
+
+        print(traceback)
+
+        return JsonResponse({'success': False, 'message': f'Error updating profile: {str(e)}'})
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def update_pharmacy_profile(request):
+
+    post_data = request.POST
+
+    errors = {}
+
+    user = request.user_obj  
+
+
+
+    # Require OTP verification for the submitted pharmacy phone number.
+
+    submitted_phone = "".join(
+
+        filter(str.isdigit, post_data.get("phone", "").strip())
+
+    )
+
+    submitted_country_code = post_data.get("countryCodes", "").strip()
+
+
+
+    expected_verification = f"{submitted_country_code}|{submitted_phone}"
+
+    verified_phone = request.session.get("verified_pharmacy_phone")
+
+    print("SAVE expected verification:", repr(expected_verification))
+
+    print(
+
+        "SAVE verified session phone:",
+
+        repr(request.session.get("verified_pharmacy_phone"))
+
+    )
+
+
+
+    if verified_phone != expected_verification:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": "Please verify your phone number with OTP before saving."
+
+        }, status=400)
+
+
+
+    validate_email_phone(post_data, errors)
+
+    # required_fields = ["company_name", "city", "state", "pincode"]
+
+    required_fields = ["company_name", "pincode"]
+
+    for field in required_fields:
+
+        if not post_data.get(field):
+
+            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+
+
+    if errors:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": next(iter(errors.values()))
+
+        }, status=400)
+
+
+
+    try:
+
+        with transaction.atomic():
+
+            # --- Update User ---
+
+            user.email = post_data.get('email')
+
+            user.phone_country_code = post_data.get("countryCodes")
+
+            user.phone_number = post_data.get("phone")
+
+            user.save()
+
+
+
+            # --- Update Pharmacy Profile ---
+
+            pharmacy_profile = get_object_or_404(PharmacyProfile, user=user)
+
+            pharmacy_profile.company_name = post_data.get("company_name")
+
+            pharmacy_profile.website = post_data.get("website_url")
+
+            pharmacy_profile.address = post_data.get("address")
+
+            
+
+            # -------- STATE --------
+
+            state_raw = post_data.get("state", "").strip()
+
+            # Remove extra spaces and normalize
+
+            state_name = ' '.join(state_raw.split())
+
+            
+
+            state_obj = None
+
+            if state_name:
+
+                # Try exact match first (case-insensitive)
+
+                state_obj = State.objects.filter(
+
+                   name__iexact=state_name
+
+                ).first()
+
+                
+
+                # If not found, try partial match
+
+                if not state_obj:
+
+                    state_obj = State.objects.filter(
+
+                       name__icontains=state_name
+
+                    ).first()
+
+                
+
+                if state_obj:
+
+                    pharmacy_profile.state = state_obj
+
+                    print(f"State found: '{state_obj.name}' for input: '{state_raw}'")
+
+                else:
+
+                    print(f"State NOT found for: '{state_name}' (raw: '{state_raw}')")
+
+
+
+            # -------- CITY --------
+
+            city_name = post_data.get("city", "").split(",")[0].strip()
+
+
+
+            if city_name and state_obj:
+
+                # Try to find existing city (case-insensitive)
+
+                city = City.objects.filter(
+
+                    name__iexact=city_name,
+
+                    state=state_obj
+
+                ).first()
+
+                
+
+                # If city doesn't exist, create it
+
+                if not city:
+
+                    city = City.objects.create(
+
+                        name=city_name.title(),  # Title case for consistency
+
+                        state=state_obj
+
+                    )
+
+                    print(f"Created new city: {city_name} in {state_obj.name}")
+
+                
+
+                pharmacy_profile.city = city
+
+
+
+            # ---------- Update Working Hours ----------
+
+            timing_id = post_data.get("working_days") or post_data.get("pharmacy_timing")
+
+
+
+            if timing_id:
+
+                pharmacy_profile.pharmacy_timing_id = int(timing_id)
+
+
+
+            pharmacy_profile.owner_name = post_data.get("owner_name", "")
+
+            pharmacy_profile.country = post_data.get("country", "")
+
+            pharmacy_profile.pincode = post_data.get("pincode")
+
+            
+
+            print("POST =", post_data.dict())
+
+            print("State POST =", post_data.get("state"))
+
+            print("City POST =", post_data.get("city"))
+
+            print("Country POST =", post_data.get("country"))
+
+            print("Working =", post_data.get("working_days"))
+
+
+
+            print("Before save")
+
+            print("pharmacy_profile.state =", pharmacy_profile.state)
+
+            print("pharmacy_profile.city =", pharmacy_profile.city)
+
+            print("pharmacy_profile.country =", pharmacy_profile.country)
+
+            print("pharmacy_profile.pincode =", pharmacy_profile.pincode)
+
+
+
+            pharmacy_profile.save()
+
+
+
+            pharmacy_profile.referral_code = post_data.get("referral_code", "")
+
+
+
+            pharmacy_type_name = post_data.get("pharmacy_type", "").strip()
+
+
+
+            if pharmacy_type_name:
+
+                type_obj = PharmacyType.objects.filter(name__iexact=pharmacy_type_name).first()
+
+
+
+            if type_obj:
+
+                pharmacy_profile.pharmacy_types.set([type_obj])
+
+
+
+            service_name = post_data.get("services_offered", "").strip()
+
+
+
+            if service_name:
+
+                service_obj = PharmacyServices.objects.filter(name__iexact=service_name).first()
+
+
+
+            if service_obj:
+
+                pharmacy_profile.services.set([service_obj])
+
+
+
+            pharmacy_profile.save()
+
+
+
+        # --- Update or Create ContactPerson ---
+
+        contact_name = post_data.get("contact_name")
+
+        contact_phone = post_data.get("contact_phone_number")
+
+        if contact_name or contact_phone:
+
+            contact, _ = ContactPerson.objects.get_or_create(
+
+                profile_type="pharmacy",
+
+                profile=user
+
+            )
+
+            contact.name = contact_name
+
+            contact.role = post_data.get("contact_role")
+
+            contact.phone_country_code = post_data.get("contact_countryCodes")
+
+            contact.phone_number = contact_phone
+
+            contact.save()
+
+
+
+        return JsonResponse({'success': True, 'message': 'Pharmacy profile updated successfully'})
+
+    
+
+    # except Exception as e:
+
+    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+    except Exception as e:
+
+        traceback.print_exc()
+
+        print("PHARMACY SAVE ERROR:", e)
+
+
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": str(e)
+
+        }, status=500)
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def update_lab_profile(request):
+
+    post_data = request.POST
+
+    errors = {}
+
+    user = request.user_obj  
+
+    
+
+    validate_email_phone(post_data, errors)
+
+    raw_code = post_data.get('phone_country_code') or post_data.get('countryCodes')
+
+    normalized_code = normalize_dial_code(raw_code)
+
+    phone_val = post_data.get('phone') or post_data.get('contact_number')
+
+    if normalized_code and normalized_code != '+91' and phone_val:
+
+        clean_phone = ''.join(c for c in phone_val if c.isdigit())
+
+        if 7 <= len(clean_phone) <= 15:
+
+            errors.pop('phone', None)
+
+    required_fields = ["lab_name", "city", "state", "pincode"]
+
+    for field in required_fields:
+
+        if not post_data.get(field):
+
+            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+
+
+    # Require OTP verification for Lab profile save
+
+    pending_lab_phone = request.session.get("pending_lab_phone") or request.session.get("pending_phone")
+
+    pending_lab_otp = request.session.get("pending_lab_otp") or request.session.get("pending_phone_otp") or TEST_OTP
+
+    phone_digits = "".join(filter(str.isdigit, phone_val or ""))
+
+    pending_digits = "".join(filter(str.isdigit, pending_lab_phone.split("|")[-1])) if pending_lab_phone else ""
+
+
+
+    if not pending_lab_phone:
+
+        errors["otp1"] = "Please request an OTP before saving profile changes."
+
+    elif phone_digits != pending_digits:
+
+        errors["otp1"] = "Phone number has changed. Please request a new OTP."
+
+    else:
+
+        otp1 = (post_data.get("otp1") or post_data.get("otp") or "").strip()
+
+        if not otp1:
+
+            errors["otp1"] = "Please enter the OTP before saving."
+
+        elif otp1 != pending_lab_otp and otp1 != TEST_OTP:
+
+            errors["otp1"] = "Invalid OTP. Please enter the correct OTP."
+
+
+
+    if errors:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": next(iter(errors.values()))
+
+        }, status=400)
+
+    
+
+    try:
+
+    
+
+        with transaction.atomic():
+
+
+
+             user.email = post_data.get('email')
+
+             if normalized_code:
+
+                 user.phone_country_code = normalized_code
+
+             if phone_val:
+
+                 user.phone_number = phone_val
+
+             user.save()
+
+
+
+             lab_profile = get_object_or_404(LabProfile, user=user)
+
+
+
+             # Update fields
+
+             lab_profile.lab_name = post_data.get("lab_name")
+
+             lab_profile.owner_name = post_data.get("owner_name")
+
+
+
+             if phone_val:
+
+                 lab_profile.contact_number = phone_val
+
+             else:
+
+                 lab_profile.contact_number = post_data.get("phone")
+
+
+
+             lab_profile.lab_registration_number = post_data.get("lab_registration_number")
+
+
+
+             lab_profile.address = post_data.get("address")
+
+             lab_profile.country = post_data.get("country")
+
+
+
+             lab_profile.pincode = post_data.get("pincode")
+
+            # ---------------- STATE ----------------
+
+
+
+             state_name = post_data.get("state", "").strip()
+
+
+
+             state = State.objects.filter(
+
+                name__iexact=state_name
+
+            ).first()
+
+
+
+             if state:
+
+                lab_profile.state = state
+
+
+
+
+
+            # ---------------- CITY ----------------
+
+
+
+             city_name = post_data.get("city", "").split(",")[0].strip()
+
+
+
+             city = City.objects.filter(
+
+                name__iexact=city_name,
+
+                state=state
+
+            ).first()
+
+
+
+             if city:
+
+              lab_profile.city = city
+
+
+
+
+
+            # ---------------- WORKING HOURS ----------------
+
+
+
+             timing_id = post_data.get("lab_timing_id")
+
+
+
+             if timing_id:
+
+                lab_profile.lab_timing_id = int(timing_id)
+
+
+
+    # DO NOT TOUCH city/state for now
+
+    # because they are ForeignKeys
+
+             print("State =", lab_profile.state)
+
+             print("City =", lab_profile.city)
+
+             print("Timing =", lab_profile.lab_timing)
+
+
+
+             lab_profile.save()
+
+             request.session.pop("pending_lab_phone", None)
+
+             request.session.pop("pending_lab_otp", None)
+
+             request.session.modified = True
+
+     
+
+             return JsonResponse({
+
+                 'success': True,
+
+                 'message': 'Lab profile updated successfully'
+
+              })
+
+    except Exception as e:
+
+        import traceback
+
+        print(traceback.format_exc())
+
+
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": str(e)
+
+        }, status=500)
+
+
+
+    
+
+    
+
+    #         return JsonResponse({'success': True, 'message': 'Lab profile updated successfully'})
+
+
+
+    # except Exception as e:
+
+    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+
+# @require_POST
+
+# @dashboard_login_required
+
+# def update_hospital_profile(request):
+
+
+
+#     if request.method == "POST":
+
+
+
+#         print(request.POST)
+
+
+
+#         post_data = request.POST
+
+#         errors = {}
+
+
+
+#         user = request.user_obj
+
+
+
+#         validate_email_phone(post_data, errors)
+
+
+
+#         required_fields = ["hospital_name", "city", "state", "pincode"]
+
+
+
+#         for field in required_fields:
+
+#             if not post_data.get(field):
+
+#                 errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+
+
+#         if errors:
+
+#             return JsonResponse({
+
+#                 "success": False,
+
+#                 "message": next(iter(errors.values()))
+
+#             }, status=400)
+
+
+
+#         try:
+
+
+
+#             with transaction.atomic():
+
+
+
+#                 user.email = post_data.get('email')
+
+#                 # user.phone_country_code = post_data.get("countryCodes")
+
+#                 # user.phone_number = post_data.get("contact_number")
+
+#                 user.phone_country_code = post_data.get("phone_country_code")
+
+#                 user.phone_number = post_data.get("phone")
+
+#                 user.save()
+
+
+
+#                 hospital_profile = get_object_or_404(
+
+#                     HospitalProfile,
+
+#                     user=user
+
+#                 )
+
+
+
+#                 hospital_profile.hospital_name = post_data.get("hospital_name")
+
+#                 hospital_profile.address = post_data.get("address")
+
+#                 # hospital_profile.city = post_data.get("city")
+
+#                 # hospital_profile.state = post_data.get("state")
+
+#                 # hospital_profile.city_name = post_data.get("city")
+
+#                 # hospital_profile.state_id = None
+
+#                 hospital_profile.owner_name = post_data.get("owner_name")
+
+#                 user.phone_country_code = post_data.get("phone_country_code")
+
+#                 user.phone_number = post_data.get("phone")
+
+#                 # hospital_profile.country = post_data.get("country")
+
+#                 # hospital_profile.pincode = post_data.get("pincode")
+
+#                 hospital_profile.owner_name = post_data.get("owner_name")
+
+
+
+#                 state_name = post_data.get("state", "").strip()
+
+#                 # city_name = post_data.get("city", "").strip()
+
+#                 city_name = post_data.get("city", "").split(",")[0].strip()
+
+
+
+#                 state = State.objects.filter(
+
+#                    name__iexact=state_name
+
+#                 ).first()
+
+
+
+#                 if state:
+
+#                     hospital_profile.state = state
+
+
+
+#                     city = City.objects.filter(
+
+#                         name__iexact=city_name,
+
+#                         state=state
+
+#                     ).first()
+
+
+
+#                     if city:
+
+#                         hospital_profile.city = city
+
+
+
+#                 hospital_profile.country = post_data.get("country")
+
+#                 hospital_profile.pincode = post_data.get("pincode")
+
+
+
+#                 hospital_profile.save()
+
+
+
+#                 print("DATA SAVED SUCCESSFULLY")
+
+
+
+#                 return JsonResponse({
+
+#                     "success": True,
+
+#                     "message": "Hospital profile updated successfully"
+
+#                 })
+
+
+
+#         except Exception as e:
+
+
+
+#             print("SAVE ERROR:", e)
+
+
+
+#             return JsonResponse({
+
+#                 "success": False,
+
+#                 "message": str(e)
+
+#             }, status=500)
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def update_hospital_profile(request):
+
+
+
+    post_data = request.POST
+
+    errors = {}
+
+
+
+    user = request.user_obj
+
+
+
+    # Existing email and phone validation
+
+    validate_email_phone(post_data, errors)
+
+
+
+    # Required fields validation
+
+    required_fields = [
+
+        "hospital_name",
+
+        "address",
+
+        "city",
+
+        "state",
+
+        "country",
+
+        "pincode",
+
+        "owner_name",
+
+    ]
+
+
+
+    for field in required_fields:
+
+        value = (post_data.get(field) or "").strip()
+
+
+
+        if not value:
+
+            errors[field] = (
+
+                f"{field.replace('_', ' ').capitalize()} is required."
+
+            )
+
+
+
+    # Existing OTP logic: do not save if OTP is missing or invalid
+
+    otp1 = (post_data.get("otp1") or "").strip()
+
+
+
+    if not otp1:
+
+        errors["otp1"] = "OTP is required."
+
+    elif otp1 != "123456":
+
+        errors["otp1"] = "Not verified."
+
+
+
+    # Stop before any database changes if validation fails
+
+    if errors:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": next(iter(errors.values())),
+
+            "errors": errors,
+
+        }, status=400)
+
+
+
+    try:
+
+        with transaction.atomic():
+
+
+
+            hospital_profile = get_object_or_404(
+
+                HospitalProfile,
+
+                user=user
+
+            )
+
+
+
+            # Update user details
+
+            user.email = post_data.get("email")
+
+            user.phone_country_code = normalize_dial_code(
+
+                post_data.get("phone_country_code")
+
+            )
+
+            user.phone_number = post_data.get("phone", "").strip()
+
+
+
+            # Update hospital details
+
+            hospital_profile.hospital_name = post_data.get(
+
+                "hospital_name"
+
+            )
+
+            hospital_profile.address = post_data.get("address")
+
+            hospital_profile.owner_name = post_data.get("owner_name")
+
+            hospital_profile.contact_no = user.phone_number
+
+            hospital_profile.alternate_contact_no = (
+
+                post_data.get("alt_contact_number") or ""
+
+            ).strip() or None
+
+            hospital_profile.country = post_data.get("country")
+
+            hospital_profile.pincode = post_data.get("pincode")
+
+
+
+            # Update state and city
+
+            state_name = (post_data.get("state") or "").strip()
+
+            city_name = (
+
+                (post_data.get("city") or "")
+
+                .split(",")[0]
+
+                .strip()
+
+            )
+
+
+
+            state = State.objects.filter(
+
+                name__iexact=state_name
+
+            ).first()
+
+
+
+            if state:
+
+                hospital_profile.state = state
+
+
+
+                city = City.objects.filter(
+
+                    name__iexact=city_name,
+
+                    state=state
+
+                ).first()
+
+
+
+                if city:
+
+                    hospital_profile.city = city
+
+
+
+            # Save only after validation succeeds
+
+            user.save()
+
+            hospital_profile.save()
+
+
+
+            print("DATA SAVED SUCCESSFULLY")
+
+
+
+            return JsonResponse({
+
+                "success": True,
+
+                "message": "Hospital profile updated successfully"
+
+            })
+
+
+
+    except IntegrityError:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": "This phone number or email is already in use.",
+
+        }, status=400)
+
+    except Exception as e:
+
+        print("SAVE ERROR:", e)
+
+
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": "Unable to update hospital profile."
+
+        }, status=500)
+
+
+
+# def update_hospital_profile(request):
+
+#     if request.method == "POST":
+
+#         print(request.POST)
+
+#     post_data = request.POST
+
+#     errors = {}
+
+#     user = request.user_obj  
+
+#     validate_email_phone(post_data, errors)
+
+#     required_fields = ["hospital_name", "city", "state", "pincode"]
+
+#     for field in required_fields:
+
+#         if not post_data.get(field):
+
+#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+
+
+#     if errors:
+
+#         return JsonResponse({"success": False, "errors": errors}, status=400)
+
+    
+
+#     try:
+
+#         with transaction.atomic():
+
+#             user.email = post_data.get('email')
+
+#             user.phone_country_code = post_data.get("countryCodes")
+
+#             user.phone_number = post_data.get("contact_number")
+
+#             user.save()
+
+            
+
+#             hospital_profile = get_object_or_404(HospitalProfile, user=user)
+
+#             hospital_profile.hospital_name = post_data.get("hospital_name")
+
+#             hospital_profile.address = post_data.get("address")
+
+#             hospital_profile.city = post_data.get("city")
+
+#             hospital_profile.state = post_data.get("state")
+
+#             hospital_profile.country = post_data.get("country")
+
+#             hospital_profile.pincode = post_data.get("pincode")
+
+#             try:
+
+#                hospital.save()
+
+#                print("DATA SAVED SUCCESSFULLY")
+
+
+
+#                return JsonResponse({
+
+#                "status": "success"
+
+#             })
+
+
+
+#             except Exception as e:
+
+#                 print("SAVE ERROR:", e)
+
+
+
+#                 return JsonResponse({
+
+#                 "status": "error",
+
+#                 "message": str(e)
+
+#             })
+
+#             # hospital_profile.save()
+
+        
+
+            
+
+    #         return JsonResponse({'success': True, 'message': 'Hospital profile updated successfully'})
+
+
+
+    # except Exception as e:
+
+    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def update_doctor_profile(request):
+
+
+
+    post_data = request.POST
+
+    errors = {}
+
+    user = request.user_obj
+
+
+
+    validate_email_phone(post_data, errors)
+
+
+
+    required_fields = ["clinic_name", "city", "state", "pincode"]
+
+
+
+    for field in required_fields:
+
+        if not post_data.get(field):
+
+            errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+        # Require OTP verification before saving Doctor profile
+    phone_digits = "".join(
+        filter(str.isdigit, post_data.get("phone", ""))
+    )
+    country_code = normalize_dial_code(
+        post_data.get("countryCodes")
+    )
+    submitted_phone = f"{country_code}|{phone_digits}"
+
+    verified_phone = request.session.get("verified_pharmacy_phone")
+
+    if not verified_phone:
+        errors["otp1"] = "Please verify your phone number with OTP before saving."
+
+    elif verified_phone != submitted_phone:
+        errors["otp1"] = "Phone number changed. Please verify OTP again."
+
+
+
+    if errors:
+
+        # The edit form posts through fetch() and shows `message` in the error
+
+        # toast, so return a readable sentence next to the per-field errors
+
+        # (previously the toast displayed a raw JSON blob of `errors`).
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": next(iter(errors.values()))
+
+        }, status=400)
+
+
+
+    try:
+
+
+
+        with transaction.atomic():
+
+
+
+            # USER UPDATE
+
+            user.email = post_data.get('email')
+
+            user.phone_country_code = normalize_dial_code(post_data.get("countryCodes"))
+
+            user.phone_number = post_data.get("phone")
+
+            user.save()
+
+
+
+            # DOCTOR PROFILE
+
+            doctor_profile = get_object_or_404(
+
+                DoctorProfile,
+
+                user=user
+
+            )
+
+
+
+            doctor_profile.clinic_name = post_data.get("clinic_name")
+
+
+
+            doctor_profile.registration_number = post_data.get(
+
+                "registration_number"
+
+            )
+
+
+
+            doctor_profile.full_address = post_data.get("address")
+
+            # ---------------- STATE ----------------
+
+
+
+            state_name = post_data.get("state", "").strip()
+
+
+
+            state = State.objects.filter(
+
+                name__iexact=state_name
+
+            ).first()
+
+
+
+            if state:
+
+               doctor_profile.state = state
+
+
+
+
+
+            # ---------------- CITY ----------------
+
+
+
+            city_name = post_data.get("city", "").split(",")[0].strip()
+
+
+
+            if state:
+
+                city = City.objects.filter(
+
+                  name__iexact=city_name,
+
+                  state=state
+
+                ).first()
+
+
+
+                if city:
+
+                  doctor_profile.city = city
+
+
+
+            # doctor_profile.city = post_data.get("city")
+
+
+
+            # doctor_profile.state = post_data.get("state")
+
+
+
+            # The account details screen shows the profile contact numbers, so
+
+            # persist them here as well (only `user.phone_number` was saved
+
+            # before, which left the displayed numbers unchanged after saving).
+
+            doctor_profile.contact_number = post_data.get("phone")
+
+
+
+            doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
+
+
+
+            # Only overwrite the country when the form actually submits one.
+
+            # The input used to render empty, and saving wiped the stored value.
+
+            country = (post_data.get("country") or "").strip()
+
+
+
+            if country:
+
+                doctor_profile.country = country
+
+
+
+            doctor_profile.pincode = post_data.get("pincode")
+
+
+
+            doctor_profile.owner_name = post_data.get("owner_name")
+
+
+
+            doctor_profile.save()
+
+
+
+            return JsonResponse({
+
+                "success": True,
+
+                "message": "Doctor profile updated successfully"
+
+            })
+
+
+
+    except Exception as e:
+
+
+
+        import traceback
+
+
+
+        print(traceback.format_exc())
+
+
+
+        print("DOCTOR SAVE ERROR:", str(e))
+
+
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": str(e)
+
+        }, status=500)
+
+# def update_doctor_profile(request):
+
+#     post_data = request.POST
+
+#     errors = {}
+
+#     user = request.user_obj
+
+
+
+#     validate_email_phone(post_data, errors)
+
+
+
+#     required_fields = ["clinic_name", "city", "state", "pincode"]
+
+
+
+#     for field in required_fields:
+
+#         if not post_data.get(field):
+
+#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+
+
+#     if errors:
+
+#         return JsonResponse({"success": False, "errors": errors}, status=400)
+
+
+
+#     try:
+
+#         with transaction.atomic():
+
+
+
+#             user.email = post_data.get('email')
+
+#             user.phone_country_code = post_data.get("countryCodes")
+
+#             user.phone_number = post_data.get("phone")
+
+#             user.save()
+
+
+
+#             doctor_profile = get_object_or_404(DoctorProfile, user=user)
+
+            
+
+
+
+            # doctor_profile.clinic_name = post_data.get("clinic_name")
+
+            # doctor_profile.registration_number = post_data.get("registration_number")
+
+
+
+        #    doctor_profile.full_address = post_data.get("address")
+
+        #    doctor_profile.city = post_data.get("city")
+
+        #    doctor_profile.state = post_data.get("state")
+
+        #    doctor_profile.pincode = post_data.get("pincode")
+
+        
+
+# def update_doctor_profile(request):
+
+#     post_data = request.POST
+
+#     errors = {}
+
+#     user = request.user_obj  
+
+#     validate_email_phone(post_data, errors)
+
+#     required_fields = ["clinic_name", "city", "state", "pincode"]
+
+#     for field in required_fields:
+
+#         if not post_data.get(field):
+
+#             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
+
+
+
+#     if errors:
+
+#         return JsonResponse({"success": False, "errors": errors}, status=400)
+
+#     try:
+
+#     with transaction.atomic():
+
+
+
+#         user.email = post_data.get('email')
+
+#         user.phone_country_code = post_data.get("countryCodes")
+
+#         user.phone_number = post_data.get("phone")
+
+#         user.save()
+
+
+
+#         doctor_profile = get_object_or_404(DoctorProfile, user=user)
+
+
+
+#         doctor_profile.clinic_name = post_data.get("clinic_name")
+
+#         doctor_profile.registration_number = post_data.get("registration_number")
+
+
+
+#         doctor_profile.address = post_data.get("address")
+
+
+
+#         doctor_profile.city = post_data.get("city")
+
+#         doctor_profile.state = post_data.get("state")
+
+#         doctor_profile.pincode = post_data.get("pincode")
+
+
+
+#         doctor_profile.owner_name = post_data.get("owner_name")
+
+
+
+#         doctor_profile.contact_number = post_data.get("phone")
+
+#         doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
+
+
+
+#         doctor_profile.save()
+
+
+
+#         return JsonResponse({
+
+#             'success': True,
+
+#             'message': 'Doctor profile updated successfully'
+
+#         })
+
+  
+
+    # try:
+
+    #     with transaction.atomic():
+
+    #         user.email = post_data.get('email')
+
+    #         user.phone_country_code = post_data.get("countryCodes")
+
+    #         user.save()
+
+            
+
+    #         # doctor_profile = get_object_or_404(DoctorProfile, user=user)
+
+    #         # doctor_profile.save()
+
+    #         doctor_profile = get_object_or_404(DoctorProfile, user=user)
+
+    #         doctor_profile.clinic_name = post_data.get("clinic_name")
+
+    #         doctor_profile.registration_number = post_data.get("registration_number")
+
+    #         # doctor_profile.full_address = post_data.get("address")
+
+    #         doctor_profile.address = post_data.get("address")
+
+    #         doctor_profile.city = post_data.get("city")
+
+    #         doctor_profile.state = post_data.get("state")
+
+    #         doctor_profile.pincode = post_data.get("pincode")
+
+    #         doctor_profile.owner_name = post_data.get("owner_name")
+
+    #         doctor_profile.contact_number = post_data.get("phone")
+
+    #         doctor_profile.alt_contact_number = post_data.get("alt_contact_number")
+
+
+
+    #         doctor_profile.save()
+
+            
+
+    #         return JsonResponse({'success': True, 'message': 'Doctor profile updated successfully'})
+
+
+
+    # except Exception as e:
+
+    #     return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+# 
+
+@require_POST
+
+@dashboard_login_required
+
+def delete_account(request):
+
+    user = request.user_obj
+
+    data = json.loads(request.body)
+
+    reason = data.get("reason", "No reason provided")
+
+
+
+    # Soft delete: deactivate user
+
+    user.is_active = False
+
+    user.save(update_fields=["is_active"])
+
+    # user.delete()
+
+    request.session.flush()
+
+
+
+    return JsonResponse({'status': 'account deleted'})
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def clear_search_history(request):
+
+    user = request.user_obj
+
+    SearchHistory.objects.filter(user=user).delete()
+
+    return JsonResponse({'status': 'search history cleared'})
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def clear_saved_data(request):
+
+    user = request.user_obj
+
+    SavedLocation.objects.filter(user=user).delete()
+
+
+
+    if user.user_type == 'advertiser':
+
+        Coupon.objects.filter(user=user, saved=True).update(saved=False)
+
+        Donation.objects.filter(user=user, saved=True).update(saved=False)
+
+
+
+    elif user.user_type == 'ngo':
+
+        NGOPost.objects.filter(user=user, saved=True).update(saved=False)
+
+
+
+    elif user.user_type == "pharmacy":
+
+        Donation.objects.filter(user=user, saved=True).update(saved=False)
+
+
+
+    return JsonResponse({'status': 'saved data cleared'})
+
+
+
+@dashboard_login_required
+
+@require_POST
+
+def send_change_password_otp(request):
+
+    user = request.user_obj
+
+
+
+    token_data = async_to_sync(async_send_otp_email)(user)
+
+
+
+    if not token_data.get("success"):
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": "Failed to send OTP."
+
+        })
+
+
+
+    secret = token_data["otp_token"]
+
+
+
+    cache.set(
+
+        f"otp:{secret}",
+
+        {
+
+            "email": user.email,
+
+            "secret": secret,
+
+            "created_at": timezone.now().isoformat(),
+
+        },
+
+        timeout=600,
+
+    )
+
+
+
+    return JsonResponse({
+
+        "success": True,
+
+        "token": secret,
+
+        "message": "OTP sent successfully."
+
+    })
+
+
+
+@dashboard_login_required
+
+@require_POST
+
+def change_password(request):
+
+    try:
+
+        user = request.user_obj
+
+        current_password = request.POST.get('current_password')
+
+        new_password = request.POST.get('new_password')
+
+        confirm_password = request.POST.get('confirm_password')
+
+        otp = request.POST.get("otp")
+
+        token = request.POST.get("token")
+
+        otp_result = verify_otp_token(user.email, otp, token)
+
+        
+
+        if not otp_result["success"]: return JsonResponse({
+
+            "success": False,
+
+            "message": otp_result["message"]
+
+        })
+
+        errors={}
+
+        error=''
+
+        if not current_password or len(current_password) <= 8:
+
+            errors["new_password"] = "Password is required (min 8 chars)."
+
+            error = "Password is required (min 8 chars)."
+
+        if not check_password(current_password, user.password):
+
+            errors["current_password"] = "Current password is incorrect."
+
+            error = "Current password is incorrect."
+
+        elif new_password != confirm_password:
+
+            errors["confirm_password"] = "Passwords do not match."
+
+            error = "Passwords do not match."
+
+            
+
+        if errors:
+
+            return JsonResponse({
+
+                "success": False,
+
+                "message": next(iter(errors.values()))
+
+            }, status=400)
+
+        
+
+        user.password = make_password(new_password)
+
+        user.save()
+
+        return JsonResponse({'success': True, 'message': 'Password changed successfully', "errors" : ''})
+
+    except Exception as e:
+
+        return JsonResponse({'success': False, 'errors': f'Error updating password: {str(e)}', "message" : ''})
+
+
+
+def get_seller_profile_id(user):
+
+    profile_map = {
+
+        "pharmacy": PharmacyProfile,
+
+        "lab": LabProfile,
+
+        "hospital": HospitalProfile,
+
+        "doctor": DoctorProfile,
+
+    }
+
+    model = profile_map.get(user.user_type)
+
+    if not model:
+
+        return None
+
+
+
+    profile = model.objects.filter(user=user).only("id").first()
+
+    return profile.id if profile else None
+
+
+
+
+
+# Subscription pricing (kept in sync with the Payment Details popup in
+
+# settings/templates/subscription/subscription.html)
+
+SUBSCRIPTION_PRICE = Decimal("999.00")
+
+SUBSCRIPTION_GST = Decimal("180.00")
+
+SUBSCRIPTION_TOTAL = SUBSCRIPTION_PRICE + SUBSCRIPTION_GST
+
+SUBSCRIPTION_VALIDITY_DAYS = 30
+
+
+
+
+
+def get_advance_balance(user):
+
+    """Current Advance (prepaid wallet) balance for a user.
+
+
+
+    The wallet keeps a running ``current_balance`` on every transaction, so the
+
+    balance is the latest row's value. Mirrors the logic used by the Advance
+
+    screens in dashboard/views.py.
+
+    """
+
+    last_txn = (
+
+        WalletTransaction.objects
+
+        .filter(user=user)
+
+        .order_by("-created_at")
+
+        .first()
+
+    )
+
+    return last_txn.current_balance if last_txn else Decimal("0.00")
+
+
+
+
+
+@dashboard_login_required
+
+def seller_subscription_status(request):
+
+    """
+
+    Returns current subscription status for logged-in seller
+
+    """
+
+    user = request.user_obj  # assuming custom auth
+
+
+
+    seller_type = user.user_type           # pharmacy / lab / hospital / doctor
+
+    seller_profile_id = get_seller_profile_id(user)  # adapt this to your project
+
+
+
+    sub = SellerSubscription.objects.filter(
+
+        seller_type=seller_type,
+
+        seller_profile_id=seller_profile_id,
+
+        is_active=True,
+
+        is_enabled=True
+
+    ).first()
+
+
+
+    # The subscription is paid out of the Advance (prepaid wallet), so the
+
+    # section has to show the live balance alongside the plan state.
+
+    advance_balance = get_advance_balance(user)
+
+
+
+    if not sub:
+
+        return JsonResponse({
+
+            "has_subscription": False,
+
+            "plan": "Free",
+
+            "price": float(SUBSCRIPTION_PRICE),
+
+            "gst": float(SUBSCRIPTION_GST),
+
+            "total": float(SUBSCRIPTION_TOTAL),
+
+            "advance_balance": float(advance_balance),
+
+        })
+
+
+
+    days_left = None
+
+    if sub.expiry_date:
+
+        days_left = (sub.expiry_date.date() - timezone.now().date()).days
+
+
+
+    return JsonResponse({
+
+        "has_subscription": True,
+
+        "plan": sub.plan_name,
+
+        "price": float(sub.price),
+
+        "expiry_date": sub.expiry_date.strftime("%d/%m/%Y") if sub.expiry_date else None,
+
+        "days_left": days_left,
+
+        "total": float(SUBSCRIPTION_TOTAL),
+
+        "advance_balance": float(advance_balance),
+
+    })
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def subscribe_subscription(request):
+
+    user = request.user_obj
+
+
+
+    seller_profile_id = get_seller_profile_id(user)
+
+    if not seller_profile_id:
+
+        return JsonResponse({"success": False, "message": "Seller profile not found"}, status=400)
+
+
+
+    # The plan fee is settled from the Advance (prepaid wallet). Reject when the
+
+    # balance can't cover it instead of granting a subscription for free, and
+
+    # write the debit so the Advance balance actually updates.
+
+    with transaction.atomic():
+
+        last_txn = (
+
+            WalletTransaction.objects
+
+            .select_for_update()
+
+            .filter(user=user)
+
+            .order_by("-created_at")
+
+            .first()
+
+        )
+
+        current_balance = last_txn.current_balance if last_txn else Decimal("0.00")
+
+
+
+        if current_balance < SUBSCRIPTION_TOTAL:
+
+            return JsonResponse({
+
+                "success": False,
+
+                "insufficient": True,
+
+                "required": float(SUBSCRIPTION_TOTAL),
+
+                "advance_balance": float(current_balance),
+
+                "message": "Insufficient advance balance",
+
+            }, status=400)
+
+
+
+        new_balance = current_balance - SUBSCRIPTION_TOTAL
+
+        WalletTransaction.objects.create(
+
+            user=user,
+
+            order_id=f"SUB-{uuid.uuid4().hex[:12].upper()}",
+
+            tranx_id=str(uuid.uuid4()),
+
+            amount=SUBSCRIPTION_TOTAL,
+
+            transaction_type="DEBIT",
+
+            points_earned=Decimal("0.00"),
+
+            current_balance=new_balance,
+
+            created_at=timezone.now(),
+
+        )
+
+
+
+        # deactivate old
+
+        SellerSubscription.objects.filter(
+
+            seller_type=user.user_type,
+
+            seller_profile_id=seller_profile_id,
+
+            is_active=True
+
+        ).update(is_active=False)
+
+
+
+        # create new subscription
+
+        SellerSubscription.objects.create(
+
+            seller_type=user.user_type,
+
+            seller_profile_id=seller_profile_id,
+
+            plan_name="Premium",
+
+            price=SUBSCRIPTION_PRICE,
+
+            is_active=True,
+
+            is_enabled=True,
+
+            expiry_date=timezone.now() + timedelta(days=SUBSCRIPTION_VALIDITY_DAYS),
+
+        )
+
+
+
+    return JsonResponse({
+
+        "success": True,
+
+        "charged": float(SUBSCRIPTION_TOTAL),
+
+        "advance_balance": float(new_balance),
+
+        # Spending the balance is a DEBIT, so no points are granted here
+
+        # (points are awarded on Advance recharge, see add_advance_amount).
+
+        "points_earned": 0,
+
+    })
+
+
+
+@dashboard_login_required
+
+@require_POST
+
+def cancel_subscription(request):
+
+    user = request.user_obj
+
+
+
+    SellerSubscription.objects.filter(
+
+        seller_type=user.user_type,
+
+        seller_profile_id=get_seller_profile_id(user),
+
+        is_active=True
+
+    ).update(is_active=False)
+
+
+
+    return JsonResponse({"success": True})
+
+
+
+@dashboard_login_required
+
+def terms_conditions(request):
+
+    user = request.user_obj
+
+    user_type = user.user_type
+
+    context = get_common_context(request, user)
+
+    context.update(get_base_context(user))
+
+    context["active_main_tab"] = request.GET.get("tab", "settings")
+
+    return render(request, 'settings/partials/terms-conditions.html',context)
+
+
+
+@dashboard_login_required
+
+def privacy_policy(request):
+
+    user = request.user_obj
+
+    user_type = user.user_type
+
+    context = get_common_context(request, user)
+
+    context.update(get_base_context(user))
+
+    context["active_main_tab"] = request.GET.get("tab", "settings")
+
+    return render(request, 'settings/partials/privacy-policy.html',context)
+
+
+
+@dashboard_login_required
+
+def disclaimer(request):
+
+    user = request.user_obj
+
+    user_type = user.user_type
+
+    context = get_common_context(request, user)
+
+    context.update(get_base_context(user))
+
+    context["active_main_tab"] = request.GET.get("tab", "settings")
+
+    return render(request, 'settings/partials/disclaimer.html',context)
+
+
+
+@require_POST
+
+@dashboard_login_required
+
+def get_cities_by_state(request):
+
+    """API endpoint to fetch cities for a given state"""
+
+    try:
+
+        data = json.loads(request.body)
+
+        state_name = data.get('state', '').strip()
+
+        
+
+        if not state_name:
+
+            return JsonResponse({'cities': []})
+
+        
+
+        # Get state object
+
+        state = State.objects.filter(name__iexact=state_name).first()
+
+        
+
+        if not state:
+
+            return JsonResponse({'cities': []})
+
+        
+
+        # Fetch cities for this state
+
+        cities = City.objects.filter(state=state).order_by('name').values_list('name', flat=True)
+
+        
+
+        return JsonResponse({'cities': list(cities)})
+
+        
+
+    except Exception as e:
+
+        print("Error fetching cities:", e)
+
+        return JsonResponse({'cities': []}, status=500)
+
+
+
+TEST_OTP = "123456"
+
+
+
+
+
+@csrf_protect
+
+@require_POST
+
+def send_phone_otp(request):
+
+    try:
+
+        data = json.loads(request.body)
+
+
+
+        phone = str(data.get("phone", "")).strip()
+
+        country_code = str(data.get("country_code", "")).strip()
+
+
+
+        if not phone:
+
+            return JsonResponse({
+
+                "success": False,
+
+                "message": "Phone number is required."
+
+            }, status=400)
+
+
+
+        digits = "".join(filter(str.isdigit, phone))
+
+
+
+        if len(digits) < 10 or len(digits) > 15:
+
+            return JsonResponse({
+
+                "success": False,
+
+                "message": "Please enter a valid phone number."
+
+            }, status=400)
+
+
+
+        # Store pending OTP in session for verification
+
+        print(f"Phone: {country_code}{digits}")
+
+        print(f"Test OTP: {TEST_OTP}")
+
+        request.session["pending_pharmacy_phone"] = f"{country_code}|{digits}"
+        request.session.pop("verified_pharmacy_phone", None)
+
+        request.session["pending_lab_phone"] = f"{country_code}|{digits}"
+
+        request.session["pending_phone"] = f"{country_code}|{digits}"
+
+        request.session["pending_lab_otp"] = TEST_OTP
+
+        request.session["pending_phone_otp"] = TEST_OTP
+
+        request.session.modified = True
+
+        return JsonResponse({
+
+            "success": True,
+
+            "message": "A verification OTP has been sent to your registered mobile number."
+
+        })
+
+
+
+    except (json.JSONDecodeError, TypeError, ValueError):
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": "Invalid request data."
+
+        }, status=400)
+
+
+
+@csrf_protect
+
+@require_POST
+
+@dashboard_login_required
+
+def verify_phone_otp(request):
+
+    try:
+
+        data = json.loads(request.body)
+
+
+
+        entered_otp = str(data.get("otp", "")).strip()
+
+        phone = "".join(filter(str.isdigit, str(data.get("phone", "")).strip()))
+
+        country_code = str(data.get("country_code", "")).strip()
+
+
+
+        submitted_phone = f"{country_code}|{phone}"
+
+        pending_phone = request.session.get("pending_pharmacy_phone")
+
+        print("OTP submitted phone:", repr(submitted_phone))
+
+        print("Pending session phone:", repr(pending_phone))
+
+
+
+        if pending_phone != submitted_phone:
+
+            return JsonResponse({
+
+                "success": False,
+
+                "message": "Please request OTP for this phone number first."
+
+            }, status=400)
+
+
+
+        if entered_otp != TEST_OTP:
+
+            return JsonResponse({
+
+                "success": False,
+
+                "message": "Invalid OTP."
+
+            }, status=400)
+
+
+
+        request.session["verified_pharmacy_phone"] = submitted_phone
+
+        request.session.pop("pending_pharmacy_phone", None)
+
+        request.session.modified = True
+
+
+
+        print(
+
+            "VERIFIED PHONE SAVED:",
+
+            repr(request.session.get("verified_pharmacy_phone"))
+
+        )
+
+
+
+        return JsonResponse({
+
+            "success": True,
+
+            "message": "OTP verified successfully."
+
+        })
+
+    except (json.JSONDecodeError, TypeError, ValueError):
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message": "Invalid request data."
+
+        }, status=400)
+
