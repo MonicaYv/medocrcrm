@@ -1626,6 +1626,23 @@ def update_lab_profile(request):
         if not post_data.get(field):
             errors[field] = f"{field.replace('_', ' ').capitalize()} is required."
 
+    # Require OTP verification for Lab profile save
+    pending_lab_phone = request.session.get("pending_lab_phone") or request.session.get("pending_phone")
+    pending_lab_otp = request.session.get("pending_lab_otp") or request.session.get("pending_phone_otp") or TEST_OTP
+    phone_digits = "".join(filter(str.isdigit, phone_val or ""))
+    pending_digits = "".join(filter(str.isdigit, pending_lab_phone.split("|")[-1])) if pending_lab_phone else ""
+
+    if not pending_lab_phone:
+        errors["otp1"] = "Please request an OTP before saving profile changes."
+    elif phone_digits != pending_digits:
+        errors["otp1"] = "Phone number has changed. Please request a new OTP."
+    else:
+        otp1 = (post_data.get("otp1") or post_data.get("otp") or "").strip()
+        if not otp1:
+            errors["otp1"] = "Please enter the OTP before saving."
+        elif otp1 != pending_lab_otp and otp1 != TEST_OTP:
+            errors["otp1"] = "Invalid OTP. Please enter the correct OTP."
+
     if errors:
         return JsonResponse({
             "success": False,
@@ -1699,6 +1716,9 @@ def update_lab_profile(request):
              print("Timing =", lab_profile.lab_timing)
 
              lab_profile.save()
+             request.session.pop("pending_lab_phone", None)
+             request.session.pop("pending_lab_otp", None)
+             request.session.modified = True
      
              return JsonResponse({
                  'success': True,
@@ -2571,8 +2591,11 @@ def send_phone_otp(request):
         print(f"Phone: {country_code}{digits}")
         print(f"Test OTP: {TEST_OTP}")
         request.session["pending_pharmacy_phone"] = f"{country_code}|{digits}"
+        request.session["pending_lab_phone"] = f"{country_code}|{digits}"
         request.session["pending_phone"] = f"{country_code}|{digits}"
+        request.session["pending_lab_otp"] = TEST_OTP
         request.session["pending_phone_otp"] = TEST_OTP
+        request.session.modified = True
         return JsonResponse({
             "success": True,
             "message": "A verification OTP has been sent to your registered mobile number."
