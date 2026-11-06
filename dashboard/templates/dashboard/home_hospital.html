@@ -1,5 +1,4 @@
-{% extends "dashboard/layout.html" %} {% load static %} {% block title %}Home{%
-endblock %} {% block content %}
+{% extends "dashboard/layout.html" %} {% load static %} {% block title %}Home{% endblock %} {% block content %}
 
 <!-- ================= SKELETON (unchanged) ================= -->
 <div
@@ -123,16 +122,10 @@ endblock %} {% block content %}
               >{{ hospital_profile.hospital_name }}
             </h2>
             <p class="addr">
-              {% if hospital_profile.address %}{{ hospital_profile.address }}{%
-              endif %}{% if hospital_profile.city %}{% if
-              hospital_profile.address %}, {% endif %}{{
-              hospital_profile.city.name }}{% endif %}{% if
-              hospital_profile.state %}{% if hospital_profile.city or
-              hospital_profile.address %}, {% endif %}{{
-              hospital_profile.state.name }}{% endif %}{% if
-              hospital_profile.pincode %}{% if hospital_profile.city or
-              hospital_profile.address or hospital_profile.state %} — {% endif
-              %}{{ hospital_profile.pincode }}{% endif %}
+              {% if hospital_profile.address %}{{ hospital_profile.address }}{% endif %}
+              {% if hospital_profile.city %}{% if hospital_profile.address %}, {% endif %}{{ hospital_profile.city.name }}{% endif %}
+              {% if hospital_profile.state %}{% if hospital_profile.city or hospital_profile.address %}, {% endif %}{{ hospital_profile.state.name }}{% endif %}
+              {% if hospital_profile.pincode %}{% if hospital_profile.city or hospital_profile.address or hospital_profile.state %} — {% endif %}{{ hospital_profile.pincode }}{% endif %}
             </p>
             <p class="hid">
               Hospital ID {{
@@ -498,9 +491,7 @@ endblock %} {% block content %}
             <div class="hh-grow">
               <p class="hh-name">{{ appointment.user.full_name }}</p>
               <p class="hh-sub">
-                {{ appointment.category.name }} · {% if
-                appointment.preferred_mode == "home_visit" %}Home Visit{% else
-                %}Hospital Visit{% endif %}
+                {{ appointment.category.name }} · {% if appointment.preferred_mode == "home_visit" %}Home Visit{% else %}Hospital Visit{% endif %}
               </p>
             </div>
             <span class="hh-pill hh-green">Confirmed</span>
@@ -814,8 +805,7 @@ endblock %} {% block content %}
                 >
               </td>
               <td class="hh-budget">
-                {% if appointment.budget %}&#8377;{{ appointment.budget }}{%
-                else %}—{% endif %}
+                {% if appointment.budget %}&#8377;{{ appointment.budget }}{% else %}—{% endif %}
               </td>
               <td class="hh-left-g">{{ appointment.time_left|default:"—" }}</td>
               <td>
@@ -1065,8 +1055,7 @@ endblock %} {% block content %}
         <p style="font-size: 12px; font-weight: 600; color: #6b7280">
           {{ active_subscription.plan.discount_text }}
         </p>
-        {% endif %} {% for feature in
-        active_subscription.plan.features.all|slice:":3" %}
+        {% endif %} {% for feature in active_subscription.plan.features.all|slice:":3" %}
         <p
           style="
             font-size: 12px;

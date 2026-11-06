@@ -420,7 +420,7 @@
                             </label>
 
                             <div class="flex items-center gap-2 w-full mt-2">
-                                <input type="text" name="pan_number" placeholder="AABCM1234F"
+                                <input type="text" name="pan_number" placeholder="AABCM1234F" maxlength="10" pattern="[A-Z]{5}[0-9]{4}[A-Z]" oninput="this.value = Array.from(this.value.toUpperCase()).reduce((value, char, index) => index !== value.length ? value : value.length < 5 ? (/[A-Z]/.test(char) ? value + char : value) : value.length < 9 ? (/[0-9]/.test(char) ? value + char : value) : value.length < 10 && /[A-Z]/.test(char) ? value + char : value, '')"
                                     class="flex-1 border border-primary-color rounded-md outline-none text-sm px-4 py-4" />
 
                                 <div class="absolute right-0 -top-3 cursor-pointer hidden remove-file-btn">
