@@ -31,6 +31,7 @@ urlpatterns = [
     path("advance/summary/ajax/",views.ajax_advance_summary,name="ajax_advance_summary"),
     path("advance/receipt/<int:advance_id>/", views.get_advance_receipt, name="get_advance_receipt"),
     path("pharmacy/order/<int:order_id>/", views.pharmacy_order_details, name="pharmacy_order_details"),
+    path("pharmacy-order-details/<int:order_id>/", views.pharmacy_order_details, name="pharmacy_order_details_alias"),
     path("pharmacy/submit-bid/", views.pharmacy_submit_bid, name="pharmacy_submit_bid"),
 
 ]

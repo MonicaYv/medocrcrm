@@ -732,7 +732,7 @@
     <script>
         $(document).ready(function () {
             // View Order Details
-            $(document).on("click", ".pharmacy-view-order-btn", function (e) {
+            $(document).on("click", ".pharmacy-view-order-btn, .order-card[data-popup='order-details-popup']", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -756,21 +756,24 @@
                 $("#medicines-container").html('<p class="text-xs text-slate-400">Fetching order details...</p>');
 
                 $.ajax({
-                    url: `/dashboard/pharmacy-order-details/${orderId}/`,
+                    url: `/dashboard/pharmacy/order/${orderId}/`,
                     type: "GET",
                     dataType: "json",
                     success: function (data) {
                         if (data && data.id) {
                             $("#order-id-label").text(`Order #${data.id}`);
-                            $("#customer-name").text(data.customer.name || "Customer");
-                            $("#customer-phone").text(data.customer.phone || "N/A");
-                            $("#delivery-type").text(data.delivery_type || "Standard");
-                            $("#payment-status").text(data.payment_status || "Pending");
+                            $("#customer-name").text(data.customer_name || data.patient_name || (data.customer && data.customer.name) || "Customer");
+                            $("#customer-phone").text(data.phone || (data.customer && data.customer.phone) || "N/A");
+                            $("#delivery-type").text(data.delivery_type || "Home Delivery");
+                            $("#payment-status").text(data.payment_status || (data.status === 'delivered' ? 'Paid' : 'Pending'));
                             $("#order-created-at").text(data.created_at || "N/A");
-                            $("#order-status-badge").text(data.status || "Pending");
 
-                            const addr = data.address;
-                            let addrStr = [addr.address_line1, addr.address_line2, addr.city, addr.state, addr.pincode].filter(Boolean).join(", ");
+                            const statusText = (data.status || data.order_status || "Pending").toUpperCase();
+                            $("#order-status-badge").text(statusText);
+
+                            const addr = data.address || {};
+                            let addrParts = [addr.address, addr.city, addr.state, addr.pincode].filter(Boolean);
+                            let addrStr = addrParts.join(", ");
                             $("#delivery-address").text(addrStr || "No address specified");
                             $("#delivery-subtext").text(addr.landmark ? `Landmark: ${addr.landmark}` : "");
 
@@ -797,7 +800,8 @@
                             $("#medicines-container").html('<p class="text-xs text-red-500">Failed to load order details.</p>');
                         }
                     },
-                    error: function () {
+                    error: function (xhr, status, error) {
+                        console.error("Order details fetch error:", status, error);
                         $("#medicines-container").html('<p class="text-xs text-red-500">Error connecting to server. Please try again.</p>');
                     }
                 });

@@ -2602,6 +2602,8 @@ def pharmacy_order_details(request, order_id):
             "address__country",
             "address__city__name",
             "address__state__name",
+            "delivery_type",
+            "payment_method",
         )
         .first()
     )
@@ -2635,12 +2637,36 @@ def pharmacy_order_details(request, order_id):
 
     total_val = order.get("final_amount") if order.get("final_amount") is not None else order.get("total_amount")
 
+    dt = order.get("delivery_type") or "Home Delivery"
+    delivery_label = "Store Pickup" if "pickup" in str(dt).lower() else "Home Delivery"
+    payment_mode = order.get("payment_method") or ("UPI Paid" if order["order_status"] == "delivered" else "Pending")
+
+    created_at_val = order.get("created_at")
+    if created_at_val:
+        try:
+            local_dt = pharmacy_order_local_time(created_at_val)
+            created_str = local_dt.strftime("%d/%m/%Y, %I:%M %p")
+        except Exception:
+            created_str = str(created_at_val)[:19]
+    else:
+        created_str = "N/A" 
+
+    phone_num = order.get("user__phone_number") or order.get("address__phone_number") or "N/A"
+
     return JsonResponse({
         "id": order["id"],
         "status": order["order_status"],
-        "phone": order.get("user__phone_number") or order.get("address__phone_number") or "N/A",
-
+        "order_status": order["order_status"],
+        "phone": phone_num,
         "patient_name": cust_name,
+        "customer_name": cust_name,
+        "customer": {
+            "name": cust_name,
+            "phone": phone_num,
+        },
+        "delivery_type": delivery_label,
+        "payment_status": "Paid" if order["order_status"] == "delivered" else ("Cash on Delivery" if "cod" in str(payment_mode).lower() else "Pending"),
+        "created_at": created_str,
 
         "age": order.get("user__userprofile__age") or "-",
         "gender": order.get("user__userprofile__gender") or "-",
@@ -2653,6 +2679,7 @@ def pharmacy_order_details(request, order_id):
             "state": order.get("address__state__name") or "",
             "country": order.get("address__country") or "",
             "pincode": order.get("address__pincode") or "",
+            "landmark": "",
         },
 
         "total": float(total_val or 0),
