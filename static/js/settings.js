@@ -909,6 +909,34 @@ $(document).ready(function () {
                     return;
                 }
             }
+
+            // Require successful OTP verification before saving lab profile
+            if (form && form.action && form.action.includes('update_lab_profile')) {
+                if (form.dataset.otpRequested !== "true") {
+                    e.preventDefault();
+                    toastr.error("Please request an OTP before saving profile changes.");
+                    return;
+                }
+
+                const otpInput = form.querySelector('input[name="otp1"], input[name="otp"]');
+                const otpVal = (otpInput?.value || "").trim();
+
+                if (!otpVal) {
+                    e.preventDefault();
+                    toastr.error("Please enter the OTP before saving.");
+                    return;
+                }
+
+                const verifiedStatus = form.querySelector(".otp-verification-status");
+                const isVerified = verifiedStatus && !verifiedStatus.classList.contains("hidden") &&
+                    verifiedStatus.querySelector("p")?.textContent.trim() === "Verified";
+
+                if (!isVerified || otpVal !== "123456") {
+                    e.preventDefault();
+                    toastr.error("Please enter the correct OTP and verify before saving.");
+                    return;
+                }
+            }
             if (!form) {
                 toastr.error("Lab profile form not found");
                 return;
@@ -1262,6 +1290,15 @@ document.addEventListener("click", async function (event) {
 
             if (verifyBtn) verifyBtn.disabled = false;
             clearError();
+            form.dataset.otpRequested = "true";
+            form.dataset.otpPhone = cleanDigits;
+            form.dataset.otpCountry = countryCode;
+            if (form && form.action && form.action.includes("update_lab_profile")) {
+                const otpInput = form.querySelector('input[name="otp1"], input[name="otp"]');
+                if (otpInput && otpInput.value) {
+                    $(otpInput).trigger("input");
+                }
+            }
             showOtpSuccessModal();
         } catch (error) {
             showOtpErrorModal("Unable to send OTP. Please try again.");
@@ -1334,6 +1371,11 @@ document.addEventListener("input", function (event) {
     if (!event.target.matches('#editForm input[name="phone"]')) return;
 
     const form = event.target.closest("form");
+    if (form && form.action && form.action.includes("update_lab_profile")) {
+        form.dataset.otpRequested = "false";
+        const otpInput = form.querySelector('input[name="otp1"], input[name="otp"]');
+        if (otpInput) otpInput.value = "";
+    }
     const statusBox = form?.querySelector(".otp-verification-status");
     const verifyButton = form?.querySelector(".verify-otp-btn");
 
@@ -1346,8 +1388,13 @@ document.addEventListener("input", function (event) {
 });
 
 document.addEventListener("change", function (event) {
-    if (event.target.matches('#editForm select[name="countryCodes"]')) {
+    if (event.target.matches('#editForm select[name="phone_country_code"], #editForm .lab-country-code, #editForm select[name="countryCodes"]')) {
         const form = event.target.closest("form");
+        if (form && form.action && form.action.includes("update_lab_profile")) {
+            form.dataset.otpRequested = "false";
+            const otpInput = form.querySelector('input[name="otp1"], input[name="otp"]');
+            if (otpInput) otpInput.value = "";
+        }
         form?.querySelector(".otp-verification-status")?.classList.add("hidden");
         const verifyButton = form?.querySelector(".verify-otp-btn");
         if (verifyButton) {
