@@ -41,10 +41,8 @@
 
             <div class="pt-4">
                 <button
-                    class="copy-coupon seller-coupon-redeem bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center {% if c.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                    class="copy-coupon bg-dodger-blue font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center {% if c.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
                     data-code="{{ c.coupon_code }}"
-                    data-coupon-id="{{ c.id }}"
-                    data-redeem-url="{% url 'created_coupon_redeem' %}"
                     {% if c.is_exhausted %}disabled{% endif %}
                 >
                     {{ c.coupon_code }}
