@@ -621,7 +621,8 @@ $(document).ready(function () {
     day: "numeric",
   });
   $("#date").text(`${formattedDate}`);
-  if (navigator.geolocation) {
+  const hasProfileLocation = $("#location-text").data("profile-location") === true;
+  if (navigator.geolocation && !hasProfileLocation) {
     navigator.geolocation.getCurrentPosition(
       function (position) {
         const lat = position.coords.latitude;
@@ -1851,19 +1852,79 @@ $(document).ready(function () {
   let labCustomStartDate = "";
   let labDateRangeToast = null;
 
-  if ($(".hospital-home-filter").length) {
+  $("#hh-date-pills [data-filter]").on("click", function () {
     const url = new URL(window.location.href);
-    const hadDateFilterParams =
-      url.searchParams.has("date_filter") ||
-      url.searchParams.has("start_date") ||
-      url.searchParams.has("end_date");
-    if (hadDateFilterParams) {
-      url.searchParams.delete("date_filter");
-      url.searchParams.delete("start_date");
-      url.searchParams.delete("end_date");
-      window.history.replaceState({}, "", url.toString());
-    }
+    url.searchParams.set("date_filter", $(this).data("filter"));
+    url.searchParams.delete("start_date");
+    url.searchParams.delete("end_date");
+    window.location.href = url.toString();
+  });
+
+  const $requestRows = $("#request-tabs").length
+    ? $(".request-row[data-status]")
+    : $();
+  let activeRequestTab = "all";
+
+  function filterHospitalRequests() {
+    if (!$requestRows.length) return;
+
+    const query = ($("#request-search").val() || "").trim().toLowerCase();
+    let visibleCount = 0;
+    $requestRows.each(function () {
+      const $row = $(this);
+      const matchesTab =
+        activeRequestTab === "all" ||
+        $row.data("status") === activeRequestTab;
+      const matchesSearch = !query || $row.text().toLowerCase().includes(query);
+      const visible = matchesTab && matchesSearch;
+      $row.toggle(visible);
+      if (visible) visibleCount += 1;
+    });
+
+    $("#request-tabs [data-tab]").each(function () {
+      const tab = $(this).data("tab");
+      const count = tab === "all"
+        ? $requestRows.length
+        : $requestRows.filter(function () {
+            return $(this).data("status") === tab;
+          }).length;
+      $(this).find(".hh-count").text(count);
+    });
+    $("#request-filter-empty").toggle(visibleCount === 0);
   }
+
+  $("#request-tabs [data-tab]").on("click", function () {
+    activeRequestTab = $(this).data("tab");
+    $("#request-tabs [data-tab]").removeClass("active");
+    $(this).addClass("active");
+    filterHospitalRequests();
+  });
+  $("#request-search").on("input", filterHospitalRequests);
+  $("#request-reset").on("click", function () {
+    activeRequestTab = "all";
+    $("#request-tabs [data-tab]").removeClass("active");
+    $('#request-tabs [data-tab="all"]').addClass("active");
+    $("#request-search").val("");
+    filterHospitalRequests();
+  });
+  filterHospitalRequests();
+
+  $("#schedule-tabs [data-tab]").on("click", function () {
+    const selectedState = $(this).data("tab");
+    $("#schedule-tabs [data-tab]").removeClass("active");
+    $(this).addClass("active");
+
+    let visibleCount = 0;
+    $(".schedule-row[data-state]").each(function () {
+      const visible = $(this).data("state") === selectedState;
+      $(this).toggle(visible);
+      if (visible) visibleCount += 1;
+    });
+    $("#schedule-filter-empty").toggle(
+      $(".schedule-row[data-state]").length > 0 && visibleCount === 0,
+    );
+  });
+  $('#schedule-tabs [data-tab="upcoming"]').trigger("click");
 
   function clearLabDateRangeToast() {
     if (labDateRangeToast && window.toastr) {
@@ -2393,6 +2454,11 @@ $(document).on("click", ".place-bid-btn", function () {
       if (resp.success) {
         toastr.success(resp.message || "Bid placed successfully");
 
+        if ($(".hh").length) {
+          window.location.reload();
+          return;
+        }
+
         row.fadeOut(300, function () {
           $(this).remove();
         });
@@ -2502,6 +2568,7 @@ $(document).on("click", ".place-bid-btn", function () {
 
 $(document).on("click", ".appointment-detail-btn", function () {
   const appointmentId = $(this).data("id");
+  const canBid = $(this).attr("data-can-bid");
 
   $.ajax({
     url: `/appointment/appointment-details/${appointmentId}/`,
@@ -2521,17 +2588,22 @@ $(document).on("click", ".appointment-detail-btn", function () {
       $("#popup-phone").text(a.phone || "-");
       $("#popup-address").text(a.address || "-");
 
-      $("#popup-visit-type").text(a.consultation_type || "-");
+      $("#popup-visit-type").text(
+        a.visit_type || a.consultation_type || a.preferred_mode || "-"
+      );
 
       $("#popup-date").text(a.appointment_date || "-");
 
-      $("#popup-medical-requirement").text(a.consultation_type || "-");
+      $("#popup-medical-requirement").text(
+        a.medical_requirement || a.service_type || a.consultation_type || "-"
+      );
 
       $("#popup-details").text(a.details || "-");
 
       $("#popup-order-id").text(a.order_id || "-");
 
       $("#popup-budget").text("₹" + (a.budget || 0));
+      $(".appointmentRequestDetail .accept-button").toggle(canBid !== "false");
 
       $(".appointmentRequestDetail")
         .attr("data-appointment-id", appointmentId)

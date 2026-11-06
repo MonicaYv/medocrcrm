@@ -4,7 +4,9 @@ from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from .utils import POINTS_ACTION_ALIASES
 from .views import (
+    build_image_media_url,
     build_media_url,
+    format_hospital_visit_mode,
     get_dashboard_appointment_date_range,
     parse_pharmacy_overview_range,
 )
@@ -26,10 +28,31 @@ class BuildMediaUrlTests(SimpleTestCase):
         self.assertEqual(build_media_url("/document/coupon.jpg"), "/document/coupon.jpg")
         self.assertEqual(build_media_url("https://example.com/coupon.jpg"), "https://example.com/coupon.jpg")
 
+    def test_build_image_media_url_normalizes_windows_paths(self):
+        self.assertEqual(
+            build_image_media_url(r"hospital_docs\hospital_photo\hospital.jpg"),
+            "/document/hospital_docs/hospital_photo/hospital.jpg",
+        )
+
+    def test_build_image_media_url_rejects_non_image_files(self):
+        self.assertEqual(
+            build_image_media_url("hospital_docs/hospital_photo/license.pdf"),
+            "",
+        )
+
 
 class PointsChartDataTests(SimpleTestCase):
     def test_coupon_aliases_include_plural_action_name(self):
         self.assertIn("Coupons", POINTS_ACTION_ALIASES["Coupon"])
+
+
+class HospitalVisitModeTests(SimpleTestCase):
+    def test_formats_known_visit_mode_values(self):
+        self.assertEqual(format_hospital_visit_mode("home-service"), "Home Visit")
+        self.assertEqual(format_hospital_visit_mode("hospital_visit"), "Hospital Visit")
+
+    def test_handles_missing_visit_mode(self):
+        self.assertEqual(format_hospital_visit_mode(None), "Not specified")
 
 
 class DashboardAppointmentDateRangeTests(SimpleTestCase):
@@ -43,6 +66,14 @@ class DashboardAppointmentDateRangeTests(SimpleTestCase):
         self.assertEqual(
             get_dashboard_appointment_date_range(request, self.today),
             ("week", date(2026, 10, 10), self.today),
+        )
+
+    def test_month_filter_starts_on_the_first_day_of_this_month(self):
+        request = self.factory.get("/", {"date_filter": "month"})
+
+        self.assertEqual(
+            get_dashboard_appointment_date_range(request, self.today),
+            ("month", date(2026, 10, 1), self.today),
         )
 
     def test_custom_filter_sorts_reversed_dates(self):
