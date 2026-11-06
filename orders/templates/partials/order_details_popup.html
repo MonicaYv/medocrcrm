@@ -186,9 +186,11 @@
                 <div class="space-y-3">
                     {% for med in order.medicines.all %}
                         <div class="flex items-start gap-3 border-b border-grayish-gray pb-3">
-                            <div class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
-                                <img src="{% static 'images/medicine.svg' %}" alt="medicine" class="h-[92px] w-[92px]" />
-                            </div>
+                            {% if med.display_image %}
+                                <div class="rounded-lg bg-off-white flex items-center justify-center overflow-hidden">
+                                    <img src="{{ med.display_image }}" alt="{{ med.product_name|default:med.medicine_id }}" class="h-[92px] w-[92px] object-contain" loading="lazy" onerror="this.parentElement.remove()" />
+                                </div>
+                            {% endif %}
                             <div class="flex-1">
                                 <p class="text-ebony font-semibold text-sm mb-1">{{ med.product_name|default:med.medicine_id }}</p>
                                 <div class="flex items-center gap-2 mb-2">
