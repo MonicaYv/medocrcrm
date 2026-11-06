@@ -5162,6 +5162,8 @@ def send_phone_otp(request):
 
         country_code = str(data.get("country_code", "")).strip()
 
+        purpose = "contact" if data.get("purpose") == "contact" else "phone"
+
 
 
         if not phone:
@@ -5198,8 +5200,14 @@ def send_phone_otp(request):
 
         print(f"Test OTP: {TEST_OTP}")
 
-        request.session["pending_pharmacy_phone"] = f"{country_code}|{digits}"
-        request.session.pop("verified_pharmacy_phone", None)
+        if purpose == "contact":
+
+            request.session["pending_pharmacy_contact_phone"] = f"{country_code}|{digits}"
+
+        else:
+
+            request.session["pending_pharmacy_phone"] = f"{country_code}|{digits}"
+            request.session.pop("verified_pharmacy_phone", None)
 
         request.session["pending_lab_phone"] = f"{country_code}|{digits}"
 
@@ -5249,6 +5257,8 @@ def verify_phone_otp(request):
 
         entered_otp = str(data.get("otp", "")).strip()
 
+        purpose = "contact" if data.get("purpose") == "contact" else "phone"
+
         phone = "".join(filter(str.isdigit, str(data.get("phone", "")).strip()))
 
         country_code = str(data.get("country_code", "")).strip()
@@ -5257,7 +5267,9 @@ def verify_phone_otp(request):
 
         submitted_phone = f"{country_code}|{phone}"
 
-        pending_phone = request.session.get("pending_pharmacy_phone")
+        pending_key = "pending_pharmacy_contact_phone" if purpose == "contact" else "pending_pharmacy_phone"
+
+        pending_phone = request.session.get(pending_key)
 
         print("OTP submitted phone:", repr(submitted_phone))
 
@@ -5289,9 +5301,15 @@ def verify_phone_otp(request):
 
 
 
-        request.session["verified_pharmacy_phone"] = submitted_phone
+        if purpose == "contact":
 
-        request.session.pop("pending_pharmacy_phone", None)
+            request.session["verified_pharmacy_contact_phone"] = submitted_phone
+
+        else:
+
+            request.session["verified_pharmacy_phone"] = submitted_phone
+
+        request.session.pop(pending_key, None)
 
         request.session.modified = True
 

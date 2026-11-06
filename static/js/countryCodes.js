@@ -6,6 +6,7 @@ $(document).ready(function () {
     if ($selectElement.length) {
         $selectElement.each(function () {
             const $thisSelect = $(this);
+            const selectedDialCode = String($thisSelect.data("selected") || $thisSelect.val() || "").trim();
             $thisSelect.empty();
 
             $.each(data, function (index, country) {
@@ -14,15 +15,16 @@ $(document).ready(function () {
                     .text(country.name)
                     .attr("data-dial-code", country.dial_code);
 
-                const selectedDialCode = $thisSelect.data("selected");
-
-                if (country.dial_code === selectedDialCode) {
-                    $option.prop("selected", true);
-                    $option.text(`${country.code} (${country.dial_code})`);
-                }
-
                 $thisSelect.append($option);
             });
+
+            const $selectedOption = $thisSelect.find("option").filter(function () {
+                return this.value === selectedDialCode || $(this).data("dial-code") === selectedDialCode;
+            }).first();
+            if ($selectedOption.length) {
+                $selectedOption.prop("selected", true);
+                $selectedOption.text(`${$selectedOption.val()} (${$selectedOption.data("dial-code")})`);
+            }
         });
     } else {
         console.error("Select element not found");

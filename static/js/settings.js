@@ -1181,20 +1181,15 @@ document.addEventListener("click", async function (event) {
         return;
     }
 
-    const sendButton = event.target.closest(".send-pharmacy-otp-btn, .send-otp-btn");
-    const verifyButton = event.target.closest(".verify-otp-btn");
+    const contactOtpAction = event.target.closest(".send-contact-phone-otp-btn, .verify-contact-phone-otp-btn");    const otpPurpose = contactOtpAction ? "contact" : "phone";    const sendButton = event.target.closest(".send-pharmacy-otp-btn, .send-otp-btn, .send-contact-phone-otp-btn");
+    const verifyButton = event.target.closest(".verify-otp-btn, .verify-contact-phone-otp-btn");
 
     if (!sendButton && !verifyButton) return;
 
     const form = event.target.closest("form") || document.querySelector("#editForm");
     if (!form) return;
 
-    const phoneInput = form.querySelector('input[name="phone"], input[name="contact_phone_number"]');
-    const countryInput = form.querySelector('select[name="phone_country_code"], select[name="countryCodes"], select.countryCodes');
-    const otpInput = form.querySelector('input[name="otp1"], input[name="otp"]');
-    const errorBox = form.querySelector(".phone-otp-error");
-    const statusBox = form.querySelector(".otp-verification-status");
-    const verifyBtn = form.querySelector(".verify-otp-btn");
+    const phoneInput = otpPurpose === "contact" ? form.querySelector('input[name="contact_phone_number"]') : form.querySelector('input[name="phone"], input[name="contact_phone_number"]');    const countryInput = otpPurpose === "contact" ? form.querySelector('select[name="contact_countryCodes"]') : form.querySelector('select[name="phone_country_code"], select[name="countryCodes"], select.countryCodes');    const otpInput = otpPurpose === "contact" ? form.querySelector('input[name="contact_otp"]') : form.querySelector('input[name="otp1"], input[name="otp"]');    const otpArea = otpPurpose === "contact" ? contactOtpAction.closest(".flex.items-center.gap-2") : form;    const errorBox = otpArea.querySelector(".phone-otp-error, .phoneError");    const statusBox = otpArea.querySelector(".otp-verification-status");    const verifyBtn = otpArea.querySelector(otpPurpose === "contact" ? ".verify-contact-phone-otp-btn" : ".verify-otp-btn");
 
     if (!phoneInput) return;
 
@@ -1277,7 +1272,7 @@ document.addEventListener("click", async function (event) {
                 },
                 body: JSON.stringify({
                     phone: cleanDigits,
-                    country_code: countryCode
+                    country_code: countryCode,                    purpose: otpPurpose
                 })
             });
 
@@ -1334,7 +1329,7 @@ document.addEventListener("click", async function (event) {
                 body: JSON.stringify({
                     phone: phone,
                     country_code: countryCode,
-                    otp: otp
+                    otp: otp,                    purpose: otpPurpose
                 })
             });
 
@@ -1402,4 +1397,4 @@ document.addEventListener("change", function (event) {
             verifyButton.textContent = "Verify OTP";
         }
     }
-});
+});
