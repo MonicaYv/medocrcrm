@@ -903,7 +903,7 @@ def dashboard_home(request):
                 status="Pending"
             ).count()
             )
-
+            
             # scheduled_appointments = DoctorAppointment.objects.filter(
             #     doctor=doctor_profile,
             #     status="Accepted"
@@ -936,6 +936,105 @@ def dashboard_home(request):
                     "STATUS =", a.status
                 )
 
+            doctor_bids = DoctorBidding.objects.filter(
+                doctor=doctor_profile
+                )
+
+            active_bids_count = doctor_bids.filter(
+                is_active=True,
+                bid_status__in=[
+                DoctorBidStatus.PENDING,
+                DoctorBidStatus.ACCEPTED
+                ]
+            ).count()
+
+            active_bids = active_bids_count
+
+            ongoing_orders_count = DoctorAppointment.objects.filter(
+            doctor=doctor_profile,
+            status="Accepted"
+            ).count()
+
+        # Weekly date range
+            week_start = today - timedelta(days=today.weekday())
+            week_end = week_start + timedelta(days=7)
+
+            weekly_appointments = DoctorAppointment.objects.filter(
+            doctor=doctor_profile,
+            created_at__date__gte=week_start,
+            created_at__date__lt=week_end
+            )
+
+            weekly_bids = doctor_bids.filter(
+            created_at__date__gte=week_start,
+            created_at__date__lt=week_end
+            )
+
+            consults_won = weekly_appointments.filter(
+            status="Accepted"
+            ).count()
+
+            bids_answered = weekly_bids.count()
+
+        # Bid conversion rate
+            total_bids = doctor_bids.count()
+
+            accepted_bids = doctor_bids.filter(
+            bid_status__in=[
+                DoctorBidStatus.ACCEPTED,
+                DoctorBidStatus.COMPLETED
+            ]
+            )
+
+            accepted_bids_count = accepted_bids.count()
+
+            bid_conversion_rate = (
+            round((accepted_bids_count / total_bids) * 100, 2)
+            if total_bids else 0
+            )
+
+        # Average winning bid
+            avg_winning_bid = accepted_bids.aggregate(
+            average=Avg("total_bid_amount")
+            )["average"] or 0
+
+        # Most-used consultation mode
+            top_mode_data = DoctorAppointment.objects.filter(
+            doctor=doctor_profile
+            ).values(
+            "consultation_type"
+            ).annotate(
+            mode_count=Count("id")
+            ).order_by("-mode_count").first()
+
+            top_mode = (
+            top_mode_data["consultation_type"]
+            if top_mode_data else "N/A"
+            )
+
+        # Average bid response time in minutes
+            response_times = []
+
+            for bid in doctor_bids.select_related("appointment"):
+                if bid.appointment.created_at:
+                    response_times.append(
+                    (
+                        bid.created_at - bid.appointment.created_at
+                    ).total_seconds()
+                )
+
+            avg_response_time = (
+                round(
+                sum(response_times) / len(response_times) / 60,
+                2
+            )
+            if response_times else 0
+            )
+
+            week_range = (
+            f"{week_start.strftime('%d %b')} - "
+            f"{(week_end - timedelta(days=1)).strftime('%d %b %Y')}"
+            )
             context["appointment_requests"] = appointment_requests
             context["scheduled_appointments"] = scheduled_appointments
             context.update({
@@ -950,25 +1049,34 @@ def dashboard_home(request):
                 'pending_count': pending_count,
                 'pending_requests_count': pending_requests_count,
                 'user_display_name': doctor_profile.clinic_name,
-                'quotes_given': DoctorBidding.objects.filter(doctor=doctor_profile).count(),
-                'active_bids': DoctorBidding.objects.filter(
-                    doctor=doctor_profile,
-                    bid_status__in=[
-                        DoctorBidStatus.PENDING,
-                        DoctorBidStatus.ACCEPTED
-                    ]
+
+                'quotes_given': DoctorBidding.objects.filter(
+                    doctor=doctor_profile
                 ).count(),
+
+                'active_bids': active_bids,
+                'active_bids_count': active_bids_count,
+
                 'orders_won': DoctorAppointment.objects.filter(
                     doctor=doctor_profile,
                     status="Accepted"
                 ).count(),
-                
+
                 'pending_orders': DoctorAppointment.objects.filter(
                     doctor=doctor_profile,
                     status="Pending"
                 ).count(),
-                'events': CalendarEvent.objects.all().order_by('date'),
-                'user': user,
+                
+                'ongoing_orders_count': ongoing_orders_count,
+                'avg_response_time': avg_response_time,
+
+                'week_range': week_range,
+                'consults_won': consults_won,
+                'bids_answered': bids_answered,
+                'bid_conversion_rate': bid_conversion_rate,
+
+                'avg_winning_bid': avg_winning_bid,
+                'top_mode': top_mode,
             })
             return render(request, "dashboard/home_doctor.html", context)
 

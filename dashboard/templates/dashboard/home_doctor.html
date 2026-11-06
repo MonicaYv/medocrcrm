@@ -46,7 +46,7 @@
     </div>
 </div>
 
-<div class="relative transition-all duration-300 main-content h-full flex-1 flex flex-col p-6 overflow-y-auto scroll bg-[#F8FAFF]">
+<div class="relative transition-all duration-300 main-content h-full flex-1 flex flex-col p-6 overflow-y-auto scroll">
 
     <div class="show-sidebar-toggle hidden fixed top-24 left-0 z-50 h-10 w-10 bg-light-sky-blue-tint items-center justify-center rounded-r-md cursor-pointer">
         <span class="material-symbols-outlined bold-weight text-[#0088FF]">arrow_forward_ios</span>
@@ -84,76 +84,73 @@
             </div>
         </div>
 
-        {# ===================== HOSPITAL BANNER + ADMIN CARD ===================== #}
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
+        {# ===================== HOSPITAL BANNER ===================== #}
+        <div class="grid grid-cols-[minmax(0,7fr)_minmax(0,3fr)] gap-4 items-stretch w-full">
 
-            {# --- Hospital / clinic banner --- #}
-            <div class="relative overflow-hidden rounded-2xl bg-[#0088FF] text-white min-h-[300px] p-6 flex flex-col justify-between">
-                {# optional clinic photo as a soft background #}
+            {# --- Hospital Banner (70%) --- #}
+                <div class="relative min-w-0 overflow-hidden rounded-2xl bg-[#0088FF] text-white min-h-[220px] p-5 flex flex-col justify-between">
                 {% if clinic_photo_url %}
                 <img src="{{ clinic_photo_url }}" alt="" aria-hidden="true"
-                     class="absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-luminosity" loading="lazy">
+                     class="absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-luminosity"
+                     loading="lazy">
                 {% endif %}
 
-                <div class="relative flex items-start justify-between gap-4">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined">apartment</span>
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <p class="text-xl font-semibold leading-tight">{{ doctor_profile.clinic_name|default:"Clinic" }}</p>
-                            <p class="text-xs text-white/80">
-                                {{ doctor_profile.full_address|default:"Address not available" }}{% if doctor_profile.city %}, {{ doctor_profile.city }}{% endif %}{% if doctor_profile.state %}, {{ doctor_profile.state }}{% endif %}{% if doctor_profile.pincode %} – {{ doctor_profile.pincode }}{% endif %}
-                            </p>
-                        </div>
+                <!-- Hospital Name -->
+                <div class="relative flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined">apartment</span>
                     </div>
-                    <span class="shrink-0 rounded-full bg-white text-[#0088FF] text-[10px] font-semibold px-3 py-1 tracking-wide">
-                        VERIFIED CLINIC
-                    </span>
+
+                    <p class="text-xl font-semibold leading-tight">
+                        {{ doctor_profile.clinic_name|default:"Hospital / Clinic" }}
+                    </p>
                 </div>
 
-                <div class="relative border-t border-white/30 pt-4 flex items-end justify-between gap-4">
-                    <div class="flex flex-col gap-1">
-                        <p class="text-[11px] font-medium text-white/80 uppercase tracking-wide">Scheduled Appointments</p>
-                        <p class="text-sm font-medium">{{ scheduled_appointments|length }} Patient{{ scheduled_appointments|length|pluralize }} currently in queue</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex -space-x-2">
-                            {% for appointment in scheduled_appointments|slice:":3" %}
-                            <div class="w-7 h-7 rounded-full border-2 border-[#0088FF] bg-white text-[#0088FF] text-[10px] font-semibold flex items-center justify-center">
-                                {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <p class="hidden sm:block text-xs text-white/90">
-                            {% for appointment in scheduled_appointments|slice:":3" %}Pt. {{ appointment.user.userprofile.first_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                        </p>
-                    </div>
+                <!-- Hospital Address -->
+                <div class="relative border-t border-white/30 pt-3 mt-6 flex items-start gap-2">
+                    <span class="material-symbols-outlined !text-lg shrink-0">home</span>
+
+                    <p class="text-xs text-white/90 leading-relaxed">
+                        {{ doctor_profile.full_address|default:"Address not available" }}{% if doctor_profile.city %}, {{ doctor_profile.city }}{% endif %}{% if doctor_profile.state %}, {{ doctor_profile.state }}{% endif %}{% if doctor_profile.pincode %} - {{ doctor_profile.pincode }}{% endif %}
+                    </p>
                 </div>
+
             </div>
 
 {# --- Admin / profile card --- #}
             <div class="rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_2px_8px_rgba(15,23,42,0.04)] p-6 flex flex-col items-center justify-center text-center">
+                  {# --- Circular Doctor Profile Photo --- #}
                 <div class="relative group">
                     {% if admin_profile_photo_path %}
-                    <img id="admin-profile-photo"
-                         src="/document/{{ admin_profile_photo_path }}"
-                         alt="Admin profile picture"
-                         class="w-20 h-20 rounded-full object-cover">
+                        <img id="admin-profile-photo"
+                             src="/document/{{ admin_profile_photo_path }}"
+                             alt="Doctor profile picture"
+                             class="w-20 h-20 rounded-full object-cover border-2 border-[#E2E8F0]">
                     {% else %}
-                    <div class="w-20 h-20 rounded-full bg-[#0088FF] text-white text-2xl font-bold flex items-center justify-center">
-                        {% if doctor_profile.first_name %}{{ doctor_profile.first_name|slice:":1" }}{{ doctor_profile.last_name|slice:":1" }}{% else %}{{ doctor_profile.full_name|default:contact_person.name|default:"A"|slice:":1" }}{% endif %}
-                    </div>
-                    <img id="admin-profile-photo" alt="" class="hidden w-20 h-20 rounded-full object-cover">
+                        <div id="admin-profile-initials"
+                             class="w-20 h-20 rounded-full bg-[#0088FF] text-white text-2xl font-bold flex items-center justify-center border-2 border-white shadow-sm">
+                            {% if doctor_profile.first_name %}
+                                {{ doctor_profile.first_name|slice:":1"|upper }}{% if doctor_profile.last_name %}{{ doctor_profile.last_name|slice:":1"|upper }}{% endif %}
+                            {% else %}
+                                {{ doctor_profile.full_name|default:contact_person.name|default:"Doctor"|slice:":1"|upper }}
+                            {% endif %}
+                        </div>
+
+                        <img id="admin-profile-photo"
+                             alt="Doctor profile picture"
+                             class="hidden w-20 h-20 rounded-full object-cover border-2 border-[#E2E8F0]">
                     {% endif %}
 
-                    {# upload trigger: appears on hover, keeps your existing upload JS working #}
                     <label for="admin-profile-photo-input"
                            class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white border border-[#E2E8F0] text-[#0088FF] flex items-center justify-center cursor-pointer shadow opacity-0 group-hover:opacity-100 transition-opacity"
                            title="Change profile picture">
                         <span class="material-symbols-outlined !text-sm">edit</span>
                     </label>
-                    <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
+
+                    <input id="admin-profile-photo-input"
+                           type="file"
+                           accept="image/jpeg,image/png"
+                           class="hidden"
                            data-upload-url="{% url 'upload_admin_profile_photo' %}">
                 </div>
 
@@ -175,47 +172,64 @@
         </div>
 
         {# ===================== QUICK STATS ROW ===================== #}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#0088FF] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined !text-xl">bolt</span>
-                </div>
-                <div class="flex flex-col">
-                    <p class="text-xs text-[#64748B]">Active Bids</p>
-                    <p class="text-xl font-bold text-[#0F172A] leading-tight">{{ active_bids_count|default:"0" }}</p>
-                    <a href="{% url 'appointment' %}" class="text-xs text-[#0088FF]">View all →</a>
-                </div>
-            </div>
+        <!-- ===================== DASHBOARD STATISTICS BAR ===================== -->
+        <div class="bg-white border border-[#E2E8F0] rounded-2xl px-3 py-2 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-[#E2E8F0]">
 
-            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#F3F0FF] text-[#7C3AED] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined !text-xl">deployed_code</span>
-                </div>
-                <div class="flex flex-col">
-                    <p class="text-xs text-[#64748B]">Ongoing Orders</p>
-                    <p class="text-xl font-bold text-[#0F172A] leading-tight">{{ ongoing_orders_count|default:"0" }}</p>
-                </div>
+        <!-- Active Bids -->
+        <div class="flex items-center gap-2 px-3 py-2 lg:py-1">
+            <div class="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#0088FF] flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined !text-xl">bolt</span>
             </div>
+            <div class="flex flex-col">
+                <p class="text-xs text-[#64748B]">Active Bids</p>
+                <p class="text-xl font-bold text-[#0F172A] leading-tight">
+                {{ active_bids|default:"0" }}
+                </p>
+                <a href="{% url 'appointment' %}" class="text-xs text-[#0088FF] hover:underline">
+                    View all →
+                </a>
+            </div>
+        </div>
 
-            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#FEFCE8] text-[#EAB308] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined !text-xl">schedule</span>
-                </div>
-                <div class="flex flex-col">
-                    <p class="text-xs text-[#64748B]">Avg Response Time</p>
-                    <p class="text-xl font-bold text-[#EAB308] leading-tight">{{ avg_response_time|default:"0 min" }}</p>
-                </div>
+        <!-- Ongoing Orders -->
+        <div class="flex items-center gap-2 px-3 py-2 lg:py-1">
+            <div class="w-9 h-9 rounded-xl bg-[#F3F0FF] text-[#7C3AED] flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined !text-xl">deployed_code</span>
             </div>
+            <div class="flex flex-col">
+                <p class="text-xs text-[#64748B]">Ongoing Orders</p>
+                <p class="text-xl font-bold text-[#0F172A] leading-tight">
+                {{ ongoing_orders_count|default:"0" }}
+                </p>
+            </div>
+        </div>
 
-            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#F3F0FF] text-[#7C3AED] flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined !text-xl">calendar_today</span>
-                </div>
-                <div class="flex flex-col">
-                    <p class="text-xs text-[#64748B]">Today's Appointments</p>
-                    <p class="text-xl font-bold text-[#0F172A] leading-tight">{{ total_appointments_today }}</p>
-                </div>
+        <!-- Average Response Time -->
+        <div class="flex items-center gap-2 px-3 py-2 lg:py-1">
+            <div class="w-9 h-9 rounded-xl bg-[#FEFCE8] text-[#EAB308] flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined !text-xl">schedule</span>
             </div>
+            <div class="flex flex-col">
+                <p class="text-xs text-[#64748B]">Avg Response Time</p>
+                <p class="text-xl font-bold text-[#EAB308] leading-tight">
+                {{ avg_response_time|default:"0 min" }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Today's Appointments -->
+        <div class="flex items-center gap-2 px-3 py-2 lg:py-1">
+            <div class="w-9 h-9 rounded-xl bg-[#F3F0FF] text-[#7C3AED] flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined !text-xl">calendar_today</span>
+            </div>
+            <div class="flex flex-col">
+                <p class="text-xs text-[#64748B]">Today's Appointments</p>
+                <p class="text-xl font-bold text-[#0F172A] leading-tight">
+                {{ total_appointments_today }}
+                </p>
+            </div>
+        </div>
+
         </div>
 
         {# ===================== OVERVIEW ===================== #}
@@ -296,10 +310,10 @@
         </div>
 
                 {# ===================== SCHEDULED APPOINTMENTS + WEEK PERFORMANCE ===================== #}
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 items-stretch">
+        <div class="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 items-stretch w-full">
 
             {# --- Scheduled appointments --- #}
-            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col">
+            <div class="min-w-0 bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col">
                 <div class="flex justify-between items-center">
                     <p class="font-semibold text-base text-[#0F172A]">Scheduled Appointments</p>
                     <a href="{% url 'history' %}" class="text-[#0088FF] text-xs font-medium">View all →</a>
@@ -339,28 +353,28 @@
             </div>
 
             {# --- This week performance --- #}
-            <div class="bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col gap-5">
+            <div class="min-w-0 bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col gap-3">
                 <div class="flex justify-between items-center">
                     <p class="font-semibold text-base text-[#0F172A]">This Week Performance</p>
                     <span class="text-[11px] text-[#94A3B8]">{{ week_range|default:"" }}</span>
                 </div>
 
-                <div class="grid grid-cols-2 border border-[#F1F5F9] text-center">
-                    <div class="py-4 border-r border-b border-[#F1F5F9]">
-                        <p class="text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ consults_won|default:"0" }}</p>
-                        <p class="text-[10px] text-[#94A3B8]">Consults Won</p>
+                <div class="grid grid-cols-2 border border-[#F1F5F9] text-left pl-[1.0px]">
+                    <div class="py-4 p1-2 border-r border-b border-[#F1F5F9]">
+                        <p class="px-2 text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ consults_won|default:"0" }}</p>
+                        <p class="px-2 text-[10px] text-[#94A3B8]">Consults Won</p>
                     </div>
-                    <div class="py-4 border-b border-[#F1F5F9]">
-                        <p class="text-[26px] leading-8 font-extrabold text-[#E11D48]">{{ no_shows|default:"0" }}</p>
-                        <p class="text-[10px] text-[#94A3B8]">No Shows</p>
+                    <div class="py-4 p1-2 border-b border-[#F1F5F9]">
+                        <p class="px-2 text-[26px] leading-8 font-extrabold text-[#E11D48]">{{ no_shows|default:"0" }}</p>
+                        <p class="px-2 text-[10px] text-[#94A3B8]">No Shows</p>
                     </div>
-                    <div class="py-4 border-r border-[#F1F5F9]">
-                        <p class="text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ bids_answered|default:"0" }}</p>
-                        <p class="text-[10px] text-[#94A3B8]">Bids Answered</p>
+                    <div class="py-4 p1-2 border-r border-[#F1F5F9]">
+                        <p class="px-2 text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ bids_answered|default:"0" }}</p>
+                        <p class="px-2 text-[10px] text-[#94A3B8]">Bids Answered</p>
                     </div>
                     <div class="py-4">
-                        <p class="text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ docs_shared|default:"0" }}</p>
-                        <p class="text-[10px] text-[#94A3B8]">Docs Shared</p>
+                        <p class="px-2 text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ docs_shared|default:"0" }}</p>
+                        <p class="px-2 text-[10px] text-[#94A3B8]">Docs Shared</p>
                     </div>
                 </div>
 
@@ -398,86 +412,112 @@
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[760px] text-sm">
                     <thead>
-                        <tr class="bg-[#0088FF] text-white text-[11px] font-medium tracking-wide">
-                            <th class="py-3 px-6 text-left">PATIENT</th>
-                            <th class="py-3 px-3 text-center">DATE &amp; TIME</th>
-                            <th class="py-3 px-3 text-center">MODE</th>
-                            <th class="py-3 px-3 text-center">URGENCY</th>
-                            <th class="py-3 px-3 text-center">BUDGET</th>
-                            <th class="py-3 px-6 text-center">ACTIONS</th>
+                        <tr class="bg-[#f8f8ff] text-[#c0c0c0] text-[11px] font-medium tracking-wide">
+                            <th class="py-3 px-3 text-left font-normal">PATIENT</th>
+                            <th class="py-3 px-3 text-center font-normal">DATE &amp; TIME</th>
+                            <th class="py-3 px-3 text-center font-normal">MODE</th>
+                            <th class="py-3 px-3 text-center font-normal">URGENCY</th>
+                            <th class="py-3 px-3 text-center font-normal">BUDGET</th>
+                            <th class="py-3 px-3 text-center font-normal">ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[#F1F5F9]">
-                        {% for appointment in appointment_requests %}
-                        <tr id="appointment-row-{{ appointment.id }}" class="appointment-row hover:bg-[#EFF6FF] transition-colors">
-                            {# Patient #}
-                            <td class="py-3 px-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full bg-[#0088FF] text-white text-xs font-semibold flex items-center justify-center shrink-0">
-                                        {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <p class="font-semibold text-[13px] text-[#0F172A]">
-                                            Pt. {{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}
-                                        </p>
-                                        <p class="text-[11px] text-[#94A3B8]">{{ appointment.description|truncatechars:30 }}</p>
-                                    </div>
-                                </div>
-                            </td>
+                                <tbody class="divide-y divide-[#F1F5F9]">
+                {% for appointment in appointment_requests %}
+                <tr id="appointment-row-{{ appointment.id }}" class="appointment-row hover:bg-[#EFF6FF] transition-colors">
 
-                            {# Date #}
-                            <td class="py-3 px-3 text-center text-[#475569] text-xs">
-                                {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
-                            </td>
+                    {# Patient #}
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-[#0088FF] text-white text-xs font-semibold flex items-center justify-center shrink-0">
+                                {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <p class="font-semibold text-[13px] text-[#0F172A] truncate">
+                                    Pt. {{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}
+                                </p>
+                                <p class="text-[11px] text-[#94A3B8] truncate">
+                                    {{ appointment.description|truncatechars:30 }}
+                                </p>
+                            </div>
+                        </div>
+                    </td>
 
-                            {# Mode #}
-                            <td class="py-3 px-3 text-center">
-                                <span class="inline-block rounded-full px-2.5 py-0.5 border text-[10px] font-medium
-                                    {% if appointment.consultation_type == 'home_visit' %}border-[#0088FF] text-[#0088FF] bg-[#EFF6FF]
-                                    {% elif appointment.consultation_type == 'video_call' %}border-[#14B8A6] text-[#14B8A6] bg-[#F0FDFA]
-                                    {% elif appointment.consultation_type == 'audio_call' %}border-[#A855F7] text-[#A855F7] bg-[#FAF5FF]
-                                    {% elif appointment.consultation_type == 'hospital_visit' %}border-[#7C3AED] text-[#7C3AED] bg-[#F5F3FF]
-                                    {% else %}border-[#22C55E] text-[#22C55E] bg-[#F0FDF4]{% endif %}">
-                                    {{ appointment.consultation_type|title }}
-                                </span>
-                            </td>
+                    {# Date #}
+                    <td class="py-3 px-3 text-center text-[#475569] text-xs">
+                        {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
+                    </td>
 
-                            {# Urgency #}
-                            <td class="py-3 px-3 text-center">
-                                {% if appointment.urgency == 'emergency' or appointment.urgency == 'Emergency' %}
-                                <span class="inline-block rounded-full px-3 py-0.5 text-[10px] font-medium bg-[#FFE4E6] text-[#E11D48]">Emergency</span>
-                                {% else %}
-                                <span class="inline-block rounded-full px-3 py-0.5 text-[10px] font-medium bg-[#F1F5F9] text-[#64748B]">Normal</span>
-                                {% endif %}
-                            </td>
+                    {# Mode #}
+                    <td class="py-3 px-2">
+                        <div class="w-full py-2 rounded-lg text-center text-[10px] font-semibold
+                            {% if appointment.consultation_type == 'home_visit' %}bg-[#EFF6FF] text-[#0088FF]
+                            {% elif appointment.consultation_type == 'video_call' %}bg-[#F0FDFA] text-[#14B8A6]
+                            {% elif appointment.consultation_type == 'audio_call' %}bg-[#FAF5FF] text-[#A855F7]
+                            {% elif appointment.consultation_type == 'hospital_visit' %}bg-[#F5F3FF] text-[#7C3AED]
+                            {% else %}bg-[#F0FDF4] text-[#22C55E]{% endif %}">
+                            {{ appointment.consultation_type|title }}
+                        </div>
+                    </td>
 
-                            {# Budget #}
-                            <td class="py-3 px-3 text-center font-semibold text-[#0088FF]">
-                                {% if appointment.budget %}&#8377;{{ appointment.budget }}{% else %}&ndash;{% endif %}
-                            </td>
+                    {# Urgency #}
+                    <td class="py-3 px-2">
+                        {% if appointment.urgency == 'emergency' or appointment.urgency == 'Emergency' %}
+                        <div class="w-full py-2 rounded-lg text-center text-[10px] font-semibold bg-[#FFE4E6] text-[#E11D48]">
+                            Emergency
+                        </div>
+                        {% else %}
+                        <div class="w-full py-2 rounded-lg text-center text-[10px] font-semibold bg-[#F1F5F9] text-[#64748B]">
+                            Normal
+                        </div>
+                        {% endif %}
+                    </td>
 
-                            {# Actions #}
-                            <td class="py-3 px-6">
-                                <div class="flex items-center justify-center gap-3">
-                                    <span class="material-symbols-outlined !text-xl cursor-pointer popup-btn appointment-detail-btn text-[#0088FF]"
-                                          data-id="{{ appointment.id }}" title="View details">visibility</span>
+                    {# Budget #}
+                    <td class="py-3 px-2 text-center font-semibold text-[#0088FF] text-xs">
+                        {% if appointment.budget %}&#8377;{{ appointment.budget }}{% else %}&ndash;{% endif %}
+                    </td>
 
-                                    <span class="material-symbols-outlined !text-xl cursor-pointer place-bid-btn text-[#22C55E]"
-                                          data-id="{{ appointment.id }}" title="Place bid">check_circle</span>
+                    {# Actions #}
+                    <td class="py-3 px-3">
+                        <div class="flex items-center justify-center gap-3">
 
-                                    {% comment %}
-                                    <span class="material-symbols-outlined !text-xl cursor-pointer reject-bid-btn text-[#E11D48]"
-                                          data-id="{{ appointment.id }}" title="Reject">cancel</span>
-                                    {% endcomment %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="py-10 text-center text-sm text-[#64748B]">No pending appointments available</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                            {# View #}
+                            <button type="button"
+                                    class="text-[#808080] flex items-center justify-center hover:text-[#0066CC] transition-colors popup-btn appointment-detail-btn"
+                                    data-id="{{ appointment.id }}"
+                                    title="View details">
+                                <span class="material-symbols-outlined !text-xl">visibility</span>
+                            </button>
+
+                            {# Accept #}
+                            <button type="button"
+                                    class="w-6 h-6 rounded-full border-2 border-[#0088FF] text-[#0088FF] flex items-center justify-center hover:bg-[#EFF6FF] transition-colors place-bid-btn"
+                                    data-id="{{ appointment.id }}"
+                                    title="Accept appointment">
+                                <span class="material-symbols-outlined !text-xl -mr-1">check</span>
+                            </button>
+
+                            {# Reject #}
+                            <button type="button"
+                                    class="w-6 h-6 rounded-full border-2 border-[#E11D48] text-[#E11D48] flex items-center justify-center hover:bg-[#FFF1F2] transition-colors reject-bid-btn"
+                                    data-id="{{ appointment.id }}"
+                                    data-url="{% url 'reject_doctor_bid' %}"
+                                    title="Reject appointment">
+                                <span class="material-symbols-outlined !text-lg">close</span>
+                            </button>
+
+                        </div>
+                    </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-10 text-center text-sm text-[#64748B]">
+                        No pending appointments available
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
                 </table>
             </div>
         </div>
