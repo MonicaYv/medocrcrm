@@ -9,7 +9,10 @@ from django.db.models.functions import Concat
 from django.utils import timezone
 from datetime import date, datetime, timedelta
 import re
-from registration.models import DoctorProfile, LabProfile, DoctorSpeciality
+from registration.models import DoctorProfile, LabProfile, DoctorSpeciality, PharmacyProfile
+from services.models import PharmacyBidding, PharmacyBidStatus
+from orders.models import UserPurchase
+from decimal import Decimal
 from django.views.decorators.http import require_GET, require_POST
 from dashboard.models import SettingMenu
 from dashboard.utils import (
@@ -467,6 +470,56 @@ def appointment_details(request, appointment_id):
                 "details": appointment.description.description if appointment.description else "",
                 "budget": str(appointment.budget if hasattr(appointment, "budget") else "0"),
                 "order_id": f"APT-{appointment.id}",
+            }
+        })
+
+    elif user_type == "pharmacy":
+        pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+        if not pharmacy_profile:
+            return JsonResponse({"success": False, "message": "Pharmacy profile not found"})
+
+        order_id = request.POST.get("order_id") or appointment_id
+        if not order_id:
+            return JsonResponse({"success": False, "message": "Order ID is required"})
+
+        order = UserPurchase.objects.defer("prescriptions", "doctor_name", "patient_name").filter(id=order_id).first()
+        if not order:
+            return JsonResponse({"success": False, "message": "Order not found"})
+
+        if PharmacyBidding.objects.filter(order=order, pharmacy=pharmacy_profile, is_active=True).exists():
+            return JsonResponse({"success": False, "message": "You have already submitted a bid for this order."})
+
+        raw_bid_amount = request.POST.get("bid_amount", "").strip()
+        bid_amount = Decimal(raw_bid_amount) if raw_bid_amount else (order.final_amount or order.total_amount or Decimal("0.00"))
+        raw_delivery_time = request.POST.get("delivery_time", "30").strip()
+        delivery_time = int(raw_delivery_time) if raw_delivery_time.isdigit() else 30
+        remarks = request.POST.get("remarks", "").strip() or None
+
+        bid_gst = (bid_amount * Decimal("0.18")).quantize(Decimal("0.01"))
+        total_amount = (bid_amount + bid_gst).quantize(Decimal("0.01"))
+
+        with transaction.atomic():
+            bid = PharmacyBidding.objects.create(
+                order=order,
+                pharmacy=pharmacy_profile,
+                bid_amount=bid_amount,
+                bid_gst=bid_gst,
+                total_amount=total_amount,
+                delivery_time=delivery_time,
+                remarks=remarks,
+                bid_status=PharmacyBidStatus.PENDING,
+                is_active=True,
+            )
+
+        return JsonResponse({
+            "success": True,
+            "message": "Bid submitted successfully!",
+            "bid": {
+                "bid_id": bid.id,
+                "bid_amount": float(bid.bid_amount),
+                "bid_gst": float(bid.bid_gst),
+                "total_amount": float(bid.total_amount),
+                "delivery_time": bid.delivery_time,
             }
         })
 

@@ -51,7 +51,8 @@ from appointments.models import WalletTransaction
 from services.models import LabBidding, LabBidStatus
 from services.models import HospitalBidding, HospitalBidStatus, HospitalServiceRateCard
 from services.models import DoctorBidding, DoctorBidStatus
-from services.models import PharmacyMedicine
+from services.models import PharmacyMedicine, PharmacyBidding, PharmacyBidStatus
+from django.db import transaction
 from appointments.models import LabAppointments
 from appointments.models import AppointmentStatus
 from appointments.models import HospitalAppointments, HospitalAppointmentStatus
@@ -156,9 +157,20 @@ def parse_pharmacy_overview_range(filter_value, start_value, end_value, today):
 
 
 def get_pharmacy_overview_metrics(pharmacy_profile, start_date, end_date):
-    orders = UserPurchase.objects.filter(
-        assigned_pharmacy=pharmacy_profile,
-        created_at__date__range=(start_date, end_date),
+    placed_bid_order_ids = PharmacyBidding.objects.filter(
+        pharmacy=pharmacy_profile
+    ).values_list("order_id", flat=True)
+
+    order_scope = Q(assigned_pharmacy=pharmacy_profile) | Q(
+        assigned_pharmacy__isnull=True,
+        order_status=OrderStatusChoices.PENDING,
+    )
+
+    orders = (
+        UserPurchase.objects
+        .filter(order_scope)
+        .exclude(id__in=placed_bid_order_ids)
+        .filter(created_at__date__range=(start_date, end_date))
     )
     completed_orders = orders.exclude(order_status=OrderStatusChoices.CANCELLED)
     amounts = completed_orders.aggregate(
@@ -172,8 +184,7 @@ def get_pharmacy_overview_metrics(pharmacy_profile, start_date, end_date):
         )
     )
     sales = PurchaseMedicine.objects.filter(
-        purchase__assigned_pharmacy=pharmacy_profile,
-        purchase__created_at__date__range=(start_date, end_date),
+        purchase__in=orders,
     ).exclude(purchase__order_status=OrderStatusChoices.CANCELLED)
     sales_totals = sales.aggregate(
         prescription=Sum("total_price", filter=Q(requires_prescription=True)),
@@ -190,14 +201,26 @@ def get_pharmacy_overview_metrics(pharmacy_profile, start_date, end_date):
         if quantity and quantity.isdigit()
     ]
 
+    total_orders = orders.count()
+    pending_orders = orders.filter(
+        order_status=OrderStatusChoices.PENDING
+    ).count()
+    processing_orders = orders.filter(
+        order_status__in=[OrderStatusChoices.CONFIRMED, OrderStatusChoices.SHIPPED]
+    ).count()
+    delivered_orders = orders.filter(
+        order_status=OrderStatusChoices.DELIVERED
+    ).count()
+
     return {
-        "total_orders": orders.count(),
-        "confirmed_orders": orders.filter(
-            order_status=OrderStatusChoices.CONFIRMED
-        ).count(),
-        "pending_orders": orders.filter(
-            order_status=OrderStatusChoices.PENDING
-        ).count(),
+        "total_orders": total_orders,
+        "confirmed_orders": processing_orders,
+        "pending_orders": pending_orders,
+        "processing_orders": processing_orders,
+        "delivered_orders": delivered_orders,
+        "pending_requests": pending_orders,
+        "customer_rating": "4.6",
+        "review_count": "218",
         "total_stock": sum(quantities),
         "available_stock": sum(quantity for quantity in quantities if quantity > 0),
         "low_stock_medicines": sum(
@@ -224,19 +247,59 @@ def pharmacy_overview_data(request):
     if not pharmacy_profile:
         return JsonResponse({"error": "Pharmacy profile not found."}, status=404)
 
+    today = timezone.localdate()
     try:
         start_date, end_date = parse_pharmacy_overview_range(
             request.GET.get("filter"),
             request.GET.get("start_date"),
             request.GET.get("end_date"),
-            timezone.localdate(),
+            today,
         )
     except ValueError as error:
         return JsonResponse({"error": str(error)}, status=400)
 
-    return JsonResponse(
-        get_pharmacy_overview_metrics(pharmacy_profile, start_date, end_date)
+    filter_value = (request.GET.get("filter") or "today").strip().lower()
+    placed_bid_order_ids = PharmacyBidding.objects.filter(
+        pharmacy=pharmacy_profile
+    ).values_list("order_id", flat=True)
+    order_scope = Q(assigned_pharmacy=pharmacy_profile) | Q(
+        assigned_pharmacy__isnull=True,
+        order_status=OrderStatusChoices.PENDING,
     )
+    orders_qs = (
+        UserPurchase.objects
+        .filter(order_scope)
+        .exclude(id__in=placed_bid_order_ids)
+    )
+
+    if filter_value == "today" and not orders_qs.filter(created_at__date=today).exists():
+        latest_created = orders_qs.values_list('created_at', flat=True).order_by('-created_at').first()
+        if latest_created:
+            latest_date = pharmacy_order_local_time(latest_created).date()
+            start_date = latest_date
+            end_date = latest_date
+
+    data = get_pharmacy_overview_metrics(pharmacy_profile, start_date, end_date)
+
+    today_orders = orders_qs.filter(created_at__date=today)
+    if not today_orders.exists():
+        latest_created = orders_qs.values_list('created_at', flat=True).order_by('-created_at').first()
+        if latest_created:
+            latest_date = pharmacy_order_local_time(latest_created).date()
+            today_orders = orders_qs.filter(created_at__date=latest_date)
+
+    data["today_orders_count"] = today_orders.count()
+    data["today_pending_count"] = today_orders.filter(
+        order_status=OrderStatusChoices.PENDING
+    ).count()
+    data["today_processing_count"] = today_orders.filter(
+        order_status__in=[OrderStatusChoices.CONFIRMED, OrderStatusChoices.SHIPPED]
+    ).count()
+    data["ongoing_orders_count"] = orders_qs.filter(
+        order_status__in=[OrderStatusChoices.CONFIRMED, OrderStatusChoices.SHIPPED]
+    ).count()
+
+    return JsonResponse(data)
 
 
 @require_GET
@@ -407,13 +470,15 @@ def dashboard_home(request):
     # -------------------------------
     # Wallet Balance (All users)
     # -------------------------------
-    context["wallet_balance"] = (
+    last_wallet_txn = (
         WalletTransaction.objects
         .filter(user=user)
         .order_by('-created_at')
-        .values_list('current_balance', flat=True)
         .first()
-    ) or 0
+    )
+    context["wallet_balance"] = (
+        last_wallet_txn.current_balance if last_wallet_txn else Decimal("0.00")
+    )
 
     try:
         # ================= NGO =================
@@ -520,10 +585,119 @@ def dashboard_home(request):
                 print("CONTACT PERSON NOT FOUND")
             pharmacy_profile = PharmacyProfile.objects.get(user=user)
             today = timezone.localdate()
-            pharmacy_overview = get_pharmacy_overview_metrics(
-                pharmacy_profile, today, today
+
+            placed_bid_order_ids = PharmacyBidding.objects.filter(
+                pharmacy=pharmacy_profile
+            ).values_list("order_id", flat=True)
+
+            order_scope = Q(assigned_pharmacy=pharmacy_profile) | Q(
+                assigned_pharmacy__isnull=True,
+                order_status=OrderStatusChoices.PENDING,
             )
-            
+
+            pharmacy_orders_qs = (
+                UserPurchase.objects
+                .filter(order_scope)
+                .exclude(id__in=placed_bid_order_ids)
+            )
+
+            today_orders_qs = pharmacy_orders_qs.filter(created_at__date=today)
+            overview_start = today
+            overview_end = today
+            if not today_orders_qs.exists():
+                latest_created = pharmacy_orders_qs.values_list('created_at', flat=True).order_by('-created_at').first()
+                if latest_created:
+                    latest_date = pharmacy_order_local_time(latest_created).date()
+                    today_orders_qs = pharmacy_orders_qs.filter(created_at__date=latest_date)
+                    overview_start = latest_date
+                    overview_end = latest_date
+
+            today_orders_count = today_orders_qs.count()
+            today_pending_count = today_orders_qs.filter(
+                order_status=OrderStatusChoices.PENDING
+            ).count()
+            today_processing_count = today_orders_qs.filter(
+                order_status__in=[OrderStatusChoices.CONFIRMED, OrderStatusChoices.SHIPPED]
+            ).count()
+            ongoing_orders_count = pharmacy_orders_qs.filter(
+                order_status__in=[OrderStatusChoices.CONFIRMED, OrderStatusChoices.SHIPPED]
+            ).count()
+
+            pharmacy_overview = get_pharmacy_overview_metrics(
+                pharmacy_profile, overview_start, overview_end
+            )
+
+            # Order Requests for the Order Requests table
+            order_scope_requests = Q(assigned_pharmacy=pharmacy_profile) | Q(
+                assigned_pharmacy__isnull=True,
+                order_status=OrderStatusChoices.PENDING,
+            )
+
+            raw_order_requests = list(
+                UserPurchase.objects
+                .filter(order_scope_requests)
+                .defer("prescriptions", "doctor_name", "patient_name")
+                .select_related("user", "user__userprofile", "address")
+                .prefetch_related("medicines")
+                .order_by("-created_at")[:15]
+            )
+
+            placed_bid_order_ids_set = set(placed_bid_order_ids)
+            order_requests = []
+            for o in raw_order_requests:
+                cust_name = ""
+                if o.user and hasattr(o.user, 'userprofile') and o.user.userprofile:
+                    first = o.user.userprofile.first_name or ""
+                    last = o.user.userprofile.last_name or ""
+                    cust_name = f"{first} {last}".strip()
+                if not cust_name and o.address:
+                    cust_name = f"{o.address.first_name or ''} {o.address.last_name or ''}".strip()
+                if not cust_name:
+                    cust_name = f"Customer #{o.user_id or o.id}"
+
+                parts = cust_name.split()
+                if len(parts) >= 2:
+                    initials = f"{parts[0][0]}{parts[1][0]}".upper()
+                elif len(parts) == 1 and len(parts[0]) > 0:
+                    initials = parts[0][:2].upper()
+                else:
+                    initials = "CU"
+
+                colors = ["bg-green-500", "bg-amber-500", "bg-[#1A73E8]", "bg-violet-600", "bg-teal-600", "bg-pink-600", "bg-indigo-600"]
+                avatar_color = colors[o.id % len(colors)]
+
+                med_list = list(o.medicines.all())
+                if med_list:
+                    med_summary = " + ".join([
+                        f"{m.product_name or m.medicine_id} × {m.quantity}"
+                        for m in med_list[:2]
+                    ])
+                    if len(med_list) > 2:
+                        med_summary += f" + {len(med_list) - 2} more"
+                    has_rx = any(m.requires_prescription for m in med_list)
+                else:
+                    med_summary = "Prescription Meds"
+                    has_rx = False
+
+                delivery_label = "Store Pickup" if (o.delivery_type and "pickup" in o.delivery_type.lower()) else "Home Delivery"
+                urgency = "Emergency" if (o.delivery_type and "quick" in o.delivery_type.lower()) else "Normal"
+                budget_val = o.final_amount if o.final_amount is not None else (o.total_amount if o.total_amount is not None else Decimal("0.00"))
+                is_bid_placed = o.id in placed_bid_order_ids_set
+
+                order_requests.append({
+                    "id": o.id,
+                    "customer_name": cust_name,
+                    "customer_initials": initials,
+                    "avatar_color": avatar_color,
+                    "medicines_summary": med_summary,
+                    "local_created_at": pharmacy_order_local_time(o.created_at),
+                    "delivery_label": delivery_label,
+                    "has_prescription": has_rx,
+                    "urgency": urgency,
+                    "budget": f"{budget_val:.0f}" if budget_val == int(budget_val) else f"{budget_val:.2f}",
+                    "is_bid_placed": is_bid_placed,
+                    "notes": o.notes or "",
+                })
 
             pending_orders = UserPurchase.objects.filter(
                 assigned_pharmacy=pharmacy_profile,
@@ -535,28 +709,63 @@ def dashboard_home(request):
             ).count()
 
 
-            scheduled_orders = list(
+            completed_orders_qs = (
                 UserPurchase.objects
                 .filter(
-                    assigned_pharmacy=pharmacy_profile
+                    assigned_pharmacy=pharmacy_profile,
+                    order_status=OrderStatusChoices.DELIVERED
                 )
-                .exclude(
-                    order_status__in=[
-                        OrderStatusChoices.DELIVERED,
-                        OrderStatusChoices.CANCELLED
-                    ]
-                )
-                .values(
-                    'id',
-                    'order_status',
-                    'created_at',
-                    'user__userprofile__first_name',
-                    'user__userprofile__last_name',
-                )
-                .order_by('-created_at')[:3]
+                .defer("prescriptions", "doctor_name", "patient_name")
+                .select_related("user", "user__userprofile", "address")
+                .prefetch_related("medicines")
+                .order_by("-updated_at", "-created_at")[:3]
             )
-            for order in scheduled_orders:
-                order['local_created_at'] = pharmacy_order_local_time(order['created_at'])
+
+            scheduled_orders = []
+            for o in completed_orders_qs:
+                cust_name = ""
+                if o.user and hasattr(o.user, 'userprofile') and o.user.userprofile:
+                    first = o.user.userprofile.first_name or ""
+                    last = o.user.userprofile.last_name or ""
+                    cust_name = f"{first} {last}".strip()
+                if not cust_name and o.address:
+                    cust_name = f"{o.address.first_name or ''} {o.address.last_name or ''}".strip()
+                if not cust_name:
+                    cust_name = f"Customer #{o.user_id or o.id}"
+
+                delivery_label = "Store Pickup" if (o.delivery_type and "pickup" in o.delivery_type.lower()) else "Home Delivery"
+
+                med_list = list(o.medicines.all())
+                if med_list:
+                    med_summary = " + ".join([
+                        f"{m.product_name or m.medicine_id} × {m.quantity}"
+                        for m in med_list[:2]
+                    ])
+                    if len(med_list) > 2:
+                        med_summary += f" + {len(med_list) - 2} more"
+                else:
+                    med_summary = ""
+
+                amount_val = o.final_amount if o.final_amount is not None else (o.total_amount if o.total_amount is not None else 0)
+
+                payment_mode = o.payment_method or "UPI Paid"
+                if "cod" in payment_mode.lower() or "cash" in payment_mode.lower():
+                    payment_label = "Cash on Delivery"
+                else:
+                    payment_label = payment_mode
+
+                scheduled_orders.append({
+                    "id": o.id,
+                    "order_status": o.order_status,
+                    "customer_name": cust_name,
+                    "delivery_label": delivery_label,
+                    "created_at": o.created_at,
+                    "updated_at": o.updated_at,
+                    "local_created_at": pharmacy_order_local_time(o.updated_at or o.created_at),
+                    "medicines": med_summary,
+                    "total_amount": f"{amount_val:.0f}" if amount_val == int(amount_val) else f"{amount_val:.2f}",
+                    "payment_mode": payment_label,
+                })
 
 
             popular_coupons = Coupon.objects.all().order_by('-redeemed_count')[:5]
@@ -568,12 +777,67 @@ def dashboard_home(request):
                 is_enabled=True
             ).first()
 
+            pharmacy_medicines = PharmacyMedicine.objects.filter(
+                pharmacy=pharmacy_profile,
+                is_active=True
+            ).order_by("-updated_at")
 
-            popular_coupons = Coupon.objects.all().order_by('-redeemed_count')[:5]
+            inventory_alerts = []
+            for med in pharmacy_medicines:
+                try:
+                    qty = int(str(med.quantity).strip())
+                except (ValueError, TypeError):
+                    qty = 0
+
+                if qty <= PHARMACY_LOW_STOCK_THRESHOLD:
+                    unit = (med.type or "unit").strip()
+                    if unit.lower() in ["tablet", "capsule", "strip", "bottle", "vial", "pack"]:
+                        unit_label = f"{unit.lower()}s"
+                    elif unit.lower().endswith("s"):
+                        unit_label = unit.lower()
+                    else:
+                        unit_label = unit
+
+                    if qty == 0:
+                        status_badge = "Out of Stock"
+                        badge_color = "text-red-600"
+                        card_bg = "bg-pink-50"
+                        remaining_text = "0 units"
+                    elif qty <= 5:
+                        status_badge = "Critical"
+                        badge_color = "text-red-600"
+                        card_bg = "bg-pink-50"
+                        remaining_text = f"{qty} {unit_label} remaining"
+                    else:
+                        status_badge = "Low Stock"
+                        badge_color = "text-amber-600"
+                        card_bg = "bg-amber-50"
+                        remaining_text = f"{qty} {unit_label} remaining"
+
+                    details_parts = []
+                    if med.category:
+                        details_parts.append(med.category.strip())
+                    if med.type and med.type.strip() not in details_parts:
+                        details_parts.append(med.type.strip())
+                    details_str = " · ".join(details_parts) if details_parts else "General Medicine"
+
+                    inventory_alerts.append({
+                        "id": med.id,
+                        "name": med.name.strip() if med.name else "Unnamed Medicine",
+                        "details": details_str,
+                        "quantity": qty,
+                        "status_badge": status_badge,
+                        "badge_color": badge_color,
+                        "card_bg": card_bg,
+                        "remaining_text": remaining_text,
+                    })
+
+            inventory_alerts.sort(key=lambda x: x["quantity"])
+            inventory_alerts = inventory_alerts[:6]
 
             context.update({
-                
                 'pharmacy_profile': pharmacy_profile,
+                'inventory_alerts': inventory_alerts,
                  
                 'contact_person': contact_person,
 
@@ -581,11 +845,19 @@ def dashboard_home(request):
                 'pharmacy_overview': pharmacy_overview,
                 'popular_coupons': popular_coupons,
 
+                'order_requests': order_requests,
                 'user_display_name': pharmacy_profile.company_name,
 
                 'pending_orders': pending_orders,
+                'today_orders_count': today_orders_count,
+                'today_pending_count': today_pending_count,
+                'today_processing_count': today_processing_count,
+                'ongoing_orders_count': ongoing_orders_count,
 
-                'active_bids': UserPurchase.objects.filter(
+                'active_bids': PharmacyBidding.objects.filter(
+                    pharmacy=pharmacy_profile,
+                    is_active=True,
+                ).count() or UserPurchase.objects.filter(
                     assigned_pharmacy=pharmacy_profile
                 ).count(),
 
@@ -2418,6 +2690,7 @@ def pharmacy_order_details(request, order_id):
         .values(
             "id",
             "final_amount",
+            "total_amount",
             "order_status",
             "created_at",
 
@@ -2429,11 +2702,16 @@ def pharmacy_order_details(request, order_id):
             "user__userprofile__gender",
             "user__userprofile__profile_photo_path",
 
+            "address__first_name",
+            "address__last_name",
+            "address__phone_number",
             "address__address",
             "address__pincode",
             "address__country",
             "address__city__name",
             "address__state__name",
+            "delivery_type",
+            "payment_method",
         )
         .first()
     )
@@ -2456,39 +2734,180 @@ def pharmacy_order_details(request, order_id):
         )
     )
 
+    cust_name = (
+        f"{order.get('user__userprofile__first_name') or ''} "
+        f"{order.get('user__userprofile__last_name') or ''}"
+    ).strip()
+    if not cust_name:
+        cust_name = f"{order.get('address__first_name') or ''} {order.get('address__last_name') or ''}".strip()
+    if not cust_name:
+        cust_name = f"Customer #{order['id']}"
+
+    total_val = order.get("final_amount") if order.get("final_amount") is not None else order.get("total_amount")
+
+    dt = order.get("delivery_type") or "Home Delivery"
+    delivery_label = "Store Pickup" if "pickup" in str(dt).lower() else "Home Delivery"
+    payment_mode = order.get("payment_method") or ("UPI Paid" if order["order_status"] == "delivered" else "Pending")
+
+    created_at_val = order.get("created_at")
+    if created_at_val:
+        try:
+            local_dt = pharmacy_order_local_time(created_at_val)
+            created_str = local_dt.strftime("%d/%m/%Y, %I:%M %p")
+        except Exception:
+            created_str = str(created_at_val)[:19]
+    else:
+        created_str = "N/A" 
+
+    phone_num = order.get("user__phone_number") or order.get("address__phone_number") or "N/A"
+
     return JsonResponse({
         "id": order["id"],
         "status": order["order_status"],
-        "phone": order["user__phone_number"],
+        "order_status": order["order_status"],
+        "phone": phone_num,
+        "patient_name": cust_name,
+        "customer_name": cust_name,
+        "customer": {
+            "name": cust_name,
+            "phone": phone_num,
+        },
+        "delivery_type": delivery_label,
+        "payment_status": "Paid" if order["order_status"] == "delivered" else ("Cash on Delivery" if "cod" in str(payment_mode).lower() else "Pending"),
+        "created_at": created_str,
 
-        "patient_name": (
-            f"{order['user__userprofile__first_name'] or ''} "
-            f"{order['user__userprofile__last_name'] or ''}"
-        ).strip(),
+        "age": order.get("user__userprofile__age") or "-",
+        "gender": order.get("user__userprofile__gender") or "-",
 
-        "age": order["user__userprofile__age"],
-        "gender": order["user__userprofile__gender"],
-
-        "profile_photo": order["user__userprofile__profile_photo_path"],
+        "profile_photo": order.get("user__userprofile__profile_photo_path"),
 
         "address": {
-            "address": order["address__address"],
-            "city": order["address__city__name"],
-            "state": order["address__state__name"],
-            "country": order["address__country"],
-            "pincode": order["address__pincode"],
+            "address": order.get("address__address") or "",
+            "city": order.get("address__city__name") or "",
+            "state": order.get("address__state__name") or "",
+            "country": order.get("address__country") or "",
+            "pincode": order.get("address__pincode") or "",
+            "landmark": "",
         },
 
-        "total": float(order["final_amount"] or 0),
+        "total": float(total_val or 0),
 
         "medicines": [
             {
-                "name": m["product_name"],
-                "qty": m["quantity"],
+                "name": m["product_name"] or "Medicine",
+                "qty": m["quantity"] or 1,
                 "price": float(m["price"] or 0),
                 "mrp": float(m["mrp"]) if m["mrp"] else float(m["price"] or 0) * 1.2,
                 "requires_prescription": m["requires_prescription"],
             }
             for m in medicines
         ],
+    })
+
+
+@require_POST
+@dashboard_login_required
+def pharmacy_submit_bid(request):
+    user = request.user_obj
+    if user.user_type != "pharmacy":
+        return JsonResponse({"success": False, "message": "Only pharmacies can place bids."}, status=403)
+
+    pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+    if not pharmacy_profile:
+        return JsonResponse({"success": False, "message": "Pharmacy profile not found."}, status=404)
+
+    order_id = request.POST.get("order_id")
+    if not order_id:
+        return JsonResponse({"success": False, "message": "Order ID is required."}, status=400)
+
+    try:
+        order_id = int(order_id)
+    except (ValueError, TypeError):
+        return JsonResponse({"success": False, "message": "Invalid Order ID."}, status=400)
+
+    raw_bid_amount = request.POST.get("bid_amount", "").strip()
+    raw_delivery_time = request.POST.get("delivery_time", "").strip()
+    remarks = request.POST.get("remarks", "").strip() or None
+
+    if not raw_bid_amount:
+        return JsonResponse({"success": False, "message": "Bid amount is required."}, status=400)
+
+    try:
+        bid_amount = Decimal(raw_bid_amount)
+        if bid_amount <= Decimal("0.00"):
+            raise ValueError()
+    except Exception:
+        return JsonResponse({"success": False, "message": "Please enter a valid bid amount greater than 0."}, status=400)
+
+    if not raw_delivery_time:
+        return JsonResponse({"success": False, "message": "Delivery time is required."}, status=400)
+
+    try:
+        delivery_time = int(raw_delivery_time)
+        if delivery_time <= 0:
+            raise ValueError()
+    except Exception:
+        return JsonResponse({"success": False, "message": "Please enter a valid delivery time in minutes."}, status=400)
+
+    order = (
+        UserPurchase.objects
+        .defer("prescriptions", "doctor_name", "patient_name")
+        .filter(id=order_id)
+        .first()
+    )
+    if not order:
+        return JsonResponse({"success": False, "message": "Order not found."}, status=404)
+
+    if order.order_status != OrderStatusChoices.PENDING:
+        return JsonResponse({"success": False, "message": f"Cannot bid on order with status '{order.order_status}'."}, status=400)
+
+    if order.assigned_pharmacy and order.assigned_pharmacy != pharmacy_profile:
+        return JsonResponse({"success": False, "message": "This order is already assigned to another pharmacy."}, status=400)
+
+    existing_bid = PharmacyBidding.objects.filter(
+        order=order,
+        pharmacy=pharmacy_profile,
+        is_active=True,
+    ).first()
+    if existing_bid:
+        return JsonResponse({
+            "success": False,
+            "message": "You have already submitted a bid for this order.",
+            "is_duplicate": True,
+        }, status=400)
+
+    bid_gst = (bid_amount * Decimal("0.18")).quantize(Decimal("0.01"))
+    total_amount = (bid_amount + bid_gst).quantize(Decimal("0.01"))
+
+    with transaction.atomic():
+        bid = PharmacyBidding.objects.create(
+            order=order,
+            pharmacy=pharmacy_profile,
+            bid_amount=bid_amount,
+            bid_gst=bid_gst,
+            total_amount=total_amount,
+            delivery_time=delivery_time,
+            remarks=remarks,
+            bid_status=PharmacyBidStatus.PENDING,
+            is_active=True,
+        )
+
+    active_bids_count = PharmacyBidding.objects.filter(
+        pharmacy=pharmacy_profile,
+        bid_status__in=[PharmacyBidStatus.PENDING, PharmacyBidStatus.ACCEPTED],
+        is_active=True,
+    ).count()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Bid submitted successfully!",
+        "bid": {
+            "id": bid.id,
+            "order_id": order.id,
+            "bid_amount": str(bid.bid_amount),
+            "bid_gst": str(bid.bid_gst),
+            "total_amount": str(bid.total_amount),
+            "delivery_time": bid.delivery_time,
+        },
+        "active_bids_count": active_bids_count,
     })

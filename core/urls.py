@@ -50,3 +50,11 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+from django.views.generic.base import RedirectView
+
+urlpatterns += [
+    path('offers/', RedirectView.as_view(url='/coupons/', permanent=False), name='offers_redirect'),
+    path('inventory/', RedirectView.as_view(url='/services/', permanent=False), name='inventory_redirect'),
+    path('payout/', RedirectView.as_view(url='/dashboard/advance/', permanent=False), name='payout_redirect'),
+]
