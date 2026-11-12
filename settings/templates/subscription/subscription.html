@@ -119,8 +119,9 @@
         </div>
         <div class="flex flex-col gap-2 lg:flex-row lg:gap-0 lg:items-center justify-between pt-5">
             <p class="font-normal text-base">Active Plan : Premium</p>
-            <p class="font-normal text-base">Expiry Date : 20/03/2025 <span class="text-strong-red">(5 days left to
-                    go)</span></p>
+            <p class="font-normal text-base">Expiry Date : <span class="subscription-expiry-date">-</span>
+                <span class="subscription-expiry-status ml-2"></span>
+            </p>
         </div>
         <div
             class="bg-{{secondary_bg}} border border-blue-haze mt-5 rounded-xl px-4 flex flex-col-reverse lg:flex-row lg:items-center justify-between">
@@ -158,7 +159,7 @@
         </div>
         <div class="flex items-center justify-center mt-5">
             <button
-                class="bg-{{text}} rounded-lg  flex items-center justify-center cursor-pointer popup-btn w-[280px] h-12"
+                class="subscription-action-btn bg-{{text}} rounded-lg flex items-center justify-center cursor-pointer popup-btn w-[280px] h-12"
                 data-popup="cancelSubscriptionPopup">
                 <span class="font-normal text-sm text-white">Cancel Subscription</span>
             </button>

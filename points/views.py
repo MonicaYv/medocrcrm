@@ -9,9 +9,10 @@ from django.template.loader import render_to_string
 from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
-from django.db.models import Sum, Q, F
+from django.db.models import Sum, Q, F, Count
 from django.core.paginator import Paginator
 from django.db import transaction
+from orders.models import UserPurchase
 
 
 @dashboard_login_required
@@ -72,10 +73,17 @@ def get_coupon_data(request, is_popular=False):
 
         data_list = []
         coupons_to_update = []
+        redemption_counts = {
+            row["coupon_code"]: row["count"]
+            for row in UserPurchase.objects.filter(
+                coupon_code__in=[coupon.code for coupon in page_obj]
+            )
+            .values("coupon_code")
+            .annotate(count=Count("id"))
+        }
         for c in page_obj:
-            claims_count = c.claims.count()
-            redeemed = max(c.redeemed_count or 0, claims_count)
-            if (c.redeemed_count or 0) < redeemed:
+            redeemed = redemption_counts.get(c.code, 0)
+            if c.redeemed_count != redeemed:
                 c.redeemed_count = redeemed
                 coupons_to_update.append(c)
 
@@ -247,14 +255,16 @@ def claim_coupon(request):
         with transaction.atomic():
             # Lock the coupon row to prevent concurrent race conditions
             coupon = Coupon.objects.select_for_update().get(id=coupon_id)
+            current_redeemed = UserPurchase.objects.filter(
+                coupon_code=coupon.code
+            ).count()
+            if (coupon.redeemed_count or 0) != current_redeemed:
+                Coupon.objects.filter(id=coupon.id).update(
+                    redeemed_count=current_redeemed
+                )
 
             # Prevent duplicate claim by the same user
             if CouponClaimed.objects.filter(user=user, coupon=coupon).exists():
-                actual_claims = coupon.claims.count()
-                current_redeemed = max(coupon.redeemed_count or 0, actual_claims)
-                if (coupon.redeemed_count or 0) != current_redeemed:
-                    Coupon.objects.filter(id=coupon.id).update(redeemed_count=current_redeemed)
-
                 max_redemptions = coupon.max_redemptions or 100
                 percent_used = min(100, int((current_redeemed / max_redemptions) * 100)) if max_redemptions else 0
 
@@ -269,8 +279,6 @@ def claim_coupon(request):
                 })
 
             # Check if coupon has reached maximum redemptions
-            actual_claims = coupon.claims.count()
-            current_redeemed = max(coupon.redeemed_count or 0, actual_claims)
             max_redemptions = coupon.max_redemptions or 100
 
             if current_redeemed >= max_redemptions:
@@ -291,18 +299,14 @@ def claim_coupon(request):
                 expiry_date=coupon.validity
             )
 
-            # Increment count and keep synchronized
-            new_redeemed = current_redeemed + 1
-            Coupon.objects.filter(id=coupon.id).update(redeemed_count=new_redeemed)
-
-            percent_used = min(100, int((new_redeemed / max_redemptions) * 100)) if max_redemptions else 0
+            percent_used = min(100, int((current_redeemed / max_redemptions) * 100)) if max_redemptions else 0
 
             return JsonResponse({
                 'status': 'success',
                 'message': 'Coupon claimed successfully!',
                 'coupon_id': coupon.id,
                 'code': coupon.code,
-                'redeemed_count': new_redeemed,
+                'redeemed_count': current_redeemed,
                 'max_redemptions': max_redemptions,
                 'percent_used': percent_used,
             })

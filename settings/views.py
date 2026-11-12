@@ -4847,6 +4847,7 @@ def seller_subscription_status(request):
         days_left = (sub.expiry_date.date() - timezone.now().date()).days
 
 
+    is_expired = not sub.expiry_date or sub.is_expired
 
     return JsonResponse({
 
@@ -4859,6 +4860,8 @@ def seller_subscription_status(request):
         "expiry_date": sub.expiry_date.strftime("%d/%m/%Y") if sub.expiry_date else None,
 
         "days_left": days_left,
+
+        "is_expired": is_expired,
 
         "total": float(SUBSCRIPTION_TOTAL),
 

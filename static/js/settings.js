@@ -728,8 +728,12 @@ document.querySelectorAll('[data-field]').forEach(input => {
             }
             input.dataset.lastSavedValue = currentValStr;
             clearQuietHoursError($container);
-            toastr.success("Updated notification settings");  // ✅ success toast
-        })
+            if (field === "quite_mode") {
+                toastr.success(value ? "Quiet hours enabled" : "Quiet hours disabled");
+            } else {
+                toastr.success("Updated notification settings");
+            }
+        })
         .catch(err => {
             console.error("Error:", err);
             const errorMsg = err.message || "Failed to update notification settings";

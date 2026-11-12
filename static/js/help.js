@@ -1,3 +1,36 @@
+document.addEventListener("change", function (event) {
+  const fileInput = event.target;
+  if (
+    !(fileInput instanceof HTMLInputElement) ||
+    !fileInput.matches(".ngo-issue-image")
+  ) {
+    return;
+  }
+
+  const form = fileInput.closest(".support-form");
+  const submitBtn = form && form.querySelector(".ngo-issue-submit-btn");
+  const fileContainer = form && form.querySelector(".ngo-file-container");
+  if (!form || !submitBtn || !fileContainer) return;
+
+  const selectedFiles = Array.from(fileInput.files || []);
+  updateNgoFileDisplay(fileContainer, selectedFiles, submitBtn, fileInput);
+
+  const hasFiles = selectedFiles.length > 0;
+  submitBtn.disabled = !hasFiles;
+  submitBtn.classList.remove(
+    "cursor-not-allowed",
+    "cursor-pointer",
+    "text-white",
+    "text-medium-gray",
+    ...Array.from(submitBtn.classList).filter(c => c.startsWith("bg-"))
+  );
+  submitBtn.classList.add(
+    ...(hasFiles
+      ? ["cursor-pointer", "text-white", `bg-${getPaginationThemeColor()}`]
+      : ["cursor-not-allowed", "bg-light-gray", "text-medium-gray"])
+  );
+});
+
 // Function to check if the form is valid
 // function checkFormValidity() {
 //   const issueType = $(".issue-type").val().trim();
@@ -832,35 +865,32 @@ function addStatus(container, statusText, timestamp) {
 
 //----------------------- new code by laxmi -------------------------------------------
 //get issue option in the dropdown
-document.getElementById("issue_type").addEventListener("change", function () {
-  const issueTypeId = this.value;
-  if (issueTypeId) {
-    fetch(`${getIssueOptionLists}?issue_type_id=${issueTypeId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        const issueSelect = document.getElementById("select_issue");
-        issueSelect.innerHTML = '<option value="">Select Issue Option</option>';
+const issueTypeSelect = document.getElementById("issue_type");
+if (issueTypeSelect) {
+  issueTypeSelect.addEventListener("change", function () {
+    const issueTypeId = this.value;
+    if (issueTypeId) {
+      fetch(`${getIssueOptionLists}?issue_type_id=${issueTypeId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const issueSelect = document.getElementById("select_issue");
+          issueSelect.innerHTML = '<option value="">Select Issue Option</option>';
 
-        data.options.forEach((option) => {
-          const opt = document.createElement("option");
-          opt.value = option.id;
-          opt.textContent = option.name;
-          issueSelect.appendChild(opt);
+          data.options.forEach((option) => {
+            const opt = document.createElement("option");
+            opt.value = option.id;
+            opt.textContent = option.name;
+            issueSelect.appendChild(opt);
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching issue options:", error);
         });
-      })
-      .catch((error) => {
-        console.error("Error fetching issue options:", error);
-      });
-  }
-});
+    }
+  });
+}
 
 //store data in db
-const form = document.querySelector(".support-form");
-const submitBtn = document.querySelector(".ngo-issue-submit-btn");
-const fileInput = document.getElementById("ngo-issue-image");
-const fileContainerElementNgo = document.getElementById("ngo-file-container");
-const ngoSelectedFiles = [];
-
 const itemsPerPage = 5;
 let allTickets = [];
 let currentPage = 1;
@@ -878,60 +908,6 @@ function getPaginationThemeColor() {
   return "dodger-blue";
 }
 
-fileInput.addEventListener("change", function () {
-
-  const activeColor = getPaginationThemeColor(); // 🔥 dynamic color
-  const activeBgClass = `bg-${activeColor}`;
-
-  if (fileInput.files.length > 0) {
-    for (let i = 0; i < fileInput.files.length; i++) {
-      const file = fileInput.files[i];
-      if (
-        !ngoSelectedFiles.some(
-          (f) => f.name === file.name && f.size === file.size
-        )
-      ) {
-        ngoSelectedFiles.push(file);
-      }
-    }
-
-    updateNgoFileDisplay();
-
-    submitBtn.disabled = false;
-
-    // remove disabled styles
-    submitBtn.classList.remove(
-      "cursor-not-allowed",
-      "bg-light-gray",
-      "text-medium-gray"
-    );
-
-    // add active styles (dynamic)
-    submitBtn.classList.add(
-      "cursor-pointer",
-      activeBgClass,
-      "text-white"
-    );
-
-  } else {
-    submitBtn.disabled = true;
-
-    // remove active styles
-    submitBtn.classList.remove(
-      "cursor-pointer",
-      "text-white",
-      ...Array.from(submitBtn.classList).filter(c => c.startsWith("bg-"))
-    );
-
-    // add disabled styles
-    submitBtn.classList.add(
-      "cursor-not-allowed",
-      "bg-light-gray",
-      "text-medium-gray"
-    );
-  }
-});
-
 function applyThemeButton(btn) {
   if (!btn) return;
 
@@ -946,20 +922,32 @@ function applyThemeButton(btn) {
   btn.classList.add(bgClass, "text-white");
 }
 
-function updateNgoFileDisplay(submitBtn) {
-  fileContainerElementNgo.innerHTML = "";
+function updateNgoFileDisplay(container, files, submitBtn, fileInput) {
+  container.innerHTML = "";
 
-  if (ngoSelectedFiles.length === 0) {
-    console.log("No files selected");
-    fileContainerElementNgo.innerHTML =
+  if (files.length === 0) {
+    container.innerHTML =
       '<span class="ngo-file-name font-normal text-sm">Upload image of the issue</span>';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.remove(
+        "cursor-pointer",
+        "text-white",
+        ...Array.from(submitBtn.classList).filter(c => c.startsWith("bg-"))
+      );
+      submitBtn.classList.add(
+        "cursor-not-allowed",
+        "bg-light-gray",
+        "text-medium-gray"
+      );
+    }
     return;
   }
 
   const filesWrapper = document.createElement("div");
   filesWrapper.className = "flex items-center gap-2 h-full flex-nowrap";
 
-  ngoSelectedFiles.forEach((file, index) => {
+  files.forEach((file, index) => {
     const fileElement = document.createElement("div");
     fileElement.className =
       "flex items-center gap-1 bg-gray-100 px-2 py-1 rounded flex-shrink-0 h-8";
@@ -977,7 +965,7 @@ function updateNgoFileDisplay(submitBtn) {
     removeBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      removeNgoFile(index, submitBtn);
+      removeNgoFile(index, container, files, submitBtn, fileInput);
     };
 
     fileElement.appendChild(fileName);
@@ -985,32 +973,33 @@ function updateNgoFileDisplay(submitBtn) {
     filesWrapper.appendChild(fileElement);
   });
 
-  fileContainerElementNgo.appendChild(filesWrapper);
+  container.appendChild(filesWrapper);
 }
 
-function removeNgoFile(index, submitBtn) {
-  ngoSelectedFiles.splice(index, 1);
-  updateNgoFileDisplay(submitBtn);
+function removeNgoFile(index, container, files, submitBtn, fileInput) {
+  files.splice(index, 1);
+  const updatedFiles = new DataTransfer();
+  files.forEach(file => updatedFiles.items.add(file));
+  fileInput.files = updatedFiles.files;
+  updateNgoFileDisplay(container, files, submitBtn, fileInput);
+  submitBtn.disabled = files.length === 0;
 }
 
 // submit btn
-form.addEventListener("submit", async function (e) {
+document.addEventListener("submit", async function (e) {
+  const form = e.target;
+  if (!(form instanceof HTMLFormElement) || !form.matches(".support-form")) return;
   e.preventDefault();
 
-  const issueType = document.getElementById("issue_type").value;
-  const issueOption = document.getElementById("select_issue").value;
+  const issueType = form.querySelector('[name="issue_type"]').value;
+  const issueOption = form.querySelector('[name="select_issue"]').value;
 
   if (!issueType || issueType === "" || !issueOption || issueOption === "") {
     toastr.error("Please select both Issue Type and Issue Option.", "Error");
-    return; // stop form submission
+    return;
   }
 
   const formData = new FormData(form);
-
-  // Append all selected images
-  for (const file of fileInput.files) {
-    formData.append("image", file); // append multiple if needed later
-  }
 
   try {
     const response = await fetch(saveTickets, {
@@ -1041,12 +1030,13 @@ form.addEventListener("submit", async function (e) {
         location.reload();
       }
 
-      // reset file input styles
-      submitBtn.disabled = true;
-      submitBtn.classList.remove("cursor-pointer", "bg-violet-sky", "text-white");
-      submitBtn.classList.add("cursor-not-allowed", "bg-light-gray", "text-medium-gray");
+      const submitBtn = form.querySelector(".ngo-issue-submit-btn");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.remove("cursor-pointer", "bg-violet-sky", "text-white");
+        submitBtn.classList.add("cursor-not-allowed", "bg-light-gray", "text-medium-gray");
+      }
 
-      // Wait for latest data from server
       await fetchTickets();
       currentPage = 1;
       renderTickets();
