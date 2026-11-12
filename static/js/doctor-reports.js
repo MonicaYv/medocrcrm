@@ -29,6 +29,28 @@ $(document).ready(function () {
     if (panel === "visit") $("#visitMenu").removeClass("hidden");
   }
 
+  function syncDoctorReportDateOption(value) {
+    const normalized = String(value || "month").toLowerCase();
+    $("#dateMenu .option")
+      .removeClass("active bg-pale-azure text-dodger-blue font-medium")
+      .addClass("text-dark-gray")
+      .attr("aria-selected", "false")
+      .find(".date-filter-check").hide();
+
+    const $selected = $("#dateMenu .option").filter(function () {
+      return String($(this).data("value") || "").toLowerCase() === normalized;
+    });
+    $selected
+      .addClass("active bg-pale-azure text-dodger-blue font-medium")
+      .removeClass("text-dark-gray")
+      .attr("aria-selected", "true")
+      .find(".date-filter-check").show();
+  }
+
+  // The reports load the current month by default, so show the matching tick
+  // even before the user opens the filter menu.
+  syncDoctorReportDateOption("month");
+
   // Handle dropdown internal submenus navigation
   $(document).on("click", "[data-open]", function (e) {
     e.stopPropagation();
@@ -43,6 +65,15 @@ $(document).ready(function () {
 
   // Global closure scripts for clicking outside dropdowns
   $(document).on("click", function (e) {
+    // jQuery UI's month navigation arrows can fire outside the menu wrapper in
+    // some layouts. Keep the report filter open while those controls rerender
+    // the inline calendar.
+    if ($(e.target).closest(
+      "#doctorReportDatepicker, " +
+      "#doctorReportDatepicker .ui-datepicker-prev, " +
+      "#doctorReportDatepicker .ui-datepicker-next"
+    ).length) return;
+
     // Clicks inside the custom date picker must not dismiss the dropdown - this
     // handler is bound before the picker handlers, so it has to opt out here.
     if ($(e.target).closest(
@@ -165,8 +196,7 @@ $(document).ready(function () {
     }
 
     // Date submenu.
-    $("#dateMenu .option").removeClass("active");
-    $option.addClass("active");
+    syncDoctorReportDateOption(value);
     window.doctorReportFilter = value;
 
     if (value === "custom") {
@@ -231,6 +261,16 @@ $(document).ready(function () {
       changeMonth: true,
       changeYear: true,
       yearRange: "2000:2035",
+      onChangeMonthYear: function () {
+        // Reassert visibility after jQuery UI finishes rebuilding the header;
+        // this also wins over any outside-click handler that runs in the same
+        // arrow click event.
+        requestAnimationFrame(function () {
+          $("#filterDropdown").removeClass("hidden").css("display", "");
+          $picker.removeClass("hidden").css("display", "");
+          placePicker();
+        });
+      },
       onSelect: function (dateText) {
         // FIRST PICK: START DATE - keep the calendar open for the end date.
         if (!doctorReportPendingStart) {
@@ -338,8 +378,7 @@ $(document).ready(function () {
     window.doctorReportStartDate = "";
     window.doctorReportEndDate = "";
     window.doctorReportFilter = value;
-    $("#dateMenu .option").removeClass("active");
-    $("#dateMenu .option[data-value='" + value + "']").addClass("active");
+    syncDoctorReportDateOption(value);
     loadDoctorDashboardData(value);
   });
 
@@ -348,8 +387,7 @@ $(document).ready(function () {
     window.doctorReportFilter = "custom";
     window.doctorReportStartDate = startDate;
     window.doctorReportEndDate = endDate;
-    $("#dateMenu .option").removeClass("active");
-    $("#dateMenu .option[data-value='Custom']").addClass("active");
+    syncDoctorReportDateOption("custom");
     $wrapper.find(".calendar-date-text").text(`${startDate} – ${endDate}`);
     loadDoctorDashboardData("custom");
   }
