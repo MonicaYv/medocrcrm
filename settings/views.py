@@ -4060,15 +4060,15 @@ def update_doctor_profile(request):
     country_code = normalize_dial_code(
         post_data.get("countryCodes")
     )
-    submitted_phone = f"{country_code}|{phone_digits}"
+    # submitted_phone = f"{country_code}|{phone_digits}"
 
-    verified_phone = request.session.get("verified_pharmacy_phone")
+    # verified_phone = request.session.get("verified_pharmacy_phone")
 
-    if not verified_phone:
-        errors["otp1"] = "Please verify your phone number with OTP before saving."
+    # if not verified_phone:
+    #     errors["otp1"] = "Please verify your phone number with OTP before saving."
 
-    elif verified_phone != submitted_phone:
-        errors["otp1"] = "Phone number changed. Please verify OTP again."
+    # elif verified_phone != submitted_phone:
+    #     errors["otp1"] = "Phone number changed. Please verify OTP again."
 
 
 
