@@ -115,7 +115,8 @@ $(document).ready(function () {
             if (res.advance_balance !== undefined) {
                 renderAdvanceBalance(res.advance_balance);
                 updatePayNowAvailability(
-                    !res.has_subscription && Number(res.advance_balance) >= Number(res.total)
+                    (!res.has_subscription || res.is_expired) &&
+                        Number(res.advance_balance) >= Number(res.total)
                 );
             }
 
@@ -129,11 +130,18 @@ $(document).ready(function () {
                 $(".premium-plan-section p:contains('Active Plan')")
                     .text("Active Plan : " + res.plan);
 
-                $(".premium-plan-section p:contains('Expiry Date')")
-                    .html(`Expiry Date : ${res.expiry_date}
-                        <span class="text-strong-red">
-                            (${res.days_left} days left to go)
-                        </span>`);
+                $(".premium-plan-section .subscription-expiry-date")
+                    .text(res.expiry_date || "-");
+
+                $(".premium-plan-section .subscription-expiry-status")
+                    .text(res.is_expired ? "(Expired)" : "(Active)")
+                    .toggleClass("text-strong-red", Boolean(res.is_expired))
+                    .toggleClass("text-green-600", !res.is_expired);
+
+                $(".premium-plan-section .subscription-action-btn")
+                    .attr("data-popup", res.is_expired ? "paymentDetailsPopup" : "cancelSubscriptionPopup")
+                    .find("span")
+                    .text(res.is_expired ? "Subscribe Now" : "Cancel Subscription");
 
                 $(".premium-plan-section .font-bold.text-base")
                     .html("&#8377;" + res.price);

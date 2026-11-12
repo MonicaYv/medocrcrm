@@ -4060,15 +4060,15 @@ def update_doctor_profile(request):
     country_code = normalize_dial_code(
         post_data.get("countryCodes")
     )
-    submitted_phone = f"{country_code}|{phone_digits}"
+    # submitted_phone = f"{country_code}|{phone_digits}"
 
-    verified_phone = request.session.get("verified_pharmacy_phone")
+    # verified_phone = request.session.get("verified_pharmacy_phone")
 
-    if not verified_phone:
-        errors["otp1"] = "Please verify your phone number with OTP before saving."
+    # if not verified_phone:
+    #     errors["otp1"] = "Please verify your phone number with OTP before saving."
 
-    elif verified_phone != submitted_phone:
-        errors["otp1"] = "Phone number changed. Please verify OTP again."
+    # elif verified_phone != submitted_phone:
+    #     errors["otp1"] = "Phone number changed. Please verify OTP again."
 
 
 
@@ -4847,6 +4847,7 @@ def seller_subscription_status(request):
         days_left = (sub.expiry_date.date() - timezone.now().date()).days
 
 
+    is_expired = not sub.expiry_date or sub.is_expired
 
     return JsonResponse({
 
@@ -4859,6 +4860,8 @@ def seller_subscription_status(request):
         "expiry_date": sub.expiry_date.strftime("%d/%m/%Y") if sub.expiry_date else None,
 
         "days_left": days_left,
+
+        "is_expired": is_expired,
 
         "total": float(SUBSCRIPTION_TOTAL),
 

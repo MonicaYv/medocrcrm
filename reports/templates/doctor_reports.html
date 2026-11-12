@@ -50,28 +50,35 @@
 
                   <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
                     data-type="date" data-value="Today">
-                    Today
+                    <span>Today</span>
+                    <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
                   </div>
 
                   <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
                     data-type="date" data-value="All">
-                    All dates
+                    <span>All dates</span>
+                    <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
                   </div>
 
                   <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
                     data-type="date" data-value="Week">
-                    Week
+                    <span>Week</span>
+                    <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
                   </div>
 
                   <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
                     data-type="date" data-value="Month">
-                    Month
+                    <span>Month</span>
+                    <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
                   </div>
 
                   <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
                     data-type="date" data-value="Custom">
                     <span>Custom</span>
-                    <span class="material-symbols-outlined text-gray-400">calendar_today</span>
+                    <span class="flex items-center gap-2">
+                      <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
+                      <span class="material-symbols-outlined text-gray-400">calendar_today</span>
+                    </span>
                   </div>
                 </div>
 
@@ -560,5 +567,5 @@
 <!-- Page Navigation & Interaction Scripts -->
 <script src="/static/js/tabs.js"></script>
 <script src="/static/js/table-pagination.js"></script>
-<script src="/static/js/doctor-reports.js?v=20261104-download-csv-fix"></script>
+<script src="/static/js/doctor-reports.js?v=20261112-calendar-nav-fix"></script>
 {% endblock %}
