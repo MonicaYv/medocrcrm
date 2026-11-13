@@ -54,6 +54,7 @@
     },
     success: function (res) {
       $(container).html(res.html);
+      applyHistorySearchAndFilter();
       console.log("History filters sent:", {
         status,
         page,
@@ -1433,6 +1434,8 @@ function applyHistorySearchAndFilter() {
     }
     $noResults.toggleClass("hidden", visibleCount !== 0);
   }
+
+  $active.find(".history-pagination").toggleClass("hidden", visibleCount === 0);
 }
 
 // Rebuild the Status submenu options depending on the active tab
