@@ -13,23 +13,8 @@ document.addEventListener("change", function (event) {
   if (!form || !submitBtn || !fileContainer) return;
 
   const selectedFiles = Array.from(fileInput.files || []);
-  const pharmacyForm = form.classList.contains("pharmacy-support-form");
   updateNgoFileDisplay(fileContainer, selectedFiles, submitBtn, fileInput);
-
-  const hasFiles = selectedFiles.length > 0;
-  submitBtn.disabled = !pharmacyForm && !hasFiles;
-  submitBtn.classList.remove(
-    "cursor-not-allowed",
-    "cursor-pointer",
-    "text-white",
-    "text-medium-gray",
-    ...Array.from(submitBtn.classList).filter(c => c.startsWith("bg-"))
-  );
-  submitBtn.classList.add(
-    ...(hasFiles || pharmacyForm
-      ? ["cursor-pointer", "text-white", `bg-${getPaginationThemeColor()}`]
-      : ["cursor-not-allowed", "bg-light-gray", "text-medium-gray"])
-  );
+  setSupportSubmitState(submitBtn, selectedFiles.length > 0);
 });
 
 // Function to check if the form is valid
@@ -866,56 +851,71 @@ function addStatus(container, statusText, timestamp) {
 
 //----------------------- new code by laxmi -------------------------------------------
 //get issue option in the dropdown
-const issueTypeSelect = document.getElementById("issue_type");
-if (issueTypeSelect) {
-  issueTypeSelect.addEventListener("change", function () {
-    const issueTypeId = this.value;
-    const pharmacyForm = this.closest(".pharmacy-support-form");
-    if (pharmacyForm) {
-      const issueSelect = pharmacyForm.querySelector('[name="select_issue"]');
-      if (!issueSelect) return;
+document.addEventListener("change", async function (event) {
+  const typeSelect = event.target;
+  if (!(typeSelect instanceof HTMLSelectElement) || !typeSelect.matches('.support-form [name="issue_type"]')) return;
 
-      let matchingOptions = 0;
-      Array.from(issueSelect.options).forEach((option) => {
-        if (!option.value) {
-          option.hidden = false;
-          option.textContent = issueTypeId ? "Select Issue Option" : "Select an issue type first";
-          return;
-        }
+  const form = typeSelect.closest(".support-form");
+  const issueSelect = form && form.querySelector('[name="select_issue"]');
+  if (!issueSelect) return;
 
-        const matchesType = option.dataset.issueType === issueTypeId;
-        option.hidden = !matchesType;
-        if (matchesType) matchingOptions += 1;
-      });
+  const issueTypeId = typeSelect.value;
+  issueSelect.value = "";
+  issueSelect.disabled = true;
+  const requestId = String(Date.now()) + Math.random();
+  issueSelect.dataset.requestId = requestId;
 
-      issueSelect.value = "";
-      issueSelect.disabled = !issueTypeId || matchingOptions === 0;
-      if (issueTypeId && matchingOptions === 0) {
-        issueSelect.options[0].textContent = "No issue options available";
+  if (form.classList.contains("pharmacy-support-form")) {
+    let matchingOptions = 0;
+    Array.from(issueSelect.options).forEach((option) => {
+      if (!option.value) {
+        option.hidden = false;
+        option.textContent = issueTypeId ? "Select Issue Option" : "Select an issue type first";
+        return;
       }
-      return;
-    }
+      const matchesType = option.dataset.issueType === issueTypeId;
+      option.hidden = !matchesType;
+      if (matchesType) matchingOptions += 1;
+    });
+    issueSelect.disabled = !issueTypeId || matchingOptions === 0;
+    if (issueTypeId && matchingOptions === 0) issueSelect.options[0].textContent = "No issue options available";
+    return;
+  }
 
-    if (issueTypeId) {
-      fetch(`${getIssueOptionLists}?issue_type_id=${issueTypeId}`)
-        .then((response) => response.json())
-        .then((data) => {
-          const issueSelect = document.getElementById("select_issue");
-          issueSelect.innerHTML = '<option value="">Select Issue Option</option>';
+  issueSelect.innerHTML = issueTypeId
+    ? '<option value="">Loading issue options…</option>'
+    : '<option value="">Select an issue type first</option>';
+  if (!issueTypeId) return;
 
-          data.options.forEach((option) => {
-            const opt = document.createElement("option");
-            opt.value = option.id;
-            opt.textContent = option.name;
-            issueSelect.appendChild(opt);
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching issue options:", error);
-        });
+  try {
+    const response = await fetch(
+      `${getIssueOptionLists}?issue_type_id=${encodeURIComponent(issueTypeId)}`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (!response.ok) throw new Error(`Issue options request failed (${response.status})`);
+    const data = await response.json();
+    if (issueSelect.dataset.requestId !== requestId) return;
+
+    const options = Array.isArray(data.options) ? data.options : [];
+    issueSelect.innerHTML = '<option value="">Select Issue Option</option>';
+    options.forEach((option) => {
+      const opt = document.createElement("option");
+      opt.value = option.id;
+      opt.textContent = option.name;
+      issueSelect.appendChild(opt);
+    });
+    if (options.length) {
+      issueSelect.disabled = false;
+    } else {
+      issueSelect.innerHTML = '<option value="">No options available for this issue type</option>';
     }
-  });
-}
+  } catch (error) {
+    if (issueSelect.dataset.requestId !== requestId) return;
+    console.error("Error fetching issue options:", error);
+    issueSelect.innerHTML = '<option value="">Unable to load issue options</option>';
+    if (window.toastr) window.toastr.error("Unable to load issue options. Please try again.");
+  }
+});
 
 //store data in db
 const itemsPerPage = 5;
@@ -935,6 +935,23 @@ function getPaginationThemeColor() {
   return "dodger-blue";
 }
 
+function setSupportSubmitState(button, enabled) {
+  if (!button) return;
+  button.disabled = !enabled;
+  button.classList.remove(
+    "cursor-not-allowed",
+    "cursor-pointer",
+    "text-white",
+    "text-medium-gray",
+    ...Array.from(button.classList).filter((className) => className.startsWith("bg-"))
+  );
+  button.classList.add(
+    ...(enabled
+      ? ["cursor-pointer", "text-white", `bg-${getPaginationThemeColor()}`]
+      : ["cursor-not-allowed", "text-medium-gray", "bg-light-gray"])
+  );
+}
+
 function applyThemeButton(btn) {
   if (!btn) return;
 
@@ -951,24 +968,10 @@ function applyThemeButton(btn) {
 
 function updateNgoFileDisplay(container, files, submitBtn, fileInput) {
   container.innerHTML = "";
-  const pharmacyForm = fileInput?.closest(".support-form")?.classList.contains("pharmacy-support-form");
 
   if (files.length === 0) {
     container.innerHTML =
       '<span class="ngo-file-name font-normal text-sm">Upload image of the issue</span>';
-    if (submitBtn) {
-      submitBtn.disabled = !pharmacyForm;
-      submitBtn.classList.remove(
-        "cursor-pointer",
-        "text-white",
-        ...Array.from(submitBtn.classList).filter(c => c.startsWith("bg-"))
-      );
-      if (pharmacyForm) {
-        submitBtn.classList.add("cursor-pointer", `bg-${getPaginationThemeColor()}`, "text-white");
-      } else {
-        submitBtn.classList.add("cursor-not-allowed", "bg-light-gray", "text-medium-gray");
-      }
-    }
     return;
   }
 
@@ -1010,7 +1013,7 @@ function removeNgoFile(index, container, files, submitBtn, fileInput) {
   files.forEach(file => updatedFiles.items.add(file));
   fileInput.files = updatedFiles.files;
   updateNgoFileDisplay(container, files, submitBtn, fileInput);
-  submitBtn.disabled = files.length === 0 && !fileInput.closest(".support-form")?.classList.contains("pharmacy-support-form");
+  setSupportSubmitState(submitBtn, files.length > 0);
 }
 
 // submit btn
@@ -1023,7 +1026,8 @@ document.addEventListener("submit", async function (e) {
   const issueOption = form.querySelector('[name="select_issue"]').value;
 
   if (!issueType || issueType === "" || !issueOption || issueOption === "") {
-    toastr.error("Please select both Issue Type and Issue Option.", "Error");
+    if (window.toastr) window.toastr.error("Please select both Issue Type and Issue Option.", "Error");
+    else window.alert("Please select both Issue Type and Issue Option.");
     return;
   }
 
@@ -1090,6 +1094,7 @@ document.addEventListener("submit", async function (e) {
       else window.alert(result.message || "Something went wrong.");
     }
   } catch (error) {
+    console.error("Support ticket submission failed:", error);
     if (window.toastr) window.toastr.error("Something went wrong while submitting your issue.", "Error");
     else window.alert("Something went wrong while submitting your issue.");
   }

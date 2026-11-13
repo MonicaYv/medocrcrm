@@ -8,14 +8,14 @@
         id="issue_type"
         class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md"
       >
-      <option>Select Issue Type</option>
+      <option value="" selected disabled>Select Issue Type</option>
         {% for issue_type in issue_types %}
         <option value="{{ issue_type.id }}">{{ issue_type.name }}</option>
         {% endfor %}
       </select>
 
-      <select name="select_issue" id="select_issue" class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md">
-        <option value="">Select Issue Option</option>
+      <select name="select_issue" id="select_issue" class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md" disabled>
+        <option value="" selected>Select an issue type first</option>
       </select>
     </div>
 
@@ -36,8 +36,7 @@
           id="ngo-issue-image"
           type="file"
           accept="image/*"
-          multiple
-          class="ngo-issue-image hidden"
+          class="ngo-issue-image sr-only"
         />
 
         <!-- Label aligned to start -->

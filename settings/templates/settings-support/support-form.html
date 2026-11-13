@@ -11,15 +11,15 @@
       {% if user.user_type == 'pharmacy' %}
       <option value="" selected>Select Issue Type</option>
       {% else %}
-      <option>Select Issue Type</option>
+      <option value="" selected disabled>Select Issue Type</option>
       {% endif %}
         {% for issue_type in issue_types %}
         <option value="{{ issue_type.id }}">{{ issue_type.name }}</option>
         {% endfor %}
       </select>
 
-      <select name="select_issue" id="select_issue" class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md">
-        <option value="">Select Issue Option</option>
+      <select name="select_issue" id="select_issue" class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md" disabled>
+        <option value="" selected>Select an issue type first</option>
 
         {% for option in issue_options %}
           {% if user.user_type == 'pharmacy' %}
@@ -53,7 +53,7 @@
           id="ngo-issue-image"
           type="file"
           accept="image/*"          
-          class="ngo-issue-image hidden"
+          class="ngo-issue-image sr-only"
         />
         <!-- <input
           name="image"
@@ -89,12 +89,8 @@
       <!-- Submit button -->
       <button
         type="submit"
-        {% if user.user_type == 'pharmacy' %}
-        class="px-8 text-white bg-dodger-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-dodger-blue focus:ring-offset-2 rounded-[10px] py-2 cursor-pointer ngo-issue-submit-btn"
-        {% else %}
         class="px-8 text-medium-gray bg-light-gray rounded-[10px] py-2 cursor-not-allowed ngo-issue-submit-btn"
         disabled
-        {% endif %}
       >
         Submit
       </button>
