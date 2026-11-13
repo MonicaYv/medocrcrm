@@ -73,10 +73,19 @@ def get_coupon_data(request, is_popular=False):
 
         data_list = []
         coupons_to_update = []
+        # redemption_counts = {
+        #     row["coupon_code"]: row["count"]
+        #     for row in UserPurchase.objects.filter(
+        #         coupon_code__in=[coupon.code for coupon in page_obj]
+        #     )
+        #     .values("coupon_code")
+        #     .annotate(count=Count("id"))
+        # }
         redemption_counts = {
             row["coupon_code"]: row["count"]
             for row in UserPurchase.objects.filter(
-                coupon_code__in=[coupon.code for coupon in page_obj]
+               coupon_code__in=[coupon.code for coupon in page_obj],
+               payment_status__iexact="success"
             )
             .values("coupon_code")
             .annotate(count=Count("id"))
@@ -255,8 +264,12 @@ def claim_coupon(request):
         with transaction.atomic():
             # Lock the coupon row to prevent concurrent race conditions
             coupon = Coupon.objects.select_for_update().get(id=coupon_id)
+            # current_redeemed = UserPurchase.objects.filter(
+            #     coupon_code=coupon.code
+            # ).count()
             current_redeemed = UserPurchase.objects.filter(
-                coupon_code=coupon.code
+                coupon_code=coupon.code,
+                payment_status__iexact="success"
             ).count()
             # Prevent duplicate claim by the same user
             if CouponClaimed.objects.filter(user=user, coupon=coupon).exists():

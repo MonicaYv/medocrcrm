@@ -28,8 +28,8 @@
     <div class="hidden lg:block h-auto w-px bg-{{ primary_bg }} mx-4"></div>
 
     <!-- Right section -->
-    <div class="pt-4 lg:pt-0 lg:w-48 flex items-center lg:items-end">
-      {% if c.is_claimed %}
+    <!-- <div class="pt-4 lg:pt-0 lg:w-48 flex items-center lg:items-end"> -->
+      <!-- {% if c.is_claimed %}
         <button 
           data-coupon-id="{{ c.id }}" 
           data-code="{{ c.code }}"
@@ -48,8 +48,8 @@
         >
           {{ c.code }} (Limit Reached)
           <span class="material-symbols-outlined">block</span>
-        </button>
-      {% else %}
+        </button> -->
+      <!-- {% else %}
         <button 
           data-coupon-id="{{ c.id }}" 
           data-code="{{ c.code }}"
@@ -58,7 +58,33 @@
           {{ c.code }}
           <span class="material-symbols-outlined">content_copy</span>
         </button>
-      {% endif %}
+      {% endif %} -->
+      <!-- Right section -->
+      <div class="pt-4 lg:pt-0 lg:w-48 flex items-center lg:items-end">
+
+        {% if c.is_exhausted %}
+          <button
+            data-coupon-id="{{ c.id }}"
+            data-code="{{ c.code }}"
+            disabled
+            class="bg-gray-400 font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-not-allowed opacity-75 claim-btn"
+          >
+            {{ c.code }} (Limit Reached)
+            <span class="material-symbols-outlined">block</span>
+          </button>
+
+        {% else %}
+          <button
+            data-coupon-id="{{ c.id }}"
+            data-code="{{ c.code }}"
+            class="bg-{{ text }} font-bold text-lg text-white w-full rounded-md p-2 flex items-center gap-2 justify-center cursor-pointer claim-btn"
+          >
+            {{ c.code }}
+            <span class="material-symbols-outlined">content_copy</span>
+          </button>
+        {% endif %}
+
+      </div>
     </div>
 
   </div>
