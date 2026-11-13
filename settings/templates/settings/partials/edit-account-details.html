@@ -1404,9 +1404,9 @@
                 <span
                     class="material-symbols-outlined cursor-pointer">keyboard_arrow_down</span>
                 <!-- Dropdown options -->
-                <ul class="issue-type-dropdown absolute top-full left-0 w-full bg-white rounded-md shadow-md z-50 hidden border mt-2">
+                <ul class="dropdown-menu hidden absolute left-0 top-full w-full z-50 border rounded bg-white mt-1 shadow-md max-h-60 overflow-y-auto">
                     {% for facility in all_facilities %}
-                    <li class="dropdown-option px-2 py-2 flex justify-between items-center hover:bg-dodger-blue hover:text-white">
+                    <li class="facility-option flex justify-between items-center px-3 py-2 hover:bg-blue-100 cursor-pointer select-none">
                         <span class="text-base font-normal">{{ facility.name }}</span>
                         <div class="flex items-center gap-2">
                             <!-- Price input (only visible when checkbox is checked) -->
@@ -1421,7 +1421,7 @@
                                 type="checkbox"
                                 name="facilities"
                                 value="{{ facility.id }}"
-                                class="issue-checkbox form-checkbox cursor-pointer w-5 h-5 text-black rounded-sm mr-2"
+                                class="facility-checkbox form-checkbox cursor-pointer w-5 h-5 text-black rounded-sm mr-2"
                                 {% if facility in facilities_selected %}checked{% endif %}>
                         </div>
                     </li>
@@ -1439,9 +1439,9 @@
 
                 <!-- Dropdown options -->
 
-                <ul class="issue-type-dropdown absolute top-full left-0 w-full bg-white rounded-md shadow-md z-50 hidden border mt-2">
+                <ul class="dropdown-menu hidden absolute left-0 top-full w-full z-50 border border-gray-300 rounded bg-white mt-1 shadow-md max-h-60 overflow-y-auto">
                     {% for service in all_services %}
-                    <li class="dropdown-option px-2 py-2 flex justify-between items-center hover:bg-dodger-blue hover:text-white">
+                    <li class="service-option flex justify-between items-center px-3 py-2 hover:bg-blue-100 cursor-pointer select-none">
                         <span class="text-base font-normal">{{ service.name }}</span>
                         <div class="flex items-center gap-2">
                             <!-- Price -->
@@ -1456,7 +1456,7 @@
                                 type="checkbox"
                                 name="services"
                                 value="{{ service.id }}"
-                                class="issue-checkbox form-checkbox cursor-pointer w-5 h-5 text-black rounded-sm mr-2"
+                                class="service-checkbox form-checkbox cursor-pointer w-5 h-5 text-black rounded-sm mr-2"
                                 {% if service in services_selected %}checked{% endif %}>
                         </div>
                     </li>

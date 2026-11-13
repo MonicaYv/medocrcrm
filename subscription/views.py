@@ -11,38 +11,108 @@ from points.models import PointsActionType, PointsHistory
 from dashboard.utils import dashboard_login_required, get_common_context
 from subscription.models import SubscriptionPlan, Feature, SubscriptionHistory
 
+# @dashboard_login_required
+# def subscription_view(request):
+#     user = request.user_obj
+#     context = get_common_context(request, user)
+    
+#     plans = SubscriptionPlan.objects.filter(is_active=True).order_by("display_order").prefetch_related(
+#         models.Prefetch('features', queryset=Feature.objects.order_by('order'))
+#     )
+#     billing_options_map = {
+#     "Standard Plan": ["Monthly", "Quarterly (10% Disc)", "Yearly (20% Disc)"],
+#     "Premium Plan": ["Monthly", "Quarterly (10% Disc)", "Yearly (20% Disc)"],
+#     "Enterprise Plan": [], 
+#     "Basic": []
+#     }   
+#     for plan in plans:
+#         plan.billing_options = billing_options_map.get(plan.name, [])
+#     context['plans'] = plans
+
+#     latest_sub = SubscriptionHistory.objects.filter(user=user).order_by("-activation_date").first()
+#     if latest_sub:
+#         latest_sub.save() 
+
+#     if latest_sub and latest_sub.is_active:
+#         context['current_plan'] = latest_sub.plan.name
+#         context['status'] = "Active"
+#         context['expiry_date'] = latest_sub.expiry_date
+#     else:
+#         context['current_plan'] = "Free Plan"
+#         context['status'] = "Please Upgrade the plan"
+#         context['expiry_date'] = None
+
+#     return render(request, 'subscription.html', context)
+
+
+
 @dashboard_login_required
 def subscription_view(request):
     user = request.user_obj
     context = get_common_context(request, user)
-    
-    plans = SubscriptionPlan.objects.filter(is_active=True).order_by("display_order").prefetch_related(
-        models.Prefetch('features', queryset=Feature.objects.order_by('order'))
+
+    plans = SubscriptionPlan.objects.filter(
+        is_active=True
+    ).order_by("display_order").prefetch_related(
+        models.Prefetch(
+            'features',
+            queryset=Feature.objects.order_by('order')
+        )
     )
+
     billing_options_map = {
-    "Standard Plan": ["Monthly", "Quarterly (10% Disc)", "Yearly (20% Disc)"],
-    "Premium Plan": ["Monthly", "Quarterly (10% Disc)", "Yearly (20% Disc)"],
-    "Enterprise Plan": [], 
-    "Basic": []
-    }   
+        "Standard Plan": ["Monthly", "Quarterly (10% Disc)", "Yearly (20% Disc)"],
+        "Premium Plan": ["Monthly", "Quarterly (10% Disc)", "Yearly (20% Disc)"],
+        "Enterprise Plan": [],
+        "Basic": []
+    }
+
     for plan in plans:
         plan.billing_options = billing_options_map.get(plan.name, [])
+
     context['plans'] = plans
 
-    latest_sub = SubscriptionHistory.objects.filter(user=user).order_by("-activation_date").first()
-    if latest_sub:
-        latest_sub.save() 
+    # Get latest subscription
+    latest_sub = SubscriptionHistory.objects.filter(
+        user=user
+    ).order_by("-activation_date").first()
 
-    if latest_sub and latest_sub.is_active:
+    if latest_sub:
+        now = timezone.now()
+
+        # Check subscription expiry
+        if latest_sub.expiry_date <= now:
+
+            latest_sub.status = "expired"
+            latest_sub.save(update_fields=["status", "updated_at"])
+
+            context['status'] = "Expired"
+            context['days_left'] = None
+
+        else:
+            latest_sub.status = "active"
+            latest_sub.save(update_fields=["status", "updated_at"])
+
+            days_left = (
+                latest_sub.expiry_date.date() - timezone.localdate()
+            ).days
+
+            context['status'] = "Active"
+            context['days_left'] = days_left
+
         context['current_plan'] = latest_sub.plan.name
-        context['status'] = "Active"
         context['expiry_date'] = latest_sub.expiry_date
+
     else:
         context['current_plan'] = "Free Plan"
         context['status'] = "Please Upgrade the plan"
         context['expiry_date'] = None
+        context['days_left'] = None
 
     return render(request, 'subscription.html', context)
+
+
+
 
 def calculate_price(request):
     plan_id = request.GET.get("plan_id")
@@ -80,6 +150,11 @@ def calculate_price(request):
         "gross_amount": f"₹{gross_amount:,.2f}",
         "net_payable": f"₹{net_payable:,.2f}"
     })
+
+
+
+
+
 
 @dashboard_login_required
 def subscribe_plan(request):
@@ -183,51 +258,105 @@ def subscription_history(request):
         })
     return JsonResponse({"history": data})
 
+# @dashboard_login_required
+# def current_subscription_summary(request):
+#     user = request.user_obj
+#     current = SubscriptionHistory.objects.filter(
+#         user=user, status="active"
+#     ).order_by("-activation_date").first()
+
+#     if current:
+#         days_left = (current.expiry_date.date() - timezone.now().date()).days
+
+#         data = {
+#             "status": current.status.capitalize(),
+#             "plan_name": current.plan.name,
+#             "license_count": current.license_count,
+#             "payment_date": current.created_at.strftime("%d/%m/%y, %H:%M"),
+#             "start_date": current.activation_date.strftime("%d/%m/%Y"),
+#             "end_date": current.expiry_date.strftime("%d/%m/%Y"),
+#             "days_left": days_left,
+#             "package_type": f"{current.billing_cycle} ({current.discount_percent}% Disc.)"
+#             if current.discount_percent > 0
+#             else current.billing_cycle,
+#             "amount": f"₹{current.net_payable}",
+#         }
+#     else:
+#         last_plan = (
+#             SubscriptionHistory.objects.filter(user=user, expiry_date__lt=timezone.now())
+#             .order_by("-expiry_date")
+#             .first()
+#         )
+
+#         start_date = None
+#         if last_plan:
+#             start_date = (last_plan.expiry_date + timedelta(days=1)).strftime("%d/%m/%Y")
+#         data = {
+#             "status": "Active",
+#             "plan_name": "Basic (Free)",
+#             "license_count": 1,
+#             "payment_date": "NA",
+#             "start_date": start_date or "NA",
+#             "end_date": "NA",
+#             "days_left": "NA",
+#             "package_type": "NA",
+#             "amount": "Free",
+#         }
+#     return JsonResponse({"summary": data})
+
+
+
+
 @dashboard_login_required
 def current_subscription_summary(request):
     user = request.user_obj
+
     current = SubscriptionHistory.objects.filter(
-        user=user, status="active"
+        user=user
     ).order_by("-activation_date").first()
 
     if current:
-        days_left = (current.expiry_date.date() - timezone.now().date()).days
+        today = timezone.localdate()
+        days_left = (current.expiry_date.date() - today).days
+
+        if days_left <= 0:
+            subscription_status = "Expired"
+            days_left_display = "Expired"
+        else:
+            subscription_status = "Active"
+            days_left_display = days_left
 
         data = {
-            "status": current.status.capitalize(),
+            "status": subscription_status,
             "plan_name": current.plan.name,
             "license_count": current.license_count,
             "payment_date": current.created_at.strftime("%d/%m/%y, %H:%M"),
             "start_date": current.activation_date.strftime("%d/%m/%Y"),
             "end_date": current.expiry_date.strftime("%d/%m/%Y"),
-            "days_left": days_left,
-            "package_type": f"{current.billing_cycle} ({current.discount_percent}% Disc.)"
-            if current.discount_percent > 0
-            else current.billing_cycle,
+            "days_left": days_left_display,
+            "package_type": (
+                f"{current.billing_cycle} ({current.discount_percent}% Disc.)"
+                if current.discount_percent > 0
+                else current.billing_cycle
+            ),
             "amount": f"₹{current.net_payable}",
         }
-    else:
-        last_plan = (
-            SubscriptionHistory.objects.filter(user=user, expiry_date__lt=timezone.now())
-            .order_by("-expiry_date")
-            .first()
-        )
 
-        start_date = None
-        if last_plan:
-            start_date = (last_plan.expiry_date + timedelta(days=1)).strftime("%d/%m/%Y")
+    else:
         data = {
             "status": "Active",
             "plan_name": "Basic (Free)",
             "license_count": 1,
             "payment_date": "NA",
-            "start_date": start_date or "NA",
+            "start_date": "NA",
             "end_date": "NA",
             "days_left": "NA",
             "package_type": "NA",
             "amount": "Free",
         }
+
     return JsonResponse({"summary": data})
+
 
 @dashboard_login_required
 def subscription_invoice(request, history_id):

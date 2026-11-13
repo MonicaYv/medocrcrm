@@ -1,4 +1,7 @@
 from datetime import date
+from decimal import Decimal
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
@@ -7,6 +10,7 @@ from .views import (
     build_image_media_url,
     build_media_url,
     format_hospital_visit_mode,
+    get_wallet_balance,
     get_dashboard_appointment_date_range,
     parse_pharmacy_overview_range,
 )
@@ -44,6 +48,29 @@ class BuildMediaUrlTests(SimpleTestCase):
 class PointsChartDataTests(SimpleTestCase):
     def test_coupon_aliases_include_plural_action_name(self):
         self.assertIn("Coupons", POINTS_ACTION_ALIASES["Coupon"])
+
+
+class WalletBalanceTests(SimpleTestCase):
+    @patch("dashboard.views.WalletTransaction.objects.filter")
+    def test_reads_latest_database_balance_with_primary_key_tiebreaker(self, filter_transactions):
+        queryset = Mock()
+        queryset.order_by.return_value.first.return_value = SimpleNamespace(
+            current_balance=Decimal("125.50")
+        )
+        filter_transactions.return_value = queryset
+        user = SimpleNamespace(id=1)
+
+        self.assertEqual(get_wallet_balance(user), Decimal("125.50"))
+        filter_transactions.assert_called_once_with(user=user)
+        queryset.order_by.assert_called_once_with("-created_at", "-pk")
+
+    @patch("dashboard.views.WalletTransaction.objects.filter")
+    def test_returns_zero_when_user_has_no_wallet_transactions(self, filter_transactions):
+        queryset = Mock()
+        queryset.order_by.return_value.first.return_value = None
+        filter_transactions.return_value = queryset
+
+        self.assertEqual(get_wallet_balance(SimpleNamespace(id=1)), Decimal("0.00"))
 
 
 class HospitalVisitModeTests(SimpleTestCase):

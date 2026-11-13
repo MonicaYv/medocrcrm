@@ -59,7 +59,7 @@
     <!-- 2. Banner + Pharmacy profile card -->
     <div class="flex flex-col lg:flex-row gap-4 items-stretch w-full">
         <!-- Banner (approx 65%) -->
-        <div class="relative min-h-[170px] w-full lg:w-[65%] overflow-hidden rounded-[14px] border border-[#E8EEF2] bg-[linear-gradient(165deg,#0D9488,#068F95,#038AA2,#0485AE,#087FBA,#0F7AD1,#1A73E8)] p-5 flex flex-col justify-end" style="flex: 1 1 65%; min-width: 0;">
+        <div class="relative min-h-[170px] w-full lg:w-[65%] overflow-hidden rounded-[14px] border border-[#E8EEF2] p-5 flex flex-col justify-end" style="flex: 1 1 65%; min-width: 0; background-image: linear-gradient(165deg, rgba(13,148,136,.42), rgba(26,115,232,.52)), url('{% static 'images/pharmacy-home-bg.jpg' %}'); background-size: cover; background-position: center;">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.2),rgba(255,255,255,0)_60%)] pointer-events-none"></div>
             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0B2A4A]/80 pointer-events-none"></div>
             <div class="relative z-10 text-[10px] leading-4 text-white">
@@ -205,12 +205,12 @@
                 <a href="{% url 'orders' %}" class="text-[11px] text-[#1A73E8] hover:underline">View All →</a>
             </div>
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                {% for order in scheduled_orders %}
+                {% for order in recent_orders %}
                 <div class="order-card popup-btn cursor-pointer rounded-lg border border-[#E8EEF2] bg-white p-3 hover:shadow-sm transition-shadow"
                      data-popup="order-details-popup" data-order-id="{{ order.id }}">
                     <div class="flex flex-wrap items-center justify-between gap-1 text-[9px] font-medium">
                         <span class="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-green-700">{{ order.delivery_label|default:"Home Delivery" }}</span>
-                        <span class="rounded-full px-2 py-0.5 bg-green-100 text-green-700 font-semibold">Completed</span>
+                        <span class="rounded-full px-2 py-0.5 font-semibold {% if order.order_status == 'delivered' %}bg-green-100 text-green-700{% elif order.order_status == 'shipped' %}bg-blue-100 text-blue-700{% else %}bg-amber-100 text-amber-700{% endif %}">{{ order.order_status_label }}</span>
                     </div>
                     <div class="mt-2 flex items-center justify-between">
                         <p class="text-xs font-bold text-slate-900 truncate" title="{{ order.customer_name }}">
@@ -230,7 +230,7 @@
                     {% endif %}
                 </div>
                 {% empty %}
-                <p class="col-span-3 py-6 text-center text-sm text-slate-500">No completed orders found.</p>
+                <p class="col-span-3 py-6 text-center text-sm text-slate-500">No recent orders found.</p>
                 {% endfor %}
             </div>
         </div>
@@ -710,6 +710,9 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data && !data.error) {
+                        if (walletEl && typeof data.wallet_balance !== "undefined") {
+                            walletEl.textContent = `₹${data.wallet_balance}`;
+                        }
                         if (todayOrdersEl && typeof data.total_orders !== "undefined") {
                             todayOrdersEl.textContent = data.total_orders;
                         }
@@ -724,12 +727,15 @@
                 .catch(err => console.debug("Home stats poll error:", err));
             }
 
+            updateStats();
             setInterval(updateStats, 10000);
         })();
     </script>
 
     <!-- Order Requests & Bidding Actions -->
     <script>
+        const pharmacyOrderDetailsUrlTemplate = "{% url 'pharmacy_order_details' 0 %}";
+
         $(document).ready(function () {
             // View Order Details
             $(document).on("click", ".pharmacy-view-order-btn, .order-card[data-popup='order-details-popup']", function (e) {
@@ -740,6 +746,7 @@
                 if (!orderId) return;
 
                 const modal = $("#pharmacy-order-details-modal");
+                const detailsUrl = pharmacyOrderDetailsUrlTemplate.replace(/0\/$/, `${orderId}/`);
                 modal.removeClass("hidden").addClass("flex");
 
                 // Show loading state
@@ -756,7 +763,7 @@
                 $("#medicines-container").html('<p class="text-xs text-slate-400">Fetching order details...</p>');
 
                 $.ajax({
-                    url: `/dashboard/pharmacy/order/${orderId}/`,
+                    url: detailsUrl,
                     type: "GET",
                     dataType: "json",
                     success: function (data) {
