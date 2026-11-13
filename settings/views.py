@@ -418,13 +418,13 @@ def settings_page(request):
 
 
 
-    issue_options = IssueOption.objects.filter(
+    issue_options = IssueOption.objects.filter(issue_type__in=issue_types)
 
-        issue_type__in=issue_types,
+    if user_type != "pharmacy":
 
-        user_types__contains=[user_type]
+        issue_options = issue_options.filter(user_types__contains=[user_type])
 
-    ).select_related("issue_type")
+    issue_options = issue_options.select_related("issue_type")
 
 
 
@@ -2898,7 +2898,7 @@ def update_pharmacy_profile(request):
 
     )
 
-    submitted_country_code = post_data.get("countryCodes", "").strip()
+    submitted_country_code = normalize_dial_code(post_data.get("countryCodes", "").strip())
 
 
 
@@ -2964,7 +2964,7 @@ def update_pharmacy_profile(request):
 
             user.email = post_data.get('email')
 
-            user.phone_country_code = post_data.get("countryCodes")
+            user.phone_country_code = submitted_country_code
 
             user.phone_number = post_data.get("phone")
 
@@ -5163,7 +5163,7 @@ def send_phone_otp(request):
 
         phone = str(data.get("phone", "")).strip()
 
-        country_code = str(data.get("country_code", "")).strip()
+        country_code = normalize_dial_code(str(data.get("country_code", "")).strip())
 
         purpose = "contact" if data.get("purpose") == "contact" else "phone"
 
@@ -5264,7 +5264,7 @@ def verify_phone_otp(request):
 
         phone = "".join(filter(str.isdigit, str(data.get("phone", "")).strip()))
 
-        country_code = str(data.get("country_code", "")).strip()
+        country_code = normalize_dial_code(str(data.get("country_code", "")).strip())
 
 
 

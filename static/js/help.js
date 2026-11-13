@@ -13,10 +13,11 @@ document.addEventListener("change", function (event) {
   if (!form || !submitBtn || !fileContainer) return;
 
   const selectedFiles = Array.from(fileInput.files || []);
+  const pharmacyForm = form.classList.contains("pharmacy-support-form");
   updateNgoFileDisplay(fileContainer, selectedFiles, submitBtn, fileInput);
 
   const hasFiles = selectedFiles.length > 0;
-  submitBtn.disabled = !hasFiles;
+  submitBtn.disabled = !pharmacyForm && !hasFiles;
   submitBtn.classList.remove(
     "cursor-not-allowed",
     "cursor-pointer",
@@ -25,7 +26,7 @@ document.addEventListener("change", function (event) {
     ...Array.from(submitBtn.classList).filter(c => c.startsWith("bg-"))
   );
   submitBtn.classList.add(
-    ...(hasFiles
+    ...(hasFiles || pharmacyForm
       ? ["cursor-pointer", "text-white", `bg-${getPaginationThemeColor()}`]
       : ["cursor-not-allowed", "bg-light-gray", "text-medium-gray"])
   );
@@ -869,6 +870,32 @@ const issueTypeSelect = document.getElementById("issue_type");
 if (issueTypeSelect) {
   issueTypeSelect.addEventListener("change", function () {
     const issueTypeId = this.value;
+    const pharmacyForm = this.closest(".pharmacy-support-form");
+    if (pharmacyForm) {
+      const issueSelect = pharmacyForm.querySelector('[name="select_issue"]');
+      if (!issueSelect) return;
+
+      let matchingOptions = 0;
+      Array.from(issueSelect.options).forEach((option) => {
+        if (!option.value) {
+          option.hidden = false;
+          option.textContent = issueTypeId ? "Select Issue Option" : "Select an issue type first";
+          return;
+        }
+
+        const matchesType = option.dataset.issueType === issueTypeId;
+        option.hidden = !matchesType;
+        if (matchesType) matchingOptions += 1;
+      });
+
+      issueSelect.value = "";
+      issueSelect.disabled = !issueTypeId || matchingOptions === 0;
+      if (issueTypeId && matchingOptions === 0) {
+        issueSelect.options[0].textContent = "No issue options available";
+      }
+      return;
+    }
+
     if (issueTypeId) {
       fetch(`${getIssueOptionLists}?issue_type_id=${issueTypeId}`)
         .then((response) => response.json())
@@ -924,22 +951,23 @@ function applyThemeButton(btn) {
 
 function updateNgoFileDisplay(container, files, submitBtn, fileInput) {
   container.innerHTML = "";
+  const pharmacyForm = fileInput?.closest(".support-form")?.classList.contains("pharmacy-support-form");
 
   if (files.length === 0) {
     container.innerHTML =
       '<span class="ngo-file-name font-normal text-sm">Upload image of the issue</span>';
     if (submitBtn) {
-      submitBtn.disabled = true;
+      submitBtn.disabled = !pharmacyForm;
       submitBtn.classList.remove(
         "cursor-pointer",
         "text-white",
         ...Array.from(submitBtn.classList).filter(c => c.startsWith("bg-"))
       );
-      submitBtn.classList.add(
-        "cursor-not-allowed",
-        "bg-light-gray",
-        "text-medium-gray"
-      );
+      if (pharmacyForm) {
+        submitBtn.classList.add("cursor-pointer", `bg-${getPaginationThemeColor()}`, "text-white");
+      } else {
+        submitBtn.classList.add("cursor-not-allowed", "bg-light-gray", "text-medium-gray");
+      }
     }
     return;
   }
@@ -982,7 +1010,7 @@ function removeNgoFile(index, container, files, submitBtn, fileInput) {
   files.forEach(file => updatedFiles.items.add(file));
   fileInput.files = updatedFiles.files;
   updateNgoFileDisplay(container, files, submitBtn, fileInput);
-  submitBtn.disabled = files.length === 0;
+  submitBtn.disabled = files.length === 0 && !fileInput.closest(".support-form")?.classList.contains("pharmacy-support-form");
 }
 
 // submit btn
@@ -1013,21 +1041,37 @@ document.addEventListener("submit", async function (e) {
     const result = await response.json();
 
     if (result.success) {
-      toastr.success(result.message || "Ticket created successfully...", "Success");
+      const pharmacySuccessNotice = form.querySelector(".pharmacy-ticket-success");
+      if (pharmacySuccessNotice) {
+        pharmacySuccessNotice.textContent = "Issue submitted successfully.";
+        pharmacySuccessNotice.classList.remove("hidden");
+      }
+      if (window.toastr) {
+        window.toastr.success(result.message || "Ticket created successfully...", "Success");
+      } else if (!pharmacySuccessNotice) {
+        window.alert(result.message || "Ticket submitted successfully.");
+      }
 
       // Reload the page but preserve the currently active main tab. Without
       // this, refreshing a Settings page (where the Support form lives as a
       // tab) would fall back to the default "Settings" section and navigate
       // the user away from the Support tab they just submitted on.
-      const activeMainTab = document.querySelector(
-        ".tabs-menu [data-tab].active-tab-main"
-      );
-      if (activeMainTab && activeMainTab.dataset && activeMainTab.dataset.tab) {
-        const reloadUrl = new URL(window.location.href);
-        reloadUrl.searchParams.set("tab", activeMainTab.dataset.tab);
-        window.location.href = reloadUrl.toString();
+      const reloadSupportPage = () => {
+        const activeMainTab = document.querySelector(
+          ".tabs-menu [data-tab].active-tab-main"
+        );
+        if (activeMainTab && activeMainTab.dataset && activeMainTab.dataset.tab) {
+          const reloadUrl = new URL(window.location.href);
+          reloadUrl.searchParams.set("tab", activeMainTab.dataset.tab);
+          window.location.href = reloadUrl.toString();
+        } else {
+          location.reload();
+        }
+      };
+      if (pharmacySuccessNotice) {
+        window.setTimeout(reloadSupportPage, 1600);
       } else {
-        location.reload();
+        reloadSupportPage();
       }
 
       const submitBtn = form.querySelector(".ngo-issue-submit-btn");
@@ -1042,10 +1086,12 @@ document.addEventListener("submit", async function (e) {
       renderTickets();
       renderSupportPagination();
     } else {
-      toastr.error(result.message || "Something went wrong.", "Error");
+      if (window.toastr) window.toastr.error(result.message || "Something went wrong.", "Error");
+      else window.alert(result.message || "Something went wrong.");
     }
   } catch (error) {
-    toastr.error("Something went wrong while submitting your issue.", "Error");
+    if (window.toastr) window.toastr.error("Something went wrong while submitting your issue.", "Error");
+    else window.alert("Something went wrong while submitting your issue.");
   }
 });
 
@@ -1496,7 +1542,6 @@ function highlightCurrentStatus(currentStatus) {
 
       filterTickets(formattedFromDate, formattedToDate);
     });
-  });
 
   let customStartDate = null;
   let customEndDate = null;

@@ -1,14 +1,18 @@
 <!-- Track or Report Issue -->
 <div class="space-y-2">
   <h1 class="font-semibold text-base">Report or Track an Issue</h1>
-  <form action="#" class="support-form issue-form space-y-4">
+  <form action="#" class="support-form issue-form space-y-4{% if user.user_type == 'pharmacy' %} pharmacy-support-form{% endif %}">
     <div class="w-full flex flex-col sm:flex-row items-center gap-5">
       <select
         name="issue_type"
         id="issue_type"
         class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md"
       >
+      {% if user.user_type == 'pharmacy' %}
+      <option value="" selected>Select Issue Type</option>
+      {% else %}
       <option>Select Issue Type</option>
+      {% endif %}
         {% for issue_type in issue_types %}
         <option value="{{ issue_type.id }}">{{ issue_type.name }}</option>
         {% endfor %}
@@ -18,9 +22,15 @@
         <option value="">Select Issue Option</option>
 
         {% for option in issue_options %}
-          <option value="{{ option.id }}">
-            {{ option.issue_type.name }} – {{ option.name }}
+          {% if user.user_type == 'pharmacy' %}
+        <option value="{{ option.id }}" data-issue-type="{{ option.issue_type_id }}" hidden>
+            {{ option.name }}
           </option>
+          {% else %}
+        <option value="{{ option.id }}">
+          {{ option.issue_type.name }} – {{ option.name }}
+        </option>
+          {% endif %}
         {% endfor %}
       </select>
 
@@ -79,12 +89,19 @@
       <!-- Submit button -->
       <button
         type="submit"
+        {% if user.user_type == 'pharmacy' %}
+        class="px-8 text-white bg-dodger-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-dodger-blue focus:ring-offset-2 rounded-[10px] py-2 cursor-pointer ngo-issue-submit-btn"
+        {% else %}
         class="px-8 text-medium-gray bg-light-gray rounded-[10px] py-2 cursor-not-allowed ngo-issue-submit-btn"
         disabled
+        {% endif %}
       >
         Submit
       </button>
     </div>
+    {% if user.user_type == 'pharmacy' %}
+    <p class="pharmacy-ticket-success hidden text-sm font-semibold text-green-700" role="status" aria-live="polite"></p>
+    {% endif %}
   </form>
   <div class="w-full h-0.5 rounded bg-{{ primary_bg }} mt-7"></div>
 </div>

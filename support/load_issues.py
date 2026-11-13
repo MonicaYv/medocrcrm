@@ -36,8 +36,24 @@ data = {
 }
 
 for issue_type_name, issues in data.items():
-    issue_type, created = IssueType.objects.get_or_create(name=issue_type_name)
+    issue_type, _ = IssueType.objects.get_or_create(
+        name=issue_type_name,
+        defaults={"user_types": ["pharmacy"]},
+    )
+    issue_type_user_types = list(issue_type.user_types or [])
+    if "pharmacy" not in issue_type_user_types:
+        issue_type.user_types = [*issue_type_user_types, "pharmacy"]
+        issue_type.save(update_fields=["user_types"])
+
     for issue_name in issues:
-        IssueOption.objects.get_or_create(issue_type=issue_type, name=issue_name)
+        issue_option, _ = IssueOption.objects.get_or_create(
+            issue_type=issue_type,
+            name=issue_name,
+            defaults={"user_types": ["pharmacy"]},
+        )
+        option_user_types = list(issue_option.user_types or [])
+        if "pharmacy" not in option_user_types:
+            issue_option.user_types = [*option_user_types, "pharmacy"]
+            issue_option.save(update_fields=["user_types"])
 
 print("✅ IssueTypes and IssueOptions loaded successfully.")
