@@ -34,7 +34,7 @@
           </div>
         </div>
         <div class="pt-4">
-          {% if product.is_claimed %}
+          <!-- {% if product.is_claimed %}
             <button data-coupon-id="{{ product.id }}" data-code="{{ product.code }}" disabled
               class="bg-gray-400 h-10 w-full rounded-lg flex items-center justify-center gap-2 font-semibold text-sm text-white claim-btn cursor-not-allowed opacity-75">
               #{{ product.code }} (Claimed)
@@ -58,7 +58,38 @@
                 content_copy
               </span>
             </button>
-          {% endif %}
+          {% endif %} -->
+          <div class="pt-4">
+
+            {% if product.is_exhausted %}
+
+              <button data-coupon-id="{{ product.id }}"
+                data-code="{{ product.code }}" disabled
+                class="bg-gray-400 h-10 w-full rounded-lg flex items-center justify-center gap-2 font-semibold text-sm text-white claim-btn cursor-not-allowed opacity-75">
+
+                #{{ product.code }} (Limit Reached)
+
+                <span class="material-symbols-outlined text-[18px]">
+                  block
+                </span>
+              </button>
+
+            {% else %}
+
+              <button data-coupon-id="{{ product.id }}"
+                data-code="{{ product.code }}"
+                class="bg-dodger-blue h-10 w-full rounded-lg flex items-center justify-center gap-2 font-semibold text-sm text-white claim-btn cursor-pointer">
+
+                #{{ product.code }}
+
+                <span class="material-symbols-outlined text-[18px]">
+                  content_copy
+                </span>
+              </button>
+
+            {% endif %}
+
+          </div>
         </div>
       </div>
     </div>

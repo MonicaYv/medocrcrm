@@ -71,6 +71,20 @@ from PIL import Image, UnidentifiedImageError
 PHARMACY_LOW_STOCK_THRESHOLD = 20
 
 
+def get_wallet_balance(user):
+    latest_transaction = (
+        WalletTransaction.objects
+        .filter(user=user)
+        .order_by("-created_at", "-pk")
+        .first()
+    )
+    return (
+        latest_transaction.current_balance
+        if latest_transaction
+        else Decimal("0.00")
+    )
+
+
 def get_dashboard_appointment_date_range(request, today):
     date_filter = request.GET.get("date_filter", "today").strip().lower()
 
@@ -298,6 +312,7 @@ def pharmacy_overview_data(request):
     data["ongoing_orders_count"] = orders_qs.filter(
         order_status__in=[OrderStatusChoices.CONFIRMED, OrderStatusChoices.SHIPPED]
     ).count()
+    data["wallet_balance"] = str(get_wallet_balance(user))
 
     return JsonResponse(data)
 
@@ -470,15 +485,7 @@ def dashboard_home(request):
     # -------------------------------
     # Wallet Balance (All users)
     # -------------------------------
-    last_wallet_txn = (
-        WalletTransaction.objects
-        .filter(user=user)
-        .order_by('-created_at')
-        .first()
-    )
-    context["wallet_balance"] = (
-        last_wallet_txn.current_balance if last_wallet_txn else Decimal("0.00")
-    )
+    context["wallet_balance"] = get_wallet_balance(user)
 
     try:
         # ================= NGO =================
@@ -709,11 +716,15 @@ def dashboard_home(request):
             ).count()
 
 
-            completed_orders_qs = (
+            recent_orders_qs = (
                 UserPurchase.objects
                 .filter(
                     assigned_pharmacy=pharmacy_profile,
-                    order_status=OrderStatusChoices.DELIVERED
+                    order_status__in=[
+                        OrderStatusChoices.CONFIRMED,
+                        OrderStatusChoices.SHIPPED,
+                        OrderStatusChoices.DELIVERED,
+                    ],
                 )
                 .defer("prescriptions", "doctor_name", "patient_name")
                 .select_related("user", "user__userprofile", "address")
@@ -721,8 +732,13 @@ def dashboard_home(request):
                 .order_by("-updated_at", "-created_at")[:3]
             )
 
-            scheduled_orders = []
-            for o in completed_orders_qs:
+            recent_orders = []
+            order_status_labels = {
+                OrderStatusChoices.CONFIRMED: "Accepted",
+                OrderStatusChoices.SHIPPED: "Shipped",
+                OrderStatusChoices.DELIVERED: "Completed",
+            }
+            for o in recent_orders_qs:
                 cust_name = ""
                 if o.user and hasattr(o.user, 'userprofile') and o.user.userprofile:
                     first = o.user.userprofile.first_name or ""
@@ -754,9 +770,12 @@ def dashboard_home(request):
                 else:
                     payment_label = payment_mode
 
-                scheduled_orders.append({
+                recent_orders.append({
                     "id": o.id,
                     "order_status": o.order_status,
+                    "order_status_label": order_status_labels.get(
+                        o.order_status, o.get_order_status_display()
+                    ),
                     "customer_name": cust_name,
                     "delivery_label": delivery_label,
                     "created_at": o.created_at,
@@ -841,7 +860,7 @@ def dashboard_home(request):
                  
                 'contact_person': contact_person,
 
-                'scheduled_orders': scheduled_orders,
+                'recent_orders': recent_orders,
                 'pharmacy_overview': pharmacy_overview,
                 'popular_coupons': popular_coupons,
 
@@ -2267,7 +2286,7 @@ def advance(request):
     last_txn = (
         WalletTransaction.objects
         .filter(user=user)
-        .order_by("-created_at")
+        .order_by("-created_at", "-pk")
         .first()
     )
     last_updated = (
@@ -2362,7 +2381,7 @@ def add_advance_amount(request):
         return JsonResponse({"success": False, "message": "Select payment method"}, status=400)
 
     # 🔹 Get Previous Balance
-    last_txn = WalletTransaction.objects.filter(user=user).order_by("-created_at").first()
+    last_txn = WalletTransaction.objects.filter(user=user).order_by("-created_at", "-pk").first()
     previous_balance = last_txn.current_balance if last_txn else Decimal("0.00")
 
     # 🔹 New Balance
@@ -2579,7 +2598,7 @@ def ajax_advance_summary(request):
     # Current balance: latest transaction across all dates
     latest_tx = WalletTransaction.objects.filter(
         user=user
-    ).order_by("-created_at").first()
+    ).order_by("-created_at", "-pk").first()
 
     current_balance = (
         latest_tx.current_balance
@@ -2682,11 +2701,25 @@ def get_advance_receipt(request, advance_id):
 
     return JsonResponse(response_data)
 
+@require_GET
+@dashboard_login_required
 def pharmacy_order_details(request, order_id):
+    user = request.user_obj
+    if user.user_type != "pharmacy":
+        return JsonResponse({"error": "Pharmacy access required."}, status=403)
+
+    pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+    if not pharmacy_profile:
+        return JsonResponse({"error": "Pharmacy profile not found."}, status=404)
+
+    order_scope = Q(assigned_pharmacy=pharmacy_profile) | Q(
+        assigned_pharmacy__isnull=True,
+        order_status=OrderStatusChoices.PENDING,
+    )
 
     order = (
         UserPurchase.objects
-        .filter(id=order_id)
+        .filter(order_scope, id=order_id)
         .values(
             "id",
             "final_amount",

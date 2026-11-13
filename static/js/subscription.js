@@ -133,8 +133,18 @@ $(document).ready(function () {
                 $(".premium-plan-section .subscription-expiry-date")
                     .text(res.expiry_date || "-");
 
+                // $(".premium-plan-section .subscription-expiry-status")
+                //     .text(res.is_expired ? "(Expired)" : "(Active)")
+                //     .toggleClass("text-strong-red", Boolean(res.is_expired))
+                //     .toggleClass("text-green-600", !res.is_expired);
+
+
                 $(".premium-plan-section .subscription-expiry-status")
-                    .text(res.is_expired ? "(Expired)" : "(Active)")
+                    .text(
+                       res.is_expired
+                          ? "(Expired)"
+                          : `(${res.days_left} days left)`
+                    )
                     .toggleClass("text-strong-red", Boolean(res.is_expired))
                     .toggleClass("text-green-600", !res.is_expired);
 

@@ -369,6 +369,16 @@ $(document).ready(function () {
 
 
 // Prevent clicks inside calendars from closing them
+  // jQuery UI replaces the clicked arrow while changing months. Capture the
+  // event before that replacement so the outside-click handler still knows it
+  // originated inside the calendar.
+  const datepickerNavigationClicks = new WeakSet();
+  document.addEventListener("click", function (event) {
+    if (event.target.closest(".ui-datepicker-prev, .ui-datepicker-next")) {
+      datepickerNavigationClicks.add(event);
+    }
+  }, true);
+
 $(document).on(
     "click",
     ".filterDropdown, .datepicker-container, .ui-datepicker",
@@ -380,6 +390,7 @@ $(document).on(
 
 // Close calendars when clicking outside
 $(document).on("click", function (e) {
+    if (datepickerNavigationClicks.has(e.originalEvent)) return;
 
     if (
         !$(e.target).closest(

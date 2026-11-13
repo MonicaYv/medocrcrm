@@ -1,571 +1,675 @@
-{% extends "dashboard/layout.html" %}
-{% load static %}
-{% block title %}Reports{% endblock %}
+{% extends "dashboard/layout.html" %} {% load static %} {% block title %}Doctor
+Reports{% endblock %} {% block content %}
+<main class="doctor-reports mx-auto w-full max-w-360 px-4 pt-[1.15rem] pb-8 text-report-17243b bg-ghost-white max-[640px]:px-[.45rem] max-[640px]:pt-[.7rem] max-[640px]:pb-[1.2rem] min-[1280px]:px-6 min-[1280px]:pt-[1.3rem]">
+  <div class="my-3">
+    <span class="text-cloud-burst-1 text-sm font-medium">Home</span>
+  </div>
 
+  <header class="flex items-center justify-between gap-4 mb-[.95rem] max-[900px]:items-start max-[900px]:flex-col max-[640px]:gap-[.65rem]">
+    <div>
+      <h1 class="text-dark-black font-semibold text-2xl">Reports</h1>
+      <p class="text-cloud-burst-1 font-medium text-sm pt-2">
+        Track your performance, earnings, and patient analytics
+      </p>
+    </div>
+    <div class="flex items-center justify-end gap-[.35rem] max-[900px]:w-full max-[900px]:justify-start max-[900px]:flex-wrap max-[640px]:gap-[.3rem]">
+      <button type="button" class="inline-flex min-h-9 items-center gap-[.35rem] rounded-lg bg-white2 px-2 py-[.3rem] text-xs text-cloud-burst-1 [&_.material-symbols-outlined]:text-[.9rem] max-[640px]:basis-full max-[640px]:justify-start">
+        <span class="material-symbols-outlined">calendar_month</span>Jul 1 - Jul
+        22, 2025
+      </button>
+      <div
+        class="flex min-h-9 items-center rounded-lg bg-white2 p-[.15rem] [&>button]:h-[1.45rem] [&>button]:rounded-[.3rem] [&>button]:border-0 [&>button]:bg-transparent [&>button]:px-[.4rem] [&>button]:text-[.75rem] [&>button]:text-report-748198 [&>button]:[font:inherit] max-[640px]:flex-1 [&>button]:max-[640px]:flex-1"
+        aria-label="Date range"
+      >
+        <button type="button">7D</button>
+        <button type="button" class="bg-report-eef5ff text-report-0088ff">
+          30D
+        </button>
+        <button type="button">3M</button>
+        <button type="button">Custom</button>
+      </div>
+      <button
+        type="button"
+        id="openExportReport"
+        aria-haspopup="dialog"
+        aria-controls="exportReportDialog"
+        aria-expanded="false"
+        class="inline-flex min-h-9 items-center gap-1 rounded-lg border border-report-0088ff bg-report-0088ff px-[.55rem] py-[.3rem] text-xs font-bold text-white [&_.material-symbols-outlined]:text-[.9rem]"
+      >
+        <span class="material-symbols-outlined">download</span>Export Report
+      </button>
+    </div>
+  </header>
 
-{% block content %}
-      <div class="doctor-report-page flex-grow flex flex-col gap-6 p-4 md:p-8 overflow-y-auto overflow-x-hidden scroll bg-white">
-        <div class="flex gap-2 sm:gap-3 items-center">
-          <span class="material-symbols-outlined !font-semibold text-lg sm:text-xl">patient_list</span>
-          <h1 class="font-semibold text-vase sm:text-lg ms:text-xl">Reports</h1>
-        </div>
+  <section
+    class="grid grid-cols-2 min-[641px]:grid-cols-3 min-[901px]:grid-cols-5 gap-3 mb-5"
+    aria-label="Report summary"
+  >
+    <article class="doctor-reports-summary-card">
+      <div class="doctor-reports-summary-card__top">
+        <span class="doctor-reports-summary-icon doctor-reports-summary-icon--blue">
+          <img src="/static/images/doctor-card-1.svg" alt="first-card">
+        </span
+        ><span class="doctor-reports-summary-card__trend"
+          >↑ 18.4% vs last month</span
+        >
+      </div>
+      <strong>426</strong
+      ><span class="doctor-reports-summary-card__label"
+        >Total Consultations</span
+      >
+    </article>
+    <article class="doctor-reports-summary-card">
+      <div class="doctor-reports-summary-card__top">
+        <span class="doctor-reports-summary-icon doctor-reports-summary-icon--green">
+         <img src="/static/images/doctor-card-2.svg" alt="second-card">
+        </span>
+        <span class="doctor-reports-summary-card__trend">↑ ₹23,200 vs last month</span>
+      </div>
+      <strong>₹1,67,400</strong
+      ><span class="doctor-reports-summary-card__label">Total Earnings</span>
+    </article>
+    <article class="doctor-reports-summary-card">
+      <div class="doctor-reports-summary-card__top">
+        <span class="doctor-reports-summary-icon doctor-reports-summary-icon--orange">
+          <img src="/static/images/doctor-card-3.svg" alt="third-card">
+        </span>
+        <span class="doctor-reports-summary-card__trend">Based on 312 reviews</span>
+      </div>
+      <strong>4.7</strong
+      ><span class="doctor-reports-summary-card__label"
+        >AVG Patient Rating</span
+      >
+    </article>
+    <article class="doctor-reports-summary-card">
+      <div class="doctor-reports-summary-card__top">
+        <span
+          class="doctor-reports-summary-icon doctor-reports-summary-icon--sky"
+          ><img src="/static/images/doctor-card-4.svg" alt="fourth-card"></span
+        ><span class="doctor-reports-summary-card__trend"
+          >↑ 2 min faster than last month</span
+        >
+      </div>
+      <strong>4min</strong
+      ><span class="doctor-reports-summary-card__label">AVG Response Time</span>
+    </article>
+    <article class="doctor-reports-summary-card">
+      <div class="doctor-reports-summary-card__top">
+        <span
+          class="doctor-reports-summary-icon doctor-reports-summary-icon--sky"
+          ><img src="/static/images/doctor-card-5.svg" alt="fifth-card"></span
+        ><span class="doctor-reports-summary-card__trend"
+          >↑ 5% vs last month</span
+        >
+      </div>
+      <strong>68%</strong
+      ><span class="doctor-reports-summary-card__label">Bid Win Rate</span>
+    </article>
+  </section>
 
-        <div class="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4 sm:items-center">
-          <div class="relative">
-            <span class="material-symbols-outlined absolute top-1 left-2 !text-xl">search</span>
-            <input type="text" id="reportSearch" placeholder="Search by name or categories"
-              class="py-1.5 pl-8 pr-2 w-full sm:w-[17rem] text-sm rounded-md border border-blue-haze placeholder:text-medium-gray focus:outline-none" />
+  <section
+    class="w-full border border-report-e8edf4 rounded-[.72rem] p-4 bg-white max-[640px]:p-3"
+    aria-label="Doctor report dashboard"
+  >
+    <div
+      class="flex items-center justify-between gap-3 mb-4 max-[640px]:items-stretch max-[640px]:flex-col max-[640px]:gap-3"
+    >
+      <div
+        class="inline-flex shrink-0 items-start gap-[.3rem] self-stretch whitespace-nowrap border-b-2 border-report-0785f9 px-2 pt-[.3rem] pb-[.48rem] text-[.78rem] font-semibold text-report-1677e8 [&>span]:grid [&>span]:h-[.8rem] [&>span]:min-w-[.8rem] [&>span]:place-items-center [&>span]:rounded-full [&>span]:bg-report-eaf3ff [&>span]:text-[.75rem] max-[640px]:self-start"
+      >
+        Overview <span>12</span>
+      </div>
+      <div class="flex items-center gap-2 flex-1 max-[640px]:w-full">
+        <label
+          class="ml-auto flex h-[1.85rem] w-full max-w-[22rem] items-center gap-[.35rem] rounded-[.35rem] border border-report-e8edf4 px-[.45rem] text-report-8290a4 [&>span]:text-[.9rem] [&>input]:min-w-0 [&>input]:w-full [&>input]:border-0 [&>input]:bg-transparent [&>input]:text-[.75rem] [&>input]:text-report-35435a [&>input]:outline-none [&>input::placeholder]:text-report-9aa6b5 max-[640px]:w-auto max-[640px]:flex-1"
+        >
+          <span class="material-symbols-outlined">search</span>
+          <input
+            type="search"
+            placeholder="Search patient, appointment or issue…"
+            aria-label="Search reports"
+          />
+        </label>
+        <button
+          type="button"
+          class="inline-flex h-[1.85rem] items-center gap-1 rounded-[.35rem] border border-report-e8edf4 bg-white px-2 text-[.75rem] text-report-526179 [&_.material-symbols-outlined]:text-[.8rem]"
+        >
+          Filter <span class="material-symbols-outlined">filter_alt</span>
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="grid grid-cols-1 min-[641px]:grid-cols-2 gap-4 max-[640px]:gap-3"
+    >
+      <article class="doctor-report-card">
+        <div class="doctor-report-card__heading">
+          <div>
+            <h2>Consultation Volume</h2>
+            <p>Daily consultations this month</p>
           </div>
-
-          <div class="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2.5 relative">
-            <p id="doctorReportRangeLabel" class="text-xs sm:text-sm text-dodger-blue whitespace-nowrap">
-              Data shown: {{ report_range_label|default:"Loading report dates…" }}
-            </p>
-            <!-- Filter -->
-            <div class="relative shrink-0">
-              <button id="filterToggle"
-                class="flex items-center justify-center border border-blue-haze rounded-md w-8 h-8">
-                <span class="material-symbols-outlined">tune</span>
-              </button>
-
-              <!-- Dropdown -->
-              <div id="filterDropdown"
-                class="hidden absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-[4px_4px_10px_2px_#00000026] z-50">
-
-                <!-- MAIN MENU -->
-                <div id="mainMenu">
-                  <div class="px-4 py-2 cursor-pointer hover:bg-pale-azure" data-open="date">
-                    Date
-                  </div>
-                  <div class="px-4 py-2 cursor-pointer hover:bg-pale-azure" data-open="visit">
-                    Visit Type
-                  </div>
-                </div>
-
-                <!-- DATE MENU -->
-                <div id="dateMenu" class="hidden">
-                  <div class="px-4 py-2 font-medium bg-gray-50 cursor-pointer" data-back>
-                    Date
-                  </div>
-
-                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
-                    data-type="date" data-value="Today">
-                    <span>Today</span>
-                    <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
-                  </div>
-
-                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
-                    data-type="date" data-value="All">
-                    <span>All dates</span>
-                    <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
-                  </div>
-
-                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
-                    data-type="date" data-value="Week">
-                    <span>Week</span>
-                    <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
-                  </div>
-
-                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
-                    data-type="date" data-value="Month">
-                    <span>Month</span>
-                    <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
-                  </div>
-
-                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
-                    data-type="date" data-value="Custom">
-                    <span>Custom</span>
-                    <span class="flex items-center gap-2">
-                      <span class="date-filter-check material-symbols-outlined hidden text-dodger-blue text-base">check</span>
-                      <span class="material-symbols-outlined text-gray-400">calendar_today</span>
-                    </span>
-                  </div>
-                </div>
-
-                <!-- VISIT TYPE MENU -->
-                <div id="visitMenu" class="hidden">
-                  <div class="px-4 py-2 font-medium bg-gray-50 cursor-pointer" data-back>
-                    Visit Type
-                  </div>
-
-                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
-                    data-type="visit" data-value="All">
-                    All
-                  </div>
-
-                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
-                    data-type="visit" data-value="Home">
-                    Home
-                  </div>
-
-                  <div class="option px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-pale-azure"
-                    data-type="visit" data-value="Clinic">
-                    Clinic
-                  </div>
-                </div>
-
-                <!-- CUSTOM DATE PICKER (shown by the "Custom" date option) -->
-                <div id="doctorReportDatepicker"
-                  class="hidden px-3 pt-2 pb-3 bg-white">
-                  <div class="flex items-center justify-between mb-1">
-                    <p id="doctorReportDateStatus" class="text-xs text-dark-gray">Select start date</p>
-                    <span id="doctorReportDatepickerBack"
-                      class="material-symbols-outlined text-sm text-dark-gray cursor-pointer"
-                      title="Back">arrow_back</span>
-                  </div>
-                  <div class="datepicker-inline"></div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Stats Cards -->
-        <div id="doctorStatsSection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="doctor-report-stat-card bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
-            <div class="flex flex-col justify-between gap-1">
-              <h2 class="text-xs sm:text-sm text-medium-gray">Total Patient</h2>
-              <p id="totalPatients" class="text-base sm:text-lg font-semibold total-patient-count">
-                  {{ total_patients|default:"0" }}
-              </p>
-            </div>
-            <div class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
-              <span class="material-symbols-outlined !font-semibold">patient_list</span>
-            </div>
-          </div>
-          <div class="doctor-report-stat-card bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
-            <div class="flex flex-col justify-between gap-1">
-              <h2 class="text-xs sm:text-sm text-medium-gray">Bids Received</h2>
-              <p id="birdsReceived" class="text-base sm:text-lg font-semibold birds-received-count">
-                  {{ bids_received|default:"0" }}
-              </p>
-            </div>
-            <div class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
-              <span class="material-symbols-outlined !font-semibold">star</span>
-            </div>
-          </div>
-          <div class="doctor-report-stat-card bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
-            <div class="flex flex-col justify-between gap-1">
-              <h2 class="text-xs sm:text-sm text-medium-gray">Quarter growth</h2>
-              <p id="quarterGrowth" class="text-base sm:text-lg font-semibold quarter-growth">
-                  {{ growth|default:"0%" }}
-              </p>
-            </div>
-            <div class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
-              <span class="material-symbols-outlined !font-semibold">paid</span>
-            </div>
-          </div>
-          <div class="doctor-report-stat-card bg-ghost-white p-4 rounded-lg flex items-center justify-between gap-3">
-            <div class="flex flex-col justify-between gap-1">
-              <h2 class="text-xs sm:text-sm text-medium-gray">Average Revenue/Patient</h2>
-              <p id="avgRevenue" class="text-base sm:text-lg font-semibold avg-revenue">
-                  {{ avg_revenue|default:"₹0" }}
-              </p>
-            </div>
-            <div class="bg-light-dodger-blue flex justify-center items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0">
-              <span class="material-symbols-outlined !font-semibold">money_range</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div id="doctorChartsSection" class="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-fr">
-          <!--Heat map-->
-          <div id="doctorHeatmapSection" class="bg-cloud-gray p-4 rounded-xl doctor-report-shadow flex flex-col ">
-            <div class="flex justify-between items-center dropdown relative mb-2">
-              <h3 class="font-semibold">Heatmap</h3>
-              <div class="relative heatmapCalendar">
-
-                <!-- Calendar trigger -->
-                <div class="flex items-center gap-2 cursor-pointer heatmapCalendarToggle">
-                  <span class="text-sm text-medium-gray calendar-date-text">14/3/25</span>
-                  <span class="material-symbols-outlined calendar-icon">calendar_today</span>
-                </div>
-
-                <!-- Calendar Popup -->
-                <div
-                  class="heatmapCalendarPopup hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-[4px_4px_10px_2px_#00000026] z-50">
-
-                  <div class="heatmap-cal-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                    data-value="Today">
-                    <span class="material-symbols-outlined text-dodger-blue">check</span>
-                    Today
-                  </div>
-
-                  <div class="heatmap-cal-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                    data-value="Week">
-                    <span class="material-symbols-outlined text-light-gray">check</span>
-                    Week
-                  </div>
-
-                  <div class="heatmap-cal-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                    data-value="Month">
-                    <span class="material-symbols-outlined text-light-gray">check</span>
-                    Month
-                  </div>
-
-                  <div
-                    class="heatmap-cal-option flex justify-between items-center px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                    data-value="Custom">
-                    <div class="flex items-center gap-3">
-                      <span class="material-symbols-outlined text-light-gray">check</span>
-                      Custom
-                    </div>
-                    <span class="material-symbols-outlined text-gray-400">calendar_today</span>
-                  </div>
-
-                </div>
-              </div>
-
-              <div
-                class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
-                <div class="datepicker-inline"></div>
-              </div>
-            </div>
-            <!-- Time Dropdown -->
-            <div class="dropdown relative inline-block w-full mb-6 shadow-[var(--box-shadow-11)]">
-              <button
-                class="dropdown-btn cursor-pointer w-full bg-white rounded-md border border-cool-steel-blue px-4 py-2 flex justify-between items-center focus:outline-none">
-                <span class="dropdown-value font-regular text-artic-gray">10-12 AM</span>
-                <span class="material-symbols-outlined">keyboard_arrow_down</span>
-              </button>
-
-              <ul class="dropdown-menu absolute hidden mt-1 w-full bg-white rounded-md z-10">
-                <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">8-9 AM</li>
-                <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">10-12 AM</li>
-                <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">5-6 PM</li>
-                <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">9-10 PM</li>
-              </ul>
-            </div>
-            <div id="heatmap" class="!h-[60%] mt-1"></div>
-            <div class="flex justify-center mt-4">
-              <button class="bg-dodger-blue text-white w-full sm:w-[322px] py-2 rounded-lg download-btn cursor-pointer hover:bg-cerulean active:scale-[0.99] transition-all duration-150" data-target="heatmap">
-                Download Report
-              </button>
-            </div>
-
-          </div>
-
-          <!-- Bid Win/Loss Rate Card -->
-          <div id="doctorBidChartSection" class="bg-white rounded-xl p-4 shadow-sm w-full doctor-report-shadow">
-            <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <h3 class="text-sm sm:text-base font-bold text-jungle-navy">
-                Bid Win/Loss Rate <span id="bidChartRangeLabel" class="font-normal text-ebony">(Loading…)</span>
-              </h3>
-              <div class="flex items-center gap-2 ">
-                <div class="relative">
-                  <!-- Calendar trigger -->
-                  <div class="flex items-center gap-2 cursor-pointer calendarToggle whitespace-nowrap">
-                    <span class="text-sm text-medium-gray calendar-date-text">14/3/25</span>
-                    <span class="material-symbols-outlined calendar-icon">calendar_today</span>
-                  </div>
-
-                  <!-- Calendar Popup -->
-                  <div
-                    class="calendarPopup hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-[4px_4px_10px_2px_#00000026] z-50">
-
-                    <div class="calendar-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                      data-value="Today">
-                      <span class="material-symbols-outlined text-dodger-blue">check</span>
-                      Today
-                    </div>
-
-                    <div class="calendar-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                      data-value="Week">
-                      <span class="material-symbols-outlined text-light-gray">check</span>
-                      Week
-                    </div>
-
-                    <div class="calendar-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                      data-value="Month">
-                      <span class="material-symbols-outlined text-light-gray">check</span>
-                      Month
-                    </div>
-
-                    <div
-                      class="calendar-option flex justify-between items-center px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                      data-value="Custom">
-                      <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-light-gray">check</span>
-                        Custom
-                      </div>
-                      <span class="material-symbols-outlined text-gray-400">calendar_today</span>
-                    </div>
-                  </div>
-
-                </div>
-
-              </div>
-            </div>
-
-            <!-- Time Dropdown -->
-            <div class="dropdown relative inline-block w-full mb-2 shadow-[var(--box-shadow-11)]">
-              <button
-                class="dropdown-btn cursor-pointer w-full bg-white rounded-md border border-cool-steel-blue px-4 py-2 flex justify-between items-center focus:outline-none">
-                <span class="dropdown-value font-regular text-artic-gray">10-12 AM</span>
-                <span class="material-symbols-outlined">keyboard_arrow_down</span>
-              </button>
-
-              <ul class="dropdown-menu absolute hidden mt-1 w-full bg-white rounded-md z-10">
-                <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">8-9 AM</li>
-                <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">10-12 AM</li>
-                <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">5-6 PM</li>
-                <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">9-10 PM</li>
-              </ul>
-            </div>
-
-            <!-- Legend -->
-            <div class="flex items-center gap-4 mt-4 text-xs text-gray-600 mb-8">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-mint-emerald"></span>
-                Bids Won
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-bright-red"></span>
-                Bids Lost
-              </div>
-            </div>
-            <!-- Chart + Y Axis -->
-            <div class="flex gap-3 overflow-x-auto sm:overflow-visible">
-              <!-- Y Axis -->
-              <div class="hidden sm:flex flex-col justify-between text-[10px] text-gray-400 h-48">
-                <span>100</span>
-                <span>75</span>
-                <span>50</span>
-                <span>25</span>
-                <span>0</span>
-              </div>
-
-              <!-- Bars -->
-              <div id="bidChartContainer" class="bid-chart-container flex-1 flex items-end justify-between h-40 sm:h-48 min-w-[480px]">
-
-              </div>
-               
-            </div>
-
-            <!-- Note -->
-            <p class="text-xs sm:text-sm font-bold text-dark-gray mt-2">
-              (Total bids per day = Won + Lost)
-            </p>
-
-            <div class="flex justify-center mt-4">
-              <button class="bg-dodger-blue text-white w-full sm:w-[322px] py-2 rounded-lg download-btn cursor-pointer hover:bg-cerulean active:scale-[0.99] transition-all duration-150" data-target="bidChartContainer">
-                Download Report
-              </button>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Consolation Fee and Appointments -->
-        <div id="doctorConsultationSection" class="bg-white rounded-xl shadow-lg flex flex-col doctor-report-shadow">
-          <!-- Header -->
-          <div class="flex items-center justify-between p-3">
-            <h3 class="text-ebony font-semibold text-base">Consolation fee and appointments</h3>
-            <div class="relative consolidationCalendar">
-
-              <div class="flex items-center gap-2 cursor-pointer consolidationCalendarToggle">
-                <span class="text-sm text-medium-gray calendar-date-text">14/3/25</span>
-                <span class="material-symbols-outlined calendar-icon">calendar_today</span>
-              </div>
-
-              <div
-                class="consolidationCalendarPopup hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-[4px_4px_10px_2px_#00000026] z-50">
-
-                <div
-                  class="consolidation-cal-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                  data-value="Today">
-                  <span class="material-symbols-outlined text-dodger-blue">check</span>
-                  Today
-                </div>
-
-                <div
-                  class="consolidation-cal-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                  data-value="Week">
-                  <span class="material-symbols-outlined text-light-gray">check</span>
-                  Week
-                </div>
-
-                <div
-                  class="consolidation-cal-option flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                  data-value="Month">
-                  <span class="material-symbols-outlined text-light-gray">check</span>
-                  Month
-                </div>
-
-                <div
-                  class="consolidation-cal-option flex justify-between items-center px-4 py-2 cursor-pointer hover:bg-pale-azure"
-                  data-value="Custom">
-                  <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-light-gray">check</span>
-                    Custom
-                  </div>
-                  <span class="material-symbols-outlined text-gray-400">calendar_today</span>
-                </div>
-
-              </div>
-              <!-- ✅ ADD DATE PICKER HERE -->
-              <input type="date" class="absolute right-0 mt-2 hidden consolidationDatePicker z-[9999]" />
-            </div>
-
-          </div>
-          <!-- Table -->
-          <div class="overflow-x-auto p-4">
-            <table id="consultationTable" class="w-full border-seperate ">
-              <colgroup>
-                <col class="w-[45%] sm:w-[55%]">
-                <col class="w-[18%] sm:w-[15%]">
-                <col class="w-[18%] sm:w-[15%]">
-                <col class="w-[19%] sm:w-[15%]">
-              </colgroup>
-
-              <thead class="bg-lightest-blue ">
-                <tr>
-                  <th
-                    class="rounded-l-lg text-left px-4 py-3 text-dark-slate-blue-gray font-semibold text-xs sm:text-sm">
-                    Day</th>
-                  <th class="text-right px-4 py-3 text-dark-slate-blue-gray font-semibold text-xs sm:text-sm">Appt</th>
-                  <th class="text-right px-4 py-3 text-dark-slate-blue-gray font-semibold text-xs sm:text-sm">Avg. Fee
-                  </th>
-                  <th
-                    class="rounded-r-lg text-right px-4 py-3 text-dark-slate-blue-gray font-semibold text-xs sm:text-sm">
-                    Earnings
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="consultation-table-body">
-                <!-- Row 1 -->
-                <!-- <tr>
-                  <td class="px-4 py-1 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-azure-radiance"></span> Monday
-                  </td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr> -->
-                <!-- Row 2 -->
-                <!-- <tr class="">
-                  <td class="px-4 py-1 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-light-green"></span> Tuesday
-                  </td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">20</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr> -->
-                <!-- Row 3 -->
-                <!-- <tr class="">
-                  <td class="px-4 py-1 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-golden-gold"></span> Wednesday
-                  </td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td> -->
-                  <!-- <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr> -->
-                <!-- Row 4 -->
-                <!-- <tr class="">
-                  <td class="px-4 py-1 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-safety-orange"></span> Thursday
-                  </td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr> -->
-                <!-- Row 5 -->
-                <!-- <tr class="">
-                  <td class="px-4 py-1 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-dark-yellow"></span> Friday
-                  </td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">15</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr> -->
-                <!-- Row 6 -->
-                <!-- <tr class=""> -->
-                  <!-- <td class="px-4 py-1 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-dodger-blue"></span> Saturday
-                  </td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">12</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr> -->
-                <!-- Row 7 -->
-                <!-- <tr class="">
-                  <td class="px-4 py-1 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-crimson-red"></span> Sunday
-                  </td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">10</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹800</td>
-                  <td class="text-right px-4 py-1 text-deep-blue font-regular text-sm">₹5,000</td>
-                </tr> -->
-
-                <!-- <tr> -->
-                  <!-- Day column: empty -->
-                  <!-- <td></td> -->
-
-                  <!-- Appt + Avg Fee + Earnings -->
-                  <!-- <td colspan="3"
-                    class="border-t border-gray-300 py-1 text-center font-semibold text-xs sm:text-sm whitespace-normal">
-                    <span class="mr-6">Total</span>
-                    <span class="mr-15">-</span>
-                    <span class="mr-6">88</span>
-                    <span class="mr-6">=</span>
-                    <span class="font-bold">₹35,000</span>
-                  </td>
-                </tr> -->
-
-              </tbody>
-            </table>
-          </div>
-          <!-- FOOTER BUTTONS -->
-          <div class="flex flex-col sm:flex-row sm:justify-end gap-3 pb-4 pr-4">
-            <button
-              class="w-full sm:w-[157px] flex items-center justify-center gap-2 px-6 py-2 rounded-[10px] bg-bright-royal-blue text-white download-btn cursor-pointer hover:bg-cerulean active:scale-[0.99] transition-all duration-150" data-target="consultationTable" data-type="pdf">
-              <span class="material-symbols-outlined text-lg leading-none">picture_as_pdf</span>
-              <span class="text-sm leading-none">PDF</span>
-            </button>
-
-            <button
-              class="w-full sm:w-[157px] flex items-center justify-center gap-2 px-6 py-2 rounded-[10px] bg-shamrock-green text-white download-btn cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all duration-150" data-target="consultationTable" data-type="excel">
-              <span class="material-symbols-outlined text-lg leading-none">download</span>
-              <span class="text-sm leading-none">Excel</span>
+          <div class="doctor-report-filter" aria-label="Consultation type">
+            <button type="button">Video</button
+            ><button type="button">Voice</button
+            ><button type="button">In-Person</button
+            ><button type="button" class="doctor-report-filter__active">
+              All
             </button>
           </div>
-
         </div>
+        <div class="mt-[.4rem] h-[9.1rem] mx-[.1rem] max-[640px]:h-40">
+          <canvas
+            id="consultationVolumeChart"
+            aria-label="Consultation volume line chart"
+          ></canvas>
+        </div>
+        <div
+          class="mt-[.4rem] grid grid-cols-4 gap-[.3rem] [&>div]:flex [&>div]:min-w-0 [&>div]:flex-col [&>div]:gap-[.22rem] [&>div>span]:text-[.75rem] [&>div>span]:text-report-8190a4 [&>div>strong]:whitespace-nowrap [&>div>strong]:text-[.75rem] [&>div>strong]:font-semibold [&>div>strong]:text-report-25334a max-[360px]:grid-cols-2 max-[360px]:gap-y-[.45rem]"
+        >
+          <div><span>Today</span><strong>19 consultations</strong></div>
+          <div><span>This Week</span><strong>89 consultations</strong></div>
+          <div><span>This Month</span><strong>426 consultations</strong></div>
+          <div>
+            <span>Peak Day</span
+            ><strong class="doctor-report-highlight">Jul 15 (21)</strong>
+          </div>
+        </div>
+      </article>
 
-  <style>
-    .download-btn {
-      cursor: pointer !important;
-    }
-    .download-btn:hover {
-      opacity: 0.92;
-      filter: brightness(0.96);
-    }
-    .download-btn:active {
-      transform: scale(0.98);
-    }
-    .download-btn:disabled, .download-btn[disabled] {
-      cursor: not-allowed !important;
-      opacity: 0.65 !important;
-      pointer-events: none !important;
-    }
-  </style>
-{% endblock %}
+      <article class="doctor-report-card">
+        <div class="doctor-report-card__heading">
+          <div>
+            <h2>Consultation Volume</h2>
+            <p>Daily consultation this month</p>
+          </div>
+          <div class="doctor-report-filter" aria-label="Consultation type">
+            <button type="button">Video</button
+            ><button type="button">Voice</button
+            ><button type="button">In-Person</button
+            ><button type="button" class="doctor-report-filter__active">
+              All
+            </button>
+          </div>
+        </div>
+        <div
+          class="flex min-h-44 items-center justify-center gap-[.7rem] max-[640px]:min-h-40"
+        >
+          <div
+            class="relative h-[9.5rem] w-[min(48%,9.5rem)] shrink-0 max-[640px]:w-[min(48%,10rem)]"
+          >
+            <canvas
+              id="consultationTypeChart"
+              aria-label="Consultation type doughnut chart"
+            ></canvas>
+            <div class="doctor-report-chart-center">
+              <strong>426</strong><span>Total</span>
+            </div>
+          </div>
+          <div
+            class="grid flex-1 gap-[.7rem] [&>div]:grid [&>div]:grid-cols-[.45rem_minmax(0,1fr)_auto] [&>div]:items-center [&>div]:gap-[.35rem] [&>div]:whitespace-nowrap [&>div]:text-[.75rem] [&>div]:text-report-405068 [&_strong]:text-[.75rem] [&_strong]:font-medium [&_strong]:text-report-2f3c51"
+          >
+            <div>
+              <i
+                class="doctor-report-legend-dot doctor-report-legend-dot--green"
+              ></i
+              ><span>Clinic Visit</span><strong>145&nbsp; 34%</strong>
+            </div>
+            <div>
+              <i
+                class="doctor-report-legend-dot doctor-report-legend-dot--orange"
+              ></i
+              ><span>Home Visit</span><strong>89&nbsp; 21%</strong>
+            </div>
+            <div>
+              <i
+                class="doctor-report-legend-dot doctor-report-legend-dot--green"
+              ></i
+              ><span>Video Call</span><strong>77&nbsp; 18%</strong>
+            </div>
+            <div>
+              <i
+                class="doctor-report-legend-dot doctor-report-legend-dot--purple"
+              ></i
+              ><span>Voice Call</span><strong>51&nbsp; 12%</strong>
+            </div>
+          </div>
+        </div>
+      </article>
 
-{% block extra_js %}
-<!-- amCharts 4 for Vector Heatmap -->
-<script src="https://www.amcharts.com/lib/4/core.js"></script>
-<script src="https://www.amcharts.com/lib/4/maps.js"></script>
-<script src="https://www.amcharts.com/lib/4/geodata/india2019High.js"></script>
-<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
-<!-- jsPDF and html2canvas for instant client-side PDF downloads -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<!-- Page Navigation & Interaction Scripts -->
-<script src="/static/js/tabs.js"></script>
-<script src="/static/js/table-pagination.js"></script>
-<script src="/static/js/doctor-reports.js?v=20261112-calendar-nav-fix"></script>
+      <article class="doctor-report-card min-h-[12.5rem]">
+        <div class="doctor-report-card__heading">
+          <div>
+            <h2>Monthly Earnings</h2>
+            <p>Last 6 months</p>
+          </div>
+          <strong class="whitespace-nowrap text-[.82rem] text-report-0785f9"
+            >↑ ₹1,67,400</strong
+          >
+        </div>
+        <div class="mt-[.3rem] h-28">
+          <canvas
+            id="monthlyEarningsChart"
+            aria-label="Monthly earnings bar chart"
+          ></canvas>
+        </div>
+        <div
+          class="mt-1 grid grid-cols-3 gap-2 [&>div]:flex [&>div]:min-w-0 [&>div]:flex-col [&>div]:gap-[.22rem] [&>div>span]:text-[.75rem] [&>div>span]:text-report-8190a4 [&>div>strong]:whitespace-nowrap [&>div>strong]:text-[.75rem] [&>div>strong]:font-semibold [&>div>strong]:text-report-25334a"
+        >
+          <div><span>Avg Monthly</span><strong>₹1,22,300</strong></div>
+          <div>
+            <span>Best Month</span
+            ><strong class="doctor-report-highlight">Jul 2025</strong>
+          </div>
+          <div>
+            <span>Growth</span
+            ><strong class="!text-report-10b95d">+16.0%</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="doctor-report-card doctor-report-card--section-title">
+        <h2>Performance Metrics</h2>
+        <div class="grid gap-[.65rem]">
+          <div class="doctor-report-metric-row">
+            <div><span>Bid Conversion Rate</span><strong>68%</strong></div>
+            <i><b class="bg-report-02c5a5 w-[82%]"></b></i>
+          </div>
+          <div class="doctor-report-metric-row">
+            <div><span>Appointment Completion</span><strong>68%</strong></div>
+            <i><b class="bg-report-21c85e w-[82%]"></b></i>
+          </div>
+          <div class="doctor-report-metric-row">
+            <div><span>Response Time Score</span><strong>92/100</strong></div>
+            <i><b class="bg-report-0785f9 w-[88%]"></b></i>
+          </div>
+          <div class="doctor-report-metric-row">
+            <div><span>Patient Retention</span><strong>71%</strong></div>
+            <i><b class="bg-report-d52ce4 w-[64%]"></b></i>
+          </div>
+          <div class="doctor-report-metric-row">
+            <div><span>Prescription Rate</span><strong>88%</strong></div>
+            <i><b class="bg-report-ff922b w-[88%]"></b></i>
+          </div>
+          <div class="doctor-report-metric-row">
+            <div><span>No Show Rate</span><strong>4%</strong></div>
+            <i><b class="bg-report-ff4357 w-[8%]"></b></i>
+          </div>
+        </div>
+      </article>
+
+      <article class="doctor-report-card min-h-44">
+        <div class="doctor-report-card__heading">
+          <div>
+            <h2>This Week</h2>
+            <p>Jul 16 - 22, 2025</p>
+          </div>
+        </div>
+        <div class="mt-[.7rem] grid gap-[.28rem]">
+          <div
+            class="doctor-report-heatmap-row doctor-report-heatmap-row--header"
+          >
+            <span></span><span>Mon</span><span>Tue</span><span>Wed</span
+            ><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div class="doctor-report-heatmap-row">
+            <span>Morning</span
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--medium"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--high"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--light"
+            ></i
+            ><i class="doctor-report-heatmap-cell"></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--medium"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--high"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--medium"
+            ></i>
+          </div>
+          <div class="doctor-report-heatmap-row">
+            <span>Afternoon</span><i class="doctor-report-heatmap-cell"></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--light"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--medium"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--high"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--light"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--high"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--high"
+            ></i>
+          </div>
+          <div class="doctor-report-heatmap-row">
+            <span>Evening</span
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--medium"
+            ></i
+            ><i class="doctor-report-heatmap-cell"></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--medium"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--high"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--light"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--medium"
+            ></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--light"
+            ></i>
+          </div>
+          <div class="doctor-report-heatmap-row">
+            <span>Night</span
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--light"
+            ></i
+            ><i class="doctor-report-heatmap-cell"></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--light"
+            ></i
+            ><i class="doctor-report-heatmap-cell"></i
+            ><i class="doctor-report-heatmap-cell"></i
+            ><i
+              class="doctor-report-heatmap-cell doctor-report-heatmap-cell--light"
+            ></i
+            ><i class="doctor-report-heatmap-cell"></i>
+          </div>
+        </div>
+        <div
+          class="mt-[.8rem] flex gap-[1.2rem] [&>div]:flex [&>div]:flex-col [&>div]:gap-[.22rem] [&>div>span]:text-[.75rem] [&>div>span]:text-report-8b97a8 [&>div>strong]:text-[.75rem] [&>div>strong]:text-report-4a576b max-[360px]:gap-[.65rem]"
+        >
+          <div>
+            <span>Busiest Day</span><strong>Thursday (16 appts)</strong>
+          </div>
+          <div><span>Peak Hours</span><strong>10 AM – 12 PM</strong></div>
+        </div>
+      </article>
+
+      <article class="doctor-report-card doctor-report-card--section-title">
+        <h2>Top Health Issues</h2>
+        <div class="grid gap-[.62rem]">
+          <div class="doctor-report-issue-row">
+            <span>Diabetes Management</span
+            ><i><b class="bg-report-0785f9 w-[96%]"></b></i><strong>48</strong>
+          </div>
+          <div class="doctor-report-issue-row">
+            <span>Hypertension/BP</span
+            ><i><b class="bg-report-d52ce4 w-[82%]"></b></i><strong>41</strong>
+          </div>
+          <div class="doctor-report-issue-row">
+            <span>Respiratory Infection</span
+            ><i><b class="bg-report-02c5a5 w-[76%]"></b></i><strong>38</strong>
+          </div>
+          <div class="doctor-report-issue-row">
+            <span>General Consultation</span
+            ><i><b class="bg-report-21c85e w-[68%]"></b></i><strong>34</strong>
+          </div>
+          <div class="doctor-report-issue-row">
+            <span>Joint / Back Pain</span
+            ><i><b class="bg-report-ff922b w-[58%]"></b></i><strong>29</strong>
+          </div>
+          <div class="doctor-report-issue-row">
+            <span>Skin Conditions</span
+            ><i><b class="bg-report-ff4357 w-[48%]"></b></i><strong>24</strong>
+          </div>
+          <div class="doctor-report-issue-row">
+            <span>Anxiety / Mental Health</span
+            ><i><b class="bg-report-635bff w-[42%]"></b></i><strong>19</strong>
+          </div>
+          <div class="doctor-report-issue-row">
+            <span>Post-op Follow-up</span
+            ><i><b class="bg-report-ff922b w-[34%]"></b></i><strong>16</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="doctor-report-card col-span-full max-[640px]:col-span-1">
+        <h2>Patient Demographics</h2>
+        <div
+          class="grid grid-cols-[8rem_minmax(0,1fr)] items-center gap-x-4 gap-y-[.2rem] px-[.1rem] py-[.6rem] pb-[.1rem] max-[640px]:grid-cols-[7rem_minmax(0,1fr)] max-[640px]:gap-x-[.45rem]"
+        >
+          <div
+            class="relative h-28 w-28 justify-self-center max-[640px]:h-24 max-[640px]:w-24"
+          >
+            <canvas
+              id="patientDemographicsChart"
+              aria-label="Patient demographics doughnut chart"
+            ></canvas>
+            <div class="doctor-report-chart-center">
+              <strong>426</strong><span>Total</span>
+            </div>
+          </div>
+          <div
+            class="grid gap-[.4rem] [&>strong]:mb-[.05rem] [&>strong]:text-[.75rem] [&>strong]:font-semibold [&>strong]:text-report-35435a [&>div]:grid [&>div]:grid-cols-[2rem_minmax(0,1fr)] [&>div]:items-center [&>div]:gap-[.4rem] [&>div>span]:text-[.75rem] [&>div>span]:text-report-7e8b9e [&_i]:block [&_i]:h-[.28rem] [&_i]:overflow-hidden [&_i]:rounded-full [&_i]:bg-report-eff3f8 [&_b]:block [&_b]:h-full [&_b]:rounded-[inherit] [&_b]:bg-report-0785f9"
+          >
+            <strong>Age Group</strong>
+            <div>
+              <span>18-30</span><i><b class="w-[25%]"></b></i>
+            </div>
+            <div>
+              <span>31-45</span><i><b class="w-[42%]"></b></i>
+            </div>
+            <div>
+              <span>46-60</span><i><b class="w-[24%]"></b></i>
+            </div>
+            <div>
+              <span>60+</span><i><b class="w-[9%]"></b></i>
+            </div>
+          </div>
+          <p
+            class="col-start-1 m-0 mt-[-.1rem] text-center text-[.75rem] text-report-56647a"
+          >
+            M 58% / F 45%
+          </p>
+        </div>
+      </article>
+
+      <section
+        class="col-span-full max-[640px]:col-span-1"
+        aria-label="Recent activity"
+      >
+        <div
+          class="my-[.1rem] mb-[.35rem] flex items-center justify-between [&>h2]:m-0 [&>h2]:text-[.9rem] [&>h2]:leading-[1.3] [&>h2]:font-semibold [&>h2]:text-report-19273e [&>button]:border-0 [&>button]:bg-transparent [&>button]:text-[.75rem] [&>button]:text-report-0785f9 [&>button]:[font:inherit]"
+        >
+          <h2>Recent Activity</h2>
+          <button type="button">View all</button>
+        </div>
+        <ul
+          class="m-0 grid list-none gap-y-3 p-0 [&>li]:grid [&>li]:min-h-[2.05rem] [&>li]:grid-cols-[1.45rem_minmax(0,1fr)_auto] [&>li]:items-center [&>li]:gap-[.55rem] [&>li>div]:min-w-0 [&>li>div>strong]:block [&>li>div>strong]:overflow-hidden [&>li>div>strong]:text-ellipsis [&>li>div>strong]:whitespace-nowrap [&>li>div>strong]:text-[.75rem] [&>li>div>strong]:font-semibold [&>li>div>strong]:text-report-243248 [&>li>div>p]:mt-[.15rem] [&>li>div>p]:overflow-hidden [&>li>div>p]:text-ellipsis [&>li>div>p]:whitespace-nowrap [&>li>div>p]:text-[.75rem] [&>li>div>p]:text-report-8995a7 [&>li>time]:whitespace-nowrap [&>li>time]:text-[.75rem] [&>li>time]:text-report-8995a7 max-[640px]:[&>li]:grid-cols-[1.35rem_minmax(0,1fr)_auto] max-[640px]:[&>li]:gap-[.4rem]"
+        >
+          <li>
+            <span
+              class="doctor-report-activity-icon doctor-report-activity-icon--green"
+              ><span class="material-symbols-outlined">check_circle</span></span
+            >
+            <div>
+              <strong>Consultation Completed</strong>
+              <p>Pt Rachel Kate Clinic Visit $400 earned</p>
+            </div>
+            <time>09:31 AM</time>
+          </li>
+          <li>
+            <span
+              class="doctor-report-activity-icon doctor-report-activity-icon--yellow"
+              ><span class="material-symbols-outlined">star</span></span
+            >
+            <div>
+              <strong>Consultation Completed</strong>
+              <p>Pt Rachel Kate Clinic Visit $400 earned</p>
+            </div>
+            <time>09:31 AM</time>
+          </li>
+          <li>
+            <span
+              class="doctor-report-activity-icon doctor-report-activity-icon--blue"
+              ><span class="material-symbols-outlined">sell</span></span
+            >
+            <div>
+              <strong>Bid Won</strong>
+              <p>REQ 5501 Kidney Stone $480 bid accepted</p>
+            </div>
+            <time>10:05 AM</time>
+          </li>
+          <li>
+            <span
+              class="doctor-report-activity-icon doctor-report-activity-icon--cyan"
+              ><span class="material-symbols-outlined">videocam</span></span
+            >
+            <div>
+              <strong>Video Call Started</strong>
+              <p>CON-1001 Pt Arjun Mehta Diabetes Mgmt</p>
+            </div>
+            <time>10:05 AM</time>
+          </li>
+          <li>
+            <span
+              class="doctor-report-activity-icon doctor-report-activity-icon--red"
+              ><span class="material-symbols-outlined">warning</span></span
+            >
+            <div>
+              <strong>Bid Expired</strong>
+              <p>REQ - 5503 Diabetes Mgmt Timer ran out</p>
+            </div>
+            <time>10:05 AM</time>
+          </li>
+          <li>
+            <span
+              class="doctor-report-activity-icon doctor-report-activity-icon--green"
+              ><span class="material-symbols-outlined"
+                >currency_rupee</span
+              ></span
+            >
+            <div>
+              <strong>Payment Received</strong>
+              <p>$ 700 Pt Karen Cooper Home Visit</p>
+            </div>
+            <time>10:05 AM</time>
+          </li>
+          <li>
+            <span
+              class="doctor-report-activity-icon doctor-report-activity-icon--pink"
+              ><span class="material-symbols-outlined"
+                >calendar_month</span
+              ></span
+            >
+            <div>
+              <strong>Payment Received</strong>
+              <p>$ 700 Pt Karen Cooper Home Visit</p>
+            </div>
+            <time>10:05 AM</time>
+          </li>
+          <li>
+            <span
+              class="doctor-report-activity-icon doctor-report-activity-icon--blue"
+              ><span class="material-symbols-outlined">sell</span></span
+            >
+            <div>
+              <strong>Prescription Sent</strong>
+              <p>CON-0997 Pt Josh Kerr dispatched</p>
+            </div>
+            <time>10:05 AM</time>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </section>
+</main>
+
+<div class="doctor-report-export-overlay" id="exportReportDialog" hidden>
+  <section
+    class="doctor-report-export-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="exportReportTitle"
+    tabindex="-1"
+  >
+    <header class="doctor-report-export-header">
+      <h2 id="exportReportTitle">Export Report</h2>
+      <button class="doctor-report-export-close" type="button" aria-label="Close export dialog" data-close-export>
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </header>
+
+    <div class="doctor-report-export-body">
+      <fieldset class="doctor-report-export-fieldset">
+        <legend>Select Report Types</legend>
+        <div class="doctor-report-type-list">
+          <button class="doctor-report-type-option doctor-report-type-option--full" type="button" aria-pressed="true" data-report-type>
+            <span class="doctor-report-option-icon doctor-report-option-icon--blue"><span class="material-symbols-outlined" aria-hidden="true">bar_chart</span></span>
+            <span><strong>Full Performance Report</strong><small>All meterial earning consultation</small></span>
+          </button>
+          <div class="doctor-report-type-group">
+            <button class="doctor-report-type-option" type="button" aria-pressed="false" data-report-type>
+              <span class="doctor-report-option-icon doctor-report-option-icon--blue"><span class="material-symbols-outlined" aria-hidden="true">currency_rupee</span></span>
+              <span><strong>Earnings Statement</strong><small>Income fees payour breakdown</small></span>
+            </button>
+            <button class="doctor-report-type-option" type="button" aria-pressed="false" data-report-type>
+              <span class="doctor-report-option-icon doctor-report-option-icon--blue"><span class="material-symbols-outlined" aria-hidden="true">person_edit</span></span>
+              <span><strong>Patient Analytics</strong><small>Income fees payout breakdown</small></span>
+            </button>
+            <button class="doctor-report-type-option" type="button" aria-pressed="false" data-report-type>
+              <span class="doctor-report-option-icon doctor-report-option-icon--orange"><span class="material-symbols-outlined" aria-hidden="true">star</span></span>
+              <span><strong>Review Summary</strong><small>Demographics retention activity</small></span>
+            </button>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="doctor-report-export-fieldset">
+        <legend>Date Range</legend>
+        <div class="doctor-report-date-range">
+          <label><span class="sr-only">Start date</span><input type="date" value="2026-07-01"></label>
+          <label><span class="sr-only">End date</span><input type="date" value="2026-07-01"></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="doctor-report-export-fieldset">
+        <legend class="doctor-report-export-subheading"><span class="material-symbols-outlined" aria-hidden="true">calculate</span>Bid / Order Details</legend>
+        <div class="doctor-report-format-options" role="group" aria-label="Export format">
+          <button type="button" aria-pressed="true" class="doctor-report-format-option doctor-report-format-option--selected">PDF</button>
+          <button type="button" aria-pressed="false" class="doctor-report-format-option">Excel(xlsx)</button>
+          <button type="button" aria-pressed="false" class="doctor-report-format-option">CSV</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="doctor-report-export-fieldset">
+        <legend>Include Section</legend>
+        <div class="doctor-report-section-options">
+          <label><input type="checkbox" checked><span class="doctor-report-checkbox" aria-hidden="true"><span class="material-symbols-outlined">check</span></span><span>Overview &amp; KPI</span></label>
+          <label><input type="checkbox" checked><span class="doctor-report-checkbox" aria-hidden="true"><span class="material-symbols-outlined">check</span></span><span>Earnings details</span></label>
+          <label><input type="checkbox" checked><span class="doctor-report-checkbox" aria-hidden="true"><span class="material-symbols-outlined">check</span></span><span>Appointment Log</span></label>
+          <label><input type="checkbox" checked><span class="doctor-report-checkbox" aria-hidden="true"><span class="material-symbols-outlined">check</span></span><span>Patient list</span></label>
+          <label><input type="checkbox" checked><span class="doctor-report-checkbox" aria-hidden="true"><span class="material-symbols-outlined">check</span></span><span>Bid History</span></label>
+          <label><input type="checkbox"><span class="doctor-report-checkbox" aria-hidden="true"><span class="material-symbols-outlined">check</span></span><span>Bid History</span></label>
+        </div>
+      </fieldset>
+    </div>
+
+    <footer class="doctor-report-export-footer">
+      <button type="button" class="doctor-report-export-cancel" data-close-export>Close</button>
+      <button type="button" class="doctor-report-export-submit" data-close-export><span class="material-symbols-outlined" aria-hidden="true">download</span>Generate &amp; Download</button>
+    </footer>
+  </section>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script src="{% static 'js/doctor-reports.js' %}?v=20261113-1"></script>
 {% endblock %}

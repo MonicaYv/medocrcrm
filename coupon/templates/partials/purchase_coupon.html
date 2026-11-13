@@ -1,4 +1,36 @@
                     <div class="tab-content purchase-coupons mt-5">
+                        <style>
+                            #popular-coupons .popular-coupon-row {
+                                display: grid;
+                                grid-template-columns: minmax(0, 1fr) 14rem 1px 10rem;
+                                align-items: center;
+                                gap: 1.5rem;
+                                width: 100%;
+                            }
+                            #popular-coupons .popular-coupon-details {
+                                min-width: 0;
+                                overflow-wrap: anywhere;
+                            }
+                            #popular-coupons .popular-coupon-redemption,
+                            #popular-coupons .popular-coupon-code {
+                                min-width: 0;
+                                width: 100%;
+                            }
+                            #popular-coupons .popular-coupon-divider {
+                                height: 5rem;
+                                width: 1px;
+                                background: #007bff;
+                            }
+                            @media (max-width: 1023px) {
+                                #popular-coupons .popular-coupon-row {
+                                    grid-template-columns: minmax(0, 1fr);
+                                    gap: 1rem;
+                                }
+                                #popular-coupons .popular-coupon-divider {
+                                    display: none;
+                                }
+                            }
+                        </style>
                         <p class="font-bold text-lg text-blue-charcoal">Coupons</p>
                         <div class="mt-2 flex items-center gap-4 overflow-x-auto no-scrollbar">
                             {% for coupon in coupons|slice:":5" %}
@@ -133,26 +165,26 @@
                             {% endfor %}
                         </div>
                         <!--Popular Coupons section-->
-                        <div class="flex justify-between items-center pt-6">
-                            <p class="font-semibold text-lg text-jet-black">Popular Coupons</p>
+                        <div class="flex items-center pt-6 px-4">
+                            <p class="w-full text-left font-semibold text-lg text-jet-black">Popular Coupons</p>
                         </div>
                         <div id="popular-coupons">
                                 {% for coupon in popular_coupons %}
                                 <!--Coupon-->
-                                <div class="bg-white mt-4 p-4 rounded-md shadow-lg coupon-card">
-                                    <div class="flex lg:justify-between lg:items-center flex-col lg:flex-row">
-                                        <div class="flex flex-col">
+                                <div class="mt-4 w-full min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-lg">
+                                    <div class="popular-coupon-row">
+                                        <div class="popular-coupon-details flex flex-col">
                                             <p class="font-bold text-[10px] text-dodger-blue tracking-[0.18em] uppercase">
                                                 Category : {{ coupon.category.name }}
                                             </p>
-                                            <p class="font-bold text-lg text-jet-black">
+                                            <p class="break-words font-bold text-lg text-jet-black">
                                                 {{ coupon.title }}
                                             </p>
-                                            <p class="font-normal text-base text-dark-gray leading-5">
+                                            <p class="break-words font-normal text-base text-dark-gray leading-5">
                                                 {{ coupon.description }}
                                             </p>
                                         </div>
-                                        <div class="flex flex-col pt-4">
+                                        <div class="popular-coupon-redemption flex flex-col">
                                             <div class="flex lg:justify-between lg:items-center gap-6">
                                                 <p class="font-normal text-base text-jet-black">
                                                     Redeemed
@@ -170,8 +202,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="hidden lg:block h-20 w-px bg-dodger-blue mx-4"></div>
-                                        <div class="pt-4">
+                                        <div class="popular-coupon-divider"></div>
+                                        <div class="popular-coupon-code">
                                             <button
                                                 class="copy-coupon bg-dodger-blue h-10 w-full rounded-lg flex items-center justify-center gap-1 font-semibold text-sm text-white {% if coupon.is_exhausted %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
                                                 data-code="{{ coupon.code }}"
