@@ -258,11 +258,6 @@ def claim_coupon(request):
             current_redeemed = UserPurchase.objects.filter(
                 coupon_code=coupon.code
             ).count()
-            if (coupon.redeemed_count or 0) != current_redeemed:
-                Coupon.objects.filter(id=coupon.id).update(
-                    redeemed_count=current_redeemed
-                )
-
             # Prevent duplicate claim by the same user
             if CouponClaimed.objects.filter(user=user, coupon=coupon).exists():
                 max_redemptions = coupon.max_redemptions or 100

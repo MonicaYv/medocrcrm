@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, date
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from dashboard.utils import dashboard_login_required, get_common_context
 from .models import (
@@ -19,6 +19,7 @@ from .models import (
     State, City, PincodeOption, AgeOption, GenderOption, SpendingPowerOption, PaymentStatusEnum,
 )
 from points.models import PointsActionType, PointsHistory
+from orders.models import UserPurchase
 from registration.models import PharmacyProfile, LabProfile, HospitalProfile, DoctorProfile
 from coupon.models import SellerCoupon
 from settings.models import SellerSubscription, SellerType
@@ -259,8 +260,14 @@ def coupon_view(request):
             "offer_type"
         ).order_by("-created_at"))
 
+        redemption_counts = {
+            row["coupon_code"]: row["count"]
+            for row in UserPurchase.objects.filter(
+                coupon_code__in=[coupon.code for coupon in coupons]
+            ).values("coupon_code").annotate(count=Count("id"))
+        }
         for coupon in coupons:
-            redeemed_count = max(coupon.redeemed_count or 0, coupon.claims.count())
+            redeemed_count = redemption_counts.get(coupon.code, 0)
             if coupon.redeemed_count != redeemed_count:
                 Coupon.objects.filter(pk=coupon.pk).update(redeemed_count=redeemed_count)
             coupon.is_exhausted = redeemed_count >= coupon.max_redemptions
@@ -488,7 +495,7 @@ def pharmacy_coupon_redeem(request):
         )
         limit = coupon.max_redemptions
         redeemed = min(
-            max(coupon.redeemed_count or 0, coupon.claims.count()), limit
+            UserPurchase.objects.filter(coupon_code=coupon.code).count(), limit
         )
         return JsonResponse({
             "status": "success",

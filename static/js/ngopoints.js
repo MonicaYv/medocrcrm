@@ -799,36 +799,8 @@ $(document).on("click", ".claim-btn", function (e) {
                     navigator.clipboard.writeText(redeemedCode).catch(function () {});
                 }
 
-                const newRedeemed = response.redeemed_count;
-                const maxRedemptions = response.max_redemptions;
-                const percentUsed = response.percent_used !== undefined ? response.percent_used : (maxRedemptions ? Math.min(100, Math.round((newRedeemed / maxRedemptions) * 100)) : 0);
-
-                // 1. Update all redeemed count displays across the All Rewards tab
-                $(`.redeemed-count[data-coupon-id="${couponId}"]`).text(newRedeemed);
-                $(`.max-redemptions[data-coupon-id="${couponId}"]`).text(maxRedemptions);
-                $(`.redeemed-count-text[data-coupon-id="${couponId}"]`).html(
-                    `<span class="redeemed-count" data-coupon-id="${couponId}">${newRedeemed}</span>/<span class="max-redemptions" data-coupon-id="${couponId}">${maxRedemptions}</span>`
-                );
-
-                // 2. Update all progress bars for this coupon
-                $(`.redemption-progress-bar[data-coupon-id="${couponId}"]`).css('width', `${percentUsed}%`);
-
-                // 3. Fallback: update any card elements for this coupon
-                $(`.reward-card[data-coupon-id="${couponId}"], .coupon-card[data-coupon-id="${couponId}"]`).each(function () {
-                    const $card = $(this);
-                    $card.find('.redeemed-count-text').text(`${newRedeemed}/${maxRedemptions}`);
-                    $card.find('.redemption-progress-bar').css('width', `${percentUsed}%`);
-                });
-
-                const $parentCard = $button.closest('.reward-card, .coupon-card');
-                if ($parentCard.length) {
-                    $parentCard.find('p:contains("Redeemed")').each(function () {
-                        $(this).siblings('p').text(`${newRedeemed}/${maxRedemptions}`);
-                    });
-                    $parentCard.find('.rounded-full > .rounded-full').css('width', `${percentUsed}%`);
-                }
-
-                // 4. Update all claim buttons for this coupon ID across the entire page (Featured & Popular)
+                // Claiming copies/reserves the coupon; it does not change how
+                // many times the coupon has actually been redeemed.
                 $(`.claim-btn[data-coupon-id="${couponId}"]`).each(function () {
                     const $btn = $(this);
                     $btn.prop('disabled', true)
@@ -839,11 +811,6 @@ $(document).on("click", ".claim-btn", function (e) {
 
             } else if (response.status === 'already_claimed') {
                 toastr.error(response.message || 'You have already claimed this coupon.');
-
-                if (response.redeemed_count !== undefined) {
-                    $(`.redeemed-count[data-coupon-id="${couponId}"]`).text(response.redeemed_count);
-                    $(`.redeemed-count-text[data-coupon-id="${couponId}"]`).text(`${response.redeemed_count}/${response.max_redemptions}`);
-                }
 
                 $(`.claim-btn[data-coupon-id="${couponId}"]`).each(function () {
                     const $btn = $(this);
