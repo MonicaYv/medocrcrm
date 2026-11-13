@@ -205,32 +205,23 @@ def _pharmacy_reports_context(request, user):
         Q(assigned_pharmacy=pharmacy_profile) | Q(bids__pharmacy=pharmacy_profile),
         created_at__date__gte=start_date,
         created_at__date__lte=end_date,
+    ).distinct()
+    total_orders_count = orders.count()
+    assigned_orders = UserPurchase.objects.filter(
+        assigned_pharmacy=pharmacy_profile,
+        created_at__date__gte=start_date,
+        created_at__date__lte=end_date,
     )
-    total_order_scope = (
-        Q(assigned_pharmacy=pharmacy_profile)
-        | Q(
-            assigned_pharmacy__isnull=True,
-            order_status=OrderStatusChoices.PENDING,
-        )
-        | Q(bids__pharmacy=pharmacy_profile)
+    reportable_orders = assigned_orders.exclude(
+        order_status=OrderStatusChoices.CANCELLED
     )
-    total_orders_count = (
-        UserPurchase.objects.filter(
-            total_order_scope,
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date,
-        )
-        .aggregate(total=Count("id", distinct=True))["total"]
-        or 0
-    )
-    completed_orders = orders.exclude(order_status=OrderStatusChoices.CANCELLED)
     amount_expr = Coalesce(
         "final_amount",
         "total_amount",
         Value(Decimal("0")),
         output_field=DecimalField(max_digits=12, decimal_places=2),
     )
-    revenue = completed_orders.aggregate(total=Sum(amount_expr))["total"] or Decimal("0")
+    revenue = reportable_orders.aggregate(total=Sum(amount_expr))["total"] or Decimal("0")
     won_order_statuses = [
         OrderStatusChoices.CONFIRMED,
         OrderStatusChoices.SHIPPED,
@@ -245,7 +236,7 @@ def _pharmacy_reports_context(request, user):
     ).count()
     avg_bid = bids.aggregate(avg=Avg("total_amount"))["avg"] or Decimal("0")
 
-    medicines = PurchaseMedicine.objects.filter(purchase__in=completed_orders)
+    medicines = PurchaseMedicine.objects.filter(purchase__in=reportable_orders)
     if search:
         medicines = medicines.filter(
             Q(product_name__icontains=search)
@@ -319,7 +310,7 @@ def _pharmacy_reports_context(request, user):
         .exclude(id__in=accepted_bid_order_ids)
         .annotate(weekday=ExtractWeekDay("updated_at"))
         .values("weekday")
-        .annotate(total=Count("id"))
+        .annotate(total=Count("id", distinct=True))
     )
     for row in won_order_weekday_rows:
         index = next((i for i, item in enumerate(day_order) if item[0] == row["weekday"]), None)
@@ -355,16 +346,24 @@ def _pharmacy_reports_context(request, user):
             "lost_percent": _percent(week_lost, total),
         })
 
-    stock_alerts = list(
-        PharmacyMedicine.objects.filter(pharmacy=pharmacy_profile, is_active=True)
-        .order_by("quantity", "name")
-        .values("name", "quantity")[:5]
-    )
-    for item in stock_alerts:
-        item["status"] = "Low Stock"
+    stock_alerts = []
+    stock_rows = PharmacyMedicine.objects.filter(
+        pharmacy=pharmacy_profile,
+        is_active=True,
+    ).values("name", "quantity")
+    for item in stock_rows:
+        try:
+            quantity = int(item["quantity"])
+        except (TypeError, ValueError):
+            continue
+        if quantity <= 20:
+            item["quantity"] = quantity
+            stock_alerts.append(item)
+    stock_alerts.sort(key=lambda item: (item["quantity"], item["name"].lower()))
+    stock_alerts = stock_alerts[:5]
 
     heatmap_rows = (
-        completed_orders.exclude(address__state__isnull=True)
+        reportable_orders.exclude(address__state__isnull=True)
         .values("address__state__name")
         .annotate(value=Count("id"))
     )

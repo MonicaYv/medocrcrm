@@ -1,5 +1,12 @@
 {% load static %}
 
+<style>
+    #orderStatusFilter option:hover {
+        background-color: #eaf3ff;
+        color: #1a73e8;
+    }
+</style>
+
 <div class="tab-content upcoming w-full pb-8">
     <form method="GET" action="" id="orderFilterForm" class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div class="relative w-full sm:w-80">
@@ -7,14 +14,14 @@
             <input type="text" name="search" id="orderSearchInput" placeholder="Search by Order ID..." value="{{ request.GET.search|default:'' }}"
                 class="py-2 pl-8 pr-4 w-full text-sm rounded-md border border-blue-haze placeholder:text-medium-gray focus:outline-none focus:border-dodger-blue" />
         </div>
-        <div class="relative w-full sm:w-48">
-            <select name="status" id="orderStatusFilter" class="py-2 px-4 w-full text-sm rounded-md border border-blue-haze focus:outline-none focus:border-dodger-blue appearance-none bg-white">
+        <div class="group relative w-full sm:w-48">
+            <select name="status" id="orderStatusFilter" class="w-full appearance-none rounded-md border border-blue-haze bg-white px-4 py-2 text-sm transition duration-150 hover:border-dodger-blue hover:bg-[#F8FBFF] hover:shadow-sm focus:border-dodger-blue focus:outline-none">
                 <option value="">All Orders</option>
                 <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
                 <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
                 <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
             </select>
-            <span class="material-symbols-outlined absolute top-1/2 right-2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+            <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-150 group-hover:text-dodger-blue">expand_more</span>
         </div>
     </form>
     {% for order in orders %}

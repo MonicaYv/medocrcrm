@@ -4766,7 +4766,7 @@ def get_advance_balance(user):
 
         .filter(user=user)
 
-        .order_by("-created_at")
+        .order_by("-created_at", "-pk")
 
         .first()
 
@@ -4905,7 +4905,7 @@ def subscribe_subscription(request):
 
             .filter(user=user)
 
-            .order_by("-created_at")
+            .order_by("-created_at", "-pk")
 
             .first()
 
