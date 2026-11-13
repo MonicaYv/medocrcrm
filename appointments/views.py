@@ -350,7 +350,7 @@ def appointment_details(request, appointment_id):
             return JsonResponse({"success": False, "message": "Appointment not found"})
 
         profile = appointment.user.userprofile
-
+        
         return JsonResponse({
             "success": True,
             "appointment": {
@@ -366,6 +366,7 @@ def appointment_details(request, appointment_id):
                 ),
                 "service_type": appointment.service_type,
                 "order_id": f"LAB-{appointment.id}",
+                "service_type": appointment.service_type or "",
             }
         })
 
@@ -373,34 +374,61 @@ def appointment_details(request, appointment_id):
     elif user_type == "doctor":
         appointment = DoctorAppointment.objects.select_related(
             "user__userprofile",
-            "address",
+            "address__city",
+            "address__state",
         ).filter(id=appointment_id).first()
 
         if not appointment:
-            return JsonResponse({"success": False, "message": "Appointment not found"})
+            return JsonResponse({
+                "success": False,
+                "message": "Appointment not found"
+            })
 
         profile = appointment.user.userprofile
         address = appointment.address
+
+        full_address = ""
+
+        if address:
+            full_address = ", ".join(
+                str(value) for value in [
+                    address.address,
+                    address.city.name if address.city else "",
+                    address.state.name if address.state else "",
+                    address.pincode,
+                    address.country,
+                ] if value
+            )
 
         return JsonResponse({
             "success": True,
             "appointment": {
                 "id": appointment.id,
-                "patient_name": f"{profile.first_name} {profile.last_name or ''}",
-                "gender": profile.gender,
-                "age": profile.age,
-                "phone": appointment.user.phone_number,
-                "address": address.address if address else "",
-                "consultation_type": appointment.consultation_type,
+                "patient_name": (
+                    f"{profile.first_name} {profile.last_name or ''}".strip()
+                ),
+                "gender": profile.gender or "",
+                "age": profile.age or "",
+                "phone": (
+                    f"{appointment.user.phone_country_code or ''}"
+                    f"{appointment.user.phone_number or ''}"
+                ),
+                "address": full_address,
+                "consultation_type": appointment.consultation_type or "",
+                "service_type": appointment.service_type or "",
                 "appointment_date": (
-                    appointment.preferred_date_time.strftime("%d/%m/%Y, %I:%M %p")
+                    appointment.preferred_date_time.strftime(
+                        "%d/%m/%Y, %I:%M %p"
+                    )
                     if appointment.preferred_date_time else ""
                 ),
-                "details": appointment.description,
+                "details": appointment.description or "",
                 "budget": float(appointment.budget or 0),
                 "order_id": f"DOC-{appointment.id}",
+                "profile_photo": profile.profile_photo_path or "",
             }
         })
+
 
     # ── HOSPITAL ──────────────────────────────────────
     elif user_type == "hospital":
@@ -984,3 +1012,86 @@ def place_bid(request):
         })
 
     return JsonResponse({"success": False, "message": "Invalid user type"})
+@require_POST
+@dashboard_login_required
+def reject_doctor_bid(request):
+    user = request.user_obj
+
+    if user.user_type != "doctor":
+        return JsonResponse({
+            "success": False,
+            "message": "Unauthorized action"
+        }, status=403)
+
+    doctor = DoctorProfile.objects.filter(user=user).first()
+
+    if not doctor:
+        return JsonResponse({
+            "success": False,
+            "message": "Doctor profile not found"
+        })
+
+    appointment_id = request.POST.get("appointment_id")
+
+    with transaction.atomic():
+        appointment = DoctorAppointment.objects.select_for_update().filter(
+            id=appointment_id,
+            status=AppointmentStatus.PENDING
+        ).first()
+
+        if not appointment:
+            return JsonResponse({
+                "success": False,
+                "message": "Appointment not found or already closed"
+            })
+
+        bid = DoctorBidding.objects.filter(
+            appointment=appointment,
+            doctor=doctor
+        ).order_by("-updated_at", "-id").first()
+
+        if bid:
+            if bid.bid_status == DoctorBidStatus.REJECTED:
+                return JsonResponse({
+                    "success": True,
+                    "message": "Appointment already rejected"
+                })
+
+            if bid.bid_status not in {
+                DoctorBidStatus.PENDING,
+                DoctorBidStatus.CANCELLED,
+                DoctorBidStatus.EXPIRED,
+            }:
+                return JsonResponse({
+                    "success": False,
+                    "message": "This appointment cannot be rejected"
+                })
+
+            bid.bid_status = DoctorBidStatus.REJECTED
+            bid.is_active = False
+            bid.remarks = "Rejected by doctor"
+
+            bid.save(update_fields=[
+                "bid_status",
+                "is_active",
+                "remarks",
+                "updated_at"
+            ])
+
+        else:
+            DoctorBidding.objects.create(
+                appointment=appointment,
+                doctor=doctor,
+                service_charges=0,
+                visit_charges=0,
+                total_bid_amount=0,
+                delivery_time="0",
+                remarks="Rejected by doctor",
+                is_active=False,
+                bid_status=DoctorBidStatus.REJECTED
+            )
+
+    return JsonResponse({
+        "success": True,
+        "message": "Appointment rejected successfully"
+    })

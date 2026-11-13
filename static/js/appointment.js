@@ -873,19 +873,8 @@ $(document).on("click", ".place-bid-btn", function () {
 
 
 // ── Accept button inside popup ───────────────────────────────
-$(document).on("click", ".accept-button, .hospital-accept-button, .accept-appointment", function () {
 
-    const appointmentId = $(".appointmentRequestDetail, .modal-pending")
-        .filter(":visible")
-        .attr("data-appointment-id");
 
-    if (!appointmentId) {
-        toastr.error("Appointment ID not found");
-        return;
-    }
-
-    _placeBid(appointmentId, null);
-});
 
 
 // ── Shared place-bid AJAX ────────────────────────────────────
@@ -1117,14 +1106,7 @@ $(document).on("click", ".close-popup, .modal-close-pending", function () {
 
 
 // ── Reject/cancel from popup (no API, UI only) ───────────────
-$(document).on("click", ".reject-button", function () {
 
-    $(".appointmentRequestDetail, .modal-pending")
-        .addClass("hidden")
-        .removeClass("flex");
-
-    toastr.info("Dismissed");
-});
 // ===============================
 // SEARCH APPOINTMENT BY NAME
 // ===============================

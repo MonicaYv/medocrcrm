@@ -2604,7 +2604,11 @@ $(document).on("click", ".appointment-detail-btn", function () {
 
       $("#popup-budget").text("₹" + (a.budget || 0));
       $(".appointmentRequestDetail .accept-button").toggle(canBid !== "false");
+      $("#popup-medical-requirement").text(a.details || "-");
+      
+      $("#popup-visit-type").text(a.consultation_type || "-");
 
+      $("#popup-medical-requirement").text(a.service_type || "-");
       $(".appointmentRequestDetail")
         .attr("data-appointment-id", appointmentId)
         .removeClass("hidden")
@@ -2751,3 +2755,49 @@ $(document).on("click", ".accept-button", function () {
     },
   });
 });
+$(document).on("click", ".reject-bid-btn", function () {
+  const button = $(this);
+  const appointmentId = button.data("id");
+  const csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+  if (!appointmentId) {
+    toastr.error("Appointment ID not found");
+    return;
+  }
+
+  if (!csrfToken) {
+    toastr.error("Unable to verify your session. Refresh the page and try again.");
+    return;
+  }
+
+  button.prop("disabled", true);
+
+  $.ajax({
+    url: button.data("url"),
+    type: "POST",
+    data: {
+      appointment_id: appointmentId,
+      csrfmiddlewaretoken: csrfToken,
+    },
+    success: function (resp) {
+      if (resp.success) {
+        toastr.success(resp.message || "Appointment rejected successfully");
+        setTimeout(function () {
+          location.reload();
+        }, 1000);
+      } else {
+        button.prop("disabled", false);
+        toastr.error(resp.message || "Unable to reject appointment");
+      }
+    },
+    error: function (xhr) {
+      button.prop("disabled", false);
+      console.error("Reject error:", xhr.status, xhr.responseText);
+      toastr.error(
+        xhr.responseJSON?.message || "Unable to reject appointment"
+      );
+    },
+  });
+});
+
+ 
