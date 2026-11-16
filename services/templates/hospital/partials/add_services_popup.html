@@ -1,8 +1,8 @@
 {% load static %}
 <div class="services-section popup-overlay fixed inset-0 bg-popup-transparent h-full items-center justify-center z-50 px-3 hidden">
-    <div class="popup-content bg-white border border-dodger-blue rounded-[10px] max-w-[700px] max-h-[90vh] p-5 w-full relative flex flex-col gap-4 shadow-17 overflow-y-auto">
+    <div class="popup-content bg-white border border-dodger-blue rounded-[10px] max-w-[640px] max-h-[65vh] p-3 w-full relative flex flex-col gap-2 shadow-17 overflow-y-auto">
         <!-- HEADER -->
-        <div class="flex items-center justify-between border-b border-dodger-blue pb-4">
+        <div class="flex items-center justify-between border-b border-dodger-blue pb-2">
             <h2 class="text-lg sm:text-[23.4px] font-bold text-desaturated-blue">
                 Add Services
             </h2>
@@ -13,7 +13,7 @@
         <!-- ================= STEP 1 ================= -->
         <div id="popup-step-1" class="popup-step-content">
 
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
 
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-bold text-desaturated-blue">
@@ -21,21 +21,21 @@
                     </h3>
                 </div>
                 <!-- DYNAMIC SERVICE CARDS -->
-                <div class="services-list flex flex-col gap-4">
+                <div class="services-list flex flex-col gap-2">
                 </div>
                 <button type="button"
-                        class="hospital-add-service border border-dodger-blue text-dodger-blue rounded-lg h-[42px] font-semibold">
+                        class="hospital-add-service border border-dodger-blue text-dodger-blue rounded-lg h-[38px] font-semibold">
                     + Add More Services
                 </button>
             </div>
-            <div class="flex justify-between gap-3 mt-5">
+            <div class="flex justify-between gap-3 mt-2">
                 <button type="button"
                         id="popup-cancel-steps"
-                        class="w-full h-[48px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold">
+                        class="w-full h-[38px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold">
                     Cancel
                 </button>
                 <button type="button"
-                        class="step-btn w-full h-[48px] bg-dodger-blue text-white rounded-lg font-semibold"
+                        class="step-btn w-full h-[38px] bg-dodger-blue text-white rounded-lg font-semibold"
                         data-target="2">
                     Next
                 </button>
@@ -43,25 +43,25 @@
         </div>
         <!-- ================= STEP 2 ================= -->
         <div id="popup-step-2" class="popup-step-content hidden">
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
                 <h3 class="text-lg font-bold text-desaturated-blue">
                     Bed & Rooms
                 </h3>
-                <div class="bed-services-list flex flex-col gap-4">
+                <div class="bed-services-list flex flex-col gap-2">
                 </div>
                 <button type="button"
-                        class="add-service-bed border border-dodger-blue text-dodger-blue text-sm font-semibold rounded-lg w-full h-[42px]">
+                        class="add-service-bed border border-dodger-blue text-dodger-blue text-sm font-semibold rounded-lg w-full h-[38px]">
                     + Add More Rooms
                 </button>
             </div>
-            <div class="flex justify-between gap-3 mt-5">
+            <div class="flex justify-between gap-3 mt-2">
                 <button type="button"
-                        class="step-btn w-full h-[48px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold"
+                        class="step-btn w-full h-[38px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold"
                         data-target="1">
                     Back
                 </button>
                 <button type="button"
-                        class="step-btn w-full h-[48px] bg-dodger-blue text-white rounded-lg font-semibold"
+                        class="step-btn w-full h-[38px] bg-dodger-blue text-white rounded-lg font-semibold"
                         data-target="3">
                     Next
                 </button>
@@ -72,7 +72,7 @@
             <h3 class="text-lg font-bold text-desaturated-blue mb-3">
                 Summary
             </h3>
-            <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-3">
                 <div>
                     <h4 class="font-semibold text-black mb-2">
                         Services
@@ -88,14 +88,14 @@
                     </div>
                 </div>
             </div>
-            <div class="flex justify-between gap-3 mt-5">
+            <div class="flex justify-between gap-3 mt-2">
                 <button type="button"
-                        class="step-btn w-full h-[48px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold"
+                        class="step-btn w-full h-[38px] border border-dodger-blue text-dodger-blue rounded-lg font-semibold"
                         data-target="2">
                     Back
                 </button>
                 <button type="button"
-                        class="save-services-btn w-full h-[48px] bg-dodger-blue text-white rounded-lg font-semibold">
+                        class="save-services-btn w-full h-[38px] bg-dodger-blue text-white rounded-lg font-semibold">
                     Save
                 </button>
             </div>
@@ -103,16 +103,16 @@
     </div>
 </div>
 <template id="popup-service-card-template">
-    <div class="service-card bg-white border border-slate-200 rounded-lg p-4 relative">
-        <div class="flex flex-col gap-3">
+    <div class="service-card bg-white border border-slate-200 rounded-lg p-2 relative">
+        <div class="flex flex-col gap-1">
             <input type="hidden" class="category-id">
             <input type="hidden" class="service-id">
             <div class="custom-dropdown relative">
-                <label class="text-base font-semibold text-jet-black">
+                <label class="text-sm font-semibold text-jet-black">
                     Select Category
                 </label>
                 <button type="button"
-                        class="category-dropdown-btn mt-2 w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                        class="category-dropdown-btn mt-1 w-full border border-slate-gray rounded-md px-3 py-1.5 text-left flex justify-between items-center">
                     <span class="selected-text text-sm sm:text-base text-dark-gray">
                         Select Category
                     </span>
@@ -124,11 +124,11 @@
                 </ul>
             </div>
             <div class="custom-dropdown relative">
-                <label class="text-base font-semibold text-jet-black">
+                <label class="text-sm font-semibold text-jet-black">
                     Select Service
                 </label>
                 <button type="button"
-                        class="service-dropdown-btn mt-2 w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                        class="service-dropdown-btn mt-1 w-full border border-slate-gray rounded-md px-3 py-1.5 text-left flex justify-between items-center">
                     <span class="selected-text text-sm sm:text-base text-dark-gray">
                         Select Service
                     </span>
@@ -140,11 +140,11 @@
                 </ul>
             </div>
             <div>
-                <label class="text-base font-semibold text-jet-black">
+                <label class="text-sm font-semibold text-jet-black">
                     Price
                 </label>
                 <input type="number"
-                       class="price-input h-[48px] w-full border border-slate-gray rounded-md px-3 mt-2 focus:outline-none"
+                       class="price-input h-[36px] w-full border border-slate-gray rounded-md px-3 mt-1 focus:outline-none"
                        placeholder="Enter Price"
                        min="0"
                        step="0.01">
@@ -157,14 +157,14 @@
     </div>
 </template>
 <template id="popup-bed-room-card-template">
-    <div class="bed-service-card bg-white border border-slate-200 rounded-lg p-4 relative">
+    <div class="bed-service-card bg-white border border-slate-200 rounded-lg p-2 relative">
         <input type="hidden" class="bed-room-id">
         <div class="custom-dropdown relative">
-            <label class="text-base font-semibold text-jet-black">
+            <label class="text-sm font-semibold text-jet-black">
                 Select Bed & Room
             </label>
             <button type="button"
-                    class="bed-room-dropdown-btn mt-2 w-full border border-slate-gray rounded-md px-3 py-3 text-left flex justify-between items-center">
+                    class="bed-room-dropdown-btn mt-1 w-full border border-slate-gray rounded-md px-3 py-1.5 text-left flex justify-between items-center">
                 <span class="selected-text text-sm sm:text-base text-dark-gray">
                     Select Bed & Room
                 </span>
@@ -175,21 +175,21 @@
             <ul class="dropdown-menu room-options hidden absolute z-[99997] mt-1 w-full bg-white border border-dodger-blue rounded shadow text-sm max-h-40 overflow-y-auto">
             </ul>
         </div>
-        <div class="grid grid-cols-2 gap-4 mt-4">
+        <div class="grid grid-cols-2 gap-2 mt-2">
             <div>
-                <label class="text-base font-semibold block mb-2">
+                <label class="text-sm font-semibold block mb-1">
                     Days
                 </label>
                 <input type="number"
-                       class="days-input w-full border border-slate-gray rounded-md px-3 py-3"
+                       class="days-input w-full border border-slate-gray rounded-md px-3 py-1.5"
                        value="1"
                        min="1">
             </div>
             <div>
-                <label class="text-base font-semibold block mb-2">
+                <label class="text-sm font-semibold block mb-1">
                     AC
                 </label>
-                <select class="ac-input w-full border border-slate-gray rounded-md px-3 py-3">
+                <select class="ac-input w-full border border-slate-gray rounded-md px-3 py-1.5">
                     <option value="false">
                         Non AC
                     </option>
@@ -199,18 +199,18 @@
                 </select>
             </div>
         </div>
-        <div class="mt-4">
-            <label class="text-base font-semibold">
+        <div class="mt-2">
+            <label class="text-sm font-semibold">
                 Price
             </label>
             <input type="number"
-                   class="room-price-input w-full border border-slate-gray rounded-md px-3 py-3 mt-2"
+                   class="room-price-input w-full border border-slate-gray rounded-md px-3 py-1.5 mt-1"
                    placeholder="Enter Price"
                    min="0"
                    step="0.01">
         </div>
         <button type="button"
-                class="remove-service-bed text-red-500 text-sm font-semibold mt-3">
+                class="remove-service-bed text-red-500 text-sm font-semibold mt-1">
             Remove
         </button>
     </div>
