@@ -9,13 +9,14 @@
         </div>
 
         <div class="flex flex-col items-center gap-2">
-            <div class="w-20 h-20 rounded-full border-[3px] border-pharmaceutical-green bg-soft-pastel-mint flex items-center justify-center">
-                <span class="text-2xl font-bold text-pharmaceutical-green">{{ seller_initials|default:"MP" }}</span>
+            <div class="w-20 h-20 rounded-full border-[3px] border-pharmaceutical-green bg-soft-pastel-mint flex items-center justify-center overflow-hidden">
+                <img id="sidebar-profile-photo" src="{{ admin_profile_photo_url|default:'' }}" alt="Profile image" class="w-full h-full object-cover {% if not admin_profile_photo_url %}hidden{% endif %}" onerror="this.classList.add('hidden'); document.getElementById('sidebar-profile-initials').classList.remove('hidden')" />
+                <span id="sidebar-profile-initials" class="text-2xl font-bold text-pharmaceutical-green {% if admin_profile_photo_url %}hidden{% endif %}">{{ user_display_name|default:user.email|slice:":2"|upper }}</span>
             </div>
             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-soft-pastel-mint text-pharmaceutical-green text-xs font-medium">
                 <span>👑</span> {{ seller_tier|default:"Premium Seller" }}
             </span>
-            <p class="text-base font-bold text-charcoal-black text-center">{{ seller_name|default:"MedPlus Pharmacy" }}</p>
+            <p class="text-base font-bold text-charcoal-black text-center">{{ user_display_name|default:user.email }}</p>
         </div>
     </div>
 

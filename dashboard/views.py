@@ -501,6 +501,7 @@ def dashboard_home(request):
                 'total_views': posts_qs.aggregate(Sum('views'))['views__sum'] or 0,
                 'total_target': posts_qs.aggregate(Sum('target_donation'))['target_donation__sum'] or 0,
                 'total_received': posts_qs.aggregate(Sum('donation_received'))['donation_received__sum'] or 0,
+                'most_viewed_post': posts_qs.order_by('-views', '-created_at').first(),
                 'trending_posts': posts_qs.filter(
                     created_at__gte=timezone.now() - timedelta(days=30)
                 ).order_by('-views')[:4],
@@ -1676,6 +1677,11 @@ def dashboard_home(request):
             )
             top_service_row = (
                 HospitalAppointments.objects.filter(
+                    accepted_hospital=hospital_profile,
+                    status__in=[
+                        HospitalAppointmentStatus.ACCEPTED,
+                        HospitalAppointmentStatus.COMPLETED,
+                    ],
                     created_at__date__gte=week_start,
                     created_at__date__lte=timezone.localdate(),
                 )

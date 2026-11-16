@@ -192,6 +192,9 @@ $(document).on('click', '.remove-service, .remove-service-visit', function (e) {
             return;
         }
 
+        const itemType = $(this).hasClass('remove-service-visit') ? 'visit' : 'service';
+        if (!window.confirm(`Remove this ${itemType} from the form?`)) return;
+
         card.remove();
     }
 });

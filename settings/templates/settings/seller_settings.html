@@ -713,14 +713,30 @@
 
         const params = new URLSearchParams(window.location.search);
 
-        const tab = params.get('tab');
+        const mainTabs = Array.from(document.querySelectorAll(".tabs-menu [data-tab]"));
+        const subTabs = Array.from(document.querySelectorAll('[data-parent="settings"][data-tab]'));
+        const selectedMainTab = mainTabs.find(tab => tab.dataset.tab === params.get("tab"))
+            || mainTabs.find(tab => tab.dataset.tab === "settings");
+        const selectedSubTab = subTabs.find(tab => tab.dataset.tab === params.get("subtab"))
+            || subTabs.find(tab => tab.dataset.tab === "account-details");
 
+        function persistTab(key, value) {
+            const url = new URL(window.location.href);
+            url.searchParams.set(key, value);
+            window.history.replaceState(null, "", url.toString());
+        }
 
+        mainTabs.forEach(tab => {
+            tab.addEventListener("click", () => persistTab("tab", tab.dataset.tab));
+        });
+        subTabs.forEach(tab => {
+            tab.addEventListener("click", () => persistTab("subtab", tab.dataset.tab));
+        });
 
-        if (tab) {
+        selectedMainTab?.click();
 
-            $(`.tabs-menu [data-tab="${tab}"]`).trigger('click');
-
+        if (selectedMainTab?.dataset.tab === "settings") {
+            selectedSubTab?.click();
         }
 
     });

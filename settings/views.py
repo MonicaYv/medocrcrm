@@ -4,6 +4,8 @@ import re
 
 import json
 
+import logging
+
 import uuid
 
 import traceback
@@ -67,12 +69,11 @@ import mimetypes
 from django.contrib.auth.hashers import make_password, check_password
 
 from dashboard.utils import (
-
     dashboard_login_required,
-
     get_common_context,
-
 )
+
+logger = logging.getLogger(__name__)
 
 from settings.models import SellerSubscription
 
@@ -4566,9 +4567,20 @@ def send_change_password_otp(request):
 
     user = request.user_obj
 
+    if not user.email:
+        return JsonResponse({
+            "success": False,
+            "message": "No email address is associated with this account."
+        }, status=400)
 
-
-    token_data = async_to_sync(async_send_otp_email)(user)
+    try:
+        token_data = async_to_sync(async_send_otp_email)(user)
+    except (OSError, ValueError):
+        logger.exception("Could not send password-change OTP email")
+        return JsonResponse({
+            "success": False,
+            "message": "Unable to send OTP email. Please try again later."
+        }, status=502)
 
 
 
@@ -4578,9 +4590,9 @@ def send_change_password_otp(request):
 
             "success": False,
 
-            "message": "Failed to send OTP."
+            "message": token_data.get("message", "Failed to send OTP.")
 
-        })
+        }, status=502)
 
 
 

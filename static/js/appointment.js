@@ -444,7 +444,8 @@ const ENQUIRY_TEMPLATES = {
 
     ${status === "pending" ? `
       <div class="pt-4 flex justify-center gap-2 mb-2">
-        <button class="accept-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10">
+        <button class="accept-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10"
+          data-appointment-id="${appointmentId}">
           Accept
         </button>
       </div>
@@ -873,8 +874,17 @@ $(document).on("click", ".place-bid-btn", function () {
 
 
 // ── Accept button inside popup ───────────────────────────────
+$(document).on("click", ".accept-appointment", function () {
+    const appointmentId = $(this).data("appointment-id") ||
+        $(this).closest(".modal-pending").attr("data-appointment-id");
 
+    if (!appointmentId) {
+        toastr.error("Appointment not found");
+        return;
+    }
 
+    _placeBid(appointmentId);
+});
 
 
 // ── Shared place-bid AJAX ────────────────────────────────────
