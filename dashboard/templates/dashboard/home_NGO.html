@@ -1,4 +1,5 @@
 {% extends "dashboard/layout.html" %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
@@ -71,14 +72,17 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 pt-6 gap-6">
         <div class="border border-light-gray2 rounded-lg px-4 py-4 w-full">
-            <a href="/posts/?tab=post-history">
-                <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center">
+                <a href="/posts/?tab=post-history">
                 <p class="font-semibold text-lg">Total Post</p>
-                <span
-                    class="material-symbols-outlined cursor-pointer rounded-full bg-translucent-sky-blue p-1 text-violet-sky">
+                </a>
+                <button type="button"
+                    class="material-symbols-outlined rounded-full border-0 bg-translucent-sky-blue p-1 text-violet-sky {% if most_viewed_post %}cursor-pointer preview-btn{% else %}cursor-not-allowed opacity-50{% endif %}"
+                    {% if most_viewed_post %}data-post-id="{{ most_viewed_post.id }}" aria-label="Preview highest-viewed post"{% else %}disabled aria-label="No posts to preview"{% endif %}>
                     content_copy
-                </span>
-                </div>
+                </button>
+            </div>
+            <a href="/posts/?tab=post-history">
                 <div class="flex justify-between items-center pt-2">
                 <p class="text-2xl font-semibold">{{ total_posts }}</p>
                 <p class="text-sm font-normal">Last 30 days</p>
@@ -87,14 +91,17 @@
         </div>
 
         <div class="border border-light-gray2 rounded-lg px-4 py-4 w-full">
-            <a href="/posts/?tab=post-history">
-                <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center">
+                <a href="/posts/?tab=post-history">
                 <p class="font-semibold text-lg">Total views</p>
-                <span
-                    class="material-symbols-outlined cursor-pointer rounded-full bg-translucent-sky-blue p-1 text-violet-sky">
+                </a>
+                <button type="button"
+                    class="material-symbols-outlined rounded-full border-0 bg-translucent-sky-blue p-1 text-violet-sky {% if most_viewed_post %}cursor-pointer preview-btn{% else %}cursor-not-allowed opacity-50{% endif %}"
+                    {% if most_viewed_post %}data-post-id="{{ most_viewed_post.id }}" aria-label="Preview highest-viewed post"{% else %}disabled aria-label="No posts to preview"{% endif %}>
                     visibility
-                </span>
-                </div>
+                </button>
+            </div>
+            <a href="/posts/?tab=post-history">
                 <div class="flex justify-between items-center pt-2">
                 <p class="text-2xl font-semibold">{{ total_views }}</p>
                 <p class="text-sm font-normal">Last 30 days</p>
@@ -102,14 +109,17 @@
             </a>
         </div>
         <div class="border border-light-gray2 rounded-lg px-4 py-4 w-full">
-            <a href="/posts/?tab=post-history">
-                <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center">
+                <a href="/posts/?tab=post-history">
                 <p class="font-semibold text-lg">Target Donation</p>
-                <span
-                    class="material-symbols-outlined cursor-pointer rounded-full bg-translucent-sky-blue p-1 text-violet-sky">
+                </a>
+                <button type="button"
+                    class="material-symbols-outlined rounded-full border-0 bg-translucent-sky-blue p-1 text-violet-sky {% if most_viewed_post %}cursor-pointer preview-btn{% else %}cursor-not-allowed opacity-50{% endif %}"
+                    {% if most_viewed_post %}data-post-id="{{ most_viewed_post.id }}" aria-label="Preview highest-viewed post"{% else %}disabled aria-label="No posts to preview"{% endif %}>
                     currency_rupee
-                </span>
-                </div>
+                </button>
+            </div>
+            <a href="/posts/?tab=post-history">
                 <div class="flex justify-between items-center pt-2">
                 <p class="text-2xl font-semibold">&#8377;{{ total_target|floatformat:0 }}</p>
                 <p class="text-sm font-normal">Last 30 Days</p>
@@ -117,14 +127,17 @@
             </a>
         </div>
         <div class="border border-light-gray2 rounded-lg px-4 py-4 w-full">
-            <a href="/posts/?tab=post-history">
-                <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center">
+                <a href="/posts/?tab=post-history">
                 <p class="font-semibold text-lg">Received Donation</p>
-                <span
-                    class="material-symbols-outlined cursor-pointer rounded-full bg-translucent-sky-blue p-1 text-violet-sky">
+                </a>
+                <button type="button"
+                    class="material-symbols-outlined rounded-full border-0 bg-translucent-sky-blue p-1 text-violet-sky {% if most_viewed_post %}cursor-pointer preview-btn{% else %}cursor-not-allowed opacity-50{% endif %}"
+                    {% if most_viewed_post %}data-post-id="{{ most_viewed_post.id }}" aria-label="Preview highest-viewed post"{% else %}disabled aria-label="No posts to preview"{% endif %}>
                     currency_rupee
-                </span>
-                </div>
+                </button>
+            </div>
+            <a href="/posts/?tab=post-history">
                 <div class="flex justify-between items-center pt-2">
                 <p class="text-2xl font-semibold">&#8377;{{ total_received|floatformat:0 }}</p>
                 <p class="text-sm font-normal">Last 30 Days</p>
@@ -342,5 +355,9 @@
     </div>
     </div>
 
-    <!-- rest of your dashboard -->
+    {% include 'preview-popup.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/NGO/post-preview.js' %}"></script>
 {% endblock %}
