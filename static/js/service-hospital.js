@@ -525,15 +525,13 @@ $(document).on("click", ".add-service-bed", function () {
     $(".popup-overlay .bed-services-list").append($card);
 });
 
-// --- FIXED REMOVE SERVICE HANDLER ---
 $(document).on("click", ".remove-service", function () {
-    // Let the card remove itself completely from the DOM, even if it's the last one
+    if (!window.confirm("Remove this service from the form?")) return;
     $(this).closest(".service-card").remove();
 });
 
-// --- FIXED REMOVE ROOM HANDLER ---
 $(document).on("click", ".remove-service-bed", function () {
-    // Let the room remove itself completely from the DOM, even if it's the last one
+    if (!window.confirm("Remove this bed/room from the form?")) return;
     $(this).closest(".bed-service-card").remove();
 });
 
@@ -828,6 +826,8 @@ $(document).on("click", ".save-services-btn", function () {
 });
 
 $(document).on("click", ".delete-hospital-service", function () {
+    if (!window.confirm("Are you sure you want to delete this service?")) return;
+
     const $btn = $(this);
     const rateId = $btn.data("rate-id");
 
@@ -859,6 +859,8 @@ $(document).on("click", ".delete-hospital-service", function () {
 });
 
 $(document).on("click", ".delete-hospital-room", function () {
+    if (!window.confirm("Are you sure you want to delete this bed/room?")) return;
+
     const $btn = $(this);
     const rateId = $btn.data("rate-id");
     fetch(`/services/hospital/rooms/${rateId}/delete/`, {
