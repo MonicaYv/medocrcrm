@@ -1677,6 +1677,11 @@ def dashboard_home(request):
             )
             top_service_row = (
                 HospitalAppointments.objects.filter(
+                    accepted_hospital=hospital_profile,
+                    status__in=[
+                        HospitalAppointmentStatus.ACCEPTED,
+                        HospitalAppointmentStatus.COMPLETED,
+                    ],
                     created_at__date__gte=week_start,
                     created_at__date__lte=timezone.localdate(),
                 )

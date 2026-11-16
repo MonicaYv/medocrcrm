@@ -568,10 +568,10 @@ def reverse_geocode(request):
         body = json.loads(request.body)
 
         # Extract input
-        city = body.get("profile_city").strip()
-        pincode = body.get("profile_pincode").strip()
-        if not city or not pincode:
-            return JsonResponse({"error": "City name and pincode are required"}, status=400)
+        city = str(body.get("profile_city") or "").strip()
+        state = str(body.get("profile_state") or "").strip()
+        address = str(body.get("profile_address") or "").strip()
+        pincode = str(body.get("profile_pincode") or "").strip()
 
         if pincode:
             pincode_match = PincodeLocation.objects.filter(pincode=pincode).first()
@@ -584,7 +584,10 @@ def reverse_geocode(request):
 
 
         # Build regex for city name
-        regex_query = {"$regex": re.escape(city), "$options": "i"}
+        location_text = city or state or address
+        if not location_text:
+            return JsonResponse({"error": "Profile location is not available"}, status=400)
+        regex_query = {"$regex": re.escape(location_text), "$options": "i"}
 
         # Only search for type: city to avoid noise
         mongo_query = {

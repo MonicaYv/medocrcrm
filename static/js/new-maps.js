@@ -83,11 +83,29 @@ if (navigator.geolocation) {
             maximumAge: 20000,
         });
 } else {
-    toastr.error('Geolocation not supported by your browser.');
+    showError({ message: "Geolocation is not supported by this browser." });
 }
 
-// tile_url = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-tile_url = "http://192.168.1.107:3090/styles/light-mode-nopoi/256/{z}/{x}/{y}.png"
+// Use the tile service configured with this CRM; public OSM tiles block this app's requests.
+tile_url = "http://192.168.1.107:3090/styles/light-mode-nopoi/256/{z}/{x}/{y}.png";
+
+function createMapAt(latitude, longitude, zoom, label) {
+    currentLat = Number(latitude);
+    currentLon = Number(longitude);
+    if (!Number.isFinite(currentLat) || !Number.isFinite(currentLon)) return false;
+    if (map) map.remove();
+    map = L.map("map").setView([currentLat, currentLon], zoom);
+    L.tileLayer(tile_url, {
+        crossOrigin: true,
+        maxZoom: 19,
+        minZoom: 7,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+    L.marker([currentLat, currentLon]).addTo(map).bindPopup(label).openPopup();
+    const locationText = document.getElementById("location-text");
+    if (locationText) locationText.textContent = label;
+    return true;
+}
 
 // Initialize map with user's location
 function showLocation(position) {
@@ -100,7 +118,10 @@ function showLocation(position) {
         crossOrigin: true,
         maxZoom: 19,
         minZoom: 7,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
+    const locationText = document.getElementById("location-text");
+    if (locationText) locationText.textContent = "Current location";
 
     // Draw a circle around the current location to show accuracy
     if (accuracy < 5000) {
@@ -156,6 +177,7 @@ function showLocation(position) {
             const currentLon = data.longitude;
             console.log("Current Lat:", currentLat, "Current Lon:", currentLon);
             const locationName = data.name || `${profileCity}, ${profileState}`;
+            if (locationText) locationText.textContent = locationName;
             L.marker([currentLat, currentLon])
             .addTo(map)
             .bindPopup(`
@@ -248,30 +270,37 @@ function sharePlace(place) {
 }
 
 function showError(error) {
-
     console.error("Geolocation Error:", error);
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem("best_location") || "null"); } catch (_) {}
+    const cacheIsUsable = cached && Number.isFinite(Number(cached.lat)) &&
+        Number.isFinite(Number(cached.lon)) && Date.now() - Number(cached.timestamp || 0) < 30 * 86400000;
+    if (cacheIsUsable && createMapAt(cached.lat, cached.lon, 14, "Saved location")) {
+        toastr.info("Using your saved location. Enable location access for a more accurate result.");
+        return;
+    }
 
-    // Show warning instead of stopping the map
-    toastr.warning("Location permission denied. Showing default location.");
-
-    // Default location (Mumbai)
-    currentLat = 19.0760;
-    currentLon = 72.8777;
-
-    // Initialize map
-    map = L.map("map").setView([currentLat, currentLon], 13);
-
-    L.tileLayer(tile_url, {
-        crossOrigin: true,
-        maxZoom: 19,
-        minZoom: 7,
-    }).addTo(map);
-
-    // Add marker
-    L.marker([currentLat, currentLon])
-        .addTo(map)
-        .bindPopup("Default Location")
-        .openPopup();
+    fetch("reverse_geocode/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+        body: JSON.stringify({
+            profile_city: profileCity,
+            profile_state: profileState,
+            profile_address: profileAddress,
+            profile_pincode: profilePincode,
+        }),
+    })
+        .then(response => response.ok ? response.json() : Promise.reject(new Error("Profile location unavailable")))
+        .then(data => {
+            if (!createMapAt(data.latitude, data.longitude, 13, data.location_name || "Your profile location")) {
+                throw new Error("Profile location coordinates are invalid");
+            }
+            toastr.info("Showing your profile location. Enable location access for a more accurate result.");
+        })
+        .catch(() => {
+            createMapAt(19.0760, 72.8777, 5, "Location unavailable");
+            toastr.warning("Could not determine your location. Showing a broad map view.");
+        });
 }
 
 function clearMarkers() {
