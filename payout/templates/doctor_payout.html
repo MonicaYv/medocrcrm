@@ -1,0 +1,406 @@
+
+
+{% extends "dashboard/layout.html" %}
+{% block title %}Earnings & Payout{% endblock %}
+
+{% block content %}
+<div id="earningsPage" class="px-4 py-5 md:px-6 text-slate-800">
+
+  <!-- Breadcrumb + header -->
+  <nav class="text-sm text-ashy-blue mb-3">Home / Earnings &amp; payout</nav>
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h1 class="flex items-center gap-2 text-[22px] font-bold text-dark-inky-blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 10h18" />
+        </svg>
+        Earnings &amp; Payouts
+      </h1>
+      <p class="text-sm text-ashy-blue mt-1">Track your income, commissions, payouts and financial performance</p>
+    </div>
+    <div class="flex flex-col items-end gap-3">
+      <div class="flex items-center gap-4 text-[12px] text-slate-600">
+        <span class="flex items-center gap-1.5">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>
+          New Delhi, India
+        </span>
+        <span class="flex items-center gap-2 font-medium text-slate-800">
+          Auto Bid
+          <button id="erAutoBid" type="button" aria-pressed="true" class="group relative w-8 h-[18px] rounded-full bg-shazam-blue transition-colors aria-[pressed=false]:bg-slate-300">
+            <span class="absolute top-[2px] left-[16px] w-[14px] h-[14px] rounded-full bg-white transition-all group-aria-[pressed=false]:left-[2px]"></span>
+          </button>
+        </span>
+        <span class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-shazam-blue text-[12px] font-bold flex items-center justify-center">Rx</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="erExportBtn" type="button" class="text-xs font-semibold px-[22px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50 flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Export
+        </button>
+        <button id="erStatementBtn" type="button" class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Download Statement
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Period -->
+  <div class="mt-5">
+    <select id="erPeriod" class="border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
+      <option>Last 30 Days</option>
+      <option>Last 7 Days</option>
+      <option>Last 90 Days</option>
+      <option>This Financial Year</option>
+    </select>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mt-5">
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+      <div class="flex justify-between items-start gap-2">
+        <span class="w-9 h-9 rounded-lg border border-facebook-blue text-facebook-blue flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8" /></svg></span>
+        <span class="text-sm font-bold px-2 py-0.5 rounded-full border border-facebook-blue text-facebook-blue whitespace-nowrap">22.4% vs last month</span>
+      </div>
+      <p class="text-[26px] font-bold mt-3 text-dark-inky-blue">₹1,24,800</p>
+      <p class="text-sm uppercase tracking-wide text-grayish-blue-slate mt-1">Total Earned (Month)</p>
+    </div>
+    <div class="bg-white rounded-xl font-bold border border-slate-200 p-4 shadow-sm">
+      <div class="flex justify-between items-start gap-2">
+        <span class="w-9 h-9 rounded-lg font-bold  border border-instant-orange text-instant-orange flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 5L5 19" /><circle cx="7" cy="7" r="2" /><circle cx="17" cy="17" r="2" /></svg></span>
+        <span class="text-sm font-bold px-2 py-0.5 rounded-full border border-instant-orange text-instant-orange whitespace-nowrap">₹1,24,800 gross</span>
+      </div>
+      <p class="text-[26px] font-bold mt-3 text-dark-inky-blue">₹14,976</p>
+      <p class="text-sm uppercase tracking-wide text-grayish-blue-slate mt-1">Platform Commission (12%)</p>
+    </div>
+    <div class="bg-white rounded-xl font-bold border border-slate-200 p-4 shadow-sm">
+      <div class="flex justify-between items-start gap-2">
+        <span class="w-9 h-9 rounded-lg border border-kyc-green text-kyc-green flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5 9-10" /></svg></span>
+        <span class="text-sm px-2 py-0.5 rounded-full border font-bold border-kyc-green text-kyc-green whitespace-nowrap">After commission</span>
+      </div>
+      <p class="text-[26px] font-bold mt-3 text-dark-inky-blue">₹1,09,824</p>
+      <p class="text-sm uppercase tracking-wide text-grayish-blue-slate mt-1">Net Earnings (Month)</p>
+    </div>
+    <div class="bg-white rounded-xl font-bold border border-slate-200 p-4 shadow-sm">
+      <div class="flex justify-between items-start gap-2">
+        <span class="w-9 h-9 rounded-lg border border-fuchsia-pink text-fuchsia-pink flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 8h2M13 8h2M9 12h2M13 12h2M10 21v-4h4v4" /></svg></span>
+        <span class="text-sm px-2 py-0.5 font-bold rounded-full border border-fuchsia-pink text-fuchsia-600 whitespace-nowrap"><span id="erTransfersTag">3 transfers</span></span>
+      </div>
+      <p class="text-[26px] font-bold mt-3 text-dark-inky-blue">₹1,18,200</p>
+      <p class="text-sm uppercase tracking-wide text-grayish-blue-slate mt-1">Paid to Bank (Month)</p>
+    </div>
+    <div class="bg-white rounded-xl font-bold border border-slate-200 p-4 shadow-sm col-span-2 lg:col-span-1">
+      <div class="flex justify-between items-start gap-2">
+        <span class="w-9 h-9 rounded-lg border border-yellow-400 text-yellow-500 flex items-center justify-center text-[16px] font-bold">₹</span>
+        <span class="text-sm px-2 py-0.5 rounded-full border border-yellow-400 text-yellow-600 whitespace-nowrap">₹42 vs last month</span>
+      </div>
+      <p class="text-[26px] font-bold mt-3 text-dark-inky-blue">₹456</p>
+      <p class="text-sm uppercase tracking-wide text-grayish-blue-slate mt-1">Avg Earning / Appt</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div id="erTabs" class="flex gap-6 overflow-x-auto border-b border-slate-100 mt-6">
+    <button type="button" data-tab="overview" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap flex items-center gap-2 text-shazam-blue border-shazam-blue font-medium">Overview</button>
+    <button type="button" data-tab="payouts" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap flex items-center gap-2 text-slate-600 border-transparent font-normal">Payout History <span class="bg-blue-100 text-facebook-blue rounded-full px-1.5 text-[10px]">18</span></button>
+    <button type="button" data-tab="transactions" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap flex items-center gap-2 text-slate-600 border-transparent font-normal">Transactions <span class="bg-blue-100 text-facebook-blue rounded-full px-1.5 text-[10px]">284</span></button>
+    <button type="button" data-tab="invoices" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap flex items-center gap-2 text-slate-600 border-transparent font-normal">Invoices <span class="bg-blue-100 text-facebook-blue rounded-full px-1.5 text-[10px]">30</span></button>
+    <button type="button" data-tab="tax" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap flex items-center gap-2 text-slate-600 border-transparent font-normal">Tax &amp; Statements</button>
+  </div>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section id="er-overview" data-pane class="mt-5">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <!-- Earnings trend -->
+      <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-[15px] font-semibold text-dark-inky-blue">Earnings Trend</h3>
+          <div id="erRange" class="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-[11px]">
+            <button type="button" data-range="daily" class="er-range px-3 py-1 rounded-md text-slate-600">Daily</button>
+            <button type="button" data-range="weekly" class="er-range px-3 py-1 rounded-md text-slate-600">Weekly</button>
+            <button type="button" data-range="monthly" class="er-range px-3 py-1 rounded-md bg-white text-dark-inky-blue shadow-sm font-medium">Monthly</button>
+          </div>
+        </div>
+        <div id="erChart" class="mt-4"></div>
+        <div class="flex items-center justify-between text-[11px] mt-2">
+          <div class="flex items-center gap-4 text-slate-600">
+            <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-facebook-blue"></i>Gross</span>
+            <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-kyc-green"></i>Net</span>
+            <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-yellow-200"></i>Commission</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] mt-3">
+          <span class="text-kyc-green font-medium">Highest: 18 Jul ₹8,400</span>
+          <span class="text-slate-400">Lowest: 08 Jul ₹0</span>
+          <span class="text-facebook-blue font-medium">Avg: ₹5,691/day</span>
+        </div>
+      </div>
+
+      <!-- Earnings by mode -->
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h3 class="text-[15px] font-semibold text-dark-inky-blue">Earnings by Mode</h3>
+        <ul class="mt-4 space-y-3.5 text-[11px]">
+          <li class="flex items-center gap-3"><span class="w-[72px] text-center rounded-md px-2 py-1 bg-green-50 text-kyc-green">Video Call</span><span class="flex-1 h-1.5 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-kyc-green w-[38.6%]"></span></span><b class="w-16 text-right text-dark-inky-blue">₹48,200</b><span class="w-10 text-slate-400">38.6%</span></li>
+          <li class="flex items-center gap-3"><span class="w-[72px] text-center rounded-md px-2 py-1 bg-orange-50 text-instant-orange">Home Visit</span><span class="flex-1 h-1.5 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-instant-orange w-[26.3%]"></span></span><b class="w-16 text-right text-dark-inky-blue">₹32,800</b><span class="w-10 text-slate-400">26.3%</span></li>
+          <li class="flex items-center gap-3"><span class="w-[72px] text-center rounded-md px-2 py-1 bg-emerald-50 text-emerald-600">Clinic Visit</span><span class="flex-1 h-1.5 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-emerald-500 w-[17.9%]"></span></span><b class="w-16 text-right text-dark-inky-blue">₹22,400</b><span class="w-10 text-slate-400">17.9%</span></li>
+          <li class="flex items-center gap-3"><span class="w-[72px] text-center rounded-md px-2 py-1 bg-purple-50 text-purple-600">Voice Call</span><span class="flex-1 h-1.5 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-purple-500 w-[10.1%]"></span></span><b class="w-16 text-right text-dark-inky-blue">₹12,600</b><span class="w-10 text-slate-400">10.1%</span></li>
+          <li class="flex items-center gap-3"><span class="w-[72px] text-center rounded-md px-2 py-1 bg-blue-50 text-facebook-blue">Hospital</span><span class="flex-1 h-1.5 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-facebook-blue w-[7.1%]"></span></span><b class="w-16 text-right text-dark-inky-blue">₹8,800</b><span class="w-10 text-slate-400">7.1%</span></li>
+        </ul>
+        <div class="border-t border-slate-100 mt-5 pt-4">
+          <p class="text-[10px] uppercase tracking-wide text-slate-400">Top earning day</p>
+          <p class="text-[20px] font-bold text-dark-inky-blue mt-1">Friday</p>
+          <div class="flex items-center justify-between text-[12px] font-semibold mt-2">
+            <span class="text-kyc-green">Online: 64.7%</span>
+            <span class="text-facebook-blue">In-Person: 35.3%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Commission breakdown -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-4 p-5">
+      <h3 class="text-[15px] font-semibold text-dark-inky-blue">Commission Breakdown — Last 30 Days</h3>
+      <div class="overflow-x-auto mt-4 rounded-lg">
+        <table class="w-full min-w-[720px] text-center">
+          <thead>
+            <tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue">
+              <th class="px-5 py-3.5 font-medium text-left">Mode</th>
+              <th class="px-3 py-3.5 font-medium">Appointments</th>
+              <th class="px-3 py-3.5 font-medium">Gross Earned</th>
+              <th class="px-3 py-3.5 font-medium">Commission Rate</th>
+              <th class="px-3 py-3.5 font-medium">Commission Amount</th>
+              <th class="px-3 py-3.5 font-medium">Net Earned</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12px]">
+            <tr class="border-b border-slate-100"><td class="px-5 py-3.5 text-left"><span class="rounded-md px-2.5 py-1 text-[11px] bg-green-50 text-kyc-green">Video Call</span></td><td>142</td><td>₹48,200</td><td>12%</td><td class="text-red-500">-₹5,784</td><td class="text-kyc-green font-medium">₹42,416</td></tr>
+            <tr class="border-b border-slate-100"><td class="px-5 py-3.5 text-left"><span class="rounded-md px-2.5 py-1 text-[11px] bg-orange-50 text-instant-orange">Home Visit</span></td><td>68</td><td>₹32,800</td><td>12%</td><td class="text-red-500">-₹3,936</td><td class="text-kyc-green font-medium">₹28,864</td></tr>
+            <tr class="border-b border-slate-100"><td class="px-5 py-3.5 text-left"><span class="rounded-md px-2.5 py-1 text-[11px] bg-emerald-50 text-emerald-600">Clinic Visit</span></td><td>66</td><td>₹22,400</td><td>12%</td><td class="text-red-500">-₹2,688</td><td class="text-kyc-green font-medium">₹19,712</td></tr>
+            <tr class="border-b border-slate-100"><td class="px-5 py-3.5 text-left"><span class="rounded-md px-2.5 py-1 text-[11px] bg-purple-50 text-purple-600">Voice Call</span></td><td>42</td><td>₹12,600</td><td>12%</td><td class="text-red-500">-₹1,512</td><td class="text-kyc-green font-medium">₹11,088</td></tr>
+            <tr class="bg-blue-100 font-bold"><td class="px-5 py-3.5 text-left text-dark-inky-blue">TOTAL</td><td>318</td><td>₹1,24,800</td><td>12%</td><td class="text-red-500">-₹14,976</td><td class="text-kyc-green">₹1,09,824</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mini stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-4">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[11px] text-grayish-blue-slate">Consults Won</p><p class="text-[22px] font-bold text-shazam-blue mt-1">15</p><p class="text-[11px] text-kyc-green mt-0.5">↗ 3 vs last week</p></div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[11px] text-grayish-blue-slate">No Shows</p><p class="text-[22px] font-bold text-red-500 mt-1">1</p><p class="text-[11px] text-slate-400 mt-0.5">Patient no-show</p></div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[11px] text-grayish-blue-slate">Bid Answer Rate</p><p class="text-[22px] font-bold text-red-500 mt-1">83%</p><p class="text-[11px] text-kyc-green mt-0.5">↗ vs 78%</p></div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[11px] text-grayish-blue-slate">Avg Response Time</p><p class="text-[22px] font-bold text-shazam-blue mt-1">4 min</p><p class="text-[11px] text-kyc-green mt-0.5">↘ vs 8 min</p></div>
+    </div>
+
+    <!-- Linked bank -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-4 p-5">
+      <div class="flex items-center justify-between">
+        <h3 class="text-[15px] font-semibold text-dark-inky-blue">Linked Bank Account</h3>
+        <a href="#" class="text-[12px] font-semibold text-shazam-blue">Manage →</a>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 mt-4">
+        <span class="w-9 h-9 rounded-lg bg-blue-50 text-shazam-blue flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2" /></svg></span>
+        <div class="leading-tight"><p class="text-[13px] font-semibold">HDFC Bank</p><p class="text-[11px] text-grayish-blue-slate">****4521</p><p class="text-[11px] text-slate-400">HDFC0001234</p></div>
+        <span class="text-[11px] px-2.5 py-0.5 rounded-full border border-green-300 bg-green-50 text-kyc-green">Primary Account</span>
+        <span class="text-[11px] text-kyc-green font-medium">Verified ✓</span>
+        <button type="button" class="w-6 h-6 rounded-md border border-slate-200 text-grayish-blue-slate flex items-center justify-center" title="Edit"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z" /></svg></button>
+        <button type="button" class="w-6 h-6 rounded-md border border-red-200 text-red-500 flex items-center justify-center" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg></button>
+      </div>
+      <div class="flex justify-end mt-4"><button type="button" class="text-[12px] font-semibold text-shazam-blue">+ Add Another Bank Account</button></div>
+    </div>
+  </section>
+
+  <!-- ============ PAYOUT HISTORY ============ -->
+  <section id="er-payouts" data-pane class="hidden mt-5">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+      <div class="relative">
+        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+        <input id="erPayoutSearch" type="text" placeholder="Search payout ID..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+      </div>
+      <div class="flex flex-wrap items-start gap-3 mt-4">
+        <div class="relative">
+          <button id="erStatusBtn" type="button" class="flex items-center gap-6 border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-700 bg-white cursor-pointer hover:bg-slate-50"><span id="erStatusLabel">All Status</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg></button>
+          <div id="erStatusMenu" class="hidden absolute top-[calc(100%+6px)] left-0 z-30 bg-white border border-slate-200 shadow-[0_10px_30px_rgba(15,23,42,.12)] min-w-[170px] rounded-[14px] p-2"></div>
+        </div>
+        <div class="relative">
+          <button id="erDateBtn" type="button" class="flex items-center gap-6 border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-700 bg-white cursor-pointer hover:bg-slate-50"><span id="erDateLabel">Date Range</span></button>
+          <div id="erDatePop" class="hidden absolute top-[calc(100%+6px)] left-0 z-30 bg-white border border-slate-200 shadow-[0_10px_30px_rgba(15,23,42,.12)] w-[320px] rounded-2xl p-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="block text-[12px] text-slate-700 mb-1.5">From</label><input id="erFrom" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
+              <div><label class="block text-[12px] text-slate-700 mb-1.5">To</label><input id="erTo" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-3">
+              <button id="erDateCancel" type="button" class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+              <button id="erDateApply" type="button" class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Apply</button>
+            </div>
+          </div>
+        </div>
+        <button id="erPayoutReset" type="button" class="text-[13px] text-slate-600 px-2 py-2 hover:text-shazam-blue">Reset Filters</button>
+      </div>
+      <div class="overflow-x-auto mt-4 rounded-lg">
+        <table class="w-full min-w-[720px] text-left">
+          <thead>
+            <tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue">
+              <th class="px-5 py-3.5 font-medium">Payout ID</th><th class="px-3 py-3.5 font-medium text-center">Date</th><th class="px-3 py-3.5 font-medium text-center">Bank</th><th class="px-3 py-3.5 font-medium text-center">Appointments</th><th class="px-3 py-3.5 font-medium text-center">Net Amount</th><th class="px-3 py-3.5 font-medium text-center">Status</th><th class="px-3 py-3.5 font-medium text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="erPayoutRows" class="text-[12px]"></tbody>
+        </table>
+      </div>
+      <p id="erPayoutCount" class="text-[12px] text-slate-600 mt-4"></p>
+    </div>
+  </section>
+
+  <!-- ============ TRANSACTIONS ============ -->
+  <section id="er-transactions" data-pane class="hidden mt-5">
+    <div class="flex items-center gap-2 rounded-lg border border-shazam-blue bg-blue-50 text-shazam-blue text-[12px] px-4 py-2.5">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
+      Each appointment creates one transaction entry
+    </div>
+    <div class="overflow-x-auto mt-4 rounded-lg bg-white border border-slate-200 shadow-sm">
+      <table class="w-full min-w-[980px] text-left">
+        <thead>
+          <tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue">
+            <th class="px-4 py-3.5 font-medium">Txn ID</th>
+            <th class="px-3 py-3.5 font-medium">Appt ID</th>
+            <th class="px-3 py-3.5 font-medium">Date</th>
+            <th class="px-3 py-3.5 font-medium">Patient</th>
+            <th class="px-3 py-3.5 font-medium text-center">Mode</th>
+            <th class="px-3 py-3.5 font-medium text-center">Gross</th>
+            <th class="px-3 py-3.5 font-medium text-center">Commission</th>
+            <th class="px-3 py-3.5 font-medium text-center">Net</th>
+            <th class="px-3 py-3.5 font-medium text-center">Payout ID</th>
+            <th class="px-3 py-3.5 font-medium text-center">Status</th>
+            <th class="px-3 py-3.5 font-medium text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="erTxnRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ INVOICES ============ -->
+  <section id="er-invoices" data-pane class="hidden mt-5">
+    <div class="overflow-x-auto rounded-lg bg-white border border-slate-200 shadow-sm">
+      <table class="w-full min-w-[980px] text-center">
+        <thead>
+          <tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue">
+            <th class="px-5 py-3.5 font-medium text-left">Invoice ID</th>
+            <th class="px-3 py-3.5 font-medium">Period</th>
+            <th class="px-3 py-3.5 font-medium">Generated</th>
+            <th class="px-3 py-3.5 font-medium">Appts</th>
+            <th class="px-3 py-3.5 font-medium">Gross</th>
+            <th class="px-3 py-3.5 font-medium">Commission</th>
+            <th class="px-3 py-3.5 font-medium">Net</th>
+            <th class="px-3 py-3.5 font-medium">GST</th>
+            <th class="px-3 py-3.5 font-medium">Total</th>
+            <th class="px-3 py-3.5 font-medium">Download</th>
+          </tr>
+        </thead>
+        <tbody id="erInvoiceRows" class="text-[12px]"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ TAX & STATEMENTS ============ -->
+  <section id="er-tax" data-pane class="hidden mt-5">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h3 class="text-[18px] font-semibold text-dark-inky-blue">Tax Summary</h3>
+        <dl class="mt-5 text-[14px]">
+          <div class="flex items-center justify-between py-4 border-b border-slate-100"><dt class="text-slate-700">PAN Number</dt><dd class="font-semibold text-shazam-blue tracking-wide">ABCDE1234F</dd></div>
+          <div class="flex items-center justify-between py-4 border-b border-slate-100"><dt class="text-slate-700">GST Registration</dt><dd><b class="text-dark-inky-blue">Not Registered</b> <a href="#" class="text-[12px] text-shazam-blue ml-2">Register for GST →</a></dd></div>
+          <div class="flex items-center justify-between py-4"><dt class="text-slate-700">TDS Deducted</dt><dd><b class="text-dark-inky-blue text-[16px]">₹0</b> <span class="text-[11px] text-slate-400 ml-2">Platform does not deduct TDS</span></dd></div>
+        </dl>
+        <div class="overflow-x-auto mt-3 rounded-lg">
+          <table class="w-full text-left text-[13px]">
+            <thead><tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue"><th class="px-4 py-3 font-medium">Quarter</th><th class="px-3 py-3 font-medium">Gross</th><th class="px-3 py-3 font-medium">Commission</th><th class="px-3 py-3 font-medium">Net</th></tr></thead>
+            <tbody>
+              <tr class="border-b border-slate-100"><td class="px-4 py-3.5">Q1 Apr–Jun</td><td class="px-3">₹2,54,800</td><td class="px-3 text-red-500">₹30,576</td><td class="px-3 text-kyc-green">₹2,24,224</td></tr>
+              <tr class="border-b border-slate-100"><td class="px-4 py-3.5">Q2 Jul</td><td class="px-3">₹1,24,800</td><td class="px-3 text-red-500">₹14,976</td><td class="px-3 text-kyc-green">₹1,09,824</td></tr>
+              <tr class="font-bold"><td class="px-4 py-3.5">FY Total</td><td class="px-3">₹3,79,600</td><td class="px-3 text-red-500">₹45,552</td><td class="px-3 text-kyc-green">₹3,34,048</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h3 class="text-[18px] font-semibold text-dark-inky-blue">Download Statements</h3>
+        <ul class="mt-4 text-[14px]">
+          <li class="flex items-center justify-between py-5 border-b border-slate-100"><span class="flex items-center gap-3 text-slate-800"><svg class="text-shazam-blue" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" /><path d="M14 3v5h5" /></svg>Annual Statement PDF</span><button type="button" data-dl="Annual Statement PDF" class="text-xs font-semibold px-[22px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Download PDF</button></li>
+          <li class="flex items-center justify-between py-5 border-b border-slate-100"><span class="flex items-center gap-3 text-slate-800"><svg class="text-kyc-green" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" /><path d="M14 3v5h5" /></svg>ITR Helper Excel</span><button type="button" data-dl="ITR Helper Excel" class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-kyc-green bg-kyc-green text-white hover:opacity-90">Download Excel</button></li>
+          <li class="flex items-center justify-between py-5"><span class="flex items-center gap-3 text-slate-800"><svg class="text-shazam-blue" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>CA Share</span><button type="button" data-dl="CA Share" class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-slate-700 bg-white hover:bg-gray-100">Share via Email</button></li>
+        </ul>
+        <div class="mt-5 rounded-lg border border-shazam-blue text-shazam-blue text-[11px] leading-relaxed px-4 py-3.5">
+          Healthcare services are exempt from GST in India. Platform commission includes no additional GST for registered sellers.
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="erToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-dark-inky-blue text-white text-[13px] px-[18px] py-2.5 rounded-[10px] z-[1100] hidden"></div>
+
+<!-- ============ TRANSACTION POPUP ============ -->
+<div id="m-txn" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
+  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[620px]">
+    <div class="flex justify-between items-center px-7 pt-[22px] pb-4 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <h3 id="tx-id" class="text-xl font-bold text-dark-inky-blue"></h3>
+        <span class="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-kyc-green border border-green-200">Settled</span>
+        <span id="tx-net-head" class="text-xl font-bold text-kyc-green"></span>
+      </div>
+      <button type="button" data-close="m-txn" class="w-[26px] h-[26px] rounded-full border-2 border-dark-inky-blue flex items-center justify-center bg-white cursor-pointer shrink-0">
+        <svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg>
+      </button>
+    </div>
+    <div class="px-7 py-5">
+      <div class="rounded-xl border border-shazam-blue bg-blue-50/50 p-4">
+        <p class="flex items-center gap-2 text-[14px] font-semibold text-dark-inky-blue"><span class="w-6 h-4 rounded-sm border border-shazam-blue text-shazam-blue text-[9px] flex items-center justify-center">₹</span>Financial Summary</p>
+        <div class="grid grid-cols-3 gap-4 mt-4">
+          <div><p class="text-[11px] text-grayish-blue-slate">Gross Amount</p><p id="tx-gross" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
+          <div><p class="text-[11px] text-grayish-blue-slate">Platform Commission</p><p id="tx-comm" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
+          <div><p class="text-[11px] text-grayish-blue-slate">Net Earnings</p><p id="tx-net" class="text-[18px] font-bold text-kyc-green mt-1"></p></div>
+        </div>
+      </div>
+      <dl class="mt-4 text-[13px]">
+        <div class="flex justify-between py-2.5"><dt class="text-grayish-blue-slate">Related appointment</dt><dd id="tx-appt" class="font-medium text-shazam-blue"></dd></div>
+        <div class="flex justify-between py-2.5"><dt class="text-grayish-blue-slate">Patient</dt><dd id="tx-patient" class="font-semibold text-dark-inky-blue"></dd></div>
+        <div class="flex justify-between py-2.5"><dt class="text-grayish-blue-slate">Transaction date</dt><dd id="tx-date" class="font-medium text-dark-inky-blue"></dd></div>
+        <div class="flex justify-between items-center py-2.5"><dt class="text-grayish-blue-slate">Appointment mode</dt><dd id="tx-mode"></dd></div>
+        <div class="flex justify-between items-center py-2.5"><dt class="text-grayish-blue-slate">Status</dt><dd id="tx-status"></dd></div>
+        <div class="flex justify-between py-2.5"><dt class="text-grayish-blue-slate">Payment method</dt><dd class="font-medium text-dark-inky-blue">Bank transfer</dd></div>
+        <div class="flex justify-between py-2.5"><dt class="text-grayish-blue-slate">Transaction ID/reference</dt><dd class="font-semibold text-dark-inky-blue flex items-center gap-2"><span id="tx-ref"></span><button id="txCopy" type="button" class="text-slate-400 hover:text-shazam-blue" title="Copy"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 012-2h10" /></svg></button></dd></div>
+      </dl>
+      <div class="border-t border-slate-100 mt-3 pt-4">
+        <p class="flex items-center gap-2 text-[14px] font-semibold text-dark-inky-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>Transaction Timeline</p>
+        <ul id="txTimeline" class="mt-3 space-y-3.5 text-[13px]"></ul>
+      </div>
+    </div>
+    <div class="flex gap-3 px-7 py-4 border-t border-slate-100">
+      <button type="button" data-close="m-txn" class="flex-1 text-xs font-semibold px-[18px] py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Close</button>
+      <button id="txReceiptBtn" type="button" class="flex-[1.6] text-xs font-semibold px-[18px] py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Download Receipt</button>
+    </div>
+  </div>
+</div>
+<!-- ============ PAYOUT DETAILS POPUP ============ -->
+<div id="m-payout" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
+  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[460px]">
+    <div class="flex justify-between items-center px-6 pt-5 pb-3">
+      <h3 class="text-[17px] font-bold text-dark-inky-blue">Payout Details</h3>
+      <div class="flex items-center gap-3">
+        <span id="pdStatus"></span>
+        <button type="button" data-close="m-payout" class="text-grayish-blue-slate cursor-pointer" title="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg>
+        </button>
+      </div>
+    </div>
+    <div id="pdBody" class="px-6 pb-4"></div>
+    <div class="px-6 pb-5 pt-1 space-y-2.5">
+      <button id="pdReceiptBtn" type="button" class="w-full text-xs font-semibold px-[18px] py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50">Download Payout Receipt</button>
+      <button id="pdInvoiceBtn" type="button" class="w-full text-xs font-semibold px-[18px] py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50">Download Invoice PDF</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/doctor-earning.js"></script>
+{% endblock %}
