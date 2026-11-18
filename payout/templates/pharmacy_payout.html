@@ -1,6 +1,6 @@
-
 {% extends "dashboard/layout.html" %}
 {% block title %}Earning{% endblock %}
+
 
 {% block content %}
 <div id="earningsPage" class="px-4 py-5 md:px-6 text-slate-800">
@@ -8,32 +8,32 @@
   <!-- ============ HEADER ============ -->
   <div class="flex flex-wrap items-start justify-between gap-4">
     <div>
-      <h1 class="flex items-center gap-2 text-[22px] font-bold text-dark-inky-blue">
+      <h1 class="flex items-center gap-2 text-[24px] font-bold text-dark-inky-blue">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M16 12h5M5 6l11-3v3" /></svg>
         Earning &amp; Payouts
       </h1>
-      <p class="text-sm text-ashy-blue mt-1">Track your performance, earnings, and patient analytics</p>
+      <p class="text-base text-ashy-blue mt-1">Track your performance, earnings, and patient analytics</p>
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
       <div class="relative">
-        <button id="erDateBtn" type="button" class="flex items-center gap-2 text-[11px] text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50">
+        <button id="erDateBtn" type="button" class="flex items-center gap-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 10h18" /></svg>
           <span id="erDateLabel">Jul 1 - Jul 22, 2025</span>
         </button>
         <div id="erDatePop" class="hidden absolute top-[calc(100%+6px)] right-0 z-30 bg-white border border-slate-200 shadow-[0_10px_30px_rgba(15,23,42,.12)] w-[300px] rounded-2xl p-4">
           <div class="grid grid-cols-2 gap-3">
-            <div><label class="block text-[12px] text-slate-700 mb-1.5">From</label><input id="erFrom" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
-            <div><label class="block text-[12px] text-slate-700 mb-1.5">To</label><input id="erTo" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
+            <div><label class="block text-[14px] text-slate-700 mb-1.5">From</label><input id="erFrom" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
+            <div><label class="block text-[14px] text-slate-700 mb-1.5">To</label><input id="erTo" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
           </div>
           <div class="grid grid-cols-2 gap-3 mt-3">
-            <button id="erDateCancel" type="button" class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
-            <button id="erDateApply" type="button" class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Apply</button>
+            <button id="erDateCancel" type="button" class="text-[14px] font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+            <button id="erDateApply" type="button" class="text-[14px] font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Apply</button>
           </div>
         </div>
       </div>
 
-      <div id="erPresets" class="flex items-center gap-1.5 text-[11px]">
+      <div id="erPresets" class="flex items-center gap-1.5 text-[13px]">
         <button type="button" data-preset="today" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">Today</button>
         <button type="button" data-preset="7d" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">7D</button>
         <button type="button" data-preset="30d" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">30 D</button>
@@ -41,10 +41,10 @@
         <button type="button" data-preset="custom" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">Custom</button>
       </div>
 
-      <button id="erStatementBtn" type="button" class="text-xs font-semibold px-4 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50 flex items-center gap-2">
+      <button id="erStatementBtn" type="button" class="text-[14px] font-semibold px-4 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50 flex items-center gap-2">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Download Statement
       </button>
-      <button id="erExportBtn" type="button" class="text-xs font-semibold px-4 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2">
+      <button id="erExportBtn" type="button" class="text-[14px] font-semibold px-4 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Export CSV
       </button>
     </div>
@@ -54,56 +54,56 @@
   <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mt-5">
     <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
       <div class="flex justify-between items-start gap-2">
-        <span class="text-[12px] text-grayish-blue-slate">Gross Eligible Sales</span>
+        <span class="text-[14px] text-grayish-blue-slate">Gross Eligible Sales</span>
         <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
       </div>
-      <p class="text-[24px] font-bold mt-2 text-dark-inky-blue">₹1,35,000</p>
+      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">₹1,35,000</p>
       <div class="flex items-end justify-between mt-2">
-        <span class="text-[11px] text-grayish-blue-slate">Before platform commission</span>
-        <span class="w-7 h-7 rounded-lg border border-facebook-blue text-facebook-blue flex items-center justify-center text-[13px] font-bold">₹</span>
+        <span class="text-[13px] text-grayish-blue-slate">Before platform commission</span>
+        <span class="w-7 h-7 rounded-lg border border-facebook-blue text-facebook-blue flex items-center justify-center text-[15px] font-bold">₹</span>
       </div>
     </div>
     <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
       <div class="flex justify-between items-start gap-2">
-        <span class="text-[12px] text-grayish-blue-slate">Platform Commission</span>
+        <span class="text-[14px] text-grayish-blue-slate">Platform Commission</span>
         <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
       </div>
-      <p class="text-[24px] font-bold mt-2 text-dark-inky-blue">-₹10,800</p>
+      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">-₹10,800</p>
       <div class="flex items-end justify-between mt-2">
-        <span class="text-[11px] text-grayish-blue-slate">8% illustrative demo rate</span>
+        <span class="text-[13px] text-grayish-blue-slate">8% illustrative demo rate</span>
         <span class="w-7 h-7 rounded-lg border border-fuchsia-pink text-fuchsia-pink flex items-center justify-center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 5L5 19" /><circle cx="7" cy="7" r="2" /><circle cx="17" cy="17" r="2" /></svg></span>
       </div>
     </div>
     <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
       <div class="flex justify-between items-start gap-2">
-        <span class="text-[12px] text-grayish-blue-slate">Net Earnings</span>
+        <span class="text-[14px] text-grayish-blue-slate">Net Earnings</span>
         <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
       </div>
-      <p class="text-[24px] font-bold mt-2 text-dark-inky-blue">₹1,24,200</p>
+      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">₹1,24,200</p>
       <div class="flex items-end justify-between mt-2">
-        <span class="text-[11px] text-grayish-blue-slate">After commission and adjustments</span>
+        <span class="text-[13px] text-grayish-blue-slate">After commission and adjustments</span>
         <span class="w-7 h-7 shrink-0 rounded-lg border border-kyc-green text-kyc-green flex items-center justify-center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8M15 7h6v6" /></svg></span>
       </div>
     </div>
     <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
       <div class="flex justify-between items-start gap-2">
-        <span class="text-[12px] text-grayish-blue-slate">Paid Out</span>
+        <span class="text-[14px] text-grayish-blue-slate">Paid Out</span>
         <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
       </div>
-      <p class="text-[24px] font-bold mt-2 text-dark-inky-blue">₹30,000</p>
+      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">₹30,000</p>
       <div class="flex items-end justify-between mt-2">
-        <span class="text-[11px] text-grayish-blue-slate">1-22 Jul 2025</span>
+        <span class="text-[13px] text-grayish-blue-slate">1-22 Jul 2025</span>
         <span class="w-7 h-7 rounded-lg border border-shazam-blue text-shazam-blue flex items-center justify-center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M8 12l3 3 5-6" /></svg></span>
       </div>
     </div>
     <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm col-span-2 lg:col-span-1">
       <div class="flex justify-between items-start gap-2">
-        <span class="text-[12px] text-grayish-blue-slate">Available Balance</span>
+        <span class="text-[14px] text-grayish-blue-slate">Available Balance</span>
         <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
       </div>
-      <p class="text-[24px] font-bold mt-2 text-dark-inky-blue">₹5,560</p>
+      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">₹5,560</p>
       <div class="flex items-end justify-between mt-2">
-        <span class="text-[11px] text-grayish-blue-slate">Eligible for payout</span>
+        <span class="text-[13px] text-grayish-blue-slate">Eligible for payout</span>
         <button id="erBankBtn" type="button" title="Banking destinations" class="w-7 h-7 rounded-lg border border-instant-orange text-instant-orange flex items-center justify-center hover:bg-orange-50"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M16 12h5M5 6l11-3v3" /></svg></button>
       </div>
     </div>
@@ -111,10 +111,10 @@
 
   <!-- ============ MAIN TABS ============ -->
   <div id="erTabs" class="flex gap-6 overflow-x-auto border-b border-slate-100 mt-6">
-    <button type="button" data-tab="overview" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">Overview</button>
-    <button type="button" data-tab="transactions" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Transactions</button>
-    <button type="button" data-tab="payouts" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Payout History</button>
-    <button type="button" data-tab="invoices" class="er-tab text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Invoice &amp; Statements</button>
+    <button type="button" data-tab="overview" class="er-tab text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">Overview</button>
+    <button type="button" data-tab="transactions" class="er-tab text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Transactions</button>
+    <button type="button" data-tab="payouts" class="er-tab text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Payout History</button>
+    <button type="button" data-tab="invoices" class="er-tab text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Invoice &amp; Statements</button>
   </div>
 
   <!-- ============ OVERVIEW ============ -->
@@ -123,11 +123,11 @@
       <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 class="text-[15px] font-semibold text-dark-inky-blue">Earnings Trends</h3>
-            <p class="text-[11px] text-grayish-blue-slate mt-1">Gross eligible sales, commission and net earnings by date</p>
+            <h3 class="text-[17px] font-semibold text-dark-inky-blue">Earnings Trends</h3>
+            <p class="text-[13px] text-grayish-blue-slate mt-1">Gross eligible sales, commission and net earnings by date</p>
           </div>
           <div class="flex items-center gap-3">
-            <div id="erRange" class="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-[11px]">
+            <div id="erRange" class="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-[13px]">
               <button type="button" data-range="daily" class="er-range px-3 py-1 rounded-md bg-white text-shazam-blue shadow-sm font-medium">Daily</button>
               <button type="button" data-range="weekly" class="er-range px-3 py-1 rounded-md text-slate-600">Weekly</button>
               <button type="button" data-range="monthly" class="er-range px-3 py-1 rounded-md text-slate-600">Monthly</button>
@@ -137,12 +137,12 @@
           </div>
         </div>
         <div id="erChart" class="mt-4"></div>
-        <div class="flex flex-wrap items-center gap-4 text-[11px] text-slate-600 mt-2">
+        <div class="flex flex-wrap items-center gap-4 text-[13px] text-slate-600 mt-2">
           <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-facebook-blue"></i>Gross Eligible Sale</span>
           <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-fuchsia-pink"></i>Platform Commission</span>
           <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-kyc-green"></i>Net Earnings</span>
         </div>
-        <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] mt-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-[13px] mt-3">
           <span id="erHigh" class="text-kyc-green font-medium"></span>
           <span id="erLow" class="text-slate-400"></span>
           <span id="erAvg" class="text-facebook-blue font-medium"></span>
@@ -150,35 +150,35 @@
       </div>
 
       <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="text-[15px] font-semibold text-dark-inky-blue">Earnings by Fulfilment</h3>
-        <ul class="mt-5 space-y-5 text-[12px]">
+        <h3 class="text-[17px] font-semibold text-dark-inky-blue">Earnings by Fulfilment</h3>
+        <ul class="mt-5 space-y-5 text-[14px]">
           <li class="flex items-center gap-3">
             <span class="w-24 text-slate-600">Home Delivery</span>
             <span class="flex-1 h-2 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-shazam-blue w-[77.8%]"></span></span>
             <b class="w-16 text-right text-dark-inky-blue">₹96,600</b>
-            <span class="w-16 text-slate-400 text-[11px]">210 orders</span>
+            <span class="w-16 text-slate-400 text-[13px]">210 orders</span>
           </li>
           <li class="flex items-center gap-3">
             <span class="w-24 text-slate-600">Stock Pick Up</span>
             <span class="flex-1 h-2 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-kyc-green w-[22.2%]"></span></span>
             <b class="w-16 text-right text-dark-inky-blue">₹27,600</b>
-            <span class="w-16 text-slate-400 text-[11px]">60 orders</span>
+            <span class="w-16 text-slate-400 text-[13px]">60 orders</span>
           </li>
         </ul>
         <div class="border-t border-slate-100 mt-6 pt-4 text-right">
-          <span class="text-[13px] text-slate-600 mr-3">Total</span><b class="text-[16px] text-dark-inky-blue">₹1,24,200</b>
+          <span class="text-[15px] text-slate-600 mr-3">Total</span><b class="text-[18px] text-dark-inky-blue">₹1,24,200</b>
         </div>
       </div>
     </div>
 
     <!-- Commission breakdown table -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-4 p-5">
-      <h3 class="text-[17px] font-semibold text-dark-inky-blue">Commission Breakdown</h3>
-      <p class="text-[11px] text-grayish-blue-slate mt-0.5">8% illustrative demo rate</p>
+      <h3 class="text-[19px] font-semibold text-dark-inky-blue">Commission Breakdown</h3>
+      <p class="text-[13px] text-grayish-blue-slate mt-0.5">8% illustrative demo rate</p>
       <div class="overflow-x-auto mt-4 rounded-lg">
         <table class="w-full min-w-[640px] text-center">
           <thead>
-            <tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue">
+            <tr class="text-white text-[13px] uppercase tracking-wide bg-shazam-blue">
               <th class="px-5 py-3.5 font-medium">Fulfilment</th>
               <th class="px-3 py-3.5 font-medium">Order</th>
               <th class="px-3 py-3.5 font-medium">Gross Sale</th>
@@ -186,7 +186,7 @@
               <th class="px-3 py-3.5 font-medium">Net</th>
             </tr>
           </thead>
-          <tbody class="text-[12px]">
+          <tbody class="text-[14px]">
             <tr class="border-b border-slate-100"><td class="px-5 py-3.5">Home Delivery</td><td>210</td><td>₹1,05,000</td><td class="text-red-500">₹8,400</td><td class="text-kyc-green font-medium">₹96,600</td></tr>
             <tr class="border-b border-slate-100"><td class="px-5 py-3.5">Stock Pickup</td><td>60</td><td>₹30,000</td><td class="text-red-500">₹2,400</td><td class="text-kyc-green font-medium">₹27,600</td></tr>
             <tr class="bg-blue-100 font-bold"><td class="px-5 py-3.5 text-dark-inky-blue">Total</td><td>270</td><td>₹1,35,000</td><td class="text-red-500">₹10,800</td><td class="text-kyc-green">₹1,24,200</td></tr>
@@ -198,8 +198,8 @@
     <!-- Recent ledger entries -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-4 p-5">
       <div class="flex items-center justify-between">
-        <h3 class="text-[15px] font-semibold text-dark-inky-blue">Commission Breakdown</h3>
-        <button id="erViewAll" type="button" class="text-[12px] font-semibold text-shazam-blue">View all →</button>
+        <h3 class="text-[17px] font-semibold text-dark-inky-blue">Commission Breakdown</h3>
+        <button id="erViewAll" type="button" class="text-[14px] font-semibold text-shazam-blue">View all →</button>
       </div>
       <ul id="erRecent" class="mt-3 divide-y divide-slate-100"></ul>
     </div>
@@ -208,22 +208,22 @@
   <!-- ============ TRANSACTIONS ============ -->
   <section id="er-transactions" data-pane class="hidden mt-5">
     <div id="erTxnTypes" class="flex gap-6 overflow-x-auto border-b border-slate-100">
-      <button type="button" data-txtype="all" class="er-txtype text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">All Transactions</button>
-      <button type="button" data-txtype="earnings" class="er-txtype text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Earnings</button>
-      <button type="button" data-txtype="commissions" class="er-txtype text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Commissions</button>
-      <button type="button" data-txtype="refunds" class="er-txtype text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Refunds &amp; Adjustments</button>
+      <button type="button" data-txtype="all" class="er-txtype text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">All Transactions</button>
+      <button type="button" data-txtype="earnings" class="er-txtype text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Earnings</button>
+      <button type="button" data-txtype="commissions" class="er-txtype text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Commissions</button>
+      <button type="button" data-txtype="refunds" class="er-txtype text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Refunds &amp; Adjustments</button>
     </div>
 
-    <p class="text-[12px] text-slate-600 mt-4">
+    <p class="text-[14px] text-slate-600 mt-4">
       Credits : <b class="text-dark-inky-blue">₹1,35,000</b> &nbsp; Debits : <b class="text-dark-inky-blue">₹1,26,760</b> &nbsp; Net Movement : <b class="text-kyc-green">+₹8,240</b>
     </p>
 
     <div class="flex flex-wrap items-center gap-3 mt-4">
       <div class="relative flex-1 min-w-[240px]">
         <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-        <input id="erTxnSearch" type="text" placeholder="Search patient, appointment or issue..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+        <input id="erTxnSearch" type="text" placeholder="Search patient, appointment or issue..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
       </div>
-      <select id="erTxnStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
+      <select id="erTxnStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
         <option value="">Filter: All Status</option>
         <option>Settled</option>
         <option>Processing</option>
@@ -235,7 +235,7 @@
     <div class="overflow-x-auto mt-4 rounded-lg bg-white border border-slate-200 shadow-sm">
       <table class="w-full min-w-[1040px] text-center">
         <thead>
-          <tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue">
+          <tr class="text-white text-[13px] uppercase tracking-wide bg-shazam-blue">
             <th class="px-4 py-3.5 font-medium">Date and Time</th>
             <th class="px-3 py-3.5 font-medium">Transaction ID</th>
             <th class="px-3 py-3.5 font-medium">Order Payout Ref</th>
@@ -248,10 +248,10 @@
             <th class="px-3 py-3.5 font-medium">Action</th>
           </tr>
         </thead>
-        <tbody id="erTxnRows" class="text-[12px]"></tbody>
+        <tbody id="erTxnRows" class="text-[14px]"></tbody>
       </table>
     </div>
-    <p id="erTxnCount" class="text-[12px] text-slate-600 mt-4"></p>
+    <p id="erTxnCount" class="text-[14px] text-slate-600 mt-4"></p>
   </section>
 
   <!-- ============ PAYOUT HISTORY ============ -->
@@ -260,50 +260,50 @@
       <div class="flex flex-wrap items-center gap-3">
         <div class="relative flex-1 min-w-[240px]">
           <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-          <input id="erPayoutSearch" type="text" placeholder="Search payout ID..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+          <input id="erPayoutSearch" type="text" placeholder="Search payout ID..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
         </div>
-        <select id="erPayoutStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
+        <select id="erPayoutStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
           <option value="">All Status</option>
           <option>Paid</option>
           <option>Processing</option>
           <option>Failed</option>
         </select>
-        <button id="erPayoutReset" type="button" class="text-[13px] text-slate-600 px-2 py-2 hover:text-shazam-blue">Reset Filters</button>
+        <button id="erPayoutReset" type="button" class="text-[15px] text-slate-600 px-2 py-2 hover:text-shazam-blue">Reset Filters</button>
       </div>
       <div class="overflow-x-auto mt-4 rounded-lg">
         <table class="w-full min-w-[720px] text-center">
           <thead>
-            <tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue">
+            <tr class="text-white text-[13px] uppercase tracking-wide bg-shazam-blue">
               <th class="px-5 py-3.5 font-medium text-left">Payout ID</th><th class="px-3 py-3.5 font-medium">Date</th><th class="px-3 py-3.5 font-medium">Bank</th><th class="px-3 py-3.5 font-medium">Orders</th><th class="px-3 py-3.5 font-medium">Net Amount</th><th class="px-3 py-3.5 font-medium">Status</th><th class="px-3 py-3.5 font-medium">Action</th>
             </tr>
           </thead>
-          <tbody id="erPayoutRows" class="text-[12px]"></tbody>
+          <tbody id="erPayoutRows" class="text-[14px]"></tbody>
         </table>
       </div>
-      <p id="erPayoutCount" class="text-[12px] text-slate-600 mt-4"></p>
+      <p id="erPayoutCount" class="text-[14px] text-slate-600 mt-4"></p>
     </div>
   </section>
 
   <!-- ============ INVOICE & STATEMENTS ============ -->
   <section id="er-invoices" data-pane class="hidden mt-5">
     <div id="erInvTabs" class="flex gap-6 overflow-x-auto border-b border-slate-100">
-      <button type="button" data-sub="commission" class="er-sub text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">Commission Invoices</button>
-      <button type="button" data-sub="settlement" class="er-sub text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Settlement Statements</button>
-      <button type="button" data-sub="tax" class="er-sub text-[13px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Tax &amp; Summary</button>
+      <button type="button" data-sub="commission" class="er-sub text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">Commission Invoices</button>
+      <button type="button" data-sub="settlement" class="er-sub text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Settlement Statements</button>
+      <button type="button" data-sub="tax" class="er-sub text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Tax &amp; Summary</button>
     </div>
 
     <!-- Commission invoices -->
     <div id="er-sub-commission" data-subpane class="mt-5">
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[11px] text-grayish-blue-slate">Total Requested</p><p class="text-[22px] font-bold text-dark-inky-blue mt-1">₹38,200</p></div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[11px] text-grayish-blue-slate">Processing</p><p class="text-[22px] font-bold text-dark-inky-blue mt-1">₹0</p></div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[11px] text-grayish-blue-slate">Paid</p><p class="text-[22px] font-bold text-kyc-green mt-1">₹30,000</p></div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[11px] text-grayish-blue-slate">Failed/Reversed</p><p class="text-[22px] font-bold text-red-500 mt-1">₹8,200</p></div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[13px] text-grayish-blue-slate">Total Requested</p><p class="text-[24px] font-bold text-dark-inky-blue mt-1">₹38,200</p></div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[13px] text-grayish-blue-slate">Processing</p><p class="text-[24px] font-bold text-dark-inky-blue mt-1">₹0</p></div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[13px] text-grayish-blue-slate">Paid</p><p class="text-[24px] font-bold text-kyc-green mt-1">₹30,000</p></div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[13px] text-grayish-blue-slate">Failed/Reversed</p><p class="text-[24px] font-bold text-red-500 mt-1">₹8,200</p></div>
       </div>
 
       <div class="flex flex-wrap items-center gap-3 mt-5">
-        <button id="erInvDateBtn" type="button" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] text-slate-700 bg-white hover:bg-slate-50">Date range</button>
-        <select id="erInvStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[13px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
+        <button id="erInvDateBtn" type="button" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] text-slate-700 bg-white hover:bg-slate-50">Date range</button>
+        <select id="erInvStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
           <option value="">Status</option>
           <option>Available</option>
           <option>Paid</option>
@@ -311,18 +311,18 @@
         </select>
         <div class="relative flex-1 min-w-[240px]">
           <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-          <input id="erInvSearch" type="text" placeholder="Search patient, appointment or issue..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+          <input id="erInvSearch" type="text" placeholder="Search patient, appointment or issue..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
         </div>
       </div>
 
       <div class="overflow-x-auto mt-4 rounded-lg bg-white border border-slate-200 shadow-sm">
         <table class="w-full min-w-[900px] text-center">
           <thead>
-            <tr class="text-white text-[11px] uppercase tracking-wide bg-shazam-blue">
+            <tr class="text-white text-[13px] uppercase tracking-wide bg-shazam-blue">
               <th class="px-4 py-3.5 font-medium">Invoice Number</th><th class="px-3 py-3.5 font-medium">Period</th><th class="px-3 py-3.5 font-medium">Issued Date</th><th class="px-3 py-3.5 font-medium">Gross Eligible Sale</th><th class="px-3 py-3.5 font-medium">Rate</th><th class="px-3 py-3.5 font-medium">Commission</th><th class="px-3 py-3.5 font-medium">Status</th><th class="px-3 py-3.5 font-medium">Action</th>
             </tr>
           </thead>
-          <tbody id="erInvoiceRows" class="text-[12px]"></tbody>
+          <tbody id="erInvoiceRows" class="text-[14px]"></tbody>
         </table>
       </div>
     </div>
@@ -332,19 +332,19 @@
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 class="text-[17px] font-semibold text-dark-inky-blue">Settlements Statements</h3>
-            <p class="text-[11px] text-grayish-blue-slate mt-1">1-22 Jul 2025 generated statement preview</p>
+            <h3 class="text-[19px] font-semibold text-dark-inky-blue">Settlements Statements</h3>
+            <p class="text-[13px] text-grayish-blue-slate mt-1">1-22 Jul 2025 generated statement preview</p>
           </div>
-          <button id="erGenStatement" type="button" class="text-xs font-semibold px-[18px] py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">+ Generate Statement</button>
+          <button id="erGenStatement" type="button" class="text-[14px] font-semibold px-[18px] py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">+ Generate Statement</button>
         </div>
         <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mt-5">
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[11px] text-grayish-blue-slate">Gross</p><p class="text-[20px] font-bold text-dark-inky-blue mt-1">₹1,35,000</p></div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[11px] text-grayish-blue-slate">Commission</p><p class="text-[20px] font-bold text-red-500 mt-1">-₹10,800</p></div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[11px] text-grayish-blue-slate">Adjustment</p><p class="text-[20px] font-bold text-red-500 mt-1">-₹420</p></div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[11px] text-grayish-blue-slate">Paid out</p><p class="text-[20px] font-bold text-dark-inky-blue mt-1">-₹1,15,960</p></div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 col-span-2 lg:col-span-1"><p class="text-[11px] text-grayish-blue-slate">Remaining</p><p class="text-[20px] font-bold text-red-500 mt-1">-₹7,820</p></div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[13px] text-grayish-blue-slate">Gross</p><p class="text-[22px] font-bold text-dark-inky-blue mt-1">₹1,35,000</p></div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[13px] text-grayish-blue-slate">Commission</p><p class="text-[22px] font-bold text-red-500 mt-1">-₹10,800</p></div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[13px] text-grayish-blue-slate">Adjustment</p><p class="text-[22px] font-bold text-red-500 mt-1">-₹420</p></div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[13px] text-grayish-blue-slate">Paid out</p><p class="text-[22px] font-bold text-dark-inky-blue mt-1">-₹1,15,960</p></div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 col-span-2 lg:col-span-1"><p class="text-[13px] text-grayish-blue-slate">Remaining</p><p class="text-[22px] font-bold text-red-500 mt-1">-₹7,820</p></div>
         </div>
-        <p class="flex items-center gap-2 text-[11px] text-grayish-blue-slate mt-5">
+        <p class="flex items-center gap-2 text-[13px] text-grayish-blue-slate mt-5">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
           Small discrepancy from refund timing, reconcile note shown
         </p>
@@ -354,11 +354,11 @@
     <!-- Tax & summary -->
     <div id="er-sub-tax" data-subpane class="hidden mt-5">
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="text-[17px] font-semibold text-dark-inky-blue">Illustrative period summary</h3>
-        <p class="text-[12px] text-slate-600 mt-3">
+        <h3 class="text-[19px] font-semibold text-dark-inky-blue">Illustrative period summary</h3>
+        <p class="text-[14px] text-slate-600 mt-3">
           Gross eligible sale : <b class="text-dark-inky-blue">₹1,35,000</b> &nbsp; Commission : <b class="text-dark-inky-blue">₹10,800</b> &nbsp; Net earnings : <b class="text-dark-inky-blue">₹1,24,200</b>
         </p>
-        <div class="flex items-center gap-2 mt-4 rounded-lg border border-instant-orange bg-orange-50 text-instant-orange text-[12px] px-4 py-3">
+        <div class="flex items-center gap-2 mt-4 rounded-lg border border-instant-orange bg-orange-50 text-instant-orange text-[14px] px-4 py-3">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2z" /><path d="M12 10v5M12 18h.01" /></svg>
           <span><b>Tax withholding not included in this demo view</b> <span class="text-slate-600">Consult a tax professional</span></span>
         </div>
@@ -367,15 +367,15 @@
   </section>
 </div>
 
-<div id="erToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-dark-inky-blue text-white text-[13px] px-[18px] py-2.5 rounded-[10px] z-[1100] hidden"></div>
+<div id="erToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-dark-inky-blue text-white text-[15px] px-[18px] py-2.5 rounded-[10px] z-[1100] hidden"></div>
 
 <!-- ============ TRANSACTION POPUP ============ -->
 <div id="m-txn" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
   <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[620px]">
     <div class="flex justify-between items-start px-6 pt-5 pb-4 border-b border-slate-100">
       <div>
-        <p id="tx-type" class="text-[14px] text-slate-600"></p>
-        <p id="tx-id" class="text-[14px] text-slate-600 mt-2"></p>
+        <p id="tx-type" class="text-[16px] text-slate-600"></p>
+        <p id="tx-id" class="text-[16px] text-slate-600 mt-2"></p>
       </div>
       <div class="flex items-center gap-3">
         <span id="tx-status"></span>
@@ -387,41 +387,41 @@
     <div class="px-6 py-5">
       <div class="rounded-2xl border border-slate-200 p-4">
         <div id="txTabs" class="flex gap-5 border-b border-slate-100">
-          <button type="button" data-txtab="summary" class="tx-tab text-[12px] py-2 border-b-2 text-shazam-blue border-shazam-blue font-medium">Summary</button>
-          <button type="button" data-txtab="ledger" class="tx-tab text-[12px] py-2 border-b-2 text-slate-600 border-transparent font-normal">Ledger Details</button>
-          <button type="button" data-txtab="activity" class="tx-tab text-[12px] py-2 border-b-2 text-slate-600 border-transparent font-normal">Activity</button>
+          <button type="button" data-txtab="summary" class="tx-tab text-[14px] py-2 border-b-2 text-shazam-blue border-shazam-blue font-medium">Summary</button>
+          <button type="button" data-txtab="ledger" class="tx-tab text-[14px] py-2 border-b-2 text-slate-600 border-transparent font-normal">Ledger Details</button>
+          <button type="button" data-txtab="activity" class="tx-tab text-[14px] py-2 border-b-2 text-slate-600 border-transparent font-normal">Activity</button>
         </div>
 
-        <div id="tx-pane-summary" data-txpane class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 mt-3 text-[13px]">
-          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[12px]">Date &amp; Time</p><p id="tx-date" class="text-[16px] font-bold text-dark-inky-blue mt-1"></p></div>
-          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[12px]">Reference</p><p id="tx-ref" class="text-[16px] font-bold text-dark-inky-blue mt-1"></p></div>
-          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[12px]">Credit</p><p id="tx-credit" class="text-[16px] font-bold text-kyc-green mt-1"></p></div>
-          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[12px]">Debit</p><p id="tx-debit" class="text-[16px] font-bold text-red-500 mt-1"></p></div>
-          <div class="py-3"><p class="text-grayish-blue-slate text-[12px]">Closing balance</p><p id="tx-bal" class="text-[16px] font-bold text-dark-inky-blue mt-1"></p></div>
-          <div class="py-3"><p class="text-grayish-blue-slate text-[12px]">Fulfilment</p><p id="tx-ful" class="text-[16px] font-bold text-dark-inky-blue mt-1"></p></div>
+        <div id="tx-pane-summary" data-txpane class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 mt-3 text-[15px]">
+          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[14px]">Date &amp; Time</p><p id="tx-date" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
+          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[14px]">Reference</p><p id="tx-ref" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
+          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[14px]">Credit</p><p id="tx-credit" class="text-[18px] font-bold text-kyc-green mt-1"></p></div>
+          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[14px]">Debit</p><p id="tx-debit" class="text-[18px] font-bold text-red-500 mt-1"></p></div>
+          <div class="py-3"><p class="text-grayish-blue-slate text-[14px]">Closing balance</p><p id="tx-bal" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
+          <div class="py-3"><p class="text-grayish-blue-slate text-[14px]">Fulfilment</p><p id="tx-ful" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
         </div>
 
-        <dl id="tx-pane-ledger" data-txpane class="hidden mt-3 text-[13px]">
+        <dl id="tx-pane-ledger" data-txpane class="hidden mt-3 text-[15px]">
           <div class="flex justify-between py-2.5 border-b border-slate-100"><dt class="text-grayish-blue-slate">Transaction type</dt><dd id="tx-l-type" class="font-medium text-dark-inky-blue"></dd></div>
           <div class="flex justify-between py-2.5 border-b border-slate-100"><dt class="text-grayish-blue-slate">Order payout ref</dt><dd id="tx-l-ref" class="font-medium text-dark-inky-blue"></dd></div>
           <div class="flex justify-between py-2.5 border-b border-slate-100"><dt class="text-grayish-blue-slate">Description</dt><dd id="tx-l-desc" class="font-medium text-dark-inky-blue"></dd></div>
           <div class="flex justify-between py-2.5"><dt class="text-grayish-blue-slate">Running balance</dt><dd id="tx-l-bal" class="font-medium text-dark-inky-blue"></dd></div>
         </dl>
 
-        <ul id="tx-pane-activity" data-txpane class="hidden mt-4 space-y-3 text-[13px]"></ul>
+        <ul id="tx-pane-activity" data-txpane class="hidden mt-4 space-y-3 text-[15px]"></ul>
       </div>
 
-      <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-[12px] px-4 py-3 mt-4">
+      <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-[14px] px-4 py-3 mt-4">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
         <span id="tx-note"></span>
       </div>
 
-      <p class="text-[13px] text-slate-600 mt-5">Activity</p>
-      <ul id="txTimeline" class="mt-3 space-y-3 text-[13px]"></ul>
+      <p class="text-[15px] text-slate-600 mt-5">Activity</p>
+      <ul id="txTimeline" class="mt-3 space-y-3 text-[15px]"></ul>
     </div>
     <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-      <button type="button" data-close="m-txn" class="text-xs font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Close</button>
-      <button id="txReceiptBtn" type="button" class="text-xs font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2">
+      <button type="button" data-close="m-txn" class="text-[14px] font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Close</button>
+      <button id="txReceiptBtn" type="button" class="text-[14px] font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Download Receipt
       </button>
     </div>
@@ -432,17 +432,17 @@
 <div id="m-statement" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
   <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[560px]">
     <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-      <p class="text-[12px] text-grayish-blue-slate">Wallet settings</p>
-      <h3 class="text-[20px] font-bold text-dark-inky-blue mt-1">Download Statement</h3>
+      <p class="text-[14px] text-grayish-blue-slate">Wallet settings</p>
+      <h3 class="text-[22px] font-bold text-dark-inky-blue mt-1">Download Statement</h3>
     </div>
-    <dl class="px-6 py-3 text-[13px] bg-slate-50/60">
-      <div class="flex justify-between items-center py-3.5 border-b border-slate-200"><dt class="text-grayish-blue-slate">Period</dt><dd id="stPeriod" class="text-[16px] font-semibold text-dark-inky-blue">1-22 Jul 2025</dd></div>
-      <div class="flex justify-between items-center py-3.5 border-b border-slate-200"><dt class="text-grayish-blue-slate">Format</dt><dd class="text-[16px] font-semibold text-dark-inky-blue">PDF / Print-ready</dd></div>
+    <dl class="px-6 py-3 text-[15px] bg-slate-50/60">
+      <div class="flex justify-between items-center py-3.5 border-b border-slate-200"><dt class="text-grayish-blue-slate">Period</dt><dd id="stPeriod" class="text-[18px] font-semibold text-dark-inky-blue">1-22 Jul 2025</dd></div>
+      <div class="flex justify-between items-center py-3.5 border-b border-slate-200"><dt class="text-grayish-blue-slate">Format</dt><dd class="text-[18px] font-semibold text-dark-inky-blue">PDF / Print-ready</dd></div>
       <div class="flex justify-between items-center py-3.5"><dt class="text-grayish-blue-slate">Sections included</dt><dd class="text-grayish-blue-slate">Summary, Transactions, Payout, Commission</dd></div>
     </dl>
     <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-      <button type="button" data-close="m-statement" class="text-xs font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
-      <button id="stDownload" type="button" class="text-xs font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Download Statement</button>
+      <button type="button" data-close="m-statement" class="text-[14px] font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+      <button id="stDownload" type="button" class="text-[14px] font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Download Statement</button>
     </div>
   </div>
 </div>
@@ -451,26 +451,26 @@
 <div id="m-export" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
   <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[560px]">
     <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-      <p class="text-[12px] text-grayish-blue-slate">Data Export</p>
-      <h3 class="text-[20px] font-bold text-dark-inky-blue mt-1">Export report</h3>
+      <p class="text-[14px] text-grayish-blue-slate">Data Export</p>
+      <h3 class="text-[22px] font-bold text-dark-inky-blue mt-1">Export report</h3>
     </div>
     <div class="px-6 py-5 bg-slate-50/60">
-      <p class="text-[13px] text-grayish-blue-slate">Select the datasets and format for your demo export</p>
+      <p class="text-[15px] text-grayish-blue-slate">Select the datasets and format for your demo export</p>
       <ul id="exList" class="mt-4 space-y-3">
-        <li><label class="flex items-center gap-4 cursor-pointer text-[13px] text-slate-700"><input type="checkbox" value="Transactions" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Transactions</label></li>
-        <li><label class="flex items-center gap-4 cursor-pointer text-[13px] text-slate-700"><input type="checkbox" value="Payout History" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Payout History</label></li>
-        <li><label class="flex items-center gap-4 cursor-pointer text-[13px] text-slate-700"><input type="checkbox" value="Commission Invoices" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Commission Invoices</label></li>
-        <li><label class="flex items-center gap-4 cursor-pointer text-[13px] text-slate-700"><input type="checkbox" value="Settlement Statement" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Settlement Statement</label></li>
+        <li><label class="flex items-center gap-4 cursor-pointer text-[15px] text-slate-700"><input type="checkbox" value="Transactions" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Transactions</label></li>
+        <li><label class="flex items-center gap-4 cursor-pointer text-[15px] text-slate-700"><input type="checkbox" value="Payout History" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Payout History</label></li>
+        <li><label class="flex items-center gap-4 cursor-pointer text-[15px] text-slate-700"><input type="checkbox" value="Commission Invoices" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Commission Invoices</label></li>
+        <li><label class="flex items-center gap-4 cursor-pointer text-[15px] text-slate-700"><input type="checkbox" value="Settlement Statement" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Settlement Statement</label></li>
       </ul>
-      <p id="exError" class="hidden text-[12px] text-red-500 mt-3">Select at least one dataset to export.</p>
-      <div class="flex items-center gap-3 rounded-lg border border-slate-200 bg-white text-grayish-blue-slate text-[12px] px-4 py-3 mt-4">
+      <p id="exError" class="hidden text-[14px] text-red-500 mt-3">Select at least one dataset to export.</p>
+      <div class="flex items-center gap-3 rounded-lg border border-slate-200 bg-white text-grayish-blue-slate text-[14px] px-4 py-3 mt-4">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
         Payout destinations are included by default
       </div>
     </div>
     <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-      <button type="button" data-close="m-export" class="text-xs font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
-      <button id="exGenerate" type="button" class="text-xs font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Generate Export</button>
+      <button type="button" data-close="m-export" class="text-[14px] font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+      <button id="exGenerate" type="button" class="text-[14px] font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Generate Export</button>
     </div>
   </div>
 </div>
@@ -479,30 +479,30 @@
 <div id="m-bank" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
   <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[720px]">
     <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-      <p class="text-[12px] text-grayish-blue-slate">Wallet settings</p>
-      <h3 class="text-[20px] font-bold text-dark-inky-blue mt-1">Banking destinations</h3>
+      <p class="text-[14px] text-grayish-blue-slate">Wallet settings</p>
+      <h3 class="text-[22px] font-bold text-dark-inky-blue mt-1">Banking destinations</h3>
     </div>
     <div class="px-6 py-5 bg-slate-50/60">
       <ul id="bkList" class="space-y-4"></ul>
-      <p class="text-[12px] text-grayish-blue-slate mt-4">Primary destination cannot be removed until another destination is set primary.</p>
-      <p class="text-[12px] text-grayish-blue-slate mt-3">Sections included: Summary, Transaction, Payout, Commission</p>
+      <p class="text-[14px] text-grayish-blue-slate mt-4">Primary destination cannot be removed until another destination is set primary.</p>
+      <p class="text-[14px] text-grayish-blue-slate mt-3">Sections included: Summary, Transaction, Payout, Commission</p>
 
       <div id="bkForm" class="hidden mt-4 rounded-xl border border-slate-200 bg-white p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><label class="block text-[12px] text-slate-700 mb-1.5">Bank name</label><input id="bkName" type="text" placeholder="e.g. ICICI Bank" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
-          <div><label class="block text-[12px] text-slate-700 mb-1.5">Last 4 digits</label><input id="bkLast4" type="text" inputmode="numeric" maxlength="4" placeholder="1234" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[13px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
+          <div><label class="block text-[14px] text-slate-700 mb-1.5">Bank name</label><input id="bkName" type="text" placeholder="e.g. ICICI Bank" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
+          <div><label class="block text-[14px] text-slate-700 mb-1.5">Last 4 digits</label><input id="bkLast4" type="text" inputmode="numeric" maxlength="4" placeholder="1234" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
         </div>
-        <p id="bkError" class="hidden text-[12px] text-red-500 mt-2">Enter a bank name and 4 digits.</p>
+        <p id="bkError" class="hidden text-[14px] text-red-500 mt-2">Enter a bank name and 4 digits.</p>
         <div class="flex justify-end gap-3 mt-3">
-          <button id="bkCancelAdd" type="button" class="text-xs font-semibold px-5 py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
-          <button id="bkSaveAdd" type="button" class="text-xs font-semibold px-5 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Save</button>
+          <button id="bkCancelAdd" type="button" class="text-[14px] font-semibold px-5 py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+          <button id="bkSaveAdd" type="button" class="text-[14px] font-semibold px-5 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Save</button>
         </div>
       </div>
 
-      <button id="bkAdd" type="button" class="mt-4 text-[13px] font-medium px-4 py-2.5 rounded-lg border border-slate-400 text-slate-600 bg-white hover:bg-slate-50">+ Add Destination</button>
+      <button id="bkAdd" type="button" class="mt-4 text-[15px] font-medium px-4 py-2.5 rounded-lg border border-slate-400 text-slate-600 bg-white hover:bg-slate-50">+ Add Destination</button>
     </div>
     <div class="flex justify-end px-6 py-4 border-t border-slate-100">
-      <button type="button" data-close="m-bank" class="text-xs font-semibold px-10 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Close</button>
+      <button type="button" data-close="m-bank" class="text-[14px] font-semibold px-10 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Close</button>
     </div>
   </div>
 </div>
@@ -510,492 +510,6 @@
 
 {% block extra_js %}
 <script src="/static/js/seller-earning.js"></script>
-<script>
-  (function () {
-  'use strict';
+<script src="/static/js/pharmacy-earning.js"></script>
 
-  /* ---------- helpers ---------- */
-  var $ = function (s, r) { return (r || document).querySelector(s); };
-  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
-  var fmt = function (v) { return '₹' + Number(v).toLocaleString('en-IN'); };
-  var root = $('#earningsPage');
-  if (!root) return;
-
-  var toastTimer;
-  function toast(msg) {
-    var t = $('#erToast');
-    t.textContent = msg;
-    t.classList.remove('hidden');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.add('hidden'); }, 2400);
-  }
-  function openModal(id) { var m = $('#' + id); m.classList.remove('hidden'); m.classList.add('flex'); }
-  function closeModal(id) { var m = $('#' + id); m.classList.add('hidden'); m.classList.remove('flex'); }
-
-  var TAB_ON = ['text-shazam-blue', 'border-shazam-blue', 'font-medium'];
-  var TAB_OFF = ['text-slate-600', 'border-transparent', 'font-normal'];
-  function setActive(btns, active, on, off) {
-    btns.forEach(function (b) {
-      var isOn = b === active;
-      on.forEach(function (c) { b.classList.toggle(c, isOn); });
-      off.forEach(function (c) { b.classList.toggle(c, !isOn); });
-    });
-  }
-
-  var STATUS_CLS = {
-    Settled: 'bg-green-50 text-kyc-green border-green-200',
-    Paid: 'bg-green-50 text-kyc-green border-green-200',
-    Available: 'bg-green-50 text-kyc-green border-green-200',
-    Processing: 'bg-yellow-50 text-yellow-600 border-yellow-300',
-    Failed: 'bg-red-50 text-red-500 border-red-200',
-    Reversed: 'bg-red-50 text-red-500 border-red-200'
-  };
-  function badge(s) {
-    return '<span class="inline-block text-[10px] px-2.5 py-0.5 rounded-full border whitespace-nowrap ' + (STATUS_CLS[s] || 'bg-slate-50 text-slate-600 border-slate-200') + '">' + s + '</span>';
-  }
-  var EYE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></svg>';
-  var DL = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>';
-
-  /* ---------- modal wiring ---------- */
-  $$('[data-modal]').forEach(function (m) {
-    m.addEventListener('click', function (e) { if (e.target === m) closeModal(m.id); });
-  });
-  $$('[data-close]').forEach(function (b) {
-    b.addEventListener('click', function () { closeModal(b.getAttribute('data-close')); });
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') $$('[data-modal]').forEach(function (m) { closeModal(m.id); });
-  });
-
-  /* ---------- main tabs ---------- */
-  var tabs = $$('.er-tab');
-  function showTab(name) {
-    setActive(tabs, tabs.filter(function (t) { return t.getAttribute('data-tab') === name; })[0], TAB_ON, TAB_OFF);
-    $$('[data-pane]').forEach(function (p) { p.classList.toggle('hidden', p.id !== 'er-' + name); });
-  }
-  tabs.forEach(function (t) { t.addEventListener('click', function () { showTab(t.getAttribute('data-tab')); }); });
-  $('#erViewAll').addEventListener('click', function () { showTab('transactions'); });
-
-  /* ---------- invoice sub tabs ---------- */
-  var subs = $$('.er-sub');
-  subs.forEach(function (s) {
-    s.addEventListener('click', function () {
-      setActive(subs, s, TAB_ON, TAB_OFF);
-      var name = s.getAttribute('data-sub');
-      $$('[data-subpane]').forEach(function (p) { p.classList.toggle('hidden', p.id !== 'er-sub-' + name); });
-    });
-  });
-
-  /* ---------- header: date range / presets ---------- */
-  var PRESETS = {
-    today: 'Jul 22, 2025',
-    '7d': 'Jul 16 - Jul 22, 2025',
-    '30d': 'Jun 23 - Jul 22, 2025',
-    '3m': 'Apr 23 - Jul 22, 2025'
-  };
-  var PRESET_ON = ['bg-white', 'text-shazam-blue', 'border-shazam-blue', 'font-medium'];
-  var PRESET_OFF = ['bg-slate-50', 'text-slate-600', 'border-slate-200'];
-  var presets = $$('.er-preset');
-  function setPreset(btn) {
-    presets.forEach(function (b) {
-      var on = b === btn;
-      PRESET_ON.forEach(function (c) { b.classList.toggle(c, on); });
-      PRESET_OFF.forEach(function (c) { b.classList.toggle(c, !on); });
-    });
-  }
-  function setPeriod(label) {
-    $('#erDateLabel').textContent = label;
-    $('#stPeriod').textContent = label;
-  }
-  presets.forEach(function (b) {
-    b.addEventListener('click', function () {
-      var key = b.getAttribute('data-preset');
-      setPreset(b);
-      if (key === 'custom') { $('#erDatePop').classList.remove('hidden'); return; }
-      $('#erDatePop').classList.add('hidden');
-      setPeriod(PRESETS[key]);
-    });
-  });
-  $('#erDateBtn').addEventListener('click', function () { $('#erDatePop').classList.toggle('hidden'); });
-  $('#erDateCancel').addEventListener('click', function () { $('#erDatePop').classList.add('hidden'); });
-  $('#erDateApply').addEventListener('click', function () {
-    var f = $('#erFrom').value, t = $('#erTo').value;
-    if (!f || !t) { toast('Select both dates'); return; }
-    if (f > t) { toast('From date cannot be after To date'); return; }
-    setPeriod(f + ' to ' + t);
-    $('#erDatePop').classList.add('hidden');
-  });
-  setPreset(presets[2]);
-  setPeriod('Jul 1 - Jul 22, 2025');
-
-  /* ---------- statement / export popups ---------- */
-  function openStatement() { openModal('m-statement'); }
-  function openExport() {
-    $$('#exList input').forEach(function (c) { c.checked = false; });
-    $('#exError').classList.add('hidden');
-    openModal('m-export');
-  }
-  $('#erStatementBtn').addEventListener('click', openStatement);
-  $('#erChartDoc').addEventListener('click', openStatement);
-  $('#erExportBtn').addEventListener('click', openExport);
-  $('#erChartDl').addEventListener('click', openExport);
-  $('#erGenStatement').addEventListener('click', openStatement);
-  $('#stDownload').addEventListener('click', function () {
-    closeModal('m-statement');
-    toast('Statement downloaded');
-  });
-  $('#exGenerate').addEventListener('click', function () {
-    var picked = $$('#exList input:checked').map(function (c) { return c.value; });
-    if (!picked.length) { $('#exError').classList.remove('hidden'); return; }
-    closeModal('m-export');
-    toast('Export generated: ' + picked.join(', '));
-  });
-
-  /* ---------- earnings trend chart ---------- */
-  var DAILY = [6000, 6200, 5800, 6400, 6900, 5900, 6300, 7200, 6100, 6500, 5700, 6000, 6600, 5900, 6300, 7000, 6200, 5800, 6100, 6400, 5700, 4000];
-  function sum(a, from, to) { return a.slice(from, to).reduce(function (x, y) { return x + y; }, 0); }
-  function series(gross, labels) {
-    var comm = gross.map(function (g) { return Math.round(g * 0.08); });
-    var net = gross.map(function (g, i) { return g - comm[i]; });
-    return { labels: labels, gross: gross, comm: comm, net: net };
-  }
-  var TREND = {
-    daily: series(DAILY, DAILY.map(function (_, i) { return 'Jul ' + (i + 1); })),
-    weekly: series(
-      [sum(DAILY, 0, 7), sum(DAILY, 7, 14), sum(DAILY, 14, 21), sum(DAILY, 21, 22)],
-      ['Jul 1-7', 'Jul 8-14', 'Jul 15-21', 'Jul 22']
-    ),
-    monthly: series(
-      [112000, 98000, 121000, 128000, 119000, 131000, 135000],
-      ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']
-    )
-  };
-  var UNIT = { daily: '/day', weekly: '/week', monthly: '/month' };
-
-  function niceMax(m) {
-    var mag = Math.pow(10, Math.floor(Math.log10(m)));
-    var steps = [1, 1.2, 1.4, 1.6, 2, 3, 4, 6, 8, 10];
-    for (var i = 0; i < steps.length; i++) { if (steps[i] * mag >= m) return steps[i] * mag; }
-    return 10 * mag;
-  }
-  function tick(v) { return v === 0 ? '₹0' : '₹' + (v >= 1000 ? Math.round(v / 100) / 10 + 'k' : v); }
-
-  function renderChart(range) {
-    var d = TREND[range];
-    var W = 640, H = 260, pl = 46, pr = 12, pt = 12, pb = 28;
-    var n = d.gross.length;
-    var max = niceMax(Math.max.apply(null, d.gross));
-    var x = function (i) { return pl + (n === 1 ? 0 : i * (W - pl - pr) / (n - 1)); };
-    var y = function (v) { return pt + (H - pt - pb) * (1 - v / max); };
-    var line = function (arr) {
-      return arr.map(function (v, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' ');
-    };
-    var band = 'M' + d.gross.map(function (v, i) { return x(i).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' L') +
-      ' L' + d.net.map(function (v, i) { return x(i).toFixed(1) + ' ' + y(v).toFixed(1); }).reverse().join(' L') + ' Z';
-
-    var out = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="w-full h-auto" role="img" aria-label="Earnings trend">';
-    [0, 0.5, 1].forEach(function (f) {
-      var v = max * f, yy = y(v).toFixed(1);
-      out += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + yy + '" y2="' + yy + '" class="stroke-slate-200" stroke-dasharray="3 4" />';
-      out += '<text x="' + (pl - 8) + '" y="' + (Number(yy) + 3) + '" text-anchor="end" class="fill-slate-400 text-[10px]">' + tick(v) + '</text>';
-    });
-    var every = n > 12 ? 4 : 1;
-    d.labels.forEach(function (l, i) {
-      if (i % every === 0) out += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" class="fill-slate-400 text-[10px]">' + l + '</text>';
-    });
-    out += '<path d="' + band + '" class="fill-yellow-200/60 stroke-none" />';
-    out += '<path d="' + line(d.comm) + '" class="fill-none stroke-fuchsia-pink stroke-2 [stroke-linejoin:round]" />';
-    out += '<path d="' + line(d.net) + '" class="fill-none stroke-kyc-green stroke-2 [stroke-linejoin:round]" />';
-    out += '<path d="' + line(d.gross) + '" class="fill-none stroke-facebook-blue stroke-2 [stroke-linejoin:round]" />';
-    d.gross.forEach(function (v, i) {
-      out += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="5" class="fill-transparent hover:fill-facebook-blue"><title>' +
-        d.labels[i] + ' | Gross ' + fmt(v) + ' | Commission ' + fmt(d.comm[i]) + ' | Net ' + fmt(d.net[i]) + '</title></circle>';
-    });
-    out += '</svg>';
-    $('#erChart').innerHTML = out;
-
-    var hi = d.gross.indexOf(Math.max.apply(null, d.gross));
-    var lo = d.gross.indexOf(Math.min.apply(null, d.gross));
-    var avg = Math.round(sum(d.gross, 0, n) / n);
-    $('#erHigh').textContent = 'Highest: ' + d.labels[hi] + ' ' + fmt(d.gross[hi]);
-    $('#erLow').textContent = 'Lowest: ' + d.labels[lo] + ' ' + fmt(d.gross[lo]);
-    $('#erAvg').textContent = 'Avg: ' + fmt(avg) + UNIT[range];
-  }
-  var ranges = $$('.er-range');
-  ranges.forEach(function (b) {
-    b.addEventListener('click', function () {
-      ranges.forEach(function (r) {
-        var on = r === b;
-        ['bg-white', 'text-shazam-blue', 'shadow-sm', 'font-medium'].forEach(function (c) { r.classList.toggle(c, on); });
-        r.classList.toggle('text-slate-600', !on);
-      });
-      renderChart(b.getAttribute('data-range'));
-    });
-  });
-  renderChart('daily');
-
-  /* ---------- transactions data ---------- */
-  var TXNS = [
-    { id: 'TXN-001', dt: '1 Jul 9:00 AM', ref: 'SETT-0701-01', type: 'Order Settlement', desc: 'Home Delivery Batch', cr: 6000, db: 0, bal: 6000, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-002', dt: '1 Jul 9:00 AM', ref: 'SETT-0701-01', type: 'Platform Commission', desc: '8% on ₹6,000', cr: 0, db: 480, bal: 5520, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-003', dt: '3 Jul 10:00 AM', ref: 'SETT-0703-01', type: 'Order Settlement', desc: 'Home Delivery', cr: 6200, db: 0, bal: 11720, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-004', dt: '3 Jul 10:00 AM', ref: 'COM-0703-01', type: 'Platform Commission', desc: '8% on ₹6,200', cr: 0, db: 496, bal: 11224, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-005', dt: '5 Jul 10:00 AM', ref: 'SETT-0705-01', type: 'Order Settlement', desc: 'Stock Pickup Batch', cr: 6500, db: 0, bal: 17724, st: 'Settled', ful: 'Stock Pick Up' },
-    { id: 'TXN-006', dt: '5 Jul 10:00 AM', ref: 'COM-0705-01', type: 'Platform Commission', desc: '8% on ₹6,500', cr: 0, db: 520, bal: 17204, st: 'Settled', ful: 'Stock Pick Up' },
-    { id: 'TXN-007', dt: '6 Jul 10:00 AM', ref: 'PAY-2400', type: 'Payout Requested', desc: 'HDFC •••• 4521', cr: 0, db: 8200, bal: 9004, st: 'Failed', ful: 'Bank transfer' },
-    { id: 'TXN-008', dt: '7 Jul 10:00 AM', ref: 'REV-PAY-2400', type: 'Payout Reversed', desc: 'Failed reversal PAY-2400', cr: 8200, db: 0, bal: 17204, st: 'Reversed', ful: 'Bank transfer' },
-    { id: 'TXN-009', dt: '9 Jul 9:00 AM', ref: 'SETT-0709-01', type: 'Order Settlement', desc: 'Batch', cr: 6500, db: 0, bal: 23704, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-010', dt: '9 Jul 9:00 AM', ref: 'COM-0709-01', type: 'Platform Commission', desc: '8% on ₹6,500', cr: 0, db: 520, bal: 23184, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-011', dt: '12 Jul 9:00 AM', ref: 'SETT-0712-01', type: 'Order Settlement', desc: 'Batch', cr: 6300, db: 0, bal: 29484, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-012', dt: '12 Jul 9:00 AM', ref: 'COM-0712-01', type: 'Platform Commission', desc: '8% on ₹6,300', cr: 0, db: 504, bal: 28980, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-013', dt: '12 Jul 9:00 AM', ref: 'PAY-2399', type: 'Payout Requested', desc: 'HDFC •••• 4521', cr: 0, db: 12000, bal: 16980, st: 'Settled', ful: 'Bank transfer' },
-    { id: 'TXN-014', dt: '20 Jul 2:30 PM', ref: 'REF-ORD-3287', type: 'Refund Adjustment', desc: 'Customer refund', cr: 0, db: 420, bal: 16560, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-015', dt: '22 Jul 9:00 AM', ref: 'SETT-0722-05', type: 'Order Settlement', desc: 'Home Delivery Batch', cr: 4200, db: 0, bal: 20760, st: 'Settled', ful: 'Home Delivery' },
-    { id: 'TXN-016', dt: '22 Jul 9:00 AM', ref: 'COM-0722-05', type: 'Platform Commission', desc: '8% on ₹4,200', cr: 0, db: 336, bal: 20424, st: 'Settled', ful: 'Home Delivery' }
-  ];
-  var TYPE_GROUP = {
-    all: null,
-    earnings: ['Order Settlement'],
-    commissions: ['Platform Commission'],
-    refunds: ['Refund Adjustment', 'Payout Reversed']
-  };
-  var txType = 'all';
-
-  function renderTxns() {
-    var q = $('#erTxnSearch').value.trim().toLowerCase();
-    var st = $('#erTxnStatus').value;
-    var group = TYPE_GROUP[txType];
-    var rows = TXNS.filter(function (t) {
-      if (group && group.indexOf(t.type) < 0) return false;
-      if (st && t.st !== st) return false;
-      if (q && (t.id + t.ref + t.type + t.desc).toLowerCase().indexOf(q) < 0) return false;
-      return true;
-    });
-    $('#erTxnRows').innerHTML = rows.length ? rows.map(function (t) {
-      return '<tr class="border-b border-slate-100">' +
-        '<td class="px-4 py-3.5 text-slate-700">' + t.dt + '</td>' +
-        '<td><button type="button" data-txn="' + t.id + '" class="text-shazam-blue font-medium hover:underline">' + t.id + '</button></td>' +
-        '<td class="text-slate-600">' + t.ref + '</td>' +
-        '<td class="text-slate-700 px-2">' + t.type + '</td>' +
-        '<td class="text-slate-600 px-2">' + t.desc + '</td>' +
-        '<td class="text-kyc-green font-medium">' + (t.cr ? '+' + fmt(t.cr) : '—') + '</td>' +
-        '<td class="text-red-500 font-medium">' + (t.db ? '-' + fmt(t.db) : '—') + '</td>' +
-        '<td class="text-dark-inky-blue font-medium">' + fmt(t.bal) + '</td>' +
-        '<td>' + badge(t.st) + '</td>' +
-        '<td><button type="button" data-txn="' + t.id + '" class="text-shazam-blue" title="View">' + EYE + '</button></td></tr>';
-    }).join('') : '<tr><td colspan="10" class="px-4 py-10 text-slate-400 text-[13px]">No transactions found</td></tr>';
-    $('#erTxnCount').textContent = 'Showing ' + rows.length + ' of ' + TXNS.length + ' transactions';
-  }
-  var txTypeBtns = $$('.er-txtype');
-  txTypeBtns.forEach(function (b) {
-    b.addEventListener('click', function () {
-      txType = b.getAttribute('data-txtype');
-      setActive(txTypeBtns, b, TAB_ON, TAB_OFF);
-      renderTxns();
-    });
-  });
-  $('#erTxnSearch').addEventListener('input', renderTxns);
-  $('#erTxnStatus').addEventListener('change', renderTxns);
-  renderTxns();
-
-  /* recent ledger on overview */
-  function renderRecent() {
-    var ids = ['TXN-015', 'TXN-016', 'TXN-014'];
-    var names = { 'TXN-015': 'Order Settlement', 'TXN-016': 'Platform Commission', 'TXN-014': 'Refund Adjustment' };
-    $('#erRecent').innerHTML = ids.map(function (id) {
-      var t = TXNS.filter(function (x) { return x.id === id; })[0];
-      var amt = t.cr ? '<span class="text-kyc-green font-semibold">+' + fmt(t.cr) + '</span>' : '<span class="text-red-500 font-semibold">-' + fmt(t.db) + '</span>';
-      return '<li><button type="button" data-txn="' + id + '" class="w-full flex items-center gap-3 py-3 text-left">' +
-        '<span class="w-5 h-5 rounded-full border-2 border-kyc-green text-kyc-green flex items-center justify-center shrink-0"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-10" /></svg></span>' +
-        '<span class="flex-1 leading-tight"><span class="block text-[13px] font-semibold text-dark-inky-blue">' + names[id] + '</span><span class="block text-[11px] text-grayish-blue-slate">' + t.dt + ' ' + t.ref + '</span></span>' +
-        amt + '<span class="text-[10px] px-2 py-0.5 rounded-md border bg-green-50 text-kyc-green border-green-200">Settled</span>' +
-        '<svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6" /></svg></button></li>';
-    }).join('');
-  }
-  renderRecent();
-
-  /* ---------- transaction popup ---------- */
-  var ACTIVITY = {
-    'Order Settlement': [['Receive Stock', 'Order delivered / stock received'], ['Cleared', 'Demo settlement cleared']],
-    'Platform Commission': [['Commission calculated', '8% of gross eligible sale'], ['Deducted', 'Deducted from settlement']],
-    'Payout Requested': [['Payout requested', 'Sent to linked bank account'], ['Bank processing', 'Awaiting bank confirmation']],
-    'Payout Reversed': [['Payout failed', 'Bank rejected the transfer'], ['Reversed', 'Amount returned to available balance']],
-    'Refund Adjustment': [['Refund raised', 'Customer refund approved'], ['Adjusted', 'Adjusted against earnings']]
-  };
-  var txTabBtns = $$('.tx-tab');
-  function showTxTab(name) {
-    setActive(txTabBtns, txTabBtns.filter(function (b) { return b.getAttribute('data-txtab') === name; })[0], TAB_ON, TAB_OFF);
-    $$('[data-txpane]').forEach(function (p) { p.classList.toggle('hidden', p.id !== 'tx-pane-' + name); });
-  }
-  txTabBtns.forEach(function (b) { b.addEventListener('click', function () { showTxTab(b.getAttribute('data-txtab')); }); });
-
-  var currentTxn = null;
-  function openTxn(id) {
-    var t = TXNS.filter(function (x) { return x.id === id; })[0];
-    if (!t) return;
-    currentTxn = t;
-    $('#tx-type').textContent = t.type;
-    $('#tx-id').textContent = t.id.replace('-', ' - ');
-    $('#tx-status').innerHTML = badge(t.st);
-    $('#tx-date').textContent = t.dt;
-    $('#tx-ref').textContent = t.ref;
-    $('#tx-credit').textContent = fmt(t.cr);
-    $('#tx-debit').textContent = fmt(t.db);
-    $('#tx-bal').textContent = fmt(t.bal);
-    $('#tx-ful').textContent = t.ful;
-    $('#tx-l-type').textContent = t.type;
-    $('#tx-l-ref').textContent = t.ref;
-    $('#tx-l-desc').textContent = t.desc;
-    $('#tx-l-bal').textContent = fmt(t.bal);
-    $('#tx-note').textContent = t.desc + '  This record is illustrative demo ledger data';
-    var steps = (ACTIVITY[t.type] || ACTIVITY['Order Settlement']).slice();
-    if (t.st === 'Failed') steps[1] = ['Failed', 'Bank rejected the transfer'];
-    if (t.st === 'Processing') steps[1] = ['Processing', 'Awaiting confirmation'];
-    var html = steps.map(function (s, i) {
-      return '<li class="flex items-start gap-2.5"><span class="w-5 h-5 mt-0.5 rounded-full border-2 border-shazam-blue text-shazam-blue flex items-center justify-center shrink-0"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-10" /></svg></span>' +
-        '<span class="leading-tight"><span class="block text-[12px] font-semibold text-shazam-blue">' + s[0] + '</span><span class="block text-[12px] text-slate-600 mt-0.5">' + (i === 0 ? t.dt : s[1]) + '</span></span></li>';
-    }).join('');
-    $('#txTimeline').innerHTML = html;
-    $('#tx-pane-activity').innerHTML = html;
-    showTxTab('summary');
-    openModal('m-txn');
-  }
-  document.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-txn]');
-    if (b) openTxn(b.getAttribute('data-txn'));
-  });
-  $('#txReceiptBtn').addEventListener('click', function () {
-    if (currentTxn) toast('Receipt for ' + currentTxn.id + ' downloaded');
-  });
-
-  /* ---------- payout history ---------- */
-  var PAYOUTS = [
-    { id: 'PAY-2399', date: '12 Jul 2025', bank: 'HDFC •••• 4521', orders: 58, amt: 12000, st: 'Paid' },
-    { id: 'PAY-2398', date: '3 Jul 2025', bank: 'HDFC •••• 4521', orders: 74, amt: 18000, st: 'Paid' },
-    { id: 'PAY-2400', date: '6 Jul 2025', bank: 'HDFC •••• 4521', orders: 31, amt: 8200, st: 'Failed' }
-  ];
-  function renderPayouts() {
-    var q = $('#erPayoutSearch').value.trim().toLowerCase();
-    var st = $('#erPayoutStatus').value;
-    var rows = PAYOUTS.filter(function (p) {
-      return (!st || p.st === st) && (!q || p.id.toLowerCase().indexOf(q) >= 0);
-    });
-    $('#erPayoutRows').innerHTML = rows.length ? rows.map(function (p) {
-      return '<tr class="border-b border-slate-100"><td class="px-5 py-3.5 text-left text-shazam-blue font-medium">' + p.id + '</td><td>' + p.date + '</td><td>' + p.bank + '</td><td>' + p.orders + '</td><td class="font-medium text-dark-inky-blue">' + fmt(p.amt) + '</td><td>' + badge(p.st) + '</td>' +
-        '<td><button type="button" data-pay="' + p.id + '" class="text-shazam-blue" title="Download receipt">' + DL + '</button></td></tr>';
-    }).join('') : '<tr><td colspan="7" class="px-4 py-10 text-slate-400 text-[13px]">No payouts found</td></tr>';
-    $('#erPayoutCount').textContent = 'Showing ' + rows.length + ' of ' + PAYOUTS.length + ' payouts';
-  }
-  $('#erPayoutSearch').addEventListener('input', renderPayouts);
-  $('#erPayoutStatus').addEventListener('change', renderPayouts);
-  $('#erPayoutReset').addEventListener('click', function () {
-    $('#erPayoutSearch').value = '';
-    $('#erPayoutStatus').value = '';
-    renderPayouts();
-  });
-  renderPayouts();
-  document.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-pay]');
-    if (b) toast('Payout receipt ' + b.getAttribute('data-pay') + ' downloaded');
-  });
-
-  /* ---------- commission invoices ---------- */
-  var INVOICES = [
-    { no: 'INV-2025-07-001', period: '1-22 Jul 2025', issued: '22 Jul 2025', gross: 135000, rate: '8%', comm: 10800, st: 'Available' },
-    { no: 'INV-2025-06-001', period: '1-30 Jun 2025', issued: '30 Jun 2025', gross: 152000, rate: '8%', comm: 12160, st: 'Paid' },
-    { no: 'INV-2025-05-001', period: '1-31 May 2025', issued: '31 May 2025', gross: 119000, rate: '8%', comm: 9520, st: 'Paid' }
-  ];
-  function renderInvoices() {
-    var q = $('#erInvSearch').value.trim().toLowerCase();
-    var st = $('#erInvStatus').value;
-    var rows = INVOICES.filter(function (i) {
-      return (!st || i.st === st) && (!q || (i.no + i.period).toLowerCase().indexOf(q) >= 0);
-    });
-    $('#erInvoiceRows').innerHTML = rows.length ? rows.map(function (i) {
-      return '<tr class="border-b border-slate-100"><td class="px-4 py-3.5 text-shazam-blue font-medium">' + i.no + '</td><td>' + i.period + '</td><td>' + i.issued + '</td><td class="font-semibold text-dark-inky-blue">' + fmt(i.gross) + '</td><td>' + i.rate + '</td><td>' + fmt(i.comm) + '</td><td>' + badge(i.st) + '</td>' +
-        '<td><div class="flex items-center justify-center gap-3"><button type="button" data-inv-preview="' + i.no + '" class="text-[11px] px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">Preview</button>' +
-        '<button type="button" data-inv-dl="' + i.no + '" class="text-slate-600 hover:text-shazam-blue" title="Download">' + DL + '</button></div></td></tr>';
-    }).join('') : '<tr><td colspan="8" class="px-4 py-10 text-slate-400 text-[13px]">No invoices found</td></tr>';
-  }
-  $('#erInvSearch').addEventListener('input', renderInvoices);
-  $('#erInvStatus').addEventListener('change', renderInvoices);
-  $('#erInvDateBtn').addEventListener('click', function () { $('#erDateBtn').click(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-  renderInvoices();
-  document.addEventListener('click', function (e) {
-    var p = e.target.closest('[data-inv-preview]');
-    if (p) toast('Opening preview of ' + p.getAttribute('data-inv-preview'));
-    var d = e.target.closest('[data-inv-dl]');
-    if (d) toast('Invoice ' + d.getAttribute('data-inv-dl') + ' downloaded');
-  });
-
-  /* ---------- banking destinations ---------- */
-  var banks = [{ id: 1, name: 'HDFC Bank.....4251', holder: 'Rakesh Gupta Verified Demo', primary: true }];
-  var nextBankId = 2;
-  var editingId = null;
-  var BOX = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" /><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5" /></svg>';
-
-  function renderBanks() {
-    $('#bkList').innerHTML = banks.map(function (b) {
-      var nameHtml = editingId === b.id
-        ? '<input id="bkEditInput" type="text" value="' + b.name.replace(/"/g, '&quot;') + '" class="border border-slate-200 rounded-lg px-3 py-1.5 text-[14px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100 w-full max-w-[240px]" />'
-        : '<p class="text-[16px] font-semibold text-dark-inky-blue">' + b.name + '</p>';
-      var canRemove = !b.primary;
-      return '<li class="rounded-xl border border-slate-200 bg-white p-4"><div class="flex flex-wrap items-center gap-3">' +
-        '<span class="w-10 h-10 rounded-lg border border-shazam-blue text-shazam-blue flex items-center justify-center shrink-0">' + BOX + '</span>' +
-        '<div class="flex-1 min-w-[160px] leading-tight">' + nameHtml + '<p class="text-[12px] text-grayish-blue-slate mt-1">' + b.holder + '</p></div>' +
-        (b.primary ? '<span class="text-[10px] px-2.5 py-0.5 rounded-md border border-kyc-green text-kyc-green bg-green-50">Primary</span>'
-          : '<button type="button" data-bk-primary="' + b.id + '" class="text-[11px] px-3 py-1 rounded-md border border-shazam-blue text-shazam-blue hover:bg-blue-50">Set Primary</button>') +
-        '<button type="button" data-bk-edit="' + b.id + '" class="text-[12px] font-medium px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">' + (editingId === b.id ? 'Save Name' : 'Edit Display Name') + '</button>' +
-        '<button type="button" data-bk-remove="' + b.id + '" ' + (canRemove ? '' : 'disabled ') + 'class="text-[12px] font-medium px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 ' + (canRemove ? 'hover:bg-red-50 hover:text-red-500 hover:border-red-200' : 'opacity-50 cursor-not-allowed') + '">Remove</button>' +
-        '</div></li>';
-    }).join('');
-  }
-  $('#erBankBtn').addEventListener('click', function () { editingId = null; renderBanks(); openModal('m-bank'); });
-  $('#bkList').addEventListener('click', function (e) {
-    var ed = e.target.closest('[data-bk-edit]');
-    var rm = e.target.closest('[data-bk-remove]');
-    var pr = e.target.closest('[data-bk-primary]');
-    if (ed) {
-      var id = Number(ed.getAttribute('data-bk-edit'));
-      if (editingId === id) {
-        var v = $('#bkEditInput').value.trim();
-        if (v) banks.filter(function (b) { return b.id === id; })[0].name = v;
-        editingId = null;
-        toast('Display name updated');
-      } else { editingId = id; }
-      renderBanks();
-      if (editingId) $('#bkEditInput').focus();
-    }
-    if (rm && !rm.disabled) {
-      var rid = Number(rm.getAttribute('data-bk-remove'));
-      banks = banks.filter(function (b) { return b.id !== rid; });
-      renderBanks();
-      toast('Destination removed');
-    }
-    if (pr) {
-      var pid = Number(pr.getAttribute('data-bk-primary'));
-      banks.forEach(function (b) { b.primary = b.id === pid; });
-      renderBanks();
-      toast('Primary destination changed');
-    }
-  });
-  $('#bkAdd').addEventListener('click', function () { $('#bkForm').classList.remove('hidden'); $('#bkName').focus(); });
-  $('#bkCancelAdd').addEventListener('click', function () {
-    $('#bkForm').classList.add('hidden');
-    $('#bkError').classList.add('hidden');
-  });
-  $('#bkSaveAdd').addEventListener('click', function () {
-    var name = $('#bkName').value.trim();
-    var last4 = $('#bkLast4').value.trim();
-    if (!name || !/^\d{4}$/.test(last4)) { $('#bkError').classList.remove('hidden'); return; }
-    banks.push({ id: nextBankId++, name: name + '.....' + last4, holder: 'Rakesh Gupta Verified Demo', primary: false });
-    $('#bkName').value = '';
-    $('#bkLast4').value = '';
-    $('#bkError').classList.add('hidden');
-    $('#bkForm').classList.add('hidden');
-    renderBanks();
-    toast('Destination added');
-  });
-})();
-</script>
 {% endblock %}
