@@ -1,72 +1,744 @@
 {% extends "dashboard/layout.html" %}
 {% load static %}
-{% block title %}Coupons{% endblock %}
+{% block title %}Offers & Bids{% endblock %}
 {% block content %}
-            <div
-                class="relative transition-all duration-300 main-content bg-slate-white p-6 overflow-y-auto scroll">
-                <div
-                    class="show-sidebar-toggle hidden fixed top-[100px] left-0 z-50 h-10 w-10 bg-light-dodger-blue items-center justify-center rounded-r-md cursor-pointer">
-                    <span class="material-symbols-outlined bold-weight text-dodger-blue">
-                        arrow_forward_ios
-                    </span>
-                </div>
-                <!-- <div class="bg-white rounded-[10px] p-5 myCoupons"> -->
-                <div id="myCouponsSection" class="bg-white rounded-[10px] p-5 myCoupons">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-xl! font-semibold!">home</span>
-                            <h1 class="text-base font-semibold">My Coupons</h1>
-                        </div>
-                    </div>
-                    <p id="coupon-copy-status"
-                        class="fixed top-5 right-5 z-[9999] hidden rounded-md bg-white px-4 py-3 text-sm font-medium shadow-lg"
-                        role="status" aria-live="polite"></p>
-                    <a href="{% url 'settings_page' %}?tab=subscription">
-                        <div class="mt-5 bg-soft-pastel-mint rounded-2xl p-2.5 flex items-center justify-between">
-                            <div class="flex flex-col gap-1.5">
-                                <p class="font-normal text-base text-dark-navy">Subscription Details</p>
-                                <div class="border {% if pharmacy_subscription_status == 'Active' %}border-dodger-blue bg-pastel-mint{% else %}border-gray-300 bg-gray-100{% endif %} min-w-[60px] h-[24px] px-2 flex items-center justify-center gap-1 rounded-3xl">
-                                    <div class="w-1 h-1 rounded-full {% if pharmacy_subscription_status == 'Active' %}bg-light-green{% else %}bg-gray-400{% endif %}"></div>
-                                    <p class="font-normal text-xs {% if pharmacy_subscription_status == 'Active' %}text-dark-green{% else %}text-gray-600{% endif %}">{{ pharmacy_subscription_status|default:"Inactive" }}</p>
-                                </div>
-                            </div>
-                            <span class="material-symbols-outlined text-dodger-blue">chevron_right</span>
-                        </div>
-                    </a>
-                    <!-- Tabs -->
-                    <div class="flex gap-4 sm:gap-4 whitespace-nowrap mt-5 overflow-x-auto no-scrollbar">
-                        <button
-                            class="tab-btn-rewards active-tab-rewards text-sm sm:text-18-nr px-4 py-1.5 font-medium cursor-pointer text-light-gray1"
-                            data-tab="purchase-coupons">
-                            Purchase Coupons
-                        </button>
-                        <button
-                            class="tab-btn-rewards text-sm sm:text-18-nr px-4 py-1.5 font-medium cursor-pointer text-light-gray1"
-                            data-tab="created-coupons">
-                            Created Coupons
-                        </button>
-                    </div>
 
-                    <!--Purchase Coupons Section-->
-                    {% include 'partials/purchase_coupon.html' %}
+<div class="p-4">
+  <div class="offers-bids bg-slate-50 relative text-gray-800 shadow-lg rounded-[10px] main-content h-full flex-1 flex flex-col gap-5 overflow-y-auto scroll p-6">
 
+    <!-- Sidebar show toggle (kept from old page) -->
+    <div class="show-sidebar-toggle hidden fixed top-24 left-0 z-50 h-10 w-10 bg-transparent items-center justify-center rounded-r-md cursor-pointer">
+      <span class="material-symbols-outlined bold-weight text-red-500">arrow_forward_ios</span>
+    </div>
 
-                    <!--Created Coupons Section-->
-                    {% include 'partials/pharmacy_created_coupons.html' %}
-                </div>
+    <!-- Page header -->
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div class="space-y-1">
+        <p class="flex items-center gap-2">
+          <span class="material-symbols-outlined">confirmation_number</span>
+          <span class="font-bold text-xl text-slate-900">Offers &amp; Bids</span>
+        </p>
+        <p class="text-xs text-slate-600">Review medicine requests, send quotations and track customer responses.</p>
+        <p class="text-xs text-slate-600">Tuesday, 22 July 2025</p>
+      </div>
+      <div class="flex flex-col items-end gap-3">
+        <div class="flex items-center gap-4 text-xs text-slate-700">
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">location_on</span>Andheri East, Mumbai</span>
+          <span class="flex items-center gap-2">Auto Bid
+            <label class="relative inline-flex cursor-pointer">
+              <input type="checkbox" checked class="peer sr-only" />
+              <span class="h-5 w-9 rounded-full bg-gray-300 transition peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"></span>
+            </label>
+          </span>
+        </div>
+        <button type="button" class="flex w-52 items-center justify-center gap-2 rounded-lg border border-blue-600 bg-white py-2.5 text-xs font-semibold text-blue-600 cursor-pointer hover:bg-blue-50">
+          <span class="material-symbols-outlined text-base">download</span>Export
+        </button>
+      </div>
+    </div>
+
+    <!-- Date filter -->
+    <div class="relative w-fit z-20" data-dd>
+      <button type="button" data-dd-trigger class="flex items-center gap-3 rounded-md border border-slate-200 bg-white px-4 py-2 text-xs text-slate-800 cursor-pointer">
+        <span data-dd-label>Today</span><span class="material-symbols-outlined text-base">keyboard_arrow_down</span>
+      </button>
+      <div data-dd-menu data-sel="text-blue-600" class="hidden absolute left-0 top-[calc(100%+6px)] z-30 w-44 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+        <button type="button" data-v="Today" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-blue-600 cursor-pointer">Today</button>
+        <button type="button" data-v="Last 7 Days" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Last 7 Days</button>
+        <button type="button" data-v="Last 30 Days" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Last 30 Days</button>
+        <button type="button" data-v="Custom Range" data-custom class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Custom Range</button>
+        <div id="date-custom" class="hidden space-y-2 border-t border-slate-100 pt-2">
+          <input type="date" class="h-9 w-full rounded-lg border border-slate-200 px-2.5 text-[12px] text-slate-700" />
+          <input type="date" class="h-9 w-full rounded-lg border border-slate-200 px-2.5 text-[12px] text-slate-700" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 relative z-0">
+      <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm space-y-1">
+        <div class="flex items-start justify-between">
+          <span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-blue-600 text-blue-600">description</span>
+          <span class="rounded-full border border-blue-600 px-2 text-[10px] text-blue-600">Open Requests</span>
+        </div>
+        <p class="text-3xl font-bold text-slate-900">8</p>
+        <p class="text-[10px] text-gray-500">5 unquoted &middot; 3 awaiting response</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm space-y-1">
+        <div class="flex items-start justify-between">
+          <span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-orange-400 text-orange-500">send</span>
+          <span class="rounded-full border border-orange-400 px-2 text-[10px] text-orange-500">Bids Submitted</span>
+        </div>
+        <p class="text-3xl font-bold text-slate-900">8</p>
+        <p class="text-[10px] text-gray-500">Today</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm space-y-1">
+        <div class="flex items-start justify-between">
+          <span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-green-500 text-green-600">check</span>
+          <span class="rounded-full border border-green-500 px-2 text-[10px] text-green-600">Bids Won</span>
+        </div>
+        <p class="text-3xl font-bold text-slate-900">2</p>
+        <p class="text-[10px] text-gray-500">Customer accepted</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm space-y-1">
+        <div class="flex items-start justify-between">
+          <span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-red-500 text-red-500">close</span>
+          <span class="rounded-full border border-red-500 px-2 text-[10px] text-red-500">Closed Without Win</span>
+        </div>
+        <p class="text-3xl font-bold text-red-500">3</p>
+        <p class="text-[10px] text-gray-500">1 lost &middot; 1 expired &middot; 1 withdrawn</p>
+      </div>
+      <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm space-y-1 col-span-2 lg:col-span-1">
+        <div class="flex items-start justify-between">
+          <span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-fuchsia-500 text-fuchsia-600">calculate</span>
+          <span class="rounded-full border border-fuchsia-500 px-2 text-[10px] text-fuchsia-600">Avg Submitted Bid</span>
+        </div>
+        <p class="text-3xl font-bold text-slate-900">&#8377;340</p>
+        <p class="text-[10px] text-gray-500">Across submitted bids</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-8 whitespace-nowrap overflow-x-auto no-scrollbar relative z-0">
+      <button type="button" data-tab="new-request" data-active="text-blue-600 border-blue-600" class="ob-tab flex items-center gap-2 px-2 pb-2 text-sm border-b-2 border-transparent cursor-pointer">New Request <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] text-blue-600">3</span></button>
+      <button type="button" data-tab="my-bids" data-active="text-blue-600 border-blue-600" class="ob-tab flex items-center gap-2 px-2 pb-2 text-sm border-b-2 border-transparent cursor-pointer">My Bids <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] text-blue-600">5</span></button>
+      <button type="button" data-tab="accepted" data-active="text-blue-600 border-blue-600" class="ob-tab flex items-center gap-2 px-2 pb-2 text-sm border-b-2 border-transparent cursor-pointer">Accepted <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] text-blue-600">5</span></button>
+      <button type="button" data-tab="completed" data-active="text-blue-600 border-blue-600" class="ob-tab flex items-center gap-2 px-2 pb-2 text-sm border-b-2 border-transparent cursor-pointer">Completed <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] text-blue-600">5</span></button>
+      <button type="button" data-tab="auto-bid" data-active="text-blue-600 border-blue-600" class="ob-tab flex items-center gap-2 px-2 pb-2 text-sm border-b-2 border-transparent cursor-pointer">Auto Bid Settings</button>
+    </div>
+
+    <!-- Search + Filter -->
+    <div id="list-controls" class="space-y-3 relative z-10">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[220px]">
+          <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-slate-400">search</span>
+          <input id="ob-search" type="text" placeholder="Search request ID, customer or Medicine..." class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-600 focus:ring-[3px] focus:ring-blue-100" />
+        </div>
+        <button id="filter-toggle" type="button" class="flex items-center gap-2 rounded-lg border border-slate-200 bg-gray-100 px-[18px] py-[9px] text-xs font-semibold text-slate-700 cursor-pointer hover:bg-gray-200">
+          Filter <span class="material-symbols-outlined text-base">filter_alt</span>
+        </button>
+      </div>
+
+      <div id="filter-bar" class="hidden flex-wrap items-center gap-3">
+        <!-- Fulfilment -->
+        <div class="relative" data-dd>
+          <button type="button" data-dd-trigger class="flex items-center gap-4 rounded-md border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-800 cursor-pointer"><span data-dd-label>Fulfilment</span><span class="material-symbols-outlined text-base">keyboard_arrow_down</span></button>
+          <div data-dd-menu data-sel="text-blue-600" class="hidden absolute left-0 top-[calc(100%+6px)] z-40 w-48 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+            <button type="button" data-filter="fulfil" data-v="All" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-blue-600 cursor-pointer">All</button>
+            <button type="button" data-filter="fulfil" data-v="Home Delivery" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Home Delivery</button>
+            <button type="button" data-filter="fulfil" data-v="Store Pickup" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Store Pickup</button>
+          </div>
+        </div>
+        <!-- Prescription -->
+        <div class="relative" data-dd>
+          <button type="button" data-dd-trigger class="flex items-center gap-4 rounded-md border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-800 cursor-pointer"><span data-dd-label>Prescription</span><span class="material-symbols-outlined text-base">keyboard_arrow_down</span></button>
+          <div data-dd-menu data-sel="text-blue-600" class="hidden absolute left-0 top-[calc(100%+6px)] z-40 w-52 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+            <button type="button" data-filter="rx" data-v="All" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-blue-600 cursor-pointer">All</button>
+            <button type="button" data-filter="rx" data-v="Not Required" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Not Required</button>
+            <button type="button" data-filter="rx" data-v="Pending Review" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Pending Review</button>
+            <button type="button" data-filter="rx" data-v="Verified" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Verified</button>
+            <button type="button" data-filter="rx" data-v="Clarification Needed" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Clarification Needed</button>
+          </div>
+        </div>
+        <!-- Stock -->
+        <div class="relative" data-dd>
+          <button type="button" data-dd-trigger class="flex items-center gap-4 rounded-md border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-800 cursor-pointer"><span data-dd-label>Stock</span><span class="material-symbols-outlined text-base">keyboard_arrow_down</span></button>
+          <div data-dd-menu data-sel="text-blue-600" class="hidden absolute left-0 top-[calc(100%+6px)] z-40 w-44 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+            <button type="button" data-filter="stock" data-v="All" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-blue-600 cursor-pointer">All</button>
+            <button type="button" data-filter="stock" data-v="Available" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Available</button>
+            <button type="button" data-filter="stock" data-v="Partial" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Partial</button>
+            <button type="button" data-filter="stock" data-v="Unavailable" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Unavailable</button>
+          </div>
+        </div>
+        <!-- Status -->
+        <div class="relative" data-dd>
+          <button type="button" data-dd-trigger class="flex items-center gap-4 rounded-md border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-800 cursor-pointer"><span data-dd-label>Status</span><span class="material-symbols-outlined text-base">keyboard_arrow_down</span></button>
+          <div data-dd-menu data-sel="text-blue-600" class="hidden absolute left-0 top-[calc(100%+6px)] z-40 w-48 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+            <button type="button" data-filter="status" data-v="All" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-blue-600 cursor-pointer">All</button>
+            <button type="button" data-filter="status" data-v="Not Submitted" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Not Submitted</button>
+            <button type="button" data-filter="status" data-v="Draft" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Draft</button>
+            <button type="button" data-filter="status" data-v="Submitted" class="ob-opt block w-full px-3 py-2 text-left text-[13px] text-slate-800 cursor-pointer">Submitted</button>
+          </div>
+        </div>
+        <!-- Price range -->
+        <div class="relative" data-dd>
+          <button type="button" data-dd-trigger class="flex items-center gap-4 rounded-md border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-800 cursor-pointer"><span data-dd-label>Price Range</span></button>
+          <div data-dd-menu class="hidden absolute left-0 top-[calc(100%+6px)] z-40 w-72 space-y-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+            <div class="grid grid-cols-2 gap-3">
+              <input id="price-min" type="number" min="0" placeholder="&#8377;Min" class="h-9 w-full rounded-lg border border-slate-200 px-3 text-[12px] text-slate-700 outline-none focus:border-blue-600" />
+              <input id="price-max" type="number" min="0" placeholder="&#8377;Max" class="h-9 w-full rounded-lg border border-slate-200 px-3 text-[12px] text-slate-700 outline-none focus:border-blue-600" />
             </div>
-{% endblock%}
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" data-range-cancel class="rounded-lg border border-slate-300 bg-white py-2 text-xs font-semibold text-slate-500 cursor-pointer hover:bg-gray-100">Cancel</button>
+              <button type="button" data-range-apply class="rounded-lg bg-blue-600 py-2 text-xs font-semibold text-white cursor-pointer hover:opacity-90">Apply</button>
+            </div>
+          </div>
+        </div>
+        <button id="filter-reset" type="button" class="px-2 text-xs text-slate-600 cursor-pointer hover:text-blue-600">Reset Filters</button>
+      </div>
+    </div>
 
+    <!-- Expiry banner (New Request + Auto Bid) -->
+    <div id="expiry-banner" class="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-700">
+      <span class="flex items-center gap-2"><span class="material-symbols-outlined text-base">info</span>2 requests expire within 15 minutes.</span>
+      <button type="button" class="flex items-center gap-1 font-semibold cursor-pointer">Review Now <span class="material-symbols-outlined text-base">arrow_forward</span></button>
+    </div>
+
+    <!-- ============ NEW REQUEST ============ -->
+    <div id="tab-new-request" class="ob-panel space-y-4 relative z-0">
+      <div class="overflow-x-auto rounded-lg border border-gray-100 bg-white shadow-sm">
+        <table class="w-full min-w-[900px] text-xs text-center">
+          <thead>
+            <tr class="bg-blue-600 text-white">
+              <th class="py-4 font-medium">REQUEST</th><th class="py-4 font-medium">CUSTOMER</th><th class="py-4 font-medium">MEDICINES</th>
+              <th class="py-4 font-medium">SERVICE TYPE</th><th class="py-4 font-medium">BUDGET</th><th class="w-16 py-4 font-medium">TIME LEFT</th>
+              <th class="py-4 font-medium">BID STATUS</th><th class="py-4 font-medium">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr data-row data-fulfil="Home Delivery" data-rx="Not Required" data-stock="Available" data-status="Open" data-price="500">
+              <td class="py-4"><p class="font-semibold text-blue-600">REQ-5501</p><p class="text-[10px] text-gray-400">11:30 AM</p></td>
+              <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-semibold text-white">MS</span><span><span class="block font-semibold text-black">Monica Singh</span><span class="block text-[10px] text-gray-400">Andheri East &middot; 1.2 km</span></span></div></td>
+              <td class="py-4"><p class="font-semibold text-black">Crocin 500mg Tablet</p><p class="text-[10px] text-gray-400">Vitamin C 500mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-gray-300 bg-gray-50 px-2 text-[9px] text-gray-600">Not Required</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+              <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">12 Km</p></td>
+              <td class="py-4 text-base font-bold text-blue-600">&#8377;500</td><td class="py-4 font-semibold text-orange-500">18m</td>
+              <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">Open</span></td>
+              <td class="py-4"><div class="flex items-center justify-center gap-2 text-lg"><button type="button" data-open="medicine-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-amber-400 cursor-pointer">open_in_new</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+            </tr>
+            <tr data-row data-fulfil="Home Delivery" data-rx="Pending Review" data-stock="Available" data-status="Not Submitted" data-price="300">
+              <td class="py-4"><p class="font-semibold text-blue-600">REQ-5502</p><p class="text-[10px] text-gray-400">12:00 PM</p></td>
+              <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-600 text-[10px] font-semibold text-white">GS</span><span><span class="block font-semibold text-black">Gaurav Sharma</span><span class="block text-[10px] text-gray-400">Borivali &middot; 6.4 km</span></span></div></td>
+              <td class="py-4"><p class="font-semibold text-black">Metformin 500mg</p><p class="text-[10px] text-gray-400">Pantop 40mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-amber-300 bg-amber-50 px-2 text-[9px] text-amber-700">Pending Review</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+              <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">12 Km</p></td>
+              <td class="py-4 text-base font-bold text-blue-600">&#8377;300</td><td class="py-4 font-semibold text-red-500">12m</td>
+              <td class="py-4"><span class="rounded-full bg-gray-100 px-3 py-0.5 text-[10px] text-gray-600">Not Submitted</span></td>
+              <td class="py-4"><div class="flex items-center justify-center gap-2 text-lg"><button type="button" data-open="medicine-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-amber-400 cursor-pointer">open_in_new</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+            </tr>
+            <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Partial" data-status="Open" data-price="450">
+              <td class="py-4"><p class="font-semibold text-blue-600">REQ-5503</p><p class="text-[10px] text-gray-400">12:10 PM</p></td>
+              <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-600 text-[10px] font-semibold text-white">PS</span><span><span class="block font-semibold text-black">Priya Sharma</span><span class="block text-[10px] text-gray-400">Goregaon &middot; 4.1 km</span></span></div></td>
+              <td class="py-4"><p class="font-semibold text-black">Amoxicillin 500mg</p><p class="text-[10px] text-gray-400">Prescribed Item</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-amber-300 bg-amber-50 px-2 text-[9px] text-amber-700">Partial</span></p></td>
+              <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">12 Km</p></td>
+              <td class="py-4 text-base font-bold text-blue-600">&#8377;450</td><td class="py-4 font-semibold text-red-600">8m</td>
+              <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">Open</span></td>
+              <td class="py-4"><div class="flex items-center justify-center gap-2 text-lg"><button type="button" data-open="medicine-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-amber-400 cursor-pointer">open_in_new</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+            </tr>
+            <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="Open" data-price="220">
+              <td class="py-4"><p class="font-semibold text-blue-600">REQ-5504</p><p class="text-[10px] text-gray-400">11:00 AM</p></td>
+              <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-700 text-[10px] font-semibold text-white">RM</span><span><span class="block font-semibold text-black">Rajan Mehta</span><span class="block text-[10px] text-gray-400">Andheri West &middot; 2.3 km</span></span></div></td>
+              <td class="py-4"><p class="font-semibold text-black">Atorva 10mg</p><p class="text-[10px] text-gray-400">Ecosprin 75mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+              <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">apartment</span> Home Delivery<p class="text-[10px] text-gray-400">12 Km</p></td>
+              <td class="py-4 text-base font-bold text-blue-600">&#8377;220</td><td class="py-4 font-semibold text-green-600">34m</td>
+              <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">Open</span></td>
+              <td class="py-4"><div class="flex items-center justify-center gap-2 text-lg"><button type="button" data-open="medicine-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-amber-400 cursor-pointer">open_in_new</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+            </tr>
+            <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="Not Submitted" data-price="250">
+              <td class="py-4"><p class="font-semibold text-blue-600">REQ-5505</p><p class="text-[10px] text-gray-400">11:45 AM</p></td>
+              <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-[10px] font-semibold text-white">AK</span><span><span class="block font-semibold text-black">Anil Kumar</span><span class="block text-[10px] text-gray-400">Jogeshwari &middot; 3.2 km</span></span></div></td>
+              <td class="py-4"><p class="font-semibold text-black">Combiflam</p><p class="text-[10px] text-gray-400">Volini Gel 50g</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+              <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">12 Km</p></td>
+              <td class="py-4 text-base font-bold text-blue-600">&#8377;250</td><td class="py-4 font-semibold text-green-600">47m</td>
+              <td class="py-4"><span class="rounded-full bg-gray-100 px-3 py-0.5 text-[10px] text-gray-600">Not Submitted</span></td>
+              <td class="py-4"><div class="flex items-center justify-center gap-2 text-lg"><button type="button" data-open="medicine-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-amber-400 cursor-pointer">open_in_new</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+            </tr>
+            <tr data-empty class="hidden"><td colspan="8" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ MY BIDS ============ -->
+    <div id="tab-my-bids" class="ob-panel hidden overflow-x-auto rounded-lg border border-gray-100 bg-white shadow-sm">
+      <table class="w-full min-w-[900px] text-xs text-center">
+        <thead>
+          <tr class="bg-blue-600 text-white">
+            <th class="py-4 font-medium">REQUEST</th><th class="py-4 font-medium">CUSTOMER</th><th class="py-4 font-medium">MEDICINES</th>
+            <th class="py-4 font-medium">FULFILMENT</th><th class="py-4 font-medium">BUDGET</th><th class="w-16 py-4 font-medium">TIME LEFT</th>
+            <th class="py-4 font-medium">BID STATUS</th><th class="py-4 font-medium">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr data-row data-fulfil="Store Pickup" data-rx="Verified" data-stock="Available" data-status="Submitted" data-price="220">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5504</p><p class="text-[10px] text-gray-400">11:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-semibold text-white">RM</span><span><span class="block font-semibold text-black">Rajan Mehta</span><span class="block text-[10px] text-gray-400">Andheri West &middot; 2.3 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Atorva 10mg</p><p class="text-[10px] text-gray-400">Ecosprin 75mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">apartment</span> Store Pickup<p class="text-[10px] text-gray-400">2-3 PM</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;220</td><td class="py-4 font-semibold text-orange-500">34m</td>
+            <td class="py-4"><span class="rounded-full bg-blue-100 px-3 py-0.5 text-[10px] text-blue-600">Submitted</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="my-bid-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" data-open="withdraw-bid" class="material-symbols-outlined text-red-500 cursor-pointer">close</button></div></td>
+          </tr>
+          <tr data-row data-fulfil="Home Delivery" data-rx="Not Required" data-stock="Available" data-status="Submitted" data-price="400">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5506</p><p class="text-[10px] text-gray-400">10:30 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-600 text-[10px] font-semibold text-white">DS</span><span><span class="block font-semibold text-black">Deepa Shah</span><span class="block text-[10px] text-gray-400">Vile Parle &middot; 2.8 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Vitamin D3 60K IU</p><p class="text-[10px] text-gray-400">Calcium 500mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-gray-300 bg-gray-50 px-2 text-[9px] text-gray-600">Not Required</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 2 hr</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;400</td><td class="py-4 font-semibold text-green-600">1h 2m</td>
+            <td class="py-4"><span class="rounded-full bg-blue-100 px-3 py-0.5 text-[10px] text-blue-600">Submitted</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="my-bid-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" data-open="withdraw-bid" class="material-symbols-outlined text-red-500 cursor-pointer">close</button></div></td>
+          </tr>
+          <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="Under Review" data-price="300">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5508</p><p class="text-[10px] text-gray-400">10:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-600 text-[10px] font-semibold text-white">KN</span><span><span class="block font-semibold text-black">Kavitha Nair</span><span class="block text-[10px] text-gray-400">Chembur &middot; 8.2 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Cetirizine 10mg</p><p class="text-[10px] text-gray-400">Montair LC</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 2 hr</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;300</td><td class="py-4 font-semibold text-green-600">1h 35m</td>
+            <td class="py-4"><span class="rounded-full border border-amber-400 px-3 py-0.5 text-[10px] text-amber-600">Under Review</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="my-bid-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" data-open="withdraw-bid" class="material-symbols-outlined text-red-500 cursor-pointer">close</button></div></td>
+          </tr>
+          <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="Submitted" data-price="300">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5510</p><p class="text-[10px] text-gray-400">09:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-600 text-[10px] font-semibold text-white">KN</span><span><span class="block font-semibold text-black">Kajal Nair</span><span class="block text-[10px] text-gray-400">Chembur &middot; 8.2 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Cetirizine 10mg</p><p class="text-[10px] text-gray-400">Montair LC</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 2 hr</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;300</td><td class="py-4 font-semibold text-green-600">1h 35m</td>
+            <td class="py-4"><span class="rounded-full bg-blue-100 px-3 py-0.5 text-[10px] text-blue-600">Submitted</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="my-bid-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" data-open="withdraw-bid" class="material-symbols-outlined text-red-500 cursor-pointer">close</button></div></td>
+          </tr>
+          <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="Rejected" data-price="300">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5512</p><p class="text-[10px] text-gray-400">11:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fuchsia-600 text-[10px] font-semibold text-white">SS</span><span><span class="block font-semibold text-black">Shruti Sharma</span><span class="block text-[10px] text-gray-400">Chembur &middot; 8.2 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Cetirizine 10mg</p><p class="text-[10px] text-gray-400">Montair LC</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 2 hr</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;300</td><td class="py-4 font-semibold text-green-600">1h 35m</td>
+            <td class="py-4"><span class="rounded-full border border-red-400 px-3 py-0.5 text-[10px] text-red-500">Rejected</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="my-bid-request" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" data-open="withdraw-bid" class="material-symbols-outlined text-red-500 cursor-pointer">close</button></div></td>
+          </tr>
+          <tr data-empty class="hidden"><td colspan="8" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============ ACCEPTED ============ -->
+    <div id="tab-accepted" class="ob-panel hidden overflow-x-auto rounded-lg border border-gray-100 bg-white shadow-sm">
+      <table class="w-full min-w-[900px] text-xs text-center">
+        <thead>
+          <tr class="bg-blue-600 text-white">
+            <th class="py-4 font-medium">REQUEST</th><th class="py-4 font-medium">CUSTOMER</th><th class="py-4 font-medium">MEDICINES</th>
+            <th class="py-4 font-medium">FULFILMENT</th><th class="py-4 font-medium">BUDGET</th><th class="w-16 py-4 font-medium">TIME LEFT</th>
+            <th class="py-4 font-medium">BID STATUS</th><th class="py-4 font-medium">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="In progress" data-price="500">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5506</p><p class="text-[10px] text-gray-400">11:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-semibold text-white">PS</span><span><span class="block font-semibold text-black">Pooja Sharma</span><span class="block text-[10px] text-gray-400">Goregaon &middot; 4.1 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Crocin 500mg Tablet</p><p class="text-[10px] text-gray-400">Vitamin C 500mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 45 min</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;500</td><td class="py-4 font-semibold text-orange-500">32m</td>
+            <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">In progress</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="request-accepted" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+          </tr>
+          <tr data-row data-fulfil="Home Delivery" data-rx="Pending Review" data-stock="Available" data-status="Out for Delivery" data-price="300">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5507</p><p class="text-[10px] text-gray-400">10:30 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-600 text-[10px] font-semibold text-white">SK</span><span><span class="block font-semibold text-black">Sonal Kapoor</span><span class="block text-[10px] text-gray-400">Andheri West &middot; 2.8 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Metformin 500mg</p><p class="text-[10px] text-gray-400">Glucophage 500mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-amber-300 bg-amber-50 px-2 text-[9px] text-amber-700">Pending Review</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 1 hr</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;300</td><td class="py-4 font-semibold text-orange-500">58m</td>
+            <td class="py-4"><span class="rounded-full border border-blue-600 px-3 py-0.5 text-[10px] text-blue-600">Out for Delivery</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="request-accepted" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+          </tr>
+          <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="In progress" data-price="450">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5508</p><p class="text-[10px] text-gray-400">10:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-600 text-[10px] font-semibold text-white">RM</span><span><span class="block font-semibold text-black">Rahul Mehta</span><span class="block text-[10px] text-gray-400">Chembur &middot; 8.2 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Amoxicillin 500mg</p><p class="text-[10px] text-gray-400">Antibiotic</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 1 hr</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;450</td><td class="py-4 font-semibold text-green-600">1h 20m</td>
+            <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">In progress</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="request-accepted" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+          </tr>
+          <tr data-row data-fulfil="Store Pickup" data-rx="Verified" data-stock="Available" data-status="In progress" data-price="220">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5509</p><p class="text-[10px] text-gray-400">09:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-600 text-[10px] font-semibold text-white">NP</span><span><span class="block font-semibold text-black">Neha Patel</span><span class="block text-[10px] text-gray-400">Bandra &middot; 7.2 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Atorva 10mg</p><p class="text-[10px] text-gray-400">Atorvastatin</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">apartment</span> Store Pickup<p class="text-[10px] text-gray-400">2-3 PM</p></td>
+            <td class="py-4 text-base font-bold text-blue-600">&#8377;220</td><td class="py-4 font-semibold text-green-600">2h 10m</td>
+            <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">In progress</span></td>
+            <td class="py-4"><div class="flex items-center justify-center gap-3 text-lg"><button type="button" data-open="request-accepted" class="material-symbols-outlined text-blue-600 cursor-pointer">visibility</button><button type="button" class="material-symbols-outlined text-green-500 cursor-pointer">call</button></div></td>
+          </tr>
+          <tr data-empty class="hidden"><td colspan="8" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============ COMPLETED ============ -->
+    <div id="tab-completed" class="ob-panel hidden overflow-x-auto rounded-lg border border-gray-100 bg-white shadow-sm">
+      <table class="w-full min-w-[900px] text-xs text-center">
+        <thead>
+          <tr class="bg-blue-600 text-white">
+            <th class="py-4 font-medium">REQUEST</th><th class="py-4 font-medium">CUSTOMER</th><th class="py-4 font-medium">MEDICINES</th>
+            <th class="py-4 font-medium">FULFILMENT</th><th class="py-4 font-medium">DELIVERY STATUS</th><th class="py-4 font-medium">COMPLETED ON</th><th class="py-4 font-medium">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="Delivered" data-price="500">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5506</p><p class="text-[10px] text-gray-400">11:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-semibold text-white">PS</span><span><span class="block font-semibold text-black">Pooja Sharma</span><span class="block text-[10px] text-gray-400">Goregaon &middot; 4.1 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Crocin 500mg Tablet</p><p class="text-[10px] text-gray-400">Vitamin C 500mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 45 min</p></td>
+            <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">Delivered</span></td>
+            <td class="py-4">22 Jul 2025<p class="text-[10px] text-gray-400">03:05 PM</p></td>
+            <td class="py-4"><button type="button" data-open="request-completed" class="material-symbols-outlined text-lg text-blue-600 cursor-pointer">visibility</button></td>
+          </tr>
+          <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="Delivered" data-price="300">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5507</p><p class="text-[10px] text-gray-400">10:30 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-600 text-[10px] font-semibold text-white">SK</span><span><span class="block font-semibold text-black">Sonal Kapoor</span><span class="block text-[10px] text-gray-400">Andheri West &middot; 2.8 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Metformin 500mg</p><p class="text-[10px] text-gray-400">Glucophage 500mg</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 1 hr</p></td>
+            <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">Delivered</span></td>
+            <td class="py-4">22 Jul 2025<p class="text-[10px] text-gray-400">02:10 PM</p></td>
+            <td class="py-4"><button type="button" data-open="request-completed" class="material-symbols-outlined text-lg text-blue-600 cursor-pointer">visibility</button></td>
+          </tr>
+          <tr data-row data-fulfil="Home Delivery" data-rx="Verified" data-stock="Available" data-status="Delivered" data-price="450">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5508</p><p class="text-[10px] text-gray-400">10:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-600 text-[10px] font-semibold text-white">RM</span><span><span class="block font-semibold text-black">Rahul Mehta</span><span class="block text-[10px] text-gray-400">Chembur &middot; 8.2 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Amoxicillin 500mg</p><p class="text-[10px] text-gray-400">Antibiotic</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">local_shipping</span> Home Delivery<p class="text-[10px] text-gray-400">Within 1 hr</p></td>
+            <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">Delivered</span></td>
+            <td class="py-4">22 Jul 2025<p class="text-[10px] text-gray-400">01:25 PM</p></td>
+            <td class="py-4"><button type="button" data-open="request-completed" class="material-symbols-outlined text-lg text-blue-600 cursor-pointer">visibility</button></td>
+          </tr>
+          <tr data-row data-fulfil="Store Pickup" data-rx="Verified" data-stock="Available" data-status="Delivered" data-price="220">
+            <td class="py-4"><p class="font-semibold text-blue-600">REQ-5509</p><p class="text-[10px] text-gray-400">09:00 AM</p></td>
+            <td class="py-4"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-600 text-[10px] font-semibold text-white">NP</span><span><span class="block font-semibold text-black">Neha Patel</span><span class="block text-[10px] text-gray-400">Bandra &middot; 7.2 km</span></span></div></td>
+            <td class="py-4"><p class="font-semibold text-black">Atorva 10mg</p><p class="text-[10px] text-gray-400">Atorvastatin</p><p class="mt-1 flex justify-center gap-1"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[9px] text-green-700">Available</span></p></td>
+            <td class="py-4"><span class="material-symbols-outlined align-middle text-base text-gray-500">apartment</span> Store Pickup<p class="text-[10px] text-gray-400">2-3 PM</p></td>
+            <td class="py-4"><span class="rounded-full border border-green-500 px-3 py-0.5 text-[10px] text-green-600">Delivered</span></td>
+            <td class="py-4">22 Jul 2025<p class="text-[10px] text-gray-400">12:10 PM</p></td>
+            <td class="py-4"><button type="button" data-open="request-completed" class="material-symbols-outlined text-lg text-blue-600 cursor-pointer">visibility</button></td>
+          </tr>
+          <tr data-empty class="hidden"><td colspan="7" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============ AUTO BID SETTINGS ============ -->
+    <div id="tab-auto-bid" class="ob-panel hidden space-y-4">
+      <div class="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div>
+          <p class="text-lg font-semibold text-slate-900">Auto Bid Settings</p>
+          <p class="text-xs text-gray-500">Automatically respond to eligible medicine requests.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="rounded-full border border-blue-600 px-2 py-0.5 text-[10px] text-blue-600">&bull; Auto Bid is paused</span>
+          <label class="relative inline-flex cursor-pointer">
+            <input type="checkbox" class="peer sr-only" />
+            <span class="h-5 w-9 rounded-full bg-gray-300 transition peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="space-y-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between"><p class="font-semibold text-slate-900">Eligibility</p><span class="rounded bg-blue-600 px-2 py-0.5 text-[10px] text-white">Rules</span></div>
+        <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" checked class="h-3.5 w-3.5 accent-blue-600" />Home Delivery checked &middot; Store Pickup unchecked</label>
+        <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" class="h-3.5 w-3.5 accent-blue-600" />Radius 5 km &middot; Budget &#8377;100&ndash;&#8377;2,000</label>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="space-y-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between"><p class="font-semibold text-slate-900">Stock</p><span class="rounded bg-blue-600 px-2 py-0.5 text-[10px] text-white">Inventory</span></div>
+          <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" checked class="h-3.5 w-3.5 accent-blue-600" />Require full quantity</label>
+          <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" checked class="h-3.5 w-3.5 accent-blue-600" />Exclude expired/blocked stock &middot; Max overlapping bids 5</label>
+        </div>
+        <div class="space-y-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between"><p class="font-semibold text-slate-900">Timing</p><span class="rounded bg-blue-600 px-2 py-0.5 text-[10px] text-white">SLA</span></div>
+          <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" class="h-3.5 w-3.5 accent-blue-600" />Business hours 09:00&ndash;21:00</label>
+          <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" class="h-3.5 w-3.5 accent-blue-600" />Delivery estimate 45 min &middot; Bid validity 30 min</label>
+        </div>
+        <div class="space-y-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between"><p class="font-semibold text-slate-900">Limits</p><span class="rounded bg-blue-600 px-2 py-0.5 text-[10px] text-white">Risk Control</span></div>
+          <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" class="h-3.5 w-3.5 accent-blue-600" />Maximum bids/day 20</label>
+          <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" class="h-3.5 w-3.5 accent-blue-600" />Maximum total exposure &#8377;5,000</label>
+        </div>
+        <div class="space-y-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between"><p class="font-semibold text-slate-900">Notifications</p><span class="rounded bg-blue-600 px-2 py-0.5 text-[10px] text-white">Alerts</span></div>
+          <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" class="h-3.5 w-3.5 accent-blue-600" />Bid submitted &middot; Bid won</label>
+          <label class="flex items-center gap-2 text-xs text-slate-700"><input type="checkbox" class="h-3.5 w-3.5 accent-blue-600" />Request skipped &middot; Auto Bid paused</label>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-white py-10 shadow-sm text-xs text-slate-700">
+        <span class="material-symbols-outlined !flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500">bolt</span>
+        <p>No auto-bid activity yet. <span class="font-semibold">Enable Auto Bid to get started.</span></p>
+      </div>
+
+      <div class="flex flex-wrap justify-end gap-3">
+        <button type="button" class="rounded-md border border-blue-600 bg-white px-5 py-2 text-xs font-medium text-blue-600 cursor-pointer">Discard Change</button>
+        <button type="button" class="rounded-md border border-blue-600 bg-white px-5 py-2 text-xs font-medium text-blue-600 cursor-pointer">Test Rules</button>
+        <button type="button" class="rounded-md bg-blue-600 px-5 py-2 text-xs font-medium text-white cursor-pointer">Save Settings</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======================= POPUPS ======================= -->
+
+<!-- Medicine Request (New Request -> eye) -->
+<div id="medicine-request" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
+  <div class="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white scroll">
+    <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div class="flex items-center gap-3">
+        <button type="button" data-close class="material-symbols-outlined cursor-pointer">cancel</button>
+        <p class="font-semibold text-slate-900">Medicine Request</p>
+        <span class="rounded bg-blue-600 px-2 py-0.5 text-[11px] font-semibold text-white">REQ-5502</span>
+        <span class="text-sm text-slate-500">| Gaurav Sharma</span>
+      </div>
+      <span class="text-xs font-semibold text-red-500">12m left</span>
+    </div>
+    <div class="space-y-4 bg-white p-5">
+      <div class="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4">
+        <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-600 text-lg font-semibold text-white">GS</span>
+        <div class="space-y-0.5">
+          <p class="font-semibold text-slate-900">Gaurav Sharma</p>
+          <p class="text-xs text-gray-500">Borivali &middot; 6.4 km</p>
+          <p class="text-xs font-medium text-slate-900">Phone: 9876-54-XXXX</p>
+          <p class="text-xs italic text-gray-500">Please handle with care, urgent delivery needed.</p>
+        </div>
+      </div>
+      <div class="rounded-xl border border-gray-200 bg-white p-4">
+        <p class="mb-2 text-sm font-semibold text-slate-900">Requested medicines</p>
+        <div class="divide-y divide-gray-100 text-xs text-slate-800">
+          <div class="grid grid-cols-4 items-center py-3"><span class="font-medium">Metformin 500mg</span><span class="text-gray-500">Strip/10</span><span>Qty 2</span><span class="justify-self-end rounded-full border border-green-300 bg-green-50 px-3 py-0.5 text-[10px] text-green-700">Available</span></div>
+          <div class="grid grid-cols-4 items-center py-3"><span class="font-medium">Pantop 40mg</span><span class="text-gray-500">Strip/10</span><span>Qty 1</span><span class="justify-self-end rounded-full border border-green-300 bg-green-50 px-3 py-0.5 text-[10px] text-green-700">Available</span></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-5 rounded-xl border border-gray-200 bg-white p-4 text-xs">
+        <div><p class="text-gray-500">Budget</p><p class="text-lg font-bold text-blue-700">&#8377;300</p></div>
+        <div><p class="text-gray-500">Timing</p><p class="font-bold text-slate-900">Within 1 hr</p></div>
+        <div><p class="text-gray-500">Fulfilment</p><p class="font-bold text-slate-900">Home Delivery</p></div>
+        <div><p class="text-gray-500">Prescription</p><p class="font-bold text-slate-900">Not Required</p></div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 border-t border-gray-100 px-5 py-4">
+      <button type="button" class="rounded-md border border-blue-600 bg-white px-5 py-2 text-xs font-medium text-blue-600 cursor-pointer">Contact Customer</button>
+      <button type="button" data-open="create-bid" class="rounded-md bg-blue-600 px-8 py-2 text-xs font-medium text-white cursor-pointer">Create Bid</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Bid (3 steps) -->
+<div id="create-bid" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
+  <div class="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white scroll">
+    <div class="flex items-start justify-between px-6 pt-5">
+      <div><p class="text-xl font-bold text-slate-900">Create Bid</p><p class="text-xs text-blue-600">REQ-5502 &middot; Gaurav Sharma</p></div>
+      <button type="button" data-close class="material-symbols-outlined cursor-pointer">cancel</button>
+    </div>
+    <div class="mt-3 flex gap-8 border-y border-gray-100 px-6 py-3 text-xs">
+      <span class="cb-ind flex items-center gap-2" data-n="1"><span class="cb-num flex h-5 w-5 items-center justify-center rounded-full text-[10px]">1</span>Medicines &amp; Pricing</span>
+      <span class="cb-ind flex items-center gap-2" data-n="2"><span class="cb-num flex h-5 w-5 items-center justify-center rounded-full text-[10px]">2</span>Fulfilment</span>
+      <span class="cb-ind flex items-center gap-2" data-n="3"><span class="cb-num flex h-5 w-5 items-center justify-center rounded-full text-[10px]">3</span>Review &amp; Submit</span>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="cb-pane-1" class="cb-pane space-y-4 p-6">
+      <p class="flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-50 px-4 py-3 text-xs font-medium text-blue-600"><span class="material-symbols-outlined text-base">calculate</span>Customer Budget: &#8377;<span id="cb-budget">300</span></p>
+      <div class="overflow-x-auto rounded-lg border border-gray-200">
+        <table class="w-full text-xs">
+          <thead><tr class="bg-slate-50 text-gray-500"><th class="px-4 py-3 text-left font-medium">Medicine / Strength</th><th class="py-3 text-left font-medium">Pack Unit</th><th class="py-3 text-left font-medium">Qty</th><th class="py-3 text-center font-medium">Unit Price</th><th class="px-4 py-3 text-right font-medium">Line Total</th></tr></thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr><td class="px-4 py-4">Metformin 500mg</td><td class="text-gray-500">Strip/10</td><td>2</td><td class="text-center"><input type="number" value="120" data-qty="2" class="cb-price h-8 w-24 rounded-md border border-gray-300 text-center text-xs" /></td><td class="cb-line px-4 text-right font-semibold">&#8377;240</td></tr>
+            <tr><td class="px-4 py-4">Pantop 40mg</td><td class="text-gray-500">Strip/10</td><td>1</td><td class="text-center"><input type="number" value="120" data-qty="1" class="cb-price h-8 w-24 rounded-md border border-gray-300 text-center text-xs" /></td><td class="cb-line px-4 text-right font-semibold">&#8377;120</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ml-auto w-full max-w-xs space-y-3 text-xs">
+        <div class="flex justify-between"><span class="text-gray-600">Subtotal</span><span id="cb-sub" class="font-semibold">&#8377;360</span></div>
+        <div class="flex items-center justify-between"><span class="text-gray-600">Discount</span><input id="cb-disc" type="number" value="0" class="h-8 w-28 rounded-md border border-gray-300 px-2 text-right text-xs" /></div>
+        <div class="flex items-center justify-between"><span class="text-gray-600">Delivery</span><input id="cb-del" type="number" value="30" class="h-8 w-28 rounded-md border border-gray-300 px-2 text-right text-xs" /></div>
+        <div class="flex justify-between border-t border-gray-100 pt-3 text-base font-bold text-slate-900"><span>Total Bid</span><span id="cb-total">&#8377;390</span></div>
+        <p id="cb-warn" class="flex items-center justify-end gap-1 text-[11px] text-blue-600"><span class="material-symbols-outlined text-sm">info</span><span id="cb-warn-text">Exceeds budget by &#8377;90</span></p>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button type="button" data-close class="w-32 rounded-md border border-gray-300 bg-white py-2 text-xs font-medium text-gray-500 cursor-pointer">Cancel</button>
+        <button type="button" data-step="2" class="w-32 rounded-md bg-blue-600 py-2 text-xs font-medium text-white cursor-pointer">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="cb-pane-2" class="cb-pane hidden space-y-4 p-6">
+      <p class="font-semibold text-slate-900">Fulfilment details</p>
+      <div class="space-y-1"><label class="text-xs font-medium text-slate-700">Bid Valid Until</label><input type="datetime-local" class="h-11 w-full rounded-lg border border-gray-200 px-3 text-xs text-slate-700" /></div>
+      <div class="space-y-1"><label class="text-xs font-medium text-slate-700">Optional Note</label><textarea rows="4" placeholder="Add a message visible to the customer..." class="w-full rounded-lg border border-gray-200 p-3 text-xs"></textarea></div>
+      <p class="rounded-lg border border-blue-600 px-4 py-3 text-xs text-blue-600">Fulfilment depends on prescription verification.</p>
+      <div class="flex justify-end gap-3">
+        <button type="button" data-step="1" class="w-32 rounded-md border border-blue-600 bg-white py-2 text-xs font-medium text-blue-600 cursor-pointer">Back</button>
+        <button type="button" data-step="3" class="w-32 rounded-md bg-blue-600 py-2 text-xs font-medium text-white cursor-pointer">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="cb-pane-3" class="cb-pane hidden space-y-4 p-6">
+      <p class="font-semibold text-slate-900">Review your quotation</p>
+      <div class="grid grid-cols-2 gap-4 rounded-xl border border-gray-200 p-5 text-xs">
+        <div><p class="text-gray-500">Customer</p><p class="text-base font-bold text-slate-900">Gaurav Sharma</p><p class="text-gray-500">REQ-5502</p></div>
+        <div><p class="text-gray-500">Fulfilment</p><p class="text-base font-bold text-slate-900">Home Delivery</p><p class="text-gray-500">5 km away</p></div>
+      </div>
+      <div class="flex items-center justify-between rounded-xl border border-gray-200 p-5 text-xs text-slate-800">
+        <div class="space-y-1"><p>Metformin 500mg &times; 2</p><p>Pantop 40mg &times; 1</p></div>
+        <p id="cb-review-total" class="text-lg font-bold text-slate-900">&#8377;390</p>
+      </div>
+      <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer"><input id="cb-confirm" type="checkbox" class="h-4 w-4 accent-blue-600" />I confirm I have verified all items, quantities, stock and pricing before submitting.</label>
+      <div class="flex justify-end gap-3">
+        <button type="button" data-step="2" class="w-32 rounded-md border border-blue-600 bg-white py-2 text-xs font-medium text-blue-600 cursor-pointer">Back</button>
+        <button type="button" id="cb-submit" data-open="bid-submitted" disabled class="w-32 rounded-md bg-blue-600 py-2 text-xs font-medium text-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">Submit Bid</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bid submitted -->
+<div id="bid-submitted" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
+  <div class="w-full max-w-md overflow-hidden rounded-2xl bg-white text-center">
+    <div class="flex flex-col items-center gap-2 px-6 py-8 text-sm text-slate-500">
+      <span class="material-symbols-outlined mb-2 !flex h-16 w-16 items-center justify-center rounded-full bg-green-50 text-3xl text-green-500">check</span>
+      <p class="text-lg font-semibold text-slate-900">Bid submitted</p>
+      <p>Your quotation was sent to the customer.</p>
+    </div>
+    <div class="border-t border-gray-100 px-6 py-4"><button type="button" data-close class="w-full rounded-md bg-blue-600 py-2 text-xs font-medium text-white cursor-pointer">Done</button></div>
+  </div>
+</div>
+
+<!-- My Bids -> Medicine Request (REQ-5504) -->
+<div id="my-bid-request" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
+  <div class="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white scroll">
+    <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div class="flex items-center gap-3">
+        <button type="button" data-close class="material-symbols-outlined cursor-pointer">cancel</button>
+        <p class="font-semibold text-slate-900">Medicine Request</p>
+        <span class="rounded bg-blue-600 px-2 py-0.5 text-[11px] font-semibold text-white">REQ-5504</span>
+        <span class="text-sm text-slate-500">| Rajan Mehta</span>
+      </div>
+      <span class="text-xs font-semibold text-red-500">34m left</span>
+    </div>
+    <div class="space-y-4 bg-white p-5">
+      <div class="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4">
+        <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-600 text-lg font-semibold text-white">RM</span>
+        <div class="space-y-0.5">
+          <p class="font-semibold text-slate-900">Rajan Mehta</p>
+          <p class="text-xs text-gray-500">Andheri West &middot; 2.3 km</p>
+          <p class="text-xs font-medium text-slate-900">Phone: 9876-54-XXXX</p>
+          <p class="text-xs italic text-gray-500">Please handle with care, urgent delivery needed.</p>
+        </div>
+      </div>
+      <div class="rounded-xl border border-gray-200 bg-white p-4">
+        <p class="mb-2 text-sm font-semibold text-slate-900">Requested medicines</p>
+        <div class="divide-y divide-gray-100 text-xs text-slate-800">
+          <div class="grid grid-cols-4 items-center py-3"><span class="font-medium">Atorva 10mg</span><span class="text-gray-500">Strip/10</span><span>Qty 2</span><span class="justify-self-end rounded-full border border-green-300 bg-green-50 px-3 py-0.5 text-[10px] text-green-700">Available</span></div>
+          <div class="grid grid-cols-4 items-center py-3"><span class="font-medium">Ecosprin 75mg</span><span class="text-gray-500">Strip/10</span><span>Qty 2</span><span class="justify-self-end rounded-full border border-green-300 bg-green-50 px-3 py-0.5 text-[10px] text-green-700">Available</span></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-5 rounded-xl border border-gray-200 bg-white p-4 text-xs">
+        <div><p class="text-gray-500">Budget</p><p class="text-lg font-bold text-blue-700">&#8377;220</p></div>
+        <div><p class="text-gray-500">Timing</p><p class="font-bold text-slate-900">2&ndash;3 PM</p></div>
+        <div><p class="text-gray-500">Fulfilment</p><p class="font-bold text-slate-900">Store Pickup</p></div>
+        <div><p class="text-gray-500">Prescription</p><p class="font-bold text-slate-900">Not Required</p></div>
+      </div>
+      <p class="flex items-center gap-2 rounded-lg border border-blue-600 bg-blue-50 px-4 py-3 text-xs text-blue-600"><span class="material-symbols-outlined text-base">description</span>Prescription uploaded, awaiting review.</p>
+    </div>
+    <div class="flex justify-end gap-3 border-t border-gray-100 px-5 py-4">
+      <button type="button" class="rounded-md border border-blue-600 bg-white px-5 py-2 text-xs font-medium text-blue-600 cursor-pointer">Contact Customer</button>
+      <button type="button" data-open="withdraw-bid" class="rounded-md bg-red-500 px-8 py-2 text-xs font-medium text-white cursor-pointer">Withdraw</button>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw Bid -->
+<div id="withdraw-bid" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
+  <div class="w-full max-w-md space-y-4 rounded-2xl bg-white p-5">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3"><button type="button" data-close class="material-symbols-outlined cursor-pointer">undo</button><p class="font-semibold text-slate-900">Withdraw Bid</p></div>
+      <button type="button" data-close class="material-symbols-outlined cursor-pointer">cancel</button>
+    </div>
+    <div class="rounded-xl border border-gray-200 p-3"><p class="text-xs text-slate-700">BID-7103 &middot; Rajan Mehta</p><p class="text-xl font-bold text-slate-900">&#8377;200</p></div>
+    <div class="space-y-3">
+      <p class="text-sm font-semibold text-slate-900">Select reason:</p>
+      <label class="flex items-center gap-3 text-xs text-slate-800 cursor-pointer"><input type="radio" name="wd-reason" class="h-4 w-4 accent-blue-600" />Stock changed</label>
+      <label class="flex items-center gap-3 text-xs text-slate-800 cursor-pointer"><input type="radio" name="wd-reason" class="h-4 w-4 accent-blue-600" />Unable to meet timing</label>
+      <label class="flex items-center gap-3 text-xs text-slate-800 cursor-pointer"><input type="radio" name="wd-reason" class="h-4 w-4 accent-blue-600" />Pricing error</label>
+      <label class="flex items-center gap-3 text-xs text-slate-800 cursor-pointer"><input type="radio" name="wd-reason" class="h-4 w-4 accent-blue-600" />Other</label>
+    </div>
+    <p class="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-3 text-xs text-red-500"><span class="material-symbols-outlined text-base">info</span>The customer will no longer be able to accept this quotation.</p>
+    <div class="flex justify-end gap-3">
+      <button type="button" data-close class="w-28 rounded-md border border-blue-600 bg-white py-2 text-xs font-medium text-blue-600 cursor-pointer">Keep Bid</button>
+      <button type="button" data-close class="w-36 rounded-md bg-red-500 py-2 text-xs font-medium text-white cursor-pointer">Withdraw</button>
+    </div>
+  </div>
+</div>
+
+<!-- Request Details (Accepted) -->
+<div id="request-accepted" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
+  <div class="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white scroll">
+    <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div class="flex items-center gap-3"><span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600">description</span><div><p class="font-semibold text-slate-900">Request Details</p><p class="text-xs text-gray-500">REQ-5506</p></div></div>
+      <button type="button" data-close class="material-symbols-outlined cursor-pointer">cancel</button>
+    </div>
+    <div class="space-y-4 p-5">
+      <div class="flex items-center justify-between rounded-xl border border-blue-600 p-4">
+        <div class="flex items-center gap-3"><span class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">PS</span><div><p class="font-semibold text-slate-900">Pooja Sharma</p><p class="flex items-center gap-1 text-xs text-gray-500"><span class="material-symbols-outlined text-sm text-blue-600">location_on</span>Goregaon &middot; 4.1 km</p></div></div>
+        <button type="button" class="flex items-center gap-1 rounded-md border border-blue-600 px-3 py-1.5 text-xs text-blue-600 cursor-pointer"><span class="material-symbols-outlined text-sm">call</span>Contact Customer</button>
+      </div>
+      <p class="flex items-center gap-2 text-sm font-semibold text-slate-900"><span class="material-symbols-outlined text-base text-blue-600">link</span>Medicine Details</p>
+      <div class="flex items-center justify-between rounded-xl border border-gray-200 p-3">
+        <div class="flex items-center gap-3"><span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600">link</span><div><p class="text-sm font-semibold text-slate-900">Crocin 500mg Tablet</p><p class="text-xs text-gray-500">Vitamin C 500mg</p><p class="mt-1 flex gap-2"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[10px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[10px] text-green-700">Available</span></p></div></div>
+        <div class="text-right text-xs"><p class="text-gray-500">QTY</p><p class="text-sm font-bold text-slate-900">2 strips</p></div>
+      </div>
+      <p class="flex items-center gap-2 text-sm font-semibold text-slate-900"><span class="material-symbols-outlined text-base text-blue-600">apartment</span>Fulfillment Details</p>
+      <div class="grid grid-cols-3 divide-x divide-gray-200 rounded-xl border border-gray-200 text-xs"><div class="flex items-start gap-2 p-3"><span class="material-symbols-outlined text-base text-gray-500">local_shipping</span><div><p class="font-semibold text-slate-900">Home Delivery</p><p class="text-gray-500">Within 45 min</p></div></div><div class="flex items-start gap-2 p-3"><span class="material-symbols-outlined text-base text-blue-600">location_on</span><div><p class="font-semibold text-slate-900">Customer Address</p><p class="text-gray-500">Goregaon, Mumbai</p><p class="text-[10px] text-gray-400">(Near Goregaon Station)</p></div></div><div class="flex items-start gap-2 p-3"><span class="material-symbols-outlined text-base text-gray-500">payments</span><div><p class="font-semibold text-slate-900">Customer Budget</p><p class="text-gray-500">&#8377;500</p></div></div></div>
+      <p class="flex items-center gap-2 text-sm font-semibold text-slate-900"><span class="material-symbols-outlined text-base text-blue-600">receipt_long</span>Bid / Order Details</p>
+      <div class="grid grid-cols-4 gap-2 rounded-xl border border-gray-200 p-3 text-xs"><div class="flex items-center gap-2"><span class="material-symbols-outlined !flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-base text-blue-600">currency_rupee</span><div><p class="text-[10px] text-gray-500">Accepted Bid</p><p class="font-bold text-slate-900">&#8377;480</p></div></div><div class="flex items-center gap-2"><span class="material-symbols-outlined !flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-base text-green-600">sync</span><div><p class="text-[10px] text-gray-500">Order Status</p><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[10px] text-green-700">In Progress</span></div></div><div class="flex items-center gap-2"><span class="material-symbols-outlined !flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-base text-orange-500">schedule</span><div><p class="text-[10px] text-gray-500">Time Left</p><p class="font-bold text-orange-500">32m</p></div></div><div class="flex items-center gap-2"><span class="material-symbols-outlined !flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-base text-blue-600">calendar_today</span><div><p class="text-[10px] text-gray-500">Accepted On</p><p class="font-bold text-slate-900">22 Jul 2025</p><p class="text-[10px] text-gray-400">10:45 AM</p></div></div></div>
+      <p class="text-sm font-semibold text-slate-900">Order Progress</p>
+      <div class="grid grid-cols-4 text-center text-[10px]"><div><div class="mb-1 flex items-center"><span class="flex-1"></span><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white"><span class="material-symbols-outlined text-sm">check</span></span><span class="h-0.5 flex-1 bg-blue-600"></span></div><p class="text-blue-600 font-medium">Request Accepted</p><p class="text-gray-400">22 Jul 2025, 10:45 AM</p></div><div><div class="mb-1 flex items-center"><span class="h-0.5 flex-1 bg-blue-600"></span><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-blue-600 bg-white"><span class="h-2 w-2 rounded-full bg-blue-600"></span></span><span class="flex-1 border-t-2 border-dashed border-gray-300"></span></div><p class="text-blue-600 font-medium">Preparing Order</p><p class="text-gray-400">In Progress</p></div><div><div class="mb-1 flex items-center"><span class="flex-1 border-t-2 border-dashed border-gray-300"></span><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-gray-100"></span><span class="flex-1 border-t-2 border-dashed border-gray-300"></span></div><p class="text-gray-600">Out for Delivery</p><p class="text-gray-400">Pending</p></div><div><div class="mb-1 flex items-center"><span class="flex-1 border-t-2 border-dashed border-gray-300"></span><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-gray-100"></span><span class="flex-1"></span></div><p class="text-gray-600">Delivered</p><p class="text-gray-400">Pending</p></div></div>
+    </div>
+    <div class="flex gap-3 border-t border-gray-100 px-5 py-4">
+      <button type="button" data-close class="flex-1 rounded-md border border-gray-300 py-2 text-xs text-gray-500 cursor-pointer">Close</button>
+      <button type="button" class="flex-1 rounded-md bg-blue-600 py-2 text-xs text-white cursor-pointer">Update Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- Request Details (Completed) -->
+<div id="request-completed" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
+  <div class="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white scroll">
+    <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div class="flex items-center gap-3"><span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600">description</span><div><p class="font-semibold text-slate-900">Request Details</p><p class="text-xs text-gray-500">REQ-5506</p></div></div>
+      <button type="button" data-close class="material-symbols-outlined cursor-pointer">cancel</button>
+    </div>
+    <div class="space-y-4 p-5">
+      <div class="flex items-center justify-between rounded-xl border border-blue-600 p-4">
+        <div class="flex items-center gap-3"><span class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">PS</span><div><p class="font-semibold text-slate-900">Pooja Sharma</p><p class="flex items-center gap-1 text-xs text-gray-500"><span class="material-symbols-outlined text-sm text-blue-600">location_on</span>Goregaon &middot; 4.1 km</p></div></div>
+        <button type="button" class="flex items-center gap-1 rounded-md border border-blue-600 px-3 py-1.5 text-xs text-blue-600 cursor-pointer"><span class="material-symbols-outlined text-sm">call</span>Contact Customer</button>
+      </div>
+      <p class="flex items-center gap-2 text-sm font-semibold text-slate-900"><span class="material-symbols-outlined text-base text-blue-600">link</span>Medicine Details</p>
+      <div class="flex items-center justify-between rounded-xl border border-gray-200 p-3">
+        <div class="flex items-center gap-3"><span class="material-symbols-outlined !flex h-10 w-10 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600">link</span><div><p class="text-sm font-semibold text-slate-900">Crocin 500mg Tablet</p><p class="text-xs text-gray-500">Vitamin C 500mg</p><p class="mt-1 flex gap-2"><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[10px] text-green-700">Verified</span><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[10px] text-green-700">Available</span></p></div></div>
+        <div class="text-right text-xs"><p class="text-gray-500">QTY</p><p class="text-sm font-bold text-slate-900">2 strips</p></div>
+      </div>
+      <p class="flex items-center gap-2 text-sm font-semibold text-slate-900"><span class="material-symbols-outlined text-base text-blue-600">apartment</span>Fulfillment Details</p>
+      <div class="grid grid-cols-2 divide-x divide-gray-200 rounded-xl border border-gray-200 text-xs"><div class="flex items-start gap-2 p-3"><span class="material-symbols-outlined text-base text-gray-500">local_shipping</span><div><p class="font-semibold text-slate-900">Home Delivery</p><p class="text-gray-500">Within 45 min</p></div></div><div class="flex items-start gap-2 p-3"><span class="material-symbols-outlined text-base text-blue-600">location_on</span><div><p class="font-semibold text-slate-900">Customer Address</p><p class="text-gray-500">Goregaon, Mumbai</p><p class="text-[10px] text-gray-400">(Near Goregaon Station)</p></div></div></div>
+      <div class="space-y-2 rounded-xl border border-gray-200 bg-slate-50 p-3 text-xs">
+        <p class="font-semibold text-slate-900">Order Summary</p>
+        <div class="grid grid-cols-5 gap-2">
+          <div><p class="text-[10px] text-gray-500">ORDER ID</p><p class="font-bold text-slate-900">REQ-5498</p></div>
+          <div><p class="text-[10px] text-gray-500">ACCEPTED BID</p><p class="font-bold text-slate-900">&#8377;480</p></div>
+          <div><p class="text-[10px] text-gray-500">PAYMENT / EARNING</p><p class="font-bold text-slate-900">&#8377;480</p></div>
+          <div><p class="text-[10px] text-gray-500">ORDER STATUS</p><span class="rounded-full border border-green-300 bg-green-50 px-2 text-[10px] text-green-700">Delivered</span></div>
+          <div><p class="text-[10px] text-gray-500">COMPLETED ON</p><p class="font-bold text-slate-900">22 Jul 2025 &middot; 03:05 PM</p></div>
+        </div>
+      </div>
+      <p class="text-sm font-semibold text-slate-900">Order Progress</p>
+      <div class="grid grid-cols-4 text-center text-[10px]"><div><div class="mb-1 flex items-center"><span class="flex-1"></span><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white"><span class="material-symbols-outlined text-sm">check</span></span><span class="h-0.5 flex-1 bg-blue-600"></span></div><p class="text-blue-600 font-medium">Request Accepted</p><p class="text-gray-400">22 Jul 2025, 10:45 AM</p></div><div><div class="mb-1 flex items-center"><span class="h-0.5 flex-1 bg-blue-600"></span><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white"><span class="material-symbols-outlined text-sm">check</span></span><span class="h-0.5 flex-1 bg-blue-600"></span></div><p class="text-blue-600 font-medium">Preparing Order</p><p class="text-gray-400">22 Jul 2025, 02:32 PM</p></div><div><div class="mb-1 flex items-center"><span class="h-0.5 flex-1 bg-blue-600"></span><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white"><span class="material-symbols-outlined text-sm">check</span></span><span class="h-0.5 flex-1 bg-blue-600"></span></div><p class="text-blue-600 font-medium">Out for Delivery</p><p class="text-gray-400">22 Jul 2025, 02:48 PM</p></div><div><div class="mb-1 flex items-center"><span class="h-0.5 flex-1 bg-blue-600"></span><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white"><span class="material-symbols-outlined text-sm">check</span></span><span class="flex-1"></span></div><p class="text-blue-600 font-medium">Delivered</p><p class="text-gray-400">22 Jul 2025, 03:05 PM</p></div></div>
+    </div>
+    <div class="flex gap-3 border-t border-gray-100 px-5 py-4">
+      <button type="button" data-close class="flex-1 rounded-md border border-gray-300 py-2 text-xs text-gray-500 cursor-pointer">Close</button>
+      <button type="button" class="flex-1 rounded-md bg-blue-600 py-2 text-xs text-white cursor-pointer">Download Receipt</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<script src="{% static 'js/coupons.js' %}"></script>
-<script src="{% static 'js/tabs.js' %}"></script>
 <script src="{% static 'js/sidebar.js' %}"></script>
-<script src="{% static 'js/points.js' %}"></script>
-<script src="{% static 'js/dropdown.js' %}"></script>
-<script src="{% static 'js/table-pagination.js' %}"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/pharmacy-offer.js' %}"></script>
+
 {% endblock %}
