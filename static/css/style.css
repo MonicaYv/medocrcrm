@@ -321,6 +321,9 @@
   --radio-fill-color: teal;
 
     --shadow-blue-box: 0px 1px 2px 0px #0000000D;
+  --color-popup-label:#334155;
+  --color-popup-blue:#DBEAFE;
+  --color-popup-light-gray:#8898AA;
 
   /* Font Size */
   /* Font Semibold */

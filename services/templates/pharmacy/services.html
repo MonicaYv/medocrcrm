@@ -16,15 +16,15 @@
             <p class="text-sm text-cloud-burst-1" id="inv-stock-date">Stock as of <span id="inv-date-text"></span></p>
         </div>
         <div class="flex items-center gap-4 flex-wrap">
-            <button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-report-0088ff text-report-0088ff text-xs font-semibold bg-white transition-colors cursor-pointer shadow-blue-box">
+            <button id="open-import-csv" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-report-0088ff text-report-0088ff text-xs font-semibold bg-white transition-colors cursor-pointer shadow-blue-box">
                 <span class="material-symbols-outlined text-base!">upload</span>
                 Imports CSV
             </button>
-            <button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-report-0088ff text-report-0088ff text-xs font-semibold bg-white transition-colors cursor-pointer shadow-blue-box">
+            <button id="open-export-csv" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-report-0088ff text-report-0088ff text-xs font-semibold bg-white transition-colors cursor-pointer shadow-blue-box">
                 <span class="material-symbols-outlined text-base!">download</span>
                 Export
             </button>
-            <button class="home-add-service inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-report-0088ff text-white text-xs font-semibold transition-colors cursor-pointer shadow-blue-box">
+            <button type="button" class="open-add-product-modal inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-report-0088ff text-white text-xs font-semibold transition-colors cursor-pointer shadow-blue-box">
                 <span class="material-symbols-outlined text-base!">add</span>
                 Add Product
             </button>
@@ -131,7 +131,7 @@
         </div>
 
         {% if has_pharmacy_medicines %}
-        <div id="replenishment-alert" class="mx-4 sm:mx-6 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FF8D28] bg-soft-ivory px-3 py-2.5 text-xs sm:text-sm">
+        <div id="replenishment-alert" class="mx-4 sm:mx-6 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-instant-orange bg-soft-ivory px-3 py-2.5 text-xs sm:text-sm">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-[#FF8D28]">warning</span>
                 <span class="font-semibold text-black text-sm" id="replenishment-msg">2 Products need replenishment</span>
@@ -176,10 +176,20 @@
                         <input id="inv-search" type="text" placeholder="Search patient, appointment or issue..."
                             class="w-full pl-9 pr-3 py-2 rounded-lg border border-kyc-medium-gray bg-white focus:outline-none transition-colors text-base">
                     </div>
-                    <button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-kyc-medium-gray text-dark-gray text-sm font-semibold bg-white hover:border-dodger-blue transition-colors cursor-pointer">
-                        <span class="material-symbols-outlined text-base!">filter_list</span>
-                        Filter
-                    </button>
+                    <div class="inventory-filter-wrapper relative">
+                        <button class="inventory-filter-toggle inline-flex items-center gap-1.5 rounded-lg border border-kyc-medium-gray bg-white px-3 py-2 text-sm font-semibold text-dark-gray transition-colors hover:border-dodger-blue" type="button" aria-haspopup="listbox" aria-controls="products-filter-menu" aria-expanded="false">
+                            <span class="material-symbols-outlined text-base!" aria-hidden="true">filter_list</span>
+                            Filter
+                        </button>
+                        <ul id="products-filter-menu" class="inventory-filter-menu absolute right-0 top-[calc(100%+8px)] z-30 m-0 hidden w-52 list-none rounded-3xl bg-white px-4.5 py-3 shadow-lg" role="listbox" aria-label="Inventory filter options">
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="product-medicine">Product Medicine</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="batch-status">Batch Status</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="expiry-status">Expiry Status</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="stock-availability">Stock Availability</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="location">Location</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="purchase-cost">Purchase Cost</button></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -607,7 +617,7 @@
             <div class="flex flex-col items-center justify-center py-16 gap-5">
                 <img src="/static/images/services-bg.svg" alt="No inventory" class="w-40 opacity-70">
                 <p class="text-sm text-center font-normal text-dark-gray max-w-xs">No medicines in inventory yet. Add your first product to get started.</p>
-                <button class="home-add-service inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-dodger-blue text-dodger-blue text-sm font-semibold hover:bg-light-dodger-blue transition-colors cursor-pointer">
+                <button type="button" class="open-add-product-modal inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-dodger-blue text-dodger-blue text-sm font-semibold hover:bg-light-dodger-blue transition-colors cursor-pointer">
                     <span class="material-symbols-outlined text-base!">add</span>
                     Add Medicine
                 </button>
@@ -636,9 +646,19 @@
                         <input id="batch-search" type="search" placeholder="Search product, batch or location..."
                             class="w-full rounded-lg border border-[#E2E8F0] bg-white py-2 pl-9 pr-3 text-sm focus:border-dodger-blue focus:outline-none">
                     </label>
-                    <button type="button" class="inline-flex items-center justify-center gap-1.5 self-start rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-dark-gray hover:border-dodger-blue sm:self-auto">
-                        Filter <span class="material-symbols-outlined text-base!" aria-hidden="true">filter_list</span>
-                    </button>
+                    <div class="inventory-filter-wrapper relative self-start sm:self-auto">
+                        <button type="button" class="inventory-filter-toggle inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-dark-gray hover:border-dodger-blue" aria-haspopup="listbox" aria-controls="batches-filter-menu" aria-expanded="false">
+                            Filter <span class="material-symbols-outlined text-base!" aria-hidden="true">filter_list</span>
+                        </button>
+                        <ul id="batches-filter-menu" class="inventory-filter-menu absolute right-0 top-[calc(100%+8px)] z-30 m-0 hidden w-52 list-none rounded-3xl bg-white px-4.5 py-3 shadow-lg" role="listbox" aria-label="Inventory filter options">
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="product-medicine">Product Medicine</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="batch-status">Batch Status</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="expiry-status">Expiry Status</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="stock-availability">Stock Availability</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="location">Location</button></li>
+                            <li><button class="w-full rounded-lg px-3 py-3.5 text-left text-base text-dark-black hover:bg-light-dodger-blue" type="button" role="option" aria-selected="false" data-filter-option="purchase-cost">Purchase Cost</button></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -876,7 +896,7 @@
                     <h2 class="text-base font-semibold text-dark-black">Purchase Orders</h2>
                     <p class="mt-1 text-xs text-medium-gray">Plan replacement with trusted suppliers</p>
                 </div>
-                <button type="button" class="inline-flex items-center justify-center gap-1.5 self-start rounded-lg bg-report-0088ff px-4 py-2.5 text-sm font-semibold text-white hover:bg-dodger-blue sm:self-auto">
+                <button id="open-purchase-order" type="button" class="inline-flex items-center justify-center gap-1.5 self-start rounded-lg bg-report-0088ff px-4 py-2.5 text-sm font-semibold text-white hover:bg-dodger-blue sm:self-auto">
                     <span class="material-symbols-outlined text-base!" aria-hidden="true">description</span>
                     Create Purchase Order
                 </button>
@@ -1186,602 +1206,526 @@
     </div>
 </div>
 
-<!-- Add Service Popup -->
-{% include 'pharmacy/partials/add_service_popup.html' %}
 
-<!-- Edit Medicine Modal -->
-<div id="edit-pharmacy-medicine-modal" class="hidden fixed inset-0 z-50 bg-black/40 p-4 items-center justify-center">
-    <form id="edit-pharmacy-medicine-form" class="w-full max-w-lg rounded-xl bg-white p-5 shadow-17 space-y-4">
-        <div class="flex items-center justify-between border-b border-blue-haze pb-3">
-            <h2 class="text-lg font-bold text-desaturated-blue">Edit Medicine</h2>
-            <button type="button" class="close-edit-pharmacy-medicine material-symbols-outlined cursor-pointer">close</button>
+<div id="medicine-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-smoky-black p-3 sm:p-6">
+    <section class="flex max-h-[calc(100dvh-24px)] w-full max-w-200 flex-col overflow-hidden rounded-xl border border-kyc-medium-gray bg-white" role="dialog" aria-modal="true" aria-labelledby="medicine-details-title">
+        <header class="flex shrink-0 items-start justify-between gap-4 border-b border-white2 px-4 py-4 sm:px-5">
+            <div class="min-w-0">
+                <h2 id="medicine-details-title" class="truncate text-xl font-semibold text-dark-black">Medicine details</h2>
+                <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                    <span id="medicine-details-code" class="rounded-full bg-white2 px-2 py-1 text-cloud-burst-1">—</span>
+                    <span id="medicine-details-status" class="rounded-full bg-light-dodger-blue px-2 py-1 text-dodger-blue">—</span>
+                </div>
+            </div>
+            <button id="close-medicine-details" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-dark-black text-dark-black" type="button" aria-label="Close medicine details">
+                <span class="material-symbols-outlined">close_small</span>
+            </button>
+        </header>
+
+        <div class="min-h-0 flex-1 space-y-3 overflow-y-auto bg-frosted-cloud p-4 sm:p-5 no-scrollbar">
+            <dl class="grid grid-cols-1 gap-x-5 rounded-xl border border-kyc-medium-gray bg-white px-3 sm:grid-cols-2 sm:px-4 shadow-blue-box">
+                <div class="border-b border-white2 py-2.5"><dt class="text-sm font-normal text-cloud-burst-1">Salt/Composition</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-medicine-detail="composition">—</dd></div>
+                <div class="border-b border-white2 py-2.5"><dt class="text-sm font-normal text-cloud-burst-1">Dosage Form</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-medicine-detail="dosage">—</dd></div>
+                <div class="border-b border-white2 py-2.5"><dt class="text-sm font-normal text-cloud-burst-1">Manufacturer</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-medicine-detail="manufacturer">—</dd></div>
+                <div class="border-b border-white2 py-2.5"><dt class="text-sm font-normal text-cloud-burst-1">Category</dt><dd class="mt-1 text-xs font-semilgld text-dark-black" data-medicine-detail="category">—</dd></div>
+                <div class="border-b border-white2 py-2.5"><dt class="text-sm font-normal text-cloud-burst-1">Pack Size</dt><dd class="mt-1 text-xs font-semilgld text-dark-black" data-medicine-detail="pack-size">—</dd></div>
+                <div class="border-b border-white2 py-2.5"><dt class="text-sm font-normal text-cloud-burst-1">Storage location</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-medicine-detail="location">—</dd></div>
+                <div class="border-b border-white2 py-2.5"><dt class="text-sm font-normal text-cloud-burst-1">Prescription</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-medicine-detail="prescription">—</dd></div>
+                <div class="border-b border-white2 py-2.5"><dt class="text-sm font-normal text-cloud-burst-1">Selling Prices</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-medicine-detail="price">—</dd></div>
+            </dl>
+
+            <section aria-labelledby="medicine-stock-summary-title">
+                <h3 id="medicine-stock-summary-title" class="mb-2 text-lg font-semibold text-dark-black">Stock Summary</h3>
+                <dl class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <div class="rounded-lg border border-kyc-medium-gray bg-white p-2"><dt class="text-sm font-normal text-cloud-burst-1">On Hand</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-stock-summary="on-hand">—</dd><dd class="mt-1 text-sm font-normal text-cloud-burst-1" data-stock-summary="unit">—</dd></div>
+                    <div class="rounded-lg border border-kyc-medium-gray bg-white p-2"><dt class="text-sm font-normal text-cloud-burst-1">Reserved</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-stock-summary="reserved">—</dd><dd class="mt-1 text-sm font-normal text-cloud-burst-1" data-stock-summary="unit">—</dd></div>
+                    <div class="rounded-lg border border-kyc-medium-gray bg-white p-2"><dt class="text-sm font-normal text-cloud-burst-1">Blocked</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-stock-summary="blocked">—</dd><dd class="mt-1 text-sm font-normal text-cloud-burst-1" data-stock-summary="unit">—</dd></div>
+                    <div class="rounded-lg border border-kyc-medium-gray bg-white p-2"><dt class="text-sm font-normal text-cloud-burst-1">Available</dt><dd class="mt-1 text-lg font-semibold text-dark-black" data-stock-summary="available">—</dd><dd class="mt-1 text-sm font-normal text-cloud-burst-1" data-stock-summary="unit">—</dd></div>
+                </dl>
+            </section>
+
+            <section aria-labelledby="medicine-batches-title">
+                <h3 id="medicine-batches-title" class="mb-2 text-lg font-semibold text-dark-black">Batches</h3>
+                <div class="overflow-x-auto rounded-lg border border-kyc-medium-gray bg-white">
+                    <table class="w-full min-w-105 text-sm">
+                        <thead class="bg-frosted-cloud uppercase text-black">
+                            <tr><th class="px-2 py-2 text-center font-semibold">Batch</th><th class="px-2 py-2 text-center font-semibold">Expiry</th><th class="px-2 py-2 text-center font-semibold">Available</th><th class="px-2 py-2 text-center font-semibold">Location</th></tr>
+                        </thead>
+                        <tbody id="medicine-details-batches">
+                            <tr><td class="border-t border-kyc-medium-gray px-2 py-4 text-center" data-batch-detail="batch">—</td><td class="border-t border-white2 px-2 py-4 text-center" data-batch-detail="expiry">—</td><td class="border-t border-white2 px-2 py-4 text-center" data-batch-detail="available">—</td><td class="border-t border-white2 px-2 py-4 text-center" data-batch-detail="location">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section aria-labelledby="medicine-movement-title">
+                <h3 id="medicine-movement-title" class="mb-1 text-lg font-semibold text-dark-black">Movement history</h3>
+                <div id="medicine-details-movements" class="divide-y divide-kyc-medium-gray"></div>
+            </section>
         </div>
-        <input type="hidden" name="medicine_id">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label class="text-sm font-semibold">Category<input required name="category" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal" maxlength="100"></label>
-            <label class="text-sm font-semibold">Medicine name<input required name="name" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal" maxlength="255"></label>
-            <label class="text-sm font-semibold">Type<input required name="type" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal" maxlength="50"></label>
-            <label class="text-sm font-semibold">Quantity<input required name="quantity" inputmode="numeric" pattern="[0-9]+" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal"></label>
-            <label class="text-sm font-semibold sm:col-span-2">Price<input required name="price" type="number" min="0" step="0.01" class="mt-1 w-full rounded-md border border-slate-gray px-3 py-2 font-normal"></label>
+
+        <footer class="flex shrink-0 flex-wrap justify-end gap-1.5 border-t border-kyc-medium-gray px-3 py-3 sm:gap-2 sm:px-4">
+            <button id="medicine-details-edit" class="inline-flex min-h-8 items-center justify-center gap-1 rounded-lg border border-kyc-medium-gray bg-white px-2 text-xs font-medium text-dark-gray" type="button">Edit Product <span class="material-symbols-outlined mini-icon">edit</span></button>
+            <button id="medicine-details-adjust" class="inline-flex min-h-8 items-center justify-center gap-1 rounded-lg border border-kyc-medium-gray bg-white px-2 text-xs font-medium text-dark-gray" type="button">Adjust Stock <span class="material-symbols-outlined mini-icon">sync_alt</span></button>
+            <button id="medicine-details-receive" class="inline-flex min-h-8 items-center justify-center gap-1 rounded-lg border border-kyc-medium-gray bg-white px-2 text-xs font-medium text-dark-gray" type="button">Receive Stock <span class="material-symbols-outlined mini-icon">inventory_2</span></button>
+            <button id="medicine-details-create-po" class="inline-flex min-h-8 items-center justify-center gap-1 rounded-lg bg-report-0088ff px-2.5 text-xs font-semibold text-white" type="button"><span class="material-symbols-outlined mini-icon">description</span>Create PO</button>
+        </footer>
+    </section>
+</div>
+
+<div id="adjust-stock-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-smoky-black p-3 sm:p-5">
+    <section class="flex max-h-[calc(100dvh-24px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-kyc-medium-gray bg-white" role="dialog" aria-modal="true" aria-labelledby="adjust-stock-title" aria-describedby="adjust-stock-description">
+        <header class="flex shrink-0 items-start justify-between gap-4 border-b border-kyc-medium-gray px-5 py-4 sm:px-7 sm:py-5">
+            <div>
+                <h2 id="adjust-stock-title" class="text-xl font-semibold text-dark-black">Adjust Stock</h2>
+                <p id="adjust-stock-description" class="mt-2 text-sm text-cloud-burst-1">Review details before continuing</p>
+            </div>
+            <button id="close-adjust-stock" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-dark-black text-dark-black" type="button" aria-label="Close adjust stock dialog">
+                <span class="material-symbols-outlined">close_small</span>
+            </button>
+        </header>
+
+        <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
+            <div class="mb-4">
+                <h3 id="adjust-stock-medicine-name" class="text-xl font-semibold text-dark-black">Medicine</h3>
+                <p class="mt-2 text-sm text-cloud-burst-1">Current available <span id="adjust-stock-current-available">—</span></p>
+            </div>
+
+            <form id="adjust-stock-form" class="space-y-5">
+                <div class="grid grid-cols-1 gap-x-3 gap-y-3 rounded-2xl border border-kyc-medium-gray p-4 shadow-blue-box sm:grid-cols-2 sm:p-5">
+                    <div class="min-w-0">
+                        <label id="adjust-stock-type-label" class="block text-sm text-dark-gray">Adjustment type</label>
+                        <div class="adjust-stock-select relative mt-3">
+                            <button id="adjust-stock-type-button" class="adjust-stock-select-button flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-kyc-medium-gray bg-white px-3 text-left text-sm font-medium text-dark-black" type="button" aria-labelledby="adjust-stock-type-label adjust-stock-type-value" aria-haspopup="listbox" aria-controls="adjust-stock-type-menu" aria-expanded="false" data-dropdown="type">
+                                <span id="adjust-stock-type-value">Increase</span>
+                                <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                            </button>
+                            <ul id="adjust-stock-type-menu" class="adjust-stock-menu absolute left-0 top-[calc(100%+5px)] z-10 m-0 max-h-45 w-full list-none overflow-y-auto rounded-lg border border-kyc-medium-gray bg-white p-1.25 shadow-lg hidden" role="listbox" aria-labelledby="adjust-stock-type-label" data-menu="type">
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-sm text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="true" tabindex="0" data-value="increase" data-default-selected="true">Increase</button></li>
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-sm text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false" tabindex="-1" data-value="decrease">Decrease</button></li>
+                            </ul>
+                            <input id="adjust-stock-type" type="hidden" name="adjustment_type" value="increase">
+                        </div>
+                    </div>
+
+                    <label class="block text-sm text-dark-gray" for="adjust-stock-quantity">Quantity
+                        <input id="adjust-stock-quantity" name="quantity" type="number" min="1" step="1" value="1" required class="mt-3 h-12 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-sm font-medium text-dark-black focus:outline-none">
+                    </label>
+
+                    <div class="min-w-0">
+                        <label id="adjust-stock-reason-label" class="block text-sm text-dark-gray">Reason</label>
+                        <div class="adjust-stock-select relative mt-3">
+                            <button id="adjust-stock-reason-button" class="adjust-stock-select-button flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-kyc-medium-gray bg-white px-3 text-left text-sm font-medium text-dark-black" type="button" aria-labelledby="adjust-stock-reason-label adjust-stock-reason-value" aria-haspopup="listbox" aria-controls="adjust-stock-reason-menu" aria-expanded="false" data-dropdown="reason">
+                                <span id="adjust-stock-reason-value">Count Correction</span>
+                                <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                            </button>
+                            <ul id="adjust-stock-reason-menu" class="adjust-stock-menu absolute left-0 top-[calc(100%+5px)] z-10 m-0 max-h-45 w-full list-none overflow-y-auto rounded-lg border border-kyc-medium-gray bg-white p-1.25 shadow-lg hidden" role="listbox" aria-labelledby="adjust-stock-reason-label" data-menu="reason">
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-sm text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="true" tabindex="0" data-value="count_correction" data-default-selected="true">Count Correction</button></li>
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-sm text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false" tabindex="-1" data-value="damaged">Damaged</button></li>
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-sm text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false" tabindex="-1" data-value="expired">Expired</button></li>
+                            </ul>
+                            <input id="adjust-stock-reason" type="hidden" name="reason" value="count_correction">
+                        </div>
+                    </div>
+
+                    <label class="block text-sm text-dark-gray" for="adjust-stock-reference">Reference
+                        <input id="adjust-stock-reference" name="reference" type="text" placeholder="Optional reference" class="mt-3 h-12 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-sm font-medium text-dark-black placeholder:text-dark-black focus:outline-none">
+                    </label>
+                </div>
+
+                <label class="block text-sm text-dark-gray" for="adjust-stock-notes">Required notes
+                    <input id="adjust-stock-notes" name="notes" type="text" required placeholder="Explain this inventory change" class="mt-3 h-12 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-sm font-medium text-dark-black placeholder:text-dark-black focus:outline-none">
+                </label>
+                <p id="adjust-stock-feedback" class="hidden text-sm text-cloud-burst-1" role="status" aria-live="polite"></p>
+            </form>
         </div>
-        <div class="flex justify-end gap-3 pt-2">
-            <button type="button" class="close-edit-pharmacy-medicine rounded-lg border border-strong-red px-4 py-2 text-sm font-semibold text-strong-red">Cancel</button>
-            <button type="submit" class="save-edit-pharmacy-medicine rounded-lg bg-dodger-blue px-4 py-2 text-sm font-semibold text-white">Save changes</button>
+
+        <footer class="flex shrink-0 justify-end gap-3 border-t border-kyc-medium-gray px-5 py-4 sm:px-7">
+            <button id="cancel-adjust-stock" type="button" class="h-10 rounded-lg border border-kyc-medium-gray bg-white px-6 text-sm font-semibold text-cloud-burst-1">Cancel</button>
+            <button id="save-adjust-stock" type="submit" form="adjust-stock-form" class="h-10 rounded-lg bg-report-0088ff px-6 text-sm font-semibold text-white">Save Adjustment</button>
+        </footer>
+    </section>
+</div>
+
+<div id="create-po-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-smoky-black p-3 sm:p-5">
+    <section class="flex max-h-[calc(100dvh-24px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-kyc-medium-gray bg-white" role="dialog" aria-modal="true" aria-labelledby="create-po-title" aria-describedby="create-po-description">
+        <header class="flex shrink-0 items-start justify-between gap-4 border-b border-kyc-medium-gray px-5 py-4 sm:px-7">
+            <div>
+                <h2 id="create-po-title" class="text-lg font-semibold text-dark-black">Create Purchase Order</h2>
+                <p id="create-po-description" class="mt-2 text-sm text-cloud-burst-1">Review details before continuing</p>
+            </div>
+            <button id="close-create-po" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-dark-black text-dark-black" type="button" aria-label="Close purchase order dialog">
+                <span class="material-symbols-outlined">close_small</span>
+            </button>
+        </header>
+
+        <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
+            <form id="create-po-form" class="space-y-3">
+                <div class="grid grid-cols-1 gap-2 rounded-xl border border-kyc-medium-gray p-3 shadow-blue-box sm:grid-cols-2 sm:p-3.5">
+                    <div class="min-w-0">
+                        <label id="po-supplier-label" class="block text-sm text-dark-gray">Supplier</label>
+                        <div class="po-supplier-select relative mt-2">
+                            <button id="po-supplier-button" class="po-supplier-select-button flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-kyc-medium-gray bg-white px-2.5 text-left text-xs font-semibold text-dark-black" type="button" aria-labelledby="po-supplier-label po-supplier-value" aria-haspopup="listbox" aria-controls="po-supplier-menu" aria-expanded="false">
+                                <span id="po-supplier-value">Healthline Distributors</span>
+                                <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                            </button>
+                            <ul id="po-supplier-menu" class="absolute left-0 top-[calc(100%+5px)] z-10 m-0 max-h-45 w-full list-none overflow-y-auto rounded-lg border border-kyc-medium-gray bg-white p-1.25 shadow-lg hidden" role="listbox" aria-labelledby="po-supplier-label">
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="true" tabindex="0" data-value="Healthline Distributors" data-default-selected="true">Healthline Distributors</button></li>
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false" tabindex="-1" data-value="Health Distributors">Health Distributors</button></li>
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false" tabindex="-1" data-value="Metro Pharma Suppliers">Metro Pharma Suppliers</button></li>
+                                <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false" tabindex="-1" data-value="Wellness Wholesale">Wellness Wholesale</button></li>
+                            </ul>
+                            <input id="po-supplier" type="hidden" name="supplier" value="Healthline Distributors">
+                        </div>
+                    </div>
+                    <label class="block text-sm text-dark-gray" for="po-expected-delivery">Expected delivery
+                        <input id="po-expected-delivery" name="expected_delivery" type="date" class="mt-2 h-10 w-full rounded-lg border border-kyc-medium-gray bg-white px-2.5 text-xs font-semibold text-dark-black focus:outline-none">
+                    </label>
+                </div>
+
+                <section aria-labelledby="po-items-title">
+                    <div class="mb-2 flex items-center justify-between gap-3">
+                        <h3 id="po-items-title" class="text-lg font-semibold text-dark-black">Order item</h3>
+                        <button id="po-add-product" class="inline-flex items-center gap-1 text-xs font-semibold text-dodger-blue" type="button">
+                            <span class="material-symbols-outlined text-sm">add</span>Add Product
+                        </button>
+                    </div>
+                    <div id="po-items" class="space-y-2"></div>
+                </section>
+
+                <template id="po-item-template">
+                    <div class="purchase-order-item grid grid-cols-1 gap-2 sm:grid-cols-[1.1fr_1.1fr_1.1fr_0.9fr_auto] sm:items-end">
+                        <label class="block min-w-0 text-sm text-dark-gray">Product
+                            <input data-po-field="product" name="product[]" type="text" required class="mt-2 h-9 w-full rounded-lg border border-kyc-medium-gray bg-white px-2 text-xs font-semibold text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block min-w-0 text-sm text-dark-gray">Order Quantity
+                            <input data-po-field="quantity" name="quantity[]" type="number" min="1" step="1" required class="mt-2 h-9 w-full rounded-lg border border-kyc-medium-gray bg-white px-2 text-xs font-semibold text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block min-w-0 text-sm text-dark-gray">Unit Price
+                            <input data-po-field="unit-price" name="unit_price[]" type="number" min="0" step="0.01" required class="mt-2 h-9 w-full rounded-lg border border-kyc-medium-gray bg-white px-2 text-xs font-semibold text-dark-black focus:outline-none">
+                        </label>
+                        <div class="flex items-center justify-between gap-2 sm:block">
+                            <span class="text-sm text-dark-gray sm:block">Line total</span>
+                            <span data-po-line-total class="mt-2 block text-sm font-bold text-dark-black">₹0</span>
+                        </div>
+                        <button data-po-remove class="hidden h-8 w-8 items-center justify-center rounded-full text-cloud-burst-1 hover:bg-frosted-cloud" type="button" aria-label="Remove product">
+                            <span class="material-symbols-outlined text-lg">close</span>
+                        </button>
+                    </div>
+                </template>
+
+                <div class="flex flex-col gap-3 border-t border-kyc-medium-gray pt-3 sm:flex-row sm:items-center sm:justify-between">
+                    <label class="flex items-start gap-2 text-[11px] text-dark-gray">
+                        <input id="po-no-stock-impact" name="no_stock_impact" type="checkbox" class="mt-0.5 h-3.5 w-3.5 rounded border-kyc-medium-gray accent-report-0088ff">
+                        <span>Creating this PO does not affect stock</span>
+                    </label>
+                    <p class="text-right text-lg font-bold text-dark-black">Total <span id="po-total">₹0</span></p>
+                </div>
+                <p id="create-po-feedback" class="hidden text-xs text-cloud-burst-1" role="status" aria-live="polite"></p>
+            </form>
         </div>
-    </form>
+
+        <footer class="flex shrink-0 justify-end gap-2 border-t border-kyc-medium-gray px-4 py-3 sm:px-6">
+            <button id="cancel-create-po" type="button" class="h-9 rounded-lg border border-kyc-medium-gray bg-white px-4 text-xs font-semibold text-cloud-burst-1">Cancel</button>
+            <button id="save-create-po" type="submit" form="create-po-form" class="h-9 rounded-lg bg-report-0088ff px-4 text-xs font-semibold text-white">Save Draft</button>
+        </footer>
+    </section>
+</div>
+
+<div id="discard-po-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-smoky-black p-4 sm:p-6">
+    <section class="w-full max-w-4xl overflow-hidden rounded-2xl border border-kyc-medium-gray bg-white" role="alertdialog" aria-modal="true" aria-labelledby="discard-po-title" aria-describedby="discard-po-description">
+        <header class="flex items-start justify-between gap-4 border-b border-kyc-medium-gray px-6 py-5 sm:px-10 sm:py-7">
+            <div>
+                <h2 id="discard-po-title" class="text-xl font-bold text-dark-black sm:text-2xl">Discard Unsaved Changes?</h2>
+                <p class="mt-1 text-sm text-cloud-burst-1 sm:text-base">Sunrise Multispeciality Hospital · Andheri East</p>
+            </div>
+            <button id="close-discard-po" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-dark-black text-dark-black" type="button" aria-label="Keep editing purchase order">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+        </header>
+        <div class="border-b border-kyc-medium-gray px-6 py-7 sm:px-10 sm:py-10">
+            <p id="discard-po-description" class="text-base text-cloud-burst-1 sm:text-lg">Your changes have not been saved. Discard them or keep editing?</p>
+        </div>
+        <footer class="flex flex-col-reverse justify-end gap-2 px-6 py-4 sm:flex-row sm:gap-3 sm:px-10 sm:py-5">
+            <button id="keep-editing-po" type="button" class="min-h-10 rounded-lg border border-report-0088ff bg-white px-5 text-sm font-semibold text-report-0088ff hover:bg-light-dodger-blue">Keep Editing</button>
+            <button id="confirm-discard-po" type="button" class="min-h-10 rounded-lg border border-[#ff3b3b] bg-[#ff3b3b] px-5 text-sm font-semibold text-white hover:bg-[#e62e2e]">Discard Changes</button>
+        </footer>
+    </section>
+</div>
+
+<div id="import-csv-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-smoky-black p-3 sm:p-6">
+    <section class="flex max-h-[calc(100dvh-24px)] w-full max-w-222.5 flex-col overflow-y-auto rounded-3xl bg-white border border-kyc-medium-gray sm:overflow-visible" role="dialog" aria-modal="true" aria-labelledby="import-csv-title" aria-describedby="import-csv-description">
+        <header class="flex items-start justify-between gap-4 border-b border-white2 px-5 py-5 sm:px-8 sm:pb-5.5 sm:pt-6.25">
+            <div>
+                <h2 id="import-csv-title" class="m-0 text-[20px] text-dark-black font-bold leading-[1.4]">Import CSV</h2>
+                <p id="import-csv-description" class="mt-2.25 text-sm text-cloud-burst-1">Review details before continuing</p>
+            </div>
+            <button id="close-import-csv" class="h-6 w-6 shrink-0 flex items-center justify-center rounded-full border-2 border-dark-black" type="button" aria-label="Close import dialog">
+                <span class="material-symbols-outlined">close_small</span>
+            </button>
+        </header>
+
+        <div class="px-4.5 py-3.75 sm:px-8 sm:pb-5.75 sm:pt-6">
+            <div id="import-csv-dropzone" class="flex min-h-27.5 flex-col items-center justify-center gap-2 text-center sm:min-h-28.75">
+                <label class="flex cursor-pointer flex-col items-center gap-2" for="import-csv-file">
+                    <span class="material-symbols-outlined text-report-0088ff medium-icon">upload</span>
+                    <span class="text-base font-semibold text-dark-black">Drop as CSV file here or browse</span>
+                    <input id="import-csv-file" class="sr-only" type="file" accept=".csv,text/csv">
+                </label>
+                <span class="text-sm text-cloud-burst-1">CSV only Download template</span>
+            </div>
+
+            <div class="mt-1 grid grid-cols-1 gap-4 rounded-2xl border border-kyc-medium-gray p-3.75 shadow-blue-box sm:grid-cols-2 sm:gap-3 sm:p-5">
+                <div class="min-w-0">
+                    <label id="import-csv-dataset-label" class="mb-2 block text-sm text-popup-label sm:mb-3">Dataset</label>
+                    <div class="import-csv-select relative">
+                        <button class="import-csv-select-button flex min-h-12.5 w-full items-center justify-between gap-3 rounded-lg border border-kyc-medium-gray bg-white px-3.25 text-left text-xs font-semibold text-dark-black" type="button" aria-labelledby="import-csv-dataset-label import-csv-dataset-value" aria-haspopup="listbox" aria-expanded="false" data-dropdown="dataset">
+                            <span id="import-csv-dataset-value">Products</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                        </button>
+                        <ul class="import-csv-menu absolute left-0 top-[calc(100%+5px)] z-10 m-0 max-h-45 w-full list-none overflow-y-auto rounded-lg border border-kyc-medium-gray bg-white p-1.25 shadow-lg hidden" role="listbox" aria-labelledby="import-csv-dataset-label" data-menu="dataset">
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="true">Products</button></li>
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false">Batches</button></li>
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false">Stock movements</button></li>
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false">Suppliers</button></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="min-w-0">
+                    <label id="import-csv-scope-label" class="mb-2 block text-sm text-popup-label sm:mb-3">Scope</label>
+                    <div class="import-csv-select relative">
+                        <button class="import-csv-select-button flex min-h-12.5 w-full items-center justify-between gap-3 rounded-lg border border-kyc-medium-gray bg-white px-3.25 text-left text-xs font-semibold text-dark-black" type="button" aria-labelledby="import-csv-scope-label import-csv-scope-value" aria-haspopup="listbox" aria-expanded="false" data-dropdown="scope">
+                            <span id="import-csv-scope-value">All records</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                        </button>
+                        <ul class="import-csv-menu absolute left-0 top-[calc(100%+5px)] z-10 m-0 max-h-45 w-full list-none overflow-y-auto rounded-lg border border-kyc-medium-gray bg-white p-1.25 shadow-lg hidden" role="listbox" aria-labelledby="import-csv-scope-label" data-menu="scope">
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="true">All records</button></li>
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false">Filtered records</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <p class="mt-3.5 rounded-lg bg-popup-blue px-3.25 py-3.75 border border-kyc-medium-gray text-xs leading-relaxed text-report-0088ff sm:mt-4.75 font-bold">CSV format Your data stays within your inventory workspace</p>
+        </div>
+
+        <footer class="flex justify-end gap-2.5 border-t border-white2 px-4.5 py-3.25 sm:px-8 sm:py-4">
+            <button id="cancel-import-csv" class="min-h-9 min-w-0 flex-1 rounded-lg border border-report-0088ff bg-white px-4 text-sm font-semibold text-report-0088ff sm:min-w-37.5 sm:flex-none shadow-blue-box" type="button">Cancel</button>
+            <button id="confirm-import-csv" class="min-h-9 min-w-0 flex-1 rounded-lg border border-report-0088ff bg-report-0088ff px-4 text-sm font-semibold text-white sm:min-w-37.5 sm:flex-none shadow-blue-box" type="button">Import Rows</button>
+        </footer>
+    </section>
+</div>
+
+<div id="export-csv-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-smoky-black p-3 sm:p-6">
+    <section class="flex max-h-[calc(100dvh-24px)] w-full max-w-222.5 flex-col overflow-y-auto rounded-3xl border border-kyc-medium-gray bg-white sm:overflow-visible" role="dialog" aria-modal="true" aria-labelledby="export-csv-title" aria-describedby="export-csv-description">
+        <header class="flex items-start justify-between gap-4 border-b border-white2 px-5 py-5 sm:px-8 sm:pb-5.5 sm:pt-6.25">
+            <div>
+                <h2 id="export-csv-title" class="m-0 text-[20px] font-bold leading-[1.4] text-dark-black">Export Data</h2>
+                <p id="export-csv-description" class="mt-2.25 text-sm text-cloud-burst-1">Review details before continuing</p>
+            </div>
+            <button id="close-export-csv" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-dark-black" type="button" aria-label="Close export dialog">
+                <span class="material-symbols-outlined">close_small</span>
+            </button>
+        </header>
+
+        <div class="px-4.5 py-3.75 sm:px-8 sm:pb-5.75 sm:pt-6">
+            <div id="export-csv-dropzone" class="flex min-h-27.5 flex-col items-center justify-center gap-2 text-center sm:min-h-28.75">
+                <label class="flex cursor-pointer flex-col items-center gap-2" for="export-csv-file">
+                    <span class="material-symbols-outlined medium-icon text-report-0088ff">upload</span>
+                    <span class="text-base font-semibold text-dark-black">Drop as CSV file here or browse</span>
+                    <input id="export-csv-file" class="mt-1 max-w-full text-xs text-dark-black" type="file" accept=".csv,text/csv">
+                </label>
+                <span class="text-sm text-cloud-burst-1"><span id="export-csv-filename">CSV only</span> <a class="text-cloud-burst-1 no-underline" href="data:text/csv;charset=utf-8,Name%2CCategory%2CQuantity%2CPrice%0A" download="products-template.csv">Download template</a></span>
+            </div>
+
+            <div class="mt-1 grid grid-cols-1 gap-4 rounded-2xl border border-kyc-medium-gray p-3.75 shadow-blue-box sm:grid-cols-2 sm:gap-3 sm:p-5">
+                <div class="min-w-0">
+                    <label id="export-csv-dataset-label" class="mb-2 block text-sm text-popup-label sm:mb-3">Dataset</label>
+                    <div class="export-csv-select relative">
+                        <button class="export-csv-select-button flex min-h-12.5 w-full items-center justify-between gap-3 rounded-lg border border-kyc-medium-gray bg-white px-3.25 text-left text-xs font-semibold text-dark-black" type="button" aria-labelledby="export-csv-dataset-label export-csv-dataset-value" aria-haspopup="listbox" aria-expanded="false" data-dropdown="dataset">
+                            <span id="export-csv-dataset-value">Products</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                        </button>
+                        <ul class="export-csv-menu absolute left-0 top-[calc(100%+5px)] z-10 m-0 max-h-45 w-full list-none overflow-y-auto rounded-lg border border-kyc-medium-gray bg-white p-1.25 shadow-lg hidden" role="listbox" aria-labelledby="export-csv-dataset-label" data-menu="dataset">
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="true">Products</button></li>
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false">Batches</button></li>
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false">Stock movements</button></li>
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false">Suppliers</button></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="min-w-0">
+                    <label id="export-csv-scope-label" class="mb-2 block text-sm text-popup-label sm:mb-3">Scope</label>
+                    <div class="export-csv-select relative">
+                        <button class="export-csv-select-button flex min-h-12.5 w-full items-center justify-between gap-3 rounded-lg border border-kyc-medium-gray bg-white px-3.25 text-left text-xs font-semibold text-dark-black" type="button" aria-labelledby="export-csv-scope-label export-csv-scope-value" aria-haspopup="listbox" aria-expanded="false" data-dropdown="scope">
+                            <span id="export-csv-scope-value">All records</span>
+                            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                        </button>
+                        <ul class="export-csv-menu absolute left-0 top-[calc(100%+5px)] z-10 m-0 max-h-45 w-full list-none overflow-y-auto rounded-lg border border-kyc-medium-gray bg-white p-1.25 shadow-lg hidden" role="listbox" aria-labelledby="export-csv-scope-label" data-menu="scope">
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="true">All records</button></li>
+                            <li><button class="w-full rounded-md px-2.25 py-2.5 text-left text-xs text-dark-black hover:bg-light-dodger-blue focus-visible:outline-2 focus-visible:outline-report-0088ff aria-selected:bg-light-dodger-blue" type="button" role="option" aria-selected="false">Filtered records</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <p class="mt-3.5 rounded-lg border border-kyc-medium-gray bg-popup-blue px-3.25 py-3.75 text-xs font-bold leading-relaxed text-report-0088ff sm:mt-4.75">CSV format Your data stays within your inventory workspace</p>
+        </div>
+
+        <footer class="flex justify-end gap-2.5 border-t border-white2 px-4.5 py-3.25 sm:px-8 sm:py-4">
+            <button id="cancel-export-csv" class="min-h-9 min-w-0 flex-1 rounded-lg border border-report-0088ff bg-white px-4 text-sm font-semibold text-report-0088ff shadow-blue-box sm:min-w-37.5 sm:flex-none" type="button">Cancel</button>
+            <button id="confirm-export-csv" class="min-h-9 min-w-0 flex-1 rounded-lg border border-report-0088ff bg-report-0088ff px-4 text-sm font-semibold text-white shadow-blue-box sm:min-w-37.5 sm:flex-none" type="button">Export CSV</button>
+        </footer>
+    </section>
+</div>
+
+<div id="add-product-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-smoky-black p-3 sm:p-6">
+    <section class="flex max-h-[calc(100dvh-24px)] w-full max-w-190 flex-col overflow-hidden rounded-3xl border border-kyc-medium-gray bg-white" role="dialog" aria-modal="true" aria-labelledby="add-product-title">
+        <header class="flex shrink-0 items-start justify-between gap-4 border-b border-white2 px-5 py-5 sm:px-6 sm:py-5">
+            <div>
+                <h2 id="add-product-title" class="m-0 text-xl font-bold leading-[1.4] text-dark-black">Add Product</h2>
+                <p class="mt-2 text-sm text-cloud-burst-1">Create a complete catalogue record with stock rules</p>
+            </div>
+            <button id="close-add-product" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-dark-black text-dark-black" type="button" aria-label="Close Add Product dialog">
+                <span class="material-symbols-outlined">close_small</span>
+            </button>
+        </header>
+
+        <form id="add-product-form" class="flex min-h-0 flex-1 flex-col overflow-hidden" novalidate>
+            <div class="min-h-0 flex-1 overflow-y-auto no-scrollbar bg-frosted-cloud px-4 py-5 sm:px-6">
+                <div class="mb-4 flex flex-wrap items-center gap-2.5" role="tablist" aria-label="Add product steps">
+                    <button class="add-product-step rounded-lg border border-report-0088ff bg-report-0088ff px-3 py-2 text-xs font-semibold text-white" id="add-product-tab-1" type="button" role="tab" aria-selected="true" aria-controls="add-product-panel-1" data-step="1">1 Product Details</button>
+                    <button class="add-product-step rounded-lg border border-kyc-medium-gray bg-white px-3 py-2 text-xs font-medium text-dark-gray" id="add-product-tab-2" type="button" role="tab" aria-selected="false" aria-controls="add-product-panel-2" data-step="2">2 Pricing and stock rules</button>
+                    <button class="add-product-step rounded-lg border border-kyc-medium-gray bg-white px-3 py-2 text-xs font-medium text-dark-gray" id="add-product-tab-3" type="button" role="tab" aria-selected="false" aria-controls="add-product-panel-3" data-step="3">3 Review</button>
+                </div>
+
+                <section id="add-product-panel-1" class="add-product-panel rounded-2xl border border-kyc-medium-gray bg-white p-4 shadow-blue-box sm:p-5" role="tabpanel" aria-labelledby="add-product-tab-1" data-step-panel="1">
+                    <div class="grid grid-cols-1 gap-x-3 gap-y-2.5 sm:grid-cols-2 sm:gap-y-2">
+                        <label class="block text-sm text-popup-label">Product name <span>*</span>
+                            <input name="product_name" required maxlength="120" placeholder="e.g Crocin" class="mt-3 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black placeholder:text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block text-sm text-popup-label">Strength <span>*</span>
+                            <input name="strength" required maxlength="60" placeholder="500 mg" class="mt-3 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black placeholder:text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block text-sm text-popup-label">Dosage form <span>*</span>
+                            <input name="dosage_form" required maxlength="60" placeholder="Tablet" class="mt-3 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black placeholder:text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block text-sm text-popup-label">Category <span>*</span>
+                            <input name="category" required maxlength="100" placeholder="Analgesic" class="mt-3 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black placeholder:text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block text-sm text-popup-label">Manufacturer <span>*</span>
+                            <input name="manufacturer" required maxlength="120" placeholder="Manufacturer name" class="mt-3 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black placeholder:text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block text-sm text-popup-label">Stock unit <span>*</span>
+                            <input name="stock_unit" required maxlength="40" placeholder="Strip" class="mt-3 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black placeholder:text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block text-sm text-popup-label">Pack Size
+                            <input name="pack_size" maxlength="60" placeholder="Strip of 10 tablets" class="mt-3 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black placeholder:text-dark-black focus:outline-none">
+                        </label>
+                        <label class="block text-sm text-popup-label">Salt composition
+                            <input name="salt_composition" maxlength="120" placeholder="Optional" class="mt-3 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black placeholder:text-dark-black focus:outline-none">
+                        </label>
+                    </div>
+                    <fieldset class="mt-3">
+                        <legend class="mb-3 text-sm text-popup-label">Prescription</legend>
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-dark-gray">
+                            <label class="inline-flex items-center gap-1.5"><input type="radio" name="prescription" value="Required" class="accent-dodger-blue"> Required</label>
+                            <label class="inline-flex items-center gap-1.5"><input type="radio" name="prescription" value="Not Required" class="accent-dodger-blue"> Not Required</label>
+                            <label class="inline-flex items-center gap-1.5"><input type="radio" name="prescription" value="Not Set" class="accent-dodger-blue" checked> Not Set</label>
+                        </div>
+                    </fieldset>
+                </section>
+
+                <section id="add-product-panel-2" class="add-product-panel hidden" role="tabpanel" aria-labelledby="add-product-tab-2" data-step-panel="2" aria-hidden="true">
+                    <h3 class="mb-3 text-base font-bold text-dark-black">Pricing and stock rules</h3>
+                    <div class="rounded-2xl border border-kyc-medium-gray bg-white p-4 shadow-blue-box sm:p-5">
+                        <div class="grid grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2">
+                            <label class="block text-sm text-popup-label">Selling Price
+                                <input name="selling_price" type="number" min="0" step="0.01" value="100" class="mt-2 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black focus:border-dodger-blue focus:outline-none">
+                            </label>
+                            <label class="block text-sm text-popup-label">Reorder level
+                                <input name="reorder_level" type="number" min="0" step="1" value="30" class="mt-2 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black focus:border-dodger-blue focus:outline-none">
+                            </label>
+                            <label class="block text-sm text-popup-label">Critical level
+                                <input name="critical_level" type="number" min="0" step="1" value="5" class="mt-2 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black focus:border-dodger-blue focus:outline-none">
+                            </label>
+                            <label class="block text-sm text-popup-label">Target Stock
+                                <input name="target_stock" type="number" min="0" step="1" value="100" class="mt-2 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black focus:border-dodger-blue focus:outline-none">
+                            </label>
+                        </div>
+                        <label class="mt-2 inline-flex items-center gap-2 text-sm text-dark-gray">
+                            <input id="add-opening-stock-toggle" name="add_opening_stock" type="checkbox" class="accent-dodger-blue">
+                            Add Opening Stock now
+                        </label>
+                        <div id="add-opening-stock-field" class="mt-3 hidden">
+                            <label class="block text-xs text-popup-label">Opening stock
+                                <input name="opening_stock" type="number" min="0" step="1" placeholder="Enter quantity" class="mt-2 h-10.75 w-full rounded-lg border border-kyc-medium-gray bg-white px-3 text-xs text-dark-black focus:border-dodger-blue focus:outline-none">
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="add-product-panel-3" class="add-product-panel hidden" role="tabpanel" aria-labelledby="add-product-tab-3" data-step-panel="3" aria-hidden="true">
+                    <h3 class="mb-3 text-base font-bold text-dark-black">Product Details</h3>
+                    <dl class="space-y-3 text-sm">
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Product name</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="product_name">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Strength</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="strength">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Dosage</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="dosage_form">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Category</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="category">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Manufacturer</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="manufacturer">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Pack Size</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="pack_size">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Pack Type</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="stock_unit">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Storage Condition</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="storage_condition">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Prescription</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="prescription">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Target Audience</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="target_audience">—</dd></div>
+                    </dl>
+
+                    <h3 class="mb-3 mt-4 text-base font-bold text-dark-black">Pricing and Stock Rules</h3>
+                    <dl class="space-y-3 text-sm">
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Selling Price</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="selling_price">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Reorder Level</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="reorder_level">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Current Stock</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="current_stock">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Critical Level</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="critical_level">—</dd></div>
+                        <div class="flex items-start justify-between gap-4"><dt class="text-popup-light-gray">Target Stock</dt><dd class="m-0 text-right font-medium text-dark-black" data-review="target_stock">—</dd></div>
+                        <div class="flex items-center justify-between gap-4"><dt class="text-popup-light-gray">Auto Reorder</dt><dd class="m-0 rounded-lg bg-light-mint-green px-2.5 py-1.5 text-right text-[10px] font-semibold text-green" data-review="auto_reorder">—</dd></div>
+                    </dl>
+                </section>
+            </div>
+
+            <footer class="shrink-0 border-t border-white2 px-4.5 py-3.25 sm:px-6 sm:py-4">
+                <div id="add-product-step-actions" class="flex justify-end gap-2.5">
+                    <button id="add-product-back" class="min-h-9 min-w-0 flex-1 rounded-lg border border-report-0088ff bg-white px-4 text-sm font-semibold text-cloud-burst-1 shadow-blue-box sm:min-w-40 sm:flex-none" type="button">Back</button>
+                    <button id="add-product-continue" class="min-h-9 min-w-0 flex-1 rounded-lg border border-report-0088ff bg-report-0088ff px-4 text-sm font-semibold text-white shadow-blue-box sm:min-w-40 sm:flex-none" type="button">Continue</button>
+                </div>
+                <div id="add-product-review-actions" class="hidden flex justify-end gap-2.5">
+                    <button id="add-product-cancel" class="min-h-9 min-w-0 flex-1 rounded-lg border border-report-0088ff bg-white px-4 text-sm font-semibold text-cloud-burst-1 shadow-blue-box sm:min-w-40 sm:flex-none" type="button">Cancel</button>
+                    <button id="add-product-save" class="min-h-9 min-w-0 flex-1 rounded-lg border border-report-0088ff bg-report-0088ff px-4 text-sm font-semibold text-white shadow-blue-box sm:min-w-40 sm:flex-none" type="button">Save Product</button>
+                </div>
+            </footer>
+        </form>
+    </section>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    window.MEDICINE_MAP = {{ medicine_map|safe }};
-    window.PHARMACY_MEDICINES = [
+<script id="pharmacy-page-data" type="application/json">
+{
+    "medicine_map": {{ medicine_map|safe }},
+    "pharmacy_medicines": [
         {% for med in pharmacy_medicines %}
             {
-                id: {{ med.id }},
-                category: "{{ med.category|escapejs }}",
-                name: "{{ med.name|escapejs }}",
-                type: "{{ med.type|escapejs }}",
-                quantity: "{{ med.quantity|escapejs }}",
-                price: "{{ med.price|escapejs }}"
+                "id": {{ med.id }},
+                "category": "{{ med.category|escapejs }}",
+                "name": "{{ med.name|escapejs }}",
+                "type": "{{ med.type|escapejs }}",
+                "quantity": "{{ med.quantity|escapejs }}",
+                "price": "{{ med.price|escapejs }}"
             }{% if not forloop.last %},{% endif %}
         {% endfor %}
-    ];
+    ]
+}
 </script>
-
-<script>
-/* =============================================
-   INVENTORY PAGE — TABS, FILTER, SEARCH & PAGINATION
-   ============================================= */
-(function () {
-    /* ---- Helpers ---- */
-    function qs(sel, ctx) { return (ctx || document).querySelector(sel); }
-    function qsa(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
-
-    /* ============================================================
-       1. TAB SWITCHING
-       ============================================================ */
-    var tabBtns  = qsa('.inv-tab');
-    var tabPanels = qsa('.inv-tab-panel');
-
-    tabBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var target = this.dataset.tab;
-            // Deactivate all
-            tabBtns.forEach(function(b) {
-                b.classList.remove('active-inv-tab', 'text-dodger-blue', 'border-dodger-blue');
-                b.classList.add('text-medium-gray', 'border-transparent');
-            });
-            tabPanels.forEach(function(p) { p.classList.add('hidden'); });
-            // Activate selected
-            this.classList.add('active-inv-tab', 'text-dodger-blue', 'border-dodger-blue');
-            this.classList.remove('text-medium-gray', 'border-transparent');
-            var panel = qs('#inv-tab-' + target);
-            if (panel) panel.classList.remove('hidden');
-        });
-    });
-
-    /* ============================================================
-       2. INVENTORY PAGINATION + FILTER + SEARCH
-       ============================================================ */
-    var allRows      = qsa('.inv-row');
-    var tbody        = qs('#inv-tbody');
-    var searchInput  = qs('#inv-search');
-    var pageSizeEl   = qs('#inv-page-size');
-    var prevBtn      = qs('#inv-prev-btn');
-    var nextBtn      = qs('#inv-next-btn');
-    var pageInfo     = qs('#inv-pagination-info');
-    var pageIndicator= qs('#inv-page-indicator');
-
-    var currentPage     = 1;
-    var pageSize        = 5;
-    var activeFilter    = 'all';
-    var searchQuery     = '';
-    var filteredRows    = allRows.slice();
-
-    /* Auto-compute status from qty for each row & update badges/cells */
-    function getStatusFromQty(qty) {
-        var n = parseInt(qty, 10);
-        if (isNaN(n) || qty === '' || n === 0) return 'out_of_stock';
-        if (n <= 5)  return 'critical';
-        if (n <= 20) return 'low';
-        return 'healthy';
-    }
-
-    var statusConfig = {
-        out_of_stock: { label: 'Out of Stock', badgeCls: 'bg-[#FFE4E4] text-[#C0392B]',   timeCls: 'text-[#C0392B]' },
-        critical:     { label: 'Critical',      badgeCls: 'bg-[#FFE4E4] text-[#C0392B]',   timeCls: 'text-[#C0392B]' },
-        low:          { label: 'Low',           badgeCls: 'bg-[#FFF3E0] text-[#E67E22]',   timeCls: 'text-[#E67E22]' },
-        healthy:      { label: 'Healthy',       badgeCls: 'bg-[#E8F5E9] text-[#27AE60]',   timeCls: 'text-charcoal-black' },
-    };
-
-    allRows.forEach(function(r) {
-        var qty = r.dataset.qty || '0';
-        var status = r.dataset.filterStatus || getStatusFromQty(qty);
-        r.dataset.filterStatus = status;
-
-        var cfg = statusConfig[status];
-        // Update status badge
-        var badge = r.querySelector('.inv-status-badge');
-        if (badge) {
-            badge.className = 'inv-status-badge inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold ' + cfg.badgeCls;
-            badge.textContent = cfg.label;
-        }
-        // Update time cell color
-        var timeCell = r.querySelector('.inv-time-cell');
-        if (timeCell) {
-            timeCell.className = 'inv-time-cell text-sm font-semibold ' + cfg.timeCls;
-        }
-    });
-
-    /* Compute status counts */
-    var counts = { all: allRows.length, healthy: 0, low: 0, critical: 0, out_of_stock: 0, archived: 0 };
-    allRows.forEach(function(r) {
-        var s = r.dataset.filterStatus || 'healthy';
-        if (counts[s] !== undefined) counts[s]++;
-    });
-    // Update badge numbers
-    var filterIdMap = { all: 'filter-all-count', healthy: 'filter-healthy-count', low: 'filter-low-count', critical: 'filter-critical-count', out_of_stock: 'filter-out-count', archived: 'filter-archived-count' };
-    Object.keys(filterIdMap).forEach(function(key) {
-        var el = qs('#' + filterIdMap[key]);
-        if (el) el.textContent = counts[key] || 0;
-    });
-    // Update summary cards
-    var lowCritEl = qs('#low-critical-count');
-    if (lowCritEl) lowCritEl.textContent = (counts.low || 0) + (counts.critical || 0);
-    var outEl = qs('#out-of-stock-count');
-    if (outEl) outEl.textContent = counts.out_of_stock || 0;
-
-    /* Replenishment alert */
-    var alertEl  = qs('#replenishment-alert');
-    var alertMsg = qs('#replenishment-msg');
-    var needsAlert = (counts.low + counts.critical + counts.out_of_stock);
-    if (alertEl) {
-        if (!needsAlert) {
-            alertEl.classList.add('hidden');
-        } else if (alertMsg) {
-            alertMsg.textContent = needsAlert + ' Products need replenishment';
-        }
-    }
-
-    /* Stock date */
-    var dateEl = qs('#inv-date-text');
-    if (dateEl) {
-        var now = new Date();
-        dateEl.textContent = now.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) +
-            ' ' + now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true}).toUpperCase();
-    }
-
-    function applyFiltersAndSearch() {
-        var q = searchQuery.toLowerCase().trim();
-        filteredRows = allRows.filter(function(r) {
-            var matchFilter = activeFilter === 'all' || r.dataset.filterStatus === activeFilter;
-            var matchSearch = !q ||
-                (r.dataset.name  && r.dataset.name.includes(q)) ||
-                (r.dataset.category && r.dataset.category.includes(q));
-            return matchFilter && matchSearch;
-        });
-        currentPage = 1;
-        renderPage();
-    }
-
-    function renderPage() {
-        var total     = filteredRows.length;
-        var totalPages = Math.max(1, Math.ceil(total / pageSize));
-        if (currentPage > totalPages) currentPage = totalPages;
-
-        var start = (currentPage - 1) * pageSize;
-        var end   = Math.min(start + pageSize, total);
-
-        // Hide all rows, show only current page slice
-        allRows.forEach(function(r) { r.classList.add('hidden'); });
-        filteredRows.forEach(function(r, i) {
-            if (i >= start && i < end) r.classList.remove('hidden');
-        });
-
-        if (pageInfo) pageInfo.textContent = total === 0
-            ? 'No results'
-            : 'Showing ' + (start + 1) + '\u2013' + end + ' of ' + total;
-        if (pageIndicator) pageIndicator.textContent = currentPage + '/' + totalPages;
-        if (prevBtn) prevBtn.disabled = currentPage <= 1;
-        if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
-    }
-
-    /* Filter button clicks */
-    qsa('.inv-filter-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            qsa('.inv-filter-btn').forEach(function(b) {
-                b.classList.remove('active-inv-filter', 'bg-report-0088ff', 'text-white');
-                b.classList.add('border', 'border-kyc-medium-gray', 'text-dark-gray');
-            });
-            this.classList.add('active-inv-filter', 'bg-report-0088ff', 'text-white');
-            this.classList.remove('border', 'border-kyc-medium-gray', 'text-dark-gray');
-            activeFilter = this.dataset.filter;
-            applyFiltersAndSearch();
-        });
-    });
-
-    /* External filter trigger (from alert buttons) */
-    window.filterInventoryByStatus = function(status) {
-        var map = { low: 'low', expiry: 'all' };
-        var target = map[status] || 'all';
-        var btn = qs('.inv-filter-btn[data-filter="' + target + '"]');
-        if (btn) btn.click();
-    };
-
-    /* Search */
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            searchQuery = this.value;
-            applyFiltersAndSearch();
-        });
-    }
-
-    /* Page size */
-    if (pageSizeEl) {
-        pageSizeEl.addEventListener('change', function() {
-            pageSize = parseInt(this.value, 10) || 5;
-            currentPage = 1;
-            renderPage();
-        });
-    }
-
-    /* Pagination buttons */
-    if (prevBtn) prevBtn.addEventListener('click', function() { if (currentPage > 1) { currentPage--; renderPage(); } });
-    if (nextBtn) nextBtn.addEventListener('click', function() {
-        var total = filteredRows.length;
-        var totalPages = Math.ceil(total / pageSize);
-        if (currentPage < totalPages) { currentPage++; renderPage(); }
-    });
-
-    /* ============================================================
-       3. MORE DROPDOWN (per row)
-       ============================================================ */
-    document.addEventListener('click', function(e) {
-        var btn = e.target.closest('.inv-more-btn');
-        if (btn) {
-            var wrap = btn.closest('.inv-more-wrapper');
-            var dropdown = wrap && wrap.querySelector('.inv-more-dropdown');
-            // Close all others
-            qsa('.inv-more-dropdown').forEach(function(d) {
-                if (d !== dropdown) d.classList.add('hidden');
-            });
-            if (dropdown) dropdown.classList.toggle('hidden');
-            e.stopPropagation();
-            return;
-        }
-        // Click outside → close all
-        qsa('.inv-more-dropdown').forEach(function(d) { d.classList.add('hidden'); });
-    });
-
-    /* Initial render */
-    renderPage();
-
-    var batchRows = qsa('.batch-row');
-    var batchSearch = qs('#batch-search');
-    var batchEmptyState = qs('#batch-empty-state');
-    var activeBatchFilter = 'all';
-
-    function applyBatchFilters() {
-        var query = batchSearch ? batchSearch.value.toLowerCase().trim() : '';
-        var visibleCount = 0;
-
-        batchRows.forEach(function(row) {
-            var statuses = (row.dataset.batchStatus || '').split(' ');
-            var matchesFilter = activeBatchFilter === 'all' || statuses.indexOf(activeBatchFilter) !== -1;
-            var matchesSearch = !query || (row.dataset.search || '').toLowerCase().includes(query);
-            var isVisible = matchesFilter && matchesSearch;
-            row.classList.toggle('hidden', !isVisible);
-            if (isVisible) visibleCount++;
-        });
-
-        if (batchEmptyState) batchEmptyState.classList.toggle('hidden', visibleCount > 0);
-    }
-
-    qsa('.batch-filter-btn').forEach(function(button) {
-        button.addEventListener('click', function() {
-            qsa('.batch-filter-btn').forEach(function(filterButton) {
-                filterButton.classList.remove('bg-report-0088ff', 'text-white');
-                filterButton.classList.add('border', 'border-[#E2E8F0]', 'text-dark-gray');
-                filterButton.setAttribute('aria-pressed', 'false');
-            });
-
-            this.classList.add('bg-report-0088ff', 'text-white');
-            this.classList.remove('border', 'border-[#E2E8F0]', 'text-dark-gray');
-            this.setAttribute('aria-pressed', 'true');
-            activeBatchFilter = this.dataset.filter;
-            applyBatchFilters();
-        });
-    });
-
-    if (batchSearch) batchSearch.addEventListener('input', applyBatchFilters);
-    applyBatchFilters();
-
-    var movementRows = qsa('.movement-row');
-    var movementTypeFilter = qs('#movement-type-filter');
-    var movementStartDate = qs('#movement-start-date');
-    var movementEndDate = qs('#movement-end-date');
-    var movementEmptyState = qs('#movement-empty-state');
-
-    function filterMovements() {
-        var type = movementTypeFilter ? movementTypeFilter.value : 'all';
-        var startDate = movementStartDate ? movementStartDate.value : '';
-        var endDate = movementEndDate ? movementEndDate.value : '';
-        var visibleCount = 0;
-
-        movementRows.forEach(function(row) {
-            var date = row.dataset.date || '';
-            var matchesType = type === 'all' || row.dataset.type === type;
-            var matchesDate = (!startDate || date >= startDate) && (!endDate || date <= endDate);
-            var isVisible = matchesType && matchesDate;
-            row.classList.toggle('hidden', !isVisible);
-            if (isVisible) visibleCount++;
-        });
-
-        if (movementEmptyState) movementEmptyState.classList.toggle('hidden', visibleCount > 0);
-    }
-
-    if (movementTypeFilter) movementTypeFilter.addEventListener('change', filterMovements);
-    if (movementStartDate) movementStartDate.addEventListener('change', filterMovements);
-    if (movementEndDate) movementEndDate.addEventListener('change', filterMovements);
-
-    var movementExportButton = qs('#movement-export-btn');
-    if (movementExportButton) movementExportButton.addEventListener('click', function() {
-        var movementTable = qs('#movement-tbody');
-        var headings = movementTable ? movementTable.closest('table').querySelectorAll('thead th') : [];
-        var csvRows = [Array.from(headings).map(function(cell) {
-            return '"' + cell.textContent.trim().replace(/"/g, '""') + '"';
-        }).join(',')];
-
-        movementRows.forEach(function(row) {
-            if (row.classList.contains('hidden')) return;
-            csvRows.push(Array.from(row.cells).map(function(cell) {
-                return '"' + cell.textContent.trim().replace(/"/g, '""') + '"';
-            }).join(','));
-        });
-
-        var blob = new Blob([csvRows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-        var downloadUrl = URL.createObjectURL(blob);
-        var downloadLink = document.createElement('a');
-        downloadLink.href = downloadUrl;
-        downloadLink.download = 'stock-movements.csv';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        downloadLink.remove();
-        URL.revokeObjectURL(downloadUrl);
-    });
-
-    filterMovements();
-
-    var supplierRows = qsa('.supplier-row');
-    var supplierSearch = qs('#supplier-search');
-    var supplierStatusFilter = qs('#supplier-status-filter');
-    var supplierEmptyState = qs('#supplier-empty-state');
-
-    function filterSuppliers() {
-        var query = supplierSearch ? supplierSearch.value.toLowerCase().trim() : '';
-        var status = supplierStatusFilter ? supplierStatusFilter.value : 'all';
-        var visibleCount = 0;
-
-        supplierRows.forEach(function(row) {
-            var matchesSearch = !query || (row.dataset.search || '').toLowerCase().includes(query);
-            var matchesStatus = status === 'all' || row.dataset.status === status;
-            var isVisible = matchesSearch && matchesStatus;
-            row.classList.toggle('hidden', !isVisible);
-            if (isVisible) visibleCount++;
-        });
-
-        if (supplierEmptyState) supplierEmptyState.classList.toggle('hidden', visibleCount > 0);
-    }
-
-    if (supplierSearch) supplierSearch.addEventListener('input', filterSuppliers);
-    if (supplierStatusFilter) supplierStatusFilter.addEventListener('change', filterSuppliers);
-    filterSuppliers();
-
-    var settingsPanel = qs('#inv-tab-settings');
-    var storageLocations = qs('#storage-locations');
-    var storageLocationTemplate = qs('#storage-location-template');
-    var storageLocationForm = qs('#storage-location-form');
-    var newStorageLocation = qs('#new-storage-location');
-    var storageLocationError = qs('#storage-location-error');
-    var settingsSaveStatus = qs('#settings-save-status');
-
-    function setNotificationState(button, enabled) {
-        var knob = button.querySelector('span');
-        button.setAttribute('aria-checked', String(enabled));
-        button.classList.toggle('bg-report-0088ff', enabled);
-        button.classList.toggle('bg-[#CBD5E1]', !enabled);
-        if (knob) {
-            knob.classList.toggle('right-0.5', enabled);
-            knob.classList.toggle('left-0.5', !enabled);
-        }
-    }
-
-    function setLocationDisabled(row, disabled) {
-        row.dataset.disabled = String(disabled);
-        row.classList.toggle('opacity-50', disabled);
-        var button = row.querySelector('.location-disable');
-        if (button) {
-            button.setAttribute('aria-pressed', String(disabled));
-            button.setAttribute('aria-label', (disabled ? 'Enable ' : 'Disable ') + row.querySelector('.location-name').textContent);
-        }
-    }
-
-    function getSettingsSnapshot() {
-        return {
-            reorder: qs('#setting-reorder-level').value,
-            critical: qs('#setting-critical-level').value,
-            target: qs('#setting-target-stock').value,
-            expiryDays: qs('.settings-expiry-option[aria-pressed="true"]').dataset.days,
-            notifications: qsa('.settings-toggle').map(function(button) {
-                return button.getAttribute('aria-checked') === 'true';
-            }),
-            locations: qsa('.storage-location-row', storageLocations).map(function(row) {
-                return {
-                    name: row.querySelector('.location-name').textContent,
-                    disabled: row.dataset.disabled === 'true'
-                };
-            })
-        };
-    }
-
-    function renderStorageLocations(locations) {
-        storageLocations.textContent = '';
-        locations.forEach(function(location) {
-            var row = storageLocationTemplate.content.firstElementChild.cloneNode(true);
-            var name = row.querySelector('.location-name');
-            name.textContent = location.name;
-            row.querySelector('.location-edit-input').setAttribute('aria-label', 'Edit ' + location.name);
-            row.querySelector('.location-edit').setAttribute('aria-label', 'Edit ' + location.name);
-            row.querySelector('.location-save').setAttribute('aria-label', 'Save ' + location.name);
-            storageLocations.appendChild(row);
-            setLocationDisabled(row, location.disabled);
-        });
-    }
-
-    function restoreSettings(settings) {
-        qs('#setting-reorder-level').value = settings.reorder;
-        qs('#setting-critical-level').value = settings.critical;
-        qs('#setting-target-stock').value = settings.target;
-        settingsPanel.querySelectorAll('.settings-expiry-option').forEach(function(button) {
-            var selected = button.dataset.days === settings.expiryDays;
-            button.setAttribute('aria-pressed', String(selected));
-            button.classList.toggle('bg-[#E8F3FF]', selected);
-            button.classList.toggle('text-dodger-blue', selected);
-            button.classList.toggle('bg-[#F1F5F9]', !selected);
-            button.classList.toggle('text-dark-gray', !selected);
-        });
-        settingsPanel.querySelectorAll('.settings-toggle').forEach(function(button, index) {
-            setNotificationState(button, settings.notifications[index]);
-        });
-        renderStorageLocations(settings.locations);
-    }
-
-    settingsPanel.querySelectorAll('.settings-expiry-option').forEach(function(button) {
-        button.addEventListener('click', function() {
-            settingsPanel.querySelectorAll('.settings-expiry-option').forEach(function(option) {
-                var selected = option === button;
-                option.setAttribute('aria-pressed', String(selected));
-                option.classList.toggle('bg-[#E8F3FF]', selected);
-                option.classList.toggle('text-dodger-blue', selected);
-                option.classList.toggle('bg-[#F1F5F9]', !selected);
-                option.classList.toggle('text-dark-gray', !selected);
-            });
-        });
-    });
-
-    settingsPanel.querySelectorAll('.settings-toggle').forEach(function(button) {
-        button.addEventListener('click', function() {
-            setNotificationState(this, this.getAttribute('aria-checked') !== 'true');
-        });
-    });
-
-    storageLocations.addEventListener('click', function(event) {
-        var button = event.target.closest('button');
-        if (!button) return;
-
-        var row = button.closest('.storage-location-row');
-        if (!row) return;
-
-        if (button.classList.contains('location-edit')) {
-            var editor = row.querySelector('.location-editor');
-            var input = row.querySelector('.location-edit-input');
-            input.value = row.querySelector('.location-name').textContent;
-            row.querySelector('.location-name').classList.add('hidden');
-            editor.classList.remove('hidden');
-            button.classList.add('hidden');
-            row.querySelector('.location-save').classList.remove('hidden');
-            input.focus();
-        } else if (button.classList.contains('location-save')) {
-            var locationInput = row.querySelector('.location-edit-input');
-            var updatedName = locationInput.value.trim();
-            if (!updatedName) {
-                locationInput.focus();
-                return;
-            }
-            var duplicate = qsa('.storage-location-row', storageLocations).some(function(otherRow) {
-                return otherRow !== row && otherRow.querySelector('.location-name').textContent.toLowerCase() === updatedName.toLowerCase();
-            });
-            if (duplicate) {
-                storageLocationError.classList.remove('hidden');
-                locationInput.focus();
-                return;
-            }
-            storageLocationError.classList.add('hidden');
-            row.querySelector('.location-name').textContent = updatedName;
-            row.querySelector('.location-name').classList.remove('hidden');
-            row.querySelector('.location-editor').classList.add('hidden');
-            row.querySelector('.location-edit').classList.remove('hidden');
-            button.classList.add('hidden');
-            row.querySelector('.location-edit').setAttribute('aria-label', 'Edit ' + updatedName);
-            row.querySelector('.location-disable').setAttribute('aria-label', 'Disable ' + updatedName);
-        } else if (button.classList.contains('location-disable')) {
-            setLocationDisabled(row, row.dataset.disabled !== 'true');
-        }
-    });
-
-    qs('#add-storage-location').addEventListener('click', function() {
-        storageLocationForm.classList.remove('hidden');
-        this.classList.add('hidden');
-        newStorageLocation.focus();
-    });
-
-    qs('#cancel-storage-location').addEventListener('click', function() {
-        storageLocationForm.reset();
-        storageLocationForm.classList.add('hidden');
-        qs('#add-storage-location').classList.remove('hidden');
-        storageLocationError.classList.add('hidden');
-    });
-
-    storageLocationForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        var locationName = newStorageLocation.value.trim();
-        var exists = qsa('.storage-location-row', storageLocations).some(function(row) {
-            return row.querySelector('.location-name').textContent.toLowerCase() === locationName.toLowerCase();
-        });
-        if (!locationName || exists) {
-            storageLocationError.classList.toggle('hidden', !exists);
-            newStorageLocation.focus();
-            return;
-        }
-
-        storageLocationError.classList.add('hidden');
-        var row = storageLocationTemplate.content.firstElementChild.cloneNode(true);
-        row.querySelector('.location-name').textContent = locationName;
-        row.querySelector('.location-edit-input').setAttribute('aria-label', 'Edit ' + locationName);
-        row.querySelector('.location-edit').setAttribute('aria-label', 'Edit ' + locationName);
-        row.querySelector('.location-save').setAttribute('aria-label', 'Save ' + locationName);
-        row.querySelector('.location-disable').setAttribute('aria-label', 'Disable ' + locationName);
-        storageLocations.appendChild(row);
-        this.reset();
-        this.classList.add('hidden');
-        qs('#add-storage-location').classList.remove('hidden');
-    });
-
-    var savedSettings = getSettingsSnapshot();
-    qs('#save-inventory-settings').addEventListener('click', function() {
-        var numericInputs = [
-            qs('#setting-reorder-level'),
-            qs('#setting-critical-level'),
-            qs('#setting-target-stock')
-        ];
-        var invalidInput = numericInputs.find(function(input) {
-            return !input.checkValidity();
-        });
-        if (invalidInput) {
-            invalidInput.reportValidity();
-            return;
-        }
-        savedSettings = getSettingsSnapshot();
-        settingsSaveStatus.textContent = 'Settings saved.';
-    });
-    qs('#discard-inventory-settings').addEventListener('click', function() {
-        restoreSettings(savedSettings);
-        settingsSaveStatus.textContent = 'Changes discarded.';
-    });
-})();
-</script>
-
+<script src="{% static 'js/pharmacy-inventory.js' %}"></script>
 <script src="/static/js/tabs.js"></script>
 <script src="/static/js/common-services.js"></script>
 <script src="/static/js/table-pagination.js"></script>
