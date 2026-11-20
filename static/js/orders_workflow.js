@@ -33,7 +33,7 @@
       paymentStatus: "Refund Pending",
       paymentMethod: "UPI",
       status: "Cancelled",
-      statusBadgeClass: "bg-gray-100 text-gray-700 border-gray-200",
+      statusBadgeClass: "bg-[#FFD7D7] text-[#FF383C] border-[#FFD7D7]",
       tab: "cancelled",
       needsAttention: true,
       attentionType: "prescription",
@@ -885,30 +885,18 @@
       // Status badge styling
       let statusBadge = '';
       if (order.status === 'Cancelled') {
-        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">${order.status}</span>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFD7D7] text-[#FF383C] border border-[#FFD7D7]">${order.status}</span>`;
       } else if (order.status === 'Collected' || order.status === 'Delivered') {
         statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">${order.status}</span>`;
       } else if (order.status === 'Out for Delivery') {
-        const alertIcon = order.hasAlert ? `<span class="material-symbols-outlined text-[14px] text-amber-600">warning</span>` : '';
-        statusBadge = `<div class="flex items-center gap-1">
-          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
-            ${order.status}
-          </span>
-          ${alertIcon}
-        </div>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">${order.status}</span>`;
       } else if (order.status === 'Ready') {
         statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-50 text-cyan-700 border border-cyan-200">${order.status}</span>`;
       } else if (order.status === 'Packing') {
         statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">${order.status}</span>`;
       } else {
         // Pending
-        const alertIcon = order.hasAlert ? `<span class="material-symbols-outlined text-[14px] text-amber-600">warning</span>` : '';
-        statusBadge = `<div class="flex items-center gap-1">
-          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-            ${order.status}
-          </span>
-          ${alertIcon}
-        </div>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">${order.status}</span>`;
       }
 
       // Actions column button
