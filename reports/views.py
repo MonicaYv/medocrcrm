@@ -202,11 +202,17 @@ def _pharmacy_reports_context(request, user):
         bids.filter(bid_status=PharmacyBidStatus.ACCEPTED).values_list("order_id", flat=True)
     )
 
-    orders = UserPurchase.objects.filter(
-        Q(assigned_pharmacy=pharmacy_profile) | Q(bids__pharmacy=pharmacy_profile),
-        created_at__date__gte=start_date,
-        created_at__date__lte=end_date,
-    ).distinct()
+    matching_order_ids = (
+        UserPurchase.objects.filter(
+            Q(assigned_pharmacy=pharmacy_profile) | Q(bids__pharmacy=pharmacy_profile),
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date,
+        )
+        .values("id")
+        .distinct()
+    )
+    orders = UserPurchase.objects.filter(id__in=matching_order_ids)
+    total_orders_count = orders.count()
     total_orders_count = orders.count()
     assigned_orders = UserPurchase.objects.filter(
         assigned_pharmacy=pharmacy_profile,
