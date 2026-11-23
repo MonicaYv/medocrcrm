@@ -78,9 +78,7 @@ def dashboard_login_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         user_id = request.session.get('user_id')
-        user_type = request.session.get('user_type')
-
-        if not user_id or not user_type:
+        if not user_id:
             return redirect('login')
 
         request.user_obj = User.objects.filter(id=user_id).first()
@@ -88,6 +86,10 @@ def dashboard_login_required(view_func):
         if not request.user_obj:
             request.session.flush()
             return redirect('login')
+
+        # The database is authoritative; older signup flows did not always
+        # populate user_type in the session.
+        request.session['user_type'] = (request.user_obj.user_type or '').strip().lower()
 
         return view_func(request, *args, **kwargs)
 

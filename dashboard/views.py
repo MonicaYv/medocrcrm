@@ -591,7 +591,9 @@ def dashboard_home(request):
                 print("ROLE =", contact_person.role)
             else:
                 print("CONTACT PERSON NOT FOUND")
-            pharmacy_profile = PharmacyProfile.objects.get(user=user)
+            pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+            if not pharmacy_profile:
+                return redirect("pharmacy_kyc")
             today = timezone.localdate()
 
             placed_bid_order_ids = PharmacyBidding.objects.filter(
@@ -902,7 +904,7 @@ def dashboard_home(request):
         elif user_type == 'lab':
             lab_profile = LabProfile.objects.filter(user=user).first()
             if not lab_profile:
-                return render(request, "dashboard/not_found.html")
+                return redirect("lab_kyc")
             today = timezone.localdate()
             date_filter = request.GET.get("date_filter", "today")
 
@@ -1118,9 +1120,9 @@ def dashboard_home(request):
             doctor_profile = DoctorProfile.objects.filter(
                 user=user
             ).first()
-            print("CLINIC PHOTO =", doctor_profile.clinic_photo_path)
             if not doctor_profile:
-                return render(request, "dashboard/not_found.html")
+                return redirect("doctor_kyc")
+            print("CLINIC PHOTO =", doctor_profile.clinic_photo_path)
 
             today = timezone.localdate()
             date_filter, start_date, end_date = (
@@ -1384,7 +1386,7 @@ def dashboard_home(request):
                 "hospital_service",
             ).first()
             if not hospital_profile:
-                return render(request, "dashboard/not_found.html", context)
+                return redirect("hospital_kyc")
 
             contact_person = ContactPerson.objects.filter(
                 profile_type="hospital",

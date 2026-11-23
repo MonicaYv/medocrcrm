@@ -16,11 +16,11 @@
 
         <div class="flex flex-col lg:flex-row lg:items-end justify-between w-full gap-3 sm:gap-4 mt-6 sm:mt-8">
             <div class="tabs-section flex gap-3 sm:gap-4 whitespace-nowrap pt-2 lg:pt-0 flex-1 min-w-0 overflow-x-auto lg:overflow-visible">
-                <button class="tab-btn-rewards active-tab-rewards font-semibold border-b-2 border-dark-blue text-dark-gray text-sm sm:text-18-nr py-1.5 px-4 cursor-pointer"
+                <button class="tab-btn-rewards {% if active_history_status == 'completed' %}active-tab-rewards font-semibold border-b-2 border-dark-blue text-dark-gray{% else %}font-medium text-light-gray1{% endif %} text-sm sm:text-18-nr py-1.5 px-4 cursor-pointer"
                         data-tab="completed">
                     Completed
                 </button>
-                <button class="tab-btn-rewards font-medium text-sm sm:text-18-nr py-1.5 px-4 cursor-pointer text-light-gray1"
+                <button class="tab-btn-rewards {% if active_history_status == 'cancelled' %}active-tab-rewards font-semibold border-b-2 border-dark-blue text-dark-gray{% else %}font-medium text-light-gray1{% endif %} text-sm sm:text-18-nr py-1.5 px-4 cursor-pointer"
                         data-tab="cancelled">
                     Cancelled
                 </button>
@@ -37,13 +37,20 @@
             </div>
         </div>
 
-        <div class="tab-content completed">
+        <div class="tab-content completed {% if active_history_status != 'completed' %}hidden{% endif %}">
             {% for order in completed_orders %}
                 {% include "history/pharmacy/partials/history_order_card.html" with order=order history_status="completed" %}
                 {% include "history/pharmacy/partials/history_order_popup.html" with order=order history_status="completed" %}
             {% empty %}
                 <p class="history-empty text-center text-gray-400 mt-8">No completed orders found</p>
             {% endfor %}
+            {% if completed_page.paginator.num_pages > 1 %}
+            <nav class="mt-6 flex items-center justify-center gap-3" aria-label="Completed bookings pagination">
+                {% if completed_page.has_previous %}<a class="rounded-lg border px-3 py-2 text-sm cursor-pointer" href="?status=completed&amp;completed_page={{ completed_page.previous_page_number }}">Previous</a>{% endif %}
+                <span class="text-sm text-gray-600">Page {{ completed_page.number }} of {{ completed_page.paginator.num_pages }}</span>
+                {% if completed_page.has_next %}<a class="rounded-lg border px-3 py-2 text-sm cursor-pointer" href="?status=completed&amp;completed_page={{ completed_page.next_page_number }}">Next</a>{% endif %}
+            </nav>
+            {% endif %}
         </div>
 
         <!-- <div class="tab-content cancelled hidden">
@@ -53,13 +60,20 @@
                 <p class="history-empty text-center text-gray-400 mt-8">No cancelled orders found</p>
             {% endfor %}
         </div> -->
-        <div class="tab-content cancelled hidden">
+        <div class="tab-content cancelled {% if active_history_status != 'cancelled' %}hidden{% endif %}">
             {% for order in cancelled_orders %}
                 {% include "history/pharmacy/partials/history_order_card.html" with order=order history_status="cancelled" %}
                 {% include "history/pharmacy/partials/history_order_popup.html" with order=order history_status="cancelled" %}
             {% empty %}
                 <p class="history-empty text-center text-gray-400 mt-8">No cancelled orders found</p>
             {% endfor %}
+            {% if cancelled_page.paginator.num_pages > 1 %}
+            <nav class="mt-6 flex items-center justify-center gap-3" aria-label="Cancelled bookings pagination">
+                {% if cancelled_page.has_previous %}<a class="rounded-lg border px-3 py-2 text-sm cursor-pointer" href="?status=cancelled&amp;cancelled_page={{ cancelled_page.previous_page_number }}">Previous</a>{% endif %}
+                <span class="text-sm text-gray-600">Page {{ cancelled_page.number }} of {{ cancelled_page.paginator.num_pages }}</span>
+                {% if cancelled_page.has_next %}<a class="rounded-lg border px-3 py-2 text-sm cursor-pointer" href="?status=cancelled&amp;cancelled_page={{ cancelled_page.next_page_number }}">Next</a>{% endif %}
+            </nav>
+            {% endif %}
         </div>
     </div>
 </div>
