@@ -2,365 +2,436 @@
 {% load static %}
 {% block title %}Reports{% endblock %}
 
-
 {% block content %}
-              <div
-                    class="show-sidebar-toggle hidden fixed top-[100px] left-12 z-50 h-10 w-10 bg-light-dodger-blue items-center justify-center rounded-r-md cursor-pointer">
-                    <span class="material-symbols-outlined bold-weight text-dodger-blue">
-                        arrow_forward_ios
-                    </span>
-                </div>
-            <div class="bg-white m-5 rounded-[10px] overflow-y-auto scroll" id="pharmacy-report-root" data-report-url="{% url 'pharmacy_report_data' %}">
-                <div class=" flex flex-col gap-6 p-4 md:p-8 ">
-                    <div class="flex gap-2 items-center">
-                        <span class="material-symbols-outlined !font-semibold">patient_list</span>
-                        <h1 class="font-semibold">Reports</h1>
-                    </div>
+<style>
+    .pharmacy-report-page {
+        background: #fff;
+        min-height: 100%;
+        color: #202b3c;
+        font-family: Inter, Arial, sans-serif;
+    }
 
-                    <div class="flex flex-col md:flex-row justify-between gap-2 md:items-center">
-                        <form method="get" class="relative">
-                            <span class="material-symbols-outlined absolute top-1 left-2 !text-xl">search</span>
-                            <input type="text" placeholder="Search by name or categories"
-                                name="q" value="{{ report_search|default:'' }}"
-                                class="py-1.5 pl-8 pr-2 w-full sm:w-[17rem] text-sm rounded-md border border-blue-haze placeholder:text-medium-gray focus:outline-none" />
-                        </form>
-                        <div class="flex items-center md:justify-end gap-2.5">
-                            <p class="font-normal text-xs text-dodger-blue">Data shown: <span id="reportRangeLabel">{{ report_range_label }}</span></p>
-                            <div class="relative dropdown">
-                                <button
-                                    class="filterToggle  flex items-center border border-blue-haze rounded-md p-1 w-8 h-8 cursor-pointer">
-                                    <span class="material-symbols-outlined flex justify-center items-center">tune</span>
-                                </button>
-                                <div
-    class="filterDropdown absolute right-0 bg-white text-dark-gray shadow-[4px_4px_10px_2px_#00000026] hidden rounded-md w-44 z-10">
-    <div data-period="today"
-        class="p-2 pl-4 hover:bg-forest-green rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-        <span class="material-symbols-outlined !text-lg text-dodger-blue">
-            check
-        </span>Today
-    </div>
-    <div data-period="week"
-        class="p-2 pl-4 hover:bg-forest-green rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-        <span class="material-symbols-outlined !text-lg text-light-gray">
-            check
-        </span>Week
-    </div>
-    <div data-period="month"
-        class="p-2 pl-4 hover:bg-forest-green rounded cursor-pointer flex items-center gap-2 font-normal text-base text-dark-gray">
-        <span class="material-symbols-outlined !text-lg text-light-gray">
-            check
-        </span>Month
-    </div>
-    <div data-period="custom"
-        class="p-2 pl-4 flex justify-between items-center cursor-pointer hover:bg-forest-green rounded font-normal text-base text-dark-gray">
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined !text-lg text-light-gray">
-                check
-            </span>Custom
+    .pharmacy-report-page .report-card {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(33, 43, 54, .04);
+    }
+
+    .pharmacy-report-page .report-btn {
+        height: 34px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .pharmacy-report-page .metric-card {
+        max-height: 188px;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        padding: 16px 14px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(33, 43, 54, .025);
+    }
+
+    .pharmacy-report-page .metric-icon {
+        width: 12px;
+        height: 12px;
+        color: #9aa3b2;
+    }
+
+    .pharmacy-report-page .chart-card {
+        height: 280px;
+    }
+
+    .pharmacy-report-page canvas {
+        max-height: 100%;
+    }
+
+    .pharmacy-report-page .bid-cell {
+        min-height: 92px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid #edf0f4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(33, 43, 54, .025);
+    }
+
+    @media (min-width:1024px) {
+        .pharmacy-report-page {
+            margin: -8px -16px 0;
+            padding: 18px 16px 28px;
+        }
+    }
+
+    @media (max-width:767px) {
+        .pharmacy-report-page .chart-card {
+            height: 320px;
+        }
+    }
+</style>
+
+<div class="pharmacy-report-page" id="pharmacy-report-root" data-report-url="{% url 'pharmacy_report_data' %}">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[19px]">description</span>
+                <h1 class="text-[24px] font-semibold leading-none">Report</h1>
+            </div>
+            <p class="mt-2 text-[12px] text-[#697386]">Track pharmacy sales, orders, stock, bids and customer experience
+            </p>
+            <p class="mt-1 text-[12px] text-[#98a1b1]">Demo data · Last updated 22 Jul 2025 12:50 PM IST</p>
         </div>
-        <span class="material-symbols-outlined calendar-icon">calendar_today</span>
+        <div class="flex items-center gap-2 shrink-0">
+            <button type="button" class="report-btn border border-[#3b82f6] px-4 text-[#347fe7] bg-white">Schedule
+                Report</button>
+            <button type="button" class="report-btn px-4 text-white bg-[#3799f5] border border-[#3799f5] download-btn"
+                data-target="pharmacy-report-root">
+                <span class="material-symbols-outlined text-[15px]">download</span> Export Report
+            </button>
+        </div>
     </div>
-</div>
-                                <div
-                                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 lg:right-[180px] z-50 bg-white shadow-md rounded">
-                                    <div class="datepicker-inline"></div>
-                                </div>
-                            </div>
-                        </div>
+
+    <div class="mt-4 flex items-center justify-between gap-3">
+        <div class="relative">
+            <button type="button"
+                class="h-8 px-3 rounded-md border border-[#edf0f4] bg-white text-[12px] text-[#9a6b00] flex items-center gap-2 shadow-sm">
+                <span id="reportRangeShort">1-22 Jul 2025</span>
+            </button>
+        </div>
+        <div class="relative dropdown">
+            <button type="button" id="reportDateToggle"
+                class="filterToggle h-8 px-3 rounded-md border border-[#edf0f4] bg-white text-[12px] text-[#697386] flex items-center gap-2 shadow-sm">
+                Filter <span class="material-symbols-outlined text-[15px]">filter_alt</span>
+            </button>
+            <div id="reportDatePopover"
+                class="hidden absolute right-0 top-[38px] z-40 w-[300px] rounded-[12px] bg-[#eef1f6] p-3 shadow-[0_8px_24px_rgba(30,41,59,.18)]">
+                <p class="text-[12px] font-semibold text-[#202b3c] mb-2">Date Filter</p>
+                <div class="rounded-[12px] bg-white p-3 mb-3">
+                    <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[12px] text-[#202b3c] hover:bg-[#f3f7fb]" data-period="today">Today</button>
+                    <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[12px] text-[#202b3c] hover:bg-[#f3f7fb]" data-period="week">Last 7 Days</button>
+                    <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[12px] text-[#202b3c] hover:bg-[#f3f7fb]" data-period="month">Last 30 Days</button>
+                    <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[12px] text-[#202b3c] hover:bg-[#f3f7fb]" data-period="custom">Custom Range</button>
+                </div>
+                <p class="text-[12px] font-semibold text-[#202b3c] mb-2">Date Range</p>
+                <div class="rounded-[12px] bg-white p-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="text-[10px] text-[#697386]">From
+                            <input id="reportStartDate" type="date" class="mt-1 h-9 w-full rounded-md border border-[#edf0f4] px-2 text-[12px] text-[#202b3c] outline-none">
+                        </label>
+                        <label class="text-[10px] text-[#697386]">To
+                            <input id="reportEndDate" type="date" class="mt-1 h-9 w-full rounded-md border border-[#edf0f4] px-2 text-[12px] text-[#202b3c] outline-none">
+                        </label>
                     </div>
-
-                    {% if active_subscription %}
-                    <div class="bg-white p-4 rounded-xl lab-report-shadow">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-semibold">Subscription Details</h3>
-                            {% if active_subscription.status == "active" %}
-                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-forest-green text-white">Active</span>
-                            {% endif %}
-                        </div>
-                        <div class="flex flex-col md:flex-row justify-between gap-4">
-                            <div>
-                                <p class="text-sm text-medium-gray mb-1">{{ active_subscription.plan.name }}</p>
-                                <p class="text-2xl font-semibold">&#8377;{{ active_subscription.plan.price }}/<span class="text-sm font-normal text-medium-gray">{{ active_subscription.plan.billing_cycle }}</span></p>
-                                <p class="text-xs text-medium-gray mt-2">{{ active_subscription.expiry_date|date:"d M Y" }} ({{ active_subscription.expiry_date|timeuntil }} left)</p>
-                            </div>
-                            <div class="flex flex-col gap-2 text-sm text-dark-gray">
-                                {% if active_subscription.plan.discount_text %}
-                                <p>{{ active_subscription.plan.discount_text }}</p>
-                                {% endif %}
-                                {% if active_subscription.plan.features.all %}
-                                {% for feature in active_subscription.plan.features.all|slice:":3" %}
-                                <p>{{ feature.text }}</p>
-                                {% endfor %}
-                                {% endif %}
-                            </div>
-                        </div>
-                        <button class="bg-dodger-blue text-white text-sm px-4 py-2 rounded-lg mt-4">View Plan Details</button>
-                    </div>
-                    {% endif %}
-
-                    <!-- Stats Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-ocean-teal p-4 rounded-lg flex justify-between items-center">
-                            <div class="flex flex-col justify-between gap-1">
-                                <h2 class="text-sm">Total Revenue</h2>
-                                <p class="text-lg font-semibold">&#8377;<span id="totalRevenueStat">{{ total_revenue|default:"0" }}</span></p>
-                            </div>
-                            <div
-                                class="bg-forest-green flex justify-center items-center w-14 h-14 rounded-full text-dodger-blue">
-                                <span class="material-symbols-outlined !font-semibold">currency_rupee_circle</span>
-                            </div>
-                        </div>
-                        <div class="bg-ocean-teal p-4 rounded-lg flex justify-between items-center">
-                            <div class="flex flex-col justify-between gap-1">
-                                <h2 class="text-sm">Bid Won</h2>
-                                <p class="text-lg font-semibold" id="bidWonStat">{{ won_bids|default:"0" }}</p>
-                            </div>
-                            <div
-                                class="bg-forest-green flex justify-center items-center w-14 h-14 rounded-full text-dodger-blue">
-                                <span class="material-symbols-outlined !font-semibold">star</span>
-                            </div>
-                        </div>
-                        <div class="bg-ocean-teal p-4 rounded-lg flex justify-between items-center">
-                            <div class="flex flex-col justify-between gap-1">
-                                <h2 class="text-sm">Total Orders</h2>
-                                <p class="text-lg font-semibold" id="totalOrdersStat">{{ total_orders|default:"0" }}</p>
-                            </div>
-                            <div
-                                class="bg-forest-green flex justify-center items-center w-14 h-14 rounded-full text-dodger-blue">
-                                <span class="material-symbols-outlined !font-semibold">paid</span>
-                            </div>
-                        </div>
-                        <div class="bg-ocean-teal p-4 rounded-lg flex justify-between items-center">
-                            <div class="flex flex-col justify-between gap-1">
-                                <h2 class="text-sm">Avg Bid</h2>
-                                <p class="text-lg font-semibold">&#8377;<span id="avgBidStat">{{ avg_bid|default:"0" }}</span></p>
-                            </div>
-                            <div
-                                class="bg-forest-green flex justify-center items-center w-14 h-14 rounded-full text-dodger-blue">
-                                <span class="material-symbols-outlined !font-semibold">money_range</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Charts Section -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white p-4 rounded-xl lab-report-shadow">
-                            <div class="flex justify-between items-center dropdown relative mb-2">
-                                <h3 class="font-semibold">Top Products</h3>
-                                <div class="flex items-center gap-2">
-                                    <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
-                                    <span
-                                        class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
-                                </div>
-                                <div
-                                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
-                                    <div class="datepicker-inline"></div>
-                                </div>
-                            </div>
-                            <div class="flex flex-col justify-center items-center gap-2 h-full">
-                                <canvas id="barChartPharmacy"></canvas>
-                                <div class="w-full space-y-2 text-sm" id="topProductsList">
-                                    {% for product in top_products %}
-                                    <div class="flex justify-between gap-3">
-                                        <span class="truncate">{{ product.name|default:"Unknown" }}</span>
-                                        <span class="text-dodger-blue whitespace-nowrap">{{ product.units|default:"0" }} units</span>
-                                    </div>
-                                    {% empty %}
-                                    <p class="text-medium-gray text-center">No product sales found for this range.</p>
-                                    {% endfor %}
-                                </div>
-                                <button class=" bg-dodger-blue text-white w-72 py-2 rounded-lg download-btn cursor-pointer"
-                                    data-target="barChartPharmacy">Download PDF</button>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-4 rounded-xl lab-report-shadow">
-                            <div class="flex justify-between items-center dropdown relative mb-2">
-                                <h3 class="font-semibold">Revenue</h3>
-                                <div class="flex items-center gap-2">
-                                    <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
-                                    <span
-                                        class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
-                                </div>
-                                <div
-                                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
-                                    <div class="datepicker-inline"></div>
-                                </div>
-                            </div>
-                            <div class="flex flex-col justify-center items-center gap-2">
-                                <canvas id="pieChart" class="!h-[50%] !w-[55%]"></canvas>
-                                <div class="w-full space-y-2 text-sm" id="revenueProductsList">
-                                    {% for product in top_products %}
-                                    <div class="flex justify-between gap-3">
-                                        <span class="truncate">{{ product.name|default:"Unknown" }}</span>
-                                        <span class="font-semibold whitespace-nowrap">&#8377;{{ product.revenue|default:"0" }}</span>
-                                    </div>
-                                    {% empty %}
-                                    <p class="text-medium-gray text-center">No revenue split available.</p>
-                                    {% endfor %}
-                                </div>
-                                <button class=" bg-dodger-blue text-white w-72 py-2 rounded-lg download-btn cursor-pointer"
-                                    data-target="pieChart">Download PDF</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Heatmap & Trends -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="bg-cloud-gray p-4 rounded-xl lab-report-shadow flex flex-col justify-between">
-                            <div class="flex justify-between items-center dropdown relative mb-2">
-                                <h3 class="font-semibold">Heatmap</h3>
-                                <div class="flex items-center gap-2">
-                                    <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
-                                    <span
-                                        class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
-                                </div>
-                                <div
-                                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
-                                    <div class="datepicker-inline"></div>
-                                </div>
-                            </div>
-                            <div class="dropdown relative inline-block w-full">
-                                <button
-                                    class="dropdown-btn cursor-pointer w-full bg-white rounded-md lab-report-shadow px-4 py-2 flex justify-between items-center focus:outline-none">
-                                    <span class="dropdown-value">10-12 AM</span>
-                                    <span class="material-symbols-outlined">keyboard_arrow_down</span>
-                                </button>
-
-                                <ul
-                                    class="dropdown-menu absolute hidden mt-1 w-full bg-white rounded-md lab-report-shadow  z-10">
-                                    <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">8-9 AM</li>
-                                    <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">10-12 AM</li>
-                                    <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">5-6 PM</li>
-                                    <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">9-10 PM</li>
-                                </ul>
-                            </div>
-                            <div id="heatmap" class="!h-[60%]"></div>
-                            <button
-                                class=" bg-dodger-blue text-white w-full text-center mt-4 py-2 rounded-lg download-btn cursor-pointer"
-                                data-target="heatmap">Download Report</button>
-                        </div>
-
-                        <div class="bg-white p-4 rounded-xl lab-report-shadow flex flex-col justify-between">
-                            <div class="flex justify-between items-center dropdown relative mb-2">
-                                <h3 class="font-semibold">Bid Trend</h3>
-                                <div class="flex items-center gap-2">
-                                    <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
-                                    <span
-                                        class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
-                                </div>
-                                <div
-                                    class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
-                                    <div class="datepicker-inline"></div>
-                                </div>
-                            </div>
-                            <div class="dropdown relative inline-block w-full">
-                                <button
-                                    class="dropdown-btn cursor-pointer w-full bg-white rounded-md lab-report-shadow px-4 py-2 flex justify-between items-center focus:outline-none">
-                                    <span class="dropdown-value">Week</span>
-                                    <span class="material-symbols-outlined">keyboard_arrow_down</span>
-                                </button>
-
-                                <ul
-                                    class="dropdown-menu absolute hidden mt-1 w-full bg-white rounded-md lab-report-shadow  z-10">
-                                    <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">Day</li>
-                                    <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">Week</li>
-                                    <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">Month</li>
-                                    <li class="px-4 py-2 hover:bg-blue-haze cursor-pointer">Year</li>
-                                </ul>
-                            </div>
-                            <canvas id="lineChart" class="!h-[60%]"></canvas>
-                            <button
-                                class=" bg-dodger-blue text-white w-full text-center mt-4 py-2 rounded-lg download-btn cursor-pointer"
-                                data-target="lineChart">Download Report</button>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="bg-white p-4 rounded-xl lab-report-shadow space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h2 class="font-semibold">Bid Win/Loss Rate</h2>
-                                    <div class="flex items-center space-x-4 text-sm">
-                                        <div class="flex items-center space-x-1">
-                                            <span class="w-3 h-3 bg-mint-leaf rounded-full"></span>
-                                            <span>win</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <span class="w-3 h-3 bg-bright-red rounded-full"></span>
-                                            <span>Loss</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <canvas id="bidWinLossChart" class="!h-[180px]"></canvas>
-                                <div id="winLossRows" class="space-y-4">
-                                {% for row in win_loss_rows %}
-                                <div class="flex items-center justify-between gap-4">
-                                    <div class="flex-1 h-5 rounded-full overflow-hidden">
-                                        <div class="flex h-full">
-                                            <div class="bg-mint-leaf text-white text-xs font-semibold flex items-center justify-center"
-                                                style="width: {{ row.won_percent }}%;">
-                                                {{ row.won }}
-                                            </div>
-                                            <div class="bg-bright-red text-white text-xs font-semibold flex items-center justify-center"
-                                                style="width: {{ row.lost_percent }}%;">
-                                                {{ row.lost }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span class="text-xs">{{ row.label }}</span>
-                                </div>
-                                {% empty %}
-                                <p class="text-sm text-medium-gray">No bid activity found.</p>
-                                {% endfor %}
-                                </div>
-                            </div>
-                            <div class="bg-white p-4 rounded-xl lab-report-shadow">
-                                <div class="flex justify-between items-center mb-2">
-                                    <h3 class="font-semibold">Stock Alerts</h3>
-                                    <span class="text-sm text-medium-gray report-range-text">{{ report_range_label }}</span>
-                                </div>
-                                <div class="space-y-2 text-sm" id="stockAlertsList">
-                                    {% for stock in stock_alerts %}
-                                    <div class="flex justify-between gap-3">
-                                        <span class="truncate">{{ stock.name|default:"Unknown" }}</span>
-                                        <span class="text-strong-red whitespace-nowrap">{{ stock.quantity|default:"0" }}</span>
-                                    </div>
-                                    {% empty %}
-                                    <p class="text-medium-gray">No active stock items added.</p>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            <div class="bg-white p-4 rounded-xl lab-report-shadow">
-                                <div class="flex justify-between items-center dropdown relative mb-2">
-                                    <h3 class="font-semibold">Rating ⭐</h3>
-                                    <div class="flex items-center gap-2">
-                                        <p class="text-sm text-medium-gray font-semibold report-range-text">{{ report_range_label }}</p>
-                                        <span
-                                            class="material-symbols-outlined calendar-icon cursor-pointer">calendar_today</span>
-                                    </div>
-                                    <div
-                                        class="datepicker-container hidden px-4 pb-3 absolute top-full right-0 z-50 bg-white shadow-md rounded">
-                                        <div class="datepicker-inline"></div>
-                                    </div>
-                                </div>
-                                <div id="ratings" class="space-y-2"></div>
-                                <button
-                                    class=" bg-dodger-blue text-white w-full text-center mt-4 py-2 rounded-lg download-btn cursor-pointer"
-                                    data-target="ratings">Download PDF</button>
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <button type="button" id="reportDateCancel" class="h-9 rounded-md border border-[#dfe5ec] bg-white text-[12px] text-[#697386]">Cancel</button>
+                        <button type="button" id="reportDateApply" class="h-9 rounded-md bg-[#3799f5] text-[12px] font-semibold text-white">Apply</button>
                     </div>
                 </div>
             </div>
-{{ pharmacy_report_data|json_script:"pharmacy-report-data" }}
+        </div>
+    </div>
+
+    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <p class="text-[12px] text-[#697386]">Net Product Sales</p><span
+                    class="material-symbols-outlined metric-icon text-[15px]">currency_rupee</span>
+            </div>
+            <p class="mt-3 text-[20px] font-semibold leading-none">&#8377;<span id="totalRevenueStat">{{
+                    total_revenue|default:"13,800" }}</span></p>
+            <p class="mt-2 text-[12px] text-[#23a56a]"><span class="mr-1">↗</span>15% <span class="text-[#9aa3b2]">vs
+                    previous period</span></p>
+        </div>
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <p class="text-[12px] text-[#697386]">Orders Placed</p><span
+                    class="material-symbols-outlined metric-icon text-[15px]">inventory_2</span>
+            </div>
+            <p class="mt-3 text-[20px] font-semibold leading-none" id="totalOrdersStat">{{ total_orders|default:"320" }}
+            </p>
+            <p class="mt-2 text-[12px] text-[#697386]"><span id="ordersCompleted">284 completed</span> · <span
+                    id="ordersCancelled">12 cancelled</span></p>
+        </div>
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <p class="text-[12px] text-[#697386]">Avg Completed Order<br>Value</p><span
+                    class="material-symbols-outlined metric-icon text-[15px]">currency_rupee</span>
+            </div>
+            <p class="mt-3 text-[20px] font-semibold leading-none">&#8377;<span id="avgBidStat">{{ avg_bid|default:"500"
+                    }}</span></p>
+            <p class="mt-2 text-[12px] text-[#697386]">Excludes delivery fees</p>
+        </div>
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <p class="text-[12px] text-[#697386]">On-Time Delivery</p><span
+                    class="material-symbols-outlined metric-icon text-[15px]">local_shipping</span>
+            </div>
+            <p class="mt-3 text-[20px] font-semibold leading-none">90%</p>
+            <p class="mt-2 text-[12px] text-[#697386]">188 of 220 completed deliveries</p>
+        </div>
+        <div class="metric-card">
+            <div class="flex items-center justify-between">
+                <p class="text-[12px] text-[#697386]">Customer Rating</p><span
+                    class="material-symbols-outlined metric-icon text-[15px]">star</span>
+            </div>
+            <p class="mt-3 text-[20px] font-semibold leading-none">4.6 / 5</p>
+            <p class="mt-2 text-[12px] text-[#697386]"><span class="text-[#ef4444] tracking-[-1px]">★★★★★</span> · 120
+                reviews</p>
+        </div>
+    </div>
+
+    <div class="mt-5 grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-4">
+        <div class="report-card chart-card p-4">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="text-[14px] font-semibold">Product Sales Trend</h2>
+                    <p class="text-[12px] text-[#9aa3b2] mt-1">Demo period · <span class="report-range-text">{{
+                            report_range_label }}</span></p>
+                </div>
+                <div class="flex items-center gap-2 text-[#697386]"><span
+                        class="material-symbols-outlined text-[15px] cursor-pointer">open_in_full</span><span
+                        class="material-symbols-outlined download-btn cursor-pointer text-[15px]"
+                        data-target="lineChart">download</span></div>
+            </div>
+            <div class="h-[215px] mt-2"><canvas id="lineChart"></canvas></div>
+        </div>
+        <div class="report-card chart-card p-4">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="text-[14px] font-semibold">Order Status</h2>
+                    <p class="text-[12px] text-[#9aa3b2] mt-1">Demo period · <span class="report-range-text">{{
+                            report_range_label }}</span></p>
+                </div>
+                <div class="flex items-center gap-2 text-[#697386]"><span
+                        class="material-symbols-outlined text-[15px] cursor-pointer">open_in_full</span><span
+                        class="material-symbols-outlined download-btn cursor-pointer text-[15px]"
+                        data-target="pieChart">download</span></div>
+            </div>
+            <div class="h-[175px] flex items-center justify-center"><canvas id="pieChart"></canvas></div>
+            <div class="flex justify-center gap-5 text-[12px] text-[#697386] mt-1">
+                <span><i class="inline-block w-2 h-2 rounded-full bg-[#3799f5] mr-1"></i>Completed</span>
+                <span><i class="inline-block w-2 h-2 rounded-full bg-[#f6c44d] mr-1"></i>In Progress</span>
+                <span><i class="inline-block w-2 h-2 rounded-full bg-[#ef4f46] mr-1"></i>Cancelled</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-card mt-4 p-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <h2 class="text-[14px] font-semibold">Bid Performance</h2>
+                <p class="text-[12px] text-[#9aa3b2] mt-1">Demo period · <span class="report-range-text">{{
+                        report_range_label }}</span></p>
+            </div>
+            <div class="flex items-center gap-2 text-[#697386]"><span
+                    class="material-symbols-outlined text-[15px] cursor-pointer">open_in_full</span><span
+                    class="material-symbols-outlined download-btn cursor-pointer text-[15px]"
+                    data-target="bidWinLossChart">download</span></div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-5">
+            <div class="bid-cell"><strong class="text-[20px]" id="bidAccepted">48</strong><span
+                    class="text-[12px] text-[#697386] mt-1">Accepted</span></div>
+            <div class="bid-cell"><strong class="text-[20px]" id="bidRejected">24</strong><span
+                    class="text-[12px] text-[#697386] mt-1">Rejected</span></div>
+            <div class="bid-cell"><strong class="text-[20px]">8</strong><span
+                    class="text-[12px] text-[#697386] mt-1">Expired</span></div>
+            <div class="bid-cell"><strong class="text-[20px]">4</strong><span
+                    class="text-[12px] text-[#697386] mt-1">Withdrawn</span></div>
+            <div class="bid-cell"><strong class="text-[20px]">12</strong><span
+                    class="text-[12px] text-[#697386] mt-1">Awaiting</span></div>
+        </div>
+        <div class="mt-4 text-[12px] text-[#697386]"><span class="font-semibold text-[#24b47e]">66.7% resolved win
+                rate</span><span class="ml-4 text-[#3799f5] cursor-pointer">View Bids ›</span></div>
+    </div>
+
+    <div class="report-card mt-4 p-0 overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-3 border-b border-[#edf0f4]">
+            <div class="flex flex-wrap items-center gap-4 text-[12px] text-[#697386]">
+                <span class="flex items-center gap-2 text-[#202b3c] font-semibold">
+                    <span class="material-symbols-outlined text-[#ef9d32] text-[15px]">error</span>
+                    Inventory attention
+                </span>
+                <span>Low/Critical: <strong class="text-[#202b3c]">2 products</strong></span>
+                <span>Out of Stock: <strong class="text-[#202b3c]">1</strong></span>
+                <span>Expiring: <strong class="text-[#202b3c]">30d 2 batches</strong></span>
+            </div>
+            <button type="button" class="text-[14px] text-[#347fe7] font-bold whitespace-nowrap cursor-pointer">Open Inventory ↗</button>
+        </div>
+    </div>
+
+    <div class="report-card mt-4 px-4 pt-4 pb-3 overflow-hidden">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-[14px] font-semibold">Top Medicines</h2>
+            <button type="button" class="text-[12px] text-[#347fe7]">View All →</button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-[12px]">
+                <thead>
+                    <tr class="bg-[#3799f5] text-white">
+                        <th class="text-left font-semibold px-12 py-2.5">PRODUCT</th>
+                        <th class="text-left font-semibold px-3 py-2.5">QTY SOLD · UNIT</th>
+                        <th class="text-left font-semibold px-3 py-2.5">COMPLETED ORDERS</th>
+                        <th class="text-left font-semibold px-3 py-2.5">NET SALES</th>
+                        <th class="text-left font-semibold px-3 py-2.5">AVAILABLE STOCK</th>
+                        <th class="text-right font-semibold px-12 py-2.5">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody class="text-[#202b3c]">
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Crocin 500mg Tablet</td>
+                        <td class="px-3 py-3">48 strips</td>
+                        <td class="px-3 py-3">32</td>
+                        <td class="px-3 py-3">₹4,800</td>
+                        <td class="px-3 py-3">12</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Vitamin C 500mg</td>
+                        <td class="px-3 py-3">40 strips</td>
+                        <td class="px-3 py-3">28</td>
+                        <td class="px-3 py-3">₹2,400</td>
+                        <td class="px-3 py-3">100</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Pantop 40mg</td>
+                        <td class="px-3 py-3">35 strips</td>
+                        <td class="px-3 py-3">22</td>
+                        <td class="px-3 py-3">₹3,800</td>
+                        <td class="px-3 py-3">70</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Amoxicillin 500mg</td>
+                        <td class="px-3 py-3">30 strips</td>
+                        <td class="px-3 py-3">18</td>
+                        <td class="px-3 py-3">₹4,500</td>
+                        <td class="px-3 py-3">50</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Atorva 10mg</td>
+                        <td class="px-3 py-3">28 strips</td>
+                        <td class="px-3 py-3">20</td>
+                        <td class="px-3 py-3">₹2,520</td>
+                        <td class="px-3 py-3">50</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Paracetamol 650mg</td>
+                        <td class="px-3 py-3">26 strips</td>
+                        <td class="px-3 py-3">19</td>
+                        <td class="px-3 py-3">₹1,820</td>
+                        <td class="px-3 py-3">85</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Azithromycin 500mg</td>
+                        <td class="px-3 py-3">24 strips</td>
+                        <td class="px-3 py-3">16</td>
+                        <td class="px-3 py-3">₹3,600</td>
+                        <td class="px-3 py-3">40</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Metformin 500mg</td>
+                        <td class="px-3 py-3">22 strips</td>
+                        <td class="px-3 py-3">15</td>
+                        <td class="px-3 py-3">₹1,540</td>
+                        <td class="px-3 py-3">110</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-[#edf0f4]">
+                        <td class="px-12 py-3">Cetirizine 10mg</td>
+                        <td class="px-3 py-3">20 strips</td>
+                        <td class="px-3 py-3">14</td>
+                        <td class="px-3 py-3">₹1,200</td>
+                        <td class="px-3 py-3">95</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-12 py-3">Telmisartan 40mg</td>
+                        <td class="px-3 py-3">18 strips</td>
+                        <td class="px-3 py-3">12</td>
+                        <td class="px-3 py-3">₹2,160</td>
+                        <td class="px-3 py-3">60</td>
+                        <td class="px-12 py-3 text-right"><span
+                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="report-card mt-4 px-4 py-4">
+        <h2 class="text-[14px] font-semibold mb-3">Recent Report Activity</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 text-[12px]">
+            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
+                        class="material-symbols-outlined text-[12px] text-[#347fe7] align-middle mr-2">trophy</span>ORD:
+                    3320 completed · ₹420</span><span class="text-[#98a1b1] whitespace-nowrap">22 Jul 12:40 PM</span>
+            </div>
+            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
+                        class="material-symbols-outlined text-[12px] text-[#347fe7] align-middle mr-2">trophy</span>New
+                    5-star review · from Monica Singh</span><span class="text-[#98a1b1] whitespace-nowrap">22 Jul 12:00
+                    PM</span></div>
+            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
+                        class="material-symbols-outlined text-[12px] text-[#f0a43a] align-middle mr-2">trophy</span>Low
+                    stock alert · Crocin 500mg, 12 strips remaining</span><span
+                    class="text-[#98a1b1] whitespace-nowrap">22 Jul 9:00 AM</span></div>
+            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
+                        class="material-symbols-outlined text-[12px] text-[#347fe7] align-middle mr-2">trophy</span>3
+                    transactions collected today · ₹1,340</span><span class="text-[#98a1b1] whitespace-nowrap">22 Jul
+                    9:00 AM</span></div>
+            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
+                        class="material-symbols-outlined text-[12px] text-[#347fe7] align-middle mr-2">trophy</span>2
+                    batches expire within 30 days</span><span class="text-[#98a1b1] whitespace-nowrap">22 Jul 8:00
+                    AM</span></div>
+        </div>
+    </div>
+</div>
+<!-- 
+<canvas id="barChartPharmacy" class="hidden"></canvas>
+<canvas id="bidWinLossChart" class="hidden"></canvas>
+<div id="topProductsList" class="hidden"></div>
+<div id="revenueProductsList" class="hidden"></div>
+<div id="stockAlertsList" class="hidden"></div>
+<div id="winLossRows" class="hidden"></div>
+<div id="ratings" class="hidden"></div>
+<span id="reportRangeLabel" class="hidden">{{ report_range_label }}</span>
+{{ pharmacy_report_data|json_script:"pharmacy-report-data" }} -->
 {% endblock %}
 
 {% block extra_js %}
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- HTML2CANVAS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="/static/js/tabs.js"></script>
-<!-- <script src="{% static 'js/pharmacy-reports.js' %}?v=20260525"></script> -->
-  <script src="{% static 'js/pharmacy-reports.js' %}?v=20261016"></script>
-  <script src="/static/js/table-pagination.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="/static/js/tabs.js"></script>
+<script src="{% static 'js/pharmacy-reports.js' %}?v=20261119"></script>
+<script src="/static/js/table-pagination.js"></script>
 {% endblock %}
