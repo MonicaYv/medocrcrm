@@ -1,4 +1,8 @@
-{% extends "dashboard/layout.html" %}
+ 
+
+
+
+     {% extends "dashboard/layout.html" %}
 {% load static %}
 
 {% block title %}Home{% endblock %}
@@ -17,32 +21,19 @@
                 <div class="h-4 w-28 rounded bg-gray-200 sm:ml-auto"></div>
             </div>
         </div>
-        <div class="flex flex-col gap-3 lg:flex-row">
-            <div class="h-[300px] w-full rounded-2xl bg-gray-200 lg:w-[72%]"></div>
-            <div class="h-[300px] w-full rounded-2xl bg-gray-200 lg:w-[28%]"></div>
-        </div>
+        <div class="h-[110px] w-full rounded-2xl bg-gray-200"></div>
         <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <div class="h-20 rounded-2xl bg-gray-200"></div>
-            <div class="h-20 rounded-2xl bg-gray-200"></div>
-            <div class="h-20 rounded-2xl bg-gray-200"></div>
-            <div class="h-20 rounded-2xl bg-gray-200"></div>
+            <div class="h-24 rounded-2xl bg-gray-200"></div>
+            <div class="h-24 rounded-2xl bg-gray-200"></div>
+            <div class="h-24 rounded-2xl bg-gray-200"></div>
+            <div class="h-24 rounded-2xl bg-gray-200"></div>
         </div>
-        <div class="space-y-4">
-            <div class="flex justify-between">
-                <div class="h-5 w-28 rounded bg-gray-200"></div>
-                <div class="h-8 w-20 rounded bg-gray-200"></div>
-            </div>
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <div class="h-32 rounded-2xl bg-gray-200"></div>
-                <div class="h-32 rounded-2xl bg-gray-200"></div>
-                <div class="h-32 rounded-2xl bg-gray-200"></div>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div class="h-64 rounded-2xl bg-gray-200 lg:col-span-2"></div>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)]">
+            <div class="h-64 rounded-2xl bg-gray-200"></div>
             <div class="h-64 rounded-2xl bg-gray-200"></div>
         </div>
         <div class="h-56 rounded-2xl bg-gray-200"></div>
+        <div class="h-40 rounded-2xl bg-gray-200"></div>
     </div>
 </div>
 
@@ -52,10 +43,10 @@
         <span class="material-symbols-outlined bold-weight text-[#0088FF]">arrow_forward_ios</span>
     </div>
 
-    <div class="flex flex-col gap-5">
+    <div class="flex flex-col gap-6 w-full">
 
         {# ===================== PAGE HEADER ===================== #}
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="w-full flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex flex-col gap-1">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[#0F172A]">home</span>
@@ -84,156 +75,113 @@
             </div>
         </div>
 
-        {# ===================== HOSPITAL BANNER ===================== #}
-        <div class="grid grid-cols-[minmax(0,7fr)_minmax(0,3fr)] gap-4 items-stretch w-full">
+               {# ===================== PROFILE + HOSPITAL BANNER ===================== #}
+        <div class="relative w-full overflow-hidden rounded-2xl bg-[#0088FF] text-white p-6 md:p-8 flex flex-col gap-5">
+            {% if clinic_photo_url %}
+            <img src="{{ clinic_photo_url }}" alt="" aria-hidden="true"
+                 class="absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-luminosity"
+                 loading="lazy">
+            {% endif %}
 
-            {# --- Hospital Banner (70%) --- #}
-                <div class="relative min-w-0 overflow-hidden rounded-2xl bg-[#0088FF] text-white min-h-[220px] p-5 flex flex-col justify-between">
-                {% if clinic_photo_url %}
-                <img src="{{ clinic_photo_url }}" alt="" aria-hidden="true"
-                     class="absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-luminosity"
-                     loading="lazy">
-                {% endif %}
+            {# --- Doctor row --- #}
+            <div class="relative flex items-start justify-between gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                    <div class="relative group shrink-0">
+                        {% if admin_profile_photo_path %}
+                            <img id="admin-profile-photo"
+                                 src="/document/{{ admin_profile_photo_path }}"
+                                 alt="Doctor profile picture"
+                                 class="w-[72px] h-[72px] rounded-[14px] object-cover border border-white/20 shadow-sm bg-white">
+                        {% else %}
+                            <div id="admin-profile-initials"
+                                 class="w-[72px] h-[72px] rounded-[14px] bg-white text-[#0088FF] text-2xl font-bold flex items-center justify-center shadow-sm">
+                                {% if doctor_profile.first_name %}
+                                    {{ doctor_profile.first_name|slice:":1"|upper }}{% if doctor_profile.last_name %}{{ doctor_profile.last_name|slice:":1"|upper }}{% endif %}
+                                {% else %}
+                                    {{ doctor_profile.full_name|default:contact_person.name|default:"Doctor"|slice:":1"|upper }}
+                                {% endif %}
+                            </div>
+                            <img id="admin-profile-photo"
+                                 alt="Doctor profile picture"
+                                 class="hidden w-[72px] h-[72px] rounded-[14px] object-cover border border-white/20 shadow-sm bg-white">
+                        {% endif %}
 
-                <!-- Hospital Name -->
-                <div class="relative flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined">apartment</span>
+                        <label for="admin-profile-photo-input"
+                               class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white border border-[#E2E8F0] text-[#0088FF] flex items-center justify-center cursor-pointer shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                               title="Change profile picture">
+                            <span class="material-symbols-outlined !text-sm">edit</span>
+                        </label>
+                        <input id="admin-profile-photo-input"
+                               type="file"
+                               accept="image/jpeg,image/png"
+                               class="hidden"
+                               data-upload-url="{% url 'upload_admin_profile_photo' %}">
                     </div>
 
-                    <p class="text-xl font-semibold leading-tight">
-                        {{ doctor_profile.clinic_name|default:"Hospital / Clinic" }}
-                    </p>
+                    <div class="flex flex-col gap-1 min-w-0">
+                        <p class="text-[17px] font-semibold leading-tight truncate">
+                            {{ doctor_profile.specialization|default:"Neurologist" }}
+                        </p>
+                        <p class="text-sm text-white/90 truncate">
+                            {{ doctor_profile.qualification|default:"MBBS, MD (Neurology)" }}
+                        </p>
+                        {% if doctor_profile.registration_number %}
+                            <p class="text-sm text-white/90">Reg. No: {{ doctor_profile.registration_number }}</p>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <!-- Hospital Address -->
-                <div class="relative border-t border-white/30 pt-3 mt-6 flex items-start gap-2">
-                    <span class="material-symbols-outlined !text-lg shrink-0">home</span>
-
-                    <p class="text-xs text-white/90 leading-relaxed">
-                        {{ doctor_profile.full_address|default:"Address not available" }}{% if doctor_profile.city %}, {{ doctor_profile.city }}{% endif %}{% if doctor_profile.state %}, {{ doctor_profile.state }}{% endif %}{% if doctor_profile.pincode %} - {{ doctor_profile.pincode }}{% endif %}
-                    </p>
-                </div>
-
-            </div>
-
-{# --- Admin / profile card --- #}
-            <div class="rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_2px_8px_rgba(15,23,42,0.04)] p-6 flex flex-col items-center justify-center text-center">
-                  {# --- Circular Doctor Profile Photo --- #}
-                <div class="relative group">
-                    {% if admin_profile_photo_path %}
-                        <img id="admin-profile-photo"
-                             src="/document/{{ admin_profile_photo_path }}"
-                             alt="Doctor profile picture"
-                             class="w-20 h-20 rounded-full object-cover border-2 border-[#E2E8F0]">
-                    {% else %}
-                        <div id="admin-profile-initials"
-                             class="w-20 h-20 rounded-full bg-[#0088FF] text-white text-2xl font-bold flex items-center justify-center border-2 border-white shadow-sm">
-                            {% if doctor_profile.first_name %}
-                                {{ doctor_profile.first_name|slice:":1"|upper }}{% if doctor_profile.last_name %}{{ doctor_profile.last_name|slice:":1"|upper }}{% endif %}
-                            {% else %}
-                                {{ doctor_profile.full_name|default:contact_person.name|default:"Doctor"|slice:":1"|upper }}
-                            {% endif %}
-                        </div>
-
-                        <img id="admin-profile-photo"
-                             alt="Doctor profile picture"
-                             class="hidden w-20 h-20 rounded-full object-cover border-2 border-[#E2E8F0]">
-                    {% endif %}
-
-                    <label for="admin-profile-photo-input"
-                           class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white border border-[#E2E8F0] text-[#0088FF] flex items-center justify-center cursor-pointer shadow opacity-0 group-hover:opacity-100 transition-opacity"
-                           title="Change profile picture">
-                        <span class="material-symbols-outlined !text-sm">edit</span>
-                    </label>
-
-                    <input id="admin-profile-photo-input"
-                           type="file"
-                           accept="image/jpeg,image/png"
-                           class="hidden"
-                           data-upload-url="{% url 'upload_admin_profile_photo' %}">
-                </div>
-
-                <p class="mt-4 font-bold text-base text-[#0F172A]">
-                    {{ doctor_profile.full_name|default:contact_person.name|default:doctor_profile.owner_name|default:"N/A" }}
-                </p>
-                <p class="mt-1 font-medium text-xs text-[#0088FF]">
-                    {{ user.phone_country_code|default:"+91" }}
-                    {{ doctor_profile.contact_number|default:user.phone_number|default:"N/A" }}
-                </p>
-                <p class="mt-2 text-sm font-medium text-[#0F172A]">{{ doctor_profile.specialization|default:contact_person.role|default:"N/A" }}</p>
-                {% if doctor_profile.qualification %}<p class="mt-1 text-[11px] text-[#64748B]">{{ doctor_profile.qualification }}</p>{% endif %}
-                {% if doctor_profile.registration_number %}<p class="text-[10px] text-[#94A3B8]">Reg. No: {{ doctor_profile.registration_number }}</p>{% endif %}
-
-                <a href="#" class="mt-3 text-xs font-semibold text-[#0088FF] inline-flex items-center gap-1">
-                    Edit Profile <span class="material-symbols-outlined !text-sm">arrow_forward</span>
+                <a href="#" class="shrink-0 text-sm font-semibold text-white inline-flex items-center gap-1.5 hover:underline mt-2">
+                    Edit Profile <span class="material-symbols-outlined !text-[18px]">arrow_forward</span>
                 </a>
             </div>
-        </div>
 
-        {# ===================== QUICK STATS ROW ===================== #}
-        <!-- ===================== DASHBOARD STATISTICS BAR ===================== -->
-        <div class="bg-white border border-[#E2E8F0] rounded-2xl px-3 py-2 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-[#E2E8F0]">
+            <div class="relative border-t border-white/20 my-1"></div>
 
-        <!-- Active Bids -->
-        <div class="flex items-center gap-2 px-3 py-2 lg:py-1">
-            <div class="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#0088FF] flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined !text-xl">bolt</span>
+            {# --- Hospital row --- #}
+            <div class="relative flex items-start justify-between gap-4">
+                <div class="flex items-start gap-4 min-w-0">
+                    <div class="w-[42px] h-[42px] rounded-xl bg-white/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <span class="material-symbols-outlined !text-[22px] text-white">apartment</span>
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <p class="text-[19px] font-semibold leading-tight truncate">
+                            {{ doctor_profile.clinic_name|default:"Lifecare Multispeciality Hospital" }}
+                        </p>
+                        <p class="text-sm text-white/90 leading-relaxed truncate">
+                            {{ doctor_profile.full_address|default:"221/A, 2nd Floor, Shanti Nagar Road, Sector 10, Andheri East, Mumbai, Maharashtra" }}{% if doctor_profile.city %} {{ doctor_profile.city }}{% endif %}{% if doctor_profile.state %} {{ doctor_profile.state }}{% endif %}{% if doctor_profile.pincode %} - {{ doctor_profile.pincode }}{% endif %}
+                        </p>
+                    </div>
+                </div>
+                <span class="shrink-0 rounded-full bg-white text-[#0088FF] text-[11px] uppercase tracking-wider font-bold px-3.5 py-1.5 flex items-center gap-1 shadow-sm mt-1">
+                    <span class="material-symbols-outlined !text-[14px]">verified</span>Verified Clinic
+                </span>
             </div>
-            <div class="flex flex-col">
-                <p class="text-xs text-[#64748B]">Active Bids</p>
-                <p class="text-xl font-bold text-[#0F172A] leading-tight">
-                {{ active_bids|default:"0" }}
-                </p>
-                <a href="{% url 'appointment' %}" class="text-xs text-[#0088FF] hover:underline">
-                    View all →
-                </a>
-            </div>
-        </div>
 
-        <!-- Ongoing Orders -->
-        <div class="flex items-center gap-2 px-3 py-2 lg:py-1">
-            <div class="w-9 h-9 rounded-xl bg-[#F3F0FF] text-[#7C3AED] flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined !text-xl">deployed_code</span>
+            {# --- Queue row --- #}
+            <div class="relative flex items-end justify-between gap-4 mt-2">
+                <div class="flex flex-col gap-1">
+                    <p class="text-[12px] uppercase tracking-wider text-white font-semibold">Scheduled Appointments</p>
+                    <p class="text-[15px] font-medium">{{ scheduled_appointments|length }} Patient{{ scheduled_appointments|length|pluralize }} currently in queue</p>
+                </div>
+                <div class="flex items-center gap-3 min-w-0 pb-1">
+                    <div class="flex -space-x-3">
+                        {% for appointment in scheduled_appointments|slice:":3" %}
+                            <div class="w-8 h-8 rounded-full border-2 border-[#0088FF] text-[11px] font-bold flex items-center justify-center text-white 
+                                        {% if forloop.counter == 1 %}bg-[#6c5ce7] ring-2 ring-[#6c5ce7]{% elif forloop.counter == 2 %}bg-[#e84393] ring-2 ring-[#e84393]{% else %}bg-[#00b894] ring-2 ring-[#00b894]{% endif %}">
+                                {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <p class="text-sm text-white font-medium truncate">
+                        {% for appointment in scheduled_appointments|slice:":3" %}Pt. {{ appointment.user.userprofile.first_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </p>
+                </div>
             </div>
-            <div class="flex flex-col">
-                <p class="text-xs text-[#64748B]">Ongoing Orders</p>
-                <p class="text-xl font-bold text-[#0F172A] leading-tight">
-                {{ ongoing_orders_count|default:"0" }}
-                </p>
-            </div>
-        </div>
-
-        <!-- Average Response Time -->
-        <div class="flex items-center gap-2 px-3 py-2 lg:py-1">
-            <div class="w-9 h-9 rounded-xl bg-[#FEFCE8] text-[#EAB308] flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined !text-xl">schedule</span>
-            </div>
-            <div class="flex flex-col">
-                <p class="text-xs text-[#64748B]">Avg Response Time</p>
-                <p class="text-xl font-bold text-[#EAB308] leading-tight">
-                {{ avg_response_time|default:"0 min" }}
-                </p>
-            </div>
-        </div>
-
-        <!-- Today's Appointments -->
-        <div class="flex items-center gap-2 px-3 py-2 lg:py-1">
-            <div class="w-9 h-9 rounded-xl bg-[#F3F0FF] text-[#7C3AED] flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined !text-xl">calendar_today</span>
-            </div>
-            <div class="flex flex-col">
-                <p class="text-xs text-[#64748B]">Today's Appointments</p>
-                <p class="text-xl font-bold text-[#0F172A] leading-tight">
-                {{ total_appointments_today }}
-                </p>
-            </div>
-        </div>
-
         </div>
 
         {# ===================== OVERVIEW ===================== #}
-        <div class="flex flex-col gap-3">
+        <div class="w-full flex flex-col gap-3">
             <div class="flex justify-between items-center">
                 <p class="font-semibold text-xl text-[#0F172A]">Overview</p>
 
@@ -269,75 +217,93 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {# Total appointments #}
-                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col gap-2">
-                    <div class="flex items-start justify-between">
-                        <p class="text-sm text-[#475569]">
-                            {% if date_filter == "week" %}Total Appointments This Week
-                            {% elif date_filter == "month" %}Total Appointments This Month
-                            {% elif date_filter == "custom" %}Total Appointments{% if start_date and end_date %} ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }}){% else %} (Custom Range){% endif %}
-                            {% else %}Total Appointments Today{% endif %}
-                        </p>
+            <div class="w-full grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+                {# Today / Week / Month appointments #}
+                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-[#0088FF] !text-xl">assignment_turned_in</span>
+                        <p class="text-base text-[#475569]">
+                            {% if date_filter == "week" %}Week Appointments
+                            {% elif date_filter == "month" %}Month Appointments
+                            {% elif date_filter == "custom" %}Appointments{% if start_date and end_date %} ({{ start_date|date:"d/m" }} - {{ end_date|date:"d/m" }}){% endif %}
+                            {% else %}Today Appointments{% endif %}
+                        </p>
                     </div>
                     <p class="font-bold text-3xl text-[#0F172A]">{{ total_appointments_today }}</p>
                     <p class="text-[#0088FF] font-medium text-xs">{{ confirmed_count }} Confirmed · {{ pending_count }} Pending</p>
                 </div>
 
                 {# Pending bid requests #}
-                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col gap-2">
-                    <div class="flex items-start justify-between">
-                        <p class="text-sm text-[#475569]">Pending Bid Requests</p>
+                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-[#0088FF] !text-xl">groups</span>
+                        <p class="text-base text-[#475569]">Pending Bid Requests</p>
                     </div>
                     <p class="font-bold text-3xl text-[#0F172A]">{{ pending_requests_count }}</p>
                     <p class="text-[#0088FF] font-medium text-xs">Today</p>
                 </div>
 
                 {# Customer rating #}
-                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col gap-2">
-                    <div class="flex items-start justify-between">
-                        <p class="text-sm text-[#475569]">Customer Rating</p>
+                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-[#FACC15] !text-xl">star</span>
+                        <p class="text-base text-[#475569]">Customer Rating</p>
                     </div>
                     <p class="font-bold text-3xl text-[#0F172A]">{{ rating_percentage|default:"0" }}%</p>
-                    <p class="text-xs text-[#64748B]">
-                        {{ satisfied_patients|default:"0" }}/{{ total_reviews|default:"0" }} patients are satisfied with service
-                    </p>
+                    <div class="flex items-center gap-2">
+                        {# 5 stars, yellow fill clipped to rating % #}
+                        <div class="relative inline-flex text-[#E2E8F0]">
+                            <span class="material-symbols-outlined !text-sm">star</span><span class="material-symbols-outlined !text-sm">star</span><span class="material-symbols-outlined !text-sm">star</span><span class="material-symbols-outlined !text-sm">star</span><span class="material-symbols-outlined !text-sm">star</span>
+                            <div class="absolute inset-y-0 left-0 overflow-hidden whitespace-nowrap flex text-[#FACC15]" style="width: {{ rating_percentage|default:0 }}%">
+                                <span class="material-symbols-outlined !text-sm">star</span><span class="material-symbols-outlined !text-sm">star</span><span class="material-symbols-outlined !text-sm">star</span><span class="material-symbols-outlined !text-sm">star</span><span class="material-symbols-outlined !text-sm">star</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-[#64748B]">Based on {{ total_reviews|default:"0" }} reviews</p>
+                    </div>
+                </div>
+
+                {# Ongoing orders #}
+                <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[#7C3AED] !text-xl">deployed_code</span>
+                        <p class="text-base text-[#475569]">Ongoing Orders</p>
+                    </div>
+                    <p class="font-bold text-3xl text-[#0F172A]">{{ ongoing_orders_count|default:"0" }}</p>
+                    <p class="text-[#0088FF] font-medium text-xs">Today</p>
                 </div>
             </div>
         </div>
 
-                {# ===================== SCHEDULED APPOINTMENTS + WEEK PERFORMANCE ===================== #}
-        <div class="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 items-stretch w-full">
+        {# ===================== SCHEDULED APPOINTMENTS + WEEK PERFORMANCE (always side by side, same row, equal height) ===================== #}
+        <div class="w-full grid grid-cols-[minmax(0,63fr)_minmax(0,37fr)] gap-6 items-stretch">
 
             {# --- Scheduled appointments --- #}
             <div class="min-w-0 bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col">
-                <div class="flex justify-between items-center">
-                    <p class="font-semibold text-base text-[#0F172A]">Scheduled Appointments</p>
-                    <a href="{% url 'history' %}" class="text-[#0088FF] text-xs font-medium">View all →</a>
+                <div class="flex justify-between items-center pb-3 border-b border-[#F1F5F9]">
+                    <p class="font-semibold text-lg text-[#0F172A]">Scheduled Appointments</p>
+                    <a href="{% url 'appointment' %}" class="text-[#0088FF] text-sm font-medium inline-flex items-center gap-1">View all <span class="material-symbols-outlined !text-base">arrow_forward</span></a>
                 </div>
 
-                <div class="mt-3 flex-1 flex flex-col divide-y divide-[#F1F5F9]">
+                <div class="flex-1 flex flex-col divide-y divide-[#F1F5F9]">
                     {% for appointment in scheduled_appointments %}
                     <div class="py-4 flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-full bg-[#0088FF] text-white font-semibold text-xs flex items-center justify-center shrink-0">
+                        <div class="w-11 h-11 rounded-full bg-[#0088FF] text-white font-semibold text-sm flex items-center justify-center shrink-0">
                             {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
                         </div>
                         <div class="flex flex-col gap-1 min-w-0">
-                            <span class="w-fit rounded-full px-2 py-px border text-[9px] font-medium
+                            <span class="w-fit rounded-full px-2.5 py-0.5 border text-xs font-medium
                                 {% if appointment.consultation_type == 'home_visit' %}border-[#0088FF] text-[#0088FF]
                                 {% elif appointment.consultation_type == 'video_call' %}border-[#14B8A6] text-[#14B8A6]
                                 {% else %}border-[#22C55E] text-[#22C55E]{% endif %}">
                                 {{ appointment.consultation_type|title }}
                             </span>
-                            <p class="text-[13px] leading-tight">
-                                <span class="font-bold text-[#0F172A]">{{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}</span>
-                                <span class="ml-2 text-xs font-medium text-[#0088FF]">{{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}</span>
+                            <p class="leading-tight flex flex-wrap items-baseline gap-x-3">
+                                <span class="font-bold text-base text-[#0F172A]">{{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}</span>
+                                <span class="text-sm font-medium text-[#0088FF]">{{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}</span>
                             </p>
-                            <p class="text-[11px] text-[#64748B] truncate">{{ appointment.description|truncatechars:40 }}</p>
-                            <p class="text-[10px] text-[#94A3B8]">{{ doctor_profile.full_name }} attending</p>
+                            <p class="text-sm text-[#64748B] truncate">{{ appointment.description|truncatechars:50 }}</p>
+                            <p class="text-xs text-[#94A3B8]">{{ doctor_profile.full_name }} attending</p>
                         </div>
                     </div>
                     {% empty %}
@@ -345,43 +311,43 @@
                         <div class="w-12 h-12 rounded-full bg-[#EFF6FF] text-[#0088FF] flex items-center justify-center">
                             <span class="material-symbols-outlined">event_available</span>
                         </div>
-                        <p class="text-sm font-medium text-[#0F172A]">No scheduled appointments</p>
-                        <p class="text-xs text-[#94A3B8]">Accepted appointments will appear here.</p>
+                        <p class="text-base font-medium text-[#0F172A]">No scheduled appointments</p>
+                        <p class="text-sm text-[#94A3B8]">Accepted appointments will appear here.</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
             {# --- This week performance --- #}
-            <div class="min-w-0 bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col gap-3">
+            <div class="min-w-0 bg-white border border-[#E2E8F0] rounded-2xl p-6 flex flex-col gap-5">
                 <div class="flex justify-between items-center">
-                    <p class="font-semibold text-base text-[#0F172A]">This Week Performance</p>
-                    <span class="text-[11px] text-[#94A3B8]">{{ week_range|default:"" }}</span>
+                    <p class="font-semibold text-lg text-[#0F172A]">This Week Performance</p>
+                    <span class="text-sm text-[#94A3B8]">{{ week_range|default:"" }}</span>
                 </div>
 
-                <div class="grid grid-cols-2 border border-[#F1F5F9] text-left pl-[1.0px]">
-                    <div class="py-4 p1-2 border-r border-b border-[#F1F5F9]">
-                        <p class="px-2 text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ consults_won|default:"0" }}</p>
-                        <p class="px-2 text-[10px] text-[#94A3B8]">Consults Won</p>
+                <div class="grid grid-cols-2 border border-[#E2E8F0] rounded-lg overflow-hidden">
+                    <div class="py-4 text-center border-r border-b border-[#E2E8F0]">
+                        <p class="text-4xl leading-10 font-medium text-[#0F172A]">{{ consults_won|default:"0" }}</p>
+                        <p class="text-sm text-[#64748B] mt-1">Consults Won</p>
                     </div>
-                    <div class="py-4 p1-2 border-b border-[#F1F5F9]">
-                        <p class="px-2 text-[26px] leading-8 font-extrabold text-[#E11D48]">{{ no_shows|default:"0" }}</p>
-                        <p class="px-2 text-[10px] text-[#94A3B8]">No Shows</p>
+                    <div class="py-4 text-center border-b border-[#E2E8F0]">
+                        <p class="text-4xl leading-10 font-medium text-[#E11D48]">{{ no_shows|default:"0" }}</p>
+                        <p class="text-sm text-[#64748B] mt-1">No Shows</p>
                     </div>
-                    <div class="py-4 p1-2 border-r border-[#F1F5F9]">
-                        <p class="px-2 text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ bids_answered|default:"0" }}</p>
-                        <p class="px-2 text-[10px] text-[#94A3B8]">Bids Answered</p>
+                    <div class="py-4 text-center border-r border-[#E2E8F0]">
+                        <p class="text-4xl leading-10 font-medium text-[#0F172A]">{{ bids_answered|default:"0" }}</p>
+                        <p class="text-sm text-[#64748B] mt-1">Bid Answered</p>
                     </div>
-                    <div class="py-4">
-                        <p class="px-2 text-[26px] leading-8 font-extrabold text-[#0F172A]">{{ docs_shared|default:"0" }}</p>
-                        <p class="px-2 text-[10px] text-[#94A3B8]">Docs Shared</p>
+                    <div class="py-4 text-center">
+                        <p class="text-4xl leading-10 font-medium text-[#E11D48]">{{ lost_bids|default:"0" }}</p>
+                        <p class="text-sm text-[#64748B] mt-1">Lost Bid</p>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-3">
-                    <p class="text-[11px] font-bold text-[#0F172A] uppercase">Target vs Actual</p>
+                <div class="flex flex-col gap-4">
+                    <p class="text-sm font-bold text-[#0F172A] uppercase">Target vs Actual</p>
                     <div>
-                        <div class="flex justify-between text-xs text-[#475569] mb-1.5">
+                        <div class="flex justify-between text-sm text-[#475569] mb-2">
                             <span>Median Start Delay</span>
                             <span class="font-bold text-[#0F172A]">{{ median_start_delay|default:"0" }} min</span>
                         </div>
@@ -390,7 +356,7 @@
                         </div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs text-[#475569] mb-1.5">
+                        <div class="flex justify-between text-sm text-[#475569] mb-2">
                             <span>Bid Conversion Rate</span>
                             <span class="font-bold text-[#0F172A]">{{ bid_conversion_rate|default:"0" }}%</span>
                         </div>
@@ -402,128 +368,144 @@
             </div>
         </div>
 
-        {# ===================== APPOINTMENT REQUESTS TABLE ===================== #}
-        <div class="bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden">
-            <div class="flex justify-between items-center px-6 py-4">
-                <p class="font-semibold text-lg text-[#0F172A]">Appointment Requests</p>
-                <a href="{% url 'appointment' %}" class="text-[#0088FF] text-sm font-medium">View all →</a>
+       {# ===================== TODAY APPOINTMENT TABLE ===================== #}
+        <div class="w-full bg-white border border-[#E2E8F0] rounded-2xl p-4 flex flex-col gap-4">
+            <div class="flex justify-between items-center px-1">
+                <p class="font-semibold text-lg text-[#0F172A]">Today Appointment</p>
+                <a href="{% url 'appointment' %}" class="text-[#0088FF] text-sm font-medium inline-flex items-center gap-1">View all <span class="material-symbols-outlined !text-base">arrow_forward</span></a>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[760px] text-sm">
+                <table class="w-full min-w-[960px] border-collapse">
                     <thead>
-                        <tr class="bg-[#f8f8ff] text-[#c0c0c0] text-[11px] font-medium tracking-wide">
-                            <th class="py-3 px-3 text-left font-normal">PATIENT</th>
-                            <th class="py-3 px-3 text-center font-normal">DATE &amp; TIME</th>
-                            <th class="py-3 px-3 text-center font-normal">MODE</th>
-                            <th class="py-3 px-3 text-center font-normal">URGENCY</th>
-                            <th class="py-3 px-3 text-center font-normal">BUDGET</th>
-                            <th class="py-3 px-3 text-center font-normal">ACTIONS</th>
+                        <tr class="bg-[#0088FF] text-white text-xs font-medium uppercase tracking-wide">
+                            <th class="py-4 px-5 text-left font-medium rounded-tl-lg">Appointment / Patient</th>
+                            <th class="py-4 px-3 text-center font-medium">Health Issue</th>
+                            <th class="py-4 px-3 text-center font-medium">Date / Time</th>
+                            <th class="py-4 px-3 text-center font-medium">Mode</th>
+                            <th class="py-4 px-3 text-center font-medium">Fee / Budget</th>
+                            <th class="py-4 px-3 text-center font-medium">Status</th>
+                            <th class="py-4 px-3 text-center font-medium rounded-tr-lg">Actions</th>
                         </tr>
                     </thead>
-                                <tbody class="divide-y divide-[#F1F5F9]">
-                {% for appointment in appointment_requests %}
-                <tr id="appointment-row-{{ appointment.id }}" class="appointment-row hover:bg-[#EFF6FF] transition-colors">
+                    <tbody class="divide-y divide-[#F1F5F9]">
+                        {% for appointment in appointment_requests %}
+                        <tr id="appointment-row-{{ appointment.id }}" class="appointment-row hover:bg-[#EFF6FF] transition-colors">
 
-                    {# Patient #}
-                    <td class="py-3 px-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-[#0088FF] text-white text-xs font-semibold flex items-center justify-center shrink-0">
-                                {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
-                            </div>
-                            <div class="flex flex-col min-w-0">
-                                <p class="font-semibold text-[13px] text-[#0F172A] truncate">
-                                    Pt. {{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}
-                                </p>
-                                <p class="text-[11px] text-[#94A3B8] truncate">
-                                    {{ appointment.description|truncatechars:30 }}
-                                </p>
-                            </div>
-                        </div>
-                    </td>
+                            {# Patient #}
+                            <td class="py-4 px-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-[#0088FF] text-white text-sm font-semibold flex items-center justify-center shrink-0">
+                                        {{ appointment.user.userprofile.first_name|slice:":1" }}{{ appointment.user.userprofile.last_name|slice:":1" }}
+                                    </div>
+                                    <div class="flex flex-col min-w-0">
+                                        <p class="font-semibold text-sm text-[#0F172A] truncate">
+                                            {{ appointment.user.userprofile.first_name }} {{ appointment.user.userprofile.last_name }}
+                                        </p>
+                                        <p class="text-xs text-[#94A3B8]">APT-{{ appointment.id }}</p>
+                                    </div>
+                                </div>
+                            </td>
 
-                    {# Date #}
-                    <td class="py-3 px-3 text-center text-[#475569] text-xs">
-                        {{ appointment.preferred_date_time|date:"d/m/Y, h:i A" }}
-                    </td>
+                            {# Health issue #}
+                            <td class="py-4 px-3 text-center">
+                                <p class="text-sm text-[#0F172A]">{{ appointment.description|truncatechars:28 }}</p>
+                                <span class="mt-1 inline-block rounded px-2.5 py-0.5 text-xs font-medium bg-[#DBEAFE] text-[#0088FF]">
+                                    {% if appointment.urgency == 'emergency' or appointment.urgency == 'Emergency' %}Quick Service{% else %}Regular Service{% endif %}
+                                </span>
+                            </td>
 
-                    {# Mode #}
-                    <td class="py-3 px-2">
-                        <div class="w-full py-2 rounded-lg text-center text-[10px] font-semibold
-                            {% if appointment.consultation_type == 'home_visit' %}bg-[#EFF6FF] text-[#0088FF]
-                            {% elif appointment.consultation_type == 'video_call' %}bg-[#F0FDFA] text-[#14B8A6]
-                            {% elif appointment.consultation_type == 'audio_call' %}bg-[#FAF5FF] text-[#A855F7]
-                            {% elif appointment.consultation_type == 'hospital_visit' %}bg-[#F5F3FF] text-[#7C3AED]
-                            {% else %}bg-[#F0FDF4] text-[#22C55E]{% endif %}">
-                            {{ appointment.consultation_type|title }}
-                        </div>
-                    </td>
+                            {# Date / time #}
+                            <td class="py-4 px-3 text-center">
+                                <p class="text-sm text-[#0F172A]">{{ appointment.preferred_date_time|date:"d M Y" }}</p>
+                                <p class="text-xs text-[#94A3B8]">{{ appointment.preferred_date_time|date:"h:i A" }}{% if appointment.duration %} · {{ appointment.duration }} min{% endif %}</p>
+                            </td>
 
-                    {# Urgency #}
-                    <td class="py-3 px-2">
-                        {% if appointment.urgency == 'emergency' or appointment.urgency == 'Emergency' %}
-                        <div class="w-full py-2 rounded-lg text-center text-[10px] font-semibold bg-[#FFE4E6] text-[#E11D48]">
-                            Emergency
-                        </div>
-                        {% else %}
-                        <div class="w-full py-2 rounded-lg text-center text-[10px] font-semibold bg-[#F1F5F9] text-[#64748B]">
-                            Normal
-                        </div>
-                        {% endif %}
-                    </td>
+                            {# Mode #}
+                            <td class="py-4 px-3 text-center">
+                                <span class="inline-block rounded-full px-3 py-0.5 border text-xs font-medium
+                                    {% if appointment.consultation_type == 'home_visit' %}border-[#0088FF] text-[#0088FF]
+                                    {% elif appointment.consultation_type == 'video_call' %}border-[#14B8A6] text-[#14B8A6]
+                                    {% elif appointment.consultation_type == 'audio_call' or appointment.consultation_type == 'voice_call' %}border-[#D946EF] text-[#D946EF]
+                                    {% elif appointment.consultation_type == 'hospital_visit' %}border-[#7C3AED] text-[#7C3AED]
+                                    {% else %}border-[#22C55E] text-[#22C55E]{% endif %}">
+                                    {{ appointment.consultation_type|title }}
+                                </span>
+                                {% if appointment.consultation_type == 'home_visit' and appointment.distance %}
+                                <p class="text-xs text-[#94A3B8] mt-1">{{ appointment.distance }} km away</p>
+                                {% endif %}
+                            </td>
 
-                    {# Budget #}
-                    <td class="py-3 px-2 text-center font-semibold text-[#0088FF] text-xs">
-                        {% if appointment.budget %}&#8377;{{ appointment.budget }}{% else %}&ndash;{% endif %}
-                    </td>
+                            {# Fee / budget #}
+                            <td class="py-4 px-3 text-center font-medium text-[#0F172A] text-sm">
+                                {% if appointment.budget %}&#8377;{{ appointment.budget }}{% else %}&ndash;{% endif %}
+                            </td>
 
-                    {# Actions #}
-                    <td class="py-3 px-3">
-                        <div class="flex items-center justify-center gap-3">
+                                                      {# Status - Updated to handle case-insensitivity #}
+                            <td class="py-4 px-3 text-center">
+                                {% with status_lower=appointment.status|lower %}
+                                    {% if status_lower == 'confirmed' or status_lower == 'accepted' %}
+                                        <span class="inline-block rounded px-3 py-0.5 text-xs font-medium bg-[#F0FDF4] text-[#22C55E]">Confirmed</span>
+                                    {% else %}
+                                        <span class="inline-block rounded px-3 py-0.5 text-xs font-medium bg-[#FEFCE8] text-[#EAB308]">In Progress</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
 
-                            {# View #}
-                            <button type="button"
-                                    class="text-[#808080] flex items-center justify-center hover:text-[#0066CC] transition-colors popup-btn appointment-detail-btn"
-                                    data-id="{{ appointment.id }}"
-                                    title="View details">
-                                <span class="material-symbols-outlined !text-xl">visibility</span>
-                            </button>
+                            {# Actions - UPDATED TO MATCH IMAGE #}
+                            <td class="py-4 px-3">
+                                <div class="flex items-center justify-center gap-3">
+                                    <button type="button"
+                                            class="text-[#0088FF] flex items-center justify-center hover:text-[#0066CC] transition-colors popup-btn appointment-detail-btn"
+                                            data-id="{{ appointment.id }}"
+                                            title="View details">
+                                        <span class="material-symbols-outlined !text-xl">visibility</span>
+                                    </button>
 
-                            {# Accept #}
-                            <button type="button"
-                                    class="w-6 h-6 rounded-full border-2 border-[#0088FF] text-[#0088FF] flex items-center justify-center hover:bg-[#EFF6FF] transition-colors place-bid-btn"
-                                    data-id="{{ appointment.id }}"
-                                    title="Accept appointment">
-                                <span class="material-symbols-outlined !text-xl -mr-1">check</span>
-                            </button>
-
-                            {# Reject #}
-                            <button type="button"
-                                    class="w-6 h-6 rounded-full border-2 border-[#E11D48] text-[#E11D48] flex items-center justify-center hover:bg-[#FFF1F2] transition-colors reject-bid-btn"
-                                    data-id="{{ appointment.id }}"
-                                    data-url="{% url 'reject_doctor_bid' %}"
-                                    title="Reject appointment">
-                                <span class="material-symbols-outlined !text-lg">close</span>
-                            </button>
-
-                        </div>
-                    </td>
-
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="py-10 text-center text-sm text-[#64748B]">
-                        No pending appointments available
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+                                    <button type="button"
+                                            class="text-[#94A3B8] flex items-center justify-center hover:text-[#64748B] transition-colors"
+                                            title="More options">
+                                        <span class="material-symbols-outlined !text-xl">more_vert</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-10 text-center text-sm text-[#64748B]">
+                                No pending appointments available
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
+            </div>
+
+            {# Footer #}
+            <div class="flex items-center justify-between px-1">
+                {% if page_obj %}
+                <p class="text-sm text-[#64748B]">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</p>
+                <div class="flex items-center gap-3 text-sm">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-1.5 rounded-lg border border-[#E2E8F0] text-[#0F172A] hover:bg-[#EFF6FF]">Previous</a>
+                    {% else %}
+                    <span class="px-4 py-1.5 rounded-lg border border-[#E2E8F0] text-[#94A3B8]">Previous</span>
+                    {% endif %}
+                    <span class="text-[#0F172A]">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-1.5 rounded-lg border border-[#E2E8F0] text-[#0F172A] hover:bg-[#EFF6FF]">Next</a>
+                    {% else %}
+                    <span class="px-4 py-1.5 rounded-lg border border-[#E2E8F0] text-[#94A3B8]">Next</span>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-sm text-[#64748B]">Showing {{ appointment_requests|length }} appointment{{ appointment_requests|length|pluralize }}</p>
+                {% endif %}
             </div>
         </div>
 
         {# ===================== MARKET TRENDS ===================== #}
-        <div class="bg-white border border-[#0088FF] rounded-2xl p-6 flex flex-col gap-4">
+        <div class="w-full bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col gap-4">
             <div class="flex items-start justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-lg bg-[#EFF6FF] text-[#0088FF] flex items-center justify-center">
@@ -534,7 +516,7 @@
                         <p class="text-xs text-[#64748B]">Real-time localized demand patterns in your specialty jurisdiction</p>
                     </div>
                 </div>
-                <span class="text-sm font-semibold text-[#0088FF]">&#8377;{{ avg_winning_bid|default:"0" }} →</span>
+                <a href="{% url 'appointment' %}" class="text-sm font-semibold text-[#0088FF]">&#8377;{{ avg_winning_bid|default:"0" }} →</a>
             </div>
 
             <ul class="flex flex-col gap-3 text-sm text-[#0F172A]">
@@ -558,8 +540,7 @@
             </a>
         </div>
 
-        {# ===================== APPOINTMENT REQUEST DETAIL POPUP ===================== #}
-        <div class="fixed inset-0 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden z-40">
+       <div class="fixed inset-0 flex items-center justify-center bg-semi-transparent-black appointmentRequestDetail hidden z-40">
             <div class="bg-white h-[500px] md:h-[650px] lg:h-[720px] mx-2 md:mx-0 overflow-y-auto no-scrollbar p-5 rounded-2xl">
                 <div class="flex items-center justify-between">
                     <p class="font-semibold text-base text-[#0F172A]">Appointment Details</p>
@@ -943,7 +924,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 {% endblock %}
