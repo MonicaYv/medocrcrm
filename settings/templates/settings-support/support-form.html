@@ -1,26 +1,36 @@
 <!-- Track or Report Issue -->
 <div class="space-y-2">
   <h1 class="font-semibold text-base">Report or Track an Issue</h1>
-  <form action="#" class="support-form issue-form space-y-4">
+  <form action="#" class="support-form issue-form space-y-4{% if user.user_type == 'pharmacy' %} pharmacy-support-form{% endif %}">
     <div class="w-full flex flex-col sm:flex-row items-center gap-5">
       <select
         name="issue_type"
         id="issue_type"
         class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md"
       >
-      <option>Select Issue Type</option>
+      {% if user.user_type == 'pharmacy' %}
+      <option value="" selected>Select Issue Type</option>
+      {% else %}
+      <option value="" selected disabled>Select Issue Type</option>
+      {% endif %}
         {% for issue_type in issue_types %}
         <option value="{{ issue_type.id }}">{{ issue_type.name }}</option>
         {% endfor %}
       </select>
 
-      <select name="select_issue" id="select_issue" class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md">
-        <option value="">Select Issue Option</option>
+      <select name="select_issue" id="select_issue" class="w-full focus:outline-none focus:ring-0 border-1 cursor-pointer p-2 rounded-md" disabled>
+        <option value="" selected>Select an issue type first</option>
 
         {% for option in issue_options %}
-          <option value="{{ option.id }}">
-            {{ option.issue_type.name }} – {{ option.name }}
+          {% if user.user_type == 'pharmacy' %}
+        <option value="{{ option.id }}" data-issue-type="{{ option.issue_type_id }}" hidden>
+            {{ option.name }}
           </option>
+          {% else %}
+        <option value="{{ option.id }}">
+          {{ option.issue_type.name }} – {{ option.name }}
+        </option>
+          {% endif %}
         {% endfor %}
       </select>
 
@@ -43,7 +53,7 @@
           id="ngo-issue-image"
           type="file"
           accept="image/*"          
-          class="ngo-issue-image hidden"
+          class="ngo-issue-image sr-only"
         />
         <!-- <input
           name="image"
@@ -85,6 +95,9 @@
         Submit
       </button>
     </div>
+    {% if user.user_type == 'pharmacy' %}
+    <p class="pharmacy-ticket-success hidden text-sm font-semibold text-green-700" role="status" aria-live="polite"></p>
+    {% endif %}
   </form>
   <div class="w-full h-0.5 rounded bg-{{ primary_bg }} mt-7"></div>
 </div>

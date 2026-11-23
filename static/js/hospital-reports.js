@@ -28,10 +28,10 @@ $(document).ready(function () {
     barChart = new Chart(barCtx.getContext("2d"), {
       type: "bar",
       data: {
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "July", "Aug", "Sept", "Oct", "Nov", "Dec"],
+        labels: [],
         datasets: [{
           label: "Requests",
-          data: [120, 160, 70, 150, 100, 50, 80, 100, 59, 90, 150, 200],
+          data: [],
           backgroundColor: ["#3b82f6", "#EF4444", "#FFB95A", "#84CC16", "#22C55E", "#1BC0C4", "#083684", "#8B5CF6", "#A855F7", "#6366F1", "#EC4899", "#3B82F6"]
         }]
       },
@@ -48,9 +48,9 @@ $(document).ready(function () {
     pieChart = new Chart(pieCtx.getContext("2d"), {
       type: "pie",
       data: {
-        labels: ["Direct (15%)", "NGO Referrals (35%)", "Ads (50%)"],
+        labels: [],
         datasets: [{
-          data: [15, 35, 50],
+          data: [],
           backgroundColor: ["#EF4444", "#155DFC", "#FFB95A"]
         }]
       },
@@ -67,10 +67,10 @@ $(document).ready(function () {
     lineChart = new Chart(lineCtx.getContext("2d"), {
       type: "line",
       data: {
-        labels: ["10:00", "10:30", "11:00", "11:30"],
+        labels: [],
         datasets: [{
-          label: "CBC",
-          data: [320, 340, 310, 360],
+          label: "Appointments",
+          data: [],
           borderColor: "#3b82f6",
           fill: false
         }]
@@ -105,27 +105,6 @@ $(document).ready(function () {
       }
     });
   }
-  // --------- 5. RATINGS FEEDBACK RENDERING ----------
-  const ratingData = [
-    { stars: 5, percent: 74 },
-    { stars: 4, percent: 54 },
-    { stars: 3, percent: 38 },
-    { stars: 2, percent: 18 },
-    { stars: 1, percent: 3 }
-  ];
-  $("#ratings").empty();
-  ratingData.forEach((r) => {
-    $("#ratings").append(`
-      <div class="flex items-center justify-between">
-        <span class="text-dodger-blue">${r.stars} star</span>
-        <div class="w-3/4 bg-[#D3D3D3] rounded-full h-2">
-          <div class="bg-[#FFCC48] h-2 rounded-full" style="width:${r.percent}%;"></div>
-        </div>
-        <span>${r.percent}%</span>
-      </div>
-    `);
-  });
-
   // --------- 6. INTERACTIVE DROPDOWN HANDLERS ----------
   $(".filterToggle").on("click", function (e) {
     e.stopPropagation();
@@ -151,11 +130,21 @@ $(document).ready(function () {
     $dropdown.find(".dropdown-menu").toggleClass("hidden");
   });
 
-  $(document).on("click", ".dropdown-menu li", function (e) {
-    e.stopPropagation();
-    const $dropdown = $(this).closest(".dropdown");
-    $dropdown.find(".dropdown-value").text($(this).text());
-    $dropdown.find(".dropdown-menu").addClass("hidden");
+  $(document).on("click", ".dropdown-menu li", function (e) {
+    e.stopPropagation();
+    const selected = $(this).text().trim();
+    const $dropdown = $(this).closest(".dropdown");
+    $dropdown.find(".dropdown-value").text(selected);
+    $dropdown.find(".dropdown-menu").addClass("hidden");
+    if ($dropdown.closest("#departmentRevenueSection").length && barChart) {
+      const source = window.lastHospitalReportData?.most_requested_test;
+      if (!source) return;
+      const index = source.labels.indexOf(selected);
+      const showAll = selected.toLowerCase() === "all departments";
+      barChart.data.labels = showAll ? source.labels : (index >= 0 ? [source.labels[index]] : []);
+      barChart.data.datasets[0].data = showAll ? source.data : (index >= 0 ? [source.data[index]] : []);
+      barChart.update();
+    }
   });
 
   // --------- 7. DOWNLOAD CONTEXT TO PDF (ROBUST MULTI-TARGET REPORT ENGINE) ----------
@@ -414,7 +403,7 @@ $(document).ready(function () {
       if (targetId === "lineChart") {
         filename = "Hospital_Load_Analytics_Report.pdf";
         const dateRange = $("#loadAnalyticsSection .chart-date-label").text().trim() || "Today";
-        drawReportHeader(pdf, "Hospital Load Analytics Report", "Hourly Facility Inflow & CBC Patient Volume Distribution", dateRange);
+        drawReportHeader(pdf, "Hospital Load Analytics Report", "Appointment counts by hour", dateRange);
 
         // Chart Visual
         let chartDataUrl = null;
@@ -445,23 +434,23 @@ $(document).ready(function () {
         // Table Data
         const labels = (typeof lineChart !== "undefined" && lineChart && lineChart.data && lineChart.data.labels)
           ? lineChart.data.labels
-          : (window.lastHospitalReportData?.bid_trend?.labels || ["10:00 AM"]);
+          : (window.lastHospitalReportData?.bid_trend?.labels || []);
         const values = (typeof lineChart !== "undefined" && lineChart && lineChart.data && lineChart.data.datasets && lineChart.data.datasets[0])
           ? lineChart.data.datasets[0].data
-          : (window.lastHospitalReportData?.bid_trend?.cbc || [0]);
+          : (window.lastHospitalReportData?.bid_trend?.cbc || []);
 
-        const tableHeaders = ["#", "Time Slot / Hour", "Parameter / Test", "Patient Volume", "Capacity Status"];
-        const colWidths = [12, 45, 45, 40, 40];
+        const tableHeaders = ["#", "Time Slot / Hour", "Metric", "Appointments"];
+        const colWidths = [15, 60, 60, 50];
         const tableRows = labels.map((label, idx) => {
           const val = Number(values[idx] || 0);
-          const status = val >= 300 ? "Peak Hours" : (val >= 100 ? "Moderate" : "Normal Inflow");
-          return [idx + 1, label, "CBC / Patient Load", val, status];
+          const status = "";
+          return [idx + 1, label, "Appointments", val];
         });
 
         const totalVol = values.reduce((acc, v) => acc + (Number(v) || 0), 0);
         const peakVol = values.length ? Math.max(...values.map(Number)) : 0;
         const avgVol = values.length ? Math.round(totalVol / values.length) : 0;
-        tableRows.push(["-", "Summary Total", "All Hours Tracked", totalVol, `Peak: ${peakVol} | Avg: ${avgVol}/hr`]);
+        tableRows.push(["-", "Summary Total", "All Hours Tracked", totalVol]);
 
         drawReportTable(pdf, tableHeaders, tableRows, startTableY + 4, colWidths);
       }
@@ -495,17 +484,14 @@ $(document).ready(function () {
 
         // Extract State Data
         let statesList = [];
-        if (window.polygonSeries && window.polygonSeries.data && window.polygonSeries.data.length) {
-          statesList = window.polygonSeries.data;
-        } else if (window.lastHospitalReportData?.heatmap?.labels) {
-          statesList = window.lastHospitalReportData.heatmap.labels.map((lbl, i) => ({
-            id: lbl,
-            value: window.lastHospitalReportData.heatmap.data[i] || 0
-          }));
-        }
-
-        if (!statesList.length) {
-          statesList = [{ id: "IN-MH (Maharashtra)", value: 11 }];
+        if (window.lastHospitalReportData?.heatmap?.labels) {
+          statesList = window.lastHospitalReportData.heatmap.labels.map((label, index) => ({
+            id: window.lastHospitalReportData.heatmap.ids?.[index] || label,
+            name: label,
+            value: window.lastHospitalReportData.heatmap.data[index] || 0
+          }));
+        } else if (window.polygonSeries && window.polygonSeries.data && window.polygonSeries.data.length) {
+          statesList = window.polygonSeries.data;
         }
 
         const stateNameMap = {
@@ -514,18 +500,18 @@ $(document).ready(function () {
           "IN-UP": "Uttar Pradesh", "IN-MP": "Madhya Pradesh", "IN-WB": "West Bengal"
         };
 
-        const totalPatients = statesList.reduce((acc, item) => acc + (Number(item.value) || 0), 0) || 1;
+        const totalPatients = statesList.reduce((acc, item) => acc + (Number(item.value) || 0), 0);
         const tableHeaders = ["#", "Geographic Region / State", "Region Code", "Patient Count", "Regional Share %"];
         const colWidths = [12, 60, 35, 40, 35];
         const tableRows = statesList.map((item, idx) => {
-          const rawId = item.id || "IN-MH";
-          const stateName = stateNameMap[rawId] || rawId.replace("IN-", "");
+          const rawId = item.id || "—";
+          const stateName = item.name || stateNameMap[rawId] || rawId.replace("IN-", "");
           const val = Number(item.value) || 0;
-          const share = Math.round((val / totalPatients) * 100) + "%";
+          const share = (totalPatients ? Math.round((val / totalPatients) * 100) : 0) + "%";
           return [idx + 1, stateName, rawId, val, share];
         });
 
-        tableRows.push(["-", "All Regions Combined", "National Total", totalPatients, "100%"]);
+        tableRows.push(["-", "All Regions Combined", "Hospital Total", totalPatients, totalPatients ? "100%" : "0%"]);
         drawReportTable(pdf, tableHeaders, tableRows, startTableY + 4, colWidths);
       }
 
@@ -616,16 +602,16 @@ $(document).ready(function () {
 
         const labels = (typeof barChart !== "undefined" && barChart?.data?.labels)
           ? barChart.data.labels
-          : (window.lastHospitalReportData?.most_requested_test?.labels || ["OPD"]);
+          : (window.lastHospitalReportData?.most_requested_test?.labels || []);
         const values = (typeof barChart !== "undefined" && barChart?.data?.datasets?.[0]?.data)
           ? barChart.data.datasets[0].data
-          : (window.lastHospitalReportData?.most_requested_test?.data || [0]);
+          : (window.lastHospitalReportData?.most_requested_test?.data || []);
 
-        const tableHeaders = ["#", "Department Name", "Revenue Amount (INR)", "Performance Category"];
+        const tableHeaders = ["#", "Department Name", "Revenue Amount (INR)", "Record Status"];
         const colWidths = [15, 65, 55, 47];
         const tableRows = labels.map((lbl, idx) => {
           const val = Number(values[idx]) || 0;
-          return [idx + 1, lbl, "₹" + val.toLocaleString("en-IN"), "Active Department"];
+          return [idx + 1, lbl, "₹" + val.toLocaleString("en-IN"), "Accepted/completed"];
         });
 
         drawReportTable(pdf, tableHeaders, tableRows, startTableY + 4, colWidths);
@@ -1133,12 +1119,23 @@ $(".calendar-icon")
             url: "/reports/hospital-report-data/", type: "GET",
             data: { filter: selectedFilter, visit_type: selectedVisitType, start_date: startDate, end_date: endDate },
             success: function (response) {
-                window.lastHospitalReportData = response;
+                window.lastHospitalReportData = response;
+                const departmentMenu = document.querySelector("#departmentRevenueSection .dropdown-menu");
+                if (departmentMenu && response.most_requested_test) {
+                    departmentMenu.replaceChildren();
+                    ["All departments", ...response.most_requested_test.labels].forEach((label) => {
+                        const option = document.createElement("li");
+                        option.className = "px-4 py-2 hover:bg-blue-haze cursor-pointer";
+                        option.textContent = label;
+                        departmentMenu.appendChild(option);
+                    });
+                    $("#departmentRevenueSection .dropdown-value").text("All departments");
+                }
                 console.log("Filtered data:", response);
                 const stats = response.stats || {};
                 $("#totalRevenue").text(stats.revenue || "₹0");
                 $("#highestRevenue").text(stats.highest_revenue || "₹0");
-                $("#growth").text(stats.growth || "0%");
+                $("#quarterGrowth").text(stats.growth || "0%");
                 $("#avgRevenue").text(stats.avg_revenue || "₹0");
                 $("#totalAppointments").text(stats.total_appointments ?? 0);
                 if (typeof barChart !== "undefined" && barChart) {
@@ -1277,7 +1274,7 @@ function loadDashboardData(filterType) {
 
                 let heatmapData = [];
                 response.heatmap.labels.forEach((state, index) => {
-                    const mapId = stateMap[state.trim()];
+                    const mapId = response.heatmap.ids?.[index] || stateMap[state.trim()];
                     if (mapId) {
                         heatmapData.push({ 
                             id: mapId, 
@@ -1286,7 +1283,7 @@ function loadDashboardData(filterType) {
                     }
                 });
 
-                window.polygonSeries.data = heatmapData.length ? heatmapData : [{ id: "IN-MH", value: 0 }];
+                window.polygonSeries.data = heatmapData;
                 
                 if (window.heatmapChart) {
                     window.polygonSeries.invalidateRawData();

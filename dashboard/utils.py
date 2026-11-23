@@ -10,6 +10,8 @@ from settings.models import UserColorScheme
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
+from django.shortcuts import redirect
+from django.urls import reverse
 import datetime
 from registration.models import (
     User,
@@ -76,14 +78,43 @@ def dashboard_login_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         user_id = request.session.get('user_id')
-        if not user_id:
+        user_type = request.session.get('user_type')
+
+        if not user_id or not user_type:
             return redirect('login')
-        # Optionally: attach the user object
+
         request.user_obj = User.objects.filter(id=user_id).first()
+
         if not request.user_obj:
+            request.session.flush()
             return redirect('login')
+
         return view_func(request, *args, **kwargs)
+
     return never_cache(_wrapped_view)
+
+
+
+def get_existing_login_redirect(request):
+    user_id = request.session.get("user_id")
+    user_type = request.session.get("user_type")
+
+    if not user_id:
+        return None
+
+    user = User.objects.filter(id=user_id, is_active=True).first()
+
+    if not user:
+        request.session.flush()
+        return None
+
+    # Keep the session's user type consistent with the database
+    user_type = (user.user_type or "").strip().lower()
+
+    request.session["user_type"] = user_type
+
+    # Redirect authenticated user to their existing dashboard
+    return redirect("dashboard")
 
 def get_common_context(request, user):
     user = request.user_obj

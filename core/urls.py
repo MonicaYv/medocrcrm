@@ -30,6 +30,9 @@ urlpatterns = [
     path('services/', include('services.urls')),
     path('staff/', include('staff.urls')),
     path('history/', include('history.urls')),
+    path('offers/', include('offers.urls')),
+    path('payout/', include('payout.urls')),
+    path('inventory/', include('inventory.urls')),
 # ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ]
 
@@ -47,3 +50,11 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+from django.views.generic.base import RedirectView
+
+urlpatterns += [
+    path('offers/', RedirectView.as_view(url='/coupons/', permanent=False), name='offers_redirect'),
+    path('inventory/', RedirectView.as_view(url='/services/', permanent=False), name='inventory_redirect'),
+    path('payout/', RedirectView.as_view(url='/dashboard/advance/', permanent=False), name='payout_redirect'),
+]

@@ -444,7 +444,8 @@ const ENQUIRY_TEMPLATES = {
 
     ${status === "pending" ? `
       <div class="pt-4 flex justify-center gap-2 mb-2">
-        <button class="accept-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10">
+        <button class="accept-appointment bg-dodger-blue text-white rounded-lg w-[180px] h-10"
+          data-appointment-id="${appointmentId}">
           Accept
         </button>
       </div>
@@ -873,18 +874,16 @@ $(document).on("click", ".place-bid-btn", function () {
 
 
 // ── Accept button inside popup ───────────────────────────────
-$(document).on("click", ".accept-button, .hospital-accept-button, .accept-appointment", function () {
-
-    const appointmentId = $(".appointmentRequestDetail, .modal-pending")
-        .filter(":visible")
-        .attr("data-appointment-id");
+$(document).on("click", ".accept-appointment", function () {
+    const appointmentId = $(this).data("appointment-id") ||
+        $(this).closest(".modal-pending").attr("data-appointment-id");
 
     if (!appointmentId) {
-        toastr.error("Appointment ID not found");
+        toastr.error("Appointment not found");
         return;
     }
 
-    _placeBid(appointmentId, null);
+    _placeBid(appointmentId);
 });
 
 
@@ -1117,14 +1116,7 @@ $(document).on("click", ".close-popup, .modal-close-pending", function () {
 
 
 // ── Reject/cancel from popup (no API, UI only) ───────────────
-$(document).on("click", ".reject-button", function () {
 
-    $(".appointmentRequestDetail, .modal-pending")
-        .addClass("hidden")
-        .removeClass("flex");
-
-    toastr.info("Dismissed");
-});
 // ===============================
 // SEARCH APPOINTMENT BY NAME
 // ===============================

@@ -21,7 +21,9 @@ def support_view(request):
     issue_types = IssueType.objects.all()
     search_query = request.GET.get('search', '').strip()
 
-    issue_types = IssueType.objects.exclude(name='chatbot_query').all()
+    issue_types = IssueType.objects.exclude(name='chatbot_query').filter(
+        user_types__contains=[user.user_type]
+    )
     tickets = SupportTicket.objects.filter(user_id=user.id).order_by('-created_at')
     faqs = FAQ.objects.filter(profile_type=user.user_type)
 
@@ -44,8 +46,13 @@ def support_view(request):
 
 @dashboard_login_required
 def get_issue_options(request):
+    user = request.user_obj
     issue_type_id = request.GET.get('issue_type_id')
-    options = IssueOption.objects.filter(issue_type_id=issue_type_id)
+    options = IssueOption.objects.filter(
+        issue_type_id=issue_type_id,
+        issue_type__user_types__contains=[user.user_type],
+        user_types__contains=[user.user_type],
+    )
     data = [{'id': opt.id, 'name': opt.name} for opt in options]
     return JsonResponse({'options': data})
 
@@ -213,14 +220,20 @@ def submit_support_ticket(request):
                 image_file,
                 subdir='support_issues',
                 field_label='Support Ticket Image',
-                user_type='user'
+                user_type=user.user_type,
+                user=user,
             )
             if error:
                 return JsonResponse({'success': False, 'message': error}, status=400)
 
         if issue_type_id and issue_option_id:
             try:
-                issue_option = IssueOption.objects.get(id=issue_option_id, issue_type_id=issue_type_id)
+                issue_option = IssueOption.objects.get(
+                    id=issue_option_id,
+                    issue_type_id=issue_type_id,
+                    issue_type__user_types__contains=[user.user_type],
+                    user_types__contains=[user.user_type],
+                )
                 ticket = SupportTicket.objects.create(
                     user=user,
                     created_by=user,

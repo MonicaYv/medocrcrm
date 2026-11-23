@@ -9,7 +9,10 @@ from django.db.models.functions import Concat
 from django.utils import timezone
 from datetime import date, datetime, timedelta
 import re
-from registration.models import DoctorProfile, LabProfile, DoctorSpeciality
+from registration.models import DoctorProfile, LabProfile, DoctorSpeciality, PharmacyProfile
+from services.models import PharmacyBidding, PharmacyBidStatus
+from orders.models import UserPurchase
+from decimal import Decimal
 from django.views.decorators.http import require_GET, require_POST
 from dashboard.models import SettingMenu
 from dashboard.utils import (
@@ -347,7 +350,7 @@ def appointment_details(request, appointment_id):
             return JsonResponse({"success": False, "message": "Appointment not found"})
 
         profile = appointment.user.userprofile
-
+        
         return JsonResponse({
             "success": True,
             "appointment": {
@@ -363,6 +366,7 @@ def appointment_details(request, appointment_id):
                 ),
                 "service_type": appointment.service_type,
                 "order_id": f"LAB-{appointment.id}",
+                "service_type": appointment.service_type or "",
             }
         })
 
@@ -370,34 +374,61 @@ def appointment_details(request, appointment_id):
     elif user_type == "doctor":
         appointment = DoctorAppointment.objects.select_related(
             "user__userprofile",
-            "address",
+            "address__city",
+            "address__state",
         ).filter(id=appointment_id).first()
 
         if not appointment:
-            return JsonResponse({"success": False, "message": "Appointment not found"})
+            return JsonResponse({
+                "success": False,
+                "message": "Appointment not found"
+            })
 
         profile = appointment.user.userprofile
         address = appointment.address
+
+        full_address = ""
+
+        if address:
+            full_address = ", ".join(
+                str(value) for value in [
+                    address.address,
+                    address.city.name if address.city else "",
+                    address.state.name if address.state else "",
+                    address.pincode,
+                    address.country,
+                ] if value
+            )
 
         return JsonResponse({
             "success": True,
             "appointment": {
                 "id": appointment.id,
-                "patient_name": f"{profile.first_name} {profile.last_name or ''}",
-                "gender": profile.gender,
-                "age": profile.age,
-                "phone": appointment.user.phone_number,
-                "address": address.address if address else "",
-                "consultation_type": appointment.consultation_type,
+                "patient_name": (
+                    f"{profile.first_name} {profile.last_name or ''}".strip()
+                ),
+                "gender": profile.gender or "",
+                "age": profile.age or "",
+                "phone": (
+                    f"{appointment.user.phone_country_code or ''}"
+                    f"{appointment.user.phone_number or ''}"
+                ),
+                "address": full_address,
+                "consultation_type": appointment.consultation_type or "",
+                "service_type": appointment.service_type or "",
                 "appointment_date": (
-                    appointment.preferred_date_time.strftime("%d/%m/%Y, %I:%M %p")
+                    appointment.preferred_date_time.strftime(
+                        "%d/%m/%Y, %I:%M %p"
+                    )
                     if appointment.preferred_date_time else ""
                 ),
-                "details": appointment.description,
+                "details": appointment.description or "",
                 "budget": float(appointment.budget or 0),
                 "order_id": f"DOC-{appointment.id}",
+                "profile_photo": profile.profile_photo_path or "",
             }
         })
+
 
     # ── HOSPITAL ──────────────────────────────────────
     elif user_type == "hospital":
@@ -439,6 +470,56 @@ def appointment_details(request, appointment_id):
                 "details": appointment.description.description if appointment.description else "",
                 "budget": str(appointment.budget if hasattr(appointment, "budget") else "0"),
                 "order_id": f"APT-{appointment.id}",
+            }
+        })
+
+    elif user_type == "pharmacy":
+        pharmacy_profile = PharmacyProfile.objects.filter(user=user).first()
+        if not pharmacy_profile:
+            return JsonResponse({"success": False, "message": "Pharmacy profile not found"})
+
+        order_id = request.POST.get("order_id") or appointment_id
+        if not order_id:
+            return JsonResponse({"success": False, "message": "Order ID is required"})
+
+        order = UserPurchase.objects.defer("prescriptions", "doctor_name", "patient_name").filter(id=order_id).first()
+        if not order:
+            return JsonResponse({"success": False, "message": "Order not found"})
+
+        if PharmacyBidding.objects.filter(order=order, pharmacy=pharmacy_profile, is_active=True).exists():
+            return JsonResponse({"success": False, "message": "You have already submitted a bid for this order."})
+
+        raw_bid_amount = request.POST.get("bid_amount", "").strip()
+        bid_amount = Decimal(raw_bid_amount) if raw_bid_amount else (order.final_amount or order.total_amount or Decimal("0.00"))
+        raw_delivery_time = request.POST.get("delivery_time", "30").strip()
+        delivery_time = int(raw_delivery_time) if raw_delivery_time.isdigit() else 30
+        remarks = request.POST.get("remarks", "").strip() or None
+
+        bid_gst = (bid_amount * Decimal("0.18")).quantize(Decimal("0.01"))
+        total_amount = (bid_amount + bid_gst).quantize(Decimal("0.01"))
+
+        with transaction.atomic():
+            bid = PharmacyBidding.objects.create(
+                order=order,
+                pharmacy=pharmacy_profile,
+                bid_amount=bid_amount,
+                bid_gst=bid_gst,
+                total_amount=total_amount,
+                delivery_time=delivery_time,
+                remarks=remarks,
+                bid_status=PharmacyBidStatus.PENDING,
+                is_active=True,
+            )
+
+        return JsonResponse({
+            "success": True,
+            "message": "Bid submitted successfully!",
+            "bid": {
+                "bid_id": bid.id,
+                "bid_amount": float(bid.bid_amount),
+                "bid_gst": float(bid.bid_gst),
+                "total_amount": float(bid.total_amount),
+                "delivery_time": bid.delivery_time,
             }
         })
 
@@ -931,3 +1012,86 @@ def place_bid(request):
         })
 
     return JsonResponse({"success": False, "message": "Invalid user type"})
+@require_POST
+@dashboard_login_required
+def reject_doctor_bid(request):
+    user = request.user_obj
+
+    if user.user_type != "doctor":
+        return JsonResponse({
+            "success": False,
+            "message": "Unauthorized action"
+        }, status=403)
+
+    doctor = DoctorProfile.objects.filter(user=user).first()
+
+    if not doctor:
+        return JsonResponse({
+            "success": False,
+            "message": "Doctor profile not found"
+        })
+
+    appointment_id = request.POST.get("appointment_id")
+
+    with transaction.atomic():
+        appointment = DoctorAppointment.objects.select_for_update().filter(
+            id=appointment_id,
+            status=AppointmentStatus.PENDING
+        ).first()
+
+        if not appointment:
+            return JsonResponse({
+                "success": False,
+                "message": "Appointment not found or already closed"
+            })
+
+        bid = DoctorBidding.objects.filter(
+            appointment=appointment,
+            doctor=doctor
+        ).order_by("-updated_at", "-id").first()
+
+        if bid:
+            if bid.bid_status == DoctorBidStatus.REJECTED:
+                return JsonResponse({
+                    "success": True,
+                    "message": "Appointment already rejected"
+                })
+
+            if bid.bid_status not in {
+                DoctorBidStatus.PENDING,
+                DoctorBidStatus.CANCELLED,
+                DoctorBidStatus.EXPIRED,
+            }:
+                return JsonResponse({
+                    "success": False,
+                    "message": "This appointment cannot be rejected"
+                })
+
+            bid.bid_status = DoctorBidStatus.REJECTED
+            bid.is_active = False
+            bid.remarks = "Rejected by doctor"
+
+            bid.save(update_fields=[
+                "bid_status",
+                "is_active",
+                "remarks",
+                "updated_at"
+            ])
+
+        else:
+            DoctorBidding.objects.create(
+                appointment=appointment,
+                doctor=doctor,
+                service_charges=0,
+                visit_charges=0,
+                total_bid_amount=0,
+                delivery_time="0",
+                remarks="Rejected by doctor",
+                is_active=False,
+                bid_status=DoctorBidStatus.REJECTED
+            )
+
+    return JsonResponse({
+        "success": True,
+        "message": "Appointment rejected successfully"
+    })

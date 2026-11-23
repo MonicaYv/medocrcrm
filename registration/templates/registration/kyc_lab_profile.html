@@ -654,6 +654,9 @@
                                     id="identity_proof_aadhar_number"
                                     class="mt-2 w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
                                     placeholder="Enter Aadhaar Number"
+                                    maxlength="12"
+                                    inputmode="numeric"
+                                    oninput="this.value = this.value.replace(/\D/g, '').slice(0, 12)"
                                     value="{{ lab_profile.identity_proof_aadhar_number|default:'' }}"
                                 >
 
@@ -731,6 +734,9 @@
                                     id="identity_proof_pan_number"
                                     class="mt-2 w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 uppercase"
                                     placeholder="Enter PAN Number"
+                                    maxlength="10"
+                                    pattern="[A-Z]{5}[0-9]{4}[A-Z]"
+                                    oninput="this.value = Array.from(this.value.toUpperCase()).reduce((value, char, index) => index !== value.length ? value : value.length < 5 ? (/[A-Z]/.test(char) ? value + char : value) : value.length < 9 ? (/[0-9]/.test(char) ? value + char : value) : value.length < 10 && /[A-Z]/.test(char) ? value + char : value, '')"
                                     value="{{ lab_profile.identity_proof_pan_number|default:'' }}"
                                 >
 

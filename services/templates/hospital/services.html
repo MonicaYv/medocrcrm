@@ -1,68 +1,740 @@
 {% extends "dashboard/layout.html" %}
-{% load static %}
-{% block title %}Services{% endblock %}
+{% block title %}Beds &amp; Facilities{% endblock %}
 
 {% block content %}
-<div class="main-section relative transition-all duration-300 main-content h-full flex-1 flex flex-col p-6 overflow-y-auto scroll">
-    <div class="show-sidebar-toggle hidden fixed top-25 left-12 z-50 h-10 w-10 bg-light-sky-blue-tint items-center justify-center rounded-r-md cursor-pointer">
-        <span class="material-symbols-outlined bold-weight text-dodger-blue">arrow_forward_ios</span>
+<div id="bedsPage" class="px-4 py-5 md:px-6 text-slate-800">
+  <div class="w-full">
+
+    <p class="text-[17px] text-ashy-blue">Home Admission Management</p>
+
+    <!-- ============ HEADER ============ -->
+    <div class="flex flex-wrap items-start justify-between gap-4 mt-3">
+      <div>
+        <h1 class="flex items-center gap-2 text-[32px] font-bold text-dark-inky-blue">
+          <span class="material-symbols-outlined text-shazam-blue !text-[32px]">bed</span>
+          Beds &amp; Facilities
+        </h1>
+        <p class="text-base text-ashy-blue mt-1">Monitor bed capacity and confirm facility availability</p>
+        <p class="text-[17px] text-ashy-blue"><span id="bfFullDate"></span> {{ hospital_profile.name|default:"Lifecare Multispeciality Hospital" }}</p>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="bfSnapshotBtn" type="button" class="flex items-center gap-2 text-[17px] font-semibold px-5 py-[12px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 whitespace-nowrap">
+          <span class="material-symbols-outlined !text-[21px]">sync</span>Update Snapshot
+        </button>
+        <div class="relative">
+          <button id="bfExportBtn" type="button" class="flex items-center gap-2 text-[17px] font-semibold px-5 py-[12px] rounded-lg border cursor-pointer transition-colors border-slate-300 text-slate-700 bg-white hover:bg-slate-50 whitespace-nowrap">
+            <span class="material-symbols-outlined !text-[21px]">download</span>Export
+            <span class="material-symbols-outlined !text-[21px]">keyboard_arrow_down</span>
+          </button>
+          <div id="bfExportMenu" class="hidden absolute right-0 top-[calc(100%+6px)] z-30 w-[200px] bg-white border border-slate-200 rounded-2xl shadow-[0_10px_30px_rgba(15,23,42,.12)] py-2">
+            <button type="button" data-export="csv" class="flex items-center gap-3 w-full text-left px-5 py-2.5 text-[18px] text-dark-inky-blue hover:bg-slate-50"><span class="material-symbols-outlined text-slate-500">description</span>Export CSV</button>
+            <button type="button" data-export="pdf" class="flex items-center gap-3 w-full text-left px-5 py-2.5 text-[18px] text-dark-inky-blue hover:bg-slate-50"><span class="material-symbols-outlined text-slate-500">description</span>Export PDF</button>
+            <button type="button" data-export="print" class="flex items-center gap-3 w-full text-left px-5 py-2.5 text-[18px] text-dark-inky-blue hover:bg-slate-50"><span class="material-symbols-outlined text-slate-500">print</span>Print</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="px-2 sm:px-4 py-4 space-y-5">
-        <div class="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined">gavel</span>
-                    <h1 class="text-xl font-medium">Services</h1>
-                </div>
-                <div id="date" class="font-normal text-base"></div>
-            </div>
-            <div class="flex flex-col gap-2 lg:items-center">
-                <div class="flex flex-col gap-2">
-                    <div class="font-normal text-base flex items-center gap-2">
-                        <span class="material-symbols-outlined !text-base">location_on</span>
-                        <span>
-                            {% if hospital_profile.city %}{{ hospital_profile.city.name }}, {% endif %}{{ hospital_profile.country|default:"India" }}
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <p>Auto Bid</p>
-                        <label class="relative inline-block w-12 h-6 cursor-pointer mt-1">
-                            <input
-                                type="checkbox"
-                                class="sr-only peer autobid-toggle"
-                                aria-label="Enable Auto Bid"
-                            >
-                            <div class="w-11 h-4 rounded-full bg-gray-300 peer-checked:bg-powder-teal transition-colors mt-0.5"></div>
-                            <div class="absolute -top-0.5 left-0 w-6 h-6 bg-gray-500 rounded-full transition-transform peer-checked:translate-x-6 peer-checked:bg-deep-teal"></div>
-                        </label>
-                        <div class="bg-gradient-to-r from-caribbean-green to-azure-radiance w-6 h-6 rounded-[7px] text-white text-xs flex items-center justify-center">Rx</div>
-                    </div>
-                </div>
-            </div>
+    <button type="button" class="mt-4 flex items-center gap-2 text-[16px] text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50">
+      <span class="material-symbols-outlined !text-[21px]">calendar_today</span>
+      Today · <span id="bfShortDate"></span>
+      <span class="material-symbols-outlined !text-[21px]">keyboard_arrow_down</span>
+    </button>
+
+    <!-- ============ STAT CARDS ============ -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mt-5">
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex justify-between items-start gap-2">
+          <span class="w-11 h-11 rounded-lg border flex items-center justify-center border-slate-200 bg-slate-100"><span class="material-symbols-outlined text-dark-inky-blue">bed</span></span>
+          <span class="text-[17px] text-grayish-blue-slate">Total</span>
         </div>
-        {% if not has_services %}
-            {% include 'hospital/partials/empty_state_page.html'%}
-        {% else %}
-            {% if has_premium %}
-                {% include 'hospital/partials/premium_section.html' %}
-            {% else %}
-                {% include 'hospital/partials/services_without_premium.html' %}
-            {% endif %}
-        {% endif %}
+        <p id="bfStatTotal" class="text-[46px] font-bold mt-4 text-dark-inky-blue leading-none"></p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex justify-between items-start gap-2">
+          <span class="w-11 h-11 rounded-lg border flex items-center justify-center border-blue-300 bg-blue-50"><span class="material-symbols-outlined text-shazam-blue">person_edit</span></span>
+          <span class="text-[17px] text-grayish-blue-slate">Occupied</span>
+        </div>
+        <p id="bfStatOccupied" class="text-[46px] font-bold mt-4 text-dark-inky-blue leading-none"></p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex justify-between items-start gap-2">
+          <span class="w-11 h-11 rounded-lg border flex items-center justify-center border-green-400 bg-green-50"><span class="material-symbols-outlined text-kyc-green">check_circle</span></span>
+          <span class="text-[17px] text-grayish-blue-slate">Available</span>
+        </div>
+        <p id="bfStatAvailable" class="text-[46px] font-bold mt-4 text-dark-inky-blue leading-none"></p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex justify-between items-start gap-2">
+          <span class="w-11 h-11 rounded-lg border flex items-center justify-center border-yellow-300 bg-yellow-50"><span class="material-symbols-outlined text-yellow-500">star</span></span>
+          <span class="text-[17px] text-grayish-blue-slate">Cleaning</span>
+        </div>
+        <p id="bfStatCleaning" class="text-[46px] font-bold mt-4 text-dark-inky-blue leading-none"></p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex justify-between items-start gap-2">
+          <span class="w-11 h-11 rounded-lg border flex items-center justify-center border-red-300 bg-red-50"><span class="material-symbols-outlined text-red-500">build</span></span>
+          <span class="text-[17px] text-grayish-blue-slate">Maint</span>
+        </div>
+        <p id="bfStatMaint" class="text-[46px] font-bold mt-4 text-dark-inky-blue leading-none"></p>
+      </div>
     </div>
-            <!-- Add Service Popup -->
-            {% include 'hospital/partials/add_services_popup.html'%}
+
+    <!-- ============ OVERALL OCCUPANCY ============ -->
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm mt-4">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-[18px] font-bold text-dark-inky-blue">Overall occupancy</p>
+          <p id="bfOccText" class="text-[16px] text-grayish-blue-slate mt-0.5"></p>
+        </div>
+        <p id="bfOccPercent" class="text-[18px] font-bold text-dark-inky-blue"></p>
+      </div>
+      <div class="h-3 rounded-full bg-slate-200 mt-3 overflow-hidden">
+        <div id="bfOccBar" class="h-full rounded-full bg-shazam-blue transition-all duration-500"></div>
+      </div>
+    </div>
+
+    <!-- ============ TABS ============ -->
+    <div id="bfTabs" class="flex gap-8 overflow-x-auto border-b border-slate-100 mt-6 px-4"></div>
+
+    <!-- ============ OVERVIEW ============ -->
+    <div id="bfPane-overview" data-bfpane class="mt-5">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[240px]">
+          <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 !text-[24px]">search</span>
+          <input data-bfsearch type="text" placeholder="Search patient, booking ID or Service..." class="w-full border border-slate-200 rounded-lg pl-11 pr-3.5 py-2.5 text-[18px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+        </div>
+        <button type="button" class="flex items-center gap-2 text-[17px] text-slate-700 bg-white border border-slate-200 rounded-lg px-5 py-2.5 hover:bg-slate-50">Filter<span class="material-symbols-outlined !text-[21px]">filter_alt</span></button>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mt-4">
+        <p class="text-[20px] font-bold text-dark-inky-blue">Bed Availability by Category</p>
+        <p class="text-[16px] text-grayish-blue-slate mt-0.5">Live operational capacity by unit</p>
+        <div class="overflow-x-auto mt-4 rounded-lg">
+          <table class="w-full min-w-[840px] text-center">
+            <thead>
+              <tr class="text-white text-[16px] uppercase tracking-wide bg-shazam-blue">
+                <th class="text-left font-medium px-5 py-4">Category</th>
+                <th class="font-medium px-4 py-4">Total</th>
+                <th class="font-medium px-4 py-4">Occupied</th>
+                <th class="font-medium px-4 py-4">Available</th>
+                <th class="font-medium px-4 py-4">Cleaning</th>
+                <th class="font-medium px-4 py-4">Maintenance</th>
+                <th class="font-medium px-4 py-4">Occupancy</th>
+                <th class="font-medium px-4 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bfCategoryRows" class="text-[17px]"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mt-4">
+        <div class="flex justify-between items-start">
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-kyc-green mt-0.5">history</span>
+            <div>
+              <p class="text-[20px] font-bold text-dark-inky-blue">Recent Activity</p>
+              <p class="text-[16px] text-grayish-blue-slate mt-0.5">Latest updates across beds and facilities</p>
+            </div>
+          </div>
+          <button id="bfViewAll" type="button" class="flex items-center gap-1 text-[16px] text-kyc-green hover:underline">View all<span class="material-symbols-outlined !text-[18px]">arrow_forward</span></button>
+        </div>
+        <div id="bfActivityPreview" class="space-y-3 mt-4"></div>
+      </div>
+    </div>
+
+    <!-- ============ BED INVENTORY ============ -->
+    <div id="bfPane-inventory" data-bfpane class="hidden mt-5">
+      <p class="flex items-center gap-2 text-[20px] font-bold text-dark-inky-blue"><span class="material-symbols-outlined">bed</span>Bed Availability</p>
+      <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+        <div class="relative w-full max-w-[420px]">
+          <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 !text-[24px]">search</span>
+          <input id="bfInvSearch" type="text" placeholder="Search patient, booking ID or Service..." class="w-full border border-slate-200 rounded-lg pl-11 pr-3.5 py-2.5 text-[18px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+        </div>
+        <button type="button" class="flex items-center gap-2 text-[17px] text-slate-700 bg-white border border-slate-200 rounded-lg px-5 py-2.5 hover:bg-slate-50">Filter<span class="material-symbols-outlined !text-[21px]">filter_alt</span></button>
+      </div>
+      <div id="bfChips" class="flex flex-wrap gap-3 mt-4"></div>
+
+      <div class="overflow-x-auto mt-4 rounded-lg bg-white border border-slate-200 shadow-sm">
+        <table class="w-full min-w-[840px] text-center">
+          <thead>
+            <tr class="text-white text-[16px] uppercase tracking-wide bg-shazam-blue">
+              <th class="font-medium px-4 py-4">Bed ID</th>
+              <th class="font-medium px-4 py-4">Category</th>
+              <th class="font-medium px-4 py-4">Ward/Location</th>
+              <th class="font-medium px-4 py-4">Status</th>
+              <th class="font-medium px-4 py-4">Last Updated</th>
+              <th class="font-medium px-4 py-4">Types</th>
+            </tr>
+          </thead>
+          <tbody id="bfInvRows" class="text-[17px]"></tbody>
+        </table>
+        <p id="bfInvEmpty" class="hidden text-[17px] text-grayish-blue-slate text-center py-10">No beds match your filters.</p>
+      </div>
+    </div>
+
+    <!-- ============ RECENT ACTIVITY ============ -->
+    <div id="bfPane-activity" data-bfpane class="hidden mt-5">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[240px]">
+          <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 !text-[24px]">search</span>
+          <input id="bfActSearch" data-bfsearch type="text" placeholder="Search patient, booking ID or Service..." class="w-full border border-slate-200 rounded-lg pl-11 pr-3.5 py-2.5 text-[18px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+        </div>
+        <button type="button" class="flex items-center gap-2 text-[17px] text-slate-700 bg-white border border-slate-200 rounded-lg px-5 py-2.5 hover:bg-slate-50">Filter<span class="material-symbols-outlined !text-[21px]">filter_alt</span></button>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mt-4">
+        <div id="bfActivityFull" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
 </div>
-{{ hospital_categories|json_script:"hospital-categories-data" }}
-{{ hospital_services|json_script:"hospital-services-data" }}
-{{ hospital_bed_rooms|json_script:"hospital-bed-rooms-data" }}
+
+<div id="bfToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-dark-inky-blue text-white text-[18px] px-[18px] py-2.5 rounded-[10px] z-[1100] hidden"></div>
+
+<!-- ============ UPDATE BED SNAPSHOT POPUP ============ -->
+<div id="m-snapshot" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
+  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[700px]">
+    <div class="flex justify-between items-start px-6 pt-5 pb-4 border-b border-slate-100">
+      <div>
+        <h3 class="text-[24px] font-bold text-dark-inky-blue">Update Bed Snapshot</h3>
+        <p class="text-[16px] text-grayish-blue-slate mt-1">Update the current operational status. The total capacity is fixed at <span id="snCap">40</span> beds</p>
+      </div>
+      <button type="button" data-close="m-snapshot" class="w-[26px] h-[26px] rounded-full border-2 border-dark-inky-blue flex items-center justify-center bg-white cursor-pointer shrink-0" title="Close"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg></button>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-[16px] text-grayish-blue-slate">Last Saved Today <span id="snSaved">9:55 AM</span></p>
+      <div id="snGroups" class="space-y-4 mt-4"></div>
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+      <button type="button" data-close="m-snapshot" class="text-[17px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+      <button id="snSave" type="button" class="text-[17px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Save Snapshot</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BED DETAIL RIGHT SIDEBAR (DRAWER) ============ -->
+<div id="m-bed" data-modal class="fixed inset-0 bg-black/60 hidden justify-end z-[1010]">
+  <aside class="bg-white h-full w-full max-w-[600px] overflow-y-auto shadow-[-10px_0_40px_rgba(15,23,42,.25)] flex flex-col">
+    <div class="flex justify-between items-start px-7 pt-6 pb-5 border-b border-slate-100">
+      <div>
+        <p id="bd-title" class="text-[26px] font-bold text-dark-inky-blue"></p>
+        <span id="bd-status" class="inline-block mt-2"></span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="material-symbols-outlined text-dark-inky-blue cursor-pointer">more_vert</span>
+        <button type="button" data-close="m-bed" class="w-[30px] h-[30px] rounded-full border-2 border-dark-inky-blue flex items-center justify-center bg-white cursor-pointer shrink-0" title="Close"><svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg></button>
+      </div>
+    </div>
+
+    <div class="flex-1 px-7">
+      <div id="bd-assign" class="hidden pt-5">
+        <p class="text-[24px] font-bold text-dark-inky-blue">Select Patient</p>
+        <div class="relative mt-3">
+          <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 !text-[24px]">search</span>
+          <input id="bdPatient" type="text" placeholder="Search patient" class="w-full border border-slate-200 rounded-lg pl-12 pr-3.5 py-3 text-[18px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+        </div>
+        <button id="bdAssign" type="button" class="mt-3 text-[17px] font-semibold px-5 py-2.5 rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Assign bed</button>
+      </div>
+
+      <div class="mt-2">
+        <div class="flex justify-between items-center py-5 border-b border-slate-100"><span class="text-[17px] text-grayish-blue-slate">Bed ID</span><span id="bd-id" class="text-[19px] font-bold text-dark-inky-blue"></span></div>
+        <div class="flex justify-between items-center py-5 border-b border-slate-100"><span class="text-[17px] text-grayish-blue-slate">Category</span><span id="bd-cat" class="text-[19px] font-bold text-dark-inky-blue"></span></div>
+        <div class="flex justify-between items-center py-5 border-b border-slate-100"><span class="text-[17px] text-grayish-blue-slate">Location</span><span id="bd-loc" class="text-[19px] font-bold text-dark-inky-blue"></span></div>
+        <div class="flex justify-between items-center py-5 border-b border-slate-100"><span class="text-[17px] text-grayish-blue-slate">Last update</span><span id="bd-upd" class="text-[19px] font-bold text-dark-inky-blue"></span></div>
+      </div>
+
+      <div class="py-6">
+        <p class="text-[24px] font-bold text-dark-inky-blue">Admission Details</p>
+        <ul class="mt-5 space-y-5">
+          <li class="flex gap-4"><span class="w-4 h-4 rounded-full bg-shazam-blue mt-1.5 shrink-0"></span><div><p class="text-[19px] font-bold text-dark-inky-blue">Bed Created</p><p class="text-[16px] text-grayish-blue-slate">Initial capacity record</p></div></li>
+          <li class="flex gap-4"><span class="w-4 h-4 rounded-full bg-kyc-green mt-1.5 shrink-0"></span><div><p class="text-[19px] font-bold text-dark-inky-blue">Marked available</p><p class="text-[16px] text-grayish-blue-slate">Operational status confirmed</p></div></li>
+          <li class="flex gap-4"><span class="w-4 h-4 rounded-full bg-instant-orange mt-1.5 shrink-0"></span><div><p class="text-[19px] font-bold text-dark-inky-blue">Marked for cleaning</p><p class="text-[16px] text-grayish-blue-slate">Today 9:15 AM</p></div></li>
+        </ul>
+        <div id="bd-occ-actions" class="hidden flex-wrap gap-3 mt-5">
+          <button type="button" id="bdLinked" class="text-[17px] px-5 py-2.5 rounded-lg border cursor-pointer transition-colors border-slate-300 text-slate-700 bg-white hover:bg-slate-50">View linked booking</button>
+          <button type="button" id="bdCleaning" class="text-[17px] px-5 py-2.5 rounded-lg border cursor-pointer transition-colors border-slate-300 text-slate-700 bg-white hover:bg-slate-50">Mark for cleaning</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-3 px-7 py-5 border-t border-slate-100">
+      <button id="bdAvail" type="button" class="text-[18px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Mark Available</button>
+      <button id="bdMaint" type="button" class="text-[18px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-slate-300 text-slate-700 bg-white hover:bg-slate-50">Mark Maintenance</button>
+    </div>
+  </aside>
+</div>
+
+<!-- ============ MARK AVAILABLE: CONFIRM (CLEANING BEDS) ============ -->
+<div id="m-avail-confirm" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1020]">
+  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[700px]">
+    <div class="flex justify-between items-center px-6 pt-5 pb-4 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl bg-blue-50 text-shazam-blue flex items-center justify-center"><span class="material-symbols-outlined">check_circle</span></span>
+        <h3 class="text-[24px] font-bold text-dark-inky-blue">Mark bed available ?</h3>
+      </div>
+      <button type="button" data-close="m-avail-confirm" class="w-[26px] h-[26px] rounded-full border-2 border-dark-inky-blue flex items-center justify-center bg-white cursor-pointer shrink-0" title="Close"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg></button>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-[17px] text-grayish-blue-slate"><b id="acId" class="text-[18px] text-dark-inky-blue mr-3"></b><span id="acCat"></span></p>
+      <p class="text-[16px] text-grayish-blue-slate mt-2"><span id="acLoc"></span> Current status <span id="acStatus"></span></p>
+      <label class="flex items-center gap-3 mt-5 text-[16px] text-slate-600 cursor-pointer">
+        <input id="acCheck" type="checkbox" class="w-5 h-5 rounded border-slate-300 accent-shazam-blue" />
+        I confirm this bed is ready for use
+      </label>
+      <p id="acError" class="hidden text-[16px] text-red-500 mt-2">Please confirm the bed is ready for use.</p>
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+      <button type="button" data-close="m-avail-confirm" class="text-[17px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+      <button id="acConfirm" type="button" class="text-[17px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Mark Available</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MARK AVAILABLE: WITH COMMENT (OTHER BEDS) ============ -->
+<div id="m-avail-comment" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1020]">
+  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[700px]">
+    <div class="flex justify-between items-center px-6 pt-5 pb-4 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl bg-blue-50 text-shazam-blue flex items-center justify-center"><span class="material-symbols-outlined">bed</span></span>
+        <div>
+          <h3 class="text-[24px] font-bold text-dark-inky-blue">Mark bed available ?</h3>
+          <p class="text-[15px] text-grayish-blue-slate">This bed will be marked as available for new admissions</p>
+        </div>
+      </div>
+      <button type="button" data-close="m-avail-comment" class="w-[26px] h-[26px] rounded-full border-2 border-dark-inky-blue flex items-center justify-center bg-white cursor-pointer shrink-0" title="Close"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg></button>
+    </div>
+    <div class="px-6 py-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[17px] text-slate-700 mb-1.5">Bed ID</label>
+          <input id="amId" type="text" readonly class="w-full border border-slate-200 rounded-lg px-3 py-3 text-[18px] text-slate-800 bg-white outline-none" />
+        </div>
+        <div>
+          <label class="block text-[17px] text-slate-700 mb-1.5">Status</label>
+          <div class="w-full border border-slate-200 rounded-lg px-3 py-2.5 bg-white"><span class="inline-block text-[15px] px-3 py-1 rounded-full border border-kyc-green text-kyc-green bg-green-50">Available</span></div>
+        </div>
+      </div>
+      <label class="block text-[17px] text-slate-700 mt-4 mb-1.5">Add Comment(optional)</label>
+      <input id="amNote" type="text" placeholder="Enter reason or notes" class="w-full border border-slate-200 rounded-lg px-3 py-3 text-[18px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+      <button type="button" data-close="m-avail-comment" class="text-[17px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+      <button id="amConfirm" type="button" class="text-[17px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Mark Available</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REPORT MAINTENANCE POPUP ============ -->
+<div id="m-maint" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1020]">
+  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[700px]">
+    <div class="flex justify-between items-center px-6 pt-5 pb-4 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl bg-blue-50 text-shazam-blue flex items-center justify-center"><span class="material-symbols-outlined">build</span></span>
+        <h3 class="text-[24px] font-bold text-dark-inky-blue">Report maintenance</h3>
+      </div>
+      <button type="button" data-close="m-maint" class="w-[26px] h-[26px] rounded-full border-2 border-dark-inky-blue flex items-center justify-center bg-white cursor-pointer shrink-0" title="Close"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg></button>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-[17px] text-grayish-blue-slate"><b id="mtId" class="text-[18px] text-dark-inky-blue mr-3"></b><span id="mtCat"></span></p>
+      <p class="text-[16px] text-grayish-blue-slate mt-2"><span id="mtLoc"></span> Current status <span id="mtStatus"></span></p>
+      <label class="block text-[17px] text-slate-700 mt-5 mb-1.5">Maintenance type</label>
+      <select id="mtType" class="w-full border border-slate-200 rounded-lg px-3 py-3 text-[17px] font-semibold text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
+        <option>General repairs</option><option>Electrical</option><option>Plumbing</option><option>Equipment fault</option>
+      </select>
+      <label class="block text-[17px] text-slate-700 mt-4 mb-1.5">Describe the maintenance needed <span class="text-[15px] text-grayish-blue-slate">No patient information</span></label>
+      <input id="mtDesc" type="text" placeholder="General repairs" class="w-full border border-slate-200 rounded-lg px-3 py-3 text-[17px] font-semibold text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+      <button type="button" data-close="m-maint" class="text-[17px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
+      <button id="mtConfirm" type="button" class="text-[17px] font-semibold px-6 py-[12px] rounded-lg border cursor-pointer transition-colors border-red-500 bg-red-500 text-white hover:opacity-90">Make Under Maintenance</button>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/tabs.js' %}"></script>
-<script src="{% static 'js/service-hospital.js' %}"></script>
-<script src="{% static 'js/common-services.js' %}"></script>
-<script src="{% static 'js/subscription.js' %}"></script>
-<script src="{% static 'js/services-autobid.js' %}"></script>
+<script src="/static/js/beds-facilities.js"></script>
+<script>
+    /* Beds & Facilities page — static/js/beds-facilities.js
+   Sample data below; replace with backend data and wire the TODO calls. */
+(function () {
+  'use strict';
+
+  /* ---------- DATA ---------- */
+  var stats = { total: 40, occupied: 28, available: 8, cleaning: 3, maintenance: 1 };
+
+  var categories = [
+    { name: 'General Ward', icon: 'bed', total: 20, occupied: 14, available: 4, cleaning: 2, maintenance: 0, percent: 70 },
+    { name: 'Private Rooms', icon: 'meeting_room', total: 8, occupied: 9, available: 2, cleaning: 0, maintenance: 1, percent: 75 },
+    { name: 'ICU', icon: 'show_chart', total: 8, occupied: 9, available: 2, cleaning: 0, maintenance: 1, percent: 75 }
+  ];
+
+  var beds = [
+    { id: 'GEN-101', category: 'General Ward', location: 'North Wing Floor 1', status: 'Occupied', updated: 'Today 9:30 AM' },
+    { id: 'GEN-102', category: 'General Ward', location: 'North Wing Floor 1', status: 'Available', updated: 'Today 9:30 AM' },
+    { id: 'GEN-103', category: 'General Ward', location: 'North Wing Floor 1', status: 'Cleaning', updated: 'Today 9:15 AM' },
+    { id: 'GEN-104', category: 'General Ward', location: 'North Wing Floor 1', status: 'Occupied', updated: 'Today 9:30 AM' },
+    { id: 'GEN-105', category: 'General Ward', location: 'North Wing Floor 1', status: 'Available', updated: 'Today 9:30 AM' },
+    { id: 'GEN-106', category: 'General Ward', location: 'North Wing Floor 1', status: 'Maintenance', updated: 'Today 9:30 AM' },
+    { id: 'GEN-107', category: 'General Ward', location: 'North Wing · Floor 1', status: 'Occupied', updated: 'Today 9:30 AM' },
+    { id: 'GEN-108', category: 'General Ward', location: 'South Wing · Floor 1', status: 'Occupied', updated: 'Today 9:30 AM' },
+    { id: 'PR-018', category: 'Private Rooms', location: 'East Wing Floor 2', status: 'Cleaning', updated: 'Today 9:22 AM' },
+    { id: 'PR-019', category: 'Private Rooms', location: 'East Wing Floor 2', status: 'Occupied', updated: 'Today 9:10 AM' },
+    { id: 'ICU-301', category: 'ICU', location: 'Critical Care Floor 3', status: 'Occupied', updated: 'Today 9:15 AM' },
+    { id: 'ICU-304', category: 'ICU', location: 'Critical Care Floor 3', status: 'Available', updated: 'Just now' }
+  ];
+
+  var activities = [
+    { title: 'ICU -04', sub: 'Bed Status changed to available', unit: 'Intensive Care Unit Just now', status: 'Available', icon: 'bed', color: 'text-shazam-blue' },
+    { title: 'PR -018', sub: 'Room cleaning initiated', unit: 'Private Rooms 8 min ago', status: 'Cleaning', icon: 'cleaning_services', color: 'text-yellow-500' },
+    { title: 'Emergency Desk', sub: 'Facility status updated to open', unit: 'Private Rooms 8 min ago', status: 'Open', icon: 'local_hospital', color: 'text-shazam-blue' },
+    { title: 'GW - 042', sub: 'Bed marked as occupied', unit: 'General Ward 20 min ago', status: 'Occupied', icon: 'bed', color: 'text-shazam-blue' },
+    { title: 'Maintenance', sub: 'Scheduled maintenance logged', unit: 'General Ward 20 min ago', status: 'Scheduled', icon: 'build', color: 'text-dark-inky-blue' }
+  ];
+
+  var STATUS_KEY = { Occupied: 'occupied', Available: 'available', Cleaning: 'cleaning', Maintenance: 'maintenance' };
+  var PILL = {
+    Available: 'border-kyc-green text-kyc-green bg-white',
+    Occupied: 'border-shazam-blue text-shazam-blue bg-white',
+    Cleaning: 'border-yellow-400 text-yellow-600 bg-yellow-50',
+    Maintenance: 'border-red-400 text-red-500 bg-red-50',
+    Open: 'border-kyc-green text-kyc-green bg-white',
+    Scheduled: 'border-purple-400 text-purple-600 bg-purple-50'
+  };
+  var TABS = [
+    { key: 'overview', label: 'Over view' },
+    { key: 'inventory', label: 'Bed Inventory' },
+    { key: 'activity', label: 'Recent Activity' }
+  ];
+
+  var state = { tab: 'overview', filter: '', search: '', bed: null, category: '' };
+
+  /* ---------- HELPERS ---------- */
+  function $(id) { return document.getElementById(id); }
+  function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function text(id, v) { var el = $(id); if (el) el.textContent = v; }
+  function pill(status) {
+    return '<span class="inline-block text-[15px] px-3 py-0.5 rounded-full border ' + (PILL[status] || '') + '">' + status + '</span>';
+  }
+  function findBed(id) { return beds.filter(function (b) { return b.id === id; })[0]; }
+
+  function openModal(id) { var m = $(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } }
+  function closeModal(id) { var m = $(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } }
+  function closeAll() { all('[data-modal]').forEach(function (m) { closeModal(m.id); }); }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $('bfToast');
+    t.textContent = msg;
+    t.classList.remove('hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.add('hidden'); }, 2400);
+  }
+
+  /* ---------- DATES ---------- */
+  function renderDates() {
+    var d = new Date();
+    var long = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/,/g, '');
+    var wd = d.toLocaleDateString('en-GB', { weekday: 'short' });
+    var rest = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    text('bfFullDate', long);
+    text('bfShortDate', wd + ', ' + rest);
+  }
+
+  /* ---------- STATS ---------- */
+  function renderStats() {
+    text('bfStatTotal', stats.total);
+    text('bfStatOccupied', stats.occupied);
+    text('bfStatAvailable', stats.available);
+    text('bfStatCleaning', stats.cleaning);
+    text('bfStatMaint', stats.maintenance);
+    var pct = Math.round((stats.occupied / stats.total) * 100);
+    text('bfOccText', stats.occupied + ' of ' + stats.total + ' beds occupied');
+    text('bfOccPercent', pct + '%');
+    $('bfOccBar').style.width = Math.min(pct, 100) + '%';
+  }
+
+  /* ---------- TABS ---------- */
+  function renderTabs() {
+    $('bfTabs').innerHTML = TABS.map(function (t) {
+      var active = t.key === state.tab;
+      return '<button type="button" data-tab="' + t.key + '" class="whitespace-nowrap text-[17px] py-3 border-b-2 cursor-pointer ' +
+        (active ? 'text-shazam-blue border-shazam-blue font-medium' : 'text-slate-700 border-transparent font-normal') + '">' + t.label + '</button>';
+    }).join('');
+    all('[data-bfpane]').forEach(function (p) { p.classList.add('hidden'); });
+    $('bfPane-' + state.tab).classList.remove('hidden');
+  }
+  function setTab(key) { state.tab = key; renderTabs(); }
+
+  /* ---------- OVERVIEW ---------- */
+  function renderCategories() {
+    $('bfCategoryRows').innerHTML = categories.map(function (c) {
+      return '<tr class="border-b border-slate-100 last:border-0">' +
+        '<td class="text-left px-5 py-6"><span class="flex items-center gap-3 font-medium text-dark-inky-blue"><span class="material-symbols-outlined">' + c.icon + '</span>' + c.name + '</span></td>' +
+        '<td class="px-4 py-6 text-grayish-blue-slate">' + c.total + '</td>' +
+        '<td class="px-4 py-6 font-bold text-dark-inky-blue">' + c.occupied + '</td>' +
+        '<td class="px-4 py-6 text-kyc-green">' + c.available + '</td>' +
+        '<td class="px-4 py-6 text-yellow-500">' + c.cleaning + '</td>' +
+        '<td class="px-4 py-6 text-red-500">' + c.maintenance + '</td>' +
+        '<td class="px-4 py-6"><div class="w-28 mx-auto text-left"><div class="h-2.5 rounded-full bg-slate-200 overflow-hidden"><div class="bf-bar h-full rounded-full bg-shazam-blue" data-w="' + c.percent + '"></div></div>' +
+        '<p class="text-[15px] text-slate-600 mt-1">' + c.percent + '%</p></div></td>' +
+        '<td class="px-4 py-6"><button type="button" data-viewbeds="' + c.name + '" class="text-[16px] px-4 py-2 rounded-lg border cursor-pointer transition-colors border-slate-300 text-slate-700 bg-white hover:bg-slate-50">View beds</button></td>' +
+        '</tr>';
+    }).join('');
+    all('.bf-bar').forEach(function (b) { b.style.width = Math.min(+b.getAttribute('data-w'), 100) + '%'; });
+  }
+
+  function activityRow(a) {
+    return '<div class="grid grid-cols-[1.2fr_1fr_auto] items-center gap-4 rounded-lg bg-slate-100 px-4 py-3.5">' +
+      '<div class="flex items-center gap-3 min-w-0"><span class="material-symbols-outlined ' + a.color + '">' + a.icon + '</span>' +
+      '<div class="min-w-0"><p class="text-[17px] font-medium text-dark-inky-blue">' + a.title + '</p><p class="text-[15px] text-grayish-blue-slate">' + a.sub + '</p></div></div>' +
+      '<p class="text-[16px] text-slate-600 text-center">' + a.unit + '</p>' +
+      '<div class="min-w-[96px] flex justify-end">' + pill(a.status) + '</div></div>';
+  }
+  function renderActivity() {
+    var q = (state.search || '').toLowerCase();
+    var list = activities.filter(function (a) { return !q || (a.title + ' ' + a.sub + ' ' + a.unit).toLowerCase().indexOf(q) > -1; });
+    $('bfActivityPreview').innerHTML = activities.slice(0, 5).map(activityRow).join('');
+    $('bfActivityFull').innerHTML = list.length ? list.map(activityRow).join('') :
+      '<p class="text-[17px] text-grayish-blue-slate text-center py-8">No activity found.</p>';
+  }
+
+  /* ---------- INVENTORY ---------- */
+  function renderChips() {
+    var defs = [
+      ['Available', 'border-kyc-green text-kyc-green bg-white'],
+      ['Occupied', 'border-shazam-blue text-shazam-blue bg-white'],
+      ['Maintenance', 'border-red-400 text-red-500 bg-red-50'],
+      ['Cleaning', 'border-yellow-400 text-yellow-600 bg-yellow-50']
+    ];
+    var html = defs.map(function (d) {
+      var on = state.filter === d[0];
+      return '<button type="button" data-chip="' + d[0] + '" class="text-[16px] px-5 py-1.5 rounded-full border cursor-pointer ' + d[1] + (on ? ' ring-2 ring-slate-300' : '') + '">' + d[0] + '</button>';
+    }).join('');
+    if (state.category) {
+      html += '<button type="button" data-clearcat class="flex items-center gap-1 text-[16px] px-5 py-1.5 rounded-full border border-slate-300 text-slate-700 bg-white cursor-pointer">' + state.category + '<span class="material-symbols-outlined !text-[18px]">close</span></button>';
+    }
+    $('bfChips').innerHTML = html;
+  }
+
+  function renderInventory() {
+    var q = (state.search || '').toLowerCase();
+    var rows = beds.filter(function (b) {
+      return (!state.filter || b.status === state.filter) && (!state.category || b.category === state.category) &&
+        (!q || (b.id + ' ' + b.category + ' ' + b.location + ' ' + b.status).toLowerCase().indexOf(q) > -1);
+    });
+    $('bfInvRows').innerHTML = rows.map(function (b) {
+      return '<tr class="border-b border-slate-100 last:border-0">' +
+        '<td class="px-4 py-6 font-bold text-shazam-blue">' + b.id + '</td>' +
+        '<td class="px-4 py-6 text-dark-inky-blue">' + b.category + '</td>' +
+        '<td class="px-4 py-6 text-dark-inky-blue">' + b.location + '</td>' +
+        '<td class="px-4 py-6">' + pill(b.status) + '</td>' +
+        '<td class="px-4 py-6 text-dark-inky-blue">' + b.updated + '</td>' +
+        '<td class="px-4 py-6"><button type="button" data-bed="' + b.id + '" class="text-[16px] text-shazam-blue hover:underline">View details</button></td></tr>';
+    }).join('');
+    $('bfInvEmpty').classList.toggle('hidden', rows.length > 0);
+  }
+
+  /* ---------- SNAPSHOT POPUP ---------- */
+  function renderSnapshot() {
+    var groups = [
+      { name: 'General Ward', n: 20 }, { name: 'Private Rooms', n: 12 },
+      { name: 'ICU', n: 8 }, { name: 'Overall totals', n: 8 }
+    ];
+    var fields = ['Occupied', 'Available', 'Cleaning', 'Maintenance'];
+    $('snGroups').innerHTML = groups.map(function (g) {
+      var opts = '';
+      for (var i = 0; i <= g.n; i++) opts += '<option value="' + i + '">' + i + '</option>';
+      return '<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">' +
+        '<div class="flex justify-between items-center"><p class="text-[21px] font-bold text-dark-inky-blue">' + g.name + '</p><p class="text-[16px] text-grayish-blue-slate">Today ' + g.n + '</p></div>' +
+        '<div class="grid grid-cols-2 gap-x-4 gap-y-3 mt-3">' +
+        fields.map(function (f) {
+          return '<div><label class="block text-[16px] text-slate-700 mb-1.5">' + f + '</label>' +
+            '<select data-snap="' + g.name + '|' + f + '" class="w-full border border-slate-200 rounded-lg px-3 py-3 text-[16px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">' +
+            '<option value="">' + f + '</option>' + opts + '</select></div>';
+        }).join('') + '</div></div>';
+    }).join('');
+  }
+
+  /* ---------- BED DETAIL POPUP ---------- */
+  function openBed(id) {
+    var b = findBed(id);
+    if (!b) return;
+    state.bed = b;
+    text('bd-title', b.id);
+    text('bd-id', b.id);
+    text('bd-cat', b.category);
+    text('bd-loc', b.location);
+    text('bd-upd', b.updated);
+    $('bd-status').innerHTML = pill(b.status);
+    $('bd-assign').classList.toggle('hidden', b.status !== 'Available');
+    var occ = $('bd-occ-actions');
+    occ.classList.toggle('hidden', b.status !== 'Occupied');
+    occ.classList.toggle('flex', b.status === 'Occupied');
+    $('bdAvail').classList.toggle('hidden', b.status === 'Available');
+    $('bdPatient').value = '';
+    openModal('m-bed');
+  }
+
+  function openAvailable() {
+    var b = state.bed;
+    if (b.status === 'Cleaning') {
+      text('acId', b.id); text('acCat', b.category); text('acLoc', b.location); text('acStatus', b.status);
+      $('acCheck').checked = false;
+      $('acError').classList.add('hidden');
+      openModal('m-avail-confirm');
+    } else {
+      $('amId').value = b.id;
+      $('amNote').value = '';
+      openModal('m-avail-comment');
+    }
+  }
+
+  function openMaintenance() {
+    var b = state.bed;
+    text('mtId', b.id); text('mtCat', b.category); text('mtLoc', b.location); text('mtStatus', b.status);
+    $('mtDesc').value = '';
+    openModal('m-maint');
+  }
+
+  /* ---------- STATUS CHANGE ---------- */
+  function changeStatus(bed, next, activityText) {
+    var prev = bed.status;
+    if (prev === next) return;
+    var pk = STATUS_KEY[prev], nk = STATUS_KEY[next];
+    if (stats[pk] > 0) stats[pk]--;
+    stats[nk]++;
+    categories.forEach(function (c) {
+      if (c.name === bed.category) {
+        if (c[pk] > 0) c[pk]--;
+        c[nk]++;
+        c.percent = Math.round((c.occupied / c.total) * 100);
+      }
+    });
+    bed.status = next;
+    bed.updated = 'Just now';
+    activities.unshift({
+      title: bed.id, sub: activityText, unit: bed.category + ' Just now', status: next,
+      icon: next === 'Maintenance' ? 'build' : (next === 'Cleaning' ? 'cleaning_services' : 'bed'),
+      color: next === 'Cleaning' ? 'text-yellow-500' : 'text-shazam-blue'
+    });
+    // TODO: POST status change to backend, then refresh from server response.
+    renderStats(); renderCategories(); renderActivity(); renderInventory();
+  }
+
+  /* ---------- EXPORT ---------- */
+  function exportCsv() {
+    var rows = [['Bed ID', 'Category', 'Location', 'Status', 'Last Updated']].concat(
+      beds.map(function (b) { return [b.id, b.category, b.location, b.status, b.updated]; }));
+    var csv = rows.map(function (r) { return r.map(function (c) { return '"' + c + '"'; }).join(','); }).join('\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'beds-facilities.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  /* ---------- EVENTS ---------- */
+  function bind() {
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      var el;
+
+      if ((el = t.closest('[data-tab]'))) { setTab(el.getAttribute('data-tab')); return; }
+      if (t.closest('#bfViewAll')) { setTab('activity'); return; }
+
+      if ((el = t.closest('[data-close]'))) { closeModal(el.getAttribute('data-close')); return; }
+      if (t.hasAttribute && t.hasAttribute('data-modal')) { closeModal(t.id); return; }
+
+      if (t.closest('#bfSnapshotBtn')) { openModal('m-snapshot'); return; }
+
+      if ((el = t.closest('[data-viewbeds]'))) {
+        state.category = el.getAttribute('data-viewbeds');
+        state.filter = '';
+        renderChips(); renderInventory(); setTab('inventory');
+        return;
+      }
+      if (t.closest('[data-clearcat]')) { state.category = ''; renderChips(); renderInventory(); return; }
+      if ((el = t.closest('[data-bed]'))) { openBed(el.getAttribute('data-bed')); return; }
+
+      if ((el = t.closest('[data-chip]'))) {
+        var f = el.getAttribute('data-chip');
+        state.filter = state.filter === f ? '' : f;
+        renderChips(); renderInventory();
+        return;
+      }
+
+      if (t.closest('#bfExportBtn')) { $('bfExportMenu').classList.toggle('hidden'); return; }
+      if ((el = t.closest('[data-export]'))) {
+        $('bfExportMenu').classList.add('hidden');
+        if (el.getAttribute('data-export') === 'csv') exportCsv(); else window.print();
+        return;
+      }
+      $('bfExportMenu').classList.add('hidden');
+    });
+
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+
+    // searches (kept in sync across tabs)
+    all('[data-bfsearch], #bfInvSearch').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        state.search = inp.value;
+        all('[data-bfsearch], #bfInvSearch').forEach(function (o) { if (o !== inp) o.value = inp.value; });
+        renderInventory(); renderActivity();
+      });
+    });
+
+    $('snSave').addEventListener('click', function () {
+      text('snSaved', new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+      // TODO: collect [data-snap] selects and POST to backend.
+      closeModal('m-snapshot');
+      toast('Snapshot saved');
+    });
+
+    $('bdAvail').addEventListener('click', openAvailable);
+    $('bdMaint').addEventListener('click', openMaintenance);
+    $('bdCleaning').addEventListener('click', function () {
+      changeStatus(state.bed, 'Cleaning', 'Bed marked for cleaning');
+      closeModal('m-bed'); toast('Bed marked for cleaning');
+    });
+    $('bdLinked').addEventListener('click', function () { toast('Opening linked booking…'); /* TODO: link to booking */ });
+
+    $('bdAssign').addEventListener('click', function () {
+      if (!$('bdPatient').value.trim()) { toast('Select a patient first'); return; }
+      changeStatus(state.bed, 'Occupied', 'Bed marked as occupied');
+      closeModal('m-bed'); toast('Bed assigned');
+    });
+
+    $('acConfirm').addEventListener('click', function () {
+      if (!$('acCheck').checked) { $('acError').classList.remove('hidden'); return; }
+      changeStatus(state.bed, 'Available', 'Bed Status changed to available');
+      closeModal('m-avail-confirm'); closeModal('m-bed'); toast('Bed marked available');
+    });
+
+    $('amConfirm').addEventListener('click', function () {
+      changeStatus(state.bed, 'Available', 'Bed Status changed to available');
+      closeModal('m-avail-comment'); closeModal('m-bed'); toast('Bed marked available');
+    });
+
+    $('mtConfirm').addEventListener('click', function () {
+      changeStatus(state.bed, 'Maintenance', 'Maintenance reported: ' + $('mtType').value);
+      closeModal('m-maint'); closeModal('m-bed'); toast('Bed moved to maintenance');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    renderDates();
+    renderStats();
+    renderTabs();
+    renderCategories();
+    renderActivity();
+    renderChips();
+    renderInventory();
+    renderSnapshot();
+    bind();
+  });
+})();
+</script>
 {% endblock %}

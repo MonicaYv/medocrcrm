@@ -403,11 +403,10 @@ $(document).on('click', '.submit-btn', function () {
 });
 
 $(document).on('click', '.add-service', function () {
-    if ($('.main-section .services-section').length) return;
-    // Only handle for pharmacy pages where hospital-categories-data doesn't exist
-    if ($("#hospital-categories-data").length > 0) return;
-    
-    const $list = $(this).closest('.step-content').find('.services-list');
+    const $pharmacySection = $(this).closest('#pharmacy-services-section');
+    if (!$pharmacySection.length) return;
+
+    const $list = $pharmacySection.find('#step-1 .services-list');
     if (!$list.length) return;
 
     clearPharmacyValidation();

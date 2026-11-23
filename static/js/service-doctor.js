@@ -176,10 +176,28 @@ $(document).on('click', '.add-service-visit', function () {
   initDoctorVisitCard(card);
 });
 
-$(document).on('click', '.remove-service, .remove-service-visit', function () {
-  $(this).closest('.service-card').remove();
-});
+// $(document).on('click', '.remove-service, .remove-service-visit', function () {
+//   $(this).closest('.service-card').remove();
+// });
+$(document).on('click', '.remove-service, .remove-service-visit', function (e) {
+    e.preventDefault();
 
+    const card = $(this).closest('.service-card');
+
+    if (card.hasClass('service-card')) {
+        const list = card.parent();
+
+        if (list.find('.service-card').length <= 1) {
+            toastr.warning("At least one entry is required.");
+            return;
+        }
+
+        const itemType = $(this).hasClass('remove-service-visit') ? 'visit' : 'service';
+        if (!window.confirm(`Remove this ${itemType} from the form?`)) return;
+
+        card.remove();
+    }
+});
 /* =========================================================
    CATEGORY → SERVICE FILTER
 ========================================================= */

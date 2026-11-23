@@ -230,7 +230,7 @@ $(document).ready(function () {
   }
 
   function renderHeatmap(rows) {
-    if (!document.getElementById("heatmap") || !window.am4core || !window.am4maps) return;
+    if (!document.getElementById("heatmap") || !window.am4core || !window.am4maps || !window.am4geodata_india2019High) return;
 
     if (heatmapSeries) {
       heatmapSeries.data = rows;
@@ -249,6 +249,8 @@ $(document).ready(function () {
       max: chart.colors.getIndex(1).brighten(-0.3),
     });
     heatmapSeries.useGeodata = true;
+    heatmapSeries.dataFields.id = "id";
+    heatmapSeries.dataFields.value = "value";
     heatmapSeries.data = rows;
 
     const polygonTemplate = heatmapSeries.mapPolygons.template;
@@ -288,6 +290,17 @@ $(document).ready(function () {
   // conflict with this page's Tailwind `hidden` classes, so pharmacy reports
   // owns these controls completely.
   $(".filterToggle, .calendar-icon").off("click");
+  // This page has one report-wide date filter. Remove duplicate chart-level
+  // calendars and their unused interval selectors so every panel follows it.
+  $(".grid .calendar-icon").each(function () {
+    const $control = $(this).closest(".flex.items-center.gap-2");
+    $control.find(".calendar-icon").remove();
+    $control.find(".report-range-text").remove();
+  });
+  $(".grid .datepicker-container").remove();
+  $("#heatmap, #lineChart").each(function () {
+    $(this).closest(".lab-report-shadow").find(".dropdown-btn").closest(".dropdown").remove();
+  });
 
   const initialParams = new URLSearchParams(window.location.search);
   let selectedStartDate = initialParams.get("period") === "custom"
@@ -490,6 +503,16 @@ $(document).ready(function () {
 
 
 // Prevent clicks inside calendars from closing them
+  // jQuery UI replaces the clicked arrow while changing months. Capture the
+  // event before that replacement so the outside-click handler still knows it
+  // originated inside the calendar.
+  const datepickerNavigationClicks = new WeakSet();
+  document.addEventListener("click", function (event) {
+    if (event.target.closest(".ui-datepicker-prev, .ui-datepicker-next")) {
+      datepickerNavigationClicks.add(event);
+    }
+  }, true);
+
 $(document).on(
     "click",
     ".filterDropdown, .datepicker-container, .ui-datepicker",
@@ -501,6 +524,7 @@ $(document).on(
 
 // Close calendars when clicking outside
 $(document).on("click", function (e) {
+    if (datepickerNavigationClicks.has(e.originalEvent)) return;
 
     if (
         !$(e.target).closest(
@@ -650,19 +674,32 @@ $(document).on(
 //     $calendar.removeClass("hidden");
 // });
 
-  $(".download-btn").on("click", function () {
+  $(".download-btn").on("click", async function () {
     const targetId = $(this).data("target");
     const target = document.getElementById(targetId);
-    if (!target || !window.jspdf) return;
+    if (!target || !window.jspdf || !window.html2canvas) return;
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.html(target, {
-      callback: function (doc) {
-        doc.save(`${targetId}.pdf`);
-      },
-      x: 10,
-      y: 10,
-    });
+    const button = this;
+    button.disabled = true;
+    try {
+      // Capture the complete report card so charts, map SVGs, and accompanying
+      // labels are exported consistently, including canvas-based charts.
+      const card = target.closest(".lab-report-shadow") || target;
+      const canvas = await html2canvas(card, { backgroundColor: "#ffffff", scale: 2, useCORS: true });
+      const pdf = new jsPDF({ orientation: canvas.width > canvas.height ? "landscape" : "portrait", unit: "pt", format: "a4" });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const scale = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
+      const width = canvas.width * scale;
+      const height = canvas.height * scale;
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", (pageWidth - width) / 2, (pageHeight - height) / 2, width, height);
+      pdf.save(`${targetId}.pdf`);
+    } catch (error) {
+      if (window.toastr) toastr.error("Unable to export this report.");
+      console.error("Pharmacy report export failed", error);
+    } finally {
+      button.disabled = false;
+    }
   });
 
   $(document).on("click", ".dropdown-btn", function (e) {

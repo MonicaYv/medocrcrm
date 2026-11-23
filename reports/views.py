@@ -14,12 +14,13 @@ from django.db.models import (
     Sum,
     Value,
 )
-from django.db.models.functions import Coalesce, Concat, ExtractWeekDay, TruncDate, TruncHour
+from django.db.models.functions import Coalesce, Concat, ExtractHour, ExtractWeekDay, TruncDate, TruncHour
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
-from appointments.models import DoctorAppointment, HospitalAppointments, LabAppointments
+from appointments.models import DoctorAppointment, HospitalAppointments, LabAppointments, HospitalAppointmentStatus
 from appointments.utils import parse_filter_date, visit_type_filter_aliases
 from dashboard.utils import (
     dashboard_login_required,
@@ -205,32 +206,23 @@ def _pharmacy_reports_context(request, user):
         Q(assigned_pharmacy=pharmacy_profile) | Q(bids__pharmacy=pharmacy_profile),
         created_at__date__gte=start_date,
         created_at__date__lte=end_date,
+    ).distinct()
+    total_orders_count = orders.count()
+    assigned_orders = UserPurchase.objects.filter(
+        assigned_pharmacy=pharmacy_profile,
+        created_at__date__gte=start_date,
+        created_at__date__lte=end_date,
     )
-    total_order_scope = (
-        Q(assigned_pharmacy=pharmacy_profile)
-        | Q(
-            assigned_pharmacy__isnull=True,
-            order_status=OrderStatusChoices.PENDING,
-        )
-        | Q(bids__pharmacy=pharmacy_profile)
+    reportable_orders = assigned_orders.exclude(
+        order_status=OrderStatusChoices.CANCELLED
     )
-    total_orders_count = (
-        UserPurchase.objects.filter(
-            total_order_scope,
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date,
-        )
-        .aggregate(total=Count("id", distinct=True))["total"]
-        or 0
-    )
-    completed_orders = orders.exclude(order_status=OrderStatusChoices.CANCELLED)
     amount_expr = Coalesce(
         "final_amount",
         "total_amount",
         Value(Decimal("0")),
         output_field=DecimalField(max_digits=12, decimal_places=2),
     )
-    revenue = completed_orders.aggregate(total=Sum(amount_expr))["total"] or Decimal("0")
+    revenue = reportable_orders.aggregate(total=Sum(amount_expr))["total"] or Decimal("0")
     won_order_statuses = [
         OrderStatusChoices.CONFIRMED,
         OrderStatusChoices.SHIPPED,
@@ -245,7 +237,7 @@ def _pharmacy_reports_context(request, user):
     ).count()
     avg_bid = bids.aggregate(avg=Avg("total_amount"))["avg"] or Decimal("0")
 
-    medicines = PurchaseMedicine.objects.filter(purchase__in=completed_orders)
+    medicines = PurchaseMedicine.objects.filter(purchase__in=reportable_orders)
     if search:
         medicines = medicines.filter(
             Q(product_name__icontains=search)
@@ -319,7 +311,7 @@ def _pharmacy_reports_context(request, user):
         .exclude(id__in=accepted_bid_order_ids)
         .annotate(weekday=ExtractWeekDay("updated_at"))
         .values("weekday")
-        .annotate(total=Count("id"))
+        .annotate(total=Count("id", distinct=True))
     )
     for row in won_order_weekday_rows:
         index = next((i for i, item in enumerate(day_order) if item[0] == row["weekday"]), None)
@@ -355,16 +347,24 @@ def _pharmacy_reports_context(request, user):
             "lost_percent": _percent(week_lost, total),
         })
 
-    stock_alerts = list(
-        PharmacyMedicine.objects.filter(pharmacy=pharmacy_profile, is_active=True)
-        .order_by("quantity", "name")
-        .values("name", "quantity")[:5]
-    )
-    for item in stock_alerts:
-        item["status"] = "Low Stock"
+    stock_alerts = []
+    stock_rows = PharmacyMedicine.objects.filter(
+        pharmacy=pharmacy_profile,
+        is_active=True,
+    ).values("name", "quantity")
+    for item in stock_rows:
+        try:
+            quantity = int(item["quantity"])
+        except (TypeError, ValueError):
+            continue
+        if quantity <= 20:
+            item["quantity"] = quantity
+            stock_alerts.append(item)
+    stock_alerts.sort(key=lambda item: (item["quantity"], item["name"].lower()))
+    stock_alerts = stock_alerts[:5]
 
     heatmap_rows = (
-        completed_orders.exclude(address__state__isnull=True)
+        reportable_orders.exclude(address__state__isnull=True)
         .values("address__state__name")
         .annotate(value=Count("id"))
     )
@@ -581,9 +581,38 @@ def reports(request):
                 Q(accepted_hospital_id=current_hospital.id) | 
                 Q(bids__hospital_id=current_hospital.id)
             ).distinct().select_related("category", "service_type")
+            report_filter = request.GET.get("filter", "all").strip().lower()
+            today = timezone.localdate()
+            if report_filter == "today":
+                report_start = report_end = today
+            elif report_filter == "week":
+                report_start, report_end = today - timedelta(days=6), today
+            elif report_filter == "month":
+                report_start, report_end = today.replace(day=1), today
+            elif report_filter == "custom":
+                try:
+                    report_start = date.fromisoformat(request.GET.get("start_date", ""))
+                    report_end = date.fromisoformat(request.GET.get("end_date", ""))
+                except ValueError:
+                    report_start = report_end = None
+                if report_start and report_end and report_start > report_end:
+                    report_start, report_end = report_end, report_start
+            else:
+                report_start = report_end = None
+            report_appointments = hospital_appointments
+            if report_start and report_end:
+                report_appointments = report_appointments.filter(
+                    created_at__date__range=(report_start, report_end)
+                )
+            elif report_filter == "custom":
+                report_appointments = report_appointments.none()
+            won_appointments = report_appointments.filter(
+                accepted_hospital=current_hospital,
+                status__in=[HospitalAppointmentStatus.ACCEPTED, HospitalAppointmentStatus.COMPLETED],
+            )
 
             # 2. Basic Overview Cards Context Metrics
-            total_revenue = hospital_appointments.aggregate(total=Sum("accepted_total_amount"))["total"] or 0
+            total_revenue = won_appointments.aggregate(total=Sum("accepted_total_amount"))["total"] or 0
             if total_revenue >= 10000000:
                 context["total_revenue"] = f"₹{round(total_revenue / 10000000, 2)} Cr"
             elif total_revenue >= 100000:
@@ -591,22 +620,29 @@ def reports(request):
             else:
                 context["total_revenue"] = f"₹{round(total_revenue, 2)}"
 
-            highest_dept = hospital_appointments.values("category__name").annotate(total=Sum("accepted_total_amount")).exclude(total__isnull=True).order_by("-total").first()
+            highest_dept = won_appointments.values("category__name").annotate(total=Sum("accepted_total_amount")).exclude(total__isnull=True).order_by("-total").first()
             context["highest_revenue"] = f"{highest_dept['category__name']}" if highest_dept else "None"
 
-            current_count = hospital_appointments.count()
-            previous_count = max(current_count - 5, 1)
-            context["growth"] = f"{abs(round(((current_count - previous_count) / previous_count) * 100, 1))}%"
-            context["avg_revenue"] = f"₹{round(hospital_appointments.aggregate(avg=Avg('accepted_total_amount'))['avg'] or 0, 2)}"
+            current_count = report_appointments.count()
+            if report_start and report_end:
+                range_days = max((report_end - report_start).days + 1, 1)
+                previous_start = report_start - timedelta(days=range_days)
+                previous_end = report_start - timedelta(days=1)
+                previous_count = hospital_appointments.filter(created_at__date__range=(previous_start, previous_end)).count()
+                growth_value = ((current_count - previous_count) / previous_count * 100) if previous_count else (100 if current_count else 0)
+                context["growth"] = f"{growth_value:+.1f}%" if previous_count else ("100.0%" if current_count else "0.0%")
+            else:
+                context["growth"] = "—"
+            context["avg_revenue"] = f"₹{round(won_appointments.aggregate(avg=Avg('accepted_total_amount'))['avg'] or 0, 2)}"
 
             # ==========================================================
             # 3. PIPELINE PATIENT FUNNEL COUNTS AND CONVERSIONS
             # ==========================================================
-            context["leads_generated"] = hospital_appointments.count()
-            context["qualified_leads"] = hospital_appointments.filter(status__in=["Accepted", "Completed"]).count()
-            context["opportunities_created"] = hospital_appointments.filter(accepted_bid__isnull=False).count()
-            context["proposals_sent"] = hospital_appointments.filter(accepted_total_amount__isnull=False).count()
-            context["deals_closed"] = hospital_appointments.filter(status="Completed").count()
+            context["leads_generated"] = report_appointments.count()
+            context["qualified_leads"] = won_appointments.count()
+            context["opportunities_created"] = report_appointments.filter(accepted_bid__isnull=False).count()
+            context["proposals_sent"] = won_appointments.filter(accepted_total_amount__isnull=False).count()
+            context["deals_closed"] = won_appointments.filter(status=HospitalAppointmentStatus.COMPLETED).count()
 
             # Dynamic Conversion Percentages
             total = context["leads_generated"] or 1
@@ -621,41 +657,41 @@ def reports(request):
             # Bar Chart: Department Revenues
             bar_labels = []
             bar_values = []
-            for item in hospital_appointments.values("category__name").annotate(total=Sum("accepted_total_amount")).exclude(total__isnull=True):
+            for item in won_appointments.values("category__name").annotate(total=Sum("accepted_total_amount")).exclude(total__isnull=True):
                 bar_labels.append(item["category__name"])
                 bar_values.append(float(item["total"] or 0))
-            context["init_bar_labels"] = bar_labels or ["OPD"]
-            context["init_bar_values"] = bar_values or [0]
+            context["init_bar_labels"] = bar_labels
+            context["init_bar_values"] = bar_values
 
             # Pie Chart: Service Bookings Count
             pie_labels = []
             pie_values = []
-            for item in hospital_appointments.values("service_type__name").annotate(total=Count("id")):
+            for item in report_appointments.values("service_type__name").annotate(total=Count("id")):
                 if item["service_type__name"]:
                     pie_labels.append(item["service_type__name"])
                     pie_values.append(item["total"])
-            context["init_pie_labels"] = pie_labels or ["Emergency"]
-            context["init_pie_values"] = pie_values or [0]
+            context["init_pie_labels"] = pie_labels
+            context["init_pie_values"] = pie_values
 
             # Line Chart: Hourly Load Analytics Datasets
-            hourly_qs = hospital_appointments.annotate(hour=TruncHour("created_at")).values("hour").annotate(total=Count("id")).order_by("hour")
+            hourly_qs = report_appointments.annotate(hour=ExtractHour("created_at")).values("hour").annotate(total=Count("id")).order_by("hour")
             line_labels = []
             line_values = []
             for item in hourly_qs:
                 if item["hour"]:
-                    line_labels.append(item["hour"].strftime("%I:%M %p"))
+                    line_labels.append(datetime.strptime(f"{item['hour']:02d}", "%H").strftime("%I:%M %p"))
                     line_values.append(item["total"])
-            context["init_line_labels"] = line_labels or ["10:00 AM"]
-            context["init_line_values"] = line_values or [0]
+            context["init_line_labels"] = line_labels
+            context["init_line_values"] = line_values
 
         else:
             context.update({
                 "total_revenue": "₹0", "highest_revenue": "None", "growth": "0%", "avg_revenue": "₹0",
                 "leads_generated": 0, "qualified_leads": 0, "opportunities_created": 0, "proposals_sent": 0, "deals_closed": 0,
                 "qualified_conversion": "0%", "opportunity_conversion": "0%", "proposal_conversion": "0%", "deals_conversion": "0%",
-                "init_bar_labels": ["OPD"], "init_bar_values": [0],
-                "init_pie_labels": ["Emergency"], "init_pie_values": [0],
-                "init_line_labels": ["10:00 AM"], "init_line_values": [0]
+                "init_bar_labels": [], "init_bar_values": [],
+                "init_pie_labels": [], "init_pie_values": [],
+                "init_line_labels": [], "init_line_values": []
             })
 
         return render(request, 'hospital_reports.html', context)
@@ -680,265 +716,111 @@ from datetime import datetime, timedelta
 
 @dashboard_login_required
 def hospital_report_data(request):
-    # ==========================================================
-    # 1. FIXED AUTH GUARD: Matches your custom user_obj framework
-    # ==========================================================
     user = getattr(request, "user_obj", None)
     if not user or not user.is_active:
         return JsonResponse({"error": "Authentication required"}, status=401)
 
-    filter_type = request.GET.get("filter", "all").strip().lower()
-    visit_type = request.GET.get("visit_type", "").strip().lower()
-    start_date = request.GET.get("start_date", "").strip()
-    end_date = request.GET.get("end_date", "").strip()
-
-    # ==========================================================
-    # 2. DYNAMIC PROFILE EXTRACT: Works for ANY hospital account
-    # ==========================================================
     try:
-        user_hospital_profile = user.hospital_profile
-    except AttributeError:
+        hospital = user.hospital_profile
+    except (AttributeError, ObjectDoesNotExist):
+        return JsonResponse({"error": "This account does not have an active hospital profile"}, status=403)
+    if not hospital:
         return JsonResponse({"error": "This account does not have an active hospital profile"}, status=403)
 
-    # ==========================================================
-    # 3. DATA ISOLATION FILTER (Uses our verified profile variable)
-    # ==========================================================
-    appointments = (
-        HospitalAppointments.objects
-        .filter(
-            Q(accepted_hospital_id=user_hospital_profile.id) | 
-            Q(bids__hospital_id=user_hospital_profile.id)
-        )
-        .distinct()
-        .select_related("category", "service_type", "address")
-    )
+    today = timezone.localdate()
+    filter_type = request.GET.get("filter", "month").strip().lower()
+    base = HospitalAppointments.objects.filter(
+        Q(accepted_hospital=hospital) | Q(bids__hospital=hospital)
+    ).distinct().select_related("category", "service_type", "address")
 
+    visit_type = request.GET.get("visit_type", "").strip().lower()
     if visit_type == "home":
-        appointments = appointments.filter(Q(preferred_mode__iexact="home") | Q(preferred_mode__iexact="home-service"))
+        base = base.filter(Q(preferred_mode__iexact="home") | Q(preferred_mode__iexact="home-service"))
     elif visit_type == "hospital":
-        appointments = appointments.filter(Q(preferred_mode__iexact="hospital") | Q(preferred_mode__iexact="visit"))
+        base = base.filter(Q(preferred_mode__iexact="hospital") | Q(preferred_mode__iexact="visit"))
 
-    # ==========================================================
-    # 4. PRINT ISOLATED DATA TO THE TERMINAL FOR INSPECTION
-    # ==========================================================
-    print("\n" + "="*60)
-    print(f"--- TERMINAL LOG: DATA FOR {user_hospital_profile.hospital_name.upper()} (ID: {user_hospital_profile.id}) ---")
-    print(f"Active Filter Type applied: {filter_type.upper()}")
-    print(f"Total Isolated Appointments for this facility: {appointments.count()}")
-    
-    # Calculate Total Revenue
-    raw_revenue = appointments.aggregate(total=Sum("accepted_total_amount"))["total"] or 0
-    print(f"Total Isolated Revenue Sum: ₹{raw_revenue:,.2f}")
-
-    # Calculate Department Breakdown
-    print("\n--- Isolated Department Breakdown (Bar Chart) ---")
-    dept_queryset = appointments.values("category__name").annotate(total=Sum("accepted_total_amount")).exclude(total__isnull=True).order_by("-total")
-    for item in dept_queryset:
-        print(f" -> Dept: {item['category__name']} | Revenue: ₹{item['total']:,.2f}")
-    if not dept_queryset.exists():
-        print(" -> No department revenue recordings found.")
-
-    # Calculate Service Type Breakdown
-    print("\n--- Isolated Service Type Breakdown (Pie Chart) ---")
-    service_queryset = appointments.values("service_type__name").annotate(total=Count("id")).order_by("-total")
-    for item in service_queryset:
-        print(f" -> Service: {item['service_type__name']} | Total Count: {item['total']}")
-    if not service_queryset.exists():
-        print(" -> No service type bookings found.")
-
-    # Funnel Analytics Checklist
-    print("\n--- Isolated Funnel Counts (Patient Journey) ---")
-    print(f" -> Leads Generated: {appointments.count()}")
-    print(f" -> Qualified Leads (Accepted/Completed): {appointments.filter(status__in=['Accepted', 'Completed']).count()}")
-    print(f" -> Opportunities Created (Has Bid): {appointments.filter(accepted_bid__isnull=False).count()}")
-    print(f" -> Deals Closed (Completed Status): {appointments.filter(status='Completed').count()}")
-    print("="*60 + "\n")
-
-    # =========================================
-    # FILTER LOGIC (Time context limits)
-    # =========================================
-    today = datetime.now().date()
-    if filter_type == "week":
-        appointments = appointments.filter(created_at__date__gte=today - timedelta(days=6), created_at__date__lte=today)
-
+    if filter_type == "today":
+        start_date = end_date = today
+    elif filter_type == "week":
+        start_date, end_date = today - timedelta(days=6), today
     elif filter_type == "month":
-        appointments = appointments.filter(created_at__year=today.year, created_at__month=today.month)
-
+        start_date, end_date = today.replace(day=1), today
     elif filter_type == "custom":
-        if not start_date or not end_date:
-            return JsonResponse({"error": "Please select a custom date."}, status=400)
         try:
-            appointments = appointments.filter(
-                created_at__date__range=(date.fromisoformat(start_date), date.fromisoformat(end_date))
-            )
+            start_date = date.fromisoformat(request.GET.get("start_date", ""))
+            end_date = date.fromisoformat(request.GET.get("end_date", ""))
         except ValueError:
-            return JsonResponse({"error": "Invalid custom date range."}, status=400)
-    elif filter_type == "today":
-        appointments = appointments.filter(created_at__date=today)
-
-    # =========================================
-    # RE-EVALUATING METRICS FOR PAYLOAD DISPATCH
-    # =========================================
-    total_revenue = appointments.aggregate(total=Sum("accepted_total_amount"))["total"] or 0
-
-    if total_revenue >= 10000000:
-        formatted_revenue = f"₹{round(total_revenue / 10000000, 2)} Cr"
-    elif total_revenue >= 100000:
-        formatted_revenue = f"₹{round(total_revenue / 100000, 2)} L"
+            return JsonResponse({"error": "Select a valid custom date range."}, status=400)
+        if start_date > end_date:
+            start_date, end_date = end_date, start_date
     else:
-        formatted_revenue = f"₹{round(total_revenue, 2)}"
+        start_date = end_date = None
 
-    highest_department = (
-        appointments
-        .values("category__name")
-        .annotate(total=Sum("accepted_total_amount"))
-        .exclude(total__isnull=True)
-        .order_by("-total")
-        .first()
+    appointments = base
+    if start_date and end_date:
+        appointments = appointments.filter(created_at__date__range=(start_date, end_date))
+
+    won = appointments.filter(
+        accepted_hospital=hospital,
+        status__in=[HospitalAppointmentStatus.ACCEPTED, HospitalAppointmentStatus.COMPLETED],
     )
+    revenue = won.aggregate(total=Sum("accepted_total_amount"))["total"] or 0
+    if revenue >= 10000000:
+        formatted_revenue = f"₹{revenue / 10000000:.2f} Cr"
+    elif revenue >= 100000:
+        formatted_revenue = f"₹{revenue / 100000:.2f} L"
+    else:
+        formatted_revenue = f"₹{revenue:.2f}"
 
-    highest_revenue = "₹0"
-    if highest_department and highest_department["total"]:
-        highest_amount = highest_department["total"]
-        if highest_amount >= 100000:
-            highest_revenue = f"₹{round(highest_amount / 100000, 2)}L"
-        else:
-            highest_revenue = f"₹{round(highest_amount, 2)}"
-
-    current_count = appointments.count()
-    previous_count = max(current_count - 5, 1)
-    growth_percent = round(((current_count - previous_count) / previous_count) * 100, 1)
-    growth = f"{abs(growth_percent)}%"
-
-    avg_revenue_patient = appointments.aggregate(avg=Avg("accepted_total_amount"))["avg"] or 0
-    avg_revenue = f"₹{round(avg_revenue_patient, 2)}"
-
-    avg_budget = appointments.aggregate(avg=Avg("budget"))["avg"] or 0
-    total_appointments = appointments.count()
-
-    # Build JSON-ready Bar arrays
-    bar_labels = []
-    bar_values = []
-    for item in appointments.values("category__name").annotate(total=Sum("accepted_total_amount")):
-        if item["category__name"]:
-            bar_labels.append(item["category__name"])
-            raw_val = item["total"] if item["total"] is not None else 0
-            bar_values.append(float(raw_val))
-
-    if not bar_labels:
-        bar_labels = ["OPD"]
-        bar_values = [0]
-
-    # Build JSON-ready Pie arrays
-    pie_labels = []
-    pie_values = []
-    for item in appointments.values("service_type__name").annotate(total=Count("id")):
-        if item["service_type__name"]:
-            pie_labels.append(item["service_type__name"])
-            pie_values.append(item["total"])
-
-    if not pie_labels:
-        pie_labels = ["Emergency"]
-        pie_values = [0]
-
-    # Hourly Line Dataset
-    hourly_queryset = appointments.annotate(hour=TruncHour("created_at")).values("hour").annotate(total=Count("id")).order_by("hour")
-    line_labels = []
-    line_values = []
-    for item in hourly_queryset:
-        if item["hour"]:
-            line_labels.append(item["hour"].strftime("%I:%M %p"))
-            line_values.append(item["total"])
-
-    if not line_labels:
-        line_labels = ["10:00 AM"]
-        line_values = [0]
-
-    # ==========================================================
-    # DYNAMIC REGIONS HEAT MAP ANALYTICS (REWRITTEN)
-    # ==========================================================
-    state_queryset = appointments.exclude(address__isnull=True).values("address__city").annotate(total=Count("id"))
-    
-    heatmap_labels = []
-    heatmap_values = []
-    
-    # Standardized lowercase mapping to prevent string mismatch gaps
-    city_state_map = {
-        "mumbai": "Maharashtra", "pune": "Maharashtra", "nagpur": "Maharashtra",
-        "delhi": "Delhi", "bangalore": "Karnataka", "chennai": "Tamil Nadu",
-        "ahmedabad": "Gujarat", "jaipur": "Rajasthan", "lucknow": "Uttar Pradesh",
-        "kolkata": "West Bengal"
-    }
-    
-    for item in state_queryset:
-        city = item["address__city"]
-        if city:
-            cleaned_city = str(city or "").strip().lower()
-            if cleaned_city in city_state_map:
-                heatmap_labels.append(city_state_map[cleaned_city])
-                heatmap_values.append(item["total"])
-
-    # CRITICAL: If no appointments match the city helper dictionary, 
-    # allocate them to the main facility state so the map visibly reflects the active dataset!
-    if not heatmap_labels:
-        heatmap_labels = ["Maharashtra"]
-        heatmap_values = [total_appointments] # Maps your 11 isolated appointments directly
-
-    # Funnel Pipeline values
+    highest = won.values("category__name").annotate(total=Sum("accepted_total_amount")).exclude(total__isnull=True).order_by("-total").first()
+    highest_revenue = highest["category__name"] if highest else "—"
     total_leads = appointments.count()
-    qualified_leads = appointments.filter(status__in=["Accepted", "Completed"]).count()
+    qualified = won.count()
     opportunities = appointments.filter(accepted_bid__isnull=False).count()
-    proposals = appointments.filter(accepted_total_amount__isnull=False).count()
-    closed = appointments.filter(status="Completed").count()
+    proposals = won.filter(accepted_total_amount__isnull=False).count()
+    closed = won.filter(status=HospitalAppointmentStatus.COMPLETED).count()
 
-    # Packaged Payload Structure
-    data = {
+    growth = "—"
+    if start_date and end_date:
+        span = max((end_date - start_date).days + 1, 1)
+        previous = base.filter(created_at__date__range=(start_date - timedelta(days=span), start_date - timedelta(days=1))).count()
+        current = total_leads
+        growth_value = (current - previous) / previous * 100 if previous else (100 if current else 0)
+        growth = f"{growth_value:+.1f}%" if previous else ("100.0%" if current else "0.0%")
+
+    departments = list(won.values("category__name").annotate(total=Sum("accepted_total_amount")).exclude(category__name__isnull=True).order_by("-total"))
+    services = list(appointments.values("service_type__name").annotate(total=Count("id")).exclude(service_type__name__isnull=True).order_by("-total"))
+    hours = appointments.annotate(hour=ExtractHour("created_at")).values("hour").annotate(total=Count("id")).order_by("hour")
+    locations = appointments.exclude(address__isnull=True).values("address__state__name").annotate(total=Count("id")).exclude(address__state__name__isnull=True).order_by("-total")
+
+    return JsonResponse({
         "stats": {
             "revenue": formatted_revenue,
             "highest_revenue": highest_revenue,
             "growth": growth,
-            "avg_revenue": avg_revenue,
-            "avg_budget": round(float(avg_budget), 2),
-            "total_appointments": total_appointments
+            "avg_revenue": f"₹{won.aggregate(avg=Avg('accepted_total_amount'))['avg'] or 0:.2f}",
+            "avg_budget": float(appointments.aggregate(avg=Avg("budget"))["avg"] or 0),
+            "total_appointments": total_leads,
         },
-        "most_requested_test": {
-            "labels": bar_labels,
-            "data": bar_values
-        },
-        "revenue_by_test": {
-            "labels": pie_labels,
-            "data": pie_values
-        },
-        "bid_trend": {
-            "labels": line_labels,
-            "cbc": line_values
-        },
+        "most_requested_test": {"labels": [row["category__name"] for row in departments], "data": [float(row["total"] or 0) for row in departments]},
+        "revenue_by_test": {"labels": [row["service_type__name"] for row in services], "data": [row["total"] for row in services]},
+        "bid_trend": {"labels": [datetime.strptime(f"{row['hour']:02d}", "%H").strftime("%I:%M %p") for row in hours if row["hour"] is not None], "cbc": [row["total"] for row in hours if row["hour"]]},
         "heatmap": {
-            "labels": heatmap_labels,
-            "data": heatmap_values
+            "labels": [row["address__state__name"] for row in locations],
+            "ids": [STATE_HEATMAP_IDS.get(row["address__state__name"].strip().lower(), "") for row in locations],
+            "data": [row["total"] for row in locations],
         },
         "patient_journey": {
             "labels": ["Leads Generated", "Qualified Leads", "Opportunities Created", "Proposals Sent", "Deals Closed"],
-            "data": [total_leads, qualified_leads, opportunities, proposals, closed],
-            "conversion": [
-                "100%",
-                f"{round((qualified_leads / total_leads) * 100) if total_leads > 0 else 0}%",
-                f"{round((opportunities / total_leads) * 100) if total_leads > 0 else 0}%",
-                f"{round((proposals / total_leads) * 100) if total_leads > 0 else 0}%",
-                f"{round((closed / total_leads) * 100) if total_leads > 0 else 0}%"
-            ]
+            "data": [total_leads, qualified, opportunities, proposals, closed],
+            "conversion": [f"{round(value / total_leads * 100) if total_leads else 0}%" for value in [total_leads, qualified, opportunities, proposals, closed]],
         },
         "package_table": [
-            {
-                "package": label,
-                "bookings": value,
-                "conversion": f"{round((value / total_appointments) * 100) if total_appointments > 0 else 0}%"
-            }
-            for label, value in zip(pie_labels, pie_values)
-        ]
-    }
+            {"package": row["service_type__name"], "bookings": row["total"], "conversion": f"{round(row['total'] / total_leads * 100) if total_leads else 0}%"}
+            for row in services
+        ],
+    })
 
-    return JsonResponse(data)
 # @dashboard_login_required
 # def hospital_report_data(request):
 

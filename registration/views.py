@@ -40,6 +40,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import requests
 import logging
+from dashboard.utils import get_existing_login_redirect
 logger = logging.getLogger(__name__)
 
 VIRUS_SCAN_URL = "http://192.168.1.99:8090/scan"
@@ -55,16 +56,32 @@ ROLE_TO_TEMPLATE = {
     'doctor': "registration/doctor_register.html",
 }
 
-@never_cache
 def new_signin(request):
+    existing_redirect = get_existing_login_redirect(request)
+
+    if existing_redirect:
+        return existing_redirect
     return render(request, 'registration/new_signin.html')
+
+def new_signup(request):
+    existing_user_id = request.session.get("user_id")
+
+    if existing_user_id:
+        existing_user = User.objects.filter(
+            id=existing_user_id,
+            is_active=True
+        ).first()
+
+        if existing_user:
+            return redirect("dashboard")
+
+        request.session.flush()
+
+    return render(request, 'registration/new_signup.html')
 
 @never_cache
 def new_otp_verify(request):
     return render(request, 'registration/new_otp_verify.html')
-
-def new_signup(request):
-    return render(request, 'registration/new_signup.html')
 
 def doctor_verification(request):
     return render(request, 'registration/doctor_verification.html')
@@ -2043,7 +2060,31 @@ def save_user(request):
 @csrf_protect
 @require_POST
 def login_auth(request):
+    # --------------------------------------------------
+    # CHECK EXISTING AUTHENTICATED SESSION FIRST
+    # --------------------------------------------------
+    existing_user_id = request.session.get("user_id")
 
+    if existing_user_id:
+        existing_user = User.objects.filter(
+            id=existing_user_id,
+            is_active=True
+        ).first()
+
+        if existing_user:
+            return JsonResponse({
+                "success": False,
+                "already_logged_in": True,
+                "message": (
+                    "You are already logged in. "
+                    "Please log out before switching accounts."
+                ),
+                "redirect": reverse("dashboard")
+            }, status=403)
+
+        # Clear invalid authentication session
+        request.session.flush()
+        
     phone_number = request.POST.get("phone_number")
 
     if not phone_number:

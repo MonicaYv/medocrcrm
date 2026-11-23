@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400..700,0..1,0" rel="stylesheet">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- CSRF for Client Subscription since we are submitting without form -->
     <meta name="csrf-token" content="{{ csrf_token }}">
     <!-- Toastr CSS -->
@@ -35,6 +35,12 @@
 </div>
 <style>
   .crm-main-area { min-width: 0; }
+  @media (min-width: 768px) {
+    body { zoom: 0.8; }
+    .crm-app-shell.h-screen { height: 125vh; }
+    .crm-app-shell .crm-app-viewport { height: calc(125vh - 72px); }
+    .crm-app-shell .sidebar { max-height: 125vh; }
+  }
   @media (max-width: 767px) {
     html, body { max-width: 100%; overflow-x: hidden; }
     .crm-main-area { min-width: 0; width: 100%; max-width: 100%; padding: .5rem; }
@@ -56,13 +62,13 @@
     #step4-main-content [id^="file-name-"] { max-width: min(45vw, 180px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   }
 </style>
-<main class="h-screen w-full">
+<main class="crm-app-shell h-screen w-full">
     <!-- Header -->
     {% block header %}
     {% include 'dashboard/header.html' %}
     {% endblock %}
     <!-- <div class="h-[calc(100vh-72px)] w-full flex"> -->
-    <div class="w-full flex h-[calc(100vh-72px)] pb-4">
+    <div class="crm-app-viewport w-full flex h-[calc(100vh-72px)] pb-4">
         <!-- Sidebar -->
         {% block sidebar %}
         {% include 'dashboard/sidebar.html' %}
@@ -110,7 +116,7 @@
   });
 </script>
 <script src="{% static 'js/common.js' %}?v=20261001-3"></script>
-<script src="/static/js/home.js?v=20261028-2"></script>
+<script src="/static/js/home.js?v=20261106-1"></script>
 <script src="/static/js/dropdown.js?v=20261029-doctor-calendar"></script>
 <script src="{% static 'js/admin-profile.js' %}"></script>
 
