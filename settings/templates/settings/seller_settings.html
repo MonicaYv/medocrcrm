@@ -4,7 +4,7 @@
 {% block title %}Settings - MedPlus Pharmacy{% endblock %}
 
 {% block content %}
-<div class="relative transition-all duration-300 main-content bg-slate-white min-h-full flex-1 flex flex-col gap-4 sm:gap-6 p-3 sm:p-5 lg:p-7 font-['Inter',sans-serif]">
+<div class="relative transition-all duration-300 main-content bg-slate-white min-h-full flex-1 flex flex-col gap-4 sm:gap-6 p-3 sm:p-5 lg:p-7 font-['Inter',sans-serif]" data-settings-user="{{ user.id }}">
 
     <!-- PAGE HEADER -->
     <div class="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -463,7 +463,7 @@
                                     <input type="checkbox" class="sr-only peer" checked>
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-dodger-blue"></div>
                                 </label>
-                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
+                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" data-working-day="Monday" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
                                     <span class="material-symbols-outlined text-[20px]">chevron_right</span>
                                 </button>
                             </div>
@@ -478,7 +478,7 @@
                                     <input type="checkbox" class="sr-only peer" checked>
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-dodger-blue"></div>
                                 </label>
-                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
+                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" data-working-day="Tuesday" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
                                     <span class="material-symbols-outlined text-[20px]">chevron_right</span>
                                 </button>
                             </div>
@@ -493,7 +493,7 @@
                                     <input type="checkbox" class="sr-only peer" checked>
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-dodger-blue"></div>
                                 </label>
-                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
+                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" data-working-day="Wednesday" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
                                     <span class="material-symbols-outlined text-[20px]">chevron_right</span>
                                 </button>
                             </div>
@@ -508,7 +508,7 @@
                                     <input type="checkbox" class="sr-only peer" checked>
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-dodger-blue"></div>
                                 </label>
-                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
+                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" data-working-day="Thursday" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
                                     <span class="material-symbols-outlined text-[20px]">chevron_right</span>
                                 </button>
                             </div>
@@ -523,7 +523,7 @@
                                     <input type="checkbox" class="sr-only peer" checked>
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-dodger-blue"></div>
                                 </label>
-                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
+                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" data-working-day="Friday" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
                                     <span class="material-symbols-outlined text-[20px]">chevron_right</span>
                                 </button>
                             </div>
@@ -538,7 +538,7 @@
                                     <input type="checkbox" class="sr-only peer" checked>
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-dodger-blue"></div>
                                 </label>
-                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
+                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" data-working-day="Saturday" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
                                     <span class="material-symbols-outlined text-[20px]">chevron_right</span>
                                 </button>
                             </div>
@@ -553,7 +553,7 @@
                                     <input type="checkbox" class="sr-only peer">
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-dodger-blue"></div>
                                 </label>
-                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
+                                <button type="button" data-nav-tab="store_hours" data-nav-subview="working_hours_edit" data-working-day="Sunday" class="text-gray-400 hover:text-dodger-blue cursor-pointer">
                                     <span class="material-symbols-outlined text-[20px]">chevron_right</span>
                                 </button>
                             </div>
@@ -631,7 +631,7 @@
                     <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-dodger-blue text-[24px]">calendar_today</span>
                         <div>
-                            <h4 class="text-base font-bold text-gray-900">Monday</h4>
+                        <h4 class="text-base font-bold text-gray-900" id="working-hours-day-title">Monday</h4>
                             <p class="text-xs text-gray-600 font-medium">Standard Working Day</p>
                         </div>
                     </div>
@@ -672,7 +672,8 @@
                 </div>
 
                 <!-- Break Interval Button -->
-                <button type="button" class="w-full py-3.5 border-2 border-dashed border-gray-300 hover:border-dodger-blue rounded-xl text-sm font-bold text-dodger-blue flex items-center justify-center gap-2 cursor-pointer transition">
+                <div id="break-interval-list" class="space-y-3"></div>
+                <button type="button" id="add-break-interval" class="w-full py-3.5 border-2 border-dashed border-gray-300 hover:border-dodger-blue rounded-xl text-sm font-bold text-dodger-blue flex items-center justify-center gap-2 cursor-pointer transition">
                     <span class="material-symbols-outlined text-[20px]">add</span>
                     <span>Add Break Interval (Lunch / Rest Shift)</span>
                 </button>

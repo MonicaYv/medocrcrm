@@ -21,6 +21,77 @@
     selectedTemplate: 'classic'
   };
 
+  const persistenceKey = `pharmacy-settings:${document.querySelector('[data-settings-user]')?.dataset.settingsUser || 'guest'}`;
+
+  function getSavedSettings() {
+    try { return JSON.parse(localStorage.getItem(persistenceKey) || '{}'); }
+    catch (_) { return {}; }
+  }
+
+  function settingsControlKey(control, index) {
+    if (control.name) return `name:${control.name}`;
+    if (control.id) return `id:${control.id}`;
+    if (!control.dataset.settingsKey) control.dataset.settingsKey = `control-${index}`;
+    return control.dataset.settingsKey;
+  }
+
+  function initializeSettingControlKeys() {
+    document.querySelectorAll('.settings-tab-panel').forEach(panel => {
+      panel.querySelectorAll('input, select, textarea').forEach((control, index) => {
+        settingsControlKey(control, index);
+      });
+    });
+  }
+
+  function restoreSavedSettings() {
+    const saved = getSavedSettings();
+    document.querySelectorAll('.settings-tab-panel').forEach(panel => {
+      const panelData = saved[panel.dataset.tabPanel];
+      if (!panelData) return;
+      panel.querySelectorAll('input, select, textarea').forEach((control, index) => {
+        const value = panelData[settingsControlKey(control, index)];
+        if (value === undefined) return;
+        if (control.type === 'checkbox' || control.type === 'radio') control.checked = Boolean(value);
+        else control.value = value;
+      });
+      if (panel.dataset.tabPanel === 'store_hours' && Array.isArray(panelData.breakIntervals)) {
+        const list = document.getElementById('break-interval-list');
+        if (list) {
+          list.replaceChildren();
+          panelData.breakIntervals.forEach(interval => {
+            const row = document.createElement('div');
+            row.className = 'flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 p-4';
+            row.innerHTML = '<label class="flex-1 min-w-[130px] text-xs font-bold text-gray-700">Break starts<input type="time" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></label><label class="flex-1 min-w-[130px] text-xs font-bold text-gray-700">Break ends<input type="time" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></label><button type="button" class="remove-break-interval rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer">Remove</button>';
+            const fields = row.querySelectorAll('input');
+            fields[0].value = interval.start || '';
+            fields[1].value = interval.end || '';
+            list.appendChild(row);
+          });
+        }
+      }
+    });
+  }
+
+  function persistPanel(panel) {
+    if (!panel) return;
+    const saved = getSavedSettings();
+    const panelData = {};
+    panel.querySelectorAll('input, select, textarea').forEach((control, index) => {
+      panelData[settingsControlKey(control, index)] =
+        control.type === 'checkbox' || control.type === 'radio' ? control.checked : control.value;
+    });
+    if (panel.dataset.tabPanel === 'store_hours') {
+      panelData.breakIntervals = Array.from(
+        panel.querySelectorAll('#break-interval-list > div'), row => {
+          const fields = row.querySelectorAll('input');
+          return { start: fields[0]?.value || '', end: fields[1]?.value || '' };
+        }
+      );
+    }
+    saved[panel.dataset.tabPanel] = panelData;
+    localStorage.setItem(persistenceKey, JSON.stringify(saved));
+  }
+
   // Toast notification helper
   function notify(message, type = 'info') {
     if (window.toastr) {
@@ -233,7 +304,30 @@
       if (navBtn) {
         const tab = navBtn.getAttribute('data-nav-tab') || settingsState.currentTab;
         const subview = navBtn.getAttribute('data-nav-subview');
+        const day = navBtn.getAttribute('data-working-day');
+        if (day) {
+          const title = document.getElementById('working-hours-day-title');
+          if (title) title.textContent = day;
+        }
         showSubView(tab, subview);
+        return;
+      }
+
+      const addBreakBtn = target.closest('#add-break-interval');
+      if (addBreakBtn) {
+        const list = document.getElementById('break-interval-list');
+        if (list) {
+          const row = document.createElement('div');
+          row.className = 'flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 p-4';
+          row.innerHTML = '<label class="flex-1 min-w-[130px] text-xs font-bold text-gray-700">Break starts<input type="time" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></label><label class="flex-1 min-w-[130px] text-xs font-bold text-gray-700">Break ends<input type="time" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></label><button type="button" class="remove-break-interval rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer">Remove</button>';
+          list.appendChild(row);
+        }
+        return;
+      }
+
+      const removeBreakBtn = target.closest('.remove-break-interval');
+      if (removeBreakBtn) {
+        removeBreakBtn.closest('#break-interval-list > div')?.remove();
         return;
       }
 
@@ -311,7 +405,13 @@
           return;
         }
 
-        notify('Settings saved successfully!', 'success');
+        const activePanel = saveBtn.closest('.settings-tab-panel');
+        try {
+          persistPanel(activePanel);
+          notify('Settings saved successfully. Your changes will remain after reloading.', 'success');
+        } catch (_) {
+          notify('Could not save settings in this browser.', 'error');
+        }
         return;
       }
 
@@ -407,6 +507,8 @@
 
   // Initialize on DOM ready
   document.addEventListener('DOMContentLoaded', function () {
+    initializeSettingControlKeys();
+    restoreSavedSettings();
     initEvents();
     switchTab('profile');
   });
