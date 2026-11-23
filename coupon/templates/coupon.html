@@ -1,4 +1,3 @@
-
 {% extends "dashboard/layout.html" %}
 {% load static %}
 {% block title %}Offers & Bids{% endblock %}
@@ -17,17 +16,17 @@
       <div class="space-y-1">
         <p class="flex items-center gap-2">
           <span class="material-symbols-outlined">work</span>
-          <span class="font-semibold text-xl text-black">Offers &amp; Bids</span>
+          <span class="font-semibold text-[24px] text-dark-inky-blue">Offers &amp; Bids</span>
         </p>
-        <p class="text-xs text-gray-500">Manage your incoming patient requests and track your bid performance</p>
+        <p class="text-[14px] text-ashy-blue">Manage your incoming patient requests and track your bid performance</p>
       </div>
-      <div class="flex items-center gap-2 text-xs text-gray-700 whitespace-nowrap">
+      <div class="flex items-center gap-2 text-[14px] text-popup-label whitespace-nowrap">
         <span>Auto Bid: ON</span>
         <label class="relative inline-flex cursor-pointer">
           <input type="checkbox" checked class="peer sr-only" />
           <span class="h-5 w-9 rounded-full bg-gray-300 transition peer-checked:bg-shazam-blue after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"></span>
         </label>
-        <button type="button" data-tab-jump="auto-bid" class="text-shazam-blue cursor-pointer">Configure &rarr;</button>
+        <button type="button" data-tab-jump="auto-bid" class="text-shazam-blue text-[14px]cursor-pointer">Configure &rarr;</button>
       </div>
     </div>
 
@@ -36,42 +35,42 @@
       <div class="rounded-lg border border-gray-200 p-3 space-y-1">
         <div class="flex items-center justify-between">
           <span class="material-symbols-outlined h-8 w-8 !flex items-center justify-center rounded-md bg-sky-100 text-shazam-blue">work</span>
-          <span class="text-[11px] text-shazam-blue">&uarr; 8 new today</span>
+          <span class="text-[12px] text-shazam-blue">&uarr; 8 new today</span>
         </div>
         <p class="text-2xl font-bold text-black">24</p>
-        <p class="text-[10px] text-gray-500">Active Requests</p>
+        <p class="text-[12px] text-grayish-blue-slate">Active Requests</p>
       </div>
       <div class="rounded-lg border border-gray-200 p-3 space-y-1">
         <div class="flex items-center justify-between">
           <span class="material-symbols-outlined h-8 w-8 !flex items-center justify-center rounded-md bg-sky-100 text-shazam-blue">send</span>
-          <span class="text-[11px] text-green-600">&uarr; 75% response rate</span>
+          <span class="text-[12px] text-kyc-green">&uarr; 75% response rate</span>
         </div>
-        <p class="text-2xl font-bold text-black">18</p>
-        <p class="text-[10px] text-gray-500">Bid Submitted Today</p>
+        <p class="text-[24px] font-bold text-black">18</p>
+        <p class="text-[12px] text-grayish-blue-slate">Bid Submitted Today</p>
       </div>
       <div class="rounded-lg border border-gray-200 p-3 space-y-1">
         <div class="flex items-center justify-between">
-          <span class="material-symbols-outlined h-8 w-8 !flex items-center justify-center rounded-md bg-orange-100 text-orange-500">emoji_events</span>
-          <span class="text-[11px] text-green-600">&uarr; 66% win rate</span>
+          <span class="material-symbols-outlined h-8 w-8 !flex items-center justify-center rounded-md bg-orange-100 text-golden-yellow">emoji_events</span>
+          <span class="text-[12px] text-kyc-green">&uarr; 66% win rate</span>
         </div>
-        <p class="text-2xl font-bold text-black">15</p>
-        <p class="text-[10px] text-gray-500">Bid Won This Week</p>
+        <p class="text-[24px] font-bold text-black">15</p>
+        <p class="text-[12px] text-grayish-blue-slate">Bid Won This Week</p>
       </div>
       <div class="rounded-lg border border-gray-200 p-3 space-y-1">
         <div class="flex items-center justify-between gap-2">
           <span class="material-symbols-outlined h-8 w-8 !flex items-center justify-center rounded-md bg-red-100 text-red-500">cancel</span>
-          <span class="text-[11px] text-red-500 text-right">&darr; 3 expired without response</span>
+          <span class="text-[12px] text-golden-yellow text-right">&darr; 3 expired without response</span>
         </div>
-        <p class="text-2xl font-bold text-black">7</p>
-        <p class="text-[10px] text-gray-500">Lost/ Expired</p>
+        <p class="text-[24px] font-bold text-black">7</p>
+        <p class="text-[12px] text-grayish-blue-slate">Lost/ Expired</p>
       </div>
       <div class="rounded-lg border border-gray-200 p-3 space-y-1 col-span-2 lg:col-span-1">
         <div class="flex items-center justify-between">
-          <span class="material-symbols-outlined h-8 w-8 !flex items-center justify-center rounded-md bg-green-100 text-green-600">check</span>
-          <span class="text-[10px] rounded-full border border-green-500 px-2 text-green-600">Completed</span>
+          <span class="material-symbols-outlined h-8 w-8 !flex items-center justify-center rounded-md bg-green-100 text-kyc-green">check</span>
+          <span class="text-[12px]  px-2 text-kyc-green">Completed</span>
         </div>
-        <p class="text-2xl font-bold text-black">&#8377;520</p>
-        <p class="text-[10px] text-gray-500">Recorded completed consultations</p>
+        <p class="text-[24px] font-bold text-black">&#8377;520</p>
+        <p class="text-[12px] text-grayish-blue-slate">Recorded completed consultations</p>
       </div>
     </div>
 
@@ -83,13 +82,13 @@
         <button type="button" data-tab="new-requests" data-active="text-shazam-blue border-shazam-blue" class="ob-tab flex items-center gap-2 px-1 pb-2 text-sm border-b-2 border-transparent text-shazam-blue border-shazam-blue cursor-pointer">
           New Requests <span class="rounded-full bg-shazam-blue px-1.5 text-[10px] text-white">24</span>
         </button>
-        <button type="button" data-tab="my-bids" data-active="text-shazam-blue border-shazam-blue" class="ob-tab flex items-center gap-2 px-1 pb-2 text-sm border-b-2 border-transparent cursor-pointer">
+        <button type="button" data-tab="my-bids" data-active="text-shazam-blue border-shazam-blue" class="ob-tab flex items-center gap-2 px-1 pb-2 text-[14px] border-b-2 border-transparent cursor-pointer">
           My Bids <span class="rounded-full bg-shazam-blue px-1.5 text-[10px] text-white">18</span>
         </button>
-        <button type="button" data-tab="accepted" data-active="text-shazam-blue border-shazam-blue" class="ob-tab flex items-center gap-2 px-1 pb-2 text-sm border-b-2 border-transparent cursor-pointer">
+        <button type="button" data-tab="accepted" data-active="text-shazam-blue border-shazam-blue" class="ob-tab flex items-center gap-2 px-1 pb-2 text-[14px] border-b-2 border-transparent cursor-pointer">
           Accepted <span class="rounded-full bg-gray-100 px-1.5 text-[10px]">2</span>
         </button>
-        <button type="button" data-tab="completed" data-active="text-shazam-blue border-shazam-blue" class="ob-tab flex items-center gap-2 px-1 pb-2 text-sm border-b-2 border-transparent cursor-pointer">
+        <button type="button" data-tab="completed" data-active="text-shazam-blue border-shazam-blue" class="ob-tab flex items-center gap-2 px-1 pb-2 text-[14px] border-b-2 border-transparent cursor-pointer">
           Completed <span class="rounded-full bg-gray-100 px-1.5 text-[10px]">24</span>
         </button>
         <button type="button" data-tab="auto-bid" data-active="text-shazam-blue border-shazam-blue" class="ob-tab flex items-center gap-2 px-1 pb-2 text-sm border-b-2 border-transparent cursor-pointer">
@@ -104,9 +103,9 @@
         <div id="list-toolbar" class="flex flex-wrap items-center gap-3">
           <div class="relative flex-1 min-w-[220px]">
             <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-slate-400">search</span>
-            <input id="ob-search" type="text" placeholder="Search patient, appointment or issue..." class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+            <input id="ob-search" type="text" placeholder="Search patient, appointment or issue..." class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-[16px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
           </div>
-          <button id="filter-toggle" type="button" class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-[18px] py-[9px] text-xs font-semibold text-slate-700 cursor-pointer transition-colors hover:bg-gray-100">
+          <button id="filter-toggle" type="button" class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-[18px] py-[9px] text-[14px] font-semibold text-slate-700 cursor-pointer transition-colors hover:bg-gray-100">
             Filter
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v6l-4 2v-8z" /></svg>
           </button>
@@ -190,9 +189,9 @@
       </div>
       <!-- ============ NEW REQUESTS ============ -->
       <div id="tab-new-requests" class="ob-panel overflow-x-auto">
-        <table class="w-full min-w-[900px] text-xs text-center">
+        <table class="w-full min-w-[900px] text-[14px] text-center">
           <thead>
-            <tr class="bg-shazam-blue text-white">
+            <tr class="bg-shazam-blue text-white text-[14px]">
               <th class="py-3 font-medium">REQUEST ID</th><th class="py-3 font-medium">PATIENT</th><th class="py-3 font-medium">HEALTH ISSUE</th>
               <th class="py-3 font-medium">REQUESTED NO</th><th class="py-3 font-medium">MODE</th><th class="py-3 font-medium">URGENCY</th>
               <th class="py-3 font-medium">BUDGET</th><th class="py-3 font-medium">TIME</th><th class="py-3 font-medium">STATUS</th><th class="py-3 font-medium">ACTIONS</th>
@@ -200,67 +199,63 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr data-row data-mode="Hospital Visit" data-urgency="Priority" data-price="500" data-date="2026-11-13">
-              <td class="py-3 font-medium text-shazam-blue">REQ - 5501</td>
-              <td class="py-3"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">DP</span><span><span class="block font-semibold text-black">Pt. Dolly Paris</span><span class="block text-[10px] text-gray-400">Kidney Stone</span></span></div></td>
-              <td class="py-3 text-black">Kidney Stone</td><td class="py-3">Today 12:30 PM</td>
-              <td class="py-3"><span class="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] text-sky-700">Hospital Visit</span></td>
-              <td class="py-3"><span class="rounded-full bg-red-100 px-2 py-0.5 text-[10px] text-red-600">Emergency</span></td>
-              <td class="py-3 text-shazam-blue">&#8377;500</td><td class="py-3 text-red-500">18m left</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">New</span></td>
-              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 font-medium text-[14px] text-shazam-blue">REQ - 5501</td>
+              <td class="py-3"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">DP</span><span><span class="block text-[14px] font-semibold text-black">Pt. Dolly Paris</span><span class="block text-[12px] text-gray-400">Kidney Stone</span></span></div></td>
+              <td class="py-3 text-[14px] text-black">Kidney Stone</td><td class="py-3 text-[14px]">Today 12:30 PM</td>
+              <td class="py-3"><span class="rounded-full bg-sky-50 px-2 py-0.5 text-[12px] text-sky-700">Hospital Visit</span></td>
+              <td class="py-3"><span class="rounded-full bg-red-100 px-2 py-0.5 text-[12px] text-red-600">Emergency</span></td>
+              <td class="py-3 text-[14px] text-shazam-blue">&#8377;500</td><td class="py-3 text-[14px] text-red-500">18m left</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">New</span></td>
+              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Home Visit" data-urgency="Normal" data-price="700" data-date="2026-11-13">
-              <td class="py-3 font-medium text-shazam-blue">REQ - 5502</td>
-              <td class="py-3"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">SL</span><span><span class="block font-semibold text-black">Pt. Steve Lamark</span><span class="block text-[10px] text-gray-400">Kidney Stone</span></span></div></td>
-              <td class="py-3 text-black">Vascular Disease</td><td class="py-3">Today 01:30 PM</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Home Visit</span></td>
-              <td class="py-3"><span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-600">Normal</span></td>
-              <td class="py-3 text-shazam-blue">&#8377;700</td><td class="py-3 text-green-600">21m left</td>
-              <td class="py-3"><span class="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] text-shazam-blue">Bid Sent</span></td>
-              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 font-medium text-[14px] text-shazam-blue">REQ - 5502</td>
+              <td class="py-3"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">SL</span><span><span class="block text-[14px] font-semibold text-black">Pt. Steve Lamark</span><span class="block text-[12px] text-gray-400">Kidney Stone</span></span></div></td>
+              <td class="py-3 text-[14px] text-black">Vascular Disease</td><td class="py-3 text-[14px]">Today 01:30 PM</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Home Visit</span></td>
+              <td class="py-3"><span class="rounded-full bg-gray-100 px-2 py-0.5 text-[12px] text-gray-600">Normal</span></td>
+              <td class="py-3 text-[14px] text-shazam-blue">&#8377;700</td><td class="py-3 text-[14px] text-kyc-green">21m left</td>
+              <td class="py-3"><span class="rounded-full bg-sky-100 px-2 py-0.5 text-[12px] text-shazam-blue">Bid Sent</span></td>
+              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Clinic Visit" data-urgency="Normal" data-price="350" data-date="2026-11-13">
-              <td class="py-3 font-medium text-shazam-blue">REQ - 5503</td>
-              <td class="py-3"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">AM</span><span><span class="block font-semibold text-black">Pt. Arjun Mehta</span><span class="block text-[10px] text-gray-400">Diabetes Management</span></span></div></td>
-              <td class="py-3 text-black">Diabetes Management</td><td class="py-3">Today 01:30 PM</td>
-              <td class="py-3"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] text-emerald-700">Clinic Visit</span></td>
-              <td class="py-3"><span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-600">Normal</span></td>
-              <td class="py-3 text-shazam-blue">&#8377;350</td><td class="py-3 text-red-500">12m left</td>
-              <td class="py-3"><span class="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] text-shazam-blue">Bid Sent</span></td>
-              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 font-medium text-[14px] text-shazam-blue">REQ - 5503</td>
+              <td class="py-3"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">AM</span><span><span class="block text-[14px] font-semibold text-black">Pt. Arjun Mehta</span><span class="block text-[12px] text-gray-400">Diabetes Management</span></span></div></td>
+              <td class="py-3 text-[14px] text-black">Diabetes Management</td><td class="py-3 text-[14px]">Today 01:30 PM</td>
+              <td class="py-3"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] text-emerald-700">Clinic Visit</span></td>
+              <td class="py-3"><span class="rounded-full bg-gray-100 px-2 py-0.5 text-[12px] text-gray-600">Normal</span></td>
+              <td class="py-3 text-[14px] text-shazam-blue">&#8377;350</td><td class="py-3 text-[14px] text-red-500">12m left</td>
+              <td class="py-3"><span class="rounded-full bg-sky-100 px-2 py-0.5 text-[12px] text-shazam-blue">Bid Sent</span></td>
+              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Voice Call" data-urgency="Normal" data-price="150" data-date="2026-11-13">
-              <td class="py-3 font-medium text-shazam-blue">REQ - 5506</td>
-              <td class="py-3"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">MD</span><span><span class="block font-semibold text-black">Pt. Mohan Das</span><span class="block text-[10px] text-gray-400">Fever &amp; Cold</span></span></div></td>
-              <td class="py-3 text-black">Fever &amp; Cold</td><td class="py-3">Today 11:30 AM</td>
-              <td class="py-3"><span class="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] text-violet-700">Voice Call</span></td>
-              <td class="py-3"><span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-600">Normal</span></td>
-              <td class="py-3 text-shazam-blue">&#8377;150</td><td class="py-3 text-green-600">55m left</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">New</span></td>
-              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 font-medium text-[14px] text-shazam-blue">REQ - 5506</td>
+              <td class="py-3"><div class="mx-auto flex w-36 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">MD</span><span><span class="block text-[14px] font-semibold text-black">Pt. Mohan Das</span><span class="block text-[12px] text-gray-400">Fever &amp; Cold</span></span></div></td>
+              <td class="py-3 text-[14px] text-black">Fever &amp; Cold</td><td class="py-3 text-[14px]">Today 11:30 AM</td>
+              <td class="py-3"><span class="rounded-full bg-violet-50 px-2 py-0.5 text-[12px] text-violet-700">Voice Call</span></td>
+              <td class="py-3"><span class="rounded-full bg-gray-100 px-2 py-0.5 text-[12px] text-gray-600">Normal</span></td>
+              <td class="py-3 text-[14px] text-shazam-blue">&#8377;150</td><td class="py-3 text-[14px] text-kyc-green">55m left</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">New</span></td>
+              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
-          <tr data-empty class="hidden"><td colspan="10" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr></tbody>
-        <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">New</span></td>
-              <td class="py-3"><button type="button" data-open="submit-bid" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
-            </tr>
-          </tbody>
+          <tr data-empty class="hidden"><td colspan="10" class="py-10 text-center text-[14px] text-slate-500">No results match. Change the search or filters.</td></tr></tbody>
         </table>
-        <div class="flex items-center justify-between pt-4 text-xs text-gray-500">
+        <div class="flex items-center justify-between pt-4 text-[14px] text-grayish-blue-slate">
           <span class="ob-showing" data-default="Showing 1-8 of 12">Showing 1-8 of 12</span>
           <div class="flex items-center gap-2">
-            <select class="rounded-md border border-gray-200 px-2 py-1 text-xs"><option>8</option><option>16</option></select>
-            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-gray-400 cursor-pointer">Previous</button>
-            <span>1/2</span>
-            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-black cursor-pointer">Next</button>
+            <select class="rounded-md border border-gray-200 px-2 py-1 text-[14px]"><option>8</option><option>16</option></select>
+            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-[14px] text-gray-400 cursor-pointer">Previous</button>
+            <span class="text-[14px]">1/2</span>
+            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-[14px] text-black cursor-pointer">Next</button>
           </div>
         </div>
       </div>
 
       <!-- ============ MY BIDS ============ -->
       <div id="tab-my-bids" class="ob-panel hidden overflow-x-auto">
-        <table class="w-full min-w-[900px] text-xs text-center">
+        <table class="w-full min-w-[900px] text-[14px] text-center">
           <thead>
-            <tr class="bg-shazam-blue text-white">
+            <tr class="bg-shazam-blue text-white text-[14px]">
               <th class="py-3 font-medium">BID ID</th><th class="py-3 font-medium">REQUEST ID</th><th class="py-3 font-medium">PATIENT</th>
               <th class="py-3 font-medium">BID AMOUNT</th><th class="py-3 font-medium">MODE</th><th class="py-3 font-medium">SUBMITTED AT</th>
               <th class="py-3 font-medium">PATIENT BUDGET</th><th class="py-3 font-medium">OUTCOME</th><th class="py-3 font-medium">ACTIONS</th>
@@ -268,109 +263,105 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr data-row data-mode="Clinic Visit" data-price="500" data-date="2026-11-13">
-              <td class="py-3 text-black">BID - 8801</td><td class="py-3 text-shazam-blue underline">REQ-5480</td>
-              <td class="py-3"><div class="mx-auto flex w-32 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">RK</span><span class="font-semibold text-black">Pt Dolly Paris</span></div></td>
-              <td class="py-3 font-semibold text-black">&#8377;500</td>
-              <td class="py-3"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] text-emerald-700">Clinic Visit</span></td>
-              <td class="py-3">Today<br />10:05 AM</td><td class="py-3 font-semibold text-black">&#8377;500</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Pending</span></td>
-              <td class="py-3"><button type="button" data-open="bid-details" data-status="pending" data-bid="BID - 8801" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-[14px] text-black">BID - 8801</td><td class="py-3 text-[14px] text-shazam-blue underline">REQ-5480</td>
+              <td class="py-3"><div class="mx-auto flex w-32 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">RK</span><span class="text-[14px] font-semibold text-black">Pt Dolly Paris</span></div></td>
+              <td class="py-3 text-[14px] font-semibold text-black">&#8377;500</td>
+              <td class="py-3"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] text-emerald-700">Clinic Visit</span></td>
+              <td class="py-3 text-[14px]">Today<br />10:05 AM</td><td class="py-3 text-[14px] font-semibold text-black">&#8377;500</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Pending</span></td>
+              <td class="py-3"><button type="button" data-open="bid-details" data-status="pending" data-bid="BID - 8801" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Home Visit" data-price="700" data-date="2026-11-13">
-              <td class="py-3 text-black">BID - 8802</td><td class="py-3 text-shazam-blue underline">REQ-5481</td>
-              <td class="py-3"><div class="mx-auto flex w-32 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">RK</span><span class="font-semibold text-black">Pt. Karen Cooper</span></div></td>
-              <td class="py-3 font-semibold text-black">&#8377;700</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Home Visit</span></td>
-              <td class="py-3">Today<br />09:30 AM</td><td class="py-3 font-semibold text-black">&#8377;700</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Pending</span></td>
-              <td class="py-3"><button type="button" data-open="bid-details" data-status="pending" data-bid="BID - 8802" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-[14px] text-black">BID - 8802</td><td class="py-3 text-[14px] text-shazam-blue underline">REQ-5481</td>
+              <td class="py-3"><div class="mx-auto flex w-32 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">RK</span><span class="text-[14px] font-semibold text-black">Pt. Karen Cooper</span></div></td>
+              <td class="py-3 text-[14px] font-semibold text-black">&#8377;700</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Home Visit</span></td>
+              <td class="py-3 text-[14px]">Today<br />09:30 AM</td><td class="py-3 text-[14px] font-semibold text-black">&#8377;700</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Pending</span></td>
+              <td class="py-3"><button type="button" data-open="bid-details" data-status="pending" data-bid="BID - 8802" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Video Call" data-price="280" data-date="2026-11-13">
-              <td class="py-3 text-black">BID - 8803</td><td class="py-3 text-shazam-blue underline">REQ-5482</td>
-              <td class="py-3"><div class="mx-auto flex w-32 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">RK</span><span class="font-semibold text-black">Pt. Josh Kerr</span></div></td>
-              <td class="py-3 font-semibold text-black">&#8377;280</td>
-              <td class="py-3"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] text-emerald-700">Video Call</span></td>
-              <td class="py-3">Today<br />08:45 AM</td><td class="py-3 font-semibold text-black">&#8377;300</td>
-              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[10px] text-green-600">Won</span></td>
-              <td class="py-3"><button type="button" data-open="bid-details" data-status="won" data-bid="BID - 8803" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-[14px] text-black">BID - 8803</td><td class="py-3 text-[14px] text-shazam-blue underline">REQ-5482</td>
+              <td class="py-3"><div class="mx-auto flex w-32 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">RK</span><span class="text-[14px] font-semibold text-black">Pt. Josh Kerr</span></div></td>
+              <td class="py-3 text-[14px] font-semibold text-black">&#8377;280</td>
+              <td class="py-3"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] text-emerald-700">Video Call</span></td>
+              <td class="py-3 text-[14px]">Today<br />08:45 AM</td><td class="py-3 text-[14px] font-semibold text-black">&#8377;300</td>
+              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[12px] text-kyc-green">Won</span></td>
+              <td class="py-3"><button type="button" data-open="bid-details" data-status="won" data-bid="BID - 8803" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Voice Call" data-price="180" data-date="2026-11-12">
-              <td class="py-3 text-black">BID - 8807</td><td class="py-3 text-shazam-blue underline">REQ-5486</td>
-              <td class="py-3"><div class="mx-auto flex w-32 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">RK</span><span class="font-semibold text-black">Pt. Sunita Rao</span></div></td>
-              <td class="py-3 font-semibold text-black">&#8377;180</td>
-              <td class="py-3"><span class="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] text-violet-700">Voice Call</span></td>
-              <td class="py-3">Yesterday<br />03:30 PM</td><td class="py-3 font-semibold text-black">&#8377;200</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Pending</span></td>
-              <td class="py-3"><button type="button" data-open="bid-details" data-status="pending" data-bid="BID - 8807" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-[14px] text-black">BID - 8807</td><td class="py-3 text-[14px] text-shazam-blue underline">REQ-5486</td>
+              <td class="py-3"><div class="mx-auto flex w-32 items-center gap-2 text-left"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-[10px] font-semibold text-white">RK</span><span class="text-[14px] font-semibold text-black">Pt. Sunita Rao</span></div></td>
+              <td class="py-3 text-[14px] font-semibold text-black">&#8377;180</td>
+              <td class="py-3"><span class="rounded-full bg-violet-50 px-2 py-0.5 text-[12px] text-violet-700">Voice Call</span></td>
+              <td class="py-3 text-[14px]">Yesterday<br />03:30 PM</td><td class="py-3 text-[14px] font-semibold text-black">&#8377;200</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Pending</span></td>
+              <td class="py-3"><button type="button" data-open="bid-details" data-status="pending" data-bid="BID - 8807" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
-          <tr data-empty class="hidden"><td colspan="10" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr></tbody>
-            </tr>
-          </tbody>
+          <tr data-empty class="hidden"><td colspan="10" class="py-10 text-center text-[14px] text-slate-500">No results match. Change the search or filters.</td></tr></tbody>
         </table>
-        <div class="flex items-center justify-between pt-4 text-xs text-gray-500">
+        <div class="flex items-center justify-between pt-4 text-[14px] text-grayish-blue-slate">
           <span class="ob-showing" data-default="Showing 1-8 of 12">Showing 1-8 of 12</span>
           <div class="flex items-center gap-2">
-            <select class="rounded-md border border-gray-200 px-2 py-1 text-xs"><option>8</option><option>16</option></select>
-            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-gray-400 cursor-pointer">Previous</button>
-            <span>1/2</span>
-            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-black cursor-pointer">Next</button>
+            <select class="rounded-md border border-gray-200 px-2 py-1 text-[14px]"><option>8</option><option>16</option></select>
+            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-[14px] text-gray-400 cursor-pointer">Previous</button>
+            <span class="text-[14px]">1/2</span>
+            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-[14px] text-black cursor-pointer">Next</button>
           </div>
         </div>
       </div>
 
       <!-- ============ ACCEPTED ============ -->
       <div id="tab-accepted" class="ob-panel hidden overflow-x-auto">
-        <table class="w-full min-w-[800px] text-xs text-center">
+        <table class="w-full min-w-[800px] text-[14px] text-center">
           <thead>
-            <tr class="bg-shazam-blue text-white">
+            <tr class="bg-shazam-blue text-white text-[14px]">
               <th class="py-3 font-medium">PATIENT CONSULTATION</th><th class="py-3 font-medium">BID AMOUNT</th><th class="py-3 font-medium">VISIT MODE</th>
               <th class="py-3 font-medium">SUBMITTED BUDGET</th><th class="py-3 font-medium">STATUS PROCESS</th><th class="py-3 font-medium">APPOINTMENT</th><th class="py-3 font-medium">ACTIONS</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr data-row data-mode="Home Visit" data-price="8000" data-date="2025-03-27">
-              <td class="py-3 text-left"><span class="block font-semibold text-black">Fever &amp; Cold</span><span class="block text-[10px] text-gray-400">Basic health consultation</span></td>
-              <td class="py-3 text-black">&#8377;8000</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Home Visit</span></td>
-              <td class="py-3">27 Mar 2025<br />12:30 PM</td><td class="py-3 text-black">&#8377;7000</td>
-              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[10px] text-green-600">Accepted</span></td>
-              <td class="py-3"><button type="button" data-open="request-accepted" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-left text-[14px]"><span class="block text-[14px] font-semibold text-black">Fever &amp; Cold</span><span class="block text-[12px] text-gray-400">Basic health consultation</span></td>
+              <td class="py-3 text-[14px] text-black">&#8377;8000</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Home Visit</span></td>
+              <td class="py-3 text-[14px]">27 Mar 2025<br />12:30 PM</td><td class="py-3 text-[14px] text-black">&#8377;7000</td>
+              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[12px] text-kyc-green">Accepted</span></td>
+              <td class="py-3"><button type="button" data-open="request-accepted" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Home Visit" data-price="7000" data-date="2025-03-25">
-              <td class="py-3 text-left"><span class="block font-semibold text-black">Headache &amp; Fever</span><span class="block text-[10px] text-gray-400">Basic health consultation</span></td>
-              <td class="py-3 text-black">&#8377;7000</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Home Visit</span></td>
-              <td class="py-3">25 Mar 2025<br />12:30 PM</td><td class="py-3 text-black">&#8377;6500</td>
-              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[10px] text-green-600">Accepted</span></td>
-              <td class="py-3"><button type="button" data-open="request-accepted" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-left text-[14px]"><span class="block text-[14px] font-semibold text-black">Headache &amp; Fever</span><span class="block text-[12px] text-gray-400">Basic health consultation</span></td>
+              <td class="py-3 text-[14px] text-black">&#8377;7000</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Home Visit</span></td>
+              <td class="py-3 text-[14px]">25 Mar 2025<br />12:30 PM</td><td class="py-3 text-[14px] text-black">&#8377;6500</td>
+              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[12px] text-kyc-green">Accepted</span></td>
+              <td class="py-3"><button type="button" data-open="request-accepted" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Video Call" data-price="5000" data-date="2025-03-25">
-              <td class="py-3 text-left"><span class="block font-semibold text-black">Cold &amp; Cough</span><span class="block text-[10px] text-gray-400">Consultation for persistent symptoms</span></td>
-              <td class="py-3 text-black">&#8377;5000</td>
-              <td class="py-3"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] text-emerald-700">Video Consultation</span></td>
-              <td class="py-3">25 Mar 2025<br />12:30 PM</td><td class="py-3 text-black">&#8377;4500</td>
-              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[10px] text-green-600">Accepted</span></td>
-              
+              <td class="py-3 text-left text-[14px]"><span class="block text-[14px] font-semibold text-black">Cold &amp; Cough</span><span class="block text-[12px] text-gray-400">Consultation for persistent symptoms</span></td>
+              <td class="py-3 text-[14px] text-black">&#8377;5000</td>
+              <td class="py-3"><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] text-emerald-700">Video Consultation</span></td>
+              <td class="py-3 text-[14px]">25 Mar 2025<br />12:30 PM</td><td class="py-3 text-[14px] text-black">&#8377;4500</td>
+              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[12px] text-kyc-green">Accepted</span></td>
             </tr>
-          <tr data-empty class="hidden"><td colspan="10" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td>
-          </tbody>
+          <tr data-empty class="hidden"><td colspan="10" class="py-10 text-center text-[14px] text-slate-500">No results match. Change the search or filters.</td></tr></tbody>
         </table>
-        <div class="flex items-center justify-between pt-4 text-xs text-gray-500">
+        <div class="flex items-center justify-between pt-4 text-[14px] text-grayish-blue-slate">
           <span class="ob-showing" data-default="Showing 1-8 of 12">Showing 1-8 of 12</span>
           <div class="flex items-center gap-2">
-            <select class="rounded-md border border-gray-200 px-2 py-1 text-xs"><option>8</option></select>
-            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-gray-400 cursor-pointer">Previous</button>
-            <span>1/2</span>
-            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-black cursor-pointer">Next</button>
+            <select class="rounded-md border border-gray-200 px-2 py-1 text-[14px]"><option>8</option></select>
+            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-[14px] text-gray-400 cursor-pointer">Previous</button>
+            <span class="text-[14px]">1/2</span>
+            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-[14px] text-black cursor-pointer">Next</button>
           </div>
         </div>
       </div>
 
       <!-- ============ COMPLETED ============ -->
       <div id="tab-completed" class="ob-panel hidden overflow-x-auto">
-        <table class="w-full min-w-[800px] text-xs text-center">
+        <table class="w-full min-w-[800px] text-[14px] text-center">
           <thead>
-            <tr class="bg-shazam-blue text-white">
+            <tr class="bg-shazam-blue text-white text-[14px]">
               <th class="py-3 font-medium">REQUEST CONSULTATION</th><th class="py-3 font-medium">PATIENT</th><th class="py-3 font-medium">LOCATION</th>
               <th class="py-3 font-medium">VISIT MODE</th><th class="py-3 font-medium">DATE &amp; TIME</th><th class="py-3 font-medium">PATIENT RATING</th>
               <th class="py-3 font-medium">FINAL AMOUNT</th><th class="py-3 font-medium">OUTCOME</th><th class="py-3 font-medium">ACTIONS</th>
@@ -378,46 +369,44 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr data-row data-mode="Home Visit" data-price="280" data-date="2025-03-27">
-              <td class="py-3 text-left"><span class="block font-semibold text-black">Fever &amp; Cold</span><span class="block text-[10px] text-gray-400">Basic health consultation</span></td>
-              <td class="py-3 text-gray-500">Patient Aniket</td><td class="py-3 text-gray-500">Saket Enclave<br />New Delhi</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Home Visit</span></td>
-              <td class="py-3">27 Mar 2025<br />12:30 PM</td>
-              <td class="py-3"><span class="block text-black">4.5</span><span class="text-amber-400">&#9733;&#9733;&#9733;&#9733;</span></td>
-              <td class="py-3 text-black">&#8377;280</td>
-              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[10px] text-green-600">Completed</span></td>
-              <td class="py-3"><button type="button" data-open="request-completed" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-left text-[14px]"><span class="block text-[14px] font-semibold text-black">Fever &amp; Cold</span><span class="block text-[12px] text-gray-400">Basic health consultation</span></td>
+              <td class="py-3 text-[14px] text-grayish-blue-slate">Patient Aniket</td><td class="py-3 text-[14px] text-grayish-blue-slate">Saket Enclave<br />New Delhi</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Home Visit</span></td>
+              <td class="py-3 text-[14px]">27 Mar 2025<br />12:30 PM</td>
+              <td class="py-3"><span class="block text-[14px] text-black">4.5</span><span class="text-amber-400 text-[14px]">&#9733;&#9733;&#9733;&#9733;</span></td>
+              <td class="py-3 text-[14px] text-black">&#8377;280</td>
+              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[12px] text-kyc-green">Completed</span></td>
+              <td class="py-3"><button type="button" data-open="request-completed" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Home Visit" data-price="500" data-date="2025-03-27">
-              <td class="py-3 text-left"><span class="block font-semibold text-black">Headache &amp; Fever</span><span class="block text-[10px] text-gray-400">Need a General Consultation</span></td>
-              <td class="py-3 text-gray-500">Patient Aniket</td><td class="py-3 text-gray-500">Saket Enclave<br />New Delhi</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Home Visit</span></td>
-              <td class="py-3">27 Mar 2025<br />12:30 PM</td>
-              <td class="py-3"><span class="block text-black">4.5</span><span class="text-amber-400">&#9733;&#9733;&#9733;&#9733;</span></td>
-              <td class="py-3 text-black">&#8377;500</td>
-              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[10px] text-green-600">Completed</span></td>
-              <td class="py-3"><button type="button" data-open="request-completed" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-left text-[14px]"><span class="block text-[14px] font-semibold text-black">Headache &amp; Fever</span><span class="block text-[12px] text-gray-400">Need a General Consultation</span></td>
+              <td class="py-3 text-[14px] text-grayish-blue-slate">Patient Aniket</td><td class="py-3 text-[14px] text-grayish-blue-slate">Saket Enclave<br />New Delhi</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Home Visit</span></td>
+              <td class="py-3 text-[14px]">27 Mar 2025<br />12:30 PM</td>
+              <td class="py-3"><span class="block text-[14px] text-black">4.5</span><span class="text-amber-400 text-[14px]">&#9733;&#9733;&#9733;&#9733;</span></td>
+              <td class="py-3 text-[14px] text-black">&#8377;500</td>
+              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[12px] text-kyc-green">Completed</span></td>
+              <td class="py-3"><button type="button" data-open="request-completed" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
             <tr data-row data-mode="Home Visit" data-price="280" data-date="2025-03-27">
-              <td class="py-3 text-left"><span class="block font-semibold text-black">Cold &amp; Cough</span><span class="block text-[10px] text-gray-400">Consultation for persistent symptoms</span></td>
-              <td class="py-3 text-gray-500">Patient Aniket</td><td class="py-3 text-gray-500">Saket Enclave<br />New Delhi</td>
-              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">Home Visit</span></td>
-              <td class="py-3">27 Mar 2025<br />12:30 PM</td>
-              <td class="py-3"><span class="block text-black">4.5</span><span class="text-amber-400">&#9733;&#9733;&#9733;&#9733;</span></td>
-              <td class="py-3 text-black">&#8377;280</td>
-              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[10px] text-green-600">Completed</span></td>
-              <td class="py-3"><button type="button" data-open="request-completed" class="inline-flex items-center gap-1 text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
+              <td class="py-3 text-left text-[14px]"><span class="block text-[14px] font-semibold text-black">Cold &amp; Cough</span><span class="block text-[12px] text-gray-400">Consultation for persistent symptoms</span></td>
+              <td class="py-3 text-[14px] text-grayish-blue-slate">Patient Aniket</td><td class="py-3 text-[14px] text-grayish-blue-slate">Saket Enclave<br />New Delhi</td>
+              <td class="py-3"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] text-amber-700">Home Visit</span></td>
+              <td class="py-3 text-[14px]">27 Mar 2025<br />12:30 PM</td>
+              <td class="py-3"><span class="block text-[14px] text-black">4.5</span><span class="text-amber-400 text-[14px]">&#9733;&#9733;&#9733;&#9733;</span></td>
+              <td class="py-3 text-[14px] text-black">&#8377;280</td>
+              <td class="py-3"><span class="rounded-full bg-green-100 px-2 py-0.5 text-[12px] text-kyc-green">Completed</span></td>
+              <td class="py-3"><button type="button" data-open="request-completed" class="inline-flex items-center gap-1 text-[14px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined text-base">visibility</span>View Details</button></td>
             </tr>
-          <tr data-empty class="hidden"><td colspan="10" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr></tbody>
-            </tr>
-          </tbody>
+          <tr data-empty class="hidden"><td colspan="10" class="py-10 text-center text-[14px] text-slate-500">No results match. Change the search or filters.</td></tr></tbody>
         </table>
-        <div class="flex items-center justify-between pt-4 text-xs text-gray-500">
+        <div class="flex items-center justify-between pt-4 text-[14px] text-grayish-blue-slate">
           <span class="ob-showing" data-default="Showing 1-8 of 12">Showing 1-8 of 12</span>
           <div class="flex items-center gap-2">
-            <select class="rounded-md border border-gray-200 px-2 py-1 text-xs"><option>8</option></select>
-            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-gray-400 cursor-pointer">Previous</button>
-            <span>1/2</span>
-            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-black cursor-pointer">Next</button>
+            <select class="rounded-md border border-gray-200 px-2 py-1 text-[14px]"><option>8</option></select>
+            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-[14px] text-gray-400 cursor-pointer">Previous</button>
+            <span class="text-[14px]">1/2</span>
+            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-[14px] text-black cursor-pointer">Next</button>
           </div>
         </div>
       </div>
@@ -427,7 +416,7 @@
         <div class="flex items-center justify-between rounded-lg border border-gray-200 p-4">
           <div>
             <p class="text-lg font-semibold text-black">Auto Bid Settings</p>
-            <p class="text-xs text-gray-500">Automatically respond to eligible patient requests.</p>
+            <p class="text-xs text-grayish-blue-slate">Automatically respond to eligible patient requests.</p>
           </div>
           <div class="flex items-center gap-3">
             <span class="rounded-full border border-shazam-blue px-2 py-0.5 text-[10px] text-shazam-blue">&bull; Auto Bid is paused</span>
@@ -519,7 +508,7 @@
     <div class="space-y-1">
       <p class="text-xs font-semibold text-black">Your Consultation Fee</p>
       <div class="flex items-center gap-2"><span class="text-sm">&#8377;</span><input type="number" value="480" class="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" /></div>
-      <p class="text-[11px] text-gray-500">Patient budget &#8377;800 Suggested &#8377;450 - 480</p>
+      <p class="text-[11px] text-grayish-blue-slate">Patient budget &#8377;800 Suggested &#8377;450 - 480</p>
     </div>
     <div class="space-y-2">
       <p class="text-xs font-semibold text-black">Select Consultation Mode</p>
@@ -568,7 +557,7 @@
           </div>
         </div>
         <span id="bd-badge-pending" class="rounded-md bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">Pending Decision</span>
-        <span id="bd-badge-won" class="hidden rounded-md bg-green-100 px-3 py-1 text-xs font-medium text-green-600">Won</span>
+        <span id="bd-badge-won" class="hidden rounded-md bg-green-100 px-3 py-1 text-xs font-medium text-kyc-green">Won</span>
       </div>
 
       <!-- Inner tabs -->
@@ -592,7 +581,7 @@
           <span class="material-symbols-outlined text-lg">description</span>
           Waiting for the patient's decision. Submission is not a confirmed appointment.
         </p>
-        <p id="bd-banner-won" class="hidden rounded-lg border border-green-500 bg-white px-4 py-3 text-sm text-green-600">The sample patient accepted your offer. View the linked appointment for confirmation details.</p>
+        <p id="bd-banner-won" class="hidden rounded-lg border border-green-500 bg-white px-4 py-3 text-sm text-kyc-green">The sample patient accepted your offer. View the linked appointment for confirmation details.</p>
       </div>
 
       <!-- Offer details -->
@@ -771,36 +760,36 @@
 <div id="request-accepted" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
   <div class="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 space-y-4 scroll">
     <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3"><span class="material-symbols-outlined !flex h-9 w-9 items-center justify-center rounded-md bg-sky-100 text-shazam-blue">description</span><div><p class="font-semibold text-black">Request Details</p><p class="text-[11px] text-gray-500">REQ-5506</p></div></div>
+      <div class="flex items-center gap-3"><span class="material-symbols-outlined !flex h-9 w-9 items-center justify-center rounded-md bg-sky-100 text-shazam-blue">description</span><div><p class="font-semibold text-black">Request Details</p><p class="text-[11px] text-grayish-blue-slate">REQ-5506</p></div></div>
       <button type="button" data-close class="cursor-pointer"><span class="material-symbols-outlined">cancel</span></button>
     </div>
     <div class="flex items-center justify-between rounded-lg border border-shazam-blue p-3">
-      <div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-shazam-blue text-xs font-semibold text-white">PS</span><div><p class="text-sm font-semibold text-black">Dr Aarav Sharma</p><p class="text-[11px] text-gray-500">General Physician New Delhi</p><p class="text-[11px] text-gray-500">Goregaon &middot; 4.1 km</p></div></div>
+      <div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-shazam-blue text-xs font-semibold text-white">PS</span><div><p class="text-sm font-semibold text-black">Dr Aarav Sharma</p><p class="text-[11px] text-grayish-blue-slate">General Physician New Delhi</p><p class="text-[11px] text-grayish-blue-slate">Goregaon &middot; 4.1 km</p></div></div>
       <button type="button" class="rounded-md border border-shazam-blue px-3 py-1.5 text-[11px] text-shazam-blue cursor-pointer">Contact Customer</button>
     </div>
     <div class="space-y-2">
       <p class="text-xs font-semibold text-black">Patient / Consultation Details</p>
       <div class="grid grid-cols-3 gap-2 rounded-lg border border-gray-200 p-3 text-[11px]">
-        <div><p class="font-semibold text-black">Fever &amp; Cold</p><p class="text-gray-500">Primary</p></div>
-        <div><p class="font-semibold text-black">Basic Health consultation</p><p class="text-gray-500">Consultation Type</p></div>
-        <div><p class="font-semibold text-black">Home Visit</p><p class="text-gray-500">Visit Types</p></div>
+        <div><p class="font-semibold text-black">Fever &amp; Cold</p><p class="text-grayish-blue-slate">Primary</p></div>
+        <div><p class="font-semibold text-black">Basic Health consultation</p><p class="text-grayish-blue-slate">Consultation Type</p></div>
+        <div><p class="font-semibold text-black">Home Visit</p><p class="text-grayish-blue-slate">Visit Types</p></div>
       </div>
     </div>
     <div class="space-y-2">
       <p class="text-xs font-semibold text-black">Appointment Details</p>
       <div class="grid grid-cols-3 gap-2 rounded-lg border border-gray-200 p-3 text-[11px]">
-        <div><p class="font-semibold text-black">Patient Location</p><p class="text-gray-500">Goregaon Mumbai</p></div>
-        <div><p class="text-gray-500">Requested Date &amp; Time</p><p class="font-semibold text-black">27 Mar 2025</p><p class="text-gray-500">12:30 PM</p></div>
-        <div><p class="text-gray-500">Patient Budget</p><p class="font-semibold text-black">&#8377;480</p></div>
+        <div><p class="font-semibold text-black">Patient Location</p><p class="text-grayish-blue-slate">Goregaon Mumbai</p></div>
+        <div><p class="text-grayish-blue-slate">Requested Date &amp; Time</p><p class="font-semibold text-black">27 Mar 2025</p><p class="text-grayish-blue-slate">12:30 PM</p></div>
+        <div><p class="text-grayish-blue-slate">Patient Budget</p><p class="font-semibold text-black">&#8377;480</p></div>
       </div>
     </div>
     <div class="space-y-2">
       <p class="text-xs font-semibold text-black">Bid Details</p>
       <div class="grid grid-cols-4 gap-2 rounded-lg border border-gray-200 p-3 text-[11px]">
-        <div><p class="text-gray-500">Your Bid</p><p class="font-semibold text-black">&#8377;7000</p></div>
-        <div><p class="text-gray-500">Order Status</p><span class="rounded-full bg-green-100 px-2 text-green-600">In Progress</span></div>
-        <div><p class="text-gray-500">Time Left</p><p class="font-semibold text-orange-500">32m</p></div>
-        <div><p class="text-gray-500">Accepted On</p><p class="font-semibold text-black">22 Jul 2025</p></div>
+        <div><p class="text-grayish-blue-slate">Your Bid</p><p class="font-semibold text-black">&#8377;7000</p></div>
+        <div><p class="text-grayish-blue-slate">Order Status</p><span class="rounded-full bg-green-100 px-2 text-kyc-green">In Progress</span></div>
+        <div><p class="text-grayish-blue-slate">Time Left</p><p class="font-semibold text-orange-500">32m</p></div>
+        <div><p class="text-grayish-blue-slate">Accepted On</p><p class="font-semibold text-black">22 Jul 2025</p></div>
       </div>
     </div>
     <div class="space-y-3">
@@ -809,7 +798,7 @@
         <div><span class="mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-shazam-blue text-white">&#10003;</span><p class="font-medium text-shazam-blue">Request Accepted</p></div>
         <div><span class="mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-shazam-blue text-white">&#10003;</span><p class="font-medium text-shazam-blue">Bid Submitted</p></div>
         <div><span class="mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-shazam-blue text-white">&#10003;</span><p class="font-medium text-shazam-blue">Bill Accepted</p></div>
-        <div><span class="mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-gray-100"></span><p class="text-gray-500">Consultation Scheduled</p></div>
+        <div><span class="mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-gray-100"></span><p class="text-grayish-blue-slate">Consultation Scheduled</p></div>
       </div>
     </div>
     <div class="flex gap-3 border-t border-gray-100 pt-4">
@@ -823,33 +812,33 @@
 <div id="request-completed" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
   <div class="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 space-y-4 scroll">
     <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3"><span class="material-symbols-outlined !flex h-9 w-9 items-center justify-center rounded-md bg-sky-100 text-shazam-blue">description</span><div><p class="font-semibold text-black">Request Details</p><p class="text-[11px] text-gray-500">REQ-5506</p></div></div>
+      <div class="flex items-center gap-3"><span class="material-symbols-outlined !flex h-9 w-9 items-center justify-center rounded-md bg-sky-100 text-shazam-blue">description</span><div><p class="font-semibold text-black">Request Details</p><p class="text-[11px] text-grayish-blue-slate">REQ-5506</p></div></div>
       <button type="button" data-close class="cursor-pointer"><span class="material-symbols-outlined">cancel</span></button>
     </div>
     <div class="flex items-center justify-between rounded-lg border border-shazam-blue p-3">
-      <div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-shazam-blue text-xs font-semibold text-white">PS</span><div><p class="text-sm font-semibold text-black">Pooja Sharma</p><p class="text-[11px] text-gray-500">Goregaon &middot; 4.1 km</p></div></div>
+      <div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-shazam-blue text-xs font-semibold text-white">PS</span><div><p class="text-sm font-semibold text-black">Pooja Sharma</p><p class="text-[11px] text-grayish-blue-slate">Goregaon &middot; 4.1 km</p></div></div>
       <button type="button" class="rounded-md border border-shazam-blue px-3 py-1.5 text-[11px] text-shazam-blue cursor-pointer">Contact Customer</button>
     </div>
     <div class="space-y-2">
       <p class="text-xs font-semibold text-black">Medicine Details</p>
       <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3">
-        <div><p class="text-xs font-semibold text-black">Crocin 500mg Tablet</p><p class="text-[11px] text-gray-500">Vitamin C 500mg</p><p class="mt-1 flex gap-2 text-[10px]"><span class="rounded-full bg-green-100 px-2 text-green-600">Verified</span><span class="rounded-full bg-green-100 px-2 text-green-600">Available</span></p></div>
-        <div class="text-right text-[11px]"><p class="text-gray-500">QTY</p><p class="text-sm font-semibold text-black">2 strips</p></div>
+        <div><p class="text-xs font-semibold text-black">Crocin 500mg Tablet</p><p class="text-[11px] text-grayish-blue-slate">Vitamin C 500mg</p><p class="mt-1 flex gap-2 text-[10px]"><span class="rounded-full bg-green-100 px-2 text-kyc-green">Verified</span><span class="rounded-full bg-green-100 px-2 text-kyc-green">Available</span></p></div>
+        <div class="text-right text-[11px]"><p class="text-grayish-blue-slate">QTY</p><p class="text-sm font-semibold text-black">2 strips</p></div>
       </div>
     </div>
     <div class="space-y-2">
       <p class="text-xs font-semibold text-black">Fulfillment Details</p>
       <div class="grid grid-cols-2 gap-2 rounded-lg border border-gray-200 p-3 text-[11px]">
-        <div><p class="font-semibold text-black">Home Delivery</p><p class="text-gray-500">Within 45 min</p></div>
-        <div><p class="text-gray-500">Customer Address</p><p class="font-semibold text-black">Goregaon, Mumbai</p><p class="text-gray-500">(Near Goregaon Station)</p></div>
+        <div><p class="font-semibold text-black">Home Delivery</p><p class="text-grayish-blue-slate">Within 45 min</p></div>
+        <div><p class="text-grayish-blue-slate">Customer Address</p><p class="font-semibold text-black">Goregaon, Mumbai</p><p class="text-grayish-blue-slate">(Near Goregaon Station)</p></div>
       </div>
       <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 text-[11px]">
         <p class="mb-2 font-semibold text-black">Order Summary</p>
         <div class="grid grid-cols-4 gap-2">
-          <div><p class="text-gray-500">ORDER ID</p><p class="font-semibold text-black">REQ-5498</p></div>
-          <div><p class="text-gray-500">ACCEPTED BID</p><p class="font-semibold text-black">&#8377;480</p></div>
-          <div><p class="text-gray-500">PAYMENT / EARNING</p><p class="font-semibold text-black">&#8377;480</p></div>
-          <div><p class="text-gray-500">ORDER STATUS</p><span class="rounded-full bg-green-100 px-2 text-green-600">Delivered</span></div>
+          <div><p class="text-grayish-blue-slate">ORDER ID</p><p class="font-semibold text-black">REQ-5498</p></div>
+          <div><p class="text-grayish-blue-slate">ACCEPTED BID</p><p class="font-semibold text-black">&#8377;480</p></div>
+          <div><p class="text-grayish-blue-slate">PAYMENT / EARNING</p><p class="font-semibold text-black">&#8377;480</p></div>
+          <div><p class="text-grayish-blue-slate">ORDER STATUS</p><span class="rounded-full bg-green-100 px-2 text-kyc-green">Delivered</span></div>
         </div>
       </div>
     </div>
@@ -872,13 +861,13 @@
 <!-- Test saved auto bid rules -->
 <div id="test-rules" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
   <div class="w-full max-w-xl rounded-xl bg-white">
-    <div class="space-y-1 border-b border-gray-100 px-6 py-4"><p class="text-xs text-gray-500">MEDOCR DOCTOR SELLERS</p><p class="text-lg font-semibold text-black">Test Saved Auto Bid Rules</p></div>
+    <div class="space-y-1 border-b border-gray-100 px-6 py-4"><p class="text-xs text-grayish-blue-slate">MEDOCR DOCTOR SELLERS</p><p class="text-lg font-semibold text-black">Test Saved Auto Bid Rules</p></div>
     <div class="space-y-3 p-6">
       <p class="text-sm font-semibold text-black">4 matching sample requests</p>
-      <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3"><div><p class="text-sm font-semibold text-black">REQ-5515 Joint pain consultation</p><p class="text-xs text-gray-500">Video call 7km Budget (&#8377;)300</p></div><button type="button" class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Review</button></div>
-      <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3"><div><p class="text-sm font-semibold text-black">REQ-5517 &middot; General consultation</p><p class="text-xs text-gray-500">Clinic Visit &middot; 9 km &middot; Budget &#8377;500</p></div><button type="button" class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Review</button></div>
-      <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3"><div><p class="text-sm font-semibold text-black">REQ-5521 &middot; Wound care assessment</p><p class="text-xs text-gray-500">Clinic Visit &middot; 4 km &middot; Budget &#8377;500</p></div><button type="button" class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Review</button></div>
-      <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3"><div><p class="text-sm font-semibold text-black">REQ-5523 &middot; Joint pain consultation</p><p class="text-xs text-gray-500">Video Call &middot; 6 km &middot; Budget &#8377;300</p></div><button type="button" class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Review</button></div>
+      <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3"><div><p class="text-sm font-semibold text-black">REQ-5515 Joint pain consultation</p><p class="text-xs text-grayish-blue-slate">Video call 7km Budget (&#8377;)300</p></div><button type="button" class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Review</button></div>
+      <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3"><div><p class="text-sm font-semibold text-black">REQ-5517 &middot; General consultation</p><p class="text-xs text-grayish-blue-slate">Clinic Visit &middot; 9 km &middot; Budget &#8377;500</p></div><button type="button" class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Review</button></div>
+      <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3"><div><p class="text-sm font-semibold text-black">REQ-5521 &middot; Wound care assessment</p><p class="text-xs text-grayish-blue-slate">Clinic Visit &middot; 4 km &middot; Budget &#8377;500</p></div><button type="button" class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Review</button></div>
+      <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3"><div><p class="text-sm font-semibold text-black">REQ-5523 &middot; Joint pain consultation</p><p class="text-xs text-grayish-blue-slate">Video Call &middot; 6 km &middot; Budget &#8377;300</p></div><button type="button" class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Review</button></div>
     </div>
     <div class="flex justify-end border-t border-gray-100 px-6 py-4"><button type="button" data-close class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Close</button></div>
   </div>
@@ -887,7 +876,7 @@
 <!-- Restore default rules -->
 <div id="restore-defaults" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
   <div class="w-full max-w-xl rounded-xl bg-white">
-    <div class="space-y-1 border-b border-gray-100 px-6 py-4"><p class="text-xs text-gray-500">MEDOCR DOCTOR SELLERS</p><p class="text-lg font-semibold text-black">Restore default rules?</p></div>
+    <div class="space-y-1 border-b border-gray-100 px-6 py-4"><p class="text-xs text-grayish-blue-slate">MEDOCR DOCTOR SELLERS</p><p class="text-lg font-semibold text-black">Restore default rules?</p></div>
     <div class="p-6"><p class="rounded-lg border border-gray-200 px-4 py-3 text-center text-xs text-gray-700">Your saved matching preference and rate card will be replaced with the sample defaults.</p></div>
     <div class="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">
       <button type="button" data-close class="rounded-md border border-gray-300 px-4 py-1.5 text-xs cursor-pointer">Keep settings</button>

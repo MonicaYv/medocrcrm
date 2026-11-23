@@ -176,7 +176,7 @@
   --color-inactive-orange: #ffd4d0;
   --color-white-opacity: #ffffff80;
   --color-platinum: #e4e4e4;
-   --color-ashy-blue:#64748B;
+  --color-ashy-blue:#64748B;
   --color-shazam-blue:#0088FF;
   --color-dark-inky-blue:#0F172A;
   --color-grayish-blue-slate:#94A3B8;
@@ -234,6 +234,10 @@
   --color-cloud-burst-1:#64748B;
   --color-dark-black:#0F172A;
   --color-white2:#F1F5F9;
+  --color-hawkes-blue:#BFDBFE; 
+  --color-alice-blue:#EFF6FF;
+  --color-east-bay:#475569;
+  --color-indigo-purple:#6155F5;
   --color-report-0088ff: #0088ff;
   --color-report-02c5a5: #02c5a5;
   --color-report-06b6c8: #06b6c8;
