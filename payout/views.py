@@ -11,3 +11,6 @@ def payout_view(request):
 
     elif user.user_type == "doctor":
         return render(request, "doctor_payout.html", context)
+
+    elif user.user_type == "hospital":
+        return render(request, "hospital_payout.html", context)

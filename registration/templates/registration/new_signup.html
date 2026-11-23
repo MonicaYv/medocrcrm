@@ -98,7 +98,11 @@
       </div>
 
       <!-- ---------------- SCREEN 1: SIGN UP ---------------- -->
-      <form id="signupForm" data-check-url="{% url 'check_phone' %}" data-url="{% url 'save_user' %}">
+      <form id="signupForm" data-check-url="{% url 'check_phone' %}" data-url="{% url 'save_user' %}"
+            data-hospital-kyc-url="{% url 'hospital_kyc' %}"
+            data-doctor-kyc-url="{% url 'doctor_kyc' %}"
+            data-lab-kyc-url="{% url 'lab_kyc' %}"
+            data-pharmacy-kyc-url="{% url 'pharmacy_kyc' %}">
 
         {% csrf_token %}
         <input type="hidden" name="user_type" id="userType" value="hospital">

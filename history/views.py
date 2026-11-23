@@ -203,22 +203,21 @@ def history(request):
             .order_by("-updated_at", "-created_at")
         )
 
+        completed_page = Paginator(
+            base_orders.filter(order_status=OrderStatusChoices.DELIVERED), 10
+        ).get_page(request.GET.get("completed_page", 1))
+        cancelled_page = Paginator(
+            base_orders.filter(order_status=OrderStatusChoices.CANCELLED), 10
+        ).get_page(request.GET.get("cancelled_page", 1))
+
         context.update({
-            "pending_orders": base_orders.filter(
-                order_status=OrderStatusChoices.PENDING
-            ),
-
-            "accepted_orders": base_orders.filter(
-                order_status=OrderStatusChoices.CONFIRMED
-            ),
-
-            "completed_orders": base_orders.filter(
-                order_status=OrderStatusChoices.DELIVERED
-            ),
-
-            "cancelled_orders": base_orders.filter(
-                order_status=OrderStatusChoices.CANCELLED
-            ),
+            "pending_orders": base_orders.filter(order_status=OrderStatusChoices.PENDING),
+            "accepted_orders": base_orders.filter(order_status=OrderStatusChoices.CONFIRMED),
+            "completed_orders": completed_page,
+            "completed_page": completed_page,
+            "cancelled_orders": cancelled_page,
+            "cancelled_page": cancelled_page,
+            "active_history_status": request.GET.get("status", "completed"),
         })
         return render(request, 'history/pharmacy/history.html', context)
     elif user.user_type == 'lab':

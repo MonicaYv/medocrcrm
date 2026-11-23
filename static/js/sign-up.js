@@ -253,9 +253,11 @@ document.getElementById("doneBtn").addEventListener("click", function () {
 
         toastr.success("OTP Verified Successfully");
 
-        // Redirect after 2 seconds
+        // Continue to the profile setup for the selected account type.
         setTimeout(() => {
-            window.location.href = "/";
+            const role = document.getElementById("userType")?.value;
+            const redirectUrl = form.dataset[`${role}KycUrl`];
+            window.location.href = redirectUrl || "/";
         }, 2000);
 
     })

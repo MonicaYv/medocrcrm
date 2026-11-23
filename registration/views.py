@@ -2055,6 +2055,7 @@ def save_user(request):
     )    
     request.session["auth_method"] = "phone"
     request.session["user_id"] = user.id
+    request.session["user_type"] = (user.user_type or "").strip().lower()
     return JsonResponse({"success": True, "message": "User registered successfully."})
 
 @csrf_protect
