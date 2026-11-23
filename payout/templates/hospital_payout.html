@@ -1,0 +1,291 @@
+{% extends "dashboard/layout.html" %}
+{% load static %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+{# Remove the next two script tags if your layout already loads Tailwind #}
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  // important: scopes utilities to #earningsPage. preflight:false keeps your layout untouched.
+  // --u (set in style.css) is "1px" scaled by screen width, so fonts, spacing and sizes grow on large screens.
+  var u = function (n) { return 'calc(var(--u) * ' + n + ')'; };
+  var spacing = {}, fontSize = { xs: u(12), lg: u(18), xl: u(20), '2xl': u(24) };
+  [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 7, 8, 9, 10, 11, 12].forEach(function (k) { spacing[k] = u(k * 4); });
+  [10, 10.5, 11, 11.5, 13, 15].forEach(function (n) { fontSize['s' + String(n).replace('.', '')] = u(n); });
+  tailwind.config = {
+    important: '#earningsPage',
+    corePlugins: { preflight: false },
+    theme: { extend: {
+      colors: { brand: '#1f6feb' },
+      spacing: spacing, fontSize: fontSize,
+      borderRadius: { md: u(6), lg: u(8), xl: u(12) }
+    } }
+  };
+</script>
+
+{# Component classes (e-card, e-btn, ...) live in static/css/style.css. Add the link below only if your layout does not already load it: #}
+{# <link rel="stylesheet" href="{% static 'css/style.css' %}"> #}
+{% url 'payout:export' as export_url %}
+{# --u = "1px" scaled by screen width (1.05px up to 1.7px). Change the numbers here to make everything bigger or smaller. #}
+<div id="earningsPage" style="--u: clamp(1.05px, calc(0.048vw + 0.38px), 1.7px);" data-export-url="{{ export_url }}" data-data-url="" data-methods-url="">
+<div class="bg-slate-50 px-6 pt-5 pb-10 text-s13 text-gray-900">
+
+  <div class="text-s11 text-gray-500 mb-2">Home &rsaquo; <span class="text-gray-900">Earnings &amp; Reports</span></div>
+
+  <!-- Header -->
+  <div class="flex flex-wrap justify-between items-start gap-4 mb-3.5">
+    <div>
+      <h1 class="flex items-center gap-2 text-xl font-semibold m-0 mb-1">
+        <svg class="text-brand" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        Earnings
+      </h1>
+      <p class="text-xs text-gray-500 m-0">Track service earnings, settlement status, and hospital payouts.</p>
+      <p class="text-s105 text-gray-500 mt-0.5 mb-0">Lifecare Multispecialty Hospital</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="e-btn" id="rangeBtn" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
+        <span>This Month: 1–29 Sep 2026</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <button class="e-btn" id="openExport" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3"/></svg>
+        Export Statement
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <button class="e-btn !px-2.5" id="refreshBtn" type="button" aria-label="Refresh">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8m0-5v5h-5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Notice -->
+  <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-900 rounded-lg px-3 py-2 text-s115 mb-3.5">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+    <span>Gross service revenue and available payout balance are different figures. <a href="#" class="text-brand font-medium no-underline">View Reports</a></span>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5 mb-3.5">
+    <div class="e-card">
+      <div class="flex justify-between items-center text-s11 font-medium text-brand mb-2"><span>Gross Collected</span><span class="w-6 h-6 rounded-md bg-blue-50 grid place-items-center">↗</span></div>
+      <div class="text-2xl font-bold tracking-tight">₹2,46,800</div>
+      <div class="text-s11 text-gray-500 mt-0.5">Before settlement · 23–29 Sep 2026</div>
+    </div>
+    <div class="e-card">
+      <div class="flex justify-between items-center text-s11 font-medium text-amber-600 mb-2"><span>Awaiting Customer Payment</span><span class="w-6 h-6 rounded-md bg-amber-50 grid place-items-center">◷</span></div>
+      <div class="text-2xl font-bold tracking-tight">₹12,600</div>
+      <div class="text-s11 text-gray-500 mt-0.5">12 orders awaiting payment · Pending customer payments</div>
+    </div>
+    <div class="e-card">
+      <div class="flex justify-between items-center text-s11 font-medium text-emerald-600 mb-2"><span>Net Recorded Earnings</span><span class="w-6 h-6 rounded-md bg-emerald-50 grid place-items-center">▣</span></div>
+      <div class="text-2xl font-bold tracking-tight">₹1,82,400</div>
+      <div class="text-s11 text-gray-500 mt-0.5">After refunds, fees and adjustments</div>
+    </div>
+  </div>
+
+  <!-- Revenue trend -->
+  <div class="e-card">
+    <h3 class="text-s13 font-semibold m-0">Revenue trend</h3>
+    <p class="text-s11 text-gray-500 mt-0.5 mb-3">Daily Gross Collected · 23–29 Sep</p>
+    <div class="relative h-[calc(var(--u)*200)]"><canvas id="trendChart"></canvas></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-6 border-b border-gray-200 mt-4 mb-3.5 overflow-x-auto whitespace-nowrap" role="tablist">
+    <button type="button" role="tab" data-tab="overview" class="etab shrink-0 bg-transparent border-0 border-b-2 -mb-px py-2 text-xs cursor-pointer text-brand border-brand font-medium">Overview</button>
+    <button type="button" role="tab" data-tab="transactions" class="etab shrink-0 bg-transparent border-0 border-b-2 -mb-px py-2 text-xs cursor-pointer text-gray-500 border-transparent">Transactions</button>
+    <button type="button" role="tab" data-tab="methods" class="etab shrink-0 bg-transparent border-0 border-b-2 -mb-px py-2 text-xs cursor-pointer text-gray-500 border-transparent">Payment Methods</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="pane" id="pane-overview">
+    <div class="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-3.5 mb-3.5">
+      <div class="e-card">
+        <div class="flex justify-between items-start">
+          <h3 class="text-s13 font-semibold m-0">Revenue vs Customer Payments</h3>
+          <div class="flex gap-3.5 text-s105 text-gray-500">
+            <span><b class="inline-block w-[calc(var(--u)*7)] h-[calc(var(--u)*7)] rounded-full bg-brand mr-1"></b>Revenue</span>
+            <span><b class="inline-block w-[calc(var(--u)*7)] h-[calc(var(--u)*7)] rounded-full bg-emerald-500 mr-1"></b>Customer Payments</span>
+          </div>
+        </div>
+        <div class="relative h-[calc(var(--u)*180)] mt-2"><canvas id="lineChart"></canvas></div>
+      </div>
+      <div class="e-card">
+        <h3 class="text-s13 font-semibold m-0 mb-3">Top Performing Services</h3>
+        <div class="flex flex-col gap-3" id="topServices"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mb-3.5">
+      <div class="e-card">
+        <h3 class="text-s13 font-semibold m-0 mb-3">Revenue by Service Category</h3>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+          <div class="relative w-[calc(var(--u)*150)] h-[calc(var(--u)*150)] shrink-0"><canvas id="categoryChart"></canvas>
+            <div class="absolute inset-0 grid place-content-center text-center pointer-events-none"><b class="text-s15">₹2.46L</b><small class="text-s10 text-gray-500">Total Revenue</small></div></div>
+          <div class="flex-1 flex flex-col gap-2.5 text-s115" id="categoryLegend"></div>
+        </div>
+      </div>
+      <div class="e-card">
+        <h3 class="text-s13 font-semibold m-0 mb-3">Payment Status Overview</h3>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+          <div class="relative w-[calc(var(--u)*150)] h-[calc(var(--u)*150)] shrink-0"><canvas id="statusChart"></canvas>
+            <div class="absolute inset-0 grid place-content-center text-center pointer-events-none"><b class="text-s15">₹2.46L</b><small class="text-s10 text-gray-500">Total</small></div></div>
+          <div class="flex-1 flex flex-col gap-2.5 text-s115" id="statusLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="e-card mb-3.5">
+      <div class="flex justify-between items-center"><h3 class="text-s13 font-semibold m-0">Payment History</h3><a href="#" class="e-link">View All Holds &rarr;</a></div>
+      <div class="relative h-[calc(var(--u)*180)] mt-3"><canvas id="historyChart"></canvas></div>
+    </div>
+
+    <div class="e-card">
+      <div class="flex justify-between items-center mb-2"><h3 class="text-s13 font-semibold m-0">Recent Transactions</h3><button type="button" class="e-link" data-goto="transactions">View all transactions &rarr;</button></div>
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-s115">
+          <thead><tr><th class="e-th">DATE</th><th class="e-th">DESCRIPTION</th><th class="e-th">REFERENCE</th><th class="e-th">AMOUNT</th><th class="e-th">STATUS</th><th class="e-th">ACTIONS</th></tr></thead>
+          <tbody id="txBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div class="pane hidden" id="pane-transactions">
+    <div class="e-card">
+      <div class="flex items-center gap-2.5 mb-3">
+        <label class="flex-1 flex items-center gap-2 border border-gray-200 rounded-lg px-2.5 bg-white focus-within:border-brand">
+          <svg class="text-gray-500 shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="search" id="txSearch" placeholder="Search patient, booking ID or Service..." class="w-full border-0 outline-none py-2 text-xs bg-transparent">
+        </label>
+        <button class="e-btn" type="button" id="txFilterBtn" aria-expanded="false">Filter
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>
+        </button>
+      </div>
+
+      <div id="txFilters" class="hidden flex-wrap items-center gap-2 p-2.5 mb-3 bg-gray-50 border border-gray-200 rounded-xl">
+        <div class="relative" data-dd id="ddRange"></div>
+        <div class="relative" data-dd id="ddStatus"></div>
+        <div class="relative" data-dd id="ddService"></div>
+        <div class="relative" data-dd id="ddSort"></div>
+        <button type="button" id="txReset" class="e-link ml-1">Reset Filters</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-s115">
+          <thead><tr><th class="e-th">DATE</th><th class="e-th">DESCRIPTION</th><th class="e-th">SERVICE</th><th class="e-th">REFERENCE</th><th class="e-th">AMOUNT</th><th class="e-th">STATUS</th><th class="e-th">ACTIONS</th></tr></thead>
+          <tbody id="txFullBody"></tbody>
+        </table>
+      </div>
+      <div id="txEmpty" class="hidden text-center text-gray-500 py-9 text-xs">No transactions match your filters.</div>
+      <div id="txCount" class="text-s11 text-gray-500 pt-3"></div>
+    </div>
+  </div>
+
+  <!-- PAYMENT METHODS -->
+  <div class="pane hidden" id="pane-methods">
+    <div class="e-card">
+      <div id="pmList"></div>
+      <button type="button" class="e-link mt-1 !text-xs" id="pmAdd">+ Add payout method</button>
+    </div>
+  </div>
+
+  <!-- Export modal -->
+  <div class="e-modal hidden" id="exportModal" aria-hidden="true">
+    <div class="e-sheet max-w-[calc(var(--u)*440)] p-5" role="dialog" aria-labelledby="expTitle">
+      <div class="flex items-start gap-2.5 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand grid place-items-center shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 0-4 4m4-4 4 4M4 17v3h16v-3"/></svg></div>
+        <div><h4 id="expTitle" class="m-0 text-s15 font-semibold">Export Report</h4><p class="m-0 mt-0.5 text-s11 text-gray-500">Download your earnings data in the format you prefer</p></div>
+        <button type="button" id="closeExport" aria-label="Close" class="ml-auto w-6 h-6 rounded-full border border-gray-200 bg-white text-gray-500 cursor-pointer leading-none">&times;</button>
+      </div>
+
+      <div class="font-semibold mb-2">Report Type</div>
+      <div class="grid grid-cols-2 gap-2.5" data-group="type">
+        <button type="button" data-value="earnings" class="text-left rounded-xl p-2.5 cursor-pointer border border-brand bg-blue-50 ring-1 ring-brand"><b class="block">Earnings</b><small class="text-s10 text-gray-500">Download your earnings report</small></button>
+        <button type="button" data-value="transactions" class="text-left rounded-xl p-2.5 cursor-pointer border border-gray-200 bg-white"><b class="block">Transactions</b><small class="text-s10 text-gray-500">Download transaction details</small></button>
+      </div>
+
+      <div class="font-semibold mt-3.5 mb-2">Date Range</div>
+      <div class="flex flex-wrap gap-2" data-group="range">
+        <button type="button" data-value="7" class="rounded-full px-3 py-1.5 text-s11 cursor-pointer border bg-white border-gray-200 text-gray-700">Last 7 Days</button>
+        <button type="button" data-value="30" class="rounded-full px-3 py-1.5 text-s11 cursor-pointer border bg-brand border-brand text-white">Last 30 Days</button>
+        <button type="button" data-value="90" class="rounded-full px-3 py-1.5 text-s11 cursor-pointer border bg-white border-gray-200 text-gray-700">Last 90 Days</button>
+        <button type="button" data-value="custom" class="rounded-full px-3 py-1.5 text-s11 cursor-pointer border bg-white border-gray-200 text-gray-700">Custom Range</button>
+      </div>
+      <div id="customRange" class="hidden gap-2 mt-2.5"><input type="date" id="expFrom" class="e-input"><input type="date" id="expTo" class="e-input"></div>
+
+      <div class="font-semibold mt-3.5 mb-2">File Format</div>
+      <div class="flex flex-wrap gap-2" data-group="format">
+        <button type="button" data-value="pdf" class="rounded-full px-3 py-1.5 text-s11 cursor-pointer border bg-brand border-brand text-white">PDF</button>
+        <button type="button" data-value="xlsx" class="rounded-full px-3 py-1.5 text-s11 cursor-pointer border bg-white border-gray-200 text-gray-700">Excel (XLSX)</button>
+        <button type="button" data-value="csv" class="rounded-full px-3 py-1.5 text-s11 cursor-pointer border bg-white border-gray-200 text-gray-700">CSV</button>
+      </div>
+
+      <div class="font-semibold mt-3.5 mb-2">Include Details</div>
+      <div class="grid grid-cols-2 gap-2.5 bg-blue-50 border border-blue-100 rounded-xl p-3 text-s11">
+        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="include" value="total" checked class="accent-brand"> Total Earnings</label>
+        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="include" value="department" checked class="accent-brand"> Earnings by Department</label>
+        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="include" value="service" checked class="accent-brand"> Earnings by Service</label>
+        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="include" value="summary" checked class="accent-brand"> Earnings Summary</label>
+      </div>
+
+      <div class="grid grid-cols-[1fr_1.6fr] gap-2.5 mt-5">
+        <button type="button" id="cancelExport" class="py-2.5 rounded-lg font-medium cursor-pointer bg-white border border-gray-200">Cancel</button>
+        <button type="button" id="submitExport" class="py-2.5 rounded-lg font-medium cursor-pointer bg-brand border border-brand text-white">Export Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payout method modal -->
+  <div class="e-modal hidden" id="pmModal" aria-hidden="true">
+    <form class="e-sheet max-w-[calc(var(--u)*420)]" id="pmForm" novalidate autocomplete="off" role="dialog" aria-labelledby="pmTitle">
+      <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 font-semibold text-s13">
+        <span id="pmTitle">Edit payout method</span>
+        <button type="button" id="pmX" aria-label="Close" class="w-[calc(var(--u)*22)] h-[calc(var(--u)*22)] rounded-full border border-gray-200 bg-white text-gray-500 cursor-pointer leading-none">&times;</button>
+      </div>
+      <div class="px-5 pt-4 pb-1.5">
+        <div class="mb-3" data-f="holder"><label class="e-label" for="pmHolder">Account holder name</label><input id="pmHolder" type="text" class="e-input"><div class="pm-err text-red-600 text-s105 mt-1"></div></div>
+        <div class="mb-3" data-f="bank"><label class="e-label" for="pmBank">Bank name</label><input id="pmBank" type="text" class="e-input"><div class="pm-err text-red-600 text-s105 mt-1"></div></div>
+        <div class="mb-3" data-f="number"><label class="e-label" for="pmNumber">Account number</label><input id="pmNumber" type="password" inputmode="numeric" class="e-input"><div class="pm-err text-red-600 text-s105 mt-1"></div></div>
+        <div class="mb-3" data-f="confirm"><label class="e-label" for="pmConfirm">Confirm account number</label><input id="pmConfirm" type="password" inputmode="numeric" class="e-input"><div class="pm-err text-red-600 text-s105 mt-1"></div></div>
+        <div class="mb-3" data-f="ifsc"><label class="e-label" for="pmIfsc">IFSC code</label><input id="pmIfsc" type="text" maxlength="11" class="e-input uppercase"><div class="pm-err text-red-600 text-s105 mt-1"></div></div>
+        <div class="mb-3">
+          <label class="e-label">Account type</label>
+          <div class="relative" id="pmType">
+            <button type="button" id="pmTypeBtn" class="w-full flex justify-between items-center border border-gray-200 rounded-md px-2.5 py-2 text-xs bg-gray-50 cursor-pointer"><span id="pmTypeLabel">Savings</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div id="pmTypeMenu" class="hidden absolute inset-x-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-1.5 z-10">
+              <button type="button" data-v="Savings" class="block w-full text-left bg-transparent border-0 px-2.5 py-2 rounded-md text-xs cursor-pointer hover:bg-slate-100">Savings</button>
+              <button type="button" data-v="Current" class="block w-full text-left bg-transparent border-0 px-2.5 py-2 rounded-md text-xs cursor-pointer hover:bg-slate-100">Current</button>
+              <button type="button" data-v="NRI" class="block w-full text-left bg-transparent border-0 px-2.5 py-2 rounded-md text-xs cursor-pointer hover:bg-slate-100">NRI</button>
+            </div>
+          </div>
+        </div>
+        <div class="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5 text-s11 text-gray-600 mb-1.5">Account details are encrypted and stored securely. Verification may take 1–2 business days.</div>
+      </div>
+      <div class="grid grid-cols-[1fr_1.6fr] gap-2.5 px-5 pt-3 pb-5">
+        <button type="button" id="pmCancel" class="py-2.5 rounded-lg font-medium cursor-pointer bg-white border border-gray-200">Cancel</button>
+        <button type="submit" class="py-2.5 rounded-lg font-medium cursor-pointer bg-brand border border-brand text-white">Save &amp; Verify</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Transaction details modal -->
+  <div class="e-modal hidden" id="txdModal" aria-hidden="true">
+    <div class="e-sheet max-w-[calc(var(--u)*460)] !overflow-hidden" role="dialog" aria-labelledby="txdTitle">
+      <div class="flex justify-between items-center px-5 py-3.5 border-b border-gray-200 font-semibold text-s13"><span id="txdTitle">Transaction Details</span><button type="button" id="txdX" aria-label="Close" class="bg-transparent border-0 text-lg text-gray-500 cursor-pointer leading-none">&times;</button></div>
+      <div class="px-5 py-4 max-h-[70vh] overflow-auto" id="txdBody"></div>
+      <div class="flex justify-end gap-2.5 px-5 py-3 border-t border-gray-200">
+        <button type="button" id="txdCancel" class="px-4 py-2 rounded-lg font-medium cursor-pointer bg-white border border-gray-200">Cancel</button>
+        <button type="button" id="txdDownload" class="px-4 py-2 rounded-lg font-medium cursor-pointer bg-brand border border-brand text-white">Download</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{% static 'js/hospital-earnings.js' %}"></script>
+{% endblock %}

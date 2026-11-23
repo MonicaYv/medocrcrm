@@ -176,7 +176,7 @@
   --color-inactive-orange: #ffd4d0;
   --color-white-opacity: #ffffff80;
   --color-platinum: #e4e4e4;
-   --color-ashy-blue:#64748B;
+  --color-ashy-blue:#64748B;
   --color-shazam-blue:#0088FF;
   --color-dark-inky-blue:#0F172A;
   --color-grayish-blue-slate:#94A3B8;
@@ -234,6 +234,10 @@
   --color-cloud-burst-1:#64748B;
   --color-dark-black:#0F172A;
   --color-white2:#F1F5F9;
+  --color-hawkes-blue:#BFDBFE; 
+  --color-alice-blue:#EFF6FF;
+  --color-east-bay:#475569;
+  --color-indigo-purple:#6155F5;
   --color-report-0088ff: #0088ff;
   --color-report-02c5a5: #02c5a5;
   --color-report-06b6c8: #06b6c8;
@@ -3096,4 +3100,108 @@ input[type="number"] {
   }
 body {
     font-family: 'Inter', sans-serif;
+}
+
+/* ============================================================
+   Earnings page  ->  append this to your style.css
+   Tailwind (CDN) handles all other styling via utility classes.
+   Plain CSS only: no @apply, no build step needed.
+   ============================================================ */
+
+/* All sizes below use var(--u): "1px" scaled by screen width.
+   --u is set on #earningsPage in earnings.html (style="--u: clamp(...)"). */
+#earningsPage,
+#earningsPage * {
+  box-sizing: border-box;
+}
+
+.e-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: calc(var(--u) * 12);
+  padding: calc(var(--u) * 16);
+}
+
+.e-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--u) * 6);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: calc(var(--u) * 8);
+  padding: calc(var(--u) * 8) calc(var(--u) * 12);
+  font-size: calc(var(--u) * 12);
+  line-height: 1.3;
+  color: #111827;
+  cursor: pointer;
+}
+.e-btn:hover {
+  border-color: #d1d5db;
+}
+
+.e-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #1f6feb;
+  font-size: calc(var(--u) * 11.5);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.e-th {
+  text-align: left;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: calc(var(--u) * 10.5);
+  padding: calc(var(--u) * 10) calc(var(--u) * 8);
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+.e-td {
+  padding: calc(var(--u) * 12) calc(var(--u) * 8);
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.e-label {
+  display: block;
+  font-size: calc(var(--u) * 11);
+  color: #4b5563;
+  margin-bottom: calc(var(--u) * 4);
+}
+.e-input {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: calc(var(--u) * 6);
+  padding: calc(var(--u) * 8) calc(var(--u) * 10);
+  font-size: calc(var(--u) * 12);
+  background: #f9fafb;
+  color: #111827;
+}
+.e-input:focus {
+  outline: 2px solid #1f6feb;
+  outline-offset: -1px;
+  background: #fff;
+}
+
+/* Modals: display is toggled by the Tailwind "hidden" / "flex" classes from earnings.js */
+.e-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.45);
+  padding: calc(var(--u) * 16);
+}
+.e-sheet {
+  background: #fff;
+  border-radius: calc(var(--u) * 12);
+  width: 100%;
+  max-height: 94vh;
+  overflow: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  font-size: calc(var(--u) * 12);
+  color: #111827;
 }
