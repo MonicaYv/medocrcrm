@@ -4,10 +4,10 @@
 
 <div id="appointmentsPage" class="px-4 py-5 md:px-6 text-slate-800">
   <!-- Breadcrumb + header -->
-  <nav class="text-[11px] text-slate-500 mb-3">Home / Appointments</nav>
+  <nav class="text-[14px] text-ashy-blue mb-3">Home / Appointments</nav>
   <div class="flex flex-wrap items-start justify-between gap-4">
     <div>
-      <h1 class="flex items-center gap-2 text-[22px] font-bold text-slate-900">
+      <h1 class="flex items-center gap-2 text-[24px] font-bold text-slate-900">
         <svg
           width="20"
           height="20"
@@ -21,10 +21,10 @@
         </svg>
         Appointments
       </h1>
-      <p class="text-[12px] text-slate-500 mt-1">
+      <p class="text-[14px] text-ashy-blue mt-1">
         Manage your patient appointments and consultation records.
       </p>
-      <p class="text-[11px] text-slate-600 mt-1">
+      <p class="text-[14px] text-ashy-blue mt-1">
         Dr. Aarav Shah · New Delhi · IST
       </p>
     </div>
@@ -32,7 +32,7 @@
       <button
         id="aptExportBtn"
         type="button"
-        class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50 flex items-center gap-2"
+        class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white flex items-center gap-2"
       >
         <svg
           width="14"
@@ -48,7 +48,7 @@
       <button
         id="aptBookBtn"
         type="button"
-        class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2"
+        class="text-[12px] font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2"
       >
         <svg
           width="14"
@@ -66,7 +66,7 @@
 
   <!-- Stat cards -->
   <div class="grid grid-cols-4 gap-3 md:gap-4 mt-5">
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+    <div class="bg-white rounded-xl border border-report-e2e8f0e5 p-4 shadow-sm">
       <div class="flex justify-between items-start">
         <span
           class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"
@@ -86,10 +86,10 @@
           >Today</span
         >
       </div>
-      <p id="aptStatToday" class="text-[26px] font-bold mt-3">12</p>
-      <p class="text-[11px] text-slate-500 mt-1">Appointments on 12 Oct 2026</p>
+      <p id="aptStatToday" class="text-[24px] font-bold mt-3">12</p>
+      <p class="text-[12px] text-ashy-blue mt-1">Appointments on 12 Oct 2026</p>
     </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+    <div class="bg-white rounded-xl border border-report-e2e8f0e5 p-4 shadow-sm">
       <div class="flex justify-between items-start">
         <span
           class="w-9 h-9 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center"
@@ -109,12 +109,12 @@
           >Upcoming</span
         >
       </div>
-      <p id="aptStatUpcoming" class="text-[26px] font-bold mt-3">12</p>
-      <p class="text-[11px] text-slate-500 mt-1">
+      <p id="aptStatUpcoming" class="text-[24px] font-bold mt-3">12</p>
+      <p class="text-[12px] text-ashy-blue mt-1">
         Future confirmed appointments
       </p>
     </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+    <div class="bg-white rounded-xl border border-report-e2e8f0e5 p-4 shadow-sm">
       <div class="flex justify-between items-start">
         <span
           class="w-9 h-9 rounded-lg bg-yellow-50 text-yellow-500 flex items-center justify-center"
@@ -134,10 +134,10 @@
           >Pending</span
         >
       </div>
-      <p id="aptStatPending" class="text-[26px] font-bold mt-3">06</p>
-      <p class="text-[11px] text-slate-500 mt-1">Requests awaiting response</p>
+      <p id="aptStatPending" class="text-[24px] font-bold mt-3">06</p>
+      <p class="text-[12px] text-ashy-blue mt-1">Requests awaiting response</p>
     </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+    <div class="bg-white rounded-xl border border-report-e2e8f0e5 p-4 shadow-sm">
       <div class="flex justify-between items-start">
         <span
           class="w-9 h-9 rounded-lg bg-green-50 text-green-500 flex items-center justify-center"
@@ -157,15 +157,15 @@
           >Completed</span
         >
       </div>
-      <p id="aptStatCompleted" class="text-[26px] font-bold mt-3">11</p>
-      <p class="text-[11px] text-slate-500 mt-1">
+      <p id="aptStatCompleted" class="text-[24px] font-bold mt-3">11</p>
+      <p class="text-[12px] text-ashy-blue mt-1">
         Recorded completed consultations
       </p>
     </div>
   </div>
 
   <div
-    class="flex flex-wrap justify-between gap-2 text-[11px] text-slate-600 mt-4"
+    class="flex flex-wrap justify-between gap-2 text-[14px] text-ashy-blue mt-4"
   >
     <span
       >Completed appointment fees: <span id="aptFees">₹5,100</span> ·
@@ -175,15 +175,15 @@
   </div>
 
   <!-- Main list card -->
-  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-5 p-5">
+  <div class="bg-white rounded-2xl border border-report-e2e8f0e5 shadow-sm mt-5 p-5">
     <div
       id="aptTabs"
-      class="flex gap-3 overflow-x-auto border-b border-slate-100"
+      class="flex gap-3 overflow-x-auto border-b border-ashy-blue"
     >
       <button
         type="button"
         data-tab="today"
-        class="apt-tab px-4 pb-3 text-[12px] flex items-center gap-2 border-b-2"
+        class="apt-tab px-4 pb-3 text-[14px] flex items-center gap-2 border-b-2"
       >
         Today
         <span
@@ -194,7 +194,7 @@
       <button
         type="button"
         data-tab="upcoming"
-        class="apt-tab px-4 pb-3 text-[12px] flex items-center gap-2 border-b-2"
+        class="apt-tab px-4 pb-3 text-[14px] flex items-center gap-2 border-b-2"
       >
         Upcoming
         <span
@@ -205,7 +205,7 @@
       <button
         type="button"
         data-tab="pending"
-        class="apt-tab px-4 pb-3 text-[12px] flex items-center gap-2 border-b-2"
+        class="apt-tab px-4 pb-3 text-[14px] font-bold flex items-center gap-2 border-b-2"
       >
         Pending
         <span
@@ -264,7 +264,7 @@
           id="aptDate"
           type="date"
           value="2026-10-12"
-          class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100 !w-[170px] !py-2 !text-[13px]"
+          class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100 !w-[170px] !py-2 !text-[13px]"
         />
       </div>
 
@@ -289,13 +289,13 @@
           id="aptSearch"
           type="text"
           placeholder="Search patient, appointment or issue..."
-          class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100 !pl-9 !text-[13px]"
+          class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100 !pl-9 !text-[13px]"
         />
       </div>
       <button
         id="aptFilterBtn"
         type="button"
-        class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100 flex items-center gap-2 !text-slate-700 !border-slate-200"
+        class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100 flex items-center gap-2 !text-slate-700 !border-report-e2e8f0e5"
       >
         Filter
         <svg
@@ -320,7 +320,7 @@
       <button
         id="aptResetFilters"
         type="button"
-        class="text-[13px] text-slate-600 px-2"
+        class="text-[13px] text-ashy-blue px-2"
       >
         Reset Filters
       </button>
@@ -347,13 +347,13 @@
     </div>
 
     <div
-      class="flex flex-wrap items-center justify-between gap-3 mt-4 text-[12px] text-slate-600"
+      class="flex flex-wrap items-center justify-between gap-3 mt-4 text-[12px] text-ashy-blue"
     >
       <span id="aptShowing">Showing 1-8 of 12</span>
       <div class="flex items-center gap-3">
         <select
           id="aptPageSize"
-          class="border border-slate-200 rounded-lg px-2 py-1.5 text-[12px]"
+          class="border border-report-e2e8f0e5 rounded-lg px-2 py-1.5 text-[12px]"
         >
           <option>8</option>
           <option>12</option>
@@ -362,7 +362,7 @@
         <button
           id="aptPrev"
           type="button"
-          class="border border-slate-200 rounded-lg px-3 py-1.5 text-slate-400"
+          class="border border-report-e2e8f0e5 rounded-lg px-3 py-1.5 text-slate-400"
         >
           Previous
         </button>
@@ -370,7 +370,7 @@
         <button
           id="aptNext"
           type="button"
-          class="border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700"
+          class="border border-report-e2e8f0e5 rounded-lg px-3 py-1.5 text-slate-700"
         >
           Next
         </button>
@@ -378,7 +378,7 @@
     </div>
   </div>
 
-  <div class="flex justify-between text-[11px] text-slate-600 mt-4 pb-4">
+  <div class="flex justify-between text-[11px] text-ashy-blue mt-4 pb-4">
     <span>Sample data · Changes saved on this device</span>
     <button id="aptResetData" type="button" class="hover:underline">
       Reset Sample Data
@@ -406,7 +406,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Book Appointment</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -427,14 +427,14 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="bookForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="bookForm">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs text-slate-700 mb-1.5 font-medium"
             >Patient name <i class="not-italic text-red-500">*</i></label
           ><input
             id="bk-name"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
             placeholder="Enter patient name"
           />
         </div>
@@ -443,7 +443,7 @@
             >Patient ID <i class="not-italic text-red-500">*</i></label
           ><input
             id="bk-pid"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           />
         </div>
         <div>
@@ -453,7 +453,7 @@
             id="bk-age"
             type="number"
             min="0"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
             placeholder="e.g. 28"
           />
         </div>
@@ -462,7 +462,7 @@
             >Gender</label
           ><select
             id="bk-gender"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           >
             <option>Female</option>
             <option>Male</option>
@@ -474,7 +474,7 @@
             >Consultation mode</label
           ><select
             id="bk-mode"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           >
             <option>Clinic Visit</option>
             <option>Hospital Visit</option>
@@ -489,7 +489,7 @@
           ><input
             id="bk-date"
             type="date"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
             value="2026-10-17"
           />
         </div>
@@ -499,7 +499,7 @@
           ><input
             id="bk-time"
             type="time"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
             value="09:00"
           />
         </div>
@@ -510,7 +510,7 @@
             id="bk-dur"
             type="number"
             min="5"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
             value="30"
           />
         </div>
@@ -521,7 +521,7 @@
             id="bk-fee"
             type="number"
             min="0"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
             value="400"
           />
         </div>
@@ -530,7 +530,7 @@
             >Location</label
           ><input
             id="bk-loc"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
             value="MedOCR Clinic, New Delhi"
           />
         </div>
@@ -542,7 +542,7 @@
         ><textarea
           id="bk-reason"
           rows="3"
-          class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+          class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           placeholder="Describe symptoms or reasons for visit..."
         ></textarea>
       </div>
@@ -577,7 +577,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Review Appointment</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -599,10 +599,10 @@
       </button>
     </div>
     <div
-      class="px-7 pt-4 pb-5 border-t border-slate-100"
+      class="px-7 pt-4 pb-5 border-t border-ashy-blue"
       id="bookReviewBody"
     ></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -634,7 +634,7 @@
         <h3 class="text-xl font-bold text-slate-900">
           Discard Unsaved Changes?
         </h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -655,12 +655,12 @@
         </svg>
       </button>
     </div>
-    <div class="p-7 border-t border-slate-100">
-      <p class="text-[15px] text-slate-600">
+    <div class="p-7 border-t border-ashy-blue">
+      <p class="text-[15px] text-ashy-blue">
         Your changes have not been saved. Discard them or keep editing?
       </p>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50"
@@ -692,7 +692,7 @@
         <h3 id="dt-title" class="text-xl font-bold text-slate-900">
           Completed Consultation
         </h3>
-        <p id="dt-sub" class="text-xs text-slate-500 mt-1"></p>
+        <p id="dt-sub" class="text-xs text-ashy-blue mt-1"></p>
       </div>
       <button
         type="button"
@@ -712,12 +712,12 @@
       </button>
     </div>
     <div
-      class="flex gap-[26px] border-b border-slate-100 px-7 overflow-x-auto"
+      class="flex gap-[26px] border-b border-ashy-blue px-7 overflow-x-auto"
       id="dtTabs"
     ></div>
     <div class="px-7 py-5" id="dtBody"></div>
     <div
-      class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100 flex-wrap"
+      class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue flex-wrap"
       id="dtFoot"
     ></div>
   </div>
@@ -735,7 +735,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Consultation Summary</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -757,10 +757,10 @@
       </button>
     </div>
     <div
-      class="px-7 pt-4 pb-5 border-t border-slate-100"
+      class="px-7 pt-4 pb-5 border-t border-ashy-blue"
       id="summaryBody"
     ></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -790,7 +790,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Consultation Invoice</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -812,10 +812,10 @@
       </button>
     </div>
     <div
-      class="px-7 pt-4 pb-5 border-t border-slate-100"
+      class="px-7 pt-4 pb-5 border-t border-ashy-blue"
       id="invoiceBody"
     ></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -847,7 +847,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Write Prescription</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -868,7 +868,7 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="rxForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="rxForm">
       <div id="rxPatient"></div>
       <label class="block text-xs text-slate-700 mb-1.5 font-semibold"
         >Clinician-recorded diagnosis
@@ -877,7 +877,7 @@
       <textarea
         id="rx-dx"
         rows="3"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
       <h4 class="text-[16px] font-semibold mt-5 mb-2">Medicines</h4>
       <div
@@ -901,14 +901,14 @@
       <textarea
         id="rx-instr"
         rows="3"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
       <label class="block text-xs text-slate-700 mb-1.5 font-medium mt-4"
         >Prescribing clinician <i class="not-italic text-red-500">*</i></label
       >
       <input
         id="rx-clin"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
         value="Dr. Aarav Shah"
       />
       <div
@@ -918,7 +918,7 @@
         medicines or dosages.
       </div>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50"
@@ -948,7 +948,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Prescription Preview</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -970,10 +970,10 @@
       </button>
     </div>
     <div
-      class="px-7 pt-4 pb-5 border-t border-slate-100"
+      class="px-7 pt-4 pb-5 border-t border-ashy-blue"
       id="rxPreviewBody"
     ></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1010,7 +1010,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Complete Consultation</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1031,7 +1031,7 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="completeForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="completeForm">
       <div id="cpPatient"></div>
       <label class="block text-xs text-slate-700 mb-1.5 font-semibold"
         >Actual duration (minutes)
@@ -1041,7 +1041,7 @@
         id="cp-dur"
         type="number"
         min="1"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       />
       <label class="block text-xs text-slate-700 mb-1.5 font-semibold mt-4"
         >Consultation summary <i class="not-italic text-red-500">*</i></label
@@ -1049,14 +1049,14 @@
       <textarea
         id="cp-summary"
         rows="4"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
       <label class="block text-xs text-slate-700 mb-1.5 font-medium mt-4"
         >Prescription status</label
       >
       <select
         id="cp-rx"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       >
         <option>Not required / Create Later</option>
         <option>Create now</option>
@@ -1068,7 +1068,7 @@
         prescription automatically.
       </div>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1098,7 +1098,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Review Completion</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1120,10 +1120,10 @@
       </button>
     </div>
     <div
-      class="px-7 pt-4 pb-5 border-t border-slate-100"
+      class="px-7 pt-4 pb-5 border-t border-ashy-blue"
       id="cpReviewBody"
     ></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1153,7 +1153,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Start Appointment</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1174,8 +1174,8 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="startBody"></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="startBody"></div>
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1207,7 +1207,7 @@
         <h3 id="callTitle" class="text-xl font-bold text-slate-900">
           Join Video Call
         </h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1228,8 +1228,8 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="callBody"></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="callBody"></div>
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1260,7 +1260,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Reschedule Appointment</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1281,7 +1281,7 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="reschForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="reschForm">
       <div id="rsPatient"></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -1290,7 +1290,7 @@
           ><input
             id="rs-date"
             type="date"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           />
         </div>
         <div>
@@ -1299,7 +1299,7 @@
           ><input
             id="rs-time"
             type="time"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           />
         </div>
         <div>
@@ -1309,7 +1309,7 @@
             id="rs-dur"
             type="number"
             min="5"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           />
         </div>
         <div>
@@ -1317,7 +1317,7 @@
             >Consultation mode</label
           ><select
             id="rs-mode"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           >
             <option>Clinic Visit</option>
             <option>Hospital Visit</option>
@@ -1333,7 +1333,7 @@
       <textarea
         id="rs-reason"
         rows="3"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
       <div
         class="bg-blue-50 border border-blue-100 text-shazam-blue text-[11px] px-4 py-3 rounded-[10px] mt-[18px]"
@@ -1342,7 +1342,7 @@
         creates a linked replacement.
       </div>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1375,7 +1375,7 @@
         <h3 class="text-xl font-bold text-slate-900">
           Mark Appointment as Missed
         </h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1396,14 +1396,14 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="missForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="missForm">
       <div id="msPatient"></div>
       <label class="block text-xs text-slate-700 mb-1.5 font-medium"
         >No-show classification <i class="not-italic text-red-500">*</i></label
       >
       <select
         id="ms-class"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       >
         <option>Patient did not attend</option>
         <option>Patient unreachable</option>
@@ -1416,7 +1416,7 @@
       <textarea
         id="ms-reason"
         rows="3"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
       <div
         class="bg-blue-50 border border-blue-100 text-shazam-blue text-[11px] px-4 py-3 rounded-[10px] mt-[18px]"
@@ -1425,7 +1425,7 @@
         rating deductions are applied.
       </div>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1456,7 +1456,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Cancel Appointment</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1477,14 +1477,14 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="cancelForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="cancelForm">
       <div id="cnPatient"></div>
       <label class="block text-xs text-slate-700 mb-1.5 font-medium"
         >Cancellation reason</label
       >
       <select
         id="cn-reason"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       >
         <option>Schedule conflict</option>
         <option>Doctor unavailable</option>
@@ -1497,7 +1497,7 @@
       <textarea
         id="cn-expl"
         rows="3"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
       <div
         class="bg-blue-50 border border-blue-100 text-shazam-blue text-[11px] px-4 py-3 rounded-[10px] mt-[18px]"
@@ -1506,7 +1506,7 @@
         hold funds or execute refunds.
       </div>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50"
@@ -1536,7 +1536,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 id="cfTitle" class="text-xl font-bold text-slate-900">Review</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1557,8 +1557,8 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="cfBody"></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="cfBody"></div>
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1590,7 +1590,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Appointment Request</h3>
-        <p id="rq-sub" class="text-xs text-slate-500 mt-1"></p>
+        <p id="rq-sub" class="text-xs text-ashy-blue mt-1"></p>
       </div>
       <button
         type="button"
@@ -1609,9 +1609,9 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="rqBody"></div>
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="rqBody"></div>
     <div
-      class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100"
+      class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue"
       id="rqFoot"
     ></div>
   </div>
@@ -1632,7 +1632,7 @@
         <h3 class="text-xl font-bold text-slate-900">
           Submit Consultation Bid
         </h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1653,7 +1653,7 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="bidForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="bidForm">
       <div id="bdPatient"></div>
       <div id="bdInfo"></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1665,7 +1665,7 @@
             id="bd-fee"
             type="number"
             min="1"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           />
         </div>
         <div>
@@ -1675,7 +1675,7 @@
             id="bd-dur"
             type="number"
             min="5"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           />
         </div>
         <div>
@@ -1684,7 +1684,7 @@
           ><input
             id="bd-date"
             type="date"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           />
         </div>
         <div>
@@ -1693,7 +1693,7 @@
           ><input
             id="bd-time"
             type="time"
-            class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+            class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
           />
         </div>
       </div>
@@ -1703,7 +1703,7 @@
       <textarea
         id="bd-details"
         rows="3"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
       <div
         class="bg-blue-50 border border-blue-100 text-shazam-blue text-[11px] px-4 py-3 rounded-[10px] mt-[18px]"
@@ -1712,7 +1712,7 @@
         appointment is confirmed.
       </div>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1745,7 +1745,7 @@
         <h3 class="text-xl font-bold text-slate-900">
           Decline Appointment Request
         </h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1766,7 +1766,7 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="declineForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="declineForm">
       <div id="dcPatient"></div>
       <label class="block text-xs text-slate-700 mb-1.5 font-medium"
         >Decline reason <i class="not-italic text-red-500">*</i></label
@@ -1774,10 +1774,10 @@
       <textarea
         id="dc-reason"
         rows="3"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50"
@@ -1809,7 +1809,7 @@
     <div class="flex justify-between items-start px-7 pt-[22px] pb-3.5">
       <div>
         <h3 class="text-xl font-bold text-slate-900">Cancellation Details</h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1830,8 +1830,8 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="cdetBody"></div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="cdetBody"></div>
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
@@ -1858,7 +1858,7 @@
         <h3 class="text-xl font-bold text-slate-900">
           Record Patient Follow-up
         </h3>
-        <p class="text-xs text-slate-500 mt-1">
+        <p class="text-xs text-ashy-blue mt-1">
           Sunrise Multispeciality Hospital · Andheri East
         </p>
       </div>
@@ -1879,7 +1879,7 @@
         </svg>
       </button>
     </div>
-    <div class="px-7 pt-4 pb-5 border-t border-slate-100" id="followForm">
+    <div class="px-7 pt-4 pb-5 border-t border-ashy-blue" id="followForm">
       <div id="fwPatient"></div>
       <label class="block text-xs text-slate-700 mb-1.5 font-medium"
         >Follow-up note <i class="not-italic text-red-500">*</i></label
@@ -1887,7 +1887,7 @@
       <textarea
         id="fw-note"
         rows="3"
-        class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
+        class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100"
       ></textarea>
       <div
         class="bg-blue-50 border border-blue-100 text-shazam-blue text-[11px] px-4 py-3 rounded-[10px] mt-[18px]"
@@ -1895,7 +1895,7 @@
         This records a local note. No email, SMS, or call is sent.
       </div>
     </div>
-    <div class="flex justify-end gap-3 px-7 py-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 px-7 py-4 border-t border-ashy-blue">
       <button
         type="button"
         class="text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100"
