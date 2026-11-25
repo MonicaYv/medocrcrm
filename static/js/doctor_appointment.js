@@ -55,7 +55,7 @@
 
     /* ---- Tailwind class tokens (full literals so the Tailwind scanner can see them; shazam-blue comes from your theme) ---- */
     var BTN =
-      "text-xs font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors ";
+      "text-sm font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors ";
     var B = {
       def:
         BTN + "border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50",
@@ -69,16 +69,16 @@
     var INPUT =
       "w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100";
     var NOTE =
-      "bg-blue-50 border border-blue-100 text-shazam-blue text-[11px] px-4 py-3 rounded-[10px]";
+      "bg-blue-50 border border-blue-100 text-shazam-blue text-[16px] px-4 py-3 rounded-[10px]";
     var PCARD =
       "flex items-center gap-3.5 bg-slate-50 border border-slate-200 rounded-xl px-[18px] py-3.5 mb-[18px]";
     var AV =
       "rounded-full bg-shazam-blue text-white font-semibold flex items-center justify-center shrink-0";
-    var SLOT =
-      "min-w-[126px] border border-slate-300 rounded-[10px] px-3 py-2 text-left bg-white shadow-[0_2px_0_#bfdbfe] hover:border-shazam-blue";
+   var SLOT =
+  "min-w-[230px] shrink-0 border border-slate-200 border-l-4 border-l-shazam-blue rounded-[10px] px-4 py-3 text-left bg-white shadow-md hover:border-shazam-blue";
     var LI =
       "relative mb-[18px] before:content-[''] before:absolute before:-left-[29px] before:top-1 before:w-2.5 before:h-2.5 before:rounded-full before:bg-shazam-blue";
-    var TAB_BASE = "text-[13px] py-3 border-b-2 whitespace-nowrap";
+    var TAB_BASE = "text-[14px] py-3 border-b-2 whitespace-nowrap";
     var TAB_ON = "text-shazam-blue border-shazam-blue font-medium";
     var TAB_OFF = "text-slate-600 border-transparent font-normal";
     var MAIN_ON = "text-shazam-blue border-shazam-blue font-semibold";
@@ -257,18 +257,7 @@
           700,
           "confirmed",
         ),
-        r(
-          3309,
-          "Amit Verma",
-          44,
-          "Male",
-          "Blood pressure check",
-          "Normal",
-          "14:00",
-          "Clinic Visit",
-          400,
-          "confirmed",
-        ),
+      
         r(
           3310,
           "Sunita Rao",
@@ -988,7 +977,7 @@
     function pill(st, label, big) {
       return (
         '<span class="inline-flex items-center leading-none rounded-full border font-medium whitespace-nowrap ' +
-        (big ? "text-[11px] px-2.5 py-1 " : "text-[10px] px-2 py-[3px] ") +
+        (big ? "text-xs px-3 py-1.5 " : "text-xs px-2.5 py-1 ") +
         PILL[st] +
         '">' +
         (label || STATUS[st]) +
@@ -1028,13 +1017,13 @@
         PCARD +
         '"><span class="' +
         AV +
-        ' w-11 h-11 text-sm">' +
+        ' w-12 h-12 text-base">' +
         initials(a.name) +
-        '</span><div><div class="flex items-center gap-2"><b class="text-[15px]">' +
+        '</span><div><div class="flex items-center gap-2"><b class="text-base">' +
         esc(a.name) +
         "</b>" +
         pill(st) +
-        '</div><div class="text-[11px] text-slate-500 mt-0.5">' +
+        '</div><div class="text-xs text-slate-500 mt-0.5">' +
         a.id +
         " · " +
         a.pid +
@@ -1047,7 +1036,7 @@
         pairs
           .map(function (p) {
             return (
-              '<div><dt class="text-[11px] text-slate-400 mb-[3px]">' +
+              '<div><dt class="text-[14px] text-slate-400 mb-[3px]">' +
               p[0] +
               '</dt><dd class="text-sm text-slate-900 font-medium">' +
               esc(p[1]) +
@@ -1128,9 +1117,9 @@
             "</button>";
       } else if (s === "awaiting")
         h +=
-          '<button type="button" data-act="bid" class="text-[13px] font-bold text-green-600">Submit Bid</button>';
+          '<button type="button" data-act="bid" class="text-[14px] font-bold text-green-600">Submit Bid</button>';
       else if (s === "bidsent")
-        h += '<span class="text-[12px] text-slate-500">Bid sent</span>';
+        h += '<span class="text-[14px] text-slate-500">Bid sent</span>';
       else if (s === "missed")
         h +=
           '<button type="button" data-act="resch" title="Reschedule">' +
@@ -1195,31 +1184,31 @@
                 AV +
                 ' w-9 h-9 text-xs">' +
                 initials(a.name) +
-                '</span><div><div class="text-[13px] font-semibold">' +
+                '</span><div><div class="text-[14px] font-semibold">' +
                 esc(a.name) +
-                '</div><div class="text-[11px] text-slate-400">' +
+                '</div><div class="text-[14px] text-slate-400">' +
                 a.id +
                 "</div></div></div></td>" +
-                '<td class="px-3 py-3 text-center"><div class="text-[12px]">' +
+                '<td class="px-3 py-3 text-center"><div class="text-[14px]">' +
                 esc(a.issue) +
-                '</div><span class="inline-block text-[10px] px-2 py-0.5 rounded-md mt-1 ' +
+                '</div><span class="inline-block text-[14px] px-2 py-0.5 rounded-md mt-1 ' +
                 (a.urgency === "Priority"
                   ? "bg-red-50 text-red-500"
                   : "bg-blue-50 text-blue-600") +
                 '">' +
                 a.urgency +
                 "</span></td>" +
-                '<td class="px-3 py-3 text-center"><div class="text-[12px]">' +
+                '<td class="px-3 py-3 text-center"><div class="text-[14px]">' +
                 fmtDate(a.date) +
-                '</div><div class="text-[10px] text-slate-400">' +
+                '</div><div class="text-[14px] text-slate-400">' +
                 fmtTime(a.time) +
                 " · " +
                 a.dur +
                 " min</div></td>" +
-                '<td class="px-3 py-3 text-center text-[12px]">' +
+                '<td class="px-3 py-3 text-center text-[14px]">' +
                 a.mode +
                 "</td>" +
-                '<td class="px-3 py-3 text-center text-[12px]">₹' +
+                '<td class="px-3 py-3 text-center text-[14px]">₹' +
                 a.fee +
                 "</td>" +
                 '<td class="px-3 py-3 text-center">' +
@@ -1231,7 +1220,7 @@
               );
             })
             .join("")
-        : '<tr><td colspan="7" class="text-center text-[13px] text-slate-500 py-10">No appointments match. Change the tab, date or filters to see more.</td></tr>';
+        : '<tr><td colspan="7" class="text-center text-[14px] text-slate-500 py-10">No appointments match. Change the tab, date or filters to see more.</td></tr>';
       var total = list.length;
       $("#aptShowing").textContent = total
         ? "Showing " +
@@ -1268,11 +1257,11 @@
                 SLOT +
                 '" data-id="' +
                 a.id +
-                '"><div class="text-[12px] font-semibold">' +
+                '"><div class="text-[14px] font-semibold">' +
                 fmtTime(a.time) +
-                '</div><div class="text-[12px] font-semibold">' +
+                '</div><div class="text-[14px] font-semibold">' +
                 esc(a.name) +
-                '</div><div class="flex justify-between gap-3 text-[10px]"><span class="text-slate-500">' +
+                '</div><div class="flex justify-between gap-3 text-[14px]"><span class="text-slate-500">' +
                 a.mode +
                 '</span><span class="' +
                 col +
@@ -1282,7 +1271,7 @@
               );
             })
             .join("")
-        : '<p class="text-[12px] text-slate-500">No appointments scheduled for this date.</p>';
+        : '<p class="text-[14px] text-slate-500">No appointments scheduled for this date.</p>';
       $("#aptDaily").classList.toggle("hidden", S.tab !== "today");
       $("#aptPendingNote").classList.toggle("hidden", S.tab !== "pending");
       updateCounts();
@@ -1429,7 +1418,7 @@
         w.innerHTML =
           '<button type="button" class="' +
           INPUT +
-          ' flex items-center justify-between gap-6 !py-2 !text-[13px] !w-auto"><span>' +
+          ' flex items-center justify-between gap-6 !py-2 !text-[14px] !w-auto"><span>' +
           S.f[k] +
           "</span>" +
           I.chev +
@@ -1437,7 +1426,7 @@
           OPTS[k]
             .map(function (o) {
               return (
-                '<button type="button" class="block w-full text-left text-[13px] px-3 py-2 rounded-lg hover:bg-blue-50 hover:text-shazam-blue ' +
+                '<button type="button" class="block w-full text-left text-[14px] px-3 py-2 rounded-lg hover:bg-blue-50 hover:text-shazam-blue ' +
                 (o === S.f[k]
                   ? "bg-blue-50 text-shazam-blue"
                   : "text-slate-800") +
@@ -1796,7 +1785,7 @@
               prev
                 .map(function (x) {
                   return (
-                    '<li class="flex justify-between items-center border border-slate-200 rounded-lg px-4 py-3 text-[13px]"><span>' +
+                    '<li class="flex justify-between items-center border border-slate-200 rounded-lg px-4 py-3 text-[14px]"><span>' +
                     x.id +
                     " · " +
                     esc(x.issue) +
@@ -1894,7 +1883,7 @@
                   esc(x.t) +
                   "</b>" +
                   (meta
-                    ? '<div class="text-[12px] text-slate-500">' +
+                    ? '<div class="text-[14px] text-slate-500">' +
                       esc(meta) +
                       "</div>"
                     : "") +
@@ -2096,7 +2085,7 @@
       var a = S.cur;
       $("#rxPreviewBody").innerHTML =
         '<div class="border border-slate-200 rounded-xl p-6"><h4 class="text-[18px] font-semibold text-shazam-blue">MedOCR · Prescription</h4>' +
-        '<p class="text-[11px] text-slate-400 mt-1 mb-4">ILLUSTRATIVE SAMPLE DATA · NOT A CLINICAL DOCUMENT</p>' +
+        '<p class="text-[14px] text-slate-400 mt-1 mb-4">ILLUSTRATIVE SAMPLE DATA · NOT A CLINICAL DOCUMENT</p>' +
         pcard(a) +
         kv([
           ["Date", fmtDate(a.date)],
@@ -2104,7 +2093,7 @@
           ["Diagnosis", r.dx || "—"],
           ["Status", r.final ? "Final" : "Draft"],
         ]) +
-        '<h4 class="text-[16px] font-bold mt-4 mb-2">Recorded medicines</h4><div class="border border-slate-200 rounded-lg overflow-hidden"><table class="w-full text-[12px]"><thead class="bg-slate-50 text-slate-500 uppercase text-[10px]"><tr><th class="text-left p-3">Medicine</th><th class="text-left p-3">Dose</th><th class="text-left p-3">Frequency</th><th class="text-left p-3">Duration</th></tr></thead><tbody>' +
+        '<h4 class="text-[16px] font-bold mt-4 mb-2">Recorded medicines</h4><div class="border border-slate-200 rounded-lg overflow-hidden"><table class="w-full text-[14px]"><thead class="bg-slate-50 text-slate-500 uppercase text-[14px]"><tr><th class="text-left p-3">Medicine</th><th class="text-left p-3">Dose</th><th class="text-left p-3">Frequency</th><th class="text-left p-3">Duration</th></tr></thead><tbody>' +
         (r.meds.length
           ? r.meds
               .map(function (m) {
@@ -2267,7 +2256,7 @@
         "</div>" +
         '<div class="text-[18px] font-semibold mt-4">' +
         (voice ? "Voice Call" : "Video Call") +
-        ' · Device Check</div><div class="text-[11px] opacity-90 mt-2">Simulation preview — no real call is placed</div></div>' +
+        ' · Device Check</div><div class="text-[14px] opacity-90 mt-2">Simulation preview — no real call is placed</div></div>' +
         '<div class="flex gap-3 mt-4"><button type="button" class="' +
         B.def +
         '" data-test="Microphone">Test Microphone</button>' +
