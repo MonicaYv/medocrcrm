@@ -1,0 +1,1439 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+
+{% block title %}Settings - MedPlus Pharmacy{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<div class="settings-scope relative transition-all duration-300 main-content min-h-full flex-1 flex flex-col gap-4 sm:gap-5 p-3 sm:p-5 lg:p-7" data-settings-user="{{ user.id }}">
+
+    <!-- PAGE HEADER -->
+    <div class="px-1 flex items-start justify-between gap-3">
+        <div class="min-w-0">
+            <h1 class="flex items-center gap-2 text-[26px] sm:text-[32px] leading-[1.25] font-bold text-dark-inky-blue">
+                <span class="material-symbols-outlined text-[28px] sm:text-[32px]">settings</span>
+                <span>Settings</span>
+            </h1>
+            <p class="text-[16px] text-ashy-blue font-medium mt-1">Manage your Pharmacy profile, operations, team, and account preferences.</p>
+        </div>
+        
+    </div>
+
+    <!-- IDENTITY STRIP -->
+    <div id="identity-strip" class="rounded-2xl border border-shazam-blue bg-info-blue px-5 py-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5 min-w-0">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center text-[#007bff] shrink-0">
+                <span class="material-symbols-outlined text-[26px]">local_pharmacy</span>
+            </div>
+            <div class="min-w-0">
+                <h2 id="identity-name" class="text-[20px] leading-7 font-bold text-[#0F172A] truncate">Med Pluse Pharmancy</h2>
+                <p class="text-[15px] font-medium text-slate-500 truncate">Pharmacy Seller</p>
+            </div>
+        </div>
+        <span class="st-pill green">Verified</span>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="relative w-full">
+        <span class="material-symbols-outlined absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400 text-[22px]">search</span>
+        <input type="text" id="settings-search-input" placeholder="Search settings..." class="st-input" style="padding-left:46px;height:46px;border-radius:10px;" />
+    </div>
+
+    <!-- TABS (6) -->
+    <div class="st-tabs px-1" role="tablist">
+        <button type="button" role="tab" class="settings-tab-btn is-active" data-tab="ph_profile">
+            <span class="material-symbols-outlined">description</span><span>Pharmacy Profile</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="ph_branch">
+            <span class="material-symbols-outlined">location_on</span><span>Branch &amp; Awareness</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="ph_team">
+            <span class="material-symbols-outlined">group</span><span>Team &amp; Permission</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="ph_notifications">
+            <span class="material-symbols-outlined">notifications</span><span>Notifications</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="ph_security">
+            <span class="material-symbols-outlined">verified_user</span><span>Security</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="ph_workspace">
+            <span class="material-symbols-outlined">app_settings_alt</span><span>WorkSpace Preferences</span>
+        </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: PHARMACY PROFILE                                            -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel" data-tab-panel="ph_profile">
+
+        <!-- 1a: main -->
+        <div class="sub-view-screen" data-view-name="main">
+
+            <!-- Pharmacy Store Identity & Licensing -->
+            <div class="st-card" data-edit-card="identity">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Pharmacy Store Identity &amp; Licensing</h3>
+                        <p class="st-sub">Displayed on patient-facing promotions and drug recall.</p>
+                    </div>
+                    <button type="button" data-edit-toggle="identity" class="st-btn">Add Details</button>
+                </div>
+
+                <div class="st-grid-2">
+                    <div>
+                        <label class="st-label" for="ph_store_name">Registered Store Name</label>
+                        <input type="text" id="ph_store_name" name="ph_store_name" value="Med Care Pluse Pharmacy"
+                               oninput="this.value = this.value.replace(/[0-9]/g, '')" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="ph_proprietor">Proprietor / Chief Pharmacist</label>
+                        <div class="relative">
+                            <input type="text" id="ph_proprietor" name="ph_proprietor" value="Dr. Aaron Sharma"
+                                   oninput="this.value = this.value.replace(/[0-9]/g, '')" disabled class="st-input settings-field" style="padding-right:44px;" />
+                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[22px] text-slate-400">verified_user</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="st-label" for="ph_gstin">GSTIN Number</label>
+                        <input type="text" id="ph_gstin" name="ph_gstin" value="27AA8GDDMS4R8.325" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="ph_drug_license">Drug License No. (20B/21B)</label>
+                        <input type="text" id="ph_drug_license" name="ph_drug_license" value="DL – 20B – MH – 400101" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="ph_contact_phone">Official Contact Phone</label>
+                        <input type="text" id="ph_contact_phone" name="ph_contact_phone" value="+91 93647665112" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="ph_ops_email">Operations Email</label>
+                        <input type="email" id="ph_ops_email" name="ph_ops_email" value="ops@medplus.co.in" disabled class="st-input settings-field" />
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="st-label" for="ph_reg_address">Registered Premise Address</label>
+                        <input type="text" id="ph_reg_address" name="ph_reg_address"
+                               value="Shop 4 Health Plaza MG Road Pune Maharashtra 411001" disabled class="st-input settings-field" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operation & Compliance -->
+            <div class="st-card" data-edit-card="operation">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Operation &amp; Compliance</h3>
+                        <p class="st-sub">Working hours &amp; Storage standards</p>
+                    </div>
+                    <button type="button" data-edit-toggle="operation" class="st-btn">Edit Details</button>
+                </div>
+
+                <!-- Open 24x7 Toggle -->
+                <div class="st-row" style="border-bottom: 1px solid #EDF1F5; padding-bottom: 14px; margin-bottom: 14px;">
+                    <div>
+                        <h5 class="text-[17px] font-semibold text-[#0F172A]">Open 24 * 7 Emergency Service</h5>
+                        <p class="st-sub">Always open round the clock orders.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="ph_open_24x7" class="sr-only peer" aria-label="Open 24x7 emergency service">
+                        <div class="st-switch"></div>
+                    </label>
+                </div>
+
+                <!-- Opening / Closing Time -->
+                <div class="st-grid-2" style="margin-top: 10px;">
+                    <div>
+                        <label class="st-label" for="ph_open_time">Opening Time</label>
+                        <div class="st-time">
+                            <input type="time" id="ph_open_time" name="ph_open_time" class="st-input" value="09:00" disabled />
+                            <span class="material-symbols-outlined">schedule</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="st-label" for="ph_close_time">Closing Time</label>
+                        <div class="st-time">
+                            <input type="time" id="ph_close_time" name="ph_close_time" class="st-input" value="08:00" disabled />
+                            <span class="material-symbols-outlined">schedule</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cold Chain Toggle -->
+                <div class="st-row" style="margin-top: 14px; border-bottom: 0; padding-bottom: 0;">
+                    <div>
+                        <h5 class="text-[17px] font-semibold text-[#0F172A]">Cold Chain Insulin &amp; Vaccine Storage</h5>
+                        <p class="st-sub">2°C – 8°C cold-chain storage logger</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="ph_cold_chain" class="sr-only peer" checked aria-label="Cold chain storage">
+                        <div class="st-switch"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="st-card" data-edit-card="ph_address">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Address</h3>
+                        <p class="st-sub">Your Primary Pharmacy location.</p>
+                    </div>
+                    <button type="button" data-edit-toggle="ph_address" class="st-btn">
+                        <span class="material-symbols-outlined">location_on</span><span data-edit-label>Edit Location</span>
+                    </button>
+                </div>
+                <div class="st-stack">
+                    <div>
+                        <label class="st-label" for="ph_addr1">Address line 1</label>
+                        <input type="text" id="ph_addr1" value="Shop 12 Silver Arcade" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="ph_addr2">Address line 2</label>
+                        <input type="text" id="ph_addr2" disabled placeholder="Landmark, floor, etc. (optional)" class="st-input settings-field" />
+                    </div>
+                    <div class="st-grid-2">
+                        <div>
+                            <label class="st-label" for="ph_area">Area</label>
+                            <input type="text" id="ph_area" value="Andheri East" disabled class="st-input settings-field" />
+                        </div>
+                        <div>
+                            <label class="st-label" for="ph_city">City</label>
+                            <input type="text" id="ph_city" value="Mumbai" disabled class="st-input settings-field" />
+                        </div>
+                        <div>
+                            <label class="st-label" for="ph_state">State</label>
+                            <input type="text" id="ph_state" value="Maharashtra" disabled class="st-input settings-field" />
+                        </div>
+                        <div>
+                            <label class="st-label" for="ph_pin">PIN</label>
+                            <input type="text" id="ph_pin" inputmode="numeric" maxlength="6" value="400091" disabled
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="st-input settings-field" />
+                        </div>
+                    </div>
+                    <div class="sm:w-[36%]">
+                        <label class="st-label" for="ph_country">Country</label>
+                        <input type="text" id="ph_country" value="India" disabled data-locked="true" class="st-input settings-field" />
+                    </div>
+                </div>
+
+                <!-- Map preview -->
+                <div class="st-map h-44 mt-5">
+                    <svg viewBox="0 0 600 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <rect width="600" height="200" fill="#e8edf7" />
+                        <path d="M0 150 Q150 110 300 130 T600 90" fill="none" stroke="#fff" stroke-width="8" />
+                        <path d="M120 0 Q160 100 140 200" fill="none" stroke="#fff" stroke-width="6" />
+                        <path d="M380 0 Q360 90 430 200" fill="none" stroke="#fff" stroke-width="6" />
+                        <rect x="40" y="30" width="90" height="60" rx="8" fill="#dcfce7" opacity="0.8" />
+                        <rect x="450" y="20" width="110" height="70" rx="10" fill="#c7d2fe" opacity="0.9" />
+                        <circle cx="210" cy="110" r="10" fill="#ef4444" opacity="0.9" />
+                        <line x1="210" y1="100" x2="210" y2="80" stroke="#ef4444" stroke-width="2" />
+                    </svg>
+                    <div class="st-map-center">
+                        <span class="material-symbols-outlined text-rose-500 text-[34px]">location_on</span>
+                        <span class="text-[15px] font-medium text-slate-500 mt-0.5">Map location preview</span>
+                    </div>
+                    <button type="button" data-open-modal="modal-pin-location" class="st-btn absolute top-2.5 right-2.5" style="padding:7px 12px;font-size:15px;"><span class="material-symbols-outlined">open_in_full</span><span>Pin location</span></button>
+                </div>
+            </div>
+
+            <!-- Verification Documents -->
+            <div class="st-card">
+                <div class="st-card-head" style="margin-bottom:12px;">
+                    <div>
+                        <h3 class="st-card-title">Verification Documents</h3>
+                        <p class="st-sub">Keep your seller verification current.</p>
+                    </div>
+                </div>
+                <div class="st-table-wrap" style="border:0;">
+                    <table class="st-table" style="min-width:620px;">
+                        <tbody>
+                            <tr class="st-mini-head">
+                                <td>Document</td><td>Uploaded</td><td>Status</td><td>Actions</td>
+                            </tr>
+                            <tr data-doc-row="drug_license">
+                                <td style="font-weight:700;color:#0F172A;" data-doc-name>Drug Licence (From 29/93)</td>
+                                <td data-doc-date>15 Mar 2024</td>
+                                <td data-doc-status><span class="st-pill green">Verified</span></td>
+                                <td data-doc-actions>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" data-open-modal="modal-document-preview" aria-label="View document" class="text-[#007bff] cursor-pointer"><span class="material-symbols-outlined text-[22px]">visibility</span></button>
+                                        <button type="button" data-open-modal="modal-replace-document" data-doc-target="drug_license" aria-label="Replace document" class="text-orange-500 cursor-pointer"><span class="material-symbols-outlined text-[22px]">sync</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-doc-row="gst_cert">
+                                <td style="font-weight:700;color:#0F172A;" data-doc-name>GST Certificate</td>
+                                <td data-doc-date>20 Jan 2024</td>
+                                <td data-doc-status><span class="st-pill green">Verified</span></td>
+                                <td data-doc-actions>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" data-open-modal="modal-document-preview" aria-label="View document" class="text-[#007bff] cursor-pointer"><span class="material-symbols-outlined text-[22px]">visibility</span></button>
+                                        <button type="button" data-open-modal="modal-replace-document" data-doc-target="gst_cert" aria-label="Replace document" class="text-orange-500 cursor-pointer"><span class="material-symbols-outlined text-[22px]">sync</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-doc-row="pharmacist_reg">
+                                <td style="font-weight:700;color:#0F172A;" data-doc-name>Pharmacist Registration</td>
+                                <td data-doc-date style="color:#94a3b8;">—</td>
+                                <td data-doc-status><span class="st-pill amber">Pending</span></td>
+                                <td data-doc-actions>
+                                    <button type="button" data-open-modal="modal-add-document" data-doc-target="pharmacist_reg" class="st-btn st-btn-ghost">+ Add Document</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Public Profile Preview -->
+            <div class="st-card flex items-center justify-between gap-3 flex-wrap" style="padding:18px 24px;">
+                <div>
+                    <h3 class="text-[20px] font-bold">Public Profile Preview</h3>
+                    <p class="st-sub">See how customers discover your store.</p>
+                </div>
+                <button type="button" data-nav-tab="ph_profile" data-nav-subview="public_preview" class="st-btn">
+                    <span class="material-symbols-outlined">visibility</span><span>Preview Public Profile</span>
+                </button>
+            </div>
+
+            <!-- Account Deletion -->
+            <div class="st-card settings-card-item st-link-card" style="margin-top:16px;" data-open-modal="modal-delete-account">
+                <div class="flex items-center gap-3">
+                    <div class="st-icon-tile rose"><span class="material-symbols-outlined text-[24px]">delete</span></div>
+                    <div>
+                        <h3 class="text-[18px] font-bold text-rose-600">Request account deletion</h3>
+                        <p class="text-[15px] text-slate-500 font-medium">Review account closure requirements</p>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined text-slate-400 text-[24px]">chevron_right</span>
+            </div>
+
+            <div class="st-footer">
+                <button type="button" id="btn-discard-profile" class="st-btn">Discard Changes</button>
+                <button type="button" class="action-save-settings st-btn st-btn-primary">Save Changes</button>
+            </div>
+        </div>
+
+        <!-- 1b: public preview -->
+        <div class="sub-view-screen hidden" data-view-name="public_preview">
+            <div class="st-card flex items-center gap-4">
+                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-icon-btn" aria-label="Back"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button>
+                <div>
+                    <h2 class="text-[24px] font-bold">Preview Public Profile</h2>
+                    <p class="st-sub">This is how customers see your pharmacy profile.</p>
+                </div>
+            </div>
+            <div class="st-card space-y-6" style="max-width:580px; margin:0 auto;">
+                <!-- Profile header -->
+                <div class="flex items-center gap-4 p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-100 border border-blue-200 flex items-center justify-center text-[#007bff] shrink-0">
+                        <span class="material-symbols-outlined text-[36px]">local_pharmacy</span>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-[22px] font-bold">HealthPluse Pharmacy</h3>
+                        <p class="text-[15px] text-slate-500 font-medium">Your Health Our Priority</p>
+                    </div>
+                </div>
+                <p class="text-[16px] text-slate-600">Quality medicines, trusted care and fast delivery for a healthier tomorrow.</p>
+
+                <!-- Operating Hours -->
+                <div>
+                    <p class="text-[16px] font-bold text-slate-800 mb-2">Operating Hours</p>
+                    <p class="text-[15px] text-slate-600">Mon–Sat: 7:00 AM–9:00 PM</p>
+                    <p class="text-[15px] text-slate-600">Sun: 8:00 AM–1:00 PM</p>
+                </div>
+
+                <!-- Collection Methods -->
+                <div>
+                    <p class="text-[16px] font-bold text-slate-800 mb-2">Collection Methods</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="st-pill blue" style="padding:5px 14px;">In-Store Pickup</span>
+                        <span class="st-pill blue" style="padding:5px 14px;">Home Delivery</span>
+                    </div>
+                </div>
+
+                <!-- Verified -->
+                <div>
+                    <p class="text-[16px] font-bold text-slate-800 mb-2">Verified</p>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-2 text-[15px] text-green-600 font-medium">
+                            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                            Business Registration
+                        </div>
+                        <div class="flex items-center gap-2 text-[15px] text-green-600 font-medium">
+                            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                            Pharmacist Registration
+                        </div>
+                    </div>
+                </div>
+
+                <div class="st-strip">This is how customers see your pharmacy profile.</div>
+                <div class="st-strip">This is a demo customers see your profile.</div>
+
+                <div class="st-footer" style="border-top:1px solid #EDF1F5;padding-top:20px;">
+                    <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn">Edit Profile</button>
+                    <button type="button" data-action="share-profile" class="st-btn st-btn-primary">Share Profile</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: BRANCH & AWARENESS                                          -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="ph_branch">
+        <div class="sub-view-screen" data-view-name="main">
+
+            <!-- Branch Section -->
+            <div class="st-card">
+                <div class="st-card-head" style="margin-bottom:16px;">
+                    <div>
+                        <h3 class="st-card-title">Branch</h3>
+                        <p class="st-sub">Manage store location and service areas.</p>
+                    </div>
+                </div>
+
+                <div class="st-table-wrap" style="border:0;">
+                    <table class="st-table" style="min-width:600px;">
+                        <thead>
+                            <tr>
+                                <th>Branch</th>
+                                <th>City</th>
+                                <th>Hours</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-branch-row>
+                                <td style="font-weight:700;color:#0F172A;">Vijay Nagar (Main)</td>
+                                <td>Indore</td>
+                                <td>8 Am - 11 PM</td>
+                                <td><span class="st-pill green">Verified</span></td>
+                                <td style="color:#94a3b8;font-size:13px;">5km</td>
+                            </tr>
+                            <tr data-branch-row>
+                                <td style="font-weight:700;color:#0F172A;">Palasia</td>
+                                <td>Indore</td>
+                                <td>24 hours</td>
+                                <td><span class="st-pill green">Verified</span></td>
+                                <td style="color:#94a3b8;font-size:13px;">4km</td>
+                            </tr>
+                            <tr data-branch-row>
+                                <td style="font-weight:700;color:#0F172A;">Area Colony</td>
+                                <td>Bhopal</td>
+                                <td>9 Am - 10 PM</td>
+                                <td><span class="st-pill amber">Pending</span></td>
+                                <td style="color:#94a3b8;font-size:13px;">3km</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+                    <button type="button" data-open-modal="modal-add-branch" class="st-btn st-btn-primary" style="padding:10px 24px;">
+                        <span class="material-symbols-outlined">add</span><span>+ Add Branch</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Awareness & Health Programs -->
+            <div class="st-card">
+                <div style="margin-bottom:16px;">
+                    <h3 class="st-card-title">Awareness &amp; Health Programs</h3>
+                    <p class="st-sub">Opt-in to campaigns shown on your pharmacy page.</p>
+                </div>
+
+                <div class="st-list">
+                    <div class="st-row">
+                        <div>
+                            <h5 class="text-[17px] font-semibold text-[#0F172A]">Free BP &amp; sugar check camps</h5>
+                            <p class="st-sub">Show monthly camp banner to nearby patients</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" checked aria-label="Free BP and sugar check camps">
+                            <div class="st-switch"></div>
+                        </label>
+                    </div>
+                    <div class="st-row">
+                        <div>
+                            <h5 class="text-[17px] font-semibold text-[#0F172A]">Generic medicine awareness</h5>
+                            <p class="st-sub">Promote lower-cost generic alternatives</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" checked aria-label="Generic medicine awareness">
+                            <div class="st-switch"></div>
+                        </label>
+                    </div>
+                    <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+                        <div>
+                            <h5 class="text-[17px] font-semibold text-[#0F172A]">Vaccination reminders</h5>
+                            <p class="st-sub">Send seasonal reminders to past customers</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" checked aria-label="Vaccination reminders">
+                            <div class="st-switch"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="st-footer">
+                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn">Back</button>
+                <button type="button" class="action-save-settings st-btn st-btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: TEAM & PERMISSIONS                                          -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="ph_team">
+
+        <!-- 3a: team + roles -->
+        <div class="sub-view-screen" data-view-name="main">
+
+            <div class="st-page-head">
+                <div>
+                    <h3 class="st-page-title">Team &amp; Permissions</h3>
+                    <p class="st-page-sub">Control who can access your Pharmacy Workspace.</p>
+                </div>
+                <button type="button" data-team-action="team" data-open-modal="modal-invite-member" class="st-btn st-btn-primary st-btn-lg">
+                    <span class="material-symbols-outlined">person_add</span><span>Invite Member</span>
+                </button>
+                <button type="button" data-team-action="roles" data-open-modal="modal-add-role" class="st-btn st-btn-primary st-btn-lg hidden">
+                    <span class="material-symbols-outlined">add</span><span>Add Role</span>
+                </button>
+            </div>
+
+            <div class="st-inner-tabs" role="tablist">
+                <button type="button" role="tab" class="st-inner-tab is-active" data-team-tab="team"><span class="material-symbols-outlined">group</span><span>Team</span></button>
+                <button type="button" role="tab" class="st-inner-tab" data-team-tab="roles"><span class="material-symbols-outlined">settings</span><span>Roles</span></button>
+            </div>
+
+            <!-- TEAM panel -->
+            <div data-team-panel="team">
+                <div class="st-toolbar">
+                    <div class="st-search">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" data-team-search class="st-input" placeholder="Search by name or mail" aria-label="Search team members" />
+                    </div>
+                    <button type="button" class="st-filter-btn" data-filter-toggle aria-expanded="false" aria-label="Filter team">
+                        <span>Filter</span><span class="st-filter-count hidden" data-filter-count>0</span><span class="material-symbols-outlined">filter_alt</span>
+                    </button>
+                </div>
+
+                <div class="st-filter-panel hidden" data-filter-panel>
+                    <div>
+                        <label class="st-label">Role</label>
+                        <select data-filter-role class="st-select st-select-sm" aria-label="Filter by role">
+                            <option value="">All Roles</option>
+                            <option>Owner / Admin</option>
+                            <option>Stock Manager</option>
+                            <option>Chief Pharmacist</option>
+                            <option>Assistant Pharmacist</option>
+                            <option>Inventory Manager</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label">Status</label>
+                        <select data-filter-status class="st-select st-select-sm" aria-label="Filter by status">
+                            <option value="">All Status</option>
+                            <option>Active</option>
+                            <option>Invited</option>
+                            <option>Deactivated</option>
+                        </select>
+                    </div>
+                    <button type="button" data-reset-filters class="st-btn st-btn-ghost">Reset Filters</button>
+                </div>
+
+                <div class="st-table-wrap st-team-table-wrap">
+                    <table class="st-table" id="team-table">
+                        <thead>
+                            <tr><th>Member Name</th><th>Email</th><th>Assign Role</th><th>Branch Access</th><th>Status</th><th>Last Active</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr data-member-row data-role="Owner / Admin" data-status="Active">
+                                <td><div class="st-member"><span class="st-avatar a">RH</span><span data-member-name>Rohan Mehta</span></div></td>
+                                <td data-member-email>rohan@apollocityhospital.example</td>
+                                <td data-member-role-cell><span class="st-pill blue">Owner Admin</span></td>
+                                <td>All branches</td>
+                                <td data-member-status-cell><span class="st-pill green">Active</span></td>
+                                <td>Active now</td>
+                                <td style="color:#94a3b8;">Owner</td>
+                            </tr>
+                            <tr data-member-row data-role="Stock Manager" data-status="Active">
+                                <td><div class="st-member"><span class="st-avatar f">NS</span><span data-member-name>Neha Shah</span></div></td>
+                                <td data-member-email>neha@medplus.example</td>
+                                <td data-member-role-cell>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <span class="st-pill blue">Pharmacy Manager</span>
+                                        <button type="button" class="st-pill lime" data-open-modal="modal-assign-role" data-member="Neha Shah" data-email="neha@medplus.example">Assign Role <span class="material-symbols-outlined" style="font-size:16px;">add</span></button>
+                                    </div>
+                                </td>
+                                <td>Andheri East</td>
+                                <td data-member-status-cell><span class="st-pill green">Active</span></td>
+                                <td>Today 09:30 AM</td>
+                                <td data-member-actions><button type="button" class="action-open-deactivate st-act-danger" data-member="Neha Shah" aria-label="Deactivate access"><span class="material-symbols-outlined text-[24px]">block</span></button></td>
+                            </tr>
+                            <tr data-member-row data-role="Chief Pharmacist" data-status="Active">
+                                <td><div class="st-member"><span class="st-avatar b">RK</span><span data-member-name>Rahul Kumar</span></div></td>
+                                <td data-member-email>rahul@medplus.example</td>
+                                <td data-member-role-cell><span class="st-pill blue">Chief Pharmacist</span></td>
+                                <td>Andheri East</td>
+                                <td data-member-status-cell><span class="st-pill green">Active</span></td>
+                                <td>Today 08:45 AM</td>
+                                <td data-member-actions><button type="button" class="action-open-deactivate st-act-danger" data-member="Rahul Kumar" aria-label="Deactivate access"><span class="material-symbols-outlined text-[24px]">block</span></button></td>
+                            </tr>
+                            <tr data-member-row data-role="Assistant Pharmacist" data-status="Active">
+                                <td><div class="st-member"><span class="st-avatar c">PS</span><span data-member-name>Priya Shah</span></div></td>
+                                <td data-member-email>priya@medplus.example</td>
+                                <td data-member-role-cell><span class="st-pill blue">Pharmacy Technician</span></td>
+                                <td>Andheri East</td>
+                                <td data-member-status-cell><span class="st-pill green">Active</span></td>
+                                <td>Yesterday</td>
+                                <td data-member-actions><button type="button" class="action-open-deactivate st-act-danger" data-member="Priya Shah" aria-label="Deactivate access"><span class="material-symbols-outlined text-[24px]">block</span></button></td>
+                            </tr>
+                            <tr data-member-row data-role="Inventory Manager" data-status="Invited">
+                                <td><div class="st-member"><span class="st-avatar e">AR</span><span data-member-name>Ananya Rao</span></div></td>
+                                <td data-member-email>ananya@medplus.example</td>
+                                <td data-member-role-cell><span class="st-pill blue">Stock Manager</span></td>
+                                <td>All branches</td>
+                                <td data-member-status-cell><span class="st-pill amber">Invited</span></td>
+                                <td>Invited</td>
+                                <td data-member-actions><button type="button" class="action-open-deactivate st-act-danger" data-member="Ananya Rao" aria-label="Deactivate access"><span class="material-symbols-outlined text-[24px]">block</span></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p data-team-empty class="hidden st-note text-center" style="padding:18px;">No team members match these filters.</p>
+            </div>
+
+            <!-- ROLES panel -->
+            <div data-team-panel="roles" class="hidden">
+                <div class="st-toolbar">
+                    <div class="st-search">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" data-team-search class="st-input" placeholder="Search by name or mail" aria-label="Search roles" />
+                    </div>
+                    <button type="button" class="st-filter-btn" data-filter-toggle aria-expanded="false" aria-label="Filter roles">
+                        <span>Filter</span><span class="st-filter-count hidden" data-filter-count>0</span><span class="material-symbols-outlined">filter_alt</span>
+                    </button>
+                </div>
+
+                <div class="st-filter-panel hidden" data-filter-panel>
+                    <div>
+                        <label class="st-label">Role</label>
+                        <select data-filter-role class="st-select st-select-sm" aria-label="Filter by role">
+                            <option value="">All Roles</option>
+                            <option>Owner / Admin</option>
+                            <option>Stock Manager</option>
+                            <option>Chief Pharmacist</option>
+                            <option>Assistant Pharmacist</option>
+                            <option>Inventory Manager</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label">Status</label>
+                        <select data-filter-status class="st-select st-select-sm" aria-label="Filter by status">
+                            <option value="">All Status</option>
+                            <option>Active</option>
+                            <option>Invited</option>
+                            <option>Deactivated</option>
+                        </select>
+                    </div>
+                    <button type="button" data-reset-filters class="st-btn st-btn-ghost">Reset Filters</button>
+                </div>
+
+                <div class="st-table-wrap st-team-table-wrap">
+                    <table class="st-table" id="roles-table">
+                        <thead>
+                            <tr><th>Role</th><th>Assigned Member</th><th>Email</th><th>Branch Access</th><th>Status</th><th>Last Active</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr data-role-row data-role="Owner / Admin" data-status="Active">
+                                <td class="st-role-name">Owner / Admin</td>
+                                <td data-role-member-cell><div class="st-member"><span class="st-avatar a">RH</span><span data-role-member>Rohan Mehta</span></div></td>
+                                <td data-role-email>rohan@medplus.example</td>
+                                <td data-role-branch>All branches</td>
+                                <td data-role-status-cell><span class="st-pill green">Active</span></td>
+                                <td data-role-active>Active now</td>
+                                <td data-role-actions style="color:#94a3b8;">Owner</td>
+                            </tr>
+                            <tr data-role-row data-role="Stock Manager" data-status="Active">
+                                <td class="st-role-name">Stock Manager</td>
+                                <td data-role-member-cell><div class="st-member"><span class="st-avatar f">NS</span><span data-role-member>Neha Shah</span></div></td>
+                                <td data-role-email>neha@medplus.example</td>
+                                <td data-role-branch>Andheri East</td>
+                                <td data-role-status-cell><span class="st-pill green">Active</span></td>
+                                <td data-role-active>Today 09:30 AM</td>
+                                <td data-role-actions>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" class="st-act-edit" data-nav-tab="ph_team" data-nav-subview="edit_role" data-role-name="Stock Manager" aria-label="Edit role"><span class="material-symbols-outlined text-[24px]">edit_square</span></button>
+                                        <button type="button" class="action-open-deactivate st-act-danger" data-member="Neha Shah" aria-label="Deactivate access"><span class="material-symbols-outlined text-[24px]">block</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-role-row data-role="Chief Pharmacist" data-status="Active">
+                                <td class="st-role-name">Chief Pharmacist</td>
+                                <td data-role-member-cell><div class="st-member"><span class="st-avatar b">RK</span><span data-role-member>Rahul Kumar</span></div></td>
+                                <td data-role-email>rahul@medplus.example</td>
+                                <td data-role-branch>Andheri East</td>
+                                <td data-role-status-cell><span class="st-pill green">Active</span></td>
+                                <td data-role-active>Today 08:45 AM</td>
+                                <td data-role-actions>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" class="st-act-edit" data-nav-tab="ph_team" data-nav-subview="edit_role" data-role-name="Chief Pharmacist" aria-label="Edit role"><span class="material-symbols-outlined text-[24px]">edit_square</span></button>
+                                        <button type="button" class="action-open-deactivate st-act-danger" data-member="Rahul Kumar" aria-label="Deactivate access"><span class="material-symbols-outlined text-[24px]">block</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-role-row data-role="Assistant Pharmacist" data-status="Active">
+                                <td class="st-role-name">Assistant Pharmacist</td>
+                                <td data-role-member-cell><div class="st-member"><span class="st-avatar c">PS</span><span data-role-member>Priya Shah</span></div></td>
+                                <td data-role-email>priya@medplus.example</td>
+                                <td data-role-branch>Andheri East</td>
+                                <td data-role-status-cell><span class="st-pill green">Active</span></td>
+                                <td data-role-active>Yesterday</td>
+                                <td data-role-actions>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" class="st-act-edit" data-nav-tab="ph_team" data-nav-subview="edit_role" data-role-name="Assistant Pharmacist" aria-label="Edit role"><span class="material-symbols-outlined text-[24px]">edit_square</span></button>
+                                        <button type="button" class="action-open-deactivate st-act-danger" data-member="Priya Shah" aria-label="Deactivate access"><span class="material-symbols-outlined text-[24px]">block</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-role-row data-role="Inventory Manager" data-status="Invited">
+                                <td class="st-role-name">Inventory Manager</td>
+                                <td data-role-member-cell><div class="st-member"><span class="st-avatar e">AR</span><span data-role-member>Ananya Rao</span></div></td>
+                                <td data-role-email>ananya@medplus.example</td>
+                                <td data-role-branch>All branches</td>
+                                <td data-role-status-cell><span class="st-pill amber">Invited</span></td>
+                                <td data-role-active>Invited</td>
+                                <td data-role-actions>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" class="st-act-edit" data-nav-tab="ph_team" data-nav-subview="edit_role" data-role-name="Inventory Manager" aria-label="Edit role"><span class="material-symbols-outlined text-[24px]">edit_square</span></button>
+                                        <button type="button" class="action-open-deactivate st-act-danger" data-member="Ananya Rao" aria-label="Deactivate access"><span class="material-symbols-outlined text-[24px]">block</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p data-team-empty class="hidden st-note text-center" style="padding:18px;">No roles match these filters.</p>
+            </div>
+        </div>
+
+        <!-- 3b: edit role & access -->
+        <div class="sub-view-screen hidden" data-view-name="edit_role">
+            <div class="st-card flex items-center gap-4">
+                <button type="button" data-back-tab="ph_team" data-back-subview="main" class="st-icon-btn" aria-label="Back"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button>
+                <div>
+                    <h2 class="text-[24px] font-bold flex items-center gap-2"><span class="material-symbols-outlined text-[26px]">settings</span>Edit Role &amp; Access</h2>
+                    <p class="st-sub">Modify permissions and settings for this role. Changes affect all assigned team members.</p>
+                </div>
+            </div>
+
+            <div class="st-card">
+                <div class="st-stack">
+                    <div>
+                        <label class="st-label" for="edit-role-name">Role</label>
+                        <select id="edit-role-name" class="st-select">
+                            <option>Owner / Admin</option>
+                            <option>Stock Manager</option>
+                            <option selected>Chief Pharmacist</option>
+                            <option>Assistant Pharmacist</option>
+                            <option>Inventory Manager</option>
+                        </select>
+                    </div>
+                    <div>
+                        <p class="st-label">Branch Access</p>
+                        <div class="st-radio-row">
+                            <label><input type="radio" name="edit_role_branch" checked /> Andheri East</label>
+                            <label><input type="radio" name="edit_role_branch" /> All branches</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto" style="margin-top:20px;">
+                    <table class="st-matrix" style="min-width:560px;">
+                        <thead><tr><th>Module</th><th>Edit</th><th>View</th><th>Approve</th><th>Delete</th></tr></thead>
+                        <tbody>
+                            <tr><td>Orders</td><td><input type="checkbox" checked aria-label="Orders edit"></td><td><input type="checkbox" aria-label="Orders view"></td><td><input type="checkbox" aria-label="Orders approve"></td><td><input type="checkbox" aria-label="Orders delete"></td></tr>
+                            <tr><td>Offers &amp; Bids</td><td><input type="checkbox" checked aria-label="Offers edit"></td><td><input type="checkbox" aria-label="Offers view"></td><td><input type="checkbox" aria-label="Offers approve"></td><td><input type="checkbox" aria-label="Offers delete"></td></tr>
+                            <tr><td>Order History</td><td><input type="checkbox" checked aria-label="Order History edit"></td><td><input type="checkbox" aria-label="Order History view"></td><td><input type="checkbox" aria-label="Order History approve"></td><td><input type="checkbox" aria-label="Order History delete"></td></tr>
+                            <tr><td>Reports</td><td><input type="checkbox" checked aria-label="Reports edit"></td><td><input type="checkbox" aria-label="Reports view"></td><td><input type="checkbox" aria-label="Reports approve"></td><td><input type="checkbox" aria-label="Reports delete"></td></tr>
+                            <tr><td>Inventory</td><td><input type="checkbox" checked aria-label="Inventory edit"></td><td><input type="checkbox" aria-label="Inventory view"></td><td><input type="checkbox" aria-label="Inventory approve"></td><td><input type="checkbox" aria-label="Inventory delete"></td></tr>
+                            <tr><td>Earnings</td><td><input type="checkbox" checked aria-label="Earnings edit"></td><td><input type="checkbox" aria-label="Earnings view"></td><td><input type="checkbox" aria-label="Earnings approve"></td><td><input type="checkbox" aria-label="Earnings delete"></td></tr>
+                            <tr><td>Settings</td><td><input type="checkbox" checked aria-label="Settings edit"></td><td><input type="checkbox" aria-label="Settings view"></td><td><input type="checkbox" aria-label="Settings approve"></td><td><input type="checkbox" aria-label="Settings delete"></td></tr>
+                            <tr><td>Team Management</td><td><input type="checkbox" checked aria-label="Team edit"></td><td><input type="checkbox" aria-label="Team view"></td><td><input type="checkbox" aria-label="Team approve"></td><td><input type="checkbox" aria-label="Team delete"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="st-footer">
+                    <button type="button" data-back-tab="ph_team" data-back-subview="main" class="st-btn">Back</button>
+                    <button type="button" class="action-save-settings st-btn st-btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 4: NOTIFICATIONS                                               -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="ph_notifications">
+        <div class="sub-view-screen" data-view-name="main">
+            <div class="st-card">
+                <div class="st-card-head" style="margin-bottom:22px;">
+                    <div>
+                        <h3 class="st-card-title">Multi Channel Alert Routing Matrix</h3>
+                        <p class="st-sub">Configure real time alerts for online orders expiry alert &amp; Schedule</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="st-table" style="min-width:620px;">
+                        <thead>
+                            <tr>
+                                <th style="width:40%;">Alert Event</th>
+                                <th class="text-center" style="text-transform:uppercase;font-size:12px;letter-spacing:0.06em;color:#94a3b8;">Manager Inventory</th>
+                                <th class="text-center" style="text-transform:uppercase;font-size:12px;letter-spacing:0.06em;color:#94a3b8;">Approve RX</th>
+                                <th class="text-center" style="text-transform:uppercase;font-size:12px;letter-spacing:0.06em;color:#94a3b8;">Process Refunds</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- New Online Order -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">New Online Order</div>
+                                    <div class="text-[14px] text-slate-500">Instant alert when a nearby customer places a medicine order.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="New Online Order - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="New Online Order - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="New Online Order - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                            <!-- Low Stock & Expiry Alert -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">Low Stock &amp; Expiry Alert</div>
+                                    <div class="text-[14px] text-slate-500">Warn when SKU stock or batch expiry hits threshold.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Low Stock - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Low Stock - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Low Stock - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                            <!-- Schedule H/H1 Rx Upload -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">Schedule H/H1 Rx Upload</div>
+                                    <div class="text-[14px] text-slate-500">Notify duty pharmacist to verify uploaded prescription.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Schedule H - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Schedule H - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Schedule H - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                            <!-- Daily GST & Settlement Payout -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">Daily GST &amp; Settlement Payout</div>
+                                    <div class="text-[14px] text-slate-500">Bank NEFT/IMPS payout confirmation and tax ledger.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Daily GST - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Daily GST - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Daily GST - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                            <!-- Prescription Rejection -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">Prescription Rejection</div>
+                                    <div class="text-[14px] text-slate-500">Alert when a Prescription is rejected.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Prescription Rejection - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Prescription Rejection - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Prescription Rejection - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                            <!-- Expired Medicine Alert -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">Expired Medicine Alert</div>
+                                    <div class="text-[14px] text-slate-500">Alert when a medicine batch expires.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Expired Medicine - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Expired Medicine - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Expired Medicine - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                            <!-- Stock Reorder Reminder -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">Stock Reorder Reminder</div>
+                                    <div class="text-[14px] text-slate-500">Notify when medicine needs restocking.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Stock Reorder - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Stock Reorder - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Stock Reorder - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                            <!-- Refund Processed -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">Refund Processed</div>
+                                    <div class="text-[14px] text-slate-500">Notify when a customer refund is completed.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Refund Processed - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Refund Processed - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Refund Processed - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                            <!-- Payment Failed Alert -->
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-[16px] text-[#0F172A]">Payment Failed Alert</div>
+                                    <div class="text-[14px] text-slate-500">Alert when an order payment fails.</div>
+                                </td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Payment Failed - Manager Inventory"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Payment Failed - Approve RX"><div class="st-switch"></div></label></td>
+                                <td class="text-center"><label class="relative inline-flex items-center justify-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Payment Failed - Process Refunds"><div class="st-switch"></div></label></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="st-footer">
+                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn" style="min-width:150px;">Back</button>
+                <button type="button" class="action-save-settings st-btn st-btn-primary" style="min-width:150px;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 5: SECURITY                                                    -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="ph_security">
+        <div class="sub-view-screen" data-view-name="main">
+            <div class="st-card">
+                <div class="st-card-head" style="margin-bottom:18px;">
+                    <div>
+                        <h3 class="st-card-title">Security &amp; Access</h3>
+                        <p class="st-sub">Protect access to your hospital workspace</p>
+                    </div>
+                </div>
+
+                <div class="st-group">
+                    <div class="st-row">
+                        <div><h5>Biometric app lock</h5><p>Available in the native mobile app on supported devices.</p></div>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Biometric app lock"><div class="st-switch"></div></label>
+                    </div>
+                    <div class="st-field" style="padding:6px 0 10px;">
+                        <label class="st-label" for="sec_autolock">Auto-lock after inactivity</label>
+                        <select id="sec_autolock" class="st-select"><option>1 min</option><option selected>5 min</option><option>15 min</option><option>30 min</option></select>
+                    </div>
+                    <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+                        <div><h5>Show sensitive notification previews</h5><p>Allow patient-related details in notification previews.</p></div>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Show sensitive notification previews"><div class="st-switch"></div></label>
+                    </div>
+                </div>
+
+                <div class="st-group" style="margin-top:16px;padding-top:0;padding-bottom:0;">
+                    <button type="button" class="st-nav-row settings-card-item" data-open-modal="modal-active-sessions">
+                        <span class="st-nav-main">
+                            <span class="st-icon-tile sm"><span class="material-symbols-outlined text-[22px]">devices</span></span>
+                            <span><span class="st-nav-title block">Active Session</span><span class="st-nav-sub block">Review signed-in devices</span></span>
+                        </span>
+                        <span class="st-nav-end"><span><span id="session-count">2</span> devices</span><span class="material-symbols-outlined">chevron_right</span></span>
+                    </button>
+                    <button type="button" class="st-nav-row settings-card-item" data-open-modal="modal-account-verification">
+                        <span class="st-nav-main">
+                            <span class="st-icon-tile sm"><span class="material-symbols-outlined text-[22px]">verified_user</span></span>
+                            <span><span class="st-nav-title block">Account Verification</span><span class="st-nav-sub block">Verified mobile &amp; business email</span></span>
+                        </span>
+                        <span class="st-nav-end"><span>2 items</span><span class="material-symbols-outlined">chevron_right</span></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="st-strip" style="margin-top:16px;">Security controls in this preview are preferences only. Live authentication and device controls require backend integration.</div>
+            <div class="st-footer">
+                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn" style="min-width:150px;">Back</button>
+                <button type="button" class="action-save-settings st-btn st-btn-primary" style="min-width:150px;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 6: WORKSPACE PREFERENCES                                       -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="ph_workspace">
+        <div class="sub-view-screen" data-view-name="main">
+            <div class="st-card">
+                <div class="st-card-head" style="margin-bottom:18px;">
+                    <div>
+                        <h3 class="st-card-title">Workspace Preferences</h3>
+                        <p class="st-sub">Customize how your dashboard looks and behaves.</p>
+                    </div>
+                </div>
+
+                <p class="text-[16px] font-medium text-slate-600" style="margin-bottom:16px;">Protect access to your hospital workspace</p>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:12px;">
+                    <div>
+                        <label class="st-label" for="pref_lang">Language</label>
+                        <input type="text" id="pref_lang" value="English" class="st-input" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="pref_timezone">Time zone</label>
+                        <input type="text" id="pref_timezone" value="5:30 PM" class="st-input" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="pref_dateformat">Date format</label>
+                        <input type="text" id="pref_dateformat" value="DD/MM/YYY" class="st-input" />
+                    </div>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label class="st-label" for="pref_currency">Currency</label>
+                    <input type="text" id="pref_currency" value="INR" class="st-input" style="max-width:100%;" />
+                </div>
+
+                <div class="st-list" style="margin-top:8px;">
+                    <div class="st-row">
+                        <div>
+                            <h5 class="text-[17px] font-semibold text-[#0F172A]">Dark mode</h5>
+                            <p class="st-sub">Switch dashboard theme</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="pref_dark_mode" class="sr-only peer" checked aria-label="Dark mode"><div class="st-switch"></div></label>
+                    </div>
+                    <div class="st-row">
+                        <div>
+                            <h5 class="text-[17px] font-semibold text-[#0F172A]">Auto-print invoice</h5>
+                            <p class="st-sub">Print bill when an order is accepted</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="pref_auto_print" class="sr-only peer" checked aria-label="Auto-print invoice"><div class="st-switch"></div></label>
+                    </div>
+                    <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+                        <div>
+                            <h5 class="text-[17px] font-semibold text-[#0F172A]">Compact tables</h5>
+                            <p class="st-sub">Show more rows per screen</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="pref_compact" class="sr-only peer" checked aria-label="Compact tables"><div class="st-switch"></div></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="st-footer">
+                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn" style="min-width:150px;">Back</button>
+                <button type="button" class="action-save-settings st-btn st-btn-primary" style="min-width:150px;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================================================================= -->
+<!-- MODALS                                                             -->
+<!-- ================================================================= -->
+
+<!-- Add Branch Modal -->
+<div id="modal-add-branch" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;max-height:94vh;overflow-y:auto;">
+        <div class="st-modal-head">
+            <div>
+                <h3>Add New Branch</h3>
+                <p>Create a new store location for Green Cross Pharmacy</p>
+            </div>
+            <button type="button" data-close-modal="modal-add-branch" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
+        </div>
+        <div class="st-modal-body st-stack">
+            <div class="st-grid-2">
+                <div><label class="st-label" for="br_name">Branch name</label><input type="text" id="br_name" class="st-input" placeholder="Branch name" /></div>
+                <div><label class="st-label" for="br_manager">Branch manager</label><input type="text" id="br_manager" class="st-input" placeholder="Pharmacist in charge" /></div>
+            </div>
+            <div class="st-grid-2">
+                <div><label class="st-label" for="br_phone">Branch Phone</label><input type="text" id="br_phone" class="st-input" placeholder="+91 XXXXXXXXXX" /></div>
+                <div><label class="st-label" for="br_drug_no">Drug licence no</label><input type="text" id="br_drug_no" class="st-input" placeholder="Licence for this branch" /></div>
+            </div>
+            <div>
+                <label class="st-label" for="br_address_search">Branch Address</label>
+                <select id="br_address_search" class="st-select"><option>Search shop building or area</option></select>
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="button" class="st-btn flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">my_location</span><span>Use current location</span></button>
+                <button type="button" class="st-btn flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">push_pin</span><span>Pin on Map</span></button>
+            </div>
+            <div><label class="st-label" for="br_addr1_m">Address line 1</label><input type="text" id="br_addr1_m" class="st-input" placeholder="Shop no." /></div>
+            <div><label class="st-label" for="br_addr2_m">Address line 2</label><input type="text" id="br_addr2_m" class="st-input" placeholder="Shop no." /></div>
+            <div class="st-grid-2">
+                <div><label class="st-label" for="br_area_m">Area</label><input type="text" id="br_area_m" class="st-input" placeholder="Area" /></div>
+                <div><label class="st-label" for="br_city_m">City</label><input type="text" id="br_city_m" class="st-input" placeholder="City" /></div>
+                <div><label class="st-label" for="br_state_m">State</label><input type="text" id="br_state_m" class="st-input" value="Madhya Pradesh" /></div>
+                <div><label class="st-label" for="br_pin_m">Pin</label><input type="text" id="br_pin_m" class="st-input" value="45200" /></div>
+            </div>
+            <!-- Map mini -->
+            <div class="st-map" style="height:120px;border-radius:12px;overflow:hidden;">
+                <svg viewBox="0 0 400 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <rect width="400" height="120" fill="#e8edf7" />
+                    <path d="M0 80 Q100 60 200 70 T400 50" fill="none" stroke="#fff" stroke-width="5" />
+                    <path d="M80 0 Q100 60 90 120" fill="none" stroke="#fff" stroke-width="4" />
+                </svg>
+                <div class="st-map-center">
+                    <span class="material-symbols-outlined text-rose-500 text-[26px]">location_on</span>
+                </div>
+            </div>
+            <!-- Days selector -->
+            <div>
+                <p class="st-label">State</p>
+                <div class="flex gap-2 flex-wrap">
+                    <span class="ph-day-btn active">Mon</span>
+                    <span class="ph-day-btn">Tue</span>
+                    <span class="ph-day-btn">Wed</span>
+                    <span class="ph-day-btn">Thu</span>
+                    <span class="ph-day-btn">Fri</span>
+                    <span class="ph-day-btn">Sat</span>
+                    <span class="ph-day-btn">Sun</span>
+                </div>
+            </div>
+            <div class="st-grid-2">
+                <div>
+                    <label class="st-label" for="br_open_time_m">Opening Time</label>
+                    <div class="st-time"><input type="time" id="br_open_time_m" class="st-input" value="08:00" /><span class="material-symbols-outlined">schedule</span></div>
+                </div>
+                <div>
+                    <label class="st-label" for="br_close_time_m">Opening Time</label>
+                    <div class="st-time"><input type="time" id="br_close_time_m" class="st-input" value="08:00" /><span class="material-symbols-outlined">schedule</span></div>
+                </div>
+            </div>
+            <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+                <div><h5 class="text-[16px] font-semibold">Opne 24 Hours</h5><p class="st-sub">Branch runs the clock</p></div>
+                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Open 24 hours"><div class="st-switch"></div></label>
+            </div>
+            <!-- Services -->
+            <p class="st-label" style="margin-top:4px;">Services</p>
+            <div class="st-grid-2">
+                <div><label class="st-label" for="br_delivery_radius">Delivery radius</label><input type="text" id="br_delivery_radius" class="st-input" value="5km" /></div>
+                <div><label class="st-label" for="br_status">Branch status</label><input type="text" id="br_status" class="st-input" value="Active" /></div>
+            </div>
+            <div class="st-row" style="border-bottom:1px solid #EDF1F5;padding-bottom:14px;">
+                <div><h5 class="text-[16px] font-semibold">Home delivery</h5><p class="st-sub">Deliver medicines from this branch</p></div>
+                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Home delivery"><div class="st-switch"></div></label>
+            </div>
+            <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+                <div><h5 class="text-[16px] font-semibold">Accept prescription orders</h5><p class="st-sub">Patients can upload prescription</p></div>
+                <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Accept prescription orders"><div class="st-switch"></div></label>
+            </div>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-add-branch" class="st-btn">Cancel</button>
+            <button type="button" id="btn-save-branch" class="st-btn st-btn-primary">Save Branch</button>
+        </div>
+    </div>
+</div>
+
+<!-- Invite Member -->
+<div id="modal-invite-member" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;max-height:94vh;overflow-y:auto;">
+        <div class="st-modal-head">
+            <div><h3>Invite Member</h3><p>Add a teammate to your Pharmacy workspace.</p></div>
+            <button type="button" data-close-modal="modal-invite-member" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
+        </div>
+        <div class="st-modal-body st-stack">
+            <div><label class="st-label" for="invite_name">Full name</label><input type="text" id="invite_name" class="st-input" placeholder="Enter full name" data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')" /></div>
+            <div><label class="st-label" for="invite_email">Email</label><input type="email" id="invite_email" class="st-input" placeholder="name@company.com" data-validate="email" /></div>
+            <div>
+                <label class="st-label" for="invite_role">Role</label>
+                <select id="invite_role" class="st-select">
+                    <option>Inventory Manager</option>
+                    <option>Owner / Admin</option>
+                    <option>Stock Manager</option>
+                    <option>Chief Pharmacist</option>
+                    <option>Assistant Pharmacist</option>
+                </select>
+            </div>
+            <div>
+                <p class="st-label">Branch Access</p>
+                <div class="st-radio-row">
+                    <label><input type="radio" name="invite_branch" value="All branches" checked /> All branches</label>
+                    <label><input type="radio" name="invite_branch" value="Specific branch" /> Specific branch</label>
+                </div>
+            </div>
+            <div class="st-summary"><h6>Permission Summary</h6><ul><li>View earnings and payment reports</li><li>View analytics and workspace activity</li><li>Cannot manage team access</li></ul></div>
+        </div>
+        <div class="st-modal-foot st-split"><button type="button" data-close-modal="modal-invite-member" class="st-btn">Cancel</button><button type="button" id="btn-send-invite" class="st-btn st-btn-primary">Send Invitation</button></div>
+    </div>
+</div>
+
+<!-- Assign Role -->
+<div id="modal-assign-role" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;max-height:94vh;overflow-y:auto;">
+        <div class="st-modal-head">
+            <div><h3>Assign Role</h3><p>Add a teammate to your Pharmacy workspace.</p></div>
+            <button type="button" data-close-modal="modal-assign-role" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
+        </div>
+        <div class="st-modal-body st-stack">
+            <div><label class="st-label" for="assign_name">Full name</label><input type="text" id="assign_name" class="st-input" value="Neha Shah" readonly /></div>
+            <div><label class="st-label" for="assign_email">Email</label><input type="email" id="assign_email" class="st-input" value="neha@medplus.example" readonly /></div>
+            <div>
+                <label class="st-label" for="assign_role">Role</label>
+                <select id="assign_role" class="st-select">
+                    <option>Inventory Manager</option>
+                    <option>Owner / Admin</option>
+                    <option>Stock Manager</option>
+                    <option>Chief Pharmacist</option>
+                    <option>Assistant Pharmacist</option>
+                </select>
+            </div>
+            <div>
+                <p class="st-label">Branch Access</p>
+                <div class="st-radio-row">
+                    <label><input type="radio" name="assign_branch" checked /> All branches</label>
+                    <label><input type="radio" name="assign_branch" /> Specific branch</label>
+                </div>
+            </div>
+            <div class="st-summary"><h6>Permission Summary</h6><ul><li>Manage admission and bed workflows</li><li>View reports for assigned branches</li></ul></div>
+        </div>
+        <div class="st-modal-foot st-split"><button type="button" data-close-modal="modal-assign-role" class="st-btn">Cancel</button><button type="button" id="btn-assign-role" class="st-btn st-btn-primary">Assign Role</button></div>
+    </div>
+</div>
+
+<!-- Assign Team Member -->
+<div id="modal-assign-member" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;max-height:94vh;overflow-y:auto;">
+        <div class="st-modal-head">
+            <div><h3>Assign Team Member</h3><p>Add a teammate to your Pharmacy workspace.</p></div>
+            <button type="button" data-close-modal="modal-assign-member" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
+        </div>
+        <div class="st-modal-body st-stack">
+            <div><label class="st-label" for="am_name">Full name</label><input type="text" id="am_name" class="st-input" placeholder="Enter full name" data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')" /></div>
+            <div><label class="st-label" for="am_email">Email</label><input type="email" id="am_email" class="st-input" placeholder="name@company.com" data-validate="email" /></div>
+            <div>
+                <label class="st-label" for="am_role">Role</label>
+                <select id="am_role" class="st-select">
+                    <option>Stock Manager</option>
+                    <option>Owner / Admin</option>
+                    <option>Chief Pharmacist</option>
+                    <option>Assistant Pharmacist</option>
+                    <option>Inventory Manager</option>
+                </select>
+            </div>
+            <div>
+                <p class="st-label">Branch Access</p>
+                <div class="st-radio-row">
+                    <label><input type="radio" name="am_branch" value="All branches" checked /> All branches</label>
+                    <label><input type="radio" name="am_branch" value="Specific branch" /> Specific branch</label>
+                </div>
+            </div>
+            <div class="st-summary"><h6>Permission Summary</h6><ul><li>View earnings and payment reports</li><li>View analytics and workspace activity</li><li>Cannot manage team access</li></ul></div>
+        </div>
+        <div class="st-modal-foot st-split"><button type="button" data-close-modal="modal-assign-member" class="st-btn">Cancel</button><button type="button" id="btn-send-member" class="st-btn st-btn-primary">Send Invitation</button></div>
+    </div>
+</div>
+
+<!-- Deactivate Access -->
+<div id="modal-deactivate" class="settings-modal-overlay hidden fixed inset-0 z-[60] bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:420px;">
+        <div class="st-modal-head">
+            <h3>Deactivate Access?</h3>
+            <button type="button" data-close-modal="modal-deactivate" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
+        </div>
+        <div class="st-modal-body"><p class="text-[17px] text-slate-500 font-medium"><strong id="deactivate-name" class="text-slate-800">This member</strong> will lose access to this workspace. Their activity history is preserved.</p></div>
+        <div class="st-modal-foot st-split"><button type="button" data-close-modal="modal-deactivate" class="st-btn">Cancel</button><button type="button" id="btn-confirm-deactivate" class="st-btn st-btn-danger">Deactivate</button></div>
+    </div>
+</div>
+
+<!-- Add Role -->
+<div id="modal-add-role" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;">
+        <div class="st-modal-head"><h3>Add Role</h3><button type="button" data-close-modal="modal-add-role" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body st-stack">
+            <div>
+                <label class="st-label" for="add_role_name">Role</label>
+                <select id="add_role_name" class="st-select">
+                    <option>Lab Manager</option>
+                    <option>Stock Manager</option>
+                    <option>Chief Pharmacist</option>
+                    <option>Assistant Pharmacist</option>
+                    <option>Inventory Manager</option>
+                    <option>Purchase Manager</option>
+                </select>
+            </div>
+            <div>
+                <p class="st-label">Branch Access</p>
+                <div class="st-radio-row">
+                    <label><input type="radio" name="add_role_branch" value="Andheri East" checked /> Andheri East</label>
+                    <label><input type="radio" name="add_role_branch" value="All branches" /> All branches</label>
+                </div>
+            </div>
+            <button type="button" data-nav-tab="ph_team" data-nav-subview="edit_role" data-role-from="#add_role_name" data-close-modal="modal-add-role" class="st-btn st-btn-block" style="color:#007bff;border-color:#93c5fd;background:#f5faff;"><span class="material-symbols-outlined">tune</span>Permission Matrix</button>
+        </div>
+        <div class="st-modal-foot st-split"><button type="button" data-close-modal="modal-add-role" class="st-btn">Cancel</button><button type="button" id="btn-add-role" class="st-btn st-btn-primary">Add Role</button></div>
+    </div>
+</div>
+
+<!-- Active Sessions -->
+<div id="modal-active-sessions" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;max-height:92vh;overflow-y:auto;">
+        <div class="st-modal-head" style="border-bottom:1px solid #EDF1F5;padding-bottom:14px;"><h3>Active sessions</h3><button type="button" data-close-modal="modal-active-sessions" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body" style="padding-top:6px;padding-bottom:10px;">
+            <div class="flex items-center justify-between gap-3 py-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="st-icon-tile sm"><span class="material-symbols-outlined text-[22px]">smartphone</span></span>
+                    <div>
+                        <p class="text-[17px] font-semibold text-[#0F172A]">This Device</p>
+                        <p class="text-[14px] text-slate-500">Last used: Today</p>
+                    </div>
+                </div>
+                <button type="button" class="st-btn" style="padding:6px 14px;font-size:14px;">Log Out</button>
+            </div>
+            <div class="flex items-center justify-between gap-3 py-4">
+                <div class="flex items-center gap-3">
+                    <span class="st-icon-tile sm"><span class="material-symbols-outlined text-[22px]">computer</span></span>
+                    <div>
+                        <p class="text-[17px] font-semibold text-[#0F172A]">Office Desktop</p>
+                        <p class="text-[14px] text-slate-500">Last Down 11 Days Ago</p>
+                    </div>
+                </div>
+                <button type="button" class="st-btn" style="padding:6px 14px;font-size:14px;">Log Out</button>
+            </div>
+            <p class="st-note" style="margin-top:4px;">Illustrative devices for this preview.</p>
+        </div>
+        <div class="st-modal-foot st-block" style="background:#f8fafc;border-top:1px solid #EDF1F5;padding-top:14px;">
+            <button type="button" data-close-modal="modal-active-sessions" class="st-btn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Account Verification -->
+<div id="modal-account-verification" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;">
+        <div class="st-modal-head" style="border-bottom:1px solid #EDF1F5;padding-bottom:14px;"><h3>Account verification</h3><button type="button" data-close-modal="modal-account-verification" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body" style="padding-top:6px;">
+            <div class="st-detail"><span>Mobile</span><strong>+91 ........04821 Verified</strong></div>
+            <div class="st-detail"><span>Business email</span><strong>Pharmacy@1234gmail.com <span class="text-green-600">Verified</span></strong></div>
+            <div class="st-strip" style="margin-top:8px;">Contact changes require identity verification in the live application.</div>
+        </div>
+        <div class="st-modal-foot st-block" style="background:#f8fafc;border-top:1px solid #EDF1F5;padding-top:14px;">
+            <button type="button" data-close-modal="modal-account-verification" class="st-btn">Back</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account -->
+<div id="modal-delete-account" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal text-center" style="max-width:420px;padding:24px;">
+        <div class="st-modal-head" style="justify-content:space-between;border-bottom:0;padding-bottom:0;">
+            <h3>Delete Account?</h3>
+            <button type="button" data-close-modal="modal-delete-account" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
+        </div>
+        <div class="st-modal-body" style="padding-top:12px;">
+            <p class="text-[17px] text-slate-500 font-medium">This request is for the permanent deletion of this account.</p>
+        </div>
+        <div class="mt-5 grid grid-cols-2 gap-3">
+            <button type="button" data-close-modal="modal-delete-account" class="st-btn st-btn-block">Cancel</button>
+            <button type="button" id="btn-confirm-delete-request" class="st-btn st-btn-danger st-btn-block">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Replace Document -->
+<div id="modal-replace-document" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;">
+        <div class="st-modal-head"><h3>Replace Document?</h3><button type="button" data-close-modal="modal-replace-document" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body"><p class="text-[17px] text-slate-500 font-medium">Uploading a new file will set the status to Pending Review while we verify the replacement.</p></div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-replace-document" class="st-btn">Cancel</button>
+            <button type="button" id="btn-confirm-replace" class="st-btn st-btn-primary">Upload Replacement</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Document -->
+<div id="modal-add-document" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:520px;">
+        <div class="st-modal-head"><h3 id="add-document-title">Add Document</h3><button type="button" data-close-modal="modal-add-document" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body" style="display:flex;flex-direction:column;gap:12px;">
+            <label for="doc-file-input" class="st-dropzone">
+                <span class="material-symbols-outlined text-[#007bff] text-[26px]">upload</span>
+                <span class="st-dz-title">Drag and drop or click to upload</span>
+                <span class="st-note">PNG or JPG · max 2 MB</span>
+                <input type="file" id="doc-file-input" accept="image/png,image/jpeg" class="sr-only" />
+            </label>
+            <p id="doc-file-name" class="hidden text-[16px] font-semibold text-slate-600"></p>
+            <p id="doc-error" class="hidden text-[16px] font-semibold text-rose-600"></p>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-add-document" class="st-btn">Cancel</button>
+            <button type="button" id="btn-send-document" class="st-btn st-btn-primary">Send Document</button>
+        </div>
+    </div>
+</div>
+
+<!-- Document Preview -->
+<div id="modal-document-preview" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:600px;max-height:92vh;overflow-y:auto;">
+        <div class="st-modal-head"><div><h3>Document Preview</h3><p>Drug Licence • DL-MH-2024-29993</p></div><button type="button" data-close-modal="modal-document-preview" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">close</span></button></div>
+        <div class="st-modal-body">
+            <div class="p-6 border-4 border-double border-slate-400 bg-amber-50/30 rounded-xl text-center font-serif space-y-3">
+                <div class="flex justify-center"><span class="material-symbols-outlined text-[48px] text-amber-700">stars</span></div>
+                <h4 class="text-[17px] font-bold tracking-widest uppercase text-slate-900">STATE OF MAHARASHTRA</h4>
+                <p class="text-[15px] uppercase tracking-wider text-slate-600">FOOD &amp; DRUG ADMINISTRATION</p>
+                <div class="border-t border-b border-slate-300 py-2 my-2"><p class="text-[17px] font-bold text-slate-900">DRUG LICENCE CERTIFICATE</p><p class="text-[15px] text-slate-500 font-sans">Drugs &amp; Cosmetics Act</p></div>
+                <p class="text-[16px] text-slate-800 font-sans">Licensed to: <strong>Med Care Pluse Pharmacy</strong></p>
+                <p class="text-[15px] text-slate-600 font-mono">Reg #DL-MH-2024-29993 • Valid Thru: 31 Dec 2029</p>
+                <div class="flex justify-between items-center text-[13px] text-slate-500 font-sans pt-4 border-t border-slate-200"><span>SEAL OF REGISTRAR</span><span>AUTHORISED SIGNATURE</span></div>
+            </div>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-document-preview" class="st-btn">Close Preview</button>
+            <button type="button" data-close-modal="modal-document-preview" class="st-btn st-btn-primary">Download Document</button>
+        </div>
+    </div>
+</div>
+
+<!-- Pin Location -->
+<div id="modal-pin-location" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal" style="max-width:600px;">
+        <div class="st-modal-head" style="border-bottom:1px solid #EDF1F5;padding-bottom:14px;"><h3>Pin Location</h3><button type="button" data-close-modal="modal-pin-location" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body" style="padding-top:16px;">
+            <div class="st-map" style="height:260px;">
+                <svg viewBox="0 0 520 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <rect width="520" height="240" fill="#eef1f6" />
+                    <rect x="26" y="20" width="78" height="52" rx="8" fill="#d6f0d9" />
+                    <rect x="330" y="160" width="70" height="44" rx="8" fill="#d6f0d9" />
+                    <path d="M410 0 Q380 80 420 130 T400 240 L440 240 Q470 150 440 110 T450 0 Z" fill="#bfe3f2" />
+                    <path d="M0 200 L520 170" stroke="#fff" stroke-width="5" fill="none" />
+                    <path d="M90 0 L140 240" stroke="#fff" stroke-width="5" fill="none" />
+                    <path d="M250 0 L230 240" stroke="#fff" stroke-width="5" fill="none" />
+                </svg>
+                <div class="st-map-center">
+                    <span class="material-symbols-outlined text-rose-500 text-[44px]">location_on</span>
+                    <span class="text-[15px] font-medium text-slate-500 mt-0.5">Map location preview</span>
+                </div>
+            </div>
+        </div>
+        <div class="st-modal-foot" style="padding-top:0;">
+            <button type="button" data-close-modal="modal-pin-location" class="st-btn st-btn-block">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Sign Out -->
+<div id="modal-signout" class="settings-modal-overlay hidden fixed inset-0 z-[60] bg-black/60 items-center justify-center p-4">
+    <div class="st-modal text-center" style="max-width:400px;padding:24px;">
+        <div class="mx-auto w-24 h-24 rounded-full bg-amber-300 flex items-center justify-center mb-4">
+            <div class="w-14 h-14 rounded-xl bg-white flex items-center justify-center"><span class="material-symbols-outlined text-amber-400 text-[32px]">logout</span></div>
+        </div>
+        <h3 class="text-[22px] font-bold">Sign out of this device?</h3>
+        <p class="text-[16px] text-slate-500 font-medium mt-1.5">You will need to sign in again to access your pharmacy workspace.</p>
+        <div class="mt-5 space-y-2.5">
+            <button type="button" data-close-modal="modal-signout" class="st-btn st-btn-block">Cancel</button>
+            <button type="button" id="btn-confirm-signout" class="st-btn st-btn-danger st-btn-block">Sign out</button>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pharmacy_settings.js' %}"></script>
+{% endblock %}
