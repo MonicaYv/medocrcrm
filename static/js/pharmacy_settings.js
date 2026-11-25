@@ -1,516 +1,540 @@
 /**
- * Pharmacy Settings Module Workflow JavaScript
- * Handles all tabs, sub-screen navigations, popups, toggles, form validation, and settings persistence.
+ * pharmacy_settings.js
+ * Handles all Pharmacy Settings tabs, sub-view navigation, modals, toggles,
+ * form edit/save, team filtering, search, and state persistence.
  */
 
 (function () {
   'use strict';
 
-  // State management
-  const settingsState = {
-    currentTab: 'profile', // profile, store_hours, order_pref, delivery_pickup, inventory_pref, notifications, invoice_template, security, app_pref
-    subViews: {
-      profile: 'main', // main, verification, public_preview
-      store_hours: 'main', // main, working_hours_edit, scheduled_closures, add_closure
-      order_pref: 'main', // main, proc_time, order_priority, order_limit
-      delivery_pickup: 'main', // main, service_area, time_slots, map_zone
-      inventory_pref: 'main' // main, low_stock, inv_report
-    },
-    activeModal: null,
-    deliveryRadius: 5,
-    selectedTemplate: 'classic'
-  };
+  /* ─── Persistence ─────────────────────────────────────────────────── */
+  const persistenceKey =
+    'pharmacy-settings:' +
+    (document.querySelector('[data-settings-user]')?.dataset.settingsUser || 'guest');
 
-  const persistenceKey = `pharmacy-settings:${document.querySelector('[data-settings-user]')?.dataset.settingsUser || 'guest'}`;
-
-  function getSavedSettings() {
+  function getSaved() {
     try { return JSON.parse(localStorage.getItem(persistenceKey) || '{}'); }
     catch (_) { return {}; }
   }
 
-  function settingsControlKey(control, index) {
-    if (control.name) return `name:${control.name}`;
-    if (control.id) return `id:${control.id}`;
-    if (!control.dataset.settingsKey) control.dataset.settingsKey = `control-${index}`;
-    return control.dataset.settingsKey;
-  }
-
-  function initializeSettingControlKeys() {
-    document.querySelectorAll('.settings-tab-panel').forEach(panel => {
-      panel.querySelectorAll('input, select, textarea').forEach((control, index) => {
-        settingsControlKey(control, index);
-      });
-    });
-  }
-
-  function restoreSavedSettings() {
-    const saved = getSavedSettings();
-    document.querySelectorAll('.settings-tab-panel').forEach(panel => {
-      const panelData = saved[panel.dataset.tabPanel];
-      if (!panelData) return;
-      panel.querySelectorAll('input, select, textarea').forEach((control, index) => {
-        const value = panelData[settingsControlKey(control, index)];
-        if (value === undefined) return;
-        if (control.type === 'checkbox' || control.type === 'radio') control.checked = Boolean(value);
-        else control.value = value;
-      });
-      if (panel.dataset.tabPanel === 'store_hours' && Array.isArray(panelData.breakIntervals)) {
-        const list = document.getElementById('break-interval-list');
-        if (list) {
-          list.replaceChildren();
-          panelData.breakIntervals.forEach(interval => {
-            const row = document.createElement('div');
-            row.className = 'flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 p-4';
-            row.innerHTML = '<label class="flex-1 min-w-[130px] text-xs font-bold text-gray-700">Break starts<input type="time" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></label><label class="flex-1 min-w-[130px] text-xs font-bold text-gray-700">Break ends<input type="time" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></label><button type="button" class="remove-break-interval rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer">Remove</button>';
-            const fields = row.querySelectorAll('input');
-            fields[0].value = interval.start || '';
-            fields[1].value = interval.end || '';
-            list.appendChild(row);
-          });
-        }
-      }
-    });
+  function controlKey(el, idx) {
+    if (el.name) return 'name:' + el.name;
+    if (el.id)   return 'id:'   + el.id;
+    if (!el.dataset.pkey) el.dataset.pkey = 'ctrl-' + idx;
+    return el.dataset.pkey;
   }
 
   function persistPanel(panel) {
     if (!panel) return;
-    const saved = getSavedSettings();
-    const panelData = {};
-    panel.querySelectorAll('input, select, textarea').forEach((control, index) => {
-      panelData[settingsControlKey(control, index)] =
-        control.type === 'checkbox' || control.type === 'radio' ? control.checked : control.value;
+    const saved = getSaved();
+    const data  = {};
+    panel.querySelectorAll('input, select, textarea').forEach((el, i) => {
+      data[controlKey(el, i)] =
+        (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value;
     });
-    if (panel.dataset.tabPanel === 'store_hours') {
-      panelData.breakIntervals = Array.from(
-        panel.querySelectorAll('#break-interval-list > div'), row => {
-          const fields = row.querySelectorAll('input');
-          return { start: fields[0]?.value || '', end: fields[1]?.value || '' };
-        }
-      );
-    }
-    saved[panel.dataset.tabPanel] = panelData;
+    saved[panel.dataset.tabPanel] = data;
     localStorage.setItem(persistenceKey, JSON.stringify(saved));
   }
 
-  // Toast notification helper
-  function notify(message, type = 'info') {
-    if (window.toastr) {
-      toastr.options = {
-        closeButton: true,
-        progressBar: true,
-        positionClass: "toast-top-right",
-        timeOut: "3200"
-      };
-      if (type === 'success') toastr.success(message);
-      else if (type === 'warning') toastr.warning(message);
-      else if (type === 'error') toastr.error(message);
-      else toastr.info(message);
-    } else {
-      console.log(`[${type.toUpperCase()}] ${message}`);
-    }
-  }
-
-  // Modal open / close helpers
-  function openModal(modalId) {
-    const el = document.getElementById(modalId);
-    if (el) {
-      el.classList.remove('hidden');
-      el.classList.add('flex');
-      settingsState.activeModal = modalId;
-      document.body.style.overflow = 'hidden';
-    }
-  }
-
-  function closeModal(modalId) {
-    const id = modalId || settingsState.activeModal;
-    if (id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.add('hidden');
-        el.classList.remove('flex');
-      }
-    }
-    settingsState.activeModal = null;
-    if (!document.querySelector('.settings-modal-overlay:not(.hidden)')) {
-      document.body.style.overflow = '';
-    }
-  }
-
-  // Switch Main Tabs
-  function switchTab(tabId) {
-    settingsState.currentTab = tabId;
-
-    // Reset subview of the tab to 'main'
-    if (settingsState.subViews[tabId]) {
-      showSubView(tabId, 'main');
-    }
-
-    // Update Tab Buttons UI
-    document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-      const bTab = btn.getAttribute('data-tab');
-      if (bTab === tabId) {
-        btn.classList.remove('border-transparent', 'text-gray-600', 'font-medium');
-        btn.classList.add('border-dodger-blue', 'text-dodger-blue', 'font-bold');
-      } else {
-        btn.classList.remove('border-dodger-blue', 'text-dodger-blue', 'font-bold');
-        btn.classList.add('border-transparent', 'text-gray-600', 'font-medium');
-      }
-    });
-
-    // Update Tab Panels
+  function restoreAll() {
+    const saved = getSaved();
     document.querySelectorAll('.settings-tab-panel').forEach(panel => {
-      const pTab = panel.getAttribute('data-tab-panel');
-      if (pTab === tabId) {
-        panel.classList.remove('hidden');
-      } else {
-        panel.classList.add('hidden');
+      const data = saved[panel.dataset.tabPanel];
+      if (!data) return;
+      panel.querySelectorAll('input, select, textarea').forEach((el, i) => {
+        const v = data[controlKey(el, i)];
+        if (v === undefined) return;
+        if (el.type === 'checkbox' || el.type === 'radio') el.checked = Boolean(v);
+        else el.value = v;
+      });
+    });
+  }
+
+  /* ─── Toast ────────────────────────────────────────────────────────── */
+  function toast(msg, type = 'info') {
+    if (window.toastr) {
+      toastr.options = { closeButton: true, progressBar: true,
+        positionClass: 'toast-top-right', timeOut: '3200' };
+      const fn = { success: 'success', warning: 'warning', error: 'error' }[type] || 'info';
+      toastr[fn](msg);
+    } else {
+      console.log('[' + type.toUpperCase() + ']', msg);
+    }
+  }
+
+  /* ─── Modals ───────────────────────────────────────────────────────── */
+  function openModal(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('flex');
+    el.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function closeAllModals() {
+    document.querySelectorAll('.settings-modal-overlay.flex').forEach(m => {
+      m.classList.remove('flex');
+      m.classList.add('hidden');
+    });
+    document.body.style.overflow = '';
+  }
+
+  /* ─── Tab switching ────────────────────────────────────────────────── */
+  const TAB_BTNS   = '[data-tab]';
+  const TAB_PANELS = '.settings-tab-panel';
+
+  function activateTab(tabKey) {
+    document.querySelectorAll(TAB_BTNS).forEach(btn => {
+      const active = btn.dataset.tab === tabKey;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.querySelectorAll(TAB_PANELS).forEach(panel => {
+      const show = panel.dataset.tabPanel === tabKey;
+      panel.classList.toggle('hidden', !show);
+      if (show) {
+        // reset to main sub-view when switching to a tab
+        showSubView(panel, 'main');
       }
     });
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Switch Sub-views within a Tab
-  function showSubView(tabId, viewName) {
-    settingsState.subViews[tabId] = viewName;
-    const parentPanel = document.querySelector(`.settings-tab-panel[data-tab-panel="${tabId}"]`);
-    if (!parentPanel) return;
+  /* ─── Sub-view navigation ──────────────────────────────────────────── */
+  function showSubView(panel, viewName) {
+    panel.querySelectorAll('.sub-view-screen').forEach(sv => {
+      sv.classList.toggle('hidden', sv.dataset.viewName !== viewName);
+    });
+  }
 
-    parentPanel.querySelectorAll('.sub-view-screen').forEach(screen => {
-      const sName = screen.getAttribute('data-view-name');
-      if (sName === viewName) {
-        screen.classList.remove('hidden');
-      } else {
-        screen.classList.add('hidden');
+  function getPanel(tabKey) {
+    return document.querySelector(`.settings-tab-panel[data-tab-panel="${tabKey}"]`);
+  }
+
+  /* ─── Team inner tabs (Team / Roles) ───────────────────────────────── */
+  function activateTeamTab(teamKey) {
+    document.querySelectorAll('[data-team-tab]').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.teamTab === teamKey);
+    });
+    document.querySelectorAll('[data-team-panel]').forEach(panel => {
+      panel.classList.toggle('hidden', panel.dataset.teamPanel !== teamKey);
+    });
+
+    // Show / hide the correct header action button
+    const inviteBtn = document.querySelector('[data-team-action="team"]');
+    const addRoleBtn = document.querySelector('[data-team-action="roles"]');
+    if (inviteBtn) inviteBtn.classList.toggle('hidden', teamKey !== 'team');
+    if (addRoleBtn) addRoleBtn.classList.toggle('hidden', teamKey !== 'roles');
+  }
+
+  /* ─── Team search & filter ─────────────────────────────────────────── */
+  function setupTeamFilter(panelEl) {
+    if (!panelEl) return;
+    const searchInput   = panelEl.querySelector('[data-team-search]');
+    const filterToggle  = panelEl.querySelector('[data-filter-toggle]');
+    const filterPanel   = panelEl.querySelector('[data-filter-panel]');
+    const filterRole    = panelEl.querySelector('[data-filter-role]');
+    const filterStatus  = panelEl.querySelector('[data-filter-status]');
+    const resetBtn      = panelEl.querySelector('[data-reset-filters]');
+    const filterCount   = panelEl.querySelector('[data-filter-count]');
+    const emptyMsg      = panelEl.querySelector('[data-team-empty]');
+    const rows          = [...panelEl.querySelectorAll('[data-member-row],[data-role-row]')];
+
+    if (!rows.length) return;
+
+    function applyFilter() {
+      const q      = searchInput  ? searchInput.value.toLowerCase() : '';
+      const role   = filterRole   ? filterRole.value   : '';
+      const status = filterStatus ? filterStatus.value : '';
+      let visible  = 0;
+
+      rows.forEach(row => {
+        const name  = (row.querySelector('[data-member-name],[data-role-member]')?.textContent || '').toLowerCase();
+        const email = (row.querySelector('[data-member-email],[data-role-email]')?.textContent || '').toLowerCase();
+        const rRole = row.dataset.role   || '';
+        const rStat = row.dataset.status || '';
+
+        const matchQ = !q || name.includes(q) || email.includes(q);
+        const matchR = !role   || rRole === role;
+        const matchS = !status || rStat === status;
+        const show   = matchQ && matchR && matchS;
+
+        row.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+
+      if (emptyMsg) emptyMsg.classList.toggle('hidden', visible > 0);
+
+      // Update active filter count badge
+      const active = [role, status].filter(Boolean).length;
+      if (filterCount) {
+        filterCount.textContent = active;
+        filterCount.classList.toggle('hidden', active === 0);
       }
-    });
+    }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (filterToggle && filterPanel) {
+      filterToggle.addEventListener('click', () => {
+        const open = filterPanel.classList.toggle('hidden');
+        filterToggle.setAttribute('aria-expanded', !open ? 'true' : 'false');
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (filterRole)   filterRole.value   = '';
+        if (filterStatus) filterStatus.value = '';
+        if (searchInput)  searchInput.value  = '';
+        applyFilter();
+      });
+    }
+
+    [searchInput, filterRole, filterStatus].forEach(el => {
+      if (el) el.addEventListener('input', applyFilter);
+    });
   }
 
-  // Strict Form Validation
-  function setupInputValidations() {
-    // 1. Name fields validation (no numbers allowed)
-    document.querySelectorAll('[data-validate="name"]').forEach(input => {
-      // Prevent numeric keys from being typed (both keypress and keydown)
-      const blockNumeric = function (e) {
-        const key = e.key;
-        if (key && /^[0-9]$/.test(key)) {
-          e.preventDefault();
-          showInputError(input, 'Numbers are not allowed in name fields.');
-          return false;
-        }
-      };
+  /* ─── Edit-card toggle ─────────────────────────────────────────────── */
+  function setupEditCards() {
+    document.querySelectorAll('[data-edit-card]').forEach(card => {
+      const cardKey = card.dataset.editCard;
+      const toggle  = card.querySelector(`[data-edit-toggle="${cardKey}"]`);
+      if (!toggle) return;
+      const fields  = card.querySelectorAll('.settings-field');
+      let editing   = false;
 
-      input.addEventListener('keydown', blockNumeric);
-      input.addEventListener('keypress', blockNumeric);
-
-      // Prevent IME or virtual keyboard numeric inputs
-      input.addEventListener('beforeinput', function (e) {
-        if (e.data && /[0-9]/.test(e.data)) {
-          e.preventDefault();
-          showInputError(input, 'Numbers are not allowed in name fields.');
-        }
-      });
-
-      // Handle paste events to strip numbers
-      input.addEventListener('paste', function (e) {
-        const text = (e.clipboardData || window.clipboardData).getData('text');
-        if (/[0-9]/.test(text)) {
-          e.preventDefault();
-          const cleanText = text.replace(/[0-9]/g, '');
-          document.execCommand ? document.execCommand('insertText', false, cleanText) : (this.value += cleanText);
-          showInputError(input, 'Numbers were removed from pasted text.');
-        }
-      });
-
-      // Filter out any numbers on input event
-      input.addEventListener('input', function () {
-        if (/[0-9]/.test(this.value)) {
-          this.value = this.value.replace(/[0-9]/g, '');
-          showInputError(input, 'Numbers are not allowed in name fields.');
-        } else {
-          clearInputError(input);
-        }
-      });
-
-      input.addEventListener('blur', function () {
-        if (/[0-9]/.test(this.value)) {
-          this.value = this.value.replace(/[0-9]/g, '');
-          showInputError(input, 'Numbers are not allowed in name fields.');
-        }
-      });
-    });
-
-    // 2. Phone fields validation (only digits, max 10 digits)
-    document.querySelectorAll('[data-validate="phone"]').forEach(input => {
-      input.addEventListener('keypress', function (e) {
-        const char = String.fromCharCode(e.which || e.keyCode);
-        if (!/[0-9+\s-]/.test(char)) {
-          e.preventDefault();
-          showInputError(input, 'Only numbers are allowed for phone.');
-        }
-      });
-
-      input.addEventListener('input', function () {
-        clearInputError(input);
-      });
-    });
-
-    // 3. Email fields validation
-    document.querySelectorAll('[data-validate="email"]').forEach(input => {
-      input.addEventListener('blur', function () {
-        const val = this.value.trim();
-        if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-          showInputError(input, 'Please enter a valid email address.');
-        } else {
-          clearInputError(input);
+      toggle.addEventListener('click', () => {
+        editing = !editing;
+        fields.forEach(f => { f.disabled = !editing; });
+        const lbl = toggle.querySelector('[data-edit-label]') || toggle;
+        if (lbl) lbl.textContent = editing ? 'Save Changes' : 'Edit Details';
+        if (!editing) {
+          persistPanel(card.closest('.settings-tab-panel'));
+          toast('Changes saved.', 'success');
         }
       });
     });
   }
 
-  function showInputError(input, msg) {
-    clearInputError(input);
-    input.classList.add('border-red-500', 'focus:border-red-500');
-    const err = document.createElement('p');
-    err.className = 'validation-error-msg text-xs text-red-600 font-medium mt-1';
-    err.textContent = msg;
-    input.parentNode.appendChild(err);
-  }
-
-  function clearInputError(input) {
-    input.classList.remove('border-red-500', 'focus:border-red-500');
-    const existing = input.parentNode.querySelector('.validation-error-msg');
-    if (existing) existing.remove();
-  }
-
-  // Event Listeners Initialization
-  function initEvents() {
-    // 1. Tab buttons click
-    document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const tab = this.getAttribute('data-tab');
-        switchTab(tab);
+  /* ─── Save / discard buttons ───────────────────────────────────────── */
+  function setupSaveDiscard() {
+    document.querySelectorAll('.action-save-settings').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const panel = btn.closest('.settings-tab-panel');
+        if (panel) persistPanel(panel);
+        toast('Settings saved successfully.', 'success');
       });
     });
 
-    // 2. Sub-view navigation triggers
-    document.addEventListener('click', function (e) {
-      const target = e.target;
+    const discard = document.getElementById('btn-discard-profile');
+    if (discard) {
+      discard.addEventListener('click', () => {
+        const saved = getSaved();
+        delete saved['ph_profile'];
+        localStorage.setItem(persistenceKey, JSON.stringify(saved));
+        toast('Changes discarded.', 'warning');
+        location.reload();
+      });
+    }
+  }
 
-      // Nav to Sub-view
-      const navBtn = target.closest('[data-nav-subview]');
+  /* ─── Description char counter ─────────────────────────────────────── */
+  function setupCounters() {
+    document.querySelectorAll('textarea[maxlength]').forEach(ta => {
+      const id  = ta.id + '-counter';
+      const max = Number(ta.maxlength);
+      const el  = document.getElementById(id);
+      if (!el || !max) return;
+      const update = () => { el.textContent = ta.value.length + '/' + max; };
+      ta.addEventListener('input', update);
+      update();
+    });
+  }
+
+  /* ─── Deactivate access ─────────────────────────────────────────────── */
+  function setupDeactivate() {
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.action-open-deactivate');
+      if (!btn) return;
+      const name = btn.dataset.member || 'This member';
+      const el   = document.getElementById('deactivate-name');
+      if (el) el.textContent = name;
+      openModal('modal-deactivate');
+    });
+
+    const confirmBtn = document.getElementById('btn-confirm-deactivate');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', () => {
+        closeModal('modal-deactivate');
+        toast('Access deactivated.', 'success');
+      });
+    }
+  }
+
+  /* ─── Assign role modal prefill ─────────────────────────────────────── */
+  function setupAssignRole() {
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('[data-open-modal="modal-assign-role"]');
+      if (!btn) return;
+      const name  = btn.dataset.member || '';
+      const email = btn.dataset.email  || '';
+      const nameEl  = document.getElementById('assign_name');
+      const emailEl = document.getElementById('assign_email');
+      if (nameEl)  nameEl.value  = name;
+      if (emailEl) emailEl.value = email;
+    });
+
+    const btn = document.getElementById('btn-assign-role');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        closeModal('modal-assign-role');
+        toast('Role assigned successfully.', 'success');
+      });
+    }
+  }
+
+  /* ─── Invite member ──────────────────────────────────────────────────── */
+  function setupInviteMember() {
+    const btn = document.getElementById('btn-send-invite');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const nameEl  = document.getElementById('invite_name');
+      const emailEl = document.getElementById('invite_email');
+      const name    = nameEl?.value.trim() || '';
+      const email   = emailEl?.value.trim() || '';
+      if (!name)  { toast('Please enter a full name.', 'error'); return; }
+      if (!email || !/\S+@\S+\.\S+/.test(email)) { toast('Please enter a valid email.', 'error'); return; }
+      closeModal('modal-invite-member');
+      toast('Invitation sent to ' + email, 'success');
+      if (nameEl)  nameEl.value  = '';
+      if (emailEl) emailEl.value = '';
+    });
+  }
+
+  /* ─── Add role (modal) ───────────────────────────────────────────────── */
+  function setupAddRole() {
+    const btn = document.getElementById('btn-add-role');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      closeModal('modal-add-role');
+      toast('Role added successfully.', 'success');
+    });
+  }
+
+  /* ─── Save branch (modal) ────────────────────────────────────────────── */
+  function setupAddBranch() {
+    const btn = document.getElementById('btn-save-branch');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      closeModal('modal-add-branch');
+      toast('Branch saved successfully.', 'success');
+    });
+
+    // Day-of-week toggles in branch modal
+    document.querySelectorAll('.ph-day-btn').forEach(d => {
+      d.addEventListener('click', () => d.classList.toggle('active'));
+    });
+  }
+
+  /* ─── Document actions ───────────────────────────────────────────────── */
+  function setupDocumentActions() {
+    // File picker display
+    const docInput  = document.getElementById('doc-file-input');
+    const docName   = document.getElementById('doc-file-name');
+    const docError  = document.getElementById('doc-error');
+    if (docInput) {
+      docInput.addEventListener('change', () => {
+        const file = docInput.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+          if (docError) { docError.textContent = 'File exceeds 2 MB limit.'; docError.classList.remove('hidden'); }
+          if (docName)  docName.classList.add('hidden');
+          return;
+        }
+        if (docError) docError.classList.add('hidden');
+        if (docName)  { docName.textContent = file.name; docName.classList.remove('hidden'); }
+      });
+    }
+
+    const sendBtn = document.getElementById('btn-send-document');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', () => {
+        closeModal('modal-add-document');
+        toast('Document uploaded for review.', 'success');
+      });
+    }
+
+    const replaceBtn = document.getElementById('btn-confirm-replace');
+    if (replaceBtn) {
+      replaceBtn.addEventListener('click', () => {
+        closeModal('modal-replace-document');
+        toast('Replacement uploaded. Status set to Pending.', 'warning');
+      });
+    }
+  }
+
+  /* ─── Active sessions sign-out / confirm buttons ─────────────────────── */
+  function setupSessionModals() {
+    const signoutConfirm = document.getElementById('btn-confirm-signout');
+    if (signoutConfirm) {
+      signoutConfirm.addEventListener('click', () => {
+        closeModal('modal-signout');
+        toast('Signed out successfully.', 'info');
+      });
+    }
+
+    const deleteConfirm = document.getElementById('btn-confirm-delete-request');
+    if (deleteConfirm) {
+      deleteConfirm.addEventListener('click', () => {
+        closeModal('modal-delete-account');
+        toast('Account deletion request submitted.', 'warning');
+      });
+    }
+  }
+
+  /* ─── Settings search ────────────────────────────────────────────────── */
+  function setupSettingsSearch() {
+    const input = document.getElementById('settings-search-input');
+    if (!input) return;
+    input.addEventListener('input', () => {
+      const q = input.value.toLowerCase().trim();
+      if (!q) {
+        document.querySelectorAll('.st-card, .st-row').forEach(el => el.style.opacity = '');
+        return;
+      }
+      document.querySelectorAll('.st-card').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.opacity = text.includes(q) ? '1' : '0.35';
+      });
+    });
+  }
+
+  /* ─── 24×7 toggle disables time inputs ──────────────────────────────── */
+  function setup24x7Toggle() {
+    const toggle    = document.getElementById('ph_open_24x7');
+    const openTime  = document.getElementById('ph_open_time');
+    const closeTime = document.getElementById('ph_close_time');
+    if (!toggle) return;
+    const update = () => {
+      const is24 = toggle.checked;
+      if (openTime)  openTime.disabled  = is24;
+      if (closeTime) closeTime.disabled = is24;
+    };
+    toggle.addEventListener('change', update);
+    update();
+  }
+
+  /* ─── Global delegated click router ─────────────────────────────────── */
+  function setupDelegated() {
+    document.addEventListener('click', e => {
+      /* Tab buttons */
+      const tabBtn = e.target.closest('[data-tab]');
+      if (tabBtn && tabBtn.classList.contains('settings-tab-btn')) {
+        activateTab(tabBtn.dataset.tab);
+        return;
+      }
+
+      /* Team inner tabs */
+      const teamTab = e.target.closest('[data-team-tab]');
+      if (teamTab) { activateTeamTab(teamTab.dataset.teamTab); return; }
+
+      /* data-nav-tab = navigate tab + subview */
+      const navBtn = e.target.closest('[data-nav-tab]');
       if (navBtn) {
-        const tab = navBtn.getAttribute('data-nav-tab') || settingsState.currentTab;
-        const subview = navBtn.getAttribute('data-nav-subview');
-        const day = navBtn.getAttribute('data-working-day');
-        if (day) {
-          const title = document.getElementById('working-hours-day-title');
-          if (title) title.textContent = day;
-        }
-        showSubView(tab, subview);
-        return;
-      }
-
-      const addBreakBtn = target.closest('#add-break-interval');
-      if (addBreakBtn) {
-        const list = document.getElementById('break-interval-list');
-        if (list) {
-          const row = document.createElement('div');
-          row.className = 'flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 p-4';
-          row.innerHTML = '<label class="flex-1 min-w-[130px] text-xs font-bold text-gray-700">Break starts<input type="time" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></label><label class="flex-1 min-w-[130px] text-xs font-bold text-gray-700">Break ends<input type="time" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"></label><button type="button" class="remove-break-interval rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer">Remove</button>';
-          list.appendChild(row);
+        const { navTab, navSubview, roleFrom } = navBtn.dataset;
+        // If the button also closes a modal, close it first
+        const closeId = navBtn.dataset.closeModal;
+        if (closeId) closeModal(closeId);
+        activateTab(navTab);
+        const p = getPanel(navTab);
+        if (p && navSubview) showSubView(p, navSubview);
+        // Prefill role name in edit_role subview if requested
+        if (roleFrom && navSubview === 'edit_role') {
+          const srcEl = document.querySelector(roleFrom);
+          const tgtEl = document.getElementById('edit-role-name');
+          if (srcEl && tgtEl) tgtEl.value = srcEl.value;
         }
         return;
       }
 
-      const removeBreakBtn = target.closest('.remove-break-interval');
-      if (removeBreakBtn) {
-        removeBreakBtn.closest('#break-interval-list > div')?.remove();
-        return;
-      }
-
-      // Back to main subview
-      const backBtn = target.closest('[data-back-subview]');
+      /* data-back-tab = back navigation */
+      const backBtn = e.target.closest('[data-back-tab]');
       if (backBtn) {
-        const tab = backBtn.getAttribute('data-back-tab') || settingsState.currentTab;
-        showSubView(tab, 'main');
+        const { backTab, backSubview } = backBtn.dataset;
+        activateTab(backTab);
+        const p = getPanel(backTab);
+        if (p && backSubview) showSubView(p, backSubview);
         return;
       }
 
-      // Open Modal trigger
-      const openModalBtn = target.closest('[data-open-modal]');
-      if (openModalBtn) {
-        const modalId = openModalBtn.getAttribute('data-open-modal');
-        openModal(modalId);
-        return;
-      }
+      /* Open modal */
+      const openBtn = e.target.closest('[data-open-modal]');
+      if (openBtn) { openModal(openBtn.dataset.openModal); return; }
 
-      // Close Modal trigger
-      const closeModalBtn = target.closest('[data-close-modal]');
-      if (closeModalBtn) {
-        const modalId = closeModalBtn.getAttribute('data-close-modal');
-        closeModal(modalId);
-        return;
-      }
+      /* Close modal */
+      const closeBtn = e.target.closest('[data-close-modal]');
+      if (closeBtn) { closeModal(closeBtn.dataset.closeModal); return; }
 
-      // Modal backdrop click
-      if (target.classList.contains('settings-modal-overlay')) {
-        closeModal(target.id);
-        return;
-      }
-
-      // Template selection cards in Invoice Template
-      const templateCard = target.closest('.template-select-card');
-      if (templateCard) {
-        const tName = templateCard.getAttribute('data-template');
-        settingsState.selectedTemplate = tName;
-        document.querySelectorAll('.template-select-card').forEach(c => {
-          c.classList.remove('border-dodger-blue', 'bg-blue-50/40');
-          c.classList.add('border-gray-200');
-          const radio = c.querySelector('input[type="radio"]');
-          if (radio) radio.checked = false;
-        });
-        templateCard.classList.remove('border-gray-200');
-        templateCard.classList.add('border-dodger-blue', 'bg-blue-50/40');
-        const r = templateCard.querySelector('input[type="radio"]');
-        if (r) r.checked = true;
-        notify(`Invoice template changed to ${tName.toUpperCase()}`, 'info');
-        return;
-      }
-
-      // Template preview choose
-      const btnSelectTemplate = target.closest('#btn-choose-template');
-      if (btnSelectTemplate) {
-        closeModal('modal-invoice-template-preview');
-        notify('Classic Invoice Template applied successfully!', 'success');
-        return;
-      }
-
-      // Generic Save button
-      const saveBtn = target.closest('.action-save-settings');
-      if (saveBtn) {
-        // Check for any input errors
-        let hasError = false;
-        document.querySelectorAll('.settings-tab-panel:not(.hidden) [data-validate="name"]').forEach(inp => {
-          if (/[0-9]/.test(inp.value)) {
-            showInputError(inp, 'Numbers are not allowed in name fields.');
-            hasError = true;
-          }
-        });
-
-        if (hasError) {
-          notify('Please fix validation errors before saving.', 'error');
-          return;
-        }
-
-        const activePanel = saveBtn.closest('.settings-tab-panel');
-        try {
-          persistPanel(activePanel);
-          notify('Settings saved successfully. Your changes will remain after reloading.', 'success');
-        } catch (_) {
-          notify('Could not save settings in this browser.', 'error');
-        }
-        return;
-      }
-
-      // Log out session
-      const logoutBtn = target.closest('.action-logout-session');
-      if (logoutBtn) {
-        const sessionRow = logoutBtn.closest('.session-row');
-        if (sessionRow) {
-          sessionRow.classList.add('opacity-40', 'pointer-events-none');
-          logoutBtn.textContent = 'Logged Out';
-          notify('Device session ended successfully.', 'info');
-        }
-        return;
-      }
-
-      // Delete closure
-      const deleteClosureBtn = target.closest('.action-delete-closure');
-      if (deleteClosureBtn) {
-        const closureCard = deleteClosureBtn.closest('.closure-item-card');
-        if (closureCard) {
-          closureCard.remove();
-          notify('Scheduled closure removed.', 'info');
-        }
+      /* Overlay backdrop click */
+      if (e.target.classList.contains('settings-modal-overlay')) {
+        closeAllModals();
         return;
       }
     });
 
-    // Delivery Radius Sliders
-    const radiusSlider = document.getElementById('delivery-radius-slider');
-    const radiusDisplay = document.getElementById('radius-display-val');
-    const mapRadiusSlider = document.getElementById('map-radius-slider');
-    const mapRadiusDisplay = document.getElementById('map-radius-display');
-    const mapCircle = document.getElementById('map-radius-circle');
-
-    function updateRadius(val) {
-      settingsState.deliveryRadius = val;
-      if (radiusSlider) radiusSlider.value = val;
-      if (radiusDisplay) radiusDisplay.textContent = `${val} km`;
-      if (mapRadiusSlider) mapRadiusSlider.value = val;
-      if (mapRadiusDisplay) mapRadiusDisplay.textContent = `${val} km`;
-      if (mapCircle) {
-        const baseR = 30;
-        const newR = baseR + (val * 3);
-        mapCircle.setAttribute('r', newR);
-      }
-    }
-
-    if (radiusSlider) {
-      radiusSlider.addEventListener('input', function () {
-        updateRadius(this.value);
-      });
-    }
-
-    if (mapRadiusSlider) {
-      mapRadiusSlider.addEventListener('input', function () {
-        updateRadius(this.value);
-      });
-    }
-
-    // Escape key listener for closing modals
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        closeModal();
-      }
+    /* Escape key closes topmost modal */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeAllModals();
     });
-
-    // Search Settings Filter
-    const searchInput = document.getElementById('settings-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', function () {
-        const q = this.value.trim().toLowerCase();
-        if (!q) {
-          document.querySelectorAll('.settings-tab-panel:not(.hidden) .settings-card-item').forEach(el => {
-            el.classList.remove('hidden');
-          });
-          return;
-        }
-
-        document.querySelectorAll('.settings-tab-panel:not(.hidden) .settings-card-item').forEach(el => {
-          const text = el.textContent.toLowerCase();
-          if (text.includes(q)) {
-            el.classList.remove('hidden');
-          } else {
-            el.classList.add('hidden');
-          }
-        });
-      });
-    }
-
-    // Input Validations
-    setupInputValidations();
   }
 
-  // Initialize on DOM ready
-  document.addEventListener('DOMContentLoaded', function () {
-    initializeSettingControlKeys();
-    restoreSavedSettings();
-    initEvents();
-    switchTab('profile');
-  });
+  /* ─── Identity strip sync ────────────────────────────────────────────── */
+  function setupIdentitySync() {
+    const nameInput = document.getElementById('ph_store_name');
+    const nameEl    = document.getElementById('identity-name');
+    if (nameInput && nameEl) {
+      nameInput.addEventListener('input', () => {
+        if (nameInput.value.trim()) nameEl.textContent = nameInput.value.trim();
+      });
+    }
+  }
 
+  /* ─── Init ───────────────────────────────────────────────────────────── */
+  function init() {
+    // Start on first tab
+    activateTab('ph_profile');
+    activateTeamTab('team');
+
+    // Setup team filter for both sub-panels
+    document.querySelectorAll('[data-team-panel]').forEach(p => setupTeamFilter(p));
+
+    setupDelegated();
+    setupEditCards();
+    setupSaveDiscard();
+    setupCounters();
+    setupDeactivate();
+    setupAssignRole();
+    setupInviteMember();
+    setupAddRole();
+    setupAddBranch();
+    setupDocumentActions();
+    setupSessionModals();
+    setupSettingsSearch();
+    setup24x7Toggle();
+    setupIdentitySync();
+    restoreAll();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
