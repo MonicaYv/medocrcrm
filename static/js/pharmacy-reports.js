@@ -5,6 +5,8 @@ $(document).ready(function () {
   const initialData = initialEl ? JSON.parse(initialEl.textContent || "{}") : {};
   const chartColors = ["#3b82f6", "#f97316", "#22c55e", "#ef4444", "#eab308", "#8b5cf6"];
   const charts = {};
+  const orderCharts = {};
+  const bidsCharts = {};
   let heatmapSeries = null;
 
   function emptySeries(label) {
@@ -134,15 +136,9 @@ $(document).ready(function () {
 
   function renderCharts(data) {
     const topProducts = data.topProducts || {};
-    const bidTrend = data.bidTrend || {};
     const winLoss = data.winLoss || {};
     const productLabels = topProducts.labels && topProducts.labels.length ? topProducts.labels : emptySeries("No sales yet").labels;
     const productUnits = topProducts.units && topProducts.units.length ? topProducts.units : emptySeries("No sales yet").values;
-    const revenueLabels = topProducts.revenueLabels && topProducts.revenueLabels.length ? topProducts.revenueLabels : emptySeries("No revenue yet").labels;
-    // Change revenue values collection to use raw float numbers
-  const revenueValues = topProducts.revenue && topProducts.revenue.length 
-    ? topProducts.revenue.map(val => parseFloat(String(val).replace(/,/g, ''))) 
-    : emptySeries("No revenue yet").values;
 
     upsertChart("barChartPharmacy", {
       type: "bar",
@@ -156,47 +152,65 @@ $(document).ready(function () {
     upsertChart("pieChart", {
       type: "doughnut",
       data: {
-        labels: ["Completed", "In Progress", "Cancelled"],
+        labels: ["UPI", "Card", "Net Banking"],
         datasets: [{
-          data: [284, 24, 12],
-          backgroundColor: ["#3799f5", "#f6c44d", "#ef4f46"],
+          data: [52, 34, 14],
+          backgroundColor: ["#1683ff", "#635bff", "#2bc35a"],
           borderWidth: 0,
         }],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "72%",
-        rotation: -90,
+        cutout: "76%",
         plugins: { legend: { display: false } },
       },
+      plugins: [{
+        id: "paymentTotalCenter",
+        afterDraw(chart) {
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return;
+          const centerX = (chartArea.left + chartArea.right) / 2;
+          const centerY = (chartArea.top + chartArea.bottom) / 2;
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#182230";
+          ctx.font = "600 11px Inter, Arial, sans-serif";
+          ctx.fillText("₹4,52,500", centerX, centerY - 1);
+          ctx.fillStyle = "#98a1b1";
+          ctx.font = "9px Inter, Arial, sans-serif";
+          ctx.fillText("Total", centerX, centerY + 13);
+          ctx.restore();
+        },
+      }],
     });
 
     upsertChart("lineChart", {
       type: "line",
       data: {
-        labels: bidTrend.labels && bidTrend.labels.length ? bidTrend.labels : ["Jul 1", "Jul 2", "Jul 3", "Jul 4", "Jul 5", "Jul 6", "Jul 7", "Jul 8", "Jul 9", "Jul 10", "Jul 11", "Jul 12", "Jul 13", "Jul 14", "Jul 15", "Jul 16", "Jul 17", "Jul 18", "Jul 19", "Jul 20", "Jul 21"],
+        labels: ["01 Jul", "05 Jul", "11 Jul", "14 Jul", "18 Jul", "19 Jul", "22 Jul"],
         datasets: [{
-          label: "Gross",
-          data: bidTrend.values && bidTrend.values.some((value) => value > 0)
-            ? bidTrend.values.map((value) => value * 3)
-            : [6000, 6500, 5600, 7400, 6200, 7800, 6000, 7000, 7400, 5600, 7100, 6400, 6700, 7600, 5800, 6300, 7000, 7400, 5900, 7300, 6200],
-          borderColor: "#3b82f6",
-          backgroundColor: "#3b82f6",
-          pointRadius: 3,
+          label: "Revenue",
+          data: [310000, 330000, 360000, 380000, 400000, 420000, 450000],
+          borderColor: "#1683ff",
+          backgroundColor: "rgba(22, 131, 255, .09)",
+          pointBackgroundColor: "#1683ff",
+          pointBorderColor: "#1683ff",
+          pointRadius: 2.5,
           pointHoverRadius: 4,
-          tension: 0,
-          fill: false,
+          borderWidth: 2,
+          tension: 0.25,
+          fill: true,
         }, {
-          label: "Refunds",
-          data: bidTrend.values && bidTrend.values.some((value) => value > 0)
-            ? bidTrend.values.map((value) => value * 0.15)
-            : [40, 100, 140, 80, 120, 100, 140, 80, 120, 80, 160, 60, 40, 140, 40, 60, 120, 40, 80, 100, 70],
-          borderColor: "#ef4444",
-          backgroundColor: "#ef4444",
-          pointRadius: 3,
-          pointHoverRadius: 4,
-          tension: 0,
+          label: "Previous Period (Last 7 days)",
+          data: [250000, 260000, 300000, 300000, 320000, 330000, 340000],
+          borderColor: "#635bff",
+          backgroundColor: "#635bff",
+          pointRadius: 1.5,
+          pointHoverRadius: 3,
+          borderWidth: 1.5,
+          borderDash: [4, 4],
+          tension: 0.15,
           fill: false,
         }],
       },
@@ -204,13 +218,36 @@ $(document).ready(function () {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, color: "#697386", font: { size: 9 } } },
+          legend: { display: false },
+          tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ₹${(context.parsed.y / 100000).toFixed(1)}L` } },
         },
         scales: {
-          x: { grid: { color: "#edf0f4" }, ticks: { color: "#98a1b1", font: { size: 9 } } },
-          y: { beginAtZero: true, grid: { color: "#edf0f4" }, ticks: { color: "#98a1b1", font: { size: 9 } } },
+          x: { grid: { display: false }, border: { display: false }, ticks: { color: "#8391a5", font: { size: 8 } } },
+          y: {
+            min: 0,
+            max: 500000,
+            grid: { color: "#e9eef4" },
+            border: { display: false },
+            ticks: { stepSize: 100000, color: "#8391a5", font: { size: 8 }, callback: (value) => value ? `₹${value / 100000}L` : "₹0" },
+          },
         },
       },
+      plugins: [{
+        id: "revenuePointLabels",
+        afterDatasetsDraw(chart) {
+          const dataset = chart.data.datasets[0];
+          const meta = chart.getDatasetMeta(0);
+          const { ctx } = chart;
+          ctx.save();
+          ctx.fillStyle = "#344054";
+          ctx.font = "600 8px Inter, Arial, sans-serif";
+          ctx.textAlign = "center";
+          meta.data.forEach((point, index) => {
+            ctx.fillText(`₹${(dataset.data[index] / 100000).toFixed(1)}L`, point.x, point.y - 8);
+          });
+          ctx.restore();
+        },
+      }],
     });
 
     upsertChart("bidWinLossChart", {
@@ -228,6 +265,204 @@ $(document).ready(function () {
     renderHeatmap(data.heatmap || []);
     renderRatings(data.ratings || []);
   }
+
+  function orderCenterLabelPlugin(value, subtitle = "Total") {
+    return {
+      id: `center-label-${value}`,
+      afterDraw(chart) {
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return;
+        const centerX = (chartArea.left + chartArea.right) / 2;
+        const centerY = (chartArea.top + chartArea.bottom) / 2;
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#182230";
+        ctx.font = "600 12px Inter, Arial, sans-serif";
+        ctx.fillText(value, centerX, centerY - 1);
+        ctx.fillStyle = "#98a1b1";
+        ctx.font = "9px Inter, Arial, sans-serif";
+        ctx.fillText(subtitle, centerX, centerY + 13);
+        ctx.restore();
+      },
+    };
+  }
+
+  function renderOrderCharts() {
+    if (!orderCharts.trend) {
+      orderCharts.trend = new Chart(document.getElementById("orderTrendChart").getContext("2d"), {
+        type: "line",
+        data: {
+          labels: ["Jul 1", "Jul 5", "Jul 8", "Jul 11", "Jul 15", "Jul 18", "Jul 22"],
+          datasets: [
+            { label: "Total Orders", data: [700, 850, 1020, 840, 1110, 980, 1248], borderColor: "#1683ff", backgroundColor: "transparent", pointBackgroundColor: "#1683ff", pointRadius: 2, borderWidth: 2, tension: 0.15 },
+            { label: "Successful Orders", data: [520, 610, 770, 590, 850, 790, 1020], borderColor: "#10b981", backgroundColor: "transparent", pointBackgroundColor: "#10b981", pointRadius: 2, borderWidth: 2, tension: 0.15 },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, border: { display: false }, ticks: { color: "#8391a5", font: { size: 8 } } },
+            y: { min: 0, max: 1500, grid: { color: "#e9eef4" }, border: { display: false }, ticks: { stepSize: 500, color: "#8391a5", font: { size: 8 }, callback: (value) => value === 0 ? "0" : `${value / 1000}K` } },
+          },
+        },
+      });
+    }
+
+    function renderBidsCharts() {
+      if (!bidsCharts.trend) {
+        bidsCharts.trend = new Chart(document.getElementById("bidTrendViewChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: ["01 Jul", "04 Jul", "09 Jul", "14 Jul", "18 Jul", "22 Jul"],
+            datasets: [{ data: [62, 78, 84, 98, 108, 121], backgroundColor: "#3b82f6", borderRadius: 4, maxBarThickness: 22 }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, border: { display: false }, ticks: { color: "#8391a5", font: { size: 10 } } },
+              y: { beginAtZero: true, max: 150, grid: { color: "#e9eef4" }, border: { display: false }, ticks: { stepSize: 50, color: "#8391a5", font: { size: 10 } } },
+            },
+          },
+        });
+      }
+
+      const doughnutOptions = { responsive: true, maintainAspectRatio: false, cutout: "70%", plugins: { legend: { display: false } } };
+      if (!bidsCharts.status) {
+        bidsCharts.status = new Chart(document.getElementById("bidStatusViewChart").getContext("2d"), {
+          type: "doughnut",
+          data: {
+            labels: ["Accepted", "Rejected", "Expired", "Withdrawn"],
+            datasets: [{ data: [66.7, 33.3, 11.1, 5.6], backgroundColor: ["#1683ff", "#ef4444", "#f59e0b", "#10b981"], borderWidth: 0 }],
+          },
+          options: doughnutOptions,
+          plugins: [orderCenterLabelPlugin("72", "Total Bids")],
+        });
+      }
+      if (!bidsCharts.offers) {
+        bidsCharts.offers = new Chart(document.getElementById("bidOffersViewChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: ["Prescription", "OTC", "Surgical", "Wellness", "Devices"],
+            datasets: [
+              { label: "Won", data: [72, 48, 39, 24, 51], backgroundColor: "#10b981", borderRadius: 2, barThickness: 7 },
+              { label: "Lost", data: [42, 30, 35, 18, 12], backgroundColor: "#f43f5e", borderRadius: 2, barThickness: 7 },
+            ],
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, border: { display: false }, ticks: { color: "#8391a5", font: { size: 8 } } },
+              y: { beginAtZero: true, max: 100, grid: { color: "#e9eef4" }, border: { display: false }, ticks: { stepSize: 50, color: "#8391a5", font: { size: 8 } } },
+            },
+          },
+        });
+      }
+
+      const lineOptions = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, border: { display: false }, ticks: { color: "#8391a5", font: { size: 9 } } },
+          y: { min: 0, max: 50, grid: { color: "#e9eef4" }, border: { display: false }, ticks: { stepSize: 10, color: "#8391a5", font: { size: 9 }, callback: (value) => `${value}%` } },
+        },
+      };
+      if (!bidsCharts.conversion) {
+        bidsCharts.conversion = new Chart(document.getElementById("bidConversionViewChart").getContext("2d"), {
+          type: "line",
+          data: {
+            labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+            datasets: [
+              { label: "Current Period", data: [29, 32, 36, 38], borderColor: "#1683ff", pointRadius: 2, borderWidth: 2, tension: 0.15 },
+              { label: "Previous Period", data: [24, 27, 30, 33], borderColor: "#10b981", pointRadius: 2, borderWidth: 1.5, tension: 0.15 },
+            ],
+          },
+          options: lineOptions,
+        });
+      }
+      if (!bidsCharts.turnaround) {
+        bidsCharts.turnaround = new Chart(document.getElementById("bidTurnaroundViewChart").getContext("2d"), {
+          type: "line",
+          data: {
+            labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+            datasets: [
+              { label: "Current Period", data: [20, 24, 27, 30], borderColor: "#1683ff", pointRadius: 2, borderWidth: 2, tension: 0.15 },
+              { label: "Previous Period", data: [13, 16, 18, 21], borderColor: "#94a3b8", pointRadius: 2, borderWidth: 1.5, borderDash: [3, 3], tension: 0.15 },
+            ],
+          },
+          options: {
+            ...lineOptions,
+            scales: {
+              ...lineOptions.scales,
+              y: { min: 0, max: 50, grid: { color: "#e9eef4" }, border: { display: false }, ticks: { stepSize: 10, color: "#8391a5", font: { size: 9 } } },
+            },
+          },
+        });
+      }
+    }
+
+    const doughnutOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "70%",
+      plugins: { legend: { display: false } },
+    };
+    if (!orderCharts.category) {
+      orderCharts.category = new Chart(document.getElementById("orderCategoryChart").getContext("2d"), {
+        type: "doughnut",
+        data: {
+          labels: ["OTC Medicines", "Health Supplements", "Personal Care", "Wellness Products"],
+          datasets: [{ data: [38.4, 32.1, 18.7, 10.8], backgroundColor: ["#1683ff", "#10b981", "#f59e0b", "#a855f7"], borderWidth: 0 }],
+        },
+        options: doughnutOptions,
+        plugins: [orderCenterLabelPlugin("1,248")],
+      });
+    }
+    if (!orderCharts.status) {
+      orderCharts.status = new Chart(document.getElementById("orderStatusChart").getContext("2d"), {
+        type: "doughnut",
+        data: {
+          labels: ["Delivered", "Processing", "Shipped", "Returned"],
+          datasets: [{ data: [88.3, 6.2, 3.8, 1.7], backgroundColor: ["#2868ed", "#10b981", "#f59e0b", "#a855f7"], borderWidth: 0 }],
+        },
+        options: doughnutOptions,
+        plugins: [orderCenterLabelPlugin("1,248")],
+      });
+    }
+  }
+
+  $(document).on("click", ".order-trend-period", function () {
+    const period = $(this).data("period");
+    const periodSeries = {
+      daily: {
+        labels: ["9 AM", "11 AM", "1 PM", "3 PM", "5 PM", "7 PM", "9 PM"],
+        orders: [120, 185, 240, 190, 215, 170, 128],
+        completed: [98, 152, 202, 158, 177, 139, 105],
+      },
+      weekly: {
+        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        orders: [720, 810, 950, 880, 1080, 1180, 1248],
+        completed: [590, 670, 790, 730, 900, 980, 1020],
+      },
+      monthly: {
+        labels: ["Jul 1", "Jul 5", "Jul 8", "Jul 11", "Jul 15", "Jul 18", "Jul 22"],
+        orders: [700, 850, 1020, 840, 1110, 980, 1248],
+        completed: [520, 610, 770, 590, 850, 790, 1020],
+      },
+    };
+    $(".order-trend-period").removeClass("bg-[#2563eb] text-white").addClass("text-[#64748b]");
+    $(this).addClass("bg-[#2563eb] text-white").removeClass("text-[#64748b]");
+    if (!orderCharts.trend) renderOrderCharts();
+    const series = periodSeries[period] || periodSeries.monthly;
+    orderCharts.trend.data.labels = series.labels;
+    orderCharts.trend.data.datasets[0].data = series.orders;
+    orderCharts.trend.data.datasets[1].data = series.completed;
+    orderCharts.trend.update();
+  });
 
   function renderHeatmap(rows) {
     if (!document.getElementById("heatmap") || !window.am4core || !window.am4maps || !window.am4geodata_india2019High) return;
@@ -266,7 +501,7 @@ $(document).ready(function () {
 
     setText("#reportRangeLabel", response.range_label);
     $(".report-range-text").text(response.range_label || "");
-    $("#reportRangeShort").text((response.range_label || "1-22 Jul 2025").replace(/, \d{4}/, ""));
+    $("#reportRangeShort").text(formatRangeForDisplay(response.range_label));
     setText("#totalRevenueStat", stats.total_revenue && stats.total_revenue !== "0" ? stats.total_revenue : "13,800");
     setText("#bidWonStat", stats.won_bids && stats.won_bids !== "0" ? stats.won_bids : "48");
     setText("#totalOrdersStat", stats.total_orders && stats.total_orders !== "0" ? stats.total_orders : "320");
@@ -286,6 +521,46 @@ $(document).ready(function () {
   }
 
   loadReport();
+  $(document).on("change", "#comparePreviousPeriod", function () {
+    if (!charts.lineChart) return;
+    charts.lineChart.setDatasetVisibility(1, this.checked);
+    charts.lineChart.update();
+  });
+  $(document).on("click", ".report-select-toggle", function (e) {
+    e.preventDefault();
+    const $menu = $(this).siblings(".report-select-menu");
+    const shouldOpen = $menu.hasClass("hidden");
+    $(".report-select-menu").addClass("hidden");
+    $("#reportDatePopover").addClass("hidden");
+    if (shouldOpen) $menu.removeClass("hidden");
+  });
+  $(document).on("click", ".report-select-option", function (e) {
+    e.preventDefault();
+    const target = $(this).data("target");
+    const selectedValue = $(this).text().trim();
+    $("#" + target).text(selectedValue);
+    $(".report-select-menu").addClass("hidden");
+
+    if (target === "selectedReportView") {
+      const isOrderView = selectedValue === "Order View";
+      const isBidsView = selectedValue === "Bids View";
+      $("#orderViewContent").toggleClass("hidden", !isOrderView);
+      $("#bidsViewContent").toggleClass("hidden", !isBidsView);
+      $("#revenueViewContent").toggleClass("hidden", isOrderView || isBidsView);
+      if (isOrderView) {
+        renderOrderCharts();
+        Object.values(orderCharts).forEach((chart) => chart.resize());
+      } else if (isBidsView) {
+        renderBidsCharts();
+        Object.values(bidsCharts).forEach((chart) => chart.resize());
+      }
+    }
+  });
+  $(document).on("click", function (e) {
+    if (!$(e.target).closest(".report-select-toggle, .report-select-menu").length) {
+      $(".report-select-menu").addClass("hidden");
+    }
+  });
   // The shared dropdown script uses inline show/hide styles. Those styles
   // conflict with this page's Tailwind `hidden` classes, so pharmacy reports
   // owns these controls completely.
@@ -303,6 +578,13 @@ $(document).ready(function () {
   });
 
   const initialParams = new URLSearchParams(window.location.search);
+  const activePeriod = initialParams.get("period") || "month";
+  $("#reportDatePreset").text(
+    activePeriod === "today" ? "Today"
+      : activePeriod === "week" ? "Last 7 days"
+        : activePeriod === "custom" ? "Custom range"
+          : "Last 30 days"
+  );
   let selectedStartDate = initialParams.get("period") === "custom"
     ? (initialParams.get("start") || "")
     : "";
@@ -326,7 +608,13 @@ $(document).ready(function () {
     const parts = dateIso.split("-");
     if (parts.length !== 3) return dateIso;
     const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  }
+
+  function formatRangeForDisplay(rangeLabel) {
+    const dates = (rangeLabel || "").match(/^([A-Za-z]+)\s+(\d+),\s+(\d{4})\s+-\s+([A-Za-z]+)\s+(\d+),\s+(\d{4})$/);
+    if (!dates) return (rangeLabel || "1 Jul - 22 Jul 2026").replace(/, \d{4}/, "");
+    return `${Number(dates[2])} ${dates[1]} - ${Number(dates[5])} ${dates[4]} ${dates[6]}`;
   }
 
   $(document).on("click", "#reportDateToggle", function (e) {
@@ -342,6 +630,7 @@ $(document).ready(function () {
     const period = $(this).data("period");
 
     if (period === "custom") {
+      $("#reportDatePreset").text("Custom range");
       if (!reportStartDate.val()) {
         reportStartDate.val(initialParams.get("start") || todayIso);
       }
@@ -361,6 +650,7 @@ $(document).ready(function () {
     selectedStartDate = "";
     selectedEndDate = "";
     updateSelectedPeriod(period);
+    $("#reportDatePreset").text(period === "today" ? "Today" : period === "week" ? "Last 7 days" : "Last 30 days");
     reportDatePopover.addClass("hidden");
     loadReport({ period, start: "", end: "" });
   });
@@ -395,7 +685,9 @@ $(document).ready(function () {
     selectedStartDate = start;
     selectedEndDate = end;
     updateSelectedPeriod("custom");
-    $("#reportRangeShort").text(`${formatDateForDisplay(start)} - ${formatDateForDisplay(end)}`);
+    $("#reportDatePreset").text("Custom range");
+    const endDate = new Date(`${end}T00:00:00`);
+    $("#reportRangeShort").text(`${formatDateForDisplay(start)} - ${formatDateForDisplay(end)} ${endDate.getFullYear()}`);
     reportDatePopover.addClass("hidden");
     loadReport({ period: "custom", start, end });
   });
@@ -674,30 +966,232 @@ $(document).on(
 //     $calendar.removeClass("hidden");
 // });
 
-  $(".download-btn").on("click", async function () {
-    const targetId = $(this).data("target");
-    const target = document.getElementById(targetId);
-    if (!target || !window.jspdf || !window.html2canvas) return;
-    const { jsPDF } = window.jspdf;
+  const $allMedicinesModal = $("#allMedicinesModal");
+  const $medicineDetailsModal = $("#medicineDetailsModal");
+  let medicineSalesChart = null;
+  let medicineDetailsOpenedFromAll = false;
+
+  function showReportModal($modal) {
+    $modal.removeClass("hidden").css("display", "flex");
+  }
+
+  function hideReportModal($modal) {
+    $modal.addClass("hidden").css("display", "");
+  }
+
+  $("#topMedicinesTable tbody td:last-child span")
+    .addClass("medicine-view-action")
+    .attr({ role: "button", tabindex: "0", "aria-label": "View medicine details" });
+
+  $("#openAllMedicines").on("click", function () {
+    const $rows = $("#allMedicinesTableBody").empty();
+    $("#topMedicinesTable tbody tr").each(function (index) {
+      const $row = $(this).clone();
+      $row.prepend($("<td>").addClass("px-2 py-2 text-center text-[#697386]").text(index + 1));
+      $row.children("td").removeClass("px-12 px-3 py-3").addClass("px-2 py-2");
+      $row.addClass("border-b border-[#edf0f4]");
+      $rows.append($row);
+    });
+    showReportModal($allMedicinesModal);
+  });
+
+  $(".closeAllMedicines").on("click", function () {
+    hideReportModal($allMedicinesModal);
+    hideReportModal($medicineDetailsModal);
+  });
+
+  $allMedicinesModal.on("click", function (event) {
+    if (event.target === this) hideReportModal($allMedicinesModal);
+  });
+
+  function closeMedicineDetails() {
+    hideReportModal($medicineDetailsModal);
+    if (!medicineDetailsOpenedFromAll) hideReportModal($allMedicinesModal);
+  }
+
+  $(".closeMedicineDetails").on("click", closeMedicineDetails);
+  $medicineDetailsModal.on("click", function (event) {
+    if (event.target === this) closeMedicineDetails();
+  });
+
+  function openMedicineDetails($row, fromAllMedicines) {
+    const cells = $row.children("td");
+    const offset = fromAllMedicines ? 1 : 0;
+    const name = cells.eq(offset).text().trim();
+    const quantity = cells.eq(offset + 1).text().trim();
+    const completedOrders = cells.eq(offset + 2).text().trim();
+    const sales = cells.eq(offset + 3).text().trim();
+    const stock = cells.eq(offset + 4).text().trim();
+
+    medicineDetailsOpenedFromAll = fromAllMedicines;
+    $("#medicineDetailsName, #medicineSummaryName").text(name);
+    $("#medicineDetailsCategory").text("Medicine summary · " + name);
+    $("#medicineQtySold").text(quantity);
+    $("#medicineCompletedOrders").text(completedOrders);
+    $("#medicineNetSales").text(sales);
+    $("#medicineAvailableStock").text(stock);
+
+    const unitsSold = Number.parseInt(quantity, 10) || 0;
+    const trendValues = [
+      Math.round(unitsSold * 0.55),
+      Math.round(unitsSold * 0.72),
+      Math.round(unitsSold * 1.0),
+      Math.round(unitsSold * 0.70),
+      Math.round(unitsSold * 0.95),
+      Math.round(unitsSold * 0.83),
+      unitsSold,
+    ];
+    showReportModal($medicineDetailsModal);
+
+    if (medicineSalesChart) {
+      medicineSalesChart.data.datasets[0].data = trendValues;
+      medicineSalesChart.options.scales.y.max = Math.max(60, Math.ceil(unitsSold / 10) * 10);
+      medicineSalesChart.update();
+      return;
+    }
+
+    medicineSalesChart = new Chart(document.getElementById("medicineSalesChart").getContext("2d"), {
+      type: "line",
+      data: {
+        labels: ["Jul 16", "Jul 17", "Jul 18", "Jul 19", "Jul 20", "Jul 21", "Jul 22"],
+        datasets: [{
+          label: "Qty Sold",
+          data: trendValues,
+          borderColor: "#1683ff",
+          backgroundColor: "rgba(22, 131, 255, .12)",
+          pointBackgroundColor: "#1683ff",
+          pointRadius: 2,
+          borderWidth: 2,
+          tension: 0.2,
+          fill: true,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, border: { display: false }, ticks: { color: "#8391a5", font: { size: 9 } } },
+          y: { beginAtZero: true, max: Math.max(60, Math.ceil(unitsSold / 10) * 10), grid: { color: "#e9eef4" }, border: { display: false }, ticks: { color: "#8391a5", font: { size: 9 } } },
+        },
+      },
+    });
+  }
+
+  $(document).on("click", ".medicine-view-action", function () {
+    openMedicineDetails($(this).closest("tr"), $(this).closest("#allMedicinesTableBody").length > 0);
+  });
+  $(document).on("keydown", ".medicine-view-action", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      $(this).trigger("click");
+    }
+  });
+
+  $("#allMedicinesExport").on("click", function () {
+    hideReportModal($allMedicinesModal);
+    $("#openReportExport").trigger("click");
+  });
+
+  $(document).on("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    if (!$medicineDetailsModal.hasClass("hidden")) closeMedicineDetails();
+    else if (!$allMedicinesModal.hasClass("hidden")) hideReportModal($allMedicinesModal);
+  });
+
+  const $reportExportModal = $("#reportExportModal");
+
+  function closeReportExportModal() {
+    $reportExportModal.addClass("hidden").css("display", "");
+    $("#reportExportScopeMenu").addClass("hidden");
+  }
+
+  $("#openReportExport").on("click", function () {
+    $("#exportDateRange").val($("#reportRangeShort").text().trim());
+    $reportExportModal.removeClass("hidden").css("display", "flex");
+    $("#reportExportScopeLabel").text("Current Tab");
+  });
+
+  $("#closeReportExport, #cancelReportExport").on("click", closeReportExportModal);
+  $reportExportModal.on("click", function (event) {
+    if (event.target === this) closeReportExportModal();
+  });
+  $(document).on("keydown", function (event) {
+    if (event.key === "Escape" && !$reportExportModal.hasClass("hidden")) {
+      closeReportExportModal();
+    }
+  });
+
+  $("#reportExportScope").on("click", function () {
+    $("#reportExportScopeMenu").toggleClass("hidden");
+  });
+  $(".reportExportScopeOption").on("click", function () {
+    $("#reportExportScopeLabel").text($(this).text().trim());
+    $("#reportExportScopeMenu").addClass("hidden");
+  });
+
+  $("#generateReportExport").on("click", async function () {
+    const target = document.getElementById("pharmacy-report-root");
     const button = this;
+    if (!target) {
+      if (window.toastr) toastr.error("The report could not be found.");
+      return;
+    }
+    if (!window.jspdf || !window.html2canvas) {
+      if (window.toastr) toastr.error("Export libraries are unavailable. Please try again later.");
+      console.error("Pharmacy report export failed: jsPDF or html2canvas is unavailable.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const includeCharts = $("#exportIncludeCharts").is(":checked");
+    const includeComparison = $("#exportIncludeComparison").is(":checked");
+    const chartsToHide = includeCharts ? [] : Array.from(target.querySelectorAll("#lineChart, #pieChart"));
+    const previousComparisonVisible = charts.lineChart
+      ? charts.lineChart.isDatasetVisible(1)
+      : false;
     button.disabled = true;
+    chartsToHide.forEach((canvas) => { canvas.style.visibility = "hidden"; });
+    if (!includeComparison && charts.lineChart) {
+      charts.lineChart.setDatasetVisibility(1, false);
+      charts.lineChart.update("none");
+    }
+
     try {
-      // Capture the complete report card so charts, map SVGs, and accompanying
-      // labels are exported consistently, including canvas-based charts.
-      const card = target.closest(".lab-report-shadow") || target;
-      const canvas = await html2canvas(card, { backgroundColor: "#ffffff", scale: 2, useCORS: true });
-      const pdf = new jsPDF({ orientation: canvas.width > canvas.height ? "landscape" : "portrait", unit: "pt", format: "a4" });
+      const canvas = await html2canvas(target, {
+        backgroundColor: "#f7f9fb",
+        scale: 2,
+        useCORS: true,
+      });
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+        unit: "pt",
+        format: "a4",
+      });
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const scale = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
       const width = canvas.width * scale;
       const height = canvas.height * scale;
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", (pageWidth - width) / 2, (pageHeight - height) / 2, width, height);
-      pdf.save(`${targetId}.pdf`);
+      pdf.addImage(
+        canvas.toDataURL("image/png"),
+        "PNG",
+        (pageWidth - width) / 2,
+        (pageHeight - height) / 2,
+        width,
+        height
+      );
+      pdf.save("pharmacy-report.pdf");
+      closeReportExportModal();
     } catch (error) {
       if (window.toastr) toastr.error("Unable to export this report.");
       console.error("Pharmacy report export failed", error);
     } finally {
+      chartsToHide.forEach((canvas) => { canvas.style.visibility = ""; });
+      if (charts.lineChart) {
+        charts.lineChart.setDatasetVisibility(1, previousComparisonVisible);
+        charts.lineChart.update("none");
+      }
       button.disabled = false;
     }
   });

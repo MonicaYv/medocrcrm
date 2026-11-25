@@ -587,12 +587,14 @@ def reports(request):
                 Q(accepted_hospital_id=current_hospital.id) | 
                 Q(bids__hospital_id=current_hospital.id)
             ).distinct().select_related("category", "service_type")
-            report_filter = request.GET.get("filter", "all").strip().lower()
+            report_filter = request.GET.get("filter", "week").strip().lower()
             today = timezone.localdate()
             if report_filter == "today":
                 report_start = report_end = today
             elif report_filter == "week":
                 report_start, report_end = today - timedelta(days=6), today
+            elif report_filter == "30days":
+                report_start, report_end = today - timedelta(days=29), today
             elif report_filter == "month":
                 report_start, report_end = today.replace(day=1), today
             elif report_filter == "custom":
@@ -630,6 +632,16 @@ def reports(request):
             context["highest_revenue"] = f"{highest_dept['category__name']}" if highest_dept else "None"
 
             current_count = report_appointments.count()
+            context["total_bookings"] = current_count
+            context["completed_bookings"] = report_appointments.filter(
+                status=HospitalAppointmentStatus.COMPLETED
+            ).count()
+            context["upcoming_bookings"] = report_appointments.filter(
+                status=HospitalAppointmentStatus.ACCEPTED
+            ).count()
+            context["cancelled_bookings"] = report_appointments.filter(
+                status__in=[HospitalAppointmentStatus.CANCELLED, HospitalAppointmentStatus.NO_SHOW]
+            ).count()
             if report_start and report_end:
                 range_days = max((report_end - report_start).days + 1, 1)
                 previous_start = report_start - timedelta(days=range_days)
@@ -697,7 +709,9 @@ def reports(request):
                 "qualified_conversion": "0%", "opportunity_conversion": "0%", "proposal_conversion": "0%", "deals_conversion": "0%",
                 "init_bar_labels": [], "init_bar_values": [],
                 "init_pie_labels": [], "init_pie_values": [],
-                "init_line_labels": [], "init_line_values": []
+                "init_line_labels": [], "init_line_values": [],
+                "total_bookings": 0, "completed_bookings": 0,
+                "upcoming_bookings": 0, "cancelled_bookings": 0,
             })
 
         return render(request, 'hospital_reports.html', context)
@@ -738,6 +752,12 @@ def hospital_report_data(request):
     base = HospitalAppointments.objects.filter(
         Q(accepted_hospital=hospital) | Q(bids__hospital=hospital)
     ).distinct().select_related("category", "service_type", "address")
+    service_options = list(
+        base.exclude(service_type__isnull=True)
+        .values("service_type_id", "service_type__name")
+        .distinct()
+        .order_by("service_type__name")
+    )
 
     visit_type = request.GET.get("visit_type", "").strip().lower()
     if visit_type == "home":
@@ -745,10 +765,18 @@ def hospital_report_data(request):
     elif visit_type == "hospital":
         base = base.filter(Q(preferred_mode__iexact="hospital") | Q(preferred_mode__iexact="visit"))
 
+    service_type_id = request.GET.get("service_type", "").strip()
+    if service_type_id:
+        if not service_type_id.isdigit():
+            return JsonResponse({"error": "Select a valid service."}, status=400)
+        base = base.filter(service_type_id=int(service_type_id))
+
     if filter_type == "today":
         start_date = end_date = today
     elif filter_type == "week":
         start_date, end_date = today - timedelta(days=6), today
+    elif filter_type == "30days":
+        start_date, end_date = today - timedelta(days=29), today
     elif filter_type == "month":
         start_date, end_date = today.replace(day=1), today
     elif filter_type == "custom":
@@ -795,9 +823,35 @@ def hospital_report_data(request):
         growth = f"{growth_value:+.1f}%" if previous else ("100.0%" if current else "0.0%")
 
     departments = list(won.values("category__name").annotate(total=Sum("accepted_total_amount")).exclude(category__name__isnull=True).order_by("-total"))
-    services = list(appointments.values("service_type__name").annotate(total=Count("id")).exclude(service_type__name__isnull=True).order_by("-total"))
+    services = list(appointments.values("service_type_id", "service_type__name").annotate(total=Count("id")).exclude(service_type__name__isnull=True).order_by("-total"))
     hours = appointments.annotate(hour=ExtractHour("created_at")).values("hour").annotate(total=Count("id")).order_by("hour")
     locations = appointments.exclude(address__isnull=True).values("address__state__name").annotate(total=Count("id")).exclude(address__state__name__isnull=True).order_by("-total")
+    booking_status = appointments.aggregate(
+        completed=Count("id", filter=Q(status=HospitalAppointmentStatus.COMPLETED)),
+        upcoming=Count("id", filter=Q(status=HospitalAppointmentStatus.ACCEPTED)),
+        in_progress=Count("id", filter=Q(status=HospitalAppointmentStatus.PENDING)),
+        cancelled=Count("id", filter=Q(status__in=[HospitalAppointmentStatus.CANCELLED, HospitalAppointmentStatus.NO_SHOW])),
+    )
+    trend_end = end_date or today
+    trend_start = max(start_date, trend_end - timedelta(days=6)) if start_date else trend_end - timedelta(days=6)
+    trend_rows = {
+        row["day"]: row
+        for row in appointments.filter(created_at__date__range=(trend_start, trend_end))
+        .annotate(day=TruncDate("created_at"))
+        .values("day")
+        .annotate(
+            total=Count("id"),
+            completed=Count("id", filter=Q(status=HospitalAppointmentStatus.COMPLETED)),
+        )
+    }
+    booking_trend = [
+        {
+            "date": (trend_start + timedelta(days=offset)).isoformat(),
+            "total": trend_rows.get(trend_start + timedelta(days=offset), {}).get("total", 0),
+            "completed": trend_rows.get(trend_start + timedelta(days=offset), {}).get("completed", 0),
+        }
+        for offset in range((trend_end - trend_start).days + 1)
+    ]
 
     return JsonResponse({
         "stats": {
@@ -807,7 +861,16 @@ def hospital_report_data(request):
             "avg_revenue": f"₹{won.aggregate(avg=Avg('accepted_total_amount'))['avg'] or 0:.2f}",
             "avg_budget": float(appointments.aggregate(avg=Avg("budget"))["avg"] or 0),
             "total_appointments": total_leads,
+            "completed_bookings": booking_status["completed"],
+            "upcoming_bookings": booking_status["upcoming"],
+            "cancelled_bookings": booking_status["cancelled"],
         },
+        "booking_status": booking_status,
+        "booking_trend": booking_trend,
+        "service_options": [
+            {"id": row["service_type_id"], "name": row["service_type__name"]}
+            for row in service_options
+        ],
         "most_requested_test": {"labels": [row["category__name"] for row in departments], "data": [float(row["total"] or 0) for row in departments]},
         "revenue_by_test": {"labels": [row["service_type__name"] for row in services], "data": [row["total"] for row in services]},
         "bid_trend": {"labels": [datetime.strptime(f"{row['hour']:02d}", "%H").strftime("%I:%M %p") for row in hours if row["hour"] is not None], "cbc": [row["total"] for row in hours if row["hour"]]},
@@ -822,7 +885,7 @@ def hospital_report_data(request):
             "conversion": [f"{round(value / total_leads * 100) if total_leads else 0}%" for value in [total_leads, qualified, opportunities, proposals, closed]],
         },
         "package_table": [
-            {"package": row["service_type__name"], "bookings": row["total"], "conversion": f"{round(row['total'] / total_leads * 100) if total_leads else 0}%"}
+            {"package": row["service_type__name"], "service_id": row["service_type_id"], "bookings": row["total"], "conversion": f"{round(row['total'] / total_leads * 100) if total_leads else 0}%"}
             for row in services
         ],
     })
