@@ -3,410 +3,154 @@
 {% block title %}Hospital Reports{% endblock %}
 
 {% block content %}
-<style>
-    .ui-datepicker td a.ui-state-range {
-        background: #087cf0;
-        border-color: #087cf0;
-        color: #fff;
-    }
-    .hospital-report-date-picker .ui-datepicker {
-        border: 0;
-        width: 100%;
-        padding: 0;
-        font-family: inherit;
-    }
-    .hospital-report-date-picker .ui-datepicker-header {
-        border: 0;
-        background: #fff;
-    }
-</style>
+<main id="hospitalReportsPage" data-user-id="{{ report_user_id }}" class="flex-grow flex flex-col gap-4 p-4 md:p-8 overflow-y-auto scroll">
 
-<main id="hospitalReportsPage" data-user-id="{{ report_user_id }}" class="flex-grow flex flex-col gap-6 p-4 md:p-8 overflow-y-auto scroll bg-[#f7f9fc]">
-    <header class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div>
-            <div class="flex items-center gap-2 text-sm text-gray-500">
-                <span>Reports</span>
-                <span class="material-symbols-outlined !text-base">chevron_right</span>
-                <span class="font-medium text-gray-700">Reports &amp; Analytics</span>
-            </div>
-            <h1 class="mt-1 text-2xl font-semibold text-[#172b4d]">Hospital Reports &amp; Analytics</h1>
-            <p class="mt-1 text-sm text-gray-500">Track bookings, services, and operational performance.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-            <div class="relative dropdown">
-                <p class="hidden text-dodger-blue" id="hospitalReportDateRange">Data shown: All dates</p>
-                <button type="button" class="filterToggle flex h-9 items-center gap-2 rounded-md border border-[#dfe5ec] bg-white px-3 text-[14px] text-[#344054] shadow-sm" aria-label="Select report date range">
-                    <span class="material-symbols-outlined !text-[14px]">calendar_month</span>
-                    <span id="reportDatePreset">Last 7 days</span>
-                    <span id="reportRangeShort" class="text-[#697386]"></span>
-                    <span class="material-symbols-outlined !text-[16px]">keyboard_arrow_down</span>
-                </button>
-                <div class="filterDropdown absolute right-0 top-[42px] z-40 mt-0 hidden w-[268px] rounded-md border border-[#edf0f4] bg-white p-1 shadow-lg">
-                    <button type="button" class="report-filter block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-type="today">Today</button>
-                    <button type="button" class="report-filter block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-type="week">Last 7 days</button>
-                    <button type="button" class="report-filter block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-type="30days">Last 30 days</button>
-                    <button type="button" class="report-filter block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-type="month">This Month</button>
-                    <button type="button" class="report-filter flex w-full items-center justify-between rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-type="custom">
-                        <span>Custom range</span>
-                        <span class="material-symbols-outlined calendar-icon !text-base">calendar_today</span>
-                    </button>
-                    <div class="datepicker-container hidden border-t border-[#edf0f4] px-2 py-2">
-                        <div class="datepicker-inline report-date-picker hospital-report-date-picker"></div>
-                    </div>
-                </div>
-            </div>
-            <button type="button" id="openHospitalExport" class="flex items-center gap-2 rounded-lg bg-[#0789f5] px-4 py-2 text-sm font-medium text-white hover:bg-[#0878d8]">
-                <span class="material-symbols-outlined !text-lg">download</span>
-                Export Report
-            </button>
-        </div>
-    </header>
+  <nav class="hr-crumb">Home <span>›</span> Reports</nav>
 
-    <section class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-wrap items-center gap-2">
-            <select id="serviceTypeFilter" class="sr-only" tabindex="-1" aria-hidden="true">
-                <option value="">All Services</option>
-            </select>
-            <div class="relative">
-                <button type="button" class="report-select-toggle h-9 rounded-md border border-[#dfe5ec] bg-white px-3 text-[14px] text-[#344054] shadow-sm flex items-center gap-2">
-                    Service: <span id="selectedServiceType">All Services</span>
-                    <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
-                </button>
-                <div id="serviceTypeMenu" class="report-select-menu hidden absolute left-0 top-[42px] z-30 min-w-full rounded-md border border-[#edf0f4] bg-white p-1 shadow-lg">
-                    <button type="button" class="hospital-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-select="serviceTypeFilter" data-value="">All Services</button>
-                </div>
-            </div>
-            <select id="visitTypeFilter" class="sr-only" tabindex="-1" aria-hidden="true">
-                <option value="">All Visit Types</option>
-                <option value="home">Home</option>
-                <option value="hospital">Hospital</option>
-            </select>
-            <div class="relative">
-                <button type="button" class="report-select-toggle h-9 rounded-md border border-[#dfe5ec] bg-white px-3 text-[14px] text-[#344054] shadow-sm flex items-center gap-2">
-                    Visit Type: <span id="selectedVisitType">All Visit Types</span>
-                    <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
-                </button>
-                <div class="report-select-menu hidden absolute left-0 top-[42px] z-30 min-w-full rounded-md border border-[#edf0f4] bg-white p-1 shadow-lg">
-                    <button type="button" class="hospital-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-select="visitTypeFilter" data-value="">All Visit Types</button>
-                    <button type="button" class="hospital-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-select="visitTypeFilter" data-value="home">Home</button>
-                    <button type="button" class="hospital-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-select="visitTypeFilter" data-value="hospital">Hospital</button>
-                </div>
-            </div>
-        </div>
-        <div class="relative">
-            <button id="bookingViewToggle" type="button" class="report-select-toggle flex h-9 items-center gap-2 rounded-md bg-[#1683ff] px-3 text-[14px] font-medium text-white">
-                <span id="selectedHospitalReportView">Booking View</span>
-                <span class="material-symbols-outlined !text-base">keyboard_arrow_down</span>
-            </button>
-            <div id="bookingViewMenu" class="report-select-menu absolute left-0 top-[42px] z-30 hidden min-w-full rounded-md border border-[#edf0f4] bg-white p-1 shadow-lg">
-                <button type="button" class="hospital-report-view-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-view="booking">Booking View</button>
-                <button type="button" class="hospital-report-view-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-view="bids">Bids View</button>
-                <button type="button" class="hospital-report-view-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-view="revenue">Revenue View</button>
-            </div>
-        </div>
-    </section>
-
-    <div id="bookingViewContent" class="flex flex-col gap-6">
-    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Booking summary">
-        <article class="rounded-xl border border-[#e7edf5] bg-white p-5 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">Total Bookings</p>
-                    <p id="totalBookings" class="mt-2 text-2xl font-semibold text-[#172b4d]">{{ total_bookings|default:"0" }}</p>
-                    <p class="mt-2 text-xs text-gray-400">Across selected period</p>
-                </div>
-                <span class="material-symbols-outlined rounded-lg bg-blue-50 p-2 text-[#1769e0]">calendar_month</span>
-            </div>
-        </article>
-        <article class="rounded-xl border border-[#e7edf5] bg-white p-5 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">Completed</p>
-                    <p id="completedBookings" class="mt-2 text-2xl font-semibold text-[#172b4d]">{{ completed_bookings|default:"0" }}</p>
-                    <p class="mt-2 text-xs text-emerald-600">Successfully completed</p>
-                </div>
-                <span class="material-symbols-outlined rounded-lg bg-emerald-50 p-2 text-emerald-600">task_alt</span>
-            </div>
-        </article>
-        <article class="rounded-xl border border-[#e7edf5] bg-white p-5 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">Upcoming / Confirmed</p>
-                    <p id="upcomingBookings" class="mt-2 text-2xl font-semibold text-[#172b4d]">{{ upcoming_bookings|default:"0" }}</p>
-                    <p class="mt-2 text-xs text-amber-600">Accepted and scheduled</p>
-                </div>
-                <span class="material-symbols-outlined rounded-lg bg-amber-50 p-2 text-amber-600">event_available</span>
-            </div>
-        </article>
-        <article class="rounded-xl border border-[#e7edf5] bg-white p-5 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">Cancelled / No-show</p>
-                    <p id="cancelledBookings" class="mt-2 text-2xl font-semibold text-[#172b4d]">{{ cancelled_bookings|default:"0" }}</p>
-                    <p class="mt-2 text-xs text-rose-600">Needs follow-up</p>
-                </div>
-                <span class="material-symbols-outlined rounded-lg bg-rose-50 p-2 text-rose-600">event_busy</span>
-            </div>
-        </article>
-    </section>
-
-    <section class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article id="bookingsTrendSection" class="rounded-xl border border-[#e7edf5] bg-white p-5 shadow-sm">
-            <div class="mb-5 flex items-start justify-between gap-4">
-                <div>
-                    <h2 class="text-base font-semibold text-[#172b4d]">Bookings Trend</h2>
-                    <p class="mt-1 text-xs text-gray-500">Booking volume and completed bookings over time</p>
-                </div>
-                <button type="button" class="rounded-md p-1 text-gray-400 hover:bg-gray-50" aria-label="More booking trend options">
-                    <span class="material-symbols-outlined">more_horiz</span>
-                </button>
-            </div>
-            <div class="h-64"><canvas id="bookingsTrendChart" aria-label="Bookings trend chart"></canvas></div>
-            <div class="mt-3 flex justify-center gap-5 text-xs text-gray-500">
-                <span class="flex items-center gap-2"><i class="h-2.5 w-2.5 rounded-full bg-[#1d70e8]"></i>Total Bookings</span>
-                <span class="flex items-center gap-2"><i class="h-2.5 w-2.5 rounded-full bg-[#35c7a1]"></i>Completed</span>
-            </div>
-        </article>
-        <article id="bookingStatusSection" class="rounded-xl border border-[#e7edf5] bg-white p-5 shadow-sm">
-            <div class="mb-4 flex items-start justify-between">
-                <div>
-                    <h2 class="text-base font-semibold text-[#172b4d]">Booking Status</h2>
-                    <p class="mt-1 text-xs text-gray-500">Breakdown of bookings by current status</p>
-                </div>
-                <button type="button" class="rounded-md p-1 text-gray-400 hover:bg-gray-50" aria-label="More booking status options">
-                    <span class="material-symbols-outlined">more_horiz</span>
-                </button>
-            </div>
-            <div class="flex flex-col items-center gap-5 sm:flex-row sm:justify-center">
-                <div class="h-56 w-56 shrink-0"><canvas id="bookingStatusChart" aria-label="Booking status chart"></canvas></div>
-                <div id="bookingStatusLegend" class="grid w-full grid-cols-2 gap-x-4 gap-y-3 text-xs sm:w-auto sm:grid-cols-1">
-                    <div class="flex items-center gap-2"><i class="h-2.5 w-2.5 rounded-full bg-[#35c7a1]"></i><span>Completed</span><strong id="statusCompleted" class="ml-auto">0</strong></div>
-                    <div class="flex items-center gap-2"><i class="h-2.5 w-2.5 rounded-full bg-[#ffb84d]"></i><span>Upcoming</span><strong id="statusUpcoming" class="ml-auto">0</strong></div>
-                    <div class="flex items-center gap-2"><i class="h-2.5 w-2.5 rounded-full bg-[#6c8cf5]"></i><span>In Progress</span><strong id="statusInProgress" class="ml-auto">0</strong></div>
-                    <div class="flex items-center gap-2"><i class="h-2.5 w-2.5 rounded-full bg-[#f27878]"></i><span>Cancelled / No-show</span><strong id="statusCancelled" class="ml-auto">0</strong></div>
-                </div>
-            </div>
-        </article>
-    </section>
-
-    <section class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article id="bookingsByServiceSection" class="rounded-xl border border-[#e7edf5] bg-white p-5 shadow-sm">
-            <div class="mb-5">
-                <h2 class="text-base font-semibold text-[#172b4d]">Bookings by Service</h2>
-                <p class="mt-1 text-xs text-gray-500">Most requested services in the selected period</p>
-            </div>
-            <div id="bookingsByService" class="flex flex-col gap-4">
-                <p class="text-sm text-gray-400">Loading service bookings…</p>
-            </div>
-        </article>
-        <article id="offersBidsSection" class="rounded-xl border border-[#e7edf5] bg-white p-5 shadow-sm">
-            <div class="mb-5 flex items-start justify-between">
-                <div>
-                    <h2 class="text-base font-semibold text-[#172b4d]">Offers &amp; Bids Performance</h2>
-                    <p class="mt-1 text-xs text-gray-500">Sample metrics for offers created and accepted</p>
-                </div>
-                <span class="material-symbols-outlined text-gray-400">more_horiz</span>
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-                <div class="rounded-lg bg-[#f7f9fc] p-3">
-                    <p class="text-xs text-gray-500">Offers sent</p>
-                    <p class="mt-2 text-xl font-semibold text-[#172b4d]">128</p>
-                </div>
-                <div class="rounded-lg bg-[#f7f9fc] p-3">
-                    <p class="text-xs text-gray-500">Accepted</p>
-                    <p class="mt-2 text-xl font-semibold text-[#172b4d]">86</p>
-                </div>
-                <div class="rounded-lg bg-[#f7f9fc] p-3">
-                    <p class="text-xs text-gray-500">Conversion</p>
-                    <p class="mt-2 text-xl font-semibold text-[#172b4d]">67.2%</p>
-                </div>
-            </div>
-            <div class="mt-5 h-36"><canvas id="offersPerformanceChart" aria-label="Offers and bids performance chart"></canvas></div>
-        </article>
-    </section>
-
-    <section id="turnaroundSection" class="rounded-md border border-[#e3e8ef] bg-white px-2 py-2">
-        <div class="flex items-center gap-1">
-            <h2 class="text-[12px] font-semibold text-[#344054]">Turnaround Time</h2>
-            <span class="material-symbols-outlined !text-[12px] text-[#758195]" aria-label="Turnaround time details">info</span>
-        </div>
-        <p class="mt-0.5 text-[9px] text-[#758195]">Completed Booking by report completion time</p>
-        <div class="mt-2 flex flex-wrap items-center gap-1.5">
-            <span class="rounded-md bg-[#eff6ff] px-2 py-1 text-[9px] text-[#1683ff]">Avg TAT: 7.4 hours</span>
-            <span class="rounded-md bg-[#eaf8f0] px-2 py-1 text-[9px] text-[#22a861]">With SLA: 91.6%</span>
-            <span class="rounded-md bg-[#fff0ef] px-2 py-1 text-[9px] text-[#ed4d48]">Overdue: 39 orders</span>
-        </div>
-        <div class="mt-2 flex h-[38px] w-full overflow-hidden rounded-md text-white">
-            <div class="flex w-[30%] min-w-0 flex-col justify-center bg-[#2fc654] px-1.5">
-                <span class="text-[9px] font-semibold leading-3">0-4 hrs</span>
-                <span class="text-[8px] leading-3">126 Bookings</span>
-            </div>
-            <div class="flex w-[30%] min-w-0 flex-col justify-center bg-[#0789f5] px-1.5">
-                <span class="text-[9px] font-semibold leading-3">4-8 hrs</span>
-                <span class="text-[8px] leading-3">176 Bookings</span>
-            </div>
-            <div class="flex w-[30%] min-w-0 flex-col justify-center bg-[#ff8c1f] px-1.5">
-                <span class="text-[9px] font-semibold leading-3">8-24 hrs</span>
-                <span class="text-[8px] leading-3">102 Bookings</span>
-            </div>
-            <div class="flex w-[10%] min-w-0 flex-col justify-center bg-[#ff3737] px-1.5">
-                <span class="whitespace-nowrap text-[9px] font-semibold leading-3">&gt;24 hrs</span>
-                <span class="text-[8px] leading-3">24</span>
-            </div>
-        </div>
-        <p class="mt-1.5 flex items-center gap-1 text-[9px] text-[#758195]">
-            <span class="material-symbols-outlined !text-[11px]">info</span>
-            SLA target varies by test and package
-        </p>
-    </section>
+  <header class="hr-head">
+    <div>
+      <h1 class="hr-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111c2e" stroke-width="2.4" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7" /></svg>
+        Reports &amp; Analytics
+      </h1>
+      <p class="hr-mute" style="font-size:14px;margin-top:10px">Track hospital performance, service demand, and capacity.</p>
+      <p style="font-size:11px;color:#8a97ab;margin-top:6px">Lifecare Multispeciality Hospital</p>
     </div>
 
-    <section id="bidsViewContent" class="hidden grid-cols-1 gap-4 lg:grid-cols-2">
-        <article class="min-w-0 rounded-lg border border-[#e7edf5] bg-white p-4">
-            <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
-                <h2 class="text-[13px] font-semibold text-[#344054]">Bid Conversion Rate</h2>
-                <div class="flex items-center gap-3 text-[9px] text-[#667085]">
-                    <span class="flex items-center gap-1"><i class="h-1.5 w-1.5 rounded-full bg-[#1683ff]"></i>Current Period</span>
-                    <span class="flex items-center gap-1"><i class="h-1.5 w-1.5 rounded-full bg-[#22c995]"></i>Previous Period</span>
-                </div>
+    <div class="hr-actions">
+      <div class="hr-dd" id="hrDateDd">
+        <button type="button" class="hr-btn" data-toggle>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 10h18" /></svg>
+          <span id="hrDateLabel">Last 7 days · 23–29 Sep 2026</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg>
+        </button>
+        <div class="hr-menu right" style="width:280px">
+          <button type="button" class="hr-opt" data-preset="today">Today</button>
+          <button type="button" class="hr-opt active" data-preset="week">Last 7 days</button>
+          <button type="button" class="hr-opt" data-preset="30days">Last 30 days</button>
+          <button type="button" class="hr-opt" data-preset="month">This Month</button>
+          <button type="button" class="hr-opt" data-preset="custom">Custom range</button>
+          <div id="hrCustomBox" style="display:none;border-top:1px solid #eef1f5;margin-top:6px;padding:10px 6px 6px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <label style="font-size:12px;color:#6b7a90">From<input id="hrFrom" type="date" class="hr-input" style="margin-top:4px" /></label>
+              <label style="font-size:12px;color:#6b7a90">To<input id="hrTo" type="date" class="hr-input" style="margin-top:4px" /></label>
             </div>
-            <div class="h-[190px]"><canvas id="bidsConversionChart" aria-label="Bid conversion rate current and previous period"></canvas></div>
-        </article>
-        <article class="min-w-0 rounded-lg border border-[#e7edf5] bg-white p-4">
-            <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
-                <div>
-                    <h2 class="text-[13px] font-semibold text-[#344054]">Turnaround Time</h2>
-                    <p class="text-[9px] text-[#98a1b1]">Average hours to complete reports, current vs previous period, by week</p>
-                </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+              <button type="button" id="hrCustomCancel" class="hr-btn hr-btn-ghost">Cancel</button>
+              <button type="button" id="hrCustomApply" class="hr-btn hr-btn-primary">Apply</button>
             </div>
-            <div class="h-[190px]"><canvas id="bidsTurnaroundChart" aria-label="Turnaround time current and previous period"></canvas></div>
-            <div class="mt-1 flex items-center gap-3 text-[9px] text-[#667085]">
-                <span class="flex items-center gap-1"><i class="h-1.5 w-1.5 rounded-full bg-[#1683ff]"></i>Current Period</span>
-                <span class="flex items-center gap-1"><i class="h-1.5 w-1.5 rounded-full bg-[#64748b]"></i>Previous Period</span>
-            </div>
-        </article>
-    </section>
-
-    <section id="revenueViewContent" class="hidden flex-col gap-4">
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <article class="rounded-lg border border-[#e7edf5] bg-white p-4"><p class="text-xs text-gray-500">Total Revenue</p><p id="revenueViewTotal" class="mt-2 text-xl font-semibold text-[#172b4d]">{{ total_revenue|default:"₹0" }}</p></article>
-            <article class="rounded-lg border border-[#e7edf5] bg-white p-4"><p class="text-xs text-gray-500">Average Revenue / Patient</p><p id="revenueViewAverage" class="mt-2 text-xl font-semibold text-[#172b4d]">{{ avg_revenue|default:"₹0" }}</p></article>
-            <article class="rounded-lg border border-[#e7edf5] bg-white p-4"><p class="text-xs text-gray-500">Top Revenue Department</p><p id="revenueViewDepartment" class="mt-2 text-xl font-semibold text-[#172b4d]">{{ highest_revenue|default:"—" }}</p></article>
-            <article class="rounded-lg border border-[#e7edf5] bg-white p-4"><p class="text-xs text-gray-500">Change vs Previous Period</p><p id="revenueViewGrowth" class="mt-2 text-xl font-semibold text-[#172b4d]">{{ growth|default:"—" }}</p></article>
+          </div>
         </div>
-        <article class="rounded-lg border border-[#e7edf5] bg-white p-4">
-            <h2 class="mb-3 text-[13px] font-semibold text-[#344054]">Revenue by Department</h2>
-            <div class="h-[280px]"><canvas id="hospitalRevenueChart" aria-label="Revenue by department"></canvas></div>
-        </article>
-    </section>
+      </div>
 
-    <div class="hidden" aria-hidden="true">
-        <span id="totalRevenue">{{ total_revenue|default:"₹0" }}</span>
-        <span id="highestRevenue">{{ highest_revenue|default:"—" }}</span>
-        <span id="quarterGrowth">{{ growth|default:"—" }}</span>
-        <span id="avgRevenue">{{ avg_revenue|default:"₹0" }}</span>
-        <span id="totalAppointments">{{ total_bookings|default:"0" }}</span>
-        <canvas id="barChart"></canvas>
-        <canvas id="pieChart"></canvas>
-        <canvas id="lineChart"></canvas>
-        <canvas id="horizontalBarChart"></canvas>
-        <div id="heatmap"></div>
-        <div id="packageTableBody"></div>
-        <div id="conversionTableBody"></div>
+      <button type="button" id="hrOpenExport" class="hr-btn hr-btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+        Export Report
+      </button>
+
+      <button type="button" id="hrRefresh" class="hr-btn hr-iconbtn" title="Refresh">
+        <svg id="hrRefreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" /><path d="M3 12A9 9 0 0 1 18.5 5.7L21 8" /><path d="M21 3v5h-5M3 21v-5h5" /></svg>
+      </button>
     </div>
+  </header>
+
+  <hr class="hr-rule" />
+
+  <section class="hr-filters">
+    <div class="hr-dd" id="hrServiceDd">
+      <button type="button" class="hr-btn hr-select" data-toggle><span data-label>All services</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg></button>
+      <div class="hr-menu"></div>
+    </div>
+    <div class="hr-dd" id="hrVisitDd">
+      <button type="button" class="hr-btn hr-select" data-toggle><span data-label>All visit types</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg></button>
+      <div class="hr-menu"></div>
+    </div>
+    <div class="hr-dd" id="hrViewDd">
+      <button type="button" class="hr-btn hr-viewbtn" data-toggle><span data-label>Booking View</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg></button>
+      <div class="hr-menu"></div>
+    </div>
+  </section>
+
+  <!-- views are rendered by hospital-reports.js -->
+  <div id="hrViewBooking" class="hr-view"></div>
+  <div id="hrViewBids" class="hr-view" hidden></div>
+  <div id="hrViewRevenue" class="hr-view" hidden></div>
 </main>
 
-<div id="hospitalExportModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-[#00000055] p-4" role="dialog" aria-modal="true" aria-labelledby="hospitalExportTitle">
-    <div class="flex max-h-[92vh] w-full max-w-[420px] flex-col overflow-hidden rounded-xl border border-[#e4e9f0] bg-white shadow-2xl">
-        <header class="flex items-center justify-between border-b border-[#edf0f4] px-4 py-3">
-            <h2 id="hospitalExportTitle" class="text-[14px] font-semibold text-[#202b3c]">Export Report</h2>
-            <button type="button" id="closeHospitalExport" class="flex h-7 w-7 items-center justify-center rounded-full text-[#344054] hover:bg-[#f3f7fb]" aria-label="Close export dialog">
-                <span class="material-symbols-outlined !text-[18px]">close</span>
-            </button>
-        </header>
-        <div class="overflow-y-auto px-4 py-3">
-            <fieldset>
-                <legend class="mb-2 text-[11px] font-semibold text-[#202b3c]">Select Report Types</legend>
-                <div class="flex flex-col gap-1.5">
-                    <button type="button" class="hospital-export-type flex items-center gap-2 rounded-lg border border-[#e4e9f0] px-2.5 py-2 text-left hover:bg-[#f8fbff] ring-1 ring-[#0789f5]" aria-pressed="true">
-                        <span class="material-symbols-outlined flex h-7 w-7 items-center justify-center rounded-md bg-[#eef6ff] !text-[17px] text-[#0789f5]">bar_chart</span>
-                        <span><span class="block text-[10px] font-semibold text-[#202b3c]">Full Performance Report</span><span class="block text-[9px] text-[#758195]">All metrics including bookings and consultation</span></span>
-                    </button>
-                    <div class="grid grid-cols-1 gap-1.5 rounded-lg border border-[#e4e9f0] p-1.5">
-                        <button type="button" class="hospital-export-type flex items-center gap-2 rounded-lg px-1.5 py-1.5 text-left hover:bg-[#f8fbff]" aria-pressed="false">
-                            <span class="material-symbols-outlined flex h-7 w-7 items-center justify-center rounded-md bg-[#eef6ff] !text-[17px] text-[#0789f5]">currency_rupee</span>
-                            <span><span class="block text-[10px] font-semibold text-[#202b3c]">Earnings Statement</span><span class="block text-[9px] text-[#758195]">Income fees payout breakdown</span></span>
-                        </button>
-                        <button type="button" class="hospital-export-type flex items-center gap-2 rounded-lg px-1.5 py-1.5 text-left hover:bg-[#f8fbff]" aria-pressed="false">
-                            <span class="material-symbols-outlined flex h-7 w-7 items-center justify-center rounded-md bg-[#eef6ff] !text-[17px] text-[#0789f5]">person_search</span>
-                            <span><span class="block text-[10px] font-semibold text-[#202b3c]">Patient Analytics</span><span class="block text-[9px] text-[#758195]">Patient journey and booking breakdown</span></span>
-                        </button>
-                        <button type="button" class="hospital-export-type flex items-center gap-2 rounded-lg px-1.5 py-1.5 text-left hover:bg-[#f8fbff]" aria-pressed="false">
-                            <span class="material-symbols-outlined flex h-7 w-7 items-center justify-center rounded-md bg-[#fff7e8] !text-[17px] text-[#f59e0b]">star</span>
-                            <span><span class="block text-[10px] font-semibold text-[#202b3c]">Review Summary</span><span class="block text-[9px] text-[#758195]">Feedback and retention activity</span></span>
-                        </button>
-                    </div>
-                </div>
-            </fieldset>
+<div id="hrToast" class="hr-toast"></div>
 
-            <fieldset class="mt-3">
-                <legend class="mb-1.5 text-[11px] font-semibold text-[#202b3c]">Date Range</legend>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="relative">
-                        <span class="sr-only">Start date</span>
-                        <input id="hospitalExportStartDate" type="date" class="h-8 w-full rounded-md border border-[#e4e9f0] px-2 text-[9px] text-[#758195] focus:outline-none focus:ring-1 focus:ring-[#0789f5]">
-                    </label>
-                    <label class="relative">
-                        <span class="sr-only">End date</span>
-                        <input id="hospitalExportEndDate" type="date" class="h-8 w-full rounded-md border border-[#e4e9f0] px-2 text-[9px] text-[#758195] focus:outline-none focus:ring-1 focus:ring-[#0789f5]">
-                    </label>
-                </div>
-            </fieldset>
-
-            <fieldset class="mt-3">
-                <legend class="mb-1.5 flex items-center gap-1 text-[11px] font-semibold text-[#202b3c]">
-                    <span class="material-symbols-outlined !text-[13px] text-[#0789f5]">receipt_long</span>Bid / Order Details
-                </legend>
-                <div class="flex gap-1.5">
-                    <span class="rounded-full bg-[#0789f5] px-2 py-0.5 text-[9px] font-medium text-white">PDF</span>
-                    <span class="rounded-full bg-[#f1f4f8] px-2 py-0.5 text-[9px] text-[#98a1b1]">Excel (xlsx)</span>
-                    <span class="rounded-full bg-[#f1f4f8] px-2 py-0.5 text-[9px] text-[#98a1b1]">CSV</span>
-                </div>
-            </fieldset>
-
-            <fieldset class="mt-3">
-                <legend class="mb-2 text-[11px] font-semibold text-[#202b3c]">Include Section</legend>
-                <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-[9px] text-[#667085]">
-                    <label class="flex items-center gap-1.5"><input type="checkbox" checked class="h-4 w-4 accent-[#0789f5]">Overview &amp; KPI</label>
-                    <label class="flex items-center gap-1.5"><input type="checkbox" checked class="h-4 w-4 accent-[#0789f5]">Earnings details</label>
-                    <label class="flex items-center gap-1.5"><input type="checkbox" checked class="h-4 w-4 accent-[#0789f5]">Appointment Log</label>
-                    <label class="flex items-center gap-1.5"><input type="checkbox" checked class="h-4 w-4 accent-[#0789f5]">Patient list</label>
-                    <label class="flex items-center gap-1.5"><input type="checkbox" checked class="h-4 w-4 accent-[#0789f5]">Bid History</label>
-                    <label class="flex items-center gap-1.5"><input type="checkbox" class="h-4 w-4 accent-[#0789f5]">Order History</label>
-                </div>
-            </fieldset>
-        </div>
-        <footer class="grid grid-cols-[84px_1fr] gap-2 border-t border-[#edf0f4] bg-[#fbfcfe] px-4 py-2.5">
-            <button type="button" id="cancelHospitalExport" class="h-8 rounded-md border border-[#b8c0cc] bg-white text-[9px] text-[#667085] hover:bg-[#f6f7f9]">Close</button>
-            <button type="button" id="generateHospitalExport" class="download-btn flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#0789f5] text-[10px] font-semibold text-white hover:bg-[#0878d8]" data-target="hospitalReportsPage">
-                <span class="material-symbols-outlined !text-[14px]">download</span>Generate &amp; Download
-            </button>
-        </footer>
+<!-- ============ EXPORT REPORT POPUP ============ -->
+<div id="hrExportModal" class="hr-modal" role="dialog" aria-modal="true" aria-labelledby="hrExportTitle">
+  <div class="hr-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #e8edf3">
+      <h3 id="hrExportTitle">Export Report</h3>
+      <button type="button" data-hr-close title="Close" style="width:26px;height:26px;border-radius:999px;border:2px solid #111c2e;display:flex;align-items:center;justify-content:center">
+        <svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg>
+      </button>
     </div>
+
+    <div style="padding:20px 24px">
+      <p class="hr-sec">Select Report Types</p>
+      <div class="hr-types single">
+        <button type="button" class="hr-type active" data-type="Full Performance Report">
+          <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7" /></svg></span>
+          <span><b>Full Performance Report</b><small>All metrics, earnings and consultations</small></span>
+        </button>
+      </div>
+      <div class="hr-types">
+        <button type="button" class="hr-type" data-type="Earnings Statement">
+          <span class="ti"><b style="font-size:20px;font-weight:500;display:inline">₹</b></span>
+          <span><b>Earnings Statement</b><small>Income, fees and payout breakdown</small></span>
+        </button>
+        <button type="button" class="hr-type" data-type="Patient Analytics">
+          <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5" /><path d="M3 20c0-3.3 2.7-6 6-6M14 20l1-4 5-5 2 2-5 5z" /></svg></span>
+          <span><b>Patient Analytics</b><small>Patient journey and booking breakdown</small></span>
+        </button>
+        <button type="button" class="hr-type" data-type="Review Summary">
+          <span class="ti amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.8-4.5 4.3 1.1 6.1L12 16.9 6.6 19.8l1.1-6.1L3.2 9.4l6.1-.8z" /></svg></span>
+          <span><b>Review Summary</b><small>Demographics, retention and activity</small></span>
+        </button>
+      </div>
+
+      <p class="hr-sec" style="margin-top:20px">Date Range</p>
+      <div class="hr-dates">
+        <input id="hrExFrom" type="date" class="hr-input" aria-label="Start date" />
+        <input id="hrExTo" type="date" class="hr-input" aria-label="End date" />
+      </div>
+
+      <p class="hr-sec" style="margin-top:20px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1683ff" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01" /></svg>
+        Bid / Order Details
+      </p>
+      <div class="hr-fmt" id="hrFormats">
+        <button type="button" class="active" data-format="pdf">PDF</button>
+        <button type="button" data-format="xls">Excel(xlsx)</button>
+        <button type="button" data-format="csv">CSV</button>
+      </div>
+
+      <p class="hr-sec" style="margin-top:20px">Include Section</p>
+      <div class="hr-checks" id="hrSections">
+        <label class="hr-check"><input type="checkbox" value="kpi" checked /><i></i>Overview &amp; KPI</label>
+        <label class="hr-check"><input type="checkbox" value="earnings" checked /><i></i>Earnings details</label>
+        <label class="hr-check"><input type="checkbox" value="appointments" checked /><i></i>Appointment Log</label>
+        <label class="hr-check"><input type="checkbox" value="patients" checked /><i></i>Patient list</label>
+        <label class="hr-check"><input type="checkbox" value="bids" checked /><i></i>Bid History</label>
+        <label class="hr-check"><input type="checkbox" value="orders" /><i></i>Order History</label>
+      </div>
+      <p id="hrExError" style="display:none;font-size:12px;color:#ef4444;margin-top:12px">Select at least one section to include.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:130px 1fr;gap:14px;padding:16px 24px;border-top:1px solid #e8edf3">
+      <button type="button" data-hr-close class="hr-btn hr-btn-ghost" style="height:42px;border-radius:10px">Close</button>
+      <button type="button" id="hrExGenerate" class="hr-btn hr-btn-primary" style="height:42px;border-radius:10px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Generate &amp; Download
+      </button>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://www.amcharts.com/lib/4/core.js"></script>
-<script src="https://www.amcharts.com/lib/4/maps.js"></script>
-<script src="https://www.amcharts.com/lib/4/geodata/india2019High.js"></script>
-<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
-<script src="/static/js/tabs.js"></script>
-<script src="/static/js/hospital-reports.js?v=20261103-booking-dashboard"></script>
-<script src="/static/js/table-pagination.js"></script>
+
+<script src="{% static 'js/hospital-reports.js' %}?v=20261126-redesign"></script>
 {% endblock %}

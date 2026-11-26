@@ -1,1903 +1,615 @@
-let barChart;
-let pieChart;
-let lineChart;
-let patientJourneyChart;
-
-const hospitalReportUserId = document.getElementById("hospitalReportsPage")?.dataset.userId || "unknown";
-const hospitalChartDateStorageKey = `hospital-report-chart-dates:${hospitalReportUserId}`;
-let individualChartDates = {};
-try {
-  individualChartDates = JSON.parse(localStorage.getItem(hospitalChartDateStorageKey) || "{}");
-} catch (error) {
-  console.warn("Could not restore saved hospital report chart dates.", error);
-  individualChartDates = {};
-}
-
-function persistIndividualChartDates() {
-  try {
-    localStorage.setItem(hospitalChartDateStorageKey, JSON.stringify(individualChartDates));
-  } catch (error) {
-    console.warn("Could not save hospital report chart dates.", error);
-  }
-}
-
-$(document).ready(function () {
-  // --------- 1. BAR CHART INITIALIZATION ----------
-  const barCtx = document.getElementById("barChart");
-  if (barCtx) {
-    barChart = new Chart(barCtx.getContext("2d"), {
-      type: "bar",
-      data: {
-        labels: [],
-        datasets: [{
-          label: "Requests",
-          data: [],
-          backgroundColor: ["#3b82f6", "#EF4444", "#FFB95A", "#84CC16", "#22C55E", "#1BC0C4", "#083684", "#8B5CF6", "#A855F7", "#6366F1", "#EC4899", "#3B82F6"]
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } }
-      }
-    });
-  }
-
-  // --------- 2. PIE CHART INITIALIZATION ----------
-  const pieCtx = document.getElementById("pieChart");
-  if (pieCtx) {
-    pieChart = new Chart(pieCtx.getContext("2d"), {
-      type: "pie",
-      data: {
-        labels: [],
-        datasets: [{
-          data: [],
-          backgroundColor: ["#EF4444", "#155DFC", "#FFB95A"]
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { position: "top" } }
-      }
-    });
-  }
-
-  // --------- LINE CHART (LOAD ANALYTICS) ----------
-  const lineCtx = document.getElementById("lineChart");
-  if (lineCtx) {
-    lineChart = new Chart(lineCtx.getContext("2d"), {
-      type: "line",
-      data: {
-        labels: [],
-        datasets: [{
-          label: "Appointments",
-          data: [],
-          borderColor: "#3b82f6",
-          fill: false
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false, // CRITICAL: Allows container sizing control
-        plugins: { legend: { position: "top" } }
-      }
-    });
-  }
-
-  // --------- HORIZONTAL BAR CHART (Patient Journey) ----------
-  const horizontalCtx = document.getElementById("horizontalBarChart");
-  if (horizontalCtx) {
-    patientJourneyChart = new Chart(horizontalCtx.getContext("2d"), {
-      type: "bar",
-      data: {
-        labels: ["Loading"],
-        datasets: [{
-          axis: "y",
-          data: [0],
-          fill: false,
-          backgroundColor: ["#3B82F6", "#EF4444", "#FABA23", "#84CC16", "#EC4899"]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false, // CRITICAL: Disables infinite stretching loops
-        plugins: { legend: false },
-        indexAxis: "y"
-      }
-    });
-  }
-  // --------- 6. INTERACTIVE DROPDOWN HANDLERS ----------
-  // $(".calendar-icon").on("click", function (e) {
-  //   e.stopPropagation();
-  //   $(".datepicker-container").addClass("hidden");
-  //   $(this).closest(".dropdown").find(".datepicker-container").toggleClass("hidden");
-  // });
-
-  // $(document).on("click", function () {
-  //   $(".filterDropdown").addClass("hidden");
-  //   $(".datepicker-container").addClass("hidden");
-  //   $(".dropdown-menu").addClass("hidden");
-  // });
-
-  $(document).on("click", ".dropdown-btn", function (e) {
-    e.stopPropagation();
-    const $dropdown = $(this).closest(".dropdown");
-    $(".dropdown-menu").not($dropdown.find(".dropdown-menu")).addClass("hidden");
-    $dropdown.find(".dropdown-menu").toggleClass("hidden");
-  });
-
-  $(document).on("click", ".dropdown-menu li", function (e) {
-    e.stopPropagation();
-    const selected = $(this).text().trim();
-    const $dropdown = $(this).closest(".dropdown");
-    $dropdown.find(".dropdown-value").text(selected);
-    $dropdown.find(".dropdown-menu").addClass("hidden");
-    if ($dropdown.closest("#departmentRevenueSection").length && barChart) {
-      const source = window.lastHospitalReportData?.most_requested_test;
-      if (!source) return;
-      const index = source.labels.indexOf(selected);
-      const showAll = selected.toLowerCase() === "all departments";
-      barChart.data.labels = showAll ? source.labels : (index >= 0 ? [source.labels[index]] : []);
-      barChart.data.datasets[0].data = showAll ? source.data : (index >= 0 ? [source.data[index]] : []);
-      barChart.update();
-    }
-  });
-
-  // --------- 7. DOWNLOAD CONTEXT TO PDF (ROBUST MULTI-TARGET REPORT ENGINE) ----------
-  function getJsPdfClass() {
-    if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
-    if (window.jsPDF) return window.jsPDF;
-    return null;
-  }
-
-  function getCanvasWithWhiteBg(canvas, bgColor) {
-    bgColor = bgColor || "#ffffff";
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = canvas.width || 800;
-    tempCanvas.height = canvas.height || 400;
-    const ctx = tempCanvas.getContext("2d");
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-    try {
-      ctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
-    } catch (e) {
-      console.warn("Could not draw canvas to tempCanvas:", e);
-    }
-    return tempCanvas.toDataURL("image/png");
-  }
-
-  async function captureHeatmapImage() {
-    // 1. Try amCharts exporting plugin if available
-    if (window.heatmapChart && window.heatmapChart.exporting && typeof window.heatmapChart.exporting.getImage === "function") {
-      try {
-        const img = await window.heatmapChart.exporting.getImage("png");
-        if (img && img.startsWith("data:image")) return img;
-      } catch (err) {
-        console.warn("amCharts exporting.getImage failed, trying SVG serializer", err);
-      }
-    }
-
-    // 2. Try SVG element serialization to canvas
-    const svgEl = document.querySelector("#heatmap svg");
-    if (svgEl) {
-      try {
-        const svgString = new XMLSerializer().serializeToString(svgEl);
-        const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-        const URLObj = window.URL || window.webkitURL || window;
-        const blobUrl = URLObj.createObjectURL(svgBlob);
-        const img = new Image();
-        const w = svgEl.clientWidth || svgEl.getBoundingClientRect().width || 700;
-        const h = svgEl.clientHeight || svgEl.getBoundingClientRect().height || 350;
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.max(w * 2, 800);
-        canvas.height = Math.max(h * 2, 400);
-
-        const dataUrl = await new Promise((resolve, reject) => {
-          img.onload = function () {
-            const ctx = canvas.getContext("2d");
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            URLObj.revokeObjectURL(blobUrl);
-            resolve(canvas.toDataURL("image/png"));
-          };
-          img.onerror = function (e) {
-            URLObj.revokeObjectURL(blobUrl);
-            reject(e);
-          };
-          img.src = blobUrl;
-        });
-        if (dataUrl) return dataUrl;
-      } catch (err) {
-        console.warn("SVG serializer failed, trying html2canvas fallback", err);
-      }
-    }
-
-    // 3. Fallback to html2canvas
-    if (typeof html2canvas === "function") {
-      const el = document.getElementById("heatmap");
-      if (el) {
-        try {
-          const canvas = await html2canvas(el, {
-            backgroundColor: "#ffffff",
-            useCORS: true,
-            allowTaint: true,
-            scale: 2,
-            logging: false
-          });
-          return canvas.toDataURL("image/png");
-        } catch (err) {
-          console.warn("html2canvas heatmap capture failed", err);
-        }
-      }
-    }
-    return null;
-  }
-
-  function drawReportHeader(pdf, reportTitle, subtitle, dateRangeText) {
-    const pageWidth = pdf.internal.pageSize.getWidth();
-
-    // Top Brand Accent Stripe
-    pdf.setFillColor(21, 93, 252); // dodger blue
-    pdf.rect(0, 0, pageWidth, 5, "F");
-
-    // Header Background Box
-    pdf.setFillColor(241, 245, 249); // light slate gray
-    pdf.rect(14, 10, pageWidth - 28, 26, "F");
-    pdf.setDrawColor(203, 213, 225);
-    pdf.rect(14, 10, pageWidth - 28, 26, "S");
-
-    // Title
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(14);
-    pdf.setTextColor(15, 23, 42); // slate 900
-    pdf.text(reportTitle.toUpperCase(), 18, 18);
-
-    // Subtitle
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(9);
-    pdf.setTextColor(71, 85, 105); // slate 600
-    pdf.text(subtitle, 18, 24);
-
-    // Metadata line
-    const now = new Date();
-    const generatedOn = now.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
-    }) + " " + now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-
-    pdf.setFontSize(8);
-    pdf.setTextColor(100, 116, 139);
-    const metaText = `Period: ${dateRangeText || "All Available Dates"}   |   Generated: ${generatedOn}   |   Status: Verified Report`;
-    pdf.text(metaText, 18, 31);
-  }
-
-  function drawReportFooter(pdf) {
-    const pageCount = pdf.internal.getNumberOfPages();
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    for (let i = 1; i <= pageCount; i++) {
-      pdf.setPage(i);
-      pdf.setDrawColor(226, 232, 240);
-      pdf.line(14, pageHeight - 12, pageWidth - 14, pageHeight - 12);
-
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(7.5);
-      pdf.setTextColor(148, 163, 184);
-      pdf.text("MedOCR CRM Hospital Management System  -  Confidential Administrative Report", 14, pageHeight - 7);
-      pdf.text(`Page ${i} of ${pageCount}`, pageWidth - 30, pageHeight - 7);
-    }
-  }
-
-  function drawReportTable(pdf, headers, rows, startY, colWidths) {
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    let currentY = startY;
-    const rowHeight = 6.5;
-
-    // Header Row
-    pdf.setFillColor(21, 93, 252);
-    pdf.rect(14, currentY, 182, rowHeight, "F");
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(8.5);
-    pdf.setTextColor(255, 255, 255);
-
-    let currentX = 16;
-    headers.forEach((h, i) => {
-      pdf.text(String(h), currentX, currentY + 4.5);
-      currentX += colWidths[i];
-    });
-
-    currentY += rowHeight;
-
-    // Table Rows
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(8);
-
-    rows.forEach((row, rowIndex) => {
-      if (currentY + rowHeight > pageHeight - 18) {
-        pdf.addPage();
-        currentY = 18;
-        // Redraw Header
-        pdf.setFillColor(21, 93, 252);
-        pdf.rect(14, currentY, 182, rowHeight, "F");
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(8.5);
-        pdf.setTextColor(255, 255, 255);
-        let hX = 16;
-        headers.forEach((h, i) => {
-          pdf.text(String(h), hX, currentY + 4.5);
-          hX += colWidths[i];
-        });
-        currentY += rowHeight;
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(8);
-      }
-
-      if (rowIndex % 2 === 1) {
-        pdf.setFillColor(248, 250, 252);
-        pdf.rect(14, currentY, 182, rowHeight, "F");
-      }
-
-      pdf.setDrawColor(226, 232, 240);
-      pdf.line(14, currentY + rowHeight, 196, currentY + rowHeight);
-
-      pdf.setTextColor(51, 65, 85);
-      let cellX = 16;
-      row.forEach((cell, colIndex) => {
-        pdf.text(String(cell !== undefined && cell !== null ? cell : "-"), cellX, currentY + 4.5);
-        cellX += colWidths[colIndex];
-      });
-
-      currentY += rowHeight;
-    });
-
-    return currentY;
-  }
-
-  $(document).on("click", ".download-btn", async function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const $btn = $(this);
-    if ($btn.prop("disabled")) return;
-
-    const targetId = $btn.data("target");
-    const targetElement = document.getElementById(targetId);
-
-    if (!targetElement && targetId !== "lineChart" && targetId !== "heatmap" && targetId !== "horizontalBarChart") {
-      const msg = "Report target element not found on page.";
-      console.error(msg, targetId);
-      if (typeof toastr !== "undefined") toastr.error(msg);
-      else alert(msg);
-      return;
-    }
-
-    const jsPdfClass = getJsPdfClass();
-    if (!jsPdfClass) {
-      const msg = "PDF download generator library is still loading. Please try again in a few moments.";
-      console.error(msg);
-      if (typeof toastr !== "undefined") toastr.warning(msg);
-      else alert(msg);
-      return;
-    }
-
-    // Disable button and show interactive loading state
-    const originalHtml = $btn.html();
-    $btn.prop("disabled", true).addClass("opacity-75 cursor-wait");
-    $btn.html('<span class="inline-flex items-center justify-center gap-2"><svg class="animate-spin h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Generating PDF...</span>');
-
-    try {
-      const pdf = new jsPdfClass("p", "mm", "a4");
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      let filename = `Hospital_Report_${targetId}.pdf`;
-
-      // =========================================================
-      // CASE 1: LOAD ANALYTICS (lineChart)
-      // =========================================================
-      if (targetId === "lineChart") {
-        filename = "Hospital_Load_Analytics_Report.pdf";
-        const dateRange = $("#loadAnalyticsSection .chart-date-label").text().trim() || "Today";
-        drawReportHeader(pdf, "Hospital Load Analytics Report", "Appointment counts by hour", dateRange);
-
-        // Chart Visual
-        let chartDataUrl = null;
-        if (typeof lineChart !== "undefined" && lineChart) {
-          chartDataUrl = getCanvasWithWhiteBg(lineChart.canvas, "#ffffff");
-        } else {
-          const cvs = document.getElementById("lineChart");
-          if (cvs) chartDataUrl = getCanvasWithWhiteBg(cvs, "#ffffff");
-        }
-
-        let startTableY = 40;
-        if (chartDataUrl) {
-          try {
-            pdf.addImage(chartDataUrl, "PNG", 14, 38, 182, 70);
-            startTableY = 113;
-          } catch (imgErr) {
-            console.warn("Failed to attach lineChart image to PDF:", imgErr);
-            startTableY = 42;
-          }
-        }
-
-        // Section Title for Table
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(10);
-        pdf.setTextColor(15, 23, 42);
-        pdf.text("HOURLY DATA BREAKDOWN", 14, startTableY);
-
-        // Table Data
-        const labels = (typeof lineChart !== "undefined" && lineChart && lineChart.data && lineChart.data.labels)
-          ? lineChart.data.labels
-          : (window.lastHospitalReportData?.bid_trend?.labels || []);
-        const values = (typeof lineChart !== "undefined" && lineChart && lineChart.data && lineChart.data.datasets && lineChart.data.datasets[0])
-          ? lineChart.data.datasets[0].data
-          : (window.lastHospitalReportData?.bid_trend?.cbc || []);
-
-        const tableHeaders = ["#", "Time Slot / Hour", "Metric", "Appointments"];
-        const colWidths = [15, 60, 60, 50];
-        const tableRows = labels.map((label, idx) => {
-          const val = Number(values[idx] || 0);
-          const status = "";
-          return [idx + 1, label, "Appointments", val];
-        });
-
-        const totalVol = values.reduce((acc, v) => acc + (Number(v) || 0), 0);
-        const peakVol = values.length ? Math.max(...values.map(Number)) : 0;
-        const avgVol = values.length ? Math.round(totalVol / values.length) : 0;
-        tableRows.push(["-", "Summary Total", "All Hours Tracked", totalVol]);
-
-        drawReportTable(pdf, tableHeaders, tableRows, startTableY + 4, colWidths);
-      }
-
-      // =========================================================
-      // CASE 2: HEATMAP (heatmap)
-      // =========================================================
-      else if (targetId === "heatmap") {
-        filename = "Hospital_Regional_Heatmap_Report.pdf";
-        const dateRange = $("#heatmapSection .chart-date-label").text().trim() || "All Dates";
-        drawReportHeader(pdf, "Hospital Regional Patient Heatmap Report", "Geographic Patient Origin & State Density Analysis", dateRange);
-
-        // Map Visual
-        const mapDataUrl = await captureHeatmapImage();
-        let startTableY = 40;
-        if (mapDataUrl) {
-          try {
-            pdf.addImage(mapDataUrl, "PNG", 14, 38, 182, 75);
-            startTableY = 118;
-          } catch (imgErr) {
-            console.warn("Failed to attach heatmap image to PDF:", imgErr);
-            startTableY = 42;
-          }
-        }
-
-        // Section Title for Table
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(10);
-        pdf.setTextColor(15, 23, 42);
-        pdf.text("REGIONAL PATIENT VOLUME & SHARE SUMMARY", 14, startTableY);
-
-        // Extract State Data
-        let statesList = [];
-        if (window.lastHospitalReportData?.heatmap?.labels) {
-          statesList = window.lastHospitalReportData.heatmap.labels.map((label, index) => ({
-            id: window.lastHospitalReportData.heatmap.ids?.[index] || label,
-            name: label,
-            value: window.lastHospitalReportData.heatmap.data[index] || 0
-          }));
-        } else if (window.polygonSeries && window.polygonSeries.data && window.polygonSeries.data.length) {
-          statesList = window.polygonSeries.data;
-        }
-
-        const stateNameMap = {
-          "IN-MH": "Maharashtra", "IN-DL": "Delhi", "IN-KA": "Karnataka",
-          "IN-TN": "Tamil Nadu", "IN-GJ": "Gujarat", "IN-RJ": "Rajasthan",
-          "IN-UP": "Uttar Pradesh", "IN-MP": "Madhya Pradesh", "IN-WB": "West Bengal"
-        };
-
-        const totalPatients = statesList.reduce((acc, item) => acc + (Number(item.value) || 0), 0);
-        const tableHeaders = ["#", "Geographic Region / State", "Region Code", "Patient Count", "Regional Share %"];
-        const colWidths = [12, 60, 35, 40, 35];
-        const tableRows = statesList.map((item, idx) => {
-          const rawId = item.id || "—";
-          const stateName = item.name || stateNameMap[rawId] || rawId.replace("IN-", "");
-          const val = Number(item.value) || 0;
-          const share = (totalPatients ? Math.round((val / totalPatients) * 100) : 0) + "%";
-          return [idx + 1, stateName, rawId, val, share];
-        });
-
-        tableRows.push(["-", "All Regions Combined", "Hospital Total", totalPatients, totalPatients ? "100%" : "0%"]);
-        drawReportTable(pdf, tableHeaders, tableRows, startTableY + 4, colWidths);
-      }
-
-      // =========================================================
-      // CASE 3: PATIENT JOURNEY INSIGHTS (horizontalBarChart)
-      // =========================================================
-      else if (targetId === "horizontalBarChart") {
-        filename = "Hospital_Patient_Journey_Report.pdf";
-        const dateRange = $("#patientJourneySection .chart-date-label").text().trim() || "Today";
-        drawReportHeader(pdf, "Hospital Patient Journey Insights Report", "Funnel Pipeline Progression & Conversion Rate Breakdown", dateRange);
-
-        let chartDataUrl = null;
-        if (typeof patientJourneyChart !== "undefined" && patientJourneyChart) {
-          chartDataUrl = getCanvasWithWhiteBg(patientJourneyChart.canvas, "#083684");
-        } else {
-          const cvs = document.getElementById("horizontalBarChart");
-          if (cvs) chartDataUrl = getCanvasWithWhiteBg(cvs, "#083684");
-        }
-
-        let startTableY = 40;
-        if (chartDataUrl) {
-          try {
-            pdf.addImage(chartDataUrl, "PNG", 14, 38, 182, 70);
-            startTableY = 113;
-          } catch (imgErr) {
-            console.warn("Failed to attach patientJourneyChart image to PDF:", imgErr);
-            startTableY = 42;
-          }
-        }
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(10);
-        pdf.setTextColor(15, 23, 42);
-        pdf.text("PATIENT JOURNEY FUNNEL BREAKDOWN", 14, startTableY);
-
-        const labels = (typeof patientJourneyChart !== "undefined" && patientJourneyChart?.data?.labels)
-          ? patientJourneyChart.data.labels
-          : ["Leads Generated", "Qualified Leads", "Opportunities Created", "Proposals Sent", "Deals Closed"];
-        const values = (typeof patientJourneyChart !== "undefined" && patientJourneyChart?.data?.datasets?.[0]?.data)
-          ? patientJourneyChart.data.datasets[0].data
-          : [10, 7, 4, 2, 1];
-
-        const convRates = window.lastHospitalReportData?.patient_journey?.conversion || ["100%", "70%", "40%", "20%", "10%"];
-
-        const tableHeaders = ["#", "Funnel Progression Stage", "Patient Count", "Conversion Rate", "Stage Status"];
-        const colWidths = [12, 65, 35, 35, 35];
-        const tableRows = labels.map((lbl, idx) => {
-          const val = values[idx] !== undefined ? values[idx] : 0;
-          const rate = convRates[idx] || "-";
-          const status = idx === labels.length - 1 ? "Deals Converted" : "In Progress";
-          return [idx + 1, lbl, val, rate, status];
-        });
-
-        drawReportTable(pdf, tableHeaders, tableRows, startTableY + 4, colWidths);
-      }
-
-      // =========================================================
-      // CASE 4: DEPARTMENT REVENUE (departmentRevenueSection)
-      // =========================================================
-      else if (targetId === "departmentRevenueSection") {
-        filename = "Hospital_Department_Revenue_Report.pdf";
-        const dateRange = $("#departmentRevenueSection .chart-date-label").text().trim() || "All Dates";
-        drawReportHeader(pdf, "Hospital Department Revenue Report", "Departmental Revenue Inflow & Service Analytics", dateRange);
-
-        let chartDataUrl = null;
-        if (typeof barChart !== "undefined" && barChart) {
-          chartDataUrl = getCanvasWithWhiteBg(barChart.canvas, "#ffffff");
-        } else {
-          const cvs = document.getElementById("barChart");
-          if (cvs) chartDataUrl = getCanvasWithWhiteBg(cvs, "#ffffff");
-        }
-
-        let startTableY = 40;
-        if (chartDataUrl) {
-          try {
-            pdf.addImage(chartDataUrl, "PNG", 14, 38, 182, 70);
-            startTableY = 113;
-          } catch (imgErr) {
-            console.warn("Failed to attach barChart image to PDF:", imgErr);
-            startTableY = 42;
-          }
-        }
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(10);
-        pdf.setTextColor(15, 23, 42);
-        pdf.text("DEPARTMENT REVENUE BREAKDOWN", 14, startTableY);
-
-        const labels = (typeof barChart !== "undefined" && barChart?.data?.labels)
-          ? barChart.data.labels
-          : (window.lastHospitalReportData?.most_requested_test?.labels || []);
-        const values = (typeof barChart !== "undefined" && barChart?.data?.datasets?.[0]?.data)
-          ? barChart.data.datasets[0].data
-          : (window.lastHospitalReportData?.most_requested_test?.data || []);
-
-        const tableHeaders = ["#", "Department Name", "Revenue Amount (INR)", "Record Status"];
-        const colWidths = [15, 65, 55, 47];
-        const tableRows = labels.map((lbl, idx) => {
-          const val = Number(values[idx]) || 0;
-          return [idx + 1, lbl, "₹" + val.toLocaleString("en-IN"), "Accepted/completed"];
-        });
-
-        drawReportTable(pdf, tableHeaders, tableRows, startTableY + 4, colWidths);
-      }
-
-      // =========================================================
-      // CASE 5: FULL HOSPITAL DASHBOARD
-      // =========================================================
-      else if (targetId === "hospitalReportsPage") {
-        filename = "Hospital_Bookings_Report.pdf";
-        const dashboardCanvas = await html2canvas(targetElement, {
-          backgroundColor: "#f7f9fc",
-          useCORS: true,
-          scale: 1.5,
-          logging: false
-        });
-        const margin = 10;
-        const printableWidth = pageWidth - margin * 2;
-        const printableHeight = pdf.internal.pageSize.getHeight() - margin * 2;
-        const sourcePageHeight = Math.floor(dashboardCanvas.width * printableHeight / printableWidth);
+(function () {
+  'use strict';
 
-        for (let sourceY = 0; sourceY < dashboardCanvas.height; sourceY += sourcePageHeight) {
-          if (sourceY > 0) pdf.addPage();
-          const sliceHeight = Math.min(sourcePageHeight, dashboardCanvas.height - sourceY);
-          const pageCanvas = document.createElement("canvas");
-          pageCanvas.width = dashboardCanvas.width;
-          pageCanvas.height = sliceHeight;
-          pageCanvas.getContext("2d").drawImage(
-            dashboardCanvas,
-            0, sourceY, dashboardCanvas.width, sliceHeight,
-            0, 0, dashboardCanvas.width, sliceHeight
-          );
-          const imageData = pageCanvas.toDataURL("image/jpeg", 0.9);
-          const renderedHeight = sliceHeight * printableWidth / dashboardCanvas.width;
-          pdf.addImage(imageData, "JPEG", margin, margin, printableWidth, renderedHeight);
+  var root = document.getElementById('hospitalReportsPage');
+  if (!root) return;
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  /* ================= config ================= */
+  // The dates in the Figma are "23-29 Sep 2026". Change to `new Date()` to use live dates.
+  var REPORT_END = new Date(2026, 8, 29);
+  var HOSPITAL = 'Lifecare Multispeciality Hospital';
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  /* ================= demo data (replace via HospitalReports.setData) ================= */
+  var BASE = {
+    services: [['general', 'General Medicine OPD', 26], ['wound', 'Wound Dressing', 18], ['ortho', 'Orthopaedic OPD', 17], ['daycare', 'Day-care Service', 13], ['other', 'Other Hospital Services', 10]],
+    booking: {
+      stats: [1248, 1102, 146, 87],
+      delta: [[12, 1], [10, 1], [8, 0], [5, 0]],
+      trend: [9, 10, 11, 12, 13, 14, 15],
+      status: [62, 10, 6, 6],
+      tat: { avg: '7.4 hours', sla: '91.6%', overdue: 39, buckets: [126, 176, 102, 24] }
+    },
+    offers: { cats: [['General', 4, 2], ['Wound', 3, 1], ['Orthopaedic', 2, 2], ['Day-care', 1, 1], ['Other', 2, 0]], active: 2 },
+    bids: {
+      stats: [324, 182, 98, 44],
+      delta: [[12, 1], [8, 1], [6, 0], [5, 0]],
+      trend: [64, 76, 82, 95, 98, 103, 113],
+      status: [62, 10, 6],
+      conv: { cur: [37, 41, 45, 48], prev: [31, 34, 38, 41] },
+      tat: { cur: [24, 28, 22, 30], prev: [15, 18, 14, 20] }
+    },
+    revenue: {
+      stats: [432500, 3475, 18.5, 28750],
+      delta: [[12, 1], [8, 1], [2.1, 1], [6, 0]],
+      trend: [310000, 330000, 360000, 380000, 400000, 420000, 450000],
+      prev: [250000, 255000, 290000, 290000, 310000, 320000, 330000],
+      pay: [['UPI', 52], ['Card', 34], ['Net Banking', 14]],
+      dept: [['General Medicine', 170000], ['Surgery', 105000], ['Orthopaedic', 75000], ['Cardiology', 50000], ['Others', 32500]]
+    },
+    tx: [
+      ['TRX-1024', 'Paracetamol 500mg', 'General Medicine', 12000, 'Paid', '29 Sep 2026, 11:45 AM'],
+      ['TRX-1023', 'Amoxicillin 500mg', 'Medicine', 8500, 'Paid', '29 Sep 2026, 10:20 AM'],
+      ['TRX-1022', 'Metformin 500mg', 'Diabetes Care', 10000, 'Pending', '28 Sep 2026, 04:15 PM'],
+      ['TRX-1021', 'Atorvastatin 10mg', 'Cardiology', 9200, 'Paid', '28 Sep 2026, 12:05 PM'],
+      ['TRX-1020', 'Ibuprofen 400mg', 'Orthopaedic', 6400, 'Paid', '27 Sep 2026, 05:30 PM']
+    ]
+  };
+
+  /* ================= state ================= */
+  var S = { view: 'booking', preset: 'week', from: null, to: null, service: '', visit: '', txAll: false };
+  var SERVICE_OPTS = [['', 'All services']].concat(BASE.services.map(function (s) { return [s[0], s[1]]; }));
+  var VISIT_OPTS = [['', 'All visit types'], ['home', 'Home'], ['hospital', 'Hospital']];
+  var VIEW_OPTS = [['booking', 'Booking View'], ['bids', 'Bids View'], ['revenue', 'Revenue View']];
+  var PRESET_LABEL = { today: 'Today', week: 'Last 7 days', '30days': 'Last 30 days', month: 'This Month', custom: 'Custom' };
+
+  /* ================= helpers ================= */
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function sum(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
+  function fmt(v) { return '₹' + Number(v).toLocaleString('en-IN'); }
+  function fmtS(v) { return '₹ ' + Number(v).toLocaleString('en-IN'); }
+  function num(v) { return Number(v).toLocaleString('en-IN'); }
+  function lakh(v) { return v >= 100000 ? '₹' + (v / 100000).toFixed(1) + 'L' : '₹' + (v / 1000).toFixed(1) + 'k'; }
+  function axisMoney(v) { return v === 0 ? '₹0' : (v >= 100000 ? '₹' + (Math.round(v / 10000) / 10) + 'L' : '₹' + (v / 1000) + 'k'); }
+  function pick(arr, n) {
+    var out = [];
+    for (var i = 0; i < n; i++) out.push(arr[Math.round(i * (arr.length - 1) / Math.max(1, n - 1))]);
+    return out;
+  }
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function iso(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function parseIso(v) { var p = v.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $('#hrToast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2400);
+  }
+  function download(name, text, type) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: type || 'text/plain' }));
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  /* ================= icons ================= */
+  var P = {
+    cal: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/>',
+    check: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    ban: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+    rupee: '<path d="M7 4h11M7 9h11M10 4c4.5 0 6 1.7 6 4.7S14.5 13 10 13H7l8 7"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/>',
+    up: '<path d="M7 17L17 7M9 7h8v8"/>',
+    down: '<path d="M7 7l10 10M17 9v8H9"/>',
+    bars: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+    grid: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>'
+  };
+  function ic(name, size, color, sw) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + (color || 'currentColor') + '" stroke-width="' + (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round">' + P[name] + '</svg>';
+  }
+
+  /* ================= date range ================= */
+  function range() {
+    var end = new Date(REPORT_END), start = new Date(end);
+    if (S.preset === 'week') start.setDate(end.getDate() - 6);
+    else if (S.preset === '30days') start.setDate(end.getDate() - 29);
+    else if (S.preset === 'month') start = new Date(end.getFullYear(), end.getMonth(), 1);
+    else if (S.preset === 'custom' && S.from && S.to) { start = S.from; end = S.to; }
+    return { start: start, end: end, days: Math.round((end - start) / 864e5) + 1, label: PRESET_LABEL[S.preset] };
+  }
+  function rangeText(r) {
+    var a = r.start, b = r.end, y = b.getFullYear();
+    if (r.days === 1) return b.getDate() + ' ' + MON[b.getMonth()] + ' ' + y;
+    if (a.getFullYear() === y && a.getMonth() === b.getMonth()) return a.getDate() + '–' + b.getDate() + ' ' + MON[b.getMonth()] + ' ' + y;
+    if (a.getFullYear() === y) return a.getDate() + ' ' + MON[a.getMonth()] + ' – ' + b.getDate() + ' ' + MON[b.getMonth()] + ' ' + y;
+    return a.getDate() + ' ' + MON[a.getMonth()] + ' ' + a.getFullYear() + ' – ' + b.getDate() + ' ' + MON[b.getMonth()] + ' ' + y;
+  }
+  function xLabels(r, n, sep) {
+    if (r.days === 1) return ['9AM', '11AM', '1PM', '3PM', '5PM', '7PM', '9PM'];
+    var out = [];
+    for (var i = 0; i < n; i++) {
+      var d = new Date(r.start.getTime() + Math.round(i * r.days / n) * 864e5);
+      out.push(d.getDate() + sep + MON[d.getMonth()]);
+    }
+    return out;
+  }
+
+  /* ================= numbers for the current filters ================= */
+  function calc() {
+    var r = range(), days = r.days;
+    var svcRow = BASE.services.filter(function (s) { return s[0] === S.service; })[0];
+    var svcShare = svcRow ? svcRow[2] / sum(BASE.services.map(function (s) { return s[2]; })) : 1;
+    var visit = S.visit === 'home' ? 0.35 : S.visit === 'hospital' ? 0.65 : 1;
+    var sv = svcShare * visit, f = days / 7 * sv;
+    var n = days === 1 ? 7 : Math.min(7, days), size = days / n;
+    var sc = function (x) { return Math.round(x * f); };
+    var B = BASE.booking, D = BASE.bids, R = BASE.revenue, O = BASE.offers;
+    var M = { r: r, f: f, n: n, range: rangeText(r), lab: xLabels(r, n, ''), lab2: xLabels(r, n, ' ') };
+
+    M.stats = B.stats.map(sc);
+    M.trend = pick(B.trend, n).map(function (v) { return Math.round(v * size * sv); });
+    M.status = B.status.map(sc);
+    M.statusTotal = sum(M.status);
+    M.services = BASE.services.filter(function (s) { return !S.service || s[0] === S.service; })
+      .map(function (s) { return [s[1], Math.round(s[2] * days / 7 * visit)]; });
+    M.cats = O.cats.map(function (k) { return [k[0], sc(k[1]), sc(k[2])]; });
+    M.won = sum(M.cats.map(function (k) { return k[1]; }));
+    M.lost = sum(M.cats.map(function (k) { return k[2]; }));
+    M.answered = M.won + M.lost;
+    M.rate = M.answered ? (M.won / M.answered * 100).toFixed(1) : '0.0';
+    M.tat = { avg: B.tat.avg, sla: B.tat.sla, overdue: sc(B.tat.overdue), buckets: B.tat.buckets.map(sc) };
+
+    M.bstats = D.stats.map(sc);
+    M.btrend = pick(D.trend, n).map(function (v) { return Math.round(v * size * sv); });
+    M.bstatus = D.status.map(sc);
+    M.bstatusTotal = sum(M.bstatus);
+
+    M.rev = [sc(R.stats[0]), R.stats[1], R.stats[2], sc(R.stats[3])];
+    M.rtrend = pick(R.trend, n).map(function (v) { return Math.round(v * size * sv); });
+    M.rprev = pick(R.prev, n).map(function (v) { return Math.round(v * size * sv); });
+    M.dept = R.dept.map(function (d) { return [d[0], Math.round(d[1] * f)]; });
+    return M;
+  }
+
+  /* ================= chart helpers (pure SVG) ================= */
+  var uid = 0;
+  function niceTicks(max, steps, maxInt) {
+    for (var mag = 1; mag <= 1e9; mag *= 10) {
+      for (var i = 0; i < steps.length; i++) {
+        var st = steps[i] * mag;
+        if (Math.ceil(max / st) <= maxInt) {
+          var top = Math.ceil(max / st) * st, t = [];
+          for (var v = 0; v <= top + 1e-9; v += st) t.push(v);
+          return t;
         }
       }
+    }
+    return [0, max];
+  }
+  function roundBar(x, y0, y1, w, r) {
+    r = Math.min(r, w / 2, Math.max(0, y0 - y1));
+    return 'M' + x.toFixed(1) + ' ' + y0.toFixed(1) + 'V' + (y1 + r).toFixed(1) + 'a' + r + ' ' + r + ' 0 0 1 ' + r + ' -' + r + 'h' + (w - 2 * r).toFixed(1) + 'a' + r + ' ' + r + ' 0 0 1 ' + r + ' ' + r + 'V' + y0.toFixed(1) + 'Z';
+  }
 
-      // =========================================================
-      // CASE 6: FALLBACK FOR OTHER DIV ELEMENTS
-      // =========================================================
-      else {
-        if (typeof html2canvas === "function") {
-          const canvas = await html2canvas(targetElement, {
-            backgroundColor: "#ffffff",
-            useCORS: true,
-            allowTaint: true,
-            scale: 2,
-            logging: false
-          });
-          const imgData = canvas.toDataURL("image/jpeg", 0.9);
-          pdf.addImage(imgData, "JPEG", 10, 10, 190, (canvas.height * 190) / canvas.width);
-        } else {
-          throw new Error("Unable to capture component visual without html2canvas.");
-        }
-      }
-
-      // Draw footer across all pages
-      drawReportFooter(pdf);
-
-      // Trigger download
-      pdf.save(filename);
-
-      if (typeof toastr !== "undefined") {
-        toastr.success("Report downloaded successfully.");
-      }
-    } catch (err) {
-      console.error("Report download failed:", err);
-      const errMsg = "Unable to generate report download. Please try again.";
-      if (typeof toastr !== "undefined") {
-        toastr.error(errMsg);
-      } else {
-        alert(errMsg);
-      }
-    } finally {
-      $btn.prop("disabled", false).removeClass("opacity-75 cursor-wait").html(originalHtml);
-    }
-  });
-
-  // --------- 8. amCharts INDIA HEATMAP INITIALIZATION ----------
-  if (typeof am4core !== "undefined") {
-    am4core.useTheme(am4themes_animated);
-    window.heatmapChart = am4core.create("heatmap", am4maps.MapChart);
-    heatmapChart.geodata = am4geodata_india2019High;
-    heatmapChart.homeZoomLevel = 1;
-    heatmapChart.homeGeoPoint = { longitude: 78.9629, latitude: 22.5937 };
-
-    window.polygonSeries = heatmapChart.series.push(new am4maps.MapPolygonSeries());
-    polygonSeries.heatRules.push({
-      property: "fill",
-      target: polygonSeries.mapPolygons.template,
-      min: heatmapChart.colors.getIndex(1).brighten(1),
-      max: heatmapChart.colors.getIndex(1).brighten(-0.3)
-    });
-    polygonSeries.useGeodata = true;
-    polygonSeries.geodata = am4geodata_india2019High;
-    polygonSeries.calculateVisualCenter = true;
-    polygonSeries.exclude = ["AQ"];
-    polygonSeries.dataFields.value = "value";
-    polygonSeries.dataFields.id = "id";
-    polygonSeries.mapPolygons.template.propertyFields.fill = "fill";
-    polygonSeries.mapPolygons.template.applyOnClones = true;
-    polygonSeries.data = [];
-
-    var polygonTemplate = polygonSeries.mapPolygons.template;
-    polygonTemplate.fill = am4core.color("#DCEBFF");
-    polygonTemplate.tooltipText = "{name}: {value}";
-    polygonTemplate.nonScalingStroke = true;
-    polygonTemplate.strokeWidth = 0.5;
-
-    var hs = polygonTemplate.states.create("hover");
-    hs.properties.fill = am4core.color("#3c5bdc");
-
-    // FIXED: Only logs ready state. Does not make a premature AJAX call that clears initial data.
-    heatmapChart.events.on("ready", function() {
-        console.log("SUCCESS: Map engine layout bound completely.");
-    });
-  }
-
-  // --------- 9. ASYNCHRONOUS TAB FILTER LISTENERS ----------
-  $("#visitTypeFilter").on("change", function () {
-    let activeType = $(".report-filter.active").data("type") || "today";
-    loadDashboardData(activeType);
-  });
-
-  $(".report-filter").on("click", function (event) {
-    event.stopPropagation();
-    $(".report-filter").removeClass("active");
-    $(this).addClass("active");
-
-    let type = $(this).data("type");
-
-    $(".report-filter span").removeClass("text-dodger-blue").addClass("text-light-gray");
-    $(this).find("span").removeClass("text-light-gray").addClass("text-dodger-blue");
-
-    if (type === "custom") {
-      $(this).closest(".dropdown").find(".datepicker-container").removeClass("hidden");
-      return;
-    }
-
-    window.hospitalReportStartDate = "";
-    window.hospitalReportEndDate = "";
-    $(this).closest(".dropdown").find(".filterDropdown").addClass("hidden");
-    loadDashboardData(type);
-  });
-
-  $(".report-date-picker").datepicker({
-    dateFormat: "yy-mm-dd",
-    onSelect: function (dateText) {
-      window.hospitalReportStartDate = dateText;
-      window.hospitalReportEndDate = dateText;
-      $(this).closest(".datepicker-container").addClass("hidden");
-      $(".filterDropdown").addClass("hidden");
-      $(".report-filter").removeClass("active");
-      $(".report-filter[data-type='custom']").addClass("active");
-      loadDashboardData("custom");
-    }
-  });
-
-  // --------- 10. SAFE DASHBOARD MODULE SEARCH ENGINE ----------
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    searchInput.addEventListener("keyup", function () {
-      let value = this.value.toLowerCase();
-      const sections = {
-        "departmentRevenueSection": ["department", "revenue", "opd"],
-        "packageSection": ["package", "booking", "lead"],
-        "conversionSection": ["conversion", "patient", "deal"],
-        "loadAnalyticsSection": ["load", "analytics", "cbc"],
-        "heatmapSection": ["heatmap", "map", "state"],
-        "patientJourneySection": ["journey", "feedback", "visited"]
-      };
-
-      Object.keys(sections).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.style.display = (value === "" || sections[id].some(keyword => value.includes(keyword))) ? "" : "none";
-        }
-      });
-    });
-  }
-
-$(document).ready(function () {
-    const reportParams = new URLSearchParams(window.location.search);
-
-    let selectedFilter = reportParams.get("filter") || "week";
-    let selectedVisitType = reportParams.get("visit_type") || "";
-    let startDate = reportParams.get("start_date") || "";
-    let endDate = reportParams.get("end_date") || "";
-    let selectingStartDate = true;
-    let reportRequest = null;
-    const $dropdown = $(".filterDropdown"), $calendar = $(".datepicker-container"), $datePicker = $(".report-date-picker");
-    const $dateLabel = $(".filterToggle").closest(".dropdown").parent().find("p.text-dodger-blue").first();
-    $(".filterToggle").on("click", function (e) {
-        e.preventDefault(); e.stopPropagation();
-        $dropdown.toggleClass("hidden");
-        if ($dropdown.hasClass("hidden")) $calendar.addClass("hidden");
-    });
-    $dropdown.add($calendar).on("click", function (e) { e.stopPropagation(); });
-    $(document).on("click", function (e) {
-        if (!$(e.target).closest(".dropdown, .datepicker-container, .ui-datepicker").length) {
-            $dropdown.addClass("hidden"); $calendar.addClass("hidden");
-        }
-    });
-    $datePicker.datepicker("destroy").datepicker({
-        dateFormat: "yy-mm-dd", changeMonth: true, changeYear: true, maxDate: null, numberOfMonths: 1,
-        onSelect: function (dateText) {
-            if (selectingStartDate) {
-                startDate = dateText; endDate = ""; selectingStartDate = false; selectedFilter = "custom";
-                updateActiveFilter("custom");
-                $dateLabel.text("Start date: " + startDate + " - Select end date");
-            } else {
-                endDate = dateText;
-                if (startDate > endDate) [startDate, endDate] = [endDate, startDate];
-                selectingStartDate = true;
-                $dateLabel.text("Data shown: " + formatDate(startDate) + " – " + formatDate(endDate));
-                $calendar.addClass("hidden"); loadDashboardData();
-            }
-        }
-    });
-    // $(".calendar-icon").on("click", function (e) {
-    //     e.preventDefault(); e.stopPropagation();
-    //     selectedFilter = "custom"; startDate = ""; endDate = ""; selectingStartDate = true;
-    //     updateActiveFilter("custom"); $dropdown.removeClass("hidden"); $calendar.removeClass("hidden");
-    //     $datePicker.datepicker("refresh");
-    // });
-    // MAIN FILTER CALENDAR
-    $(".filterDropdown .report-filter[data-type='custom'] .calendar-icon")
-      .off("click.reportCalendar")
-      .on("click.reportCalendar", function (e) {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        selectedFilter = "custom";
-        startDate = "";
-        endDate = "";
-        selectingStartDate = true;
-
-        updateActiveFilter("custom");
-
-        $dropdown.removeClass("hidden");
-
-        const $mainCalendar = $(".report-date-picker")
-            .closest(".datepicker-container");
-
-        $(".datepicker-container").addClass("hidden");
-        $mainCalendar.removeClass("hidden");
-
-        $dateLabel.text("Select start date");
-
-        $datePicker.datepicker("refresh");
-    });
-
-
-    
-  // // INDIVIDUAL CHART CALENDARS
-  // const individualChartDates = {};
-
-  // $(".calendar-icon")
-  //   .not(".filterDropdown .report-filter .calendar-icon")
-  //   .off("click.chartCalendar")
-  //   .on("click.chartCalendar", function (e) {
-  //     e.preventDefault();
-  //     e.stopPropagation();
-
-  //     const $chart = $(this).closest("[id$='Section']");
-  //     const $pickerContainer = $chart.find(".datepicker-container").first();
-  //     const $inline = $pickerContainer.find(".datepicker-inline").first();
-
-  //     if (!$pickerContainer.length || !$inline.length) {
-  //       console.warn("Calendar container not found for:", $chart.attr("id"));
-  //       return;
-  //     }
-
-  //     $(".datepicker-container").addClass("hidden");
-  //     $dropdown.addClass("hidden");
-  //     $pickerContainer.removeClass("hidden");
-
-  //     const chartId = $chart.attr("id");
-
-  //     if ($inline.hasClass("hasDatepicker")) {
-  //       $inline.datepicker("destroy");
-  //     }
-
-  //     $inline.empty().datepicker({
-  //       dateFormat: "yy-mm-dd",
-  //       changeMonth: true,
-  //       changeYear: true,
-  //       onSelect: function (dateText) {
-  //         const state = individualChartDates[chartId] || {
-  //           start: "",
-  //           end: ""
-  //         };
-
-  //         if (!state.start || state.end) {
-  //           state.start = dateText;
-  //           state.end = "";
-  //           individualChartDates[chartId] = state;
-
-  //           $inline.datepicker("option", "minDate", dateText);
-  //           console.log("Individual graph start date:", chartId, dateText);
-  //           return;
-  //         }
-
-  //         state.end = dateText;
-
-  //         if (state.start > state.end) {
-  //           [state.start, state.end] = [state.end, state.start];
-  //         }
-
-  //         individualChartDates[chartId] = state;
-
-  //         console.log("Individual graph date range:", {
-  //           chart: chartId,
-  //           start_date: state.start,
-  //           end_date: state.end
-  //         });
-
-  //         $pickerContainer.addClass("hidden");
-  //         $inline.datepicker("option", "minDate", null);
-
-  //         $.ajax({
-  //           url: "/reports/hospital-report-data/",
-  //           type: "GET",
-  //           dataType: "json",
-  //           data: {
-  //             filter: "custom",
-  //             visit_type: $("#visitTypeFilter").val() || "",
-  //             start_date: state.start,
-  //             end_date: state.end
-  //           },
-  //           success: function (response) {
-  //             console.log("Individual graph response:", chartId, response);
-
-  //             // Update only the selected graph.
-  //             if (chartId === "departmentRevenueSection" &&
-  //                 response.most_requested_test) {
-  //               barChart.data.labels = response.most_requested_test.labels;
-  //               barChart.data.datasets[0].data = response.most_requested_test.data;
-  //               barChart.update();
-  //             } else if (chartId === "packageSection" &&
-  //                        response.revenue_by_test) {
-  //               pieChart.data.labels = response.revenue_by_test.labels;
-  //               pieChart.data.datasets[0].data = response.revenue_by_test.data;
-  //               pieChart.update();
-  //             } else if (chartId === "loadAnalyticsSection" &&
-  //                        response.bid_trend) {
-  //               lineChart.data.labels = response.bid_trend.labels;
-  //               lineChart.data.datasets[0].data = response.bid_trend.cbc;
-  //               lineChart.update();
-  //             } else if (chartId === "patientJourneySection" &&
-  //                        response.patient_journey) {
-  //               patientJourneyChart.data.labels = response.patient_journey.labels;
-  //               patientJourneyChart.data.datasets[0].data = response.patient_journey.data;
-  //               patientJourneyChart.update();
-  //             }
-  //           },
-  //           error: function (xhr) {
-  //             console.error(
-  //               "Individual graph date filter failed:",
-  //               xhr.status,
-  //               xhr.responseText
-  //             );
-  //           }
-  //         });
-  //       }
-  //     });
-  //   });
-  // INDIVIDUAL CHART CALENDARS
-  // INDIVIDUAL CHART CALENDARS
-// INDIVIDUAL CHART CALENDARS
-$(".calendar-icon")
-  .not(".filterDropdown .report-filter .calendar-icon")
-  .off("click.chartCalendar")
-  .on("click.chartCalendar", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const $chart = $(this).closest("[id$='Section']");
-    const $pickerContainer = $chart.find(".datepicker-container").first();
-    const $inline = $pickerContainer.find(".datepicker-inline").first();
-
-    if (!$pickerContainer.length || !$inline.length) {
-      console.warn(
-        "Calendar container not found:",
-        $chart.attr("id")
-      );
-      return;
-    }
-
-    $(".datepicker-container").addClass("hidden");
-    $dropdown.addClass("hidden");
-    $pickerContainer.removeClass("hidden");
-
-    const chartId = $chart.attr("id");
-
-    const savedRange = individualChartDates[chartId];
-    const params = new URLSearchParams(window.location.search);
-    const queryStart = params.get(`${chartId}_start_date`);
-    const queryEnd = params.get(`${chartId}_end_date`);
-    if (queryStart && queryEnd) {
-      individualChartDates[chartId] = { start: queryStart, end: queryEnd };
-    }
-    const restoredRange = individualChartDates[chartId] || savedRange;
-    if ($inline.hasClass("hasDatepicker")) {
-      $inline.datepicker("destroy");
-    }
-
-    $inline.empty().datepicker({
-      dateFormat: "yy-mm-dd",
-      changeMonth: true,
-      changeYear: true,
-      defaultDate: restoredRange?.start || new Date(),
-      beforeShowDay: function (date) {
-        const range = individualChartDates[chartId];
-        if (!range?.start || !range?.end) return [true, ""];
-        const value = $.datepicker.formatDate("yy-mm-dd", date);
-        return [true, value >= range.start && value <= range.end ? "ui-state-range" : ""];
-      },
-
-      onSelect: function (dateText) {
-        const state = individualChartDates[chartId] || {
-          start: "",
-          end: ""
-        };
-
-        // First date: Start date
-        if (!state.start || state.end) {
-          state.start = dateText;
-          state.end = "";
-
-          individualChartDates[chartId] = state;
-
-          $inline.datepicker("option", "minDate", dateText);
-
-          console.log("Individual graph start date:", {
-            chart: chartId,
-            start_date: dateText
-          });
-
-          return;
-        }
-
-        // Second date: End date
-        state.end = dateText;
-
-        // Ensure chronological order
-        if (state.start > state.end) {
-          [state.start, state.end] = [
-            state.end,
-            state.start
-          ];
-        }
-
-        individualChartDates[chartId] = state;
-        persistIndividualChartDates();
-
-        console.log("Individual graph date range:", {
-          chart: chartId,
-          start_date: state.start,
-          end_date: state.end
-        });
-
-        $pickerContainer.addClass("hidden");
-        $inline.datepicker("option", "minDate", null);
-
-        // Preserve existing query parameters
-        const params = new URLSearchParams(
-          window.location.search
-        );
-
-        params.set("filter", "custom");
-        params.set(
-          "visit_type",
-          $("#visitTypeFilter").val() || ""
-        );
-
-        // Store date range separately for this chart
-        params.set(`${chartId}_start_date`, state.start);
-        params.set(`${chartId}_end_date`, state.end);
-
-        // Remove old generic date parameters
-        params.delete("start_date");
-        params.delete("end_date");
-        params.delete("chart");
-
-        // Reload reports page
-        window.location.href =
-          window.location.pathname + "?" + params.toString();
-      }
-    });
-    if (restoredRange?.start) {
-      $inline.datepicker("setDate", restoredRange.start);
-      $inline.datepicker("refresh");
-    }
-  });
-
-    $(".report-filter").on("click", function (e) {
-        e.preventDefault(); e.stopPropagation();
-        const type = $(this).data("type");
-        selectedFilter = type; updateActiveFilter(type);
-        if (type === "custom") {
-            startDate = ""; endDate = ""; selectingStartDate = true;
-            $calendar.removeClass("hidden"); $dateLabel.text("Select start date");
-            return;
-        }
-        startDate = ""; endDate = ""; selectingStartDate = true;
-        $calendar.addClass("hidden");
-        $dateLabel.text({
-            today: "Data shown: Today",
-            week: "Data shown: This week",
-            "30days": "Data shown: Last 30 days",
-            month: "Data shown: This month",
-            all: "Data shown: All dates"
-        }[type] || "Data shown: --");
-        loadDashboardData();
-    });
-    $("#visitTypeFilter").on("change", function () {
-        selectedVisitType = $(this).val(); loadDashboardData();
-    });
-    function updateActiveFilter(type) {
-        $(".report-filter").each(function () {
-            const $icon = $(this).find(".material-symbols-outlined").first();
-            $icon.toggleClass("text-dodger-blue", $(this).data("type") === type)
-                 .toggleClass("text-light-gray", $(this).data("type") !== type);
-        });
-    }
-    function formatDate(value) {
-        const [y, m, d] = value.split("-").map(Number);
-        return new Date(y, m - 1, d).toLocaleDateString("en-IN", {
-            day: "numeric", month: "short", year: "numeric"
-        });
-    }
-    function loadDashboardData() {
-        if (selectedFilter === "custom" && (!startDate || !endDate)) return;
-        if (reportRequest) reportRequest.abort();
-        reportRequest = $.ajax({
-            url: "/reports/hospital-report-data/", type: "GET",
-            data: {
-                filter: selectedFilter,
-                visit_type: selectedVisitType,
-                service_type: $("#serviceTypeFilter").val() || "",
-                start_date: startDate,
-                end_date: endDate
-            },
-            success: function (response) {
-                window.lastHospitalReportData = response;
-                const departmentMenu = document.querySelector("#departmentRevenueSection .dropdown-menu");
-                if (departmentMenu && response.most_requested_test) {
-                    departmentMenu.replaceChildren();
-                    ["All departments", ...response.most_requested_test.labels].forEach((label) => {
-                        const option = document.createElement("li");
-                        option.className = "px-4 py-2 hover:bg-blue-haze cursor-pointer";
-                        option.textContent = label;
-                        departmentMenu.appendChild(option);
-                    });
-                    $("#departmentRevenueSection .dropdown-value").text("All departments");
-                }
-                console.log("Filtered data:", response);
-                const stats = response.stats || {};
-                $("#totalRevenue").text(stats.revenue || "₹0");
-                $("#highestRevenue").text(stats.highest_revenue || "₹0");
-                $("#quarterGrowth").text(stats.growth || "0%");
-                $("#avgRevenue").text(stats.avg_revenue || "₹0");
-                $("#totalAppointments").text(stats.total_appointments ?? 0);
-                if (typeof barChart !== "undefined" && barChart) {
-                    barChart.data.labels = response.most_requested_test.labels;
-                    barChart.data.datasets[0].data = response.most_requested_test.data;
-                    barChart.update();
-                }
-                if (typeof pieChart !== "undefined" && pieChart) {
-                    pieChart.data.labels = response.revenue_by_test.labels;
-                    pieChart.data.datasets[0].data = response.revenue_by_test.data;
-                    pieChart.update();
-                }
-                if (typeof lineChart !== "undefined" && lineChart) {
-                    lineChart.data.labels = response.bid_trend.labels;
-                    lineChart.data.datasets[0].data = response.bid_trend.cbc;
-                    lineChart.update();
-                }
-                if (typeof updateHospitalHeatmap === "function") updateHospitalHeatmap(response.heatmap);
-            },
-            error: function (xhr, status) {
-                if (status !== "abort") console.error("Filter request failed:", xhr.status, xhr.responseText);
-            }
-        });
-    }
-    updateActiveFilter(selectedFilter);
-    $dateLabel.text({
-        today: "Data shown: Today",
-        week: "Data shown: This week",
-        "30days": "Data shown: Last 30 days",
-        month: "Data shown: This month",
-        all: "Data shown: All dates",
-        custom: startDate && endDate
-            ? `Data shown: ${formatDate(startDate)} – ${formatDate(endDate)}`
-            : "Data shown: Select date range"
-    }[selectedFilter] || "Data shown: All dates");
-    loadDashboardData();
-});
-
-  // FIXED: Removed automated loadDashboardData("month") from here to protect Django initial values!
-});
-
-// =========================================================================
-// CENTRAL HOOK DEFINITION: PULL DATA VIA AJAX FOR MANUAL USER FILTER CLICKS
-// =========================================================================
-function loadDashboardData(filterType) {
-    $.ajax({
-        url: "/reports/hospital-report-data/",
-        type: "GET",
-        data: {
-            filter: filterType,
-            visit_type: $("#visitTypeFilter").val(),
-            service_type: $("#serviceTypeFilter").val() || "",
-            start_date: window.hospitalReportStartDate || "",
-            end_date: window.hospitalReportEndDate || ""
-        },
-        success: function(response) {
-            window.lastHospitalReportData = response;
-            console.log("LIVE PIPELINE RESPONSE RE-HYDRATED:", response);
-
-            // Sync Card Value Text
-            $("#totalRevenue").text(response.stats.revenue);
-            $("#highestRevenue").text(response.stats.highest_revenue);
-            $("#quarterGrowth").text(response.stats.growth);
-            $("#avgRevenue").text(response.stats.avg_revenue);
-
-            // Refresh Visual Chart Objects
-            if (response.most_requested_test && barChart) {
-                barChart.data.labels = response.most_requested_test.labels;
-                barChart.data.datasets[0].data = response.most_requested_test.data;
-                barChart.update();
-            }
-
-            if (response.revenue_by_test && pieChart) {
-                pieChart.data.labels = response.revenue_by_test.labels;
-                pieChart.data.datasets[0].data = response.revenue_by_test.data;
-                pieChart.update();
-            }
-
-            if (response.bid_trend && lineChart) {
-                lineChart.data.labels = response.bid_trend.labels;
-                lineChart.data.datasets[0].data = response.bid_trend.cbc || response.bid_trend.data;
-                lineChart.update();
-            }
-
-            if (response.patient_journey && patientJourneyChart) {
-                patientJourneyChart.data.labels = response.patient_journey.labels;
-                patientJourneyChart.data.datasets[0].data = response.patient_journey.data;
-                patientJourneyChart.update();
-            }
-
-            // Sync Conversion Table Rows
-            let conversionRows = "";
-            const colors = ["bg-azure-radiance", "bg-light-green", "bg-sunrise-yellow", "bg-violet", "bg-red"];
-            if (response.patient_journey && response.patient_journey.labels) {
-                response.patient_journey.labels.forEach((label, index) => {
-                    conversionRows += `
-                        <div class="flex items-center justify-between px-4 border-b border-blue-haze py-2">
-                            <div class="flex items-center gap-1">
-                                <div class="w-1 h-1 rounded-full ${colors[index] || 'bg-gray-400'}"></div>
-                                <p class="font-normal text-xs">${label}</p>
-                            </div>
-                            <div class="flex items-center gap-[130px]">
-                                <p class="font-normal text-xs">${response.patient_journey.data[index]}</p>
-                                <p class="font-normal text-xs">${response.patient_journey.conversion[index]}</p>
-                            </div>
-                        </div>`;
-                });
-                $("#conversionTableBody").html(conversionRows);
-            }
-
-            // Sync Package Demand Booking Rows
-            let packageRows = "";
-            if (response.package_table) {
-                response.package_table.forEach((item, index) => {
-                    let colorClass = index === 1 ? "bg-light-green" : (index === 2 ? "bg-sunrise-yellow" : "bg-azure-radiance");
-                    packageRows += `
-                        <div class="flex items-center justify-between px-4 border-b border-blue-haze py-2">
-                            <div class="flex items-center gap-1">
-                                <div class="w-1 h-1 rounded-full ${colorClass}"></div>
-                                <p class="font-normal text-xs">${item.package}</p>
-                            </div>
-                            <div class="flex items-center gap-[130px]">
-                                <p class="font-normal text-xs">${item.bookings}</p>
-                                <p class="font-normal text-xs">${item.conversion}</p>
-                            </div>
-                        </div>`;
-                });
-                $("#packageTableBody").html(packageRows);
-            }
-
-            // Sync Regional Map Heat Indicators
-            if (response.heatmap && window.polygonSeries) {
-                const stateMap = {
-                    "Maharashtra": "IN-MH", "Delhi": "IN-DL", "Karnataka": "IN-KA",
-                    "Tamil Nadu": "IN-TN", "Gujarat": "IN-GJ", "Rajasthan": "IN-RJ",
-                    "Uttar Pradesh": "IN-UP", "Madhya Pradesh": "IN-MP", "West Bengal": "IN-WB"
-                };
-
-                let heatmapData = [];
-                response.heatmap.labels.forEach((state, index) => {
-                    const mapId = response.heatmap.ids?.[index] || stateMap[state.trim()];
-                    if (mapId) {
-                        heatmapData.push({ 
-                            id: mapId, 
-                            value: parseInt(response.heatmap.data[index]) || 0 
-                        });
-                    }
-                });
-
-                window.polygonSeries.data = heatmapData;
-                
-                if (window.heatmapChart) {
-                    window.polygonSeries.invalidateRawData();
-                    window.heatmapChart.validateData();
-                }
-            }
-        },
-        error: function(xhr) {
-            const message = xhr.responseJSON && xhr.responseJSON.error
-                ? xhr.responseJSON.error
-                : "Unable to load filtered report data.";
-            console.error("AJAX Error: UI synchronization failed:", xhr.responseText);
-            if (typeof toastr !== "undefined") {
-                toastr.error(message);
-            }
-        }
-    });
-}
-
-
-// INDIVIDUAL CHART DATE LABELS
-$(document).ready(function () {
-    const params = new URLSearchParams(window.location.search);
-
-    function formatChartDate(dateString) {
-        const [year, month, day] = dateString.split("-");
-        return `${day}/${month}/${year.slice(-2)}`;
-    }
-
-    // Restore dates for every chart after page reload
-    [
-        "departmentRevenueSection",
-        "packageSection",
-        "conversionSection",
-        "loadAnalyticsSection",
-        "heatmapSection",
-        "patientJourneySection"
-    ].forEach(function (chartId) {
-        const start = params.get(`${chartId}_start_date`);
-        const end = params.get(`${chartId}_end_date`);
-
-        if (start && end) {
-            individualChartDates[chartId] = { start, end };
-            persistIndividualChartDates();
-            $("#" + chartId)
-                .find(".chart-date-label")
-                .first()
-                .text(
-                    `${formatChartDate(start)} – ${formatChartDate(end)}`
-                );
-      } else {
-            const savedRange = individualChartDates[chartId];
-            const today = new Date();
-            const todayString = $.datepicker.formatDate("yy-mm-dd", today);
-            $("#" + chartId)
-                .find(".chart-date-label")
-                .first()
-                .text(savedRange?.start && savedRange?.end
-                    ? `${formatChartDate(savedRange.start)} – ${formatChartDate(savedRange.end)}`
-                    : formatChartDate(todayString));
-        }
-    });
-
-    $(document).ready(function () {
-        const trendCanvas = document.getElementById("bookingsTrendChart");
-        const statusCanvas = document.getElementById("bookingStatusChart");
-        const offersCanvas = document.getElementById("offersPerformanceChart");
-        const bidsConversionCanvas = document.getElementById("bidsConversionChart");
-        const bidsTurnaroundCanvas = document.getElementById("bidsTurnaroundChart");
-        const revenueCanvas = document.getElementById("hospitalRevenueChart");
-        let bookingsTrendChart = null;
-        let bookingStatusChart = null;
-        let bidsConversionChart = null;
-        let bidsTurnaroundChart = null;
-        let hospitalRevenueChart = null;
-
-        if (trendCanvas) {
-            bookingsTrendChart = new Chart(trendCanvas, {
-                type: "line",
-                data: {
-                    labels: [],
-                    datasets: [
-                        {
-                            label: "Total Bookings",
-                            data: [],
-                            borderColor: "#1d70e8",
-                            backgroundColor: "rgba(29, 112, 232, 0.1)",
-                            fill: true,
-                            tension: 0.35,
-                            pointRadius: 3
-                        },
-                        {
-                            label: "Completed",
-                            data: [],
-                            borderColor: "#35c7a1",
-                            backgroundColor: "rgba(53, 199, 161, 0.08)",
-                            fill: true,
-                            tension: 0.35,
-                            pointRadius: 3
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#edf1f6" } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        if (statusCanvas) {
-            bookingStatusChart = new Chart(statusCanvas, {
-                type: "doughnut",
-                data: {
-                    labels: ["Completed", "Upcoming", "In Progress", "Cancelled / No-show"],
-                    datasets: [{
-                        data: [0, 0, 0, 0],
-                        backgroundColor: ["#35c7a1", "#ffb84d", "#6c8cf5", "#f27878"],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: "68%",
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        if (offersCanvas) {
-            new Chart(offersCanvas, {
-                type: "bar",
-                data: {
-                    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-                    datasets: [
-                        { label: "Offers", data: [24, 31, 28, 45], backgroundColor: "#dce9ff", borderRadius: 5 },
-                        { label: "Accepted", data: [16, 21, 19, 30], backgroundColor: "#3983ed", borderRadius: 5 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#edf1f6" } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        const bidChartOptions = function (maxValue, tickSuffix) {
-            return {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                interaction: { intersect: false, mode: "index" },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: maxValue,
-                        ticks: {
-                            stepSize: maxValue === 75 ? 25 : 10,
-                            color: "#98a1b1",
-                            font: { size: 9 },
-                            callback: function (value) { return value + tickSuffix; }
-                        },
-                        grid: { color: "#edf1f6" }
-                    },
-                    x: {
-                        ticks: { color: "#667085", font: { size: 9 } },
-                        grid: { display: false }
-                    }
-                }
-            };
-        };
-        if (bidsConversionCanvas) {
-            bidsConversionChart = new Chart(bidsConversionCanvas, {
-                type: "line",
-                data: {
-                    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-                    datasets: [
-                        {
-                            label: "Current Period",
-                            data: [39, 43, 47, 50],
-                            borderColor: "#1683ff",
-                            backgroundColor: "#1683ff",
-                            borderWidth: 1.5,
-                            pointRadius: 2,
-                            tension: 0.25
-                        },
-                        {
-                            label: "Previous Period",
-                            data: [32, 36, 40, 44],
-                            borderColor: "#22c995",
-                            backgroundColor: "#22c995",
-                            borderWidth: 1.5,
-                            pointRadius: 2,
-                            tension: 0.25
-                        }
-                    ]
-                },
-                options: bidChartOptions(75, "%")
-            });
-        }
-        if (bidsTurnaroundCanvas) {
-            bidsTurnaroundChart = new Chart(bidsTurnaroundCanvas, {
-                type: "line",
-                data: {
-                    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-                    datasets: [
-                        {
-                            label: "Current Period",
-                            data: [24, 27, 22, 30],
-                            borderColor: "#1683ff",
-                            backgroundColor: "#1683ff",
-                            borderWidth: 1.5,
-                            pointRadius: 2,
-                            tension: 0.45
-                        },
-                        {
-                            label: "Previous Period",
-                            data: [15, 18, 14, 20],
-                            borderColor: "#64748b",
-                            backgroundColor: "#64748b",
-                            borderWidth: 1.2,
-                            borderDash: [3, 3],
-                            pointRadius: 0,
-                            tension: 0.4
-                        }
-                    ]
-                },
-                options: bidChartOptions(40, "")
-            });
-        }
-        if (revenueCanvas) {
-            hospitalRevenueChart = new Chart(revenueCanvas, {
-                type: "bar",
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: "Revenue",
-                        data: [],
-                        backgroundColor: "#3983ed",
-                        borderRadius: 5
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: "#edf1f6" } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        function setBookingText(id, value) {
-            const element = document.getElementById(id);
-            if (element) element.textContent = String(value ?? 0);
-        }
-
-        function setHospitalReportView(view) {
-            const isBooking = view === "booking";
-            const isBids = view === "bids";
-            const isRevenue = view === "revenue";
-            $("#bookingViewContent").toggleClass("hidden", !isBooking);
-            $("#bidsViewContent").toggleClass("hidden", !isBids).toggleClass("grid", isBids);
-            $("#revenueViewContent").toggleClass("hidden", !isRevenue).toggleClass("flex", isRevenue);
-            const labels = { booking: "Booking View", bids: "Bids View", revenue: "Revenue View" };
-            setBookingText("selectedHospitalReportView", labels[view] || labels.booking);
-            requestAnimationFrame(function () {
-                if (isBids) {
-                    if (bidsConversionChart) bidsConversionChart.resize();
-                    if (bidsTurnaroundChart) bidsTurnaroundChart.resize();
-                }
-                if (isRevenue && hospitalRevenueChart) hospitalRevenueChart.resize();
-            });
-        }
-
-        function updateBookingServices(rows) {
-            const container = document.getElementById("bookingsByService");
-            if (!container) return;
-            container.replaceChildren();
-
-            if (!Array.isArray(rows) || rows.length === 0) {
-                const empty = document.createElement("p");
-                empty.className = "text-sm text-gray-400";
-                empty.textContent = "No service bookings for this period.";
-                container.appendChild(empty);
-                return;
-            }
-
-            const maxBookings = Math.max.apply(null, rows.map(function (row) {
-                return Number(row.bookings) || 0;
-            })) || 1;
-            rows.slice(0, 5).forEach(function (row) {
-                const item = document.createElement("div");
-                item.className = "space-y-2";
-                const heading = document.createElement("div");
-                heading.className = "flex items-center justify-between gap-3 text-sm";
-                const name = document.createElement("span");
-                name.className = "truncate text-[#344054]";
-                name.textContent = row.package || "Other service";
-                const count = document.createElement("strong");
-                count.className = "shrink-0 font-medium text-[#172b4d]";
-                count.textContent = String(row.bookings || 0);
-                heading.append(name, count);
-                const track = document.createElement("div");
-                track.className = "h-2 overflow-hidden rounded-full bg-[#edf1f6]";
-                const bar = document.createElement("div");
-                bar.className = "h-full rounded-full bg-[#3983ed]";
-                bar.style.width = Math.max((Number(row.bookings) || 0) / maxBookings * 100, 2) + "%";
-                track.appendChild(bar);
-                item.append(heading, track);
-                container.appendChild(item);
-            });
-        }
-
-        function updateBookingDashboard(response) {
-            if (!response || !response.stats) return;
-            const status = response.booking_status || {};
-            setBookingText("totalBookings", response.stats.total_appointments);
-            setBookingText("completedBookings", status.completed ?? response.stats.completed_bookings);
-            setBookingText("upcomingBookings", status.upcoming ?? response.stats.upcoming_bookings);
-            setBookingText("cancelledBookings", status.cancelled ?? response.stats.cancelled_bookings);
-            setBookingText("statusCompleted", status.completed);
-            setBookingText("statusUpcoming", status.upcoming);
-            setBookingText("statusInProgress", status.in_progress);
-            setBookingText("statusCancelled", status.cancelled);
-            setBookingText("revenueViewTotal", response.stats.revenue || "₹0");
-            setBookingText("revenueViewAverage", response.stats.avg_revenue || "₹0");
-            setBookingText("revenueViewDepartment", response.stats.highest_revenue || "—");
-            setBookingText("revenueViewGrowth", response.stats.growth || "—");
-
-            if (bookingsTrendChart && Array.isArray(response.booking_trend)) {
-                bookingsTrendChart.data.labels = response.booking_trend.map(function (row) {
-                    return new Date(row.date + "T00:00:00").toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short"
-                    });
-                });
-                bookingsTrendChart.data.datasets[0].data = response.booking_trend.map(function (row) { return row.total; });
-                bookingsTrendChart.data.datasets[1].data = response.booking_trend.map(function (row) { return row.completed; });
-                bookingsTrendChart.update();
-            }
-
-            if (bookingStatusChart) {
-                bookingStatusChart.data.datasets[0].data = [
-                    Number(status.completed) || 0,
-                    Number(status.upcoming) || 0,
-                    Number(status.in_progress) || 0,
-                    Number(status.cancelled) || 0
-                ];
-                bookingStatusChart.update();
-            }
-            if (hospitalRevenueChart && response.most_requested_test) {
-                hospitalRevenueChart.data.labels = response.most_requested_test.labels || [];
-                hospitalRevenueChart.data.datasets[0].data = response.most_requested_test.data || [];
-                hospitalRevenueChart.update();
-            }
-
-            const serviceSelect = document.getElementById("serviceTypeFilter");
-            if (serviceSelect && Array.isArray(response.service_options)) {
-                const selectedService = serviceSelect.value;
-                const options = document.createDocumentFragment();
-                const serviceMenu = document.getElementById("serviceTypeMenu");
-                if (serviceMenu) serviceMenu.replaceChildren();
-                const allServices = document.createElement("option");
-                allServices.value = "";
-                allServices.textContent = "All Services";
-                options.appendChild(allServices);
-                if (serviceMenu) {
-                    const allServicesOption = document.createElement("button");
-                    allServicesOption.type = "button";
-                    allServicesOption.className = "hospital-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]";
-                    allServicesOption.dataset.select = "serviceTypeFilter";
-                    allServicesOption.dataset.value = "";
-                    allServicesOption.textContent = "All Services";
-                    serviceMenu.appendChild(allServicesOption);
-                }
-                response.service_options.forEach(function (service) {
-                    const option = document.createElement("option");
-                    option.value = String(service.id);
-                    option.textContent = service.name;
-                    options.appendChild(option);
-                    if (serviceMenu) {
-                        const menuOption = document.createElement("button");
-                        menuOption.type = "button";
-                        menuOption.className = "hospital-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]";
-                        menuOption.dataset.select = "serviceTypeFilter";
-                        menuOption.dataset.value = String(service.id);
-                        menuOption.textContent = service.name;
-                        serviceMenu.appendChild(menuOption);
-                    }
-                });
-                serviceSelect.replaceChildren(options);
-                if (Array.from(serviceSelect.options).some(function (option) { return option.value === selectedService; })) {
-                    serviceSelect.value = selectedService;
-                }
-                const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
-                setBookingText("selectedServiceType", selectedOption ? selectedOption.textContent : "All Services");
-            }
-            updateBookingServices(response.package_table);
-        }
-
-        const reportParams = new URLSearchParams(window.location.search);
-        const initialVisitType = reportParams.get("visit_type") || "";
-        $("#visitTypeFilter").val(initialVisitType);
-        const initialVisitOption = document.getElementById("visitTypeFilter").selectedOptions[0];
-        setBookingText("selectedVisitType", initialVisitOption ? initialVisitOption.textContent : "All Visit Types");
-
-        let activeDatePreset = reportParams.get("filter") || "week";
-        function setDateHeader(preset, customRange) {
-            const presetLabels = {
-                today: "Today",
-                week: "Last 7 days",
-                "30days": "Last 30 days",
-                month: "This Month",
-                custom: "Custom range",
-                all: "All dates"
-            };
-            const presetElement = document.getElementById("reportDatePreset");
-            const rangeElement = document.getElementById("reportRangeShort");
-            if (!presetElement || !rangeElement) return;
-            presetElement.textContent = presetLabels[preset] || presetLabels.all;
-
-            if (preset === "custom") {
-                rangeElement.textContent = customRange ? "· " + customRange : "· Select dates";
-                return;
-            }
-            if (preset === "all") {
-                rangeElement.textContent = "";
-                return;
-            }
-
-            const end = new Date();
-            end.setHours(0, 0, 0, 0);
-            const start = new Date(end);
-            if (preset === "week") start.setDate(start.getDate() - 6);
-            else if (preset === "30days") start.setDate(start.getDate() - 29);
-            else if (preset === "month") start.setDate(1);
-
-            const monthYear = new Intl.DateTimeFormat("en-IN", { month: "short", year: "numeric" });
-            let range;
-            if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-                range = start.getDate() + "–" + end.getDate() + " " + monthYear.format(end);
-            } else {
-                const fullDate = new Intl.DateTimeFormat("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric"
-                });
-                range = fullDate.format(start) + " – " + fullDate.format(end);
-            }
-            rangeElement.textContent = "· " + range;
-        }
-
-        setDateHeader(activeDatePreset);
-        $(document).on("click", ".report-filter", function () {
-            activeDatePreset = $(this).data("type");
-            setDateHeader(activeDatePreset);
-        });
-
-        $(document).on("click", ".report-select-toggle", function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            const menu = $(this).parent().find(".report-select-menu").first();
-            const shouldOpen = menu.hasClass("hidden");
-            $(".report-select-menu").addClass("hidden");
-            if (shouldOpen) menu.removeClass("hidden");
-        });
-        $(document).on("click", ".hospital-select-option", function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            const select = document.getElementById(this.dataset.select);
-            if (!select) return;
-            select.value = this.dataset.value;
-            setBookingText(
-                select.id === "serviceTypeFilter" ? "selectedServiceType" : "selectedVisitType",
-                select.options[select.selectedIndex]?.textContent || ""
-            );
-            $(select).trigger("change");
-            $(this).closest(".report-select-menu").addClass("hidden");
-        });
-        $(document).on("click", "#bookingViewMenu button[data-view]", function (event) {
-            event.preventDefault();
-            setHospitalReportView(this.dataset.view);
-            $("#bookingViewMenu").addClass("hidden");
-        });
-        $(document).on("click", function (event) {
-            if (!$(event.target).closest(".report-select-toggle, .report-select-menu").length) {
-                $(".report-select-menu").addClass("hidden");
-            }
-        });
-        setHospitalReportView("booking");
-
-        const exportModal = document.getElementById("hospitalExportModal");
-        function closeHospitalExport() {
-            if (!exportModal) return;
-            exportModal.classList.add("hidden");
-            exportModal.classList.remove("flex");
-            document.body.classList.remove("overflow-hidden");
-        }
-        $("#openHospitalExport").on("click", function () {
-            if (!exportModal) return;
-            exportModal.classList.remove("hidden");
-            exportModal.classList.add("flex");
-            document.body.classList.add("overflow-hidden");
-            $("#closeHospitalExport").trigger("focus");
-        });
-        $("#closeHospitalExport, #cancelHospitalExport").on("click", closeHospitalExport);
-        $("#hospitalExportModal").on("click", function (event) {
-            if (event.target === this) closeHospitalExport();
-        });
-        $(document).on("keydown.hospitalExport", function (event) {
-            if (event.key === "Escape" && exportModal && !exportModal.classList.contains("hidden")) {
-                closeHospitalExport();
-            }
-        });
-        $(".hospital-export-type").on("click", function () {
-            $(".hospital-export-type")
-                .removeClass("ring-1 ring-[#0789f5]")
-                .attr("aria-pressed", "false");
-            $(this).addClass("ring-1 ring-[#0789f5]").attr("aria-pressed", "true");
-        });
-        $("#generateHospitalExport").on("click", closeHospitalExport);
-
-        $("#serviceTypeFilter").on("change", function () {
-            $("#visitTypeFilter").trigger("change");
-        });
-        $(document).on("ajaxComplete", function (event, xhr, settings) {
-            if (!settings.url || settings.url.indexOf("/reports/hospital-report-data/") === -1) return;
-            if (activeDatePreset === "custom") {
-                const hiddenLabel = $("#hospitalReportDateRange").text().replace(/^Data shown:\s*/, "").trim();
-                if (hiddenLabel && hiddenLabel.indexOf("Select") === -1 && hiddenLabel.indexOf("Start date:") !== 0) {
-                    setDateHeader("custom", hiddenLabel);
-                }
-            }
-            if (xhr.responseJSON) updateBookingDashboard(xhr.responseJSON);
-        });
-        if (window.lastHospitalReportData) updateBookingDashboard(window.lastHospitalReportData);
+  function barSvg(o) {
+    var W = 720, H = 250, pl = o.yTitle ? 64 : 50, pr = 10, pt = 12, pb = 32;
+    var t = niceTicks(Math.max.apply(null, o.values.concat([1])), o.steps || [1, 2, 5, 10], 4), top = t[t.length - 1];
+    var n = o.values.length, cw = (W - pl - pr) / n, bw = Math.min(34, cw * 0.5);
+    var y = function (v) { return pt + (H - pt - pb) * (1 - v / top); };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" role="img" aria-label="' + esc(o.aria) + '">';
+    t.forEach(function (v) {
+      var yy = y(v).toFixed(1);
+      s += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + yy + '" y2="' + yy + '" stroke="#eef1f5"/><text x="' + (pl - 12) + '" y="' + (Number(yy) + 4) + '" text-anchor="end" font-size="11" fill="#6b7a90">' + v + '</text>';
     });
-
-    // Support the currently selected chart's existing URL parameters
-    const chartId = params.get("chart");
-    const start = params.get("start_date");
-    const end = params.get("end_date");
-
-    if (chartId && start && end) {
-        params.set(`${chartId}_start_date`, start);
-        params.set(`${chartId}_end_date`, end);
-
-        $("#" + chartId)
-            .find(".chart-date-label")
-            .first()
-            .text(
-                `${formatChartDate(start)} – ${formatChartDate(end)}`
-            );
-
-        // Keep the individual chart dates in the URL
-        params.delete("start_date");
-        params.delete("end_date");
-        params.delete("chart");
-
-        history.replaceState(
-            null,
-            "",
-            window.location.pathname + "?" + params.toString()
-        );
-    }
-});
+    if (o.yTitle) s += '<text transform="translate(14 ' + ((pt + H - pb) / 2) + ') rotate(-90)" text-anchor="middle" font-size="10" fill="#8a97ab">' + o.yTitle + '</text>';
+    o.values.forEach(function (v, i) {
+      var cx = pl + cw * i + cw / 2;
+      s += '<path d="' + roundBar(cx - bw / 2, y(0), y(v), bw, 3) + '" fill="#3b82f6"><title>' + esc(o.labels[i]) + ': ' + v + '</title></path>';
+      s += '<text x="' + cx.toFixed(1) + '" y="' + (H - 10) + '" text-anchor="middle" font-size="11" fill="#6b7a90">' + esc(o.labels[i]) + '</text>';
+    });
+    return s + '</svg>';
+  }
+
+  function smoothPath(p) {
+    var d = 'M' + p[0][0].toFixed(1) + ' ' + p[0][1].toFixed(1);
+    for (var i = 0; i < p.length - 1; i++) {
+      var p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
+      d += 'C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + ' ' +
+        (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+    }
+    return d;
+  }
+  function linePath(p) { return p.map(function (q, i) { return (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(''); }
+
+  function lineSvg(o) {
+    var W = 720, H = o.h || 250, pl = o.pl || 56, pr = 14, pt = o.dl ? 30 : 14, pb = 30, pad = o.pad || 26;
+    var tk = o.ticks, top = tk[tk.length - 1], n = o.xl.length, gid = 'hrg' + (uid++);
+    var x = function (i) { return pl + pad + (n > 1 ? i * (W - pl - pr - 2 * pad) / (n - 1) : (W - pl - pr - 2 * pad) / 2); };
+    var y = function (v) { return pt + (H - pt - pb) * (1 - v / top); };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" role="img" aria-label="' + esc(o.aria) + '">' +
+      '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1683ff" stop-opacity=".28"/><stop offset="1" stop-color="#1683ff" stop-opacity=".02"/></linearGradient></defs>';
+    tk.forEach(function (v) {
+      var yy = y(v).toFixed(1);
+      s += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + yy + '" y2="' + yy + '" stroke="#eef1f5"/><text x="' + (pl - 12) + '" y="' + (Number(yy) + 4) + '" text-anchor="end" font-size="10" fill="#8a97ab">' + o.fmtTick(v) + '</text>';
+    });
+    o.xl.forEach(function (l, i) { s += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10" fill="#6b7a90">' + esc(l) + '</text>'; });
+    o.series.forEach(function (ser) {
+      var pts = ser.v.map(function (v, i) { return [x(i), y(v)]; });
+      var d = o.smooth ? smoothPath(pts) : linePath(pts);
+      if (ser.area) s += '<path d="' + d + 'L' + x(n - 1).toFixed(1) + ' ' + y(0).toFixed(1) + 'L' + x(0).toFixed(1) + ' ' + y(0).toFixed(1) + 'Z" fill="url(#' + gid + ')"/>';
+      s += '<path d="' + d + '" fill="none" stroke="' + ser.c + '" stroke-width="' + (ser.w || 2) + '" stroke-linejoin="round" stroke-linecap="round"' + (ser.dash ? ' stroke-dasharray="' + ser.dash + '"' : '') + '/>';
+      pts.forEach(function (p, i) {
+        var big = ser.big && (i === 0 || i === pts.length - 1);
+        if (ser.r || big) s += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (big ? 5.5 : ser.r) + '" fill="' + ser.c + '"><title>' + esc(o.xl[i]) + ': ' + (ser.tip ? ser.tip(ser.v[i]) : ser.v[i]) + '</title></circle>';
+        if (ser.dl) s += '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] - 10).toFixed(1) + '" text-anchor="middle" font-size="10" font-weight="600" fill="#344054">' + ser.dl(ser.v[i]) + '</text>';
+      });
+    });
+    return s + '</svg>';
+  }
+
+  function groupSvg(cats) {
+    var W = 440, H = 130, base = 100, max = Math.max.apply(null, [1].concat(cats.map(function (k) { return Math.max(k[1], k[2]); })));
+    var cw = W / cats.length, h = function (v) { return v / max * 80; };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" role="img" aria-label="Won and lost bids by service">';
+    cats.forEach(function (k, i) {
+      var cx = cw * i + cw / 2;
+      if (k[1] > 0) s += '<path d="' + roundBar(cx - 14, base, base - h(k[1]), 12, 2) + '" fill="#16a34a"><title>' + k[0] + ' won: ' + k[1] + '</title></path>';
+      if (k[2] > 0) s += '<path d="' + roundBar(cx + 2, base, base - h(k[2]), 12, 2) + '" fill="#ef4444"><title>' + k[0] + ' lost: ' + k[2] + '</title></path>';
+      s += '<text x="' + cx.toFixed(1) + '" y="120" text-anchor="middle" font-size="10" fill="#6b7a90">' + esc(k[0]) + '</text>';
+    });
+    return s + '</svg>';
+  }
+
+  function donut(items, big, small, valFmt) {
+    var total = sum(items.map(function (i) { return i.v; })), R = 60, C = 2 * Math.PI * R, off = 0;
+    var s = '<div class="hr-donut"><div class="ring"><svg width="160" height="160" viewBox="0 0 160 160" role="img">';
+    if (!total) s += '<circle cx="80" cy="80" r="60" fill="none" stroke="#eef2f7" stroke-width="24"/>';
+    items.forEach(function (it) {
+      var len = total ? C * it.v / total : 0;
+      s += '<circle cx="80" cy="80" r="60" fill="none" stroke="' + it.c + '" stroke-width="24" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '"><title>' + esc(it.n) + '</title></circle>';
+      off += len;
+    });
+    s += '</svg><div class="ctr"><b>' + big + '</b><span>' + small + '</span></div></div><ul class="hr-legend">';
+    items.forEach(function (it) { s += '<li><i style="background:' + it.c + '"></i><span>' + esc(it.n) + '</span><b>' + valFmt(it.v) + '</b></li>'; });
+    return s + '</ul></div>';
+  }
+
+  function hbars(rows, o) {
+    if (!rows.length) return '<p class="hr-sub" style="margin-top:24px">No data for this selection.</p>';
+    var max = Math.max.apply(null, rows.map(function (r) { return r[1]; }).concat([1]));
+    return '<div class="hr-hbars">' + rows.map(function (r, i) {
+      var col = o.alt ? (i % 2 ? '#8bb8f7' : '#2f80ed') : '#0b8bff';
+      return '<div class="hr-hrow"><span class="nm">' + esc(r[0]) + '</span><span class="tr"><i style="width:' + Math.max(r[1] / max * 100, 2).toFixed(1) + '%;background:' + col + '"></i></span><b>' + (o.money ? fmtS(r[1]) : r[1]) + '</b></div>';
+    }).join('') + '</div>';
+  }
+
+  /* ================= card builders ================= */
+  function stat(icon, bg, color, label, value, d) {
+    return '<article class="hr-card hr-stat"><span class="info">' + ic('info', 14) + '</span>' +
+      '<div class="top"><span class="ico" style="background:' + bg + ';color:' + color + '">' + ic(icon, 18) + '</span><span class="lbl">' + label + '</span></div>' +
+      '<div class="val">' + value + '</div><div class="dl ' + (d[1] ? 'up' : 'down') + '">' + ic(d[1] ? 'up' : 'down', 12) + ' ' + d[0] + '% <em>vs last period</em></div></article>';
+  }
+  function card(title, sub, body, o) {
+    o = o || {};
+    return '<article class="hr-card"' + (o.style ? ' style="' + o.style + '"' : '') + '><div class="hr-card-head"><div><h2 class="hr-h">' + (o.icon || '') + title + '</h2>' + (sub ? '<p class="hr-sub">' + sub + '</p>' : '') + '</div>' + (o.right || '') + '</div>' + body + '</article>';
+  }
+  function legendDots(items) {
+    return '<div style="display:flex;flex-wrap:wrap;gap:14px;font-size:10px;color:#667085">' + items.map(function (i) {
+      return '<span style="display:flex;align-items:center;gap:5px"><i style="width:8px;height:8px;border-radius:999px;background:' + i[1] + ';display:inline-block"></i>' + i[0] + '</span>';
+    }).join('') + '</div>';
+  }
+  function statusCard(title, M, items, total, unit) {
+    return card(title, 'Breakdown by status · period total ' + total, donut(items, total, unit, function (v) { return v; }), {});
+  }
+  function offersCard(M) {
+    var kp = '<div class="hr-kpis"><div><b>' + M.answered + '</b><span>Answered</span></div><div><b class="up">' + M.won + '</b><span>Won</span></div><div><b class="down">' + M.lost + '</b><span>Lost</span></div><div><b>' + M.rate + '%</b><span>Win rate</span></div></div>';
+    var body = kp + '<div style="margin-top:14px;border-top:1px solid #eef1f5;padding-top:12px">' + groupSvg(M.cats) + '</div>' +
+      '<p class="hr-note">' + BASE.offers.active + ' active bids awaiting customer response are excluded from answered bid totals.</p>';
+    return card('Offers &amp; Bids Performance', 'Answered bids · selected period', body, { right: '<a class="hr-link" data-go="bids">View Offers &amp; Bids →</a>' });
+  }
+  function servicesCard(title, sub, M) {
+    return card(title, sub, hbars(M.services, { alt: true }), {});
+  }
+
+  /* ================= views ================= */
+  function bookingHtml(M) {
+    var B = BASE.booking, d = B.delta, s = M.stats;
+    var h = '<section class="hr-grid hr-g4">' +
+      stat('cal', '#e8f1ff', '#1683ff', 'Total Bookings', num(s[0]), d[0]) +
+      stat('check', '#e6f8ee', '#16a34a', 'Completed Bookings', num(s[1]), d[1]) +
+      stat('clock', '#fff6dc', '#f5b400', 'Pending Bookings', num(s[2]), d[2]) +
+      stat('ban', '#ffe8e8', '#ef4444', 'Cancelled Bookings', num(s[3]), d[3]) + '</section>';
+
+    h += '<section class="hr-grid hr-g2">' +
+      card('Bookings Trend', (M.n === 7 && M.r.days <= 7 ? 'Daily bookings' : 'Bookings') + ' · ' + M.range,
+        '<div style="margin-top:14px">' + barSvg({ labels: M.lab, values: M.trend, yTitle: 'Number of Bookings', steps: [1, 2, 4, 5, 10], aria: 'Bookings trend' }) + '</div>') +
+      statusCard('Booking Status', M, [
+        { n: 'Completed', v: M.status[0], c: '#16a34a' }, { n: 'Upcoming / Confirmed', v: M.status[1], c: '#2f80ed' },
+        { n: 'Checked-in / In-progress', v: M.status[2], c: '#8b5cf6' }, { n: 'Cancelled / No-show', v: M.status[3], c: '#ef4444' }
+      ], M.statusTotal, 'Bookings') + '</section>';
+
+    h += '<section class="hr-grid hr-g2">' + servicesCard('Bookings by Service', 'Booking volume by service', M) + offersCard(M) + '</section>';
+
+    var T = M.tat, tot = sum(T.buckets) || 1, cols = ['#2fc654', '#0789f5', '#ff8c1f', '#ff3737'], names = ['0-4 hrs', '4-8 hrs', '8-24 hrs', '&gt;24 hrs'];
+    h += card('Turnaround Time', 'Completed Booking by report completion time',
+      '<div class="hr-chips"><span class="hr-chip blue">Avg TAT : ' + T.avg + '</span><span class="hr-chip green">With SLA : ' + T.sla + '</span><span class="hr-chip red">Overdue: ' + T.overdue + ' orders</span></div>' +
+      '<div class="hr-tat">' + T.buckets.map(function (v, i) {
+        return '<div style="flex:' + Math.max(v / tot * 100, 12).toFixed(1) + ' 1 0;background:' + cols[i] + '"><b>' + names[i] + '</b>' + (i === 3 ? v : v + ' Bookings') + '</div>';
+      }).join('') + '</div>' +
+      '<p class="hr-note" style="display:flex;align-items:center;gap:6px;margin-top:10px">' + ic('info', 12) + 'SLA target varies by test and package</p>',
+      { icon: '', right: '<span style="color:#9aa5b6">' + ic('info', 15) + '</span>' }).replace('hr-h">', 'hr-h">');
+    return h;
+  }
+
+  function bidsHtml(M) {
+    var D = BASE.bids, d = D.delta, s = M.bstats;
+    var h = '<section class="hr-grid hr-g4">' +
+      stat('cal', '#e8f1ff', '#1683ff', 'Total Bids', num(s[0]), d[0]) +
+      stat('check', '#e6f8ee', '#16a34a', 'Accepted Bids', num(s[1]), d[1]) +
+      stat('clock', '#fff6dc', '#f5b400', 'Pending Bids', num(s[2]), d[2]) +
+      stat('ban', '#ffe8e8', '#ef4444', 'Rejected Bids', num(s[3]), d[3]) + '</section>';
+
+    h += '<section class="hr-grid hr-g2">' +
+      card('Bid Trend', 'Total bids over the selected period',
+        '<div style="margin-top:14px">' + barSvg({ labels: M.lab2, values: M.btrend, steps: [1, 2, 5, 10], aria: 'Bid trend' }) + '</div>', { icon: '<span style="color:#1683ff;display:flex">' + ic('bars', 16) + '</span>' }) +
+      statusCard('Bids Status', M, [
+        { n: 'Accepted', v: M.bstatus[0], c: '#16a34a' }, { n: 'Expire', v: M.bstatus[1], c: '#2f80ed' }, { n: 'Rejected', v: M.bstatus[2], c: '#ef4444' }
+      ], M.bstatusTotal, 'Bids') + '</section>';
+
+    h += '<section class="hr-grid hr-g2">' + servicesCard('Bids by Service', 'Bid volume by service', M) + offersCard(M) + '</section>';
+
+    var wk = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+    h += '<section class="hr-grid hr-g2">' +
+      card('Bid Conversion Rate', '', '<div style="margin-top:10px">' + lineSvg({
+        xl: wk, ticks: [0, 25, 50, 75], fmtTick: function (v) { return v === 0 ? '0' : v + '%'; }, aria: 'Bid conversion rate', h: 260,
+        series: [{ v: D.conv.prev, c: '#22c55e', r: 3, tip: function (v) { return v + '%'; } }, { v: D.conv.cur, c: '#1683ff', r: 3, tip: function (v) { return v + '%'; } }]
+      }) + '</div>', { right: legendDots([['Current Period', '#1683ff'], ['Previous Period', '#22c55e']]) }) +
+      card('Turnaround Time', 'Average hours to complete reports, current vs previous period, by week', '<div style="margin-top:10px">' + lineSvg({
+        xl: wk, ticks: [0, 10, 20, 30, 40], fmtTick: function (v) { return v; }, smooth: true, aria: 'Turnaround time', h: 260,
+        series: [{ v: D.tat.prev, c: '#64748b', w: 1.5, dash: '3 3' }, { v: D.tat.cur, c: '#1683ff', w: 2, big: true, tip: function (v) { return v + ' hrs'; } }]
+      }) + '</div><div style="margin-top:6px">' + legendDots([['Current Period', '#1683ff'], ['Previous Period', '#64748b']]) + '</div>') + '</section>';
+    return h;
+  }
+
+  function revenueHtml(M) {
+    var R = BASE.revenue, d = R.delta;
+    var h = '<section class="hr-grid hr-g4">' +
+      stat('rupee', '#e8f1ff', '#1683ff', 'Total Revenue', fmt(M.rev[0]), d[0]) +
+      stat('rupee', '#e6f8ee', '#16a34a', 'Avg Revenue per Booking', fmt(M.rev[1]), d[1]) +
+      stat('clock', '#fff6dc', '#f5b400', 'Revenue Growth', M.rev[2] + '%', d[2]) +
+      stat('ban', '#ffe8e8', '#ef4444', 'Cancelled Revenue', fmt(M.rev[3]), d[3]) + '</section>';
+
+    var max = Math.max.apply(null, M.rtrend.concat(M.rprev, [1])), tk = niceTicks(max, [1, 2, 2.5, 5, 10], 5);
+    var payTotal = M.rev[0], cols = ['#1683ff', '#6d5bf6', '#22c55e'];
+    h += '<section class="hr-grid hr-g2">' +
+      card('Revenue Trend', 'Your revenue over the selected period', '<div style="margin-top:14px">' + lineSvg({
+        xl: M.lab2, ticks: tk, fmtTick: axisMoney, dl: true, smooth: false, aria: 'Revenue trend', h: 250, pl: 58,
+        series: [{ v: M.rprev, c: '#6d5bf6', w: 1.5, dash: '4 4', r: 2.5 }, { v: M.rtrend, c: '#1683ff', w: 2, r: 3.5, area: true, dl: lakh, tip: fmt }]
+      }) + '</div>', {
+        icon: '<span style="color:#1683ff;display:flex">' + ic('bars', 16) + '</span>',
+        right: legendDots([['Revenue', '#1683ff'], ['Previous Period [ ' + M.r.label + ' ]', '#6d5bf6']])
+      }) +
+      card('Payment Method Breakdown', 'Share of payments received', donut(R.pay.map(function (p, i) { return { n: p[0], v: p[1], c: cols[i] }; }), '₹ ' + num(payTotal), 'Total', function (v) { return v.toFixed(1) + '%'; }),
+        { icon: '<span style="color:#1683ff;display:flex">' + ic('rupee', 16) + '</span>' }) + '</section>';
+
+    h += card('Revenue by Department', 'Contribution by department', hbars(M.dept, { money: true }), { icon: '<span style="color:#1683ff;display:flex">' + ic('grid', 16) + '</span>' });
+
+    var rows = S.txAll ? BASE.tx : BASE.tx.slice(0, 3);
+    h += '<article class="hr-card" style="padding:0;overflow:hidden"><div class="hr-card-head" style="padding:18px 20px 14px"><div><h2 class="hr-h"><span style="color:#1683ff;display:flex">' + ic('clock', 18) + '</span>Recent Transactions</h2><p class="hr-sub">Latest revenue transactions</p></div>' +
+      '<a class="hr-link" id="hrTxToggle" style="font-size:12px">' + (S.txAll ? 'Show less' : 'View All') + ' →</a></div>' +
+      '<div class="hr-scroll"><table class="hr-table"><thead><tr><th>Transaction ID</th><th>Medicine</th><th>Department</th><th>Amount</th><th>Status</th><th>Date &amp; Time</th></tr></thead><tbody>' +
+      rows.map(function (t) {
+        return '<tr><td>' + t[0] + '</td><td><b style="color:#111c2e">' + esc(t[1]) + '</b></td><td>' + esc(t[2]) + '</td><td><b style="color:#111c2e">' + fmtS(t[3]) + '</b></td><td><span class="hr-pill ' + t[4].toLowerCase() + '">' + t[4] + '</span></td><td>' + t[5] + '</td></tr>';
+      }).join('') + '</tbody></table></div></article>';
+    return h;
+  }
+
+  /* ================= render ================= */
+  var lastM = null;
+  function render() {
+    var M = lastM = calc();
+    $('#hrViewBooking').innerHTML = bookingHtml(M);
+    $('#hrViewBids').innerHTML = bidsHtml(M);
+    $('#hrViewRevenue').innerHTML = revenueHtml(M);
+    $('#hrViewBooking').hidden = S.view !== 'booking';
+    $('#hrViewBids').hidden = S.view !== 'bids';
+    $('#hrViewRevenue').hidden = S.view !== 'revenue';
+    $('#hrDateLabel').textContent = M.r.label + ' · ' + M.range;
+  }
+  function changed() {
+    render();
+    document.dispatchEvent(new CustomEvent('hospitalReportFilterChange', {
+      detail: { preset: S.preset, start: iso(lastM.r.start), end: iso(lastM.r.end), service: S.service, visit: S.visit, view: S.view }
+    }));
+  }
+
+  /* ================= dropdowns ================= */
+  function closeMenus() { $$('.hr-menu.open').forEach(function (m) { m.classList.remove('open'); }); }
+  $$('.hr-dd').forEach(function (dd) {
+    var menu = $('.hr-menu', dd);
+    $('[data-toggle]', dd).addEventListener('click', function (e) {
+      e.stopPropagation();
+      var was = menu.classList.contains('open');
+      closeMenus();
+      if (!was) menu.classList.add('open');
+    });
+    menu.addEventListener('click', function (e) { e.stopPropagation(); });
+  });
+  document.addEventListener('click', closeMenus);
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    closeMenus();
+    closeExport();
+  });
+
+  function fillMenu(id, opts, get, set) {
+    var dd = $('#' + id), menu = $('.hr-menu', dd);
+    menu.innerHTML = opts.map(function (o) { return '<button type="button" class="hr-opt' + (o[0] === get() ? ' active' : '') + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('');
+    $$('.hr-opt', menu).forEach(function (b) {
+      b.addEventListener('click', function () {
+        set(b.getAttribute('data-v'));
+        $('[data-label]', dd).textContent = b.textContent;
+        $$('.hr-opt', menu).forEach(function (x) { x.classList.toggle('active', x === b); });
+        menu.classList.remove('open');
+      });
+    });
+  }
+  fillMenu('hrServiceDd', SERVICE_OPTS, function () { return S.service; }, function (v) { S.service = v; changed(); });
+  fillMenu('hrVisitDd', VISIT_OPTS, function () { return S.visit; }, function (v) { S.visit = v; changed(); });
+  fillMenu('hrViewDd', VIEW_OPTS, function () { return S.view; }, function (v) { S.view = v; changed(); });
+
+  function setView(v) {
+    S.view = v;
+    var o = VIEW_OPTS.filter(function (x) { return x[0] === v; })[0];
+    $('#hrViewDd [data-label]').textContent = o[1];
+    $$('#hrViewDd .hr-opt').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-v') === v); });
+    changed();
+  }
+
+  /* date dropdown */
+  $$('#hrDateDd [data-preset]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var p = b.getAttribute('data-preset');
+      $$('#hrDateDd [data-preset]').forEach(function (x) { x.classList.toggle('active', x === b); });
+      if (p === 'custom') {
+        $('#hrCustomBox').style.display = 'block';
+        var r = range();
+        $('#hrFrom').value = iso(r.start); $('#hrTo').value = iso(r.end);
+        return;
+      }
+      $('#hrCustomBox').style.display = 'none';
+      S.preset = p; S.from = S.to = null;
+      closeMenus();
+      changed();
+    });
+  });
+  $('#hrCustomCancel').addEventListener('click', function () { $('#hrCustomBox').style.display = 'none'; closeMenus(); });
+  $('#hrCustomApply').addEventListener('click', function () {
+    var f = $('#hrFrom').value, t = $('#hrTo').value;
+    if (!f || !t) { toast('Select both dates'); return; }
+    if (f > t) { toast('From date cannot be after To date'); return; }
+    S.preset = 'custom'; S.from = parseIso(f); S.to = parseIso(t);
+    $('#hrCustomBox').style.display = 'none';
+    closeMenus();
+    changed();
+  });
+
+  $('#hrRefresh').addEventListener('click', function () {
+    var i = $('#hrRefreshIcon');
+    i.classList.remove('hr-spin'); void i.getBoundingClientRect(); i.classList.add('hr-spin');
+    changed();
+    toast('Report refreshed');
+  });
+
+  root.addEventListener('click', function (e) {
+    var go = e.target.closest('[data-go]');
+    if (go) { e.preventDefault(); setView(go.getAttribute('data-go')); return; }
+    if (e.target.closest('#hrTxToggle')) { S.txAll = !S.txAll; render(); }
+  });
+
+  /* ================= export ================= */
+  var modal = $('#hrExportModal'), exType = 'Full Performance Report', exFormat = 'pdf';
+  function closeExport() { modal.classList.remove('open'); }
+  $('#hrOpenExport').addEventListener('click', function () {
+    var r = range();
+    $('#hrExFrom').value = iso(r.start); $('#hrExTo').value = iso(r.end);
+    $('#hrExError').style.display = 'none';
+    modal.classList.add('open');
+  });
+  $$('[data-hr-close]', modal).forEach(function (b) { b.addEventListener('click', closeExport); });
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeExport(); });
+  $$('.hr-type', modal).forEach(function (b) {
+    b.addEventListener('click', function () {
+      exType = b.getAttribute('data-type');
+      $$('.hr-type', modal).forEach(function (x) { x.classList.toggle('active', x === b); });
+    });
+  });
+  $$('#hrFormats button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      exFormat = b.getAttribute('data-format');
+      $$('#hrFormats button').forEach(function (x) { x.classList.toggle('active', x === b); });
+    });
+  });
+
+  function note(text) { return { title: text.t, head: ['Note'], rows: [[text.m]] }; }
+  function exportTables(sections) {
+    var M = calc(), out = [], B = BASE.booking, D = BASE.bids, R = BASE.revenue;
+    if (sections.indexOf('kpi') >= 0) {
+      out.push({ title: 'Overview & KPI', head: ['Metric', 'Value'], rows: [
+        ['Total Bookings', M.stats[0]], ['Completed Bookings', M.stats[1]], ['Pending Bookings', M.stats[2]], ['Cancelled Bookings', M.stats[3]],
+        ['Total Bids', M.bstats[0]], ['Accepted Bids', M.bstats[1]], ['Pending Bids', M.bstats[2]], ['Rejected Bids', M.bstats[3]],
+        ['Total Revenue', fmt(M.rev[0])], ['Avg Revenue per Booking', fmt(M.rev[1])], ['Revenue Growth', M.rev[2] + '%'], ['Cancelled Revenue', fmt(M.rev[3])]
+      ] });
+    }
+    if (sections.indexOf('earnings') >= 0) {
+      out.push({ title: 'Revenue by Department', head: ['Department', 'Revenue'], rows: M.dept.map(function (d) { return [d[0], fmt(d[1])]; }) });
+      out.push({ title: 'Payment Methods', head: ['Method', 'Share'], rows: R.pay.map(function (p) { return [p[0], p[1].toFixed(1) + '%']; }) });
+      out.push({ title: 'Recent Transactions', head: ['Transaction ID', 'Medicine', 'Department', 'Amount', 'Status', 'Date & Time'], rows: BASE.tx.map(function (t) { return [t[0], t[1], t[2], fmt(t[3]), t[4], t[5]]; }) });
+    }
+    if (sections.indexOf('appointments') >= 0) {
+      out.push({ title: 'Bookings Trend', head: ['Period', 'Bookings'], rows: M.lab2.map(function (l, i) { return [l, M.trend[i]]; }) });
+      out.push({ title: 'Booking Status', head: ['Status', 'Count'], rows: [['Completed', M.status[0]], ['Upcoming / Confirmed', M.status[1]], ['Checked-in / In-progress', M.status[2]], ['Cancelled / No-show', M.status[3]]] });
+      out.push({ title: 'Bookings by Service', head: ['Service', 'Bookings'], rows: M.services });
+    }
+    if (sections.indexOf('patients') >= 0) out.push(note({ t: 'Patient list', m: 'Patient-level rows are not part of the demo data. Connect this section to your server export.' }));
+    if (sections.indexOf('bids') >= 0) {
+      out.push({ title: 'Bid Trend', head: ['Period', 'Bids'], rows: M.lab2.map(function (l, i) { return [l, M.btrend[i]]; }) });
+      out.push({ title: 'Bid Status', head: ['Status', 'Count'], rows: [['Accepted', M.bstatus[0]], ['Expire', M.bstatus[1]], ['Rejected', M.bstatus[2]]] });
+      out.push({ title: 'Bid Conversion Rate', head: ['Week', 'Current Period', 'Previous Period'], rows: D.conv.cur.map(function (v, i) { return ['Week ' + (i + 1), v + '%', D.conv.prev[i] + '%']; }) });
+    }
+    if (sections.indexOf('orders') >= 0) out.push(note({ t: 'Order History', m: 'Order-level rows are not part of the demo data. Connect this section to your server export.' }));
+    return out;
+  }
+
+  $('#hrExGenerate').addEventListener('click', function () {
+    var sections = $$('#hrSections input:checked').map(function (c) { return c.value; });
+    if (!sections.length) { $('#hrExError').style.display = 'block'; return; }
+    var tables = exportTables(sections);
+    var f = $('#hrExFrom').value, t = $('#hrExTo').value;
+    var period = f && t ? f + ' to ' + t : lastM.range;
+    var stamp = new Date().toLocaleString('en-IN');
+    var base = exType.replace(/\s+/g, '_') + '_' + iso(new Date());
+
+    if (exFormat === 'csv') {
+      var q = function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; };
+      var csv = [q(exType), q(HOSPITAL), q('Period: ' + period), q('Generated: ' + stamp), ''];
+      tables.forEach(function (tb) {
+        csv.push(q(tb.title)); csv.push(tb.head.map(q).join(','));
+        tb.rows.forEach(function (r) { csv.push(r.map(q).join(',')); });
+        csv.push('');
+      });
+      download(base + '.csv', csv.join('\n'), 'text/csv');
+    } else {
+      var html = '<h2>' + esc(exType) + '</h2><p>' + esc(HOSPITAL) + '<br>Period: ' + esc(period) + '<br>Generated: ' + esc(stamp) + '</p>' +
+        tables.map(function (tb) {
+          return '<h3>' + esc(tb.title) + '</h3><table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;font-size:12px"><tr>' +
+            tb.head.map(function (h) { return '<th style="background:#eef5ff;text-align:left">' + esc(h) + '</th>'; }).join('') + '</tr>' +
+            tb.rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>';
+        }).join('');
+      if (exFormat === 'xls') {
+        download(base + '.xls', '<html><head><meta charset="utf-8"></head><body style="font-family:Arial">' + html + '</body></html>', 'application/vnd.ms-excel');
+      } else {
+        var w = window.open('', '_blank');
+        if (!w) { toast('Allow pop-ups to download the PDF'); return; }
+        w.document.write('<html><head><title>' + esc(base) + '</title><meta charset="utf-8"></head><body style="font-family:Arial;padding:24px">' + html + '</body></html>');
+        w.document.close(); w.focus();
+        setTimeout(function () { w.print(); }, 300);
+      }
+    }
+    closeExport();
+    toast('Report generated');
+  });
+
+  /* ================= public hook for your backend ================= */
+  // HospitalReports.setData({ booking: {...}, bids: {...}, revenue: {...}, services: [...], tx: [...] })
+  // replaces the matching blocks of the demo data above and re-renders.
+  window.HospitalReports = {
+    setData: function (patch) { Object.keys(patch || {}).forEach(function (k) { BASE[k] = patch[k]; }); render(); },
+    render: render,
+    getState: function () { return JSON.parse(JSON.stringify(S)); }
+  };
+
+  /* ================= init ================= */
+  var qs = new URLSearchParams(window.location.search);
+  if (qs.get('view') && VIEW_OPTS.some(function (v) { return v[0] === qs.get('view'); })) setView(qs.get('view'));
+  else render();
+})();

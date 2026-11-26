@@ -34,386 +34,438 @@
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined !text-xl">home</span>
-                <h1 class="text-base font-bold">Home</h1>
+                <span class="material-symbols-outlined !text-[22px]">home</span>
+                <h1 class="text-[18px] font-bold">Home</h1>
             </div>
-            <div id="date" class="text-xs text-slate-500">{% now "l, F j, Y" %}</div>
+            <div id="date" class="mt-0.5 text-[13px] text-slate-500">{% now "l, F j, Y" %}</div>
         </div>
-        <div id="infoSection" class="flex items-center gap-4 text-xs text-slate-600">
-            <div id="location" class="flex items-center gap-1">
-                <span class="material-symbols-outlined !text-sm">location_on</span>
+        <div id="infoSection" class="flex items-center gap-5 text-[13px] text-slate-600">
+            <div id="location" class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined !text-[18px]">location_on</span>
                 <span id="location-text">{{ pharmacy_profile.city|default:"Location unavailable" }}</span>
             </div>
             <div class="flex items-center gap-2">
                 <p class="font-medium">Auto Bid</p>
-                <label class="relative inline-block h-5 w-9 cursor-pointer">
+                <label class="relative inline-block h-6 w-11 cursor-pointer">
                     <input type="checkbox" id="autobid-toggle" class="peer sr-only" aria-label="Enable Auto Bid">
                     <span class="absolute inset-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-[#1A73E8]"></span>
-                    <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4"></span>
+                    <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></span>
                 </label>
-                <span class="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-[#1A73E8]">Rx</span>
+                <span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-[14px] font-medium text-[#1A73E8]">Rx</span>
             </div>
         </div>
     </div>
 
-    <!-- 2. Banner + Pharmacy profile card -->
-    <div class="flex flex-col lg:flex-row gap-4 items-stretch w-full">
-        <!-- Banner (approx 65%) -->
-        <div class="relative min-h-[170px] w-full lg:w-[65%] overflow-hidden rounded-[14px] border border-[#E8EEF2] p-5 flex flex-col justify-end" style="flex: 1 1 65%; min-width: 0; background-image: linear-gradient(165deg, rgba(13,148,136,.42), rgba(26,115,232,.52)), url('{% static 'images/pharmacy-home-bg.jpg' %}'); background-size: cover; background-position: center;">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.2),rgba(255,255,255,0)_60%)] pointer-events-none"></div>
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0B2A4A]/80 pointer-events-none"></div>
-            <div class="relative z-10 text-[10px] leading-4 text-white">
-                <p class="text-xs font-semibold">🏪 {{ pharmacy_profile.company_name|default:"Pharmacy" }}</p>
-                <p class="truncate max-w-full text-white/90">{{ pharmacy_profile.address|default:"Address not available" }}</p>
-                {% if pharmacy_profile.license_number %}<p class="text-white/90">License: {{ pharmacy_profile.license_number }}</p>{% endif %}
-            </div>
-        </div>
+    <!-- 2. Pharmacy card (flat blue, no background image) -->
+  <!-- 2. Pharmacy card (flat blue, no background image) -->
+<div class="relative min-h-[200px] w-full overflow-hidden rounded-[14px] bg-[#0A84FF] p-5 text-white">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_65%_15%,rgba(255,255,255,0.28),transparent_55%)]"></div>
 
-        <!-- Pharmacy Profile Card (approx 35%, min-width 320px) -->
-        <div class="w-full lg:w-[35%] rounded-[14px] border border-[#E8EEF2] bg-white p-4 sm:p-5 flex items-center gap-4 shrink-0 shadow-sm" style="flex: 0 0 35%; min-width: 320px;">
-            <div class="relative shrink-0">
-                {% if admin_profile_photo_path %}
-                <img id="admin-profile-photo"
-                     src="/document/{{ admin_profile_photo_path }}"
-                     alt="Admin profile picture"
-                     class="h-14 w-14 sm:h-16 sm:w-16 rounded-xl border border-[#1A73E8] bg-[#EBF3FE] object-cover">
-                {% else %}
-                <div id="admin-profile-photo-fallback"
-                     class="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-xl border border-[#1A73E8] bg-[#EBF3FE] text-base sm:text-lg font-bold text-[#1A73E8]">
-                    {{ seller_initials|default:"MP" }}
-                </div>
-                <img id="admin-profile-photo"
-                     src=""
-                     alt="Admin profile picture"
-                     onload="this.classList.remove('hidden'); var fb = document.getElementById('admin-profile-photo-fallback'); if(fb) fb.classList.add('hidden');"
-                     class="hidden h-14 w-14 sm:h-16 sm:w-16 rounded-xl border border-[#1A73E8] bg-[#EBF3FE] object-cover">
-                {% endif %}
-                <label for="admin-profile-photo-input" title="Change profile picture"
-                       class="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-[#1A73E8] text-white shadow hover:bg-blue-600 transition-colors">
-                    <span class="material-symbols-outlined !text-xs">edit</span>
-                </label>
-                <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
-                       data-upload-url="{% url 'upload_admin_profile_photo' %}">
+    <!-- top: avatar + name / GSTIN / Reg -->
+    <div class="relative z-10 flex items-center gap-4">
+        <div class="relative shrink-0">
+            {% if admin_profile_photo_path %}
+            <img id="admin-profile-photo" src="/document/{{ admin_profile_photo_path }}" alt="Admin profile picture"
+                 class="h-16 w-16 rounded-xl bg-[#EBF3FE] object-cover">
+            {% else %}
+            <div id="admin-profile-photo-fallback"
+                 class="flex h-16 w-16 items-center justify-center rounded-xl bg-[#EBF3FE] text-[20px] font-bold text-[#1A73E8]">
+                {{ seller_initials|default:"MP" }}
             </div>
-            <div class="min-w-0 flex-1 text-[11px] leading-tight text-slate-500 space-y-1">
-                <p class="text-sm font-bold text-slate-900 leading-snug truncate" title="{{ pharmacy_profile.company_name|default:'Pharmacy' }}">
-                    {{ pharmacy_profile.company_name|default:"Pharmacy" }}
-                </p>
-                <p class="text-[11px] text-slate-500 leading-none truncate">
-                    {{ contact_person.name|default:"N/A" }} — {{ contact_person.role|default:"Owner" }}
-                </p>
-                <p class="text-[11px] font-semibold text-[#1A73E8] leading-none whitespace-nowrap">
-                    {{ user.phone_country_code|default:"+91" }} {{ pharmacy_profile.contact_number|default:user.phone_number|default:"N/A" }}
-                </p>
-                {% if pharmacy_profile.gstin %}
-                <p class="text-[10px] text-slate-400 leading-none whitespace-nowrap">GSTIN: {{ pharmacy_profile.gstin }}</p>
-                {% endif %}
-                {% if pharmacy_profile.license_number %}
-                <p class="text-[10px] text-slate-400 leading-none whitespace-nowrap">Reg: {{ pharmacy_profile.license_number }}</p>
-                {% endif %}
-                <div class="pt-0.5">
-                    <a href="{% url 'settings_page' %}" class="inline-flex items-center text-[11px] font-semibold text-[#1A73E8] hover:underline whitespace-nowrap">
-                        Edit Profile →
-                    </a>
-                </div>
-            </div>
+            <img id="admin-profile-photo" src="" alt="Admin profile picture"
+                 onload="this.classList.remove('hidden'); var fb = document.getElementById('admin-profile-photo-fallback'); if(fb) fb.classList.add('hidden');"
+                 class="hidden h-16 w-16 rounded-xl bg-[#EBF3FE] object-cover">
+            {% endif %}
+            <label for="admin-profile-photo-input" title="Change profile picture"
+                   class="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-[#1A73E8] shadow">
+                <span class="material-symbols-outlined !text-[13px]">edit</span>
+            </label>
+            <input id="admin-profile-photo-input" type="file" accept="image/jpeg,image/png" class="hidden"
+                   data-upload-url="{% url 'upload_admin_profile_photo' %}">
+        </div>
+        <div class="min-w-0 space-y-1 text-[11.3px] leading-4 text-white/95">
+            <p class="truncate text-[13.7px] font-bold text-black-light">MedPlus Pharmacy</p>
+            <p>GSTIN: {{ pharmacy_profile.gstin|default:"27ABCDE1234F1Z5" }}</p>
+            <p>Reg: {{ pharmacy_profile.license_number|default:"LIC-MH-20011" }}</p>
         </div>
     </div>
 
-    <!-- 3. Quick stats (5 columns with Wallet Balance) -->
-    <div class="grid grid-cols-2 gap-y-3 rounded-[12px] border border-[#E8EEF2] bg-white py-4 lg:grid-cols-5 lg:divide-x lg:divide-[#E8EEF2]">
-        <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                <span class="material-symbols-outlined !text-lg text-[#1A73E8]">account_balance_wallet</span>Wallet Balance
-            </p>
-            <p class="mt-1 text-lg font-bold" id="pharmacy-wallet-balance">₹{{ wallet_balance|default:"0.00" }}</p>
-            <a href="{% url 'advance' %}" class="text-[10px] text-[#1A73E8] hover:underline">Withdraw →</a>
-        </div>
-        <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                <span class="material-symbols-outlined !text-lg text-[#1A73E8]">bolt</span>Active Bids
-            </p>
-            <p class="mt-1 text-lg font-bold" id="pharmacy-active-bids-count">{{ active_bids|default:"0" }}</p>
-            <a href="{% url 'coupons' %}" class="text-[10px] text-[#1A73E8] hover:underline">View all →</a>
-        </div>
-        <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                <span class="material-symbols-outlined !text-lg text-[#1A73E8]">package_2</span>Today's Orders
-            </p>
-            <p class="mt-1 text-lg font-bold" id="pharmacy-today-orders-count">{{ today_orders_count|default:"0" }}</p>
-            <p class="text-[10px] text-[#1A73E8]" id="pharmacy-today-orders-subtext">{{ today_pending_count|default:"0" }} Pending · {{ today_processing_count|default:"0" }} Processing</p>
-        </div>
-        <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                <span class="material-symbols-outlined !text-lg text-[#1A73E8]">local_shipping</span>Out for Delivery
-            </p>
-            <p class="mt-1 text-lg font-bold text-[#1A73E8]" id="pharmacy-out-for-delivery-count">{{ ongoing_orders_count|default:"0" }}</p>
-            <p class="text-[10px] text-[#1A73E8]"><a href="{% url 'orders' %}?status=confirmed" class="hover:underline">On the way →</a></p>
-        </div>
-        <div class="px-6">
-            <p class="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                <span class="material-symbols-outlined !text-lg text-green-500">schedule</span>Avg Response Time
-            </p>
-            <p class="mt-1 text-lg font-bold text-green-600">3 min</p>
-        </div>
+    <!-- bottom: owner + address + license -->
+    <div class="relative z-10 mt-5 space-y-1 pr-32 text-[11.3px] leading-4 text-white/95">
+        <p class="flex flex-wrap items-center gap-x-4 text-[13.7px] font-semibold text-white">
+            <span>🏪 MedPlus Pharmacy</span>
+            <span class="font-normal">{{ contact_person.name|default:"Rakesh Gupta" }} — {{ contact_person.role|default:"Owner" }}</span>
+        </p>
+        <p class="max-w-[640px] truncate">221/A, 2nd Floor, Shanti Nagar Road, Andheri East, Mumbai — 400093</p>
+        <p>License: {{ pharmacy_profile.license_number|default:"LIC-MH-20011" }}</p>
+        <p>GSTIN: {{ pharmacy_profile.gstin|default:"27ABCDE1234F1Z5" }}   Reg: {{ pharmacy_profile.license_number|default:"LIC-MH-20011" }}</p>
     </div>
 
-    <!-- 4. Overview -->
+    <a href="{% url 'settings_page' %}"
+       class="absolute bottom-5 right-5 z-10 rounded-lg border border-white/80 px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/10">
+        Edit Profile →
+    </a>
+</div>
+
+    <!-- 3. Overview + 5 stat cards -->
     <div id="pharmacy-overview" data-endpoint="{% url 'pharmacy_overview_data' %}" class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
-            <p class="text-sm font-bold">Overview <span id="pharmacy-overview-period" class="ml-2 text-[11px] font-normal text-slate-500">Today</span></p>
-            <div class="relative flex items-center gap-1.5 text-[10px]">
-                <button class="filterOption rounded-full bg-[#1A73E8] px-3 py-1 text-white" data-value="Today">Today</button>
-                <button class="filterOption rounded-full border border-[#E8EEF2] bg-white px-3 py-1 text-slate-600" data-value="Week">This Week</button>
-                <button class="filterOption rounded-full border border-[#E8EEF2] bg-white px-3 py-1 text-slate-600" data-value="Month">This Month</button>
-                <span class="calendar-icon material-symbols-outlined cursor-pointer !text-base text-slate-500">calendar_today</span>
+            <p class="text-[14px] font-bold">Overview <span id="pharmacy-overview-period" class="hidden">Today</span></p>
+            <div class="relative flex items-center gap-2 text-[14px]">
+                <button class="filterOption rounded-full bg-[#1A73E8] px-4 py-1.5 text-white" data-value="Today">Today</button>
+                <button class="filterOption rounded-full border border-[#E8EEF2] bg-white px-4 py-1.5 text-slate-600" data-value="Week">This Week</button>
+                <button class="filterOption rounded-full border border-[#E8EEF2] bg-white px-4 py-1.5 text-slate-600" data-value="Month">This Month</button>
+                <span class="calendar-icon material-symbols-outlined cursor-pointer !text-[20px] text-slate-500">calendar_today</span>
                 <div class="datepicker-container absolute right-0 top-full z-50 hidden rounded bg-white px-4 pb-3 shadow-md">
                     <div class="datepicker-inline"></div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div class="relative rounded-[12px] border border-[#E8EEF2] bg-white p-4">
-                <span class="material-symbols-outlined absolute right-4 top-4 !text-lg text-[#1A73E8]">package_2</span>
-                <p class="text-[11px] text-slate-500">Total Orders Today</p>
-                <p id="pharmacy-overview-total-orders" class="mt-1 text-3xl font-bold">{{ pharmacy_overview.total_orders }}</p>
-                <p class="mt-1 text-[10px] text-[#1A73E8]">🔵 <span id="pharmacy-overview-pending-orders">{{ pharmacy_overview.pending_orders }}</span> Pending · <span id="pharmacy-overview-confirmed-orders">{{ pharmacy_overview.confirmed_orders }}</span> Confirmed</p>
-            </div>
-            <div class="relative rounded-[12px] border border-[#E8EEF2] bg-white p-4">
-                <span class="material-symbols-outlined absolute right-4 top-4 !text-lg text-amber-500">pending_actions</span>
-                <p class="text-[11px] text-slate-500">Pending Requests</p>
-                <p class="mt-1 text-3xl font-bold">24</p>
-                <p class="mt-1 flex items-center gap-1 text-[10px] text-amber-500"><span class="material-symbols-outlined !text-sm">schedule</span>Respond before timer expires</p>
-            </div>
-            <div class="relative rounded-[12px] border border-[#E8EEF2] bg-white p-4">
-                <span class="material-symbols-outlined absolute right-4 top-4 !text-lg text-amber-400">star</span>
-                <p class="text-[11px] text-slate-500">Customer Rating</p>
-                <p class="mt-1 text-3xl font-bold">4.6</p>
-                <p class="mt-1 text-[10px] text-amber-500">★★★★½ Based on 218 reviews</p>
-            </div>
-        </div>
-        <!-- Kept hidden so pharmacy-overview.js can still update them -->
-        <div class="hidden"><span id="pharmacy-overview-total-stock">{{ pharmacy_overview.total_stock }}</span><span id="pharmacy-overview-available-stock">{{ pharmacy_overview.available_stock }}</span><span id="pharmacy-overview-low-stock">{{ pharmacy_overview.low_stock_medicines }}</span><span id="pharmacy-overview-revenue">{{ pharmacy_overview.revenue }}</span><span id="pharmacy-overview-prescription-revenue">{{ pharmacy_overview.prescription_revenue }}</span><span id="pharmacy-overview-otc-revenue">{{ pharmacy_overview.otc_revenue }}</span></div>
-    </div>
-
-    <!-- 5. Recent Orders + This Week -->
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
-        <div class="rounded-[12px] border border-[#E8EEF2] bg-white p-4">
-            <div class="mb-3 flex items-center justify-between">
-                <p class="text-sm font-bold">Recent Orders</p>
-                <a href="{% url 'orders' %}" class="text-[11px] text-[#1A73E8] hover:underline">View All →</a>
-            </div>
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                {% for order in recent_orders %}
-                <div class="order-card popup-btn cursor-pointer rounded-lg border border-[#E8EEF2] bg-white p-3 hover:shadow-sm transition-shadow"
-                     data-popup="order-details-popup" data-order-id="{{ order.id }}">
-                    <div class="flex flex-wrap items-center justify-between gap-1 text-[9px] font-medium">
-                        <span class="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-green-700">{{ order.delivery_label|default:"Home Delivery" }}</span>
-                        <span class="rounded-full px-2 py-0.5 font-semibold {% if order.order_status == 'delivered' %}bg-green-100 text-green-700{% elif order.order_status == 'shipped' %}bg-blue-100 text-blue-700{% else %}bg-amber-100 text-amber-700{% endif %}">{{ order.order_status_label }}</span>
-                    </div>
-                    <div class="mt-2 flex items-center justify-between">
-                        <p class="text-xs font-bold text-slate-900 truncate" title="{{ order.customer_name }}">
-                            {{ order.customer_name|default:"Customer" }}
-                        </p>
-                        <span class="text-[10px] font-semibold text-slate-400">Order #{{ order.id }}</span>
-                    </div>
-                    <p class="text-[10px] text-[#1A73E8] mt-0.5">{{ order.local_created_at|date:"d/m/Y, h:i A" }}</p>
-                    <img src="{% static 'images/sample-qr.png' %}" alt="Payment QR code" class="mt-1 h-8 w-8 rounded border border-blue-haze bg-white object-contain" />
-                    {% if order.medicines %}<p class="mt-1.5 text-[9px] leading-3 text-slate-500 truncate" title="{{ order.medicines }}">{{ order.medicines }}</p>{% endif %}
-                    {% if order.total_amount %}
-                    <p class="mt-1.5 text-[10px] font-semibold {% if order.payment_mode == 'Cash on Delivery' %}text-amber-500{% else %}text-green-600{% endif %}">
-                        ₹{{ order.total_amount }} · {{ order.payment_mode|default:"UPI Paid" }}{% if order.payment_mode != 'Cash on Delivery' %} ✅{% endif %}
-                    </p>
-                    {% else %}
-                    <p class="mt-1.5 text-[10px] text-slate-500">Order #{{ order.id }}</p>
-                    {% endif %}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <!-- Total Orders Today -->
+            <div class="rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+                <div class="flex items-start justify-between">
+                    <p class="text-[14px] text-slate-500">Total Orders Today</p>
+                    <span class="material-symbols-outlined !text-[20px] text-[#1A73E8]">package_2</span>
                 </div>
-                {% empty %}
-                <p class="col-span-3 py-6 text-center text-sm text-slate-500">No recent orders found.</p>
-                {% endfor %}
+                <p id="pharmacy-overview-total-orders" class="mt-3 text-[30px] font-bold leading-none">{{ pharmacy_overview.total_orders }}</p>
+                <p class="mt-2 text-[14px] leading-4 text-[#1A73E8]">🔵 <span id="pharmacy-overview-pending-orders">{{ pharmacy_overview.pending_orders }}</span> Pending · <span id="pharmacy-overview-confirmed-orders">{{ pharmacy_overview.confirmed_orders }}</span> Processing</p>
+            </div>
+            <!-- Pending Requests -->
+            <div class="rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+                <div class="flex items-start justify-between">
+                    <p class="text-[14px] text-slate-500">Pending Requests</p>
+                    <span class="material-symbols-outlined !text-[20px] text-amber-500">pending_actions</span>
+                </div>
+                <p class="mt-3 text-[30px] font-bold leading-none">24</p>
+                <p class="mt-2 flex items-center gap-1 text-[14px] leading-4 text-amber-500"><span class="material-symbols-outlined !text-[16px]">schedule</span>Respond before timer expires</p>
+            </div>
+            <!-- Out For Delivery -->
+            <div class="rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+                <div class="flex items-start justify-between">
+                    <p class="text-[14px] text-slate-500">Out For Delivery</p>
+                    <span class="material-symbols-outlined !text-[20px] text-[#1A73E8]">local_shipping</span>
+                </div>
+                <p id="pharmacy-out-for-delivery-count" class="mt-3 text-[30px] font-bold leading-none">{{ ongoing_orders_count|default:"0" }}</p>
+                <a href="{% url 'orders' %}?status=confirmed" class="mt-2 inline-block text-[14px] text-[#1A73E8] hover:underline">On the way →</a>
+            </div>
+            <!-- Customer Rating -->
+            <div class="rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+                <div class="flex items-start justify-between">
+                    <p class="text-[14px] text-slate-500">Customer Rating</p>
+                    <span class="material-symbols-outlined !text-[20px] text-amber-400">star</span>
+                </div>
+                <p class="mt-3 text-[30px] font-bold leading-none">4.6</p>
+                <p class="mt-2 text-[14px] leading-4 text-amber-500">★★★★½ Based on 218 reviews</p>
+            </div>
+            <!-- Avg Response Time -->
+            <div class="rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+                <div class="flex items-start justify-between">
+                    <p class="text-[14px] text-slate-500">Avg Response Time</p>
+                    <span class="material-symbols-outlined !text-[20px] text-green-500">schedule</span>
+                </div>
+                <p class="mt-3 text-[30px] font-bold leading-none">3 min</p>
             </div>
         </div>
 
-        <div class="rounded-[12px] border border-[#E8EEF2] bg-white p-4">
-            <div class="mb-3 flex items-center justify-between">
-                <p class="text-sm font-bold">This Week</p>
-                <p class="text-[9px] text-slate-500">16–22 Jul 2025</p>
-            </div>
-            <div class="grid grid-cols-2 text-[9px] text-slate-500">
-                <div class="border-b border-r border-[#E8EEF2] py-3 pl-2"><p class="text-lg font-bold text-green-600">48</p>Orders Won</div>
-                <div class="border-b border-[#E8EEF2] py-3 pl-4"><p class="text-lg font-bold text-red-600">2</p>Cancelled</div>
-                <div class="border-r border-[#E8EEF2] py-3 pl-2"><p class="text-lg font-bold text-[#1A73E8]">52</p>Bids Answered</div>
-                <div class="py-3 pl-4"><p class="text-lg font-bold text-slate-700">8</p>Docs Shared</div>
-            </div>
-            <p class="mt-3 text-[11px] font-bold">Target vs Actual</p>
-            <div class="mt-2 space-y-2.5 text-[9px] text-slate-600">
-                <div><div class="mb-1 flex justify-between"><span>Avg Delivery Time</span><span>28 min avg</span></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-3/5 rounded-full bg-amber-500"></div></div></div>
-                <div><div class="mb-1 flex justify-between"><span>Bid Conversion Rate</span><span>72%</span></div><div class="h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-[72%] rounded-full bg-[#1A73E8]"></div></div></div>
-            </div>
-        </div>
+        <!-- Kept hidden so pharmacy-overview.js and the live stats updater can still find their ids -->
+        <div class="hidden"><span id="pharmacy-wallet-balance">₹{{ wallet_balance|default:"0.00" }}</span><span id="pharmacy-active-bids-count">{{ active_bids|default:"0" }}</span><span id="pharmacy-today-orders-count">{{ today_orders_count|default:"0" }}</span><span id="pharmacy-today-orders-subtext"></span><span id="pharmacy-overview-total-stock">{{ pharmacy_overview.total_stock }}</span><span id="pharmacy-overview-available-stock">{{ pharmacy_overview.available_stock }}</span><span id="pharmacy-overview-low-stock">{{ pharmacy_overview.low_stock_medicines }}</span><span id="pharmacy-overview-revenue">{{ pharmacy_overview.revenue }}</span><span id="pharmacy-overview-prescription-revenue">{{ pharmacy_overview.prescription_revenue }}</span><span id="pharmacy-overview-otc-revenue">{{ pharmacy_overview.otc_revenue }}</span></div>
     </div>
 
-    <!-- 6. Inventory Alerts -->
-    <div class="rounded-[12px] border border-[#E8EEF2] bg-white p-4">
+  <!-- 4. Recent Orders + This Week -->
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-[1.45fr_1fr]">
+    <div class="rounded-[14px] border border-[#E8EEF2] bg-white p-4">
         <div class="mb-3 flex items-center justify-between">
-            <p class="flex items-center gap-2 text-sm font-bold text-amber-800">
-                <span class="material-symbols-outlined !text-base text-amber-600">warning</span>Inventory Alerts
-            </p>
-            <a href="{% url 'services' %}" class="text-xs text-[#1A73E8] hover:underline">View All Inventory →</a>
+            <p class="text-[14px] font-bold">Recent Orders</p>
+            <a href="{% url 'orders' %}" class="text-[14px] text-[#1A73E8] hover:underline">View all →</a>
         </div>
-        <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-            {% for alert in inventory_alerts %}
-            <div class="rounded-lg border-l-4 border-amber-500 {{ alert.card_bg }} p-3 text-xs flex flex-col justify-between">
-                <div>
-                    <span class="rounded-full bg-white px-2 py-0.5 text-[10px] {{ alert.badge_color }} font-semibold">{{ alert.status_badge }}</span>
-                    <p class="mt-2 font-bold text-slate-900 truncate" title="{{ alert.name }}">{{ alert.name }}</p>
-                    <p class="text-[10px] text-slate-500 truncate" title="{{ alert.details }}">{{ alert.details }}</p>
+
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {% for order in recent_orders|slice:":3" %}
+            <div class="order-card popup-btn cursor-pointer rounded-[10px] border border-[#E8EEF2] bg-white p-3.5 transition-shadow hover:shadow-sm"
+                 data-popup="order-details-popup" data-order-id="{{ order.id }}">
+                <div class="flex items-center justify-between gap-1 text-[11px] font-medium">
+                    <span class="rounded-full bg-green-50 px-2.5 py-1 text-green-700">{{ order.delivery_label|default:"Home Delivery" }}</span>
+                    <span class="rounded-full px-2.5 py-1 {% if order.order_status == 'delivered' %}bg-green-100 text-green-700{% elif order.order_status == 'shipped' %}bg-blue-100 text-blue-700{% else %}bg-amber-100 text-amber-700{% endif %}">{{ order.order_status_label|default:"Pending Pickup" }}</span>
                 </div>
-                <div class="mt-2 pt-1">
-                    <p class="mt-1 font-semibold {{ alert.badge_color }}">{{ alert.remaining_text }}</p>
-                    <a href="{% url 'services' %}" class="mt-1 inline-block text-[11px] {{ alert.badge_color }} hover:underline">Reorder Now →</a>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-span-1 lg:col-span-3 py-6 text-center text-xs text-slate-500 bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
-                <p class="font-semibold text-slate-700">No Inventory Alerts</p>
-                <p class="text-[11px] text-slate-400 mt-0.5">All medicines currently have sufficient stock levels.</p>
+                <p class="mt-3 truncate text-[14px] font-bold text-slate-900" title="{{ order.customer_name }}">{{ order.customer_name|default:"Customer" }}</p>
+                <p class="mt-1 text-[14px] text-[#1A73E8]">{{ order.local_created_at|date:"d/m/Y, h:i A" }}</p>
+                {% if order.medicines %}<p class="mt-2 line-clamp-2 text-[11.6px] leading-4 text-slate-500" title="{{ order.medicines }}">{{ order.medicines }}</p>{% endif %}
+                {% if order.total_amount %}
+                <p class="mt-3 text-[13px] font-semibold {% if order.payment_mode == 'Cash on Delivery' %}text-amber-500{% else %}text-green-600{% endif %}">
+                    ₹{{ order.total_amount }} · {{ order.payment_mode|default:"UPI Paid" }}{% if order.payment_mode != 'Cash on Delivery' %} ✅{% endif %}
+                </p>
+                {% else %}
+                <p class="mt-3 text-[14px] text-slate-500">Order #{{ order.id }}</p>
+                {% endif %}
             </div>
             {% endfor %}
+
+            {% if recent_orders|length < 3 %}
+            <div class="order-card popup-btn cursor-pointer rounded-[10px] border border-[#E8EEF2] bg-white p-3.5 transition-shadow hover:shadow-sm"
+                 data-popup="order-details-popup" data-order-id="101">
+                <div class="flex items-center justify-between gap-1 text-[11px] font-medium">
+                    <span class="rounded-full bg-green-50 px-2.5 py-1 text-green-700">Home Delivery</span>
+                    <span class="rounded-full bg-green-100 px-2.5 py-1 text-green-700">Delivered</span>
+                </div>
+                <p class="mt-3 truncate text-[14px] font-bold text-slate-900" title="Monica Singh">Monica Singh</p>
+                <p class="mt-1 text-[14px] text-[#1A73E8]">22/07/2025, 10:30 AM</p>
+                <p class="mt-2 line-clamp-2 text-[11.6px] leading-4 text-slate-500" title="Crocin 500mg × 3 · Vitamin C × 2">Crocin 500mg × 3 · Vitamin C × 2</p>
+                <p class="mt-3 text-[13px] font-semibold text-green-600">₹480 · UPI Paid ✅</p>
+            </div>
+            {% endif %}
+
+            {% if recent_orders|length < 2 %}
+            <div class="order-card popup-btn cursor-pointer rounded-[10px] border border-[#E8EEF2] bg-white p-3.5 transition-shadow hover:shadow-sm"
+                 data-popup="order-details-popup" data-order-id="102">
+                <div class="flex items-center justify-between gap-1 text-[11px] font-medium">
+                    <span class="rounded-full bg-green-50 px-2.5 py-1 text-green-700">Home Delivery</span>
+                    <span class="rounded-full bg-blue-100 px-2.5 py-1 text-blue-700">In Transit</span>
+                </div>
+                <p class="mt-3 truncate text-[14px] font-bold text-slate-900" title="Gaurav Sharma">Gaurav Sharma</p>
+                <p class="mt-1 text-[14px] text-[#1A73E8]">22/07/2025, 11:00 AM</p>
+                <p class="mt-2 line-clamp-2 text-[11.6px] leading-4 text-slate-500" title="Metformin 500mg × 1 · Pantop 40mg × 1">Metformin 500mg × 1 · Pantop 40mg × 1</p>
+                <p class="mt-3 text-[13px] font-semibold text-green-600">₹280 · UPI Paid ✅</p>
+            </div>
+            {% endif %}
+
+            {% if recent_orders|length < 1 %}
+            <div class="order-card popup-btn cursor-pointer rounded-[10px] border border-[#E8EEF2] bg-white p-3.5 transition-shadow hover:shadow-sm"
+                 data-popup="order-details-popup" data-order-id="103">
+                <div class="flex items-center justify-between gap-1 text-[11px] font-medium">
+                    <span class="rounded-full bg-green-50 px-2.5 py-1 text-green-700">Home Delivery</span>
+                    <span class="rounded-full bg-amber-100 px-2.5 py-1 text-amber-700">Pending Pickup</span>
+                </div>
+                <p class="mt-3 truncate text-[14px] font-bold text-slate-900" title="Priya Sharma">Priya Sharma</p>
+                <p class="mt-1 text-[14px] text-[#1A73E8]">22/07/2025, 11:30 AM</p>
+                <p class="mt-2 line-clamp-2 text-[11.6px] leading-4 text-slate-500" title="Amoxicillin 500mg × 2 · Paracetamol × 1">Amoxicillin 500mg × 2 · Paracetamol × 1</p>
+                <p class="mt-3 text-[13px] font-semibold text-amber-500">₹320 · Cash on Delivery</p>
+            </div>
+            {% endif %}
         </div>
     </div>
+
+    <div class="rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+        <div class="mb-3 flex items-center justify-between">
+            <p class="text-[14px] font-bold">This Week</p>
+            <p class="text-[14px] text-slate-500">16–22 Jul 2025</p>
+        </div>
+        <div class="grid grid-cols-2 text-[14px] text-slate-500">
+            <div class="border-b border-[#E8EEF2] px-3 py-4"><p class="text-[18px] font-bold text-green-600">48</p>Orders Won</div>
+            <div class="border-b border-[#E8EEF2] px-3 py-4"><p class="text-[18px] font-bold text-red-600">2</p>Cancelled</div>
+            <div class="border-b border-[#E8EEF2] px-3 py-4"><p class="text-[18px] font-bold text-[#1A73E8]">52</p>Bids Answered</div>
+            <div class="border-b border-[#E8EEF2] px-3 py-4"><p class="text-[18px] font-bold text-slate-700">8</p>Docs Shared</div>
+        </div>
+    </div>
+</div>
+
+    <!-- 5. Target vs Actual -->
+<div class="flex flex-col gap-3 rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+    <p class="text-[14px] font-bold text-slate-900">Target vs Actual</p>
+    <div>
+        <div class="mb-1.5 flex items-center justify-between text-[14px]">
+            <span class="text-slate-600">Avg Delivery Time</span>
+            <span class="font-medium text-slate-700">28 min avg</span>
+        </div>
+        <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-200/75">
+            <div class="h-2.5 w-[62%] rounded-full bg-amber-500"></div>
+        </div>
+    </div>
+    <div>
+        <div class="mb-1.5 flex items-center justify-between text-[14px]">
+            <span class="text-slate-600">Bid Conversion Rate</span>
+            <span class="font-medium text-slate-700">72%</span>
+        </div>
+        <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-200/75">
+            <div class="h-2.5 w-[72%] rounded-full bg-[#1A73E8]"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. Inventory Alerts -->
+<div class="rounded-[14px] border border-[#E8EEF2] bg-white p-4">
+    <div class="mb-3 flex items-center justify-between">
+        <p class="flex items-center gap-2 text-[14px] font-bold text-amber-800">
+            <span class="material-symbols-outlined !text-[18px] text-amber-600">info</span>Inventory Alerts
+        </p>
+        <a href="{% url 'services' %}" class="text-[14px] text-[#1A73E8] hover:underline">View all inventory →</a>
+    </div>
+
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        {% for alert in inventory_alerts|slice:":3" %}
+        <div class="flex flex-col justify-between rounded-[10px] border-l-4 border-amber-500 {{ alert.card_bg|default:'bg-amber-50/70' }} p-4">
+            <div>
+                <span class="inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-medium shadow-[0_1px_2px_rgba(0,0,0,0.03)] {{ alert.badge_color|default:'text-amber-600' }}">
+                    {{ alert.status_badge|default:"Low Stock" }}
+                </span>
+                <p class="mt-3 truncate text-[14px] font-bold text-slate-900" title="{{ alert.name }}">{{ alert.name }}</p>
+                <p class="mt-0.5 truncate text-[14px] text-slate-500" title="{{ alert.details }}">{{ alert.details }}</p>
+            </div>
+            <div class="mt-3">
+                <p class="text-[14px] font-semibold {{ alert.badge_color|default:'text-amber-600' }}">{{ alert.remaining_text }}</p>
+                <a href="{% url 'services' %}" class="mt-1 inline-block text-[14px] font-medium {{ alert.badge_color|default:'text-amber-600' }} hover:underline">Reorder Now →</a>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if inventory_alerts|length < 3 %}
+        <div class="flex flex-col justify-between rounded-[10px] border-l-4 border-amber-500 bg-[#FFFDF2] p-4">
+            <div>
+                <span class="inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-amber-600 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">Low Stock</span>
+                <p class="mt-3 truncate text-[14px] font-bold text-slate-900">Crocin 500mg Tablet</p>
+                <p class="mt-0.5 truncate text-[14px] text-slate-500">GSK Pharma · Pain Relief</p>
+            </div>
+            <div class="mt-3">
+                <p class="text-[14px] font-semibold text-amber-600">12 strips remaining</p>
+                <a href="{% url 'services' %}" class="mt-1 inline-block text-[14px] font-medium text-amber-600 hover:underline">Reorder Now →</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if inventory_alerts|length < 2 %}
+        <div class="flex flex-col justify-between rounded-[10px] border-l-4 border-amber-500 bg-[#FFF7F5] p-4">
+            <div>
+                <span class="inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-red-600 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">Critical</span>
+                <p class="mt-3 truncate text-[14px] font-bold text-slate-900">Metformin 500mg</p>
+                <p class="mt-0.5 truncate text-[14px] text-slate-500">Sun Pharma · Diabetes</p>
+            </div>
+            <div class="mt-3">
+                <p class="text-[14px] font-semibold text-red-600">3 strips remaining</p>
+                <a href="{% url 'services' %}" class="mt-1 inline-block text-[14px] font-medium text-red-600 hover:underline">Reorder Now →</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if inventory_alerts|length < 1 %}
+        <div class="flex flex-col justify-between rounded-[10px] border-l-4 border-amber-500 bg-[#FFF7F5] p-4">
+            <div>
+                <span class="inline-block rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-red-600 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">Out of Stock</span>
+                <p class="mt-3 truncate text-[14px] font-bold text-slate-900">Insulin Glargine 100IU</p>
+                <p class="mt-0.5 truncate text-[14px] text-slate-500">Sanofi · Diabetes</p>
+            </div>
+            <div class="mt-3">
+                <p class="text-[14px] font-semibold text-red-600">0 units</p>
+                <a href="{% url 'services' %}" class="mt-1 inline-block text-[14px] font-medium text-red-600 hover:underline">Reorder Now →</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
     <!-- 7. Order Requests -->
-    <div class="overflow-hidden rounded-[12px] border border-[#E8EEF2] bg-white">
-        <div class="flex items-center justify-between p-4">
-            <p class="text-sm font-bold">Order Requests</p>
-            <a href="{% url 'orders' %}" class="text-xs text-[#1A73E8] hover:underline">View All →</a>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[980px] text-left text-[11px]">
-                <thead class="text-[10px] uppercase text-slate-500 bg-slate-50/70 border-b border-[#E8EEF2]">
-                    <tr>
-                        <th class="px-4 py-2.5 font-medium">Customer</th>
-                        <th class="px-4 py-2.5 font-medium">Medicines Requested</th>
-                        <th class="px-4 py-2.5 font-medium">Date &amp; Time</th>
-                        <th class="px-4 py-2.5 font-medium">Delivery</th>
-                        <th class="px-4 py-2.5 font-medium">Prescription</th>
-                        <th class="px-4 py-2.5 font-medium">Urgency</th>
-                        <th class="px-4 py-2.5 font-medium">Budget</th>
-                        <th class="px-4 py-2.5 font-medium">Timer</th>
-                        <th class="px-4 py-2.5 font-medium">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="pharmacy-order-requests-tbody" class="divide-y divide-[#E8EEF2]">
-                    {% for order in order_requests %}
-                    <tr class="hover:bg-slate-50/60 transition-colors" id="order-row-{{ order.id }}" data-order-id="{{ order.id }}">
-                        <td class="px-4 py-2.5">
-                            <div class="flex items-center gap-2">
-                                <span class="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold text-white {{ order.avatar_color }}">{{ order.customer_initials }}</span>
-                                <div>
-                                    <p class="font-semibold text-slate-900">{{ order.customer_name }}</p>
-                                    <p class="text-[10px] text-slate-500">Order #{{ order.id }}{% if order.notes %} · {{ order.notes|truncatechars:18 }}{% endif %}</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-4 py-2.5 text-slate-600 font-medium">{{ order.medicines_summary }}</td>
-                        <td class="whitespace-nowrap px-4 py-2.5 text-slate-500">{{ order.local_created_at|date:"d/m h:i A" }}</td>
-                        <td class="px-4 py-2.5">
-                            <span class="rounded-full px-2 py-0.5 text-[10px] font-medium
-                                {% if order.delivery_label == 'Store Pickup' %}bg-blue-50 text-[#1A73E8]{% else %}bg-green-50 text-green-700{% endif %}">
-                                {{ order.delivery_label }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-2.5">
-                            {% if order.has_prescription %}
-                            <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">Required</span>
-                            {% else %}
-                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Not Req</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-4 py-2.5">
-                            {% if order.urgency == 'Emergency' %}
-                            <span class="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-600">Emergency</span>
-                            {% else %}
-                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">Normal</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-4 py-2.5 font-bold text-slate-900">₹{{ order.budget }}</td>
-                        <td class="px-4 py-2.5 timer-col">
-                            {% if order.is_bid_placed %}
-                            <span class="rounded-full bg-blue-50 px-2 py-0.5 text-[#1A73E8] font-medium whitespace-nowrap">Bid Sent</span>
-                            {% else %}
-                            <span class="flex items-center gap-1 font-semibold text-amber-600">
-                                <span class="material-symbols-outlined !text-xs">timer</span> 14m left
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td class="px-4 py-2.5 actions-col">
-                            <div class="flex items-center gap-2">
-                                <button type="button"
-                                        class="pharmacy-view-order-btn flex items-center justify-center p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-[#1A73E8] transition-colors cursor-pointer"
-                                        data-order-id="{{ order.id }}"
-                                        title="View Order Details">
-                                    <span class="material-symbols-outlined !text-base">visibility</span>
-                                </button>
-                                {% if order.is_bid_placed %}
-                                <button type="button"
-                                        class="rounded-md border border-slate-300 bg-slate-50 px-3 py-1 text-slate-400 cursor-not-allowed text-[11px] font-medium"
-                                        disabled>
-                                    Bid Sent
-                                </button>
-                                {% else %}
-                                <button type="button"
-                                        class="pharmacy-bid-btn rounded-md border border-[#1A73E8] bg-white px-3 py-1 text-[#1A73E8] hover:bg-[#1A73E8] hover:text-white transition-colors cursor-pointer text-[11px] font-semibold"
-                                        data-order-id="{{ order.id }}"
-                                        data-customer-name="{{ order.customer_name }}"
-                                        data-budget="{{ order.budget }}"
-                                        data-medicines="{{ order.medicines_summary }}">
-                                    Submit Bid
-                                </button>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="9" class="py-8 text-center text-xs text-slate-400">
-                            No pending order requests found.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="overflow-hidden rounded-[14px] border border-[#E8EEF2] bg-white">
+    <div class="flex items-center justify-between p-4">
+        <p class="text-[14px] font-bold">Order Requests</p>
+        <a href="{% url 'orders' %}" class="text-[14px] text-[#1A73E8] hover:underline">View all →</a>
     </div>
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[1000px] text-center">
+            <thead class="bg-[#0A84FF] text-white">
+                <tr class="text-[14px] font-medium uppercase">
+                    <th class="px-4 py-3.5 text-left font-medium">Customer</th>
+                    <th class="px-3 py-3.5 font-medium">Medicines Requested</th>
+                    <th class="px-3 py-3.5 font-medium">Date & Time</th>
+                    <th class="px-3 py-3.5 font-medium">Delivery</th>
+                    <th class="px-3 py-3.5 font-medium">Prescription</th>
+                    <th class="px-3 py-3.5 font-medium">Urgency</th>
+                    <th class="px-3 py-3.5 font-medium">Budget</th>
+                    <th class="px-3 py-3.5 font-medium">Timer</th>
+                    <th class="px-3 py-3.5 font-medium">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="pharmacy-order-requests-tbody" class="divide-y divide-[#E8EEF2] text-[14px]">
+                {% for order in order_requests %}
+                <tr class="transition-colors even:bg-slate-50/70 hover:bg-slate-50" id="order-row-{{ order.id }}" data-order-id="{{ order.id }}">
+                    <td class="px-4 py-2.5 text-left">
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[14px] font-semibold text-white {{ order.avatar_color }}">{{ order.customer_initials }}</span>
+                            <div class="min-w-0">
+                                <p class="truncate text-[14px] font-bold text-slate-900">{{ order.customer_name }}</p>
+                                <p class="truncate text-[9px] leading-3 text-slate-500">{% if order.notes %}{{ order.notes|truncatechars:22 }}{% else %}Order #{{ order.id }}{% endif %}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-3 py-2.5 text-[14px] text-slate-600">{{ order.medicines_summary }}</td>
+                    <td class="whitespace-nowrap px-3 py-2.5 text-[14px] text-slate-700">{{ order.local_created_at|date:"d/m h:i A" }}</td>
+                    <td class="px-3 py-2.5">
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined !text-[18px] text-slate-500">local_shipping</span>
+                            <div class="text-left leading-4">
+                                <p class="text-[14px] font-medium text-slate-800">{{ order.delivery_label|default:"Home Delivery" }}</p>
+                                <p class="text-[9px] leading-3 text-slate-400">{{ order.distance|default:"12" }} Km Away</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-3 py-2.5">
+                        {% if order.has_prescription %}
+                        <span class="rounded-full bg-red-50 px-3 py-1 text-[9px] font-medium text-red-600">Required</span>
+                        {% else %}
+                        <span class="rounded-full bg-slate-100 px-3 py-1 text-[9px] font-medium text-slate-500">Not Required</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-3 py-2.5">
+                        {% if order.urgency == 'Emergency' %}
+                        <span class="rounded-full bg-red-50 px-3 py-1 text-[9px] font-semibold text-red-600">Emergency</span>
+                        {% else %}
+                        <span class="rounded-full bg-slate-100 px-3 py-1 text-[9px] font-medium text-slate-600">Normal</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-3 py-2.5 text-[14px] font-bold text-[#1A73E8]">₹{{ order.budget }}</td>
+                    <td class="timer-col px-3 py-2.5">
+                        {% if order.is_bid_placed %}
+                        <span class="whitespace-nowrap rounded-full bg-blue-50 px-3 py-1 text-[9px] font-medium text-[#1A73E8]">Bid Sent</span>
+                        {% else %}
+                        <span class="text-[14px] font-semibold text-green-600">14m left</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions-col px-3 py-2.5">
+                        <div class="flex items-center justify-center">
+                            <button type="button"
+                                    class="pharmacy-view-order-btn flex cursor-pointer items-center justify-center rounded p-1 text-[#1A73E8] transition-colors hover:bg-slate-100"
+                                    data-order-id="{{ order.id }}" title="View Order Details">
+                                <span class="material-symbols-outlined !text-[20px]">visibility</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="py-8 text-center text-[14px] text-slate-400">No pending order requests found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
     <!-- 8. Market Trends -->
-    <div class="flex flex-col gap-3 rounded-[12px] border border-[#E8EEF2] bg-white p-4">
+    <div class="flex flex-col gap-3 rounded-[14px] border border-[#E8EEF2] bg-white p-4">
         <div class="flex items-center justify-between">
-            <p class="flex items-center gap-2 text-xs font-bold">
-                <span class="material-symbols-outlined !text-base text-[#1A73E8]">bar_chart</span>Market Trends — Pharmacy Insights
+            <p class="flex items-center gap-2 text-[14px] font-bold">
+                <span class="material-symbols-outlined !text-[18px] text-[#1A73E8]">bar_chart</span>Market Trends — Pharmacy Insights
             </p>
-            <a href="#" class="text-[11px] font-medium text-[#1A73E8]">₹200 →</a>
+            <a href="#" class="text-[13px] font-medium text-[#1A73E8]">₹200 →</a>
         </div>
-        <ul class="flex flex-col gap-2 text-[11px] text-slate-600">
+        <ul class="flex flex-col gap-2 text-[14px] text-slate-600">
             <li class="flex items-center gap-2">
-                <span class="material-symbols-outlined !text-base text-green-600">check_circle</span>
+                <span class="material-symbols-outlined !text-[18px] text-green-600">check_box</span>
                 <span>Top requested medicines in your area: <b class="text-slate-900">Crocin 500mg · Metformin 500mg · Vitamin D3</b></span>
             </li>
             <li class="flex items-center gap-2">
-                <span class="material-symbols-outlined !text-base text-green-600">check_circle</span>
+                <span class="material-symbols-outlined !text-[18px] text-green-600">check_box</span>
                 <span>Avg winning bid by Pharmacy: <b class="text-slate-900">₹320 per medicine order</b></span>
             </li>
             <li class="flex items-center gap-2">
-                <span class="material-symbols-outlined !text-base text-green-600">check_circle</span>
+                <span class="material-symbols-outlined !text-[18px] text-green-600">check_box</span>
                 <span>Most popular delivery mode this week: <b class="text-slate-900">Home Delivery (+24%)</b></span>
             </li>
         </ul>
-        <a href="{% url 'reports' %}" class="mt-1 flex items-center justify-center w-full rounded-md bg-[#1A73E8] hover:bg-blue-600 py-2.5 text-xs font-bold text-white transition-colors">
+        <a href="{% url 'reports' %}" class="mt-1 flex w-full items-center justify-center rounded-lg bg-[#1A73E8] py-3 text-[14px] font-bold text-white transition-colors hover:bg-blue-600">
             View Full Insights Report →
         </a>
     </div>
+
 
     <!-- Order Details Popup (logic/IDs unchanged) -->
     <div class="popup-overlay fixed inset-0 z-50 flex hidden items-center justify-center bg-black/40 px-3"
