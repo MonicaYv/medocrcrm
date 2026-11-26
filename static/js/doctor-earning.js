@@ -1,12 +1,12 @@
-  /* Earnings & payout page. Static data below is sample data; replace the arrays with
-   backend/API responses. All styling uses Tailwind classes only (full literal class
-   strings so the Tailwind scanner can find them - add this file to your content paths). */
+/* Earnings page. Data below is sample data; replace the arrays with backend/API responses.
+   Styling uses Tailwind classes only (full literal class strings so the Tailwind scanner
+   can find them - add this file to your Tailwind content paths). */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
 
   var MODE = {
-    "Clinic Visit": "bg-emerald-50 text-emerald-600",
+    "Clinic Visit": "bg-green-50 text-kyc-green",
     "Video Call": "bg-green-50 text-kyc-green",
     "Voice Call": "bg-purple-50 text-purple-600",
     "Home Visit": "bg-orange-50 text-instant-orange",
@@ -14,30 +14,21 @@
   };
   var STATUS = {
     Settled: "bg-green-50 text-kyc-green",
-    Missed: "bg-slate-200 text-grayish-blue-slate",
-    Paid: "bg-green-50 text-kyc-green",
-    Processing: "bg-amber-50 text-yellow-600",
-    Pending: "bg-amber-50 text-yellow-600",
-    Failed: "bg-red-50 text-red-500"
+    Missed: "bg-slate-200 text-grayish-blue-slate"
   };
-  var PILL = {
-    Paid: "bg-green-50 text-kyc-green border-green-200",
-    Processing: "bg-amber-50 text-yellow-600 border-yellow-200",
-    Pending: "bg-amber-50 text-yellow-600 border-yellow-200",
-    Failed: "bg-red-50 text-red-500 border-red-200"
-  };
-  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   var TAB_ON = "text-shazam-blue border-shazam-blue font-medium";
   var TAB_OFF = "text-slate-600 border-transparent font-normal";
-  var RANGE_ON = "bg-white text-dark-inky-blue shadow-sm font-medium";
+  var EYE = '<svg class="w-5 h-5 text-shazam-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 
   function toggle(el, on, onCls, offCls) {
     onCls.split(" ").forEach(function (c) { el.classList.toggle(c, on); });
     offCls.split(" ").forEach(function (c) { el.classList.toggle(c, !on); });
   }
   function chip(map, label) {
-    return '<span class="inline-block text-[10px] px-2.5 py-1 rounded-md ' + map[label] + '">' + label + "</span>";
+    return '<span class="inline-block text-[12px] px-2.5 py-1 rounded-full ' + map[label] + '">' + label + "</span>";
   }
+  function inr(n) { return "₹" + n.toLocaleString("en-IN"); }
+  function ini(n) { return n.split(" ").map(function (w) { return w[0]; }).join("").slice(0, 2); }
   function toast(msg) {
     var t = $("#erToast");
     t.textContent = msg;
@@ -45,243 +36,192 @@
     clearTimeout(toast.h);
     toast.h = setTimeout(function () { t.classList.add("hidden"); }, 2400);
   }
-  var EYE = '<svg class="w-[18px] h-[18px] text-shazam-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
-  var DL = '<svg class="w-[18px] h-[18px] text-kyc-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>';
-
-  /* ---------- tabs ---------- */
-  $("#erTabs").addEventListener("click", function (e) {
-    var b = e.target.closest(".er-tab");
-    if (!b) return;
-    $$(".er-tab").forEach(function (t) { toggle(t, t === b, TAB_ON, TAB_OFF); });
-    $$("[data-pane]").forEach(function (p) { p.classList.toggle("hidden", p.id !== "er-" + b.dataset.tab); });
-  });
-
-  /* ---------- auto bid toggle ---------- */
-  $("#erAutoBid").addEventListener("click", function (e) {
-    var b = e.currentTarget;
-    var on = b.getAttribute("aria-pressed") !== "true";
-    b.setAttribute("aria-pressed", on ? "true" : "false");
-    toast("Auto Bid " + (on ? "enabled" : "disabled"));
-  });
-
-  /* ---------- earnings trend (SVG built with Tailwind classes) ---------- */
-  var SERIES = {
-    daily:   { gross: [3.2, 5.1, 4.4, 6.8, 5.2, 7.4, 6.1], net: [2.8, 4.5, 3.9, 6.0, 4.6, 6.5, 5.4], labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-    weekly:  { gross: [22, 31, 27, 36], net: [19, 27, 24, 32], labels: ["Wk 1", "Wk 2", "Wk 3", "Wk 4"] },
-    monthly: { gross: [3, 5.5, 4.6, 7.2, 8.4, 6.8, 7.6, 5.2, 6.4, 8, 7.2, 8.6, 7.4, 6.9, 7.8, 7.1], net: [2.6, 4.8, 4, 6.3, 7.3, 6, 6.7, 4.5, 5.6, 7, 6.3, 7.5, 6.5, 6, 6.8, 6.2], labels: ["Jul 1", "", "", "", "Jul 8", "", "", "", "Jul 15", "", "", "", "Jul 22", "", "", ""] }
-  };
-  var W = 560, H = 210, PL = 34, PR = 8, PT = 10, PB = 24;
-
-  function path(data, max, close) {
-    var n = data.length, step = (W - PL - PR) / (n - 1), pts = data.map(function (v, i) {
-      return [PL + i * step, PT + (H - PT - PB) * (1 - v / max)];
-    });
-    var d = "M" + pts.map(function (p) { return p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" L");
-    return close ? { d: d, pts: pts } : d;
-  }
-  function drawChart(key) {
-    var s = SERIES[key], max = Math.ceil(Math.max.apply(null, s.gross) / 2) * 2, i, out = "";
-    for (i = 0; i <= 4; i++) {
-      var y = PT + (H - PT - PB) * (i / 4);
-      out += '<line x1="' + PL + '" x2="' + (W - PR) + '" y1="' + y + '" y2="' + y + '" class="stroke-slate-100"/>' +
-        '<text x="' + (PL - 6) + '" y="' + (y + 3) + '" text-anchor="end" class="fill-slate-400 text-[9px]">' + (i === 4 ? "0" : Math.round(max * (1 - i / 4)) + "k") + "</text>";
-    }
-    var g = path(s.gross, max, true), n = path(s.net, max, true), base = H - PB;
-    out += '<path d="' + g.d + " L" + g.pts[g.pts.length - 1][0] + " " + n.pts[n.pts.length - 1][1] +
-      " " + n.d.replace(/^M/, "L").split(" L").reverse().join(" L") + ' Z" class="fill-yellow-100/80"/>';
-    out += '<path d="' + n.d + " L" + n.pts[n.pts.length - 1][0] + " " + base + " L" + n.pts[0][0] + " " + base + ' Z" class="fill-green-50"/>';
-    out += '<path d="' + g.d + '" class="fill-none stroke-facebook-blue stroke-2"/><path d="' + n.d + '" class="fill-none stroke-kyc-green stroke-2"/>';
-    s.labels.forEach(function (l, i2) {
-      if (l) out += '<text x="' + (PL + i2 * ((W - PL - PR) / (s.labels.length - 1))) + '" y="' + (H - 6) + '" text-anchor="middle" class="fill-grayish-blue-slate text-[9px]">' + l + "</text>";
-    });
-    $("#erChart").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" class="w-full h-auto">' + out + "</svg>";
-  }
-  $("#erRange").addEventListener("click", function (e) {
-    var b = e.target.closest(".er-range");
-    if (!b) return;
-    $$(".er-range").forEach(function (r) { toggle(r, r === b, RANGE_ON, "text-slate-600"); });
-    drawChart(b.dataset.range);
-  });
-
-  /* ---------- transactions ---------- */
-  var TXN = [
-    ["TXN-20001", "APT-3312", "22 Jul", "Rachel Kate", "Clinic Visit", 400, 48, "PAY-8801", "Settled", "10:30 AM", "10:35 AM"],
-    ["TXN-20000", "APT-3311", "22 Jul", "Joleen Smith", "Hospital", 800, 96, "PAY-8801", "Settled", "11:00 AM", "11:05 AM"],
-    ["TXN-19999", "APT-3309", "22 Jul", "Arjun Mehta", "Video Call", 300, 36, "PAY-8801", "Settled", "12:00 PM", "12:05 PM"],
-    ["TXN-19998", "APT-3308", "22 Jul", "Priya Sharma", "Clinic Visit", 400, 48, "PAY-8801", "Settled", "12:30 PM", "12:35 PM"],
-    ["TXN-19997", "APT-3307", "22 Jul", "Mohan Das", "Voice Call", 150, 18, "PAY-8801", "Settled", "01:00 PM", "01:05 PM"],
-    ["TXN-19996", "APT-3306", "22 Jul", "Nisha Kapoor", "Video Call", 250, 30, "PAY-8801", "Settled", "02:00 PM", "02:05 PM"],
-    ["TXN-19995", "APT-3305", "22 Jul", "Steve Lamark", "Home Visit", 550, 66, "PAY-8801", "Settled", "03:00 PM", "03:05 PM"],
-    ["TXN-19994", "APT-3304", "22 Jul", "Dolly Paris", "Hospital", 0, 0, "", "Missed", "", ""],
-    ["TXN-19993", "APT-3303", "22 Jul", "Josh Kerr", "Video Call", 300, 36, "PAY-8801", "Settled", "04:00 PM", "04:05 PM"],
-    ["TXN-19992", "APT-3302", "22 Jul", "Karen Cooper", "Home Visit", 700, 84, "PAY-8801", "Settled", "05:00 PM", "05:05 PM"]
-  ];
-  function inr(n) { return "₹" + n.toLocaleString("en-IN"); }
-  function ini(n) { return n.split(" ").map(function (w) { return w[0]; }).join("").slice(0, 2); }
-
-  $("#erTxnRows").innerHTML = TXN.map(function (t, i) {
-    var missed = t[8] === "Missed", net = t[5] - t[6];
-    return '<tr class="border-b border-slate-100 text-[12px]">' +
-      '<td class="px-4 py-3.5 text-slate-700">' + t[0].replace("-", "–") + "</td>" +
-      '<td class="px-3 text-shazam-blue">' + t[1].replace("-", "–") + "</td>" +
-      '<td class="px-3 text-slate-700">' + t[2] + "</td>" +
-      '<td class="px-3"><span class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-shazam-blue text-white text-[9px] font-semibold flex items-center justify-center">' + ini(t[3]) + "</span>" + t[3] + "</span></td>" +
-      '<td class="px-3 text-center">' + chip(MODE, t[4]) + "</td>" +
-      '<td class="px-3 text-center">' + inr(t[5]) + "</td>" +
-      '<td class="px-3 text-center ' + (missed ? "text-slate-700" : "text-red-500") + '">' + (missed ? "₹0" : "-" + inr(t[6])) + "</td>" +
-      '<td class="px-3 text-center font-semibold ' + (missed ? "text-slate-700" : "text-kyc-green") + '">' + inr(net) + "</td>" +
-      '<td class="px-3 text-center text-shazam-blue">' + (t[7] ? t[7].replace("-", "–") : "–") + "</td>" +
-      '<td class="px-3 text-center">' + chip(STATUS, t[8]) + "</td>" +
-      '<td class="px-3 text-center"><button type="button" data-txn="' + i + '" title="View">' + EYE + "</button></td></tr>";
-  }).join("");
-
-  /* ---------- payout history: search + filters + table ---------- */
-  var PAYOUTS = [
-    { id: "PAY-8802", date: "2026-07-29", bank: "HDFC ****4521", n: 8, gross: 3500, status: "Processing" },
-    { id: "PAY-8801", date: "2026-07-22", bank: "HDFC ****4521", n: 12, gross: 5400, status: "Paid" },
-    { id: "PAY-8790", date: "2026-07-15", bank: "HDFC ****4521", n: 14, gross: 6200, status: "Paid" },
-    { id: "PAY-8776", date: "2026-07-08", bank: "HDFC ****4521", n: 10, gross: 4600, status: "Paid" },
-    { id: "PAY-8761", date: "2026-07-01", bank: "HDFC ****4521", n: 9, gross: 3900, status: "Paid" }
-  ];
-  var STATUS_OPTS = ["All Status", "Paid", "Processing", "Pending", "Failed"];
-  var PF = { q: "", status: "All Status", from: "", to: "" };
-  var OPT = "block w-full text-left text-[13px] px-3 py-2 rounded-lg hover:bg-blue-50 hover:text-shazam-blue ";
-
-  function fmtD(iso) { var p = iso.split("-"); return +p[2] + " " + MONTHS[+p[1] - 1] + " " + p[0]; }
-  function comm(p) { return Math.round(p.gross * 0.12); }
-  function netOf(p) { return p.gross - comm(p); }
-
-  function renderPayouts() {
-    var list = PAYOUTS.filter(function (p) {
-      if (PF.q && p.id.toLowerCase().indexOf(PF.q.toLowerCase()) < 0) return false;
-      if (PF.status !== "All Status" && p.status !== PF.status) return false;
-      if (PF.from && p.date < PF.from) return false;
-      if (PF.to && p.date > PF.to) return false;
-      return true;
-    });
-    $("#erPayoutRows").innerHTML = list.length ? list.map(function (p) {
-      return '<tr class="border-b border-slate-100"><td class="px-5 py-3.5 text-shazam-blue font-medium">' + p.id.replace("-", "–") + '</td><td class="px-3 text-center">' + fmtD(p.date) + '</td><td class="px-3 text-center">' + p.bank + '</td><td class="px-3 text-center">' + p.n + '</td><td class="px-3 text-center font-semibold text-kyc-green">' + inr(netOf(p)) + '</td><td class="px-3 text-center">' + chip(STATUS, p.status) + '</td><td class="px-3 text-center"><button type="button" data-pay="' + p.id + '" title="View payout">' + EYE + "</button></td></tr>";
-    }).join("") : '<tr><td colspan="7" class="text-center text-[13px] text-grayish-blue-slate py-10">No payouts match. Change the search or filters to see more.</td></tr>';
-    $("#erPayoutCount").textContent = "Showing " + list.length + " of " + PAYOUTS.length;
-    $("#erStatusLabel").textContent = PF.status;
-    $("#erDateLabel").textContent = PF.from || PF.to ? (PF.from ? fmtD(PF.from) : "Any") + " – " + (PF.to ? fmtD(PF.to) : "Any") : "Date Range";
-  }
-  function buildStatusMenu() {
-    $("#erStatusMenu").innerHTML = STATUS_OPTS.map(function (o) {
-      return '<button type="button" data-status="' + o + '" class="' + OPT + (o === PF.status ? "bg-blue-50 text-shazam-blue" : "text-slate-800") + '">' + o + "</button>";
-    }).join("");
-  }
-  $("#erPayoutSearch").addEventListener("input", function (e) { PF.q = e.target.value.trim(); renderPayouts(); });
-  $("#erStatusBtn").addEventListener("click", function () { $("#erDatePop").classList.add("hidden"); $("#erStatusMenu").classList.toggle("hidden"); });
-  $("#erStatusMenu").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-status]");
-    if (!b) return;
-    PF.status = b.dataset.status;
-    $("#erStatusMenu").classList.add("hidden");
-    buildStatusMenu();
-    renderPayouts();
-  });
-  $("#erDateBtn").addEventListener("click", function () { $("#erStatusMenu").classList.add("hidden"); $("#erDatePop").classList.toggle("hidden"); });
-  $("#erDateCancel").addEventListener("click", function () { $("#erDatePop").classList.add("hidden"); });
-  $("#erDateApply").addEventListener("click", function () {
-    var f = $("#erFrom").value, t = $("#erTo").value;
-    if (f && t && f > t) { toast("'From' date must be before 'To' date"); return; }
-    PF.from = f; PF.to = t;
-    $("#erDatePop").classList.add("hidden");
-    renderPayouts();
-  });
-  $("#erPayoutReset").addEventListener("click", function () {
-    PF = { q: "", status: "All Status", from: "", to: "" };
-    $("#erPayoutSearch").value = ""; $("#erFrom").value = ""; $("#erTo").value = "";
-    buildStatusMenu();
-    renderPayouts();
-  });
-  document.addEventListener("click", function (e) {
-    if (!e.target.closest("#erStatusBtn, #erStatusMenu")) $("#erStatusMenu").classList.add("hidden");
-    if (!e.target.closest("#erDateBtn, #erDatePop")) $("#erDatePop").classList.add("hidden");
-  });
-  buildStatusMenu();
-  renderPayouts();
-
-  /* ---------- payout details popup ---------- */
-  var CARD = "rounded-xl border border-slate-200 p-4 mb-3";
-  function row(label, val, valCls) {
-    return '<div class="flex justify-between py-1.5 text-[12px]"><span class="text-slate-600">' + label + '</span><span class="' + (valCls || "text-dark-inky-blue") + ' font-semibold">' + val + "</span></div>";
-  }
-  function dot(color, label, time) {
-    return '<li class="flex items-center gap-2.5 text-[12px]"><i class="w-2 h-2 rounded-full ' + color + '"></i><b class="font-semibold text-dark-inky-blue">' + label + '</b><span class="ml-auto text-slate-400 text-[11px]">' + time + "</span></li>";
-  }
-  var curPay = null;
-  function openPayout(p) {
-    curPay = p;
-    var paid = p.status === "Paid", d = fmtD(p.date).slice(0, -5), net = netOf(p), more = p.n - 5;
-    var html =
-      '<div class="rounded-xl border border-green-200 bg-green-50 p-4 mb-3"><div class="flex items-start justify-between gap-3">' +
-      '<div class="flex items-center gap-3"><span class="w-8 h-6 rounded-md border border-green-300 bg-white text-kyc-green text-[11px] font-bold flex items-center justify-center">₹</span><div><p class="text-[13px] font-bold text-dark-inky-blue">' + p.id.replace("-", "–") + '</p><p class="text-[11px] text-grayish-blue-slate">' + p.bank.replace("HDFC", "HDFC Bank") + "</p></div></div>" +
-      '<div class="text-right"><p class="text-[22px] font-bold text-kyc-green leading-none">' + inr(net) + '</p><p class="text-[10px] text-grayish-blue-slate mt-1">Net Amount ' + (paid ? "Transferred" : "Pending") + "</p></div></div>" +
-      '<div class="border-t border-green-200 mt-3 pt-2.5 flex items-center justify-between text-[10px] text-grayish-blue-slate"><span>Initiated ' + d + " 09:00 AM" + (paid ? " · Received " + d + " 11:30 AM" : " · Awaiting bank credit") + "</span>" + (paid ? '<b class="text-kyc-green">2h 30m · Fast Transfer</b>' : "") + "</div></div>" +
-
-      '<div class="' + CARD + '"><p class="text-[13px] font-bold text-dark-inky-blue mb-1.5">Amount Breakdown</p>' +
-      row("Gross", inr(p.gross)) + row("Commission", "-" + inr(comm(p)), "text-red-500") + row("GST", "₹0") + row("Processing", "₹0") + row("Dispute", "₹0") +
-      '<div class="border-t border-slate-100 mt-1.5 pt-2.5 flex justify-between"><b class="text-[12px] text-dark-inky-blue">Net Amount</b><b class="text-[16px] text-kyc-green">' + inr(net) + "</b></div></div>" +
-
-      '<div class="' + CARD + '"><div class="flex items-center justify-between mb-2"><p class="text-[13px] font-bold text-dark-inky-blue">Appointments Included (' + p.n + ')</p><button type="button" data-viewall class="text-[11px] font-semibold text-shazam-blue">View All ↗</button></div>' +
-      TXN.slice(0, 5).map(function (t) {
-        return '<div class="grid grid-cols-[62px_1fr_70px_40px_40px] gap-2 items-center border-b border-slate-100 py-2.5 text-[11px]"><b class="text-dark-inky-blue">' + t[1] + '</b><span class="text-slate-700 truncate">' + t[3] + '</span><span class="text-grayish-blue-slate text-center">' + t[4] + '</span><span class="text-slate-700 text-right">' + inr(t[5]) + '</span><span class="text-kyc-green font-semibold text-right">' + inr(t[5] - t[6]) + "</span></div>";
-      }).join("") +
-      '<div class="flex items-center justify-between pt-3 text-[11px]"><span class="text-slate-400">' + (more > 0 ? "+ " + more + " more" : "") + '</span><button type="button" data-viewall class="font-semibold text-shazam-blue">View All ↗</button></div></div>' +
-
-      '<div class="' + CARD + '"><p class="text-[13px] font-bold text-dark-inky-blue mb-1.5">Bank Confirmation</p>' +
-      row("Bank", "HDFC") + row("Account", "****4521", "text-dark-inky-blue tracking-wide") +
-      row("Ref", "NEFT/" + p.date.replace(/-/g, "") + "/00" + (1000 + p.n * 11), "text-dark-inky-blue text-[11px]") +
-      row("UTR", "UTR" + p.date.replace(/-/g, "") + "HDFC001", "text-dark-inky-blue text-[11px]") +
-      '<p class="text-[11px] mt-1.5 flex items-center gap-1.5 ' + (paid ? "text-kyc-green" : "text-yellow-600") + '"><span class="w-3.5 h-3.5 rounded-full border text-[8px] flex items-center justify-center">' + (paid ? "✓" : "…") + "</span>" + (paid ? "Successfully credited" : "Credit in progress") + "</p></div>" +
-
-      '<div class="' + CARD + '"><p class="text-[13px] font-bold text-dark-inky-blue mb-3">Activity Log</p><ul class="space-y-3">' +
-      (paid ? dot("bg-kyc-green", "Amount credited HDFC", "11:30 AM") : "") +
-      dot("bg-facebook-blue", "NEFT initiated", "09:05 AM") +
-      dot("bg-instant-orange", "Payout auto-generated", "09:00 AM") +
-      dot("bg-kyc-green", p.n + " appointments settled", "08:45 AM") + "</ul></div>";
-
-    $("#pdBody").innerHTML = html;
-    $("#pdStatus").innerHTML = '<span class="text-[10px] px-2.5 py-0.5 rounded-full border ' + PILL[p.status] + '">' + p.status + "</span>";
-    open("m-payout");
-  }
-  $("#erPayoutRows").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-pay]");
-    if (!b) return;
-    openPayout(PAYOUTS.filter(function (p) { return p.id === b.dataset.pay; })[0]);
-  });
-  $("#pdBody").addEventListener("click", function (e) {
-    if (!e.target.closest("[data-viewall]")) return;
-    hide("m-payout");
-    $('[data-tab="transactions"]').click();
-  });
-  $("#pdReceiptBtn").addEventListener("click", function () { toast("Payout receipt " + curPay.id + " - connect to your backend download URL"); });
-  $("#pdInvoiceBtn").addEventListener("click", function () { toast("Invoice PDF for " + curPay.id + " - connect to your backend download URL"); });
-
-  /* ---------- invoices ---------- */
-  var INVOICES = [
-    ["INV–2025–07", "Jul 1–22, 2025", "22 Jul 2025", 318, 124800, 14976],
-    ["INV–2025–06", "Jun 2025", "01 Jul 2025", 284, 98400, 11808],
-    ["INV–2025–05", "May 2025", "01 Jun 2025", 256, 84200, 10104],
-    ["INV–2025–04", "Apr 2025", "01 May 2025", 212, 72400, 8688],
-    ["INV–2025–03", "Mar 2025", "01 Apr 2025", 198, 68600, 8232],
-    ["INV–2025–02", "Feb 2025", "01 Mar 2025", 184, 58200, 6984],
-    ["INV–2025–01", "Jan 2025", "01 Feb 2025", 172, 52400, 6288],
-    ["INV–2024–12", "Dec 2024", "01 Jan 2025", 168, 48800, 5856]
-  ];
-  $("#erInvoiceRows").innerHTML = INVOICES.map(function (v) {
-    var net = v[4] - v[5];
-    return '<tr class="border-b border-slate-100"><td class="px-5 py-3.5 text-left text-shazam-blue font-medium">' + v[0] + '</td><td class="px-3 text-slate-700">' + v[1] + '</td><td class="px-3 text-slate-700">' + v[2] + '</td><td class="px-3 text-slate-700">' + v[3] + '</td><td class="px-3 text-slate-700">' + inr(v[4]) + '</td><td class="px-3 text-red-500">' + inr(v[5]) + '</td><td class="px-3 text-kyc-green font-semibold">' + inr(net) + '</td><td class="px-3 text-slate-700">Exempt</td><td class="px-3 text-kyc-green font-semibold">' + inr(net) + '</td>' +
-      '<td class="px-3"><span class="flex items-center justify-center gap-2 text-[10px] font-semibold"><button type="button" data-dl="' + v[0] + ' PDF" class="text-red-500 cursor-pointer">PDF</button><button type="button" data-dl="' + v[0] + ' CSV" class="text-kyc-green cursor-pointer">CSV</button></span></td></tr>';
-  }).join("");
-
-  /* ---------- transaction popup ---------- */
-  var cur = null;
   function open(id) { var m = $("#" + id); m.classList.remove("hidden"); m.classList.add("flex"); }
   function hide(id) { var m = $("#" + id); m.classList.add("hidden"); m.classList.remove("flex"); }
 
+  /* ---------- tabs ---------- */
+  function showTab(name) {
+    $$(".er-tab").forEach(function (t) { toggle(t, t.dataset.tab === name, TAB_ON, TAB_OFF); });
+    $$("[data-pane]").forEach(function (p) { p.classList.toggle("hidden", p.id !== "er-" + name); });
+  }
+  $("#erTabs").addEventListener("click", function (e) {
+    var b = e.target.closest(".er-tab");
+    if (b) showTab(b.dataset.tab);
+  });
+  $("#erViewAll").addEventListener("click", function () { showTab("transactions"); });
+
+  /* ---------- header: period, export, refresh ---------- */
+  var PERIOD = {
+    "This Month": "This Month · 1-29 July 2026",
+    "Last 30 Days": "Last 30 Days",
+    "Last 90 Days": "Last 90 Days",
+    "This Financial Year": "This Financial Year"
+  };
+  function closeMenus() {
+    $("#erPeriodMenu").classList.add("hidden");
+    $("#erExportMenu").classList.add("hidden");
+  }
+  $("#erPeriodBtn").addEventListener("click", function () {
+    var m = $("#erPeriodMenu"), was = m.classList.contains("hidden");
+    closeMenus();
+    m.classList.toggle("hidden", !was);
+  });
+  $("#erExportBtn").addEventListener("click", function () {
+    var m = $("#erExportMenu"), was = m.classList.contains("hidden");
+    closeMenus();
+    m.classList.toggle("hidden", !was);
+  });
+  $("#erPeriodMenu").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-period]");
+    if (!b) return;
+    $("#erPeriodLabel").textContent = PERIOD[b.dataset.period];
+    closeMenus();
+    toast("Period set to " + b.dataset.period + " - connect to your backend to reload data");
+  });
+  $("#erExportMenu").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-export]");
+    if (!b) return;
+    closeMenus();
+    if (b.dataset.export === "csv") exportCsv();
+    else toast("PDF statement - connect to your backend download URL");
+  });
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest("#erPeriodBtn, #erPeriodMenu, #erExportBtn, #erExportMenu")) closeMenus();
+  });
+  $("#erRefresh").addEventListener("click", function () {
+    var i = $("#erRefreshIcon");
+    i.classList.add("animate-spin");
+    drawAll();
+    setTimeout(function () { i.classList.remove("animate-spin"); toast("Data refreshed"); }, 700);
+  });
+
+  /* ---------- revenue trend (SVG bars) ---------- */
+  var REVENUE = [["Jun 1", 5.3], ["Jun 8", 6.2], ["Jun 15", 7.1], ["Jun 22", 6.8]]; /* values in thousands */
+
+  function barChart(target, data, max, ticks, fmtSub) {
+    var W = 900, H = 240, PL = 50, PR = 10, PT = 10, PB = fmtSub ? 44 : 30, BW = 40, out = "", i;
+    for (i = 0; i < ticks.length; i++) {
+      var y = PT + (H - PT - PB) * (i / (ticks.length - 1));
+      out += '<line x1="' + PL + '" x2="' + (W - PR) + '" y1="' + y + '" y2="' + y + '" class="stroke-slate-100"/>' +
+        '<text x="' + (PL - 8) + '" y="' + (y + 4) + '" text-anchor="end" class="fill-grayish-blue-slate text-[11px]">' + ticks[i] + "</text>";
+    }
+    out += '<line x1="' + PL + '" x2="' + (W - PR) + '" y1="' + (H - PB) + '" y2="' + (H - PB) + '" class="stroke-slate-200"/>';
+    var slot = (W - PL - PR) / data.length;
+    data.forEach(function (d, k) {
+      var h = (H - PT - PB) * d[1] / max, x = PL + slot * (k + 0.5) - BW / 2;
+      out += '<rect x="' + x.toFixed(1) + '" y="' + (H - PB - h).toFixed(1) + '" width="' + BW + '" height="' + h.toFixed(1) + '" class="fill-shazam-blue"/>' +
+        '<text x="' + (x + BW / 2).toFixed(1) + '" y="' + (H - PB + 18) + '" text-anchor="middle" class="fill-slate-700 text-[11px]">' + d[0] + "</text>";
+      if (fmtSub) out += '<text x="' + (x + BW / 2).toFixed(1) + '" y="' + (H - PB + 33) + '" text-anchor="middle" class="fill-slate-400 text-[10px]">' + fmtSub(d[1]) + "</text>";
+    });
+    $(target).innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" class="w-full h-auto">' + out + "</svg>";
+  }
+  function drawRevenue() { barChart("#erRevenueChart", REVENUE, 8, ["8K", "6K", "4K", "2K", "0"], null); }
+
+  /* ---------- payment history (SVG bars) ---------- */
+  var HISTORY = [["Jun", 0.98], ["Jul", 1.1], ["Aug", 1.4], ["Sep", 1.3]]; /* values in lakh */
+  function drawHistory() {
+    barChart("#erHistoryChart", HISTORY, 1.5, ["₹1.5L", "₹1L", "₹50K", "₹0"], function (v) {
+      return v >= 1 ? "₹" + v.toFixed(1) + "L" : "₹" + Math.round(v * 100) + "K";
+    });
+  }
+
+  /* ---------- donuts ---------- */
+  function donut(target, segs, top, bottom, legend) {
+    var R = 62, C = 2 * Math.PI * R, off = 0;
+    var svg = '<svg viewBox="0 0 160 160" class="w-[170px] h-[170px] shrink-0"><circle cx="80" cy="80" r="' + R + '" class="fill-none stroke-slate-100" stroke-width="22"/>';
+    segs.forEach(function (s) {
+      var len = C * s.v / 100;
+      svg += '<circle cx="80" cy="80" r="' + R + '" class="fill-none ' + s.stroke + '" stroke-width="22" stroke-dasharray="' + len.toFixed(2) + " " + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '" transform="rotate(-90 80 80)"/>';
+      off += len;
+    });
+    svg += '<text x="80" y="78" text-anchor="middle" class="fill-dark-inky-blue text-[18px] font-bold">' + top + '</text><text x="80" y="95" text-anchor="middle" class="fill-grayish-blue-slate text-[10px]">' + bottom + "</text></svg>";
+    $(target).innerHTML = svg + '<ul class="flex-1 min-w-[200px] space-y-3.5 text-[14px]">' + legend + "</ul>";
+  }
+  function legendPct(dot, name, pct) {
+    return '<li class="flex items-center gap-3"><i class="w-2.5 h-2.5 rounded-full ' + dot + '"></i><span class="text-slate-700">' + name + '</span><b class="ml-auto font-semibold text-dark-inky-blue">' + pct + "%</b></li>";
+  }
+  function legendAmt(dot, name, amt, pct) {
+    return '<li class="flex items-start gap-3"><i class="w-2.5 h-2.5 rounded-full mt-1.5 ' + dot + '"></i><div><p class="font-semibold text-dark-inky-blue">' + name + '</p><p class="text-[13px] text-grayish-blue-slate">' + amt + " • " + pct + "%</p></div></li>";
+  }
+  function drawDonuts() {
+    donut("#erCommDonut", [
+      { v: 42, stroke: "stroke-shazam-blue" },
+      { v: 28, stroke: "stroke-purple-500" },
+      { v: 19, stroke: "stroke-kyc-green" },
+      { v: 11, stroke: "stroke-instant-orange" }
+    ], "₹1.24L", "Total Revenue",
+      legendPct("bg-shazam-blue", "Video Call", 42) + legendPct("bg-purple-500", "Voice Call", 28) +
+      legendPct("bg-kyc-green", "Clinic Visit", 19) + legendPct("bg-instant-orange", "Home Visit", 11));
+
+    donut("#erStatusDonut", [
+      { v: 74, stroke: "stroke-kyc-green" },
+      { v: 5, stroke: "stroke-instant-orange" },
+      { v: 21, stroke: "stroke-shazam-blue" }
+    ], "₹1.24L", "Total",
+      legendAmt("bg-kyc-green", "Cleared", "₹1,82,400", 74) + legendAmt("bg-instant-orange", "Pending Clearance", "₹12,600", 5) +
+      legendAmt("bg-shazam-blue", "Processing", "₹54,500", 21));
+  }
+  function drawAll() { drawRevenue(); drawDonuts(); drawHistory(); }
+
+  /* ---------- transactions ---------- */
+  var TXN = [
+    ["TXN-20001", "APT-3312", "22 Jul", "Rachel Kate", "Clinic Visit", 400, 48, "Settled", "10:30 AM", "10:35 AM"],
+    ["TXN-20000", "APT-3311", "22 Jul", "Joleen Smith", "Home Visit", 800, 96, "Settled", "11:00 AM", "11:05 AM"],
+    ["TXN-19999", "APT-3309", "22 Jul", "Arjun Mehta", "Video Call", 300, 36, "Settled", "12:00 PM", "12:05 PM"],
+    ["TXN-19998", "APT-3308", "22 Jul", "Priya Sharma", "Clinic Visit", 400, 48, "Settled", "12:30 PM", "12:35 PM"],
+    ["TXN-19997", "APT-3307", "22 Jul", "Mohan Das", "Voice Call", 150, 18, "Settled", "01:00 PM", "01:05 PM"],
+    ["TXN-19996", "APT-3306", "22 Jul", "Nisha Kapoor", "Video Call", 250, 30, "Settled", "02:00 PM", "02:05 PM"],
+    ["TXN-19995", "APT-3305", "22 Jul", "Steve Lamark", "Home Visit", 550, 66, "Settled", "03:00 PM", "03:05 PM"],
+    ["TXN-19994", "APT-3304", "22 Jul", "Dolly Paris", "Clinic Visit", 0, 0, "Missed", "", ""],
+    ["TXN-19993", "APT-3303", "22 Jul", "Josh Kerr", "Video Call", 300, 36, "Settled", "04:00 PM", "04:05 PM"],
+    ["TXN-19992", "APT-3302", "22 Jul", "Karen Cooper", "Home Visit", 700, 84, "Settled", "05:00 PM", "05:05 PM"]
+  ];
+  var TF = { q: "", mode: "All Modes", status: "All Status" };
+
+  function filtered() {
+    return TXN.filter(function (t) {
+      var hay = (t[0] + " " + t[1] + " " + t[3] + " " + t[4]).toLowerCase();
+      if (TF.q && hay.indexOf(TF.q.toLowerCase()) < 0) return false;
+      if (TF.mode !== "All Modes" && t[4] !== TF.mode) return false;
+      if (TF.status !== "All Status" && t[7] !== TF.status) return false;
+      return true;
+    });
+  }
+  function renderTxn() {
+    var list = filtered();
+    $("#erTxnRows").innerHTML = list.length ? list.map(function (t) {
+      var missed = t[7] === "Missed", net = t[5] - t[6];
+      return '<tr class="border-b border-slate-100 text-[14px]">' +
+        '<td class="px-4 py-3.5 text-slate-700">' + t[0].replace("-", "–") + "</td>" +
+        '<td class="px-3 text-shazam-blue">' + t[1].replace("-", "–") + "</td>" +
+        '<td class="px-3 text-slate-700">' + t[2] + "</td>" +
+        '<td class="px-3"><span class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-shazam-blue text-white text-[10px] font-semibold flex items-center justify-center">' + ini(t[3]) + "</span>" + t[3] + "</span></td>" +
+        '<td class="px-3 text-center">' + chip(MODE, t[4]) + "</td>" +
+        '<td class="px-3 text-center">' + inr(t[5]) + "</td>" +
+        '<td class="px-3 text-center ' + (missed ? "text-slate-700" : "text-red-500") + '">' + (missed ? "₹0" : "-" + inr(t[6])) + "</td>" +
+        '<td class="px-3 text-center font-semibold ' + (missed ? "text-slate-700" : "text-kyc-green") + '">' + inr(net) + "</td>" +
+        '<td class="px-3 text-center">' + chip(STATUS, t[7]) + "</td>" +
+        '<td class="px-3 text-center"><button type="button" data-txn="' + t[0] + '" title="View">' + EYE + "</button></td></tr>";
+    }).join("") : '<tr><td colspan="10" class="text-center text-[14px] text-grayish-blue-slate py-10">No transactions match. Change the search or filters to see more.</td></tr>';
+  }
+  $("#erTxnSearch").addEventListener("input", function (e) { TF.q = e.target.value.trim(); renderTxn(); });
+  $("#erFilterBtn").addEventListener("click", function () {
+    var f = $("#erFilters");
+    f.classList.toggle("hidden");
+    f.classList.toggle("flex");
+  });
+  $("#erFMode").addEventListener("change", function (e) { TF.mode = e.target.value; renderTxn(); });
+  $("#erFStatus").addEventListener("change", function (e) { TF.status = e.target.value; renderTxn(); });
+  $("#erFReset").addEventListener("click", function () {
+    TF = { q: "", mode: "All Modes", status: "All Status" };
+    $("#erTxnSearch").value = "";
+    $("#erFMode").selectedIndex = 0;
+    $("#erFStatus").selectedIndex = 0;
+    renderTxn();
+  });
+
+  /* ---------- transaction popup ---------- */
+  var cur = null;
   function openTxn(t) {
     cur = t;
     var net = t[5] - t[6];
@@ -294,22 +234,23 @@
     $("#tx-patient").textContent = t[3];
     $("#tx-date").textContent = t[2] + " 2026";
     $("#tx-mode").innerHTML = chip(MODE, t[4]);
-    $("#tx-status").innerHTML = chip(STATUS, t[8]);
+    $("#tx-status").innerHTML = chip(STATUS, t[7]);
     $("#tx-ref").textContent = t[0].replace("-", "–");
     var steps = [
-      ["Appointment completed", t[9]],
-      ["Transaction recorded", t[10]],
+      ["Appointment completed", t[8]],
+      ["Transaction recorded", t[9]],
       ["Payout processed", t[2] + " 2026"],
       ["Settled to bank", t[2] + " 2026"]
     ];
     $("#txTimeline").innerHTML = steps.map(function (s) {
-      return '<li class="flex items-center gap-2.5"><span class="w-4 h-4 rounded-full bg-kyc-green text-white text-[9px] flex items-center justify-center">✓</span><b class="font-semibold text-dark-inky-blue">' + s[0] + '</b><span class="text-slate-400 text-[12px]">· ' + (s[1] || "–") + "</span></li>";
+      return '<li class="flex items-center gap-2.5"><span class="w-4 h-4 rounded-full bg-kyc-green text-white text-[9px] flex items-center justify-center">✓</span><b class="font-semibold text-dark-inky-blue">' + s[0] + '</b><span class="text-slate-400 text-[13px]">· ' + (s[1] || "–") + "</span></li>";
     }).join("");
     open("m-txn");
   }
   $("#erTxnRows").addEventListener("click", function (e) {
     var b = e.target.closest("[data-txn]");
-    if (b) openTxn(TXN[+b.dataset.txn]);
+    if (!b) return;
+    openTxn(TXN.filter(function (t) { return t[0] === b.dataset.txn; })[0]);
   });
   $("#txCopy").addEventListener("click", function () {
     if (navigator.clipboard) navigator.clipboard.writeText($("#tx-ref").textContent);
@@ -331,22 +272,49 @@
     if (e.key === "Escape") $$("[data-modal].flex").forEach(function (m) { hide(m.id); });
   });
 
-  /* ---------- downloads / export ---------- */
-  document.addEventListener("click", function (e) {
-    var d = e.target.closest("[data-dl]");
-    if (d) toast(d.dataset.dl + " - connect to your backend download URL");
+  /* ---------- payment method ---------- */
+  var METHODS = [
+    { id: "pm1", bank: "HDFC Bank", last4: "4821", holder: "Lifecare Multispeciality Hospital", verified: true, def: true }
+  ];
+  var SHIELD = '<svg class="text-kyc-green mt-1 shrink-0" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>';
+  function renderMethods() {
+    $("#erMethods").innerHTML = METHODS.length ? METHODS.map(function (m) {
+      return '<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-wrap items-start justify-between gap-4">' +
+        '<div class="flex items-start gap-3">' + SHIELD + "<div>" +
+        '<div class="flex flex-wrap items-center gap-3"><b class="text-[14px] font-semibold text-dark-inky-blue">' + m.bank + " ···· " + m.last4 + "</b>" +
+        (m.verified ? '<span class="text-[12px] px-3 py-0.5 rounded-full bg-green-50 text-kyc-green">✓ Verified</span>' : "") + "</div>" +
+        '<p class="text-[13px] text-grayish-blue-slate mt-1">Account holder: ' + m.holder + "</p>" +
+        '<p class="text-[14px] font-semibold text-dark-inky-blue mt-4">···· ' + m.last4 + "</p>" +
+        (m.def ? '<span class="inline-block text-[12px] px-3 py-1 rounded-full bg-blue-50 text-shazam-blue mt-2">Default payout method</span>' : "") +
+        "</div></div>" +
+        '<div class="flex items-center gap-3"><button type="button" data-edit="' + m.id + '" class="text-[13px] font-medium px-5 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 cursor-pointer hover:bg-slate-50">Edit Details</button>' +
+        '<button type="button" data-remove="' + m.id + '" class="text-[13px] font-medium px-5 py-2 rounded-lg border border-red-500 bg-white text-red-500 cursor-pointer hover:bg-red-50">Remove</button></div></div>';
+    }).join("") : '<div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-[14px] text-grayish-blue-slate">No payment method added yet.</div>';
+  }
+  $("#erMethods").addEventListener("click", function (e) {
+    var ed = e.target.closest("[data-edit]"), rm = e.target.closest("[data-remove]");
+    if (ed) toast("Edit details - connect to your backend form");
+    if (rm) {
+      METHODS = METHODS.filter(function (m) { return m.id !== rm.dataset.remove; });
+      renderMethods();
+      toast("Payment method removed");
+    }
   });
-  $("#erStatementBtn").addEventListener("click", function () { toast("Statement - connect to your backend download URL"); });
-  $("#erExportBtn").addEventListener("click", function () {
-    var rows = [["Txn ID", "Appt ID", "Date", "Patient", "Mode", "Gross", "Commission", "Net", "Payout ID", "Status"]].concat(TXN.map(function (t) {
-      return [t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[5] - t[6], t[7], t[8]];
+  $("#erAddMethod").addEventListener("click", function () { toast("Add payment method - connect to your backend flow"); });
+
+  /* ---------- export CSV ---------- */
+  function exportCsv() {
+    var rows = [["Txn ID", "Appt ID", "Date", "Patient", "Mode", "Gross", "Commission", "Net", "Status"]].concat(TXN.map(function (t) {
+      return [t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[5] - t[6], t[7]];
     }));
     var csv = rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","); }).join("\n");
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     a.download = "earnings-transactions.csv";
     a.click();
-  });
+  }
 
-  drawChart("monthly");
+  renderTxn();
+  renderMethods();
+  drawAll();
 })();

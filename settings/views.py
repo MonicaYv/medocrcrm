@@ -495,7 +495,7 @@ def settings_page(request):
 
     template_map = {
 
-        "pharmacy": "settings/seller_settings.html",
+        "pharmacy": "settings/pharmacy_seller_settings.html",
 
         "lab": "settings/seller_settings.html",
 

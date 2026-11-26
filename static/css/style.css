@@ -178,6 +178,7 @@
   --color-platinum: #e4e4e4;
   --color-ashy-blue:#64748B;
   --color-shazam-blue:#0088FF;
+  --color-info-blue: #0088FF1A;
   --color-dark-inky-blue:#0F172A;
   --color-grayish-blue-slate:#94A3B8;
   --color-facebook-blue:#1877F2;
@@ -3480,7 +3481,7 @@ body {
 .st-tabs {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 36px;
   overflow-x: auto;
   border-bottom: 1px solid var(--st-border);
   scrollbar-width: none;
@@ -4423,3 +4424,29 @@ body {
   font-size: 17px;
   color: #64748b;
 }
+
+
+/*Pharmacy Settings */
+
+
+/* Pharmacy day selector buttons */
+.ph-day-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid #e2e8f0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+}
+.ph-day-btn:hover { border-color: #007bff; color: #007bff; }
+.ph-day-btn.active { background: #007bff; border-color: #007bff; color: #fff; }
+
+/* Notifications matrix */
+.st-table td { vertical-align: middle; }

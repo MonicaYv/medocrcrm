@@ -27,7 +27,7 @@
   /* =====================  FILTERS  ===================== */
   const searchInput = $("#ob-search");
   const filterBar = $("#filter-bar");
-  const DEFAULTS = { mode: "All Modes", urgency: "All Urgency", from: "", to: "", min: "", max: "" };
+  const DEFAULTS = { service: "All Services", mode: "All Visit type", urgency: "All Priorities", status: "All Status", from: "", to: "", min: "", max: "" };
   let F = { ...DEFAULTS };
 
   const fmt = (iso) => {
@@ -53,8 +53,10 @@
       const d = tr.dataset;
       let ok = true;
       if (q && !tr.textContent.toLowerCase().includes(q)) ok = false;
+      if (F.service !== DEFAULTS.service && !tr.textContent.toLowerCase().includes(F.service.toLowerCase())) ok = false;
       if (F.mode !== DEFAULTS.mode && d.mode !== F.mode) ok = false;
       if (F.urgency !== DEFAULTS.urgency && d.urgency && d.urgency !== F.urgency) ok = false;
+      if (F.status !== DEFAULTS.status && !(d.status || tr.textContent).toLowerCase().includes(F.status.toLowerCase())) ok = false;
       if (F.from && d.date < F.from) ok = false;
       if (F.to && d.date > F.to) ok = false;
       if (F.min !== "" && +d.price < +F.min) ok = false;
@@ -96,7 +98,10 @@
         label.textContent = "Price Range";
       }
     });
-    ["#range-from", "#range-to", "#price-min", "#price-max"].forEach((id) => ($(id).value = ""));
+    ["#range-from", "#range-to", "#price-min", "#price-max"].forEach((id) => {
+      const input = $(id);
+      if (input) input.value = "";
+    });
     closeMenus();
     applyFilters();
   }
@@ -184,6 +189,51 @@
     $$(".ob-modal").forEach(closeModal);
   }
 
+  /* ---------- Accepted appointment calendar ---------- */
+  const appointmentCalendarGrid = $("#appointment-calendar-grid");
+  let appointmentCalendarMonth = new Date(2026, 8, 1);
+  let selectedAppointmentDate = new Date(2026, 8, 29);
+  const appointmentDateKey = (date) => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+  const renderAppointmentCalendar = () => {
+    if (!appointmentCalendarGrid) return;
+    const monthLabel = $("#appointment-calendar-month");
+    if (monthLabel) monthLabel.textContent = appointmentCalendarMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const firstDay = new Date(appointmentCalendarMonth.getFullYear(), appointmentCalendarMonth.getMonth(), 1);
+    const startDate = new Date(firstDay.getFullYear(), firstDay.getMonth(), 1 - firstDay.getDay());
+    appointmentCalendarGrid.innerHTML = Array.from({ length: 42 }, (_, index) => {
+      const day = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + index);
+      const selected = appointmentDateKey(day) === appointmentDateKey(selectedAppointmentDate);
+      const inMonth = day.getMonth() === appointmentCalendarMonth.getMonth();
+      return `<button type="button" data-calendar-day="${appointmentDateKey(day)}" aria-pressed="${selected}" class="mx-auto my-0.5 flex h-7 w-7 items-center justify-center rounded-full text-xs ${selected ? "bg-shazam-blue font-semibold text-white" : inMonth ? "text-dark-gray hover:bg-sky-50" : "text-gray-300 hover:bg-gray-50"}">${day.getDate()}</button>`;
+    }).join("");
+    const dateTime = $("#appointment-date-time");
+    const selectedLabel = $("#appointment-selected-label");
+    if (dateTime) dateTime.textContent = `${selectedAppointmentDate.getDate()} ${selectedAppointmentDate.toLocaleDateString("en-US", { month: "short" })} ${selectedAppointmentDate.getFullYear()}, 04:30 PM`;
+    if (selectedLabel) {
+      const isReferenceDate = appointmentDateKey(selectedAppointmentDate) === "2026-09-29";
+      selectedLabel.textContent = `${isReferenceDate ? "Today" : selectedAppointmentDate.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" })} · 5:00 PM`;
+    }
+    const summaryTime = $("#appointment-summary-time");
+    if (summaryTime) summaryTime.textContent = selectedLabel?.textContent.replace(" · ", ", ") || "Today, 5:00 PM";
+  };
+  $("[data-calendar-prev]")?.addEventListener("click", () => {
+    appointmentCalendarMonth = new Date(appointmentCalendarMonth.getFullYear(), appointmentCalendarMonth.getMonth() - 1, 1);
+    renderAppointmentCalendar();
+  });
+  $("[data-calendar-next]")?.addEventListener("click", () => {
+    appointmentCalendarMonth = new Date(appointmentCalendarMonth.getFullYear(), appointmentCalendarMonth.getMonth() + 1, 1);
+    renderAppointmentCalendar();
+  });
+  appointmentCalendarGrid?.addEventListener("click", (event) => {
+    const dayButton = event.target.closest("[data-calendar-day]");
+    if (!dayButton) return;
+    const [year, month, day] = dayButton.dataset.calendarDay.split("-").map(Number);
+    selectedAppointmentDate = new Date(year, month - 1, day);
+    appointmentCalendarMonth = new Date(year, month - 1, 1);
+    renderAppointmentCalendar();
+  });
+  renderAppointmentCalendar();
+
   /* ---------- Bid details ---------- */
   const subtabs = $$(".bd-subtab");
   const panes = $$(".bd-pane");
@@ -218,18 +268,26 @@
   const showStep = (n) => steps.forEach((s) => s.classList.toggle("hidden", s.id !== `eb-step-${n}`));
   function resetEditBid() {
     showStep(1);
-    confirmBox.checked = false;
-    saveBtn.disabled = true;
+    if (confirmBox) confirmBox.checked = false;
+    if (saveBtn) saveBtn.disabled = true;
   }
-  $("#eb-review").addEventListener("click", () => showStep(2));
-  $("#eb-back").addEventListener("click", () => showStep(1));
-  confirmBox.addEventListener("change", () => (saveBtn.disabled = !confirmBox.checked));
+  $("#eb-review")?.addEventListener("click", () => showStep(2));
+  $("#eb-back")?.addEventListener("click", () => showStep(1));
+  confirmBox?.addEventListener("change", () => {
+    if (saveBtn) saveBtn.disabled = !confirmBox.checked;
+  });
 
   /* ---------- Open / close wiring ---------- */
   document.addEventListener("click", (e) => {
     const opener = e.target.closest("[data-open]");
     if (opener && !opener.disabled) {
       const target = opener.dataset.open;
+      if (target === "appointment-details") renderAppointmentCalendar();
+      if (target === "prescription-preview") {
+        const returnTo = opener.dataset.return || opener.closest(".ob-modal")?.id || "request-details";
+        const preview = document.getElementById(target);
+        $$('[data-close][data-return]', preview).forEach((button) => (button.dataset.return = returnTo));
+      }
       if (target === "bid-saved" && opener.dataset.bid) $("#bs-bid").textContent = opener.dataset.bid;
       if (target === "bid-details") configureBidDetails(opener.dataset.status, opener.dataset.bid);
       if (target === "edit-bid") resetEditBid();
@@ -240,7 +298,10 @@
     const closer = e.target.closest("[data-close]");
     if (closer) {
       const m = closer.closest(".ob-modal");
-      if (m) closeModal(m);
+      if (m) {
+        closeModal(m);
+        if (closer.dataset.return) openModal(closer.dataset.return);
+      }
       return;
     }
     if (e.target.classList.contains("ob-modal")) closeModal(e.target);
@@ -261,6 +322,38 @@
       card.classList.add(...card.dataset.on.split(" "));
     })
   );
+
+  /* ---------- Submit bid: accessible custom selects ---------- */
+  const customDropdowns = $$("[data-custom-dropdown]");
+  const closeCustomDropdowns = (except) => customDropdowns.forEach((dropdown) => {
+    if (dropdown === except) return;
+    const menu = $("[data-custom-menu]", dropdown);
+    const trigger = $("[data-custom-trigger]", dropdown);
+    menu.classList.add("hidden");
+    trigger.setAttribute("aria-expanded", "false");
+  });
+  customDropdowns.forEach((dropdown) => {
+    const trigger = $("[data-custom-trigger]", dropdown);
+    const menu = $("[data-custom-menu]", dropdown);
+    trigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const opening = menu.classList.contains("hidden");
+      closeCustomDropdowns(dropdown);
+      menu.classList.toggle("hidden", !opening);
+      trigger.setAttribute("aria-expanded", String(opening));
+    });
+    menu.querySelectorAll("[data-value]").forEach((option) => {
+      option.addEventListener("click", () => {
+        $("[data-custom-value]", trigger).textContent = option.dataset.value;
+        const input = $("input[type=hidden]", dropdown);
+        if (input) input.value = option.dataset.value;
+        menu.querySelectorAll("[data-value]").forEach((item) => item.setAttribute("aria-selected", String(item === option)));
+        menu.classList.add("hidden");
+        trigger.setAttribute("aria-expanded", "false");
+      });
+    });
+  });
+  document.addEventListener("click", () => closeCustomDropdowns());
 
   showSubtab("bd-overview");
   showTab("new-requests");
