@@ -105,12 +105,7 @@ $(document).ready(function () {
       }
     });
   }
-  // --------- 6. INTERACTIVE DROPDOWN HANDLERS ----------
-  $(".filterToggle").on("click", function (e) {
-    e.stopPropagation();
-    $(".filterDropdown").toggleClass("hidden");
-  });
-
+  // --------- 6. INTERACTIVE DROPDOWN HANDLERS ----------
   // $(".calendar-icon").on("click", function (e) {
   //   e.stopPropagation();
   //   $(".datepicker-container").addClass("hidden");
@@ -617,10 +612,43 @@ $(document).ready(function () {
         drawReportTable(pdf, tableHeaders, tableRows, startTableY + 4, colWidths);
       }
 
-      // =========================================================
-      // CASE 5: FALLBACK FOR OTHER DIV ELEMENTS
-      // =========================================================
-      else {
+      // =========================================================
+      // CASE 5: FULL HOSPITAL DASHBOARD
+      // =========================================================
+      else if (targetId === "hospitalReportsPage") {
+        filename = "Hospital_Bookings_Report.pdf";
+        const dashboardCanvas = await html2canvas(targetElement, {
+          backgroundColor: "#f7f9fc",
+          useCORS: true,
+          scale: 1.5,
+          logging: false
+        });
+        const margin = 10;
+        const printableWidth = pageWidth - margin * 2;
+        const printableHeight = pdf.internal.pageSize.getHeight() - margin * 2;
+        const sourcePageHeight = Math.floor(dashboardCanvas.width * printableHeight / printableWidth);
+
+        for (let sourceY = 0; sourceY < dashboardCanvas.height; sourceY += sourcePageHeight) {
+          if (sourceY > 0) pdf.addPage();
+          const sliceHeight = Math.min(sourcePageHeight, dashboardCanvas.height - sourceY);
+          const pageCanvas = document.createElement("canvas");
+          pageCanvas.width = dashboardCanvas.width;
+          pageCanvas.height = sliceHeight;
+          pageCanvas.getContext("2d").drawImage(
+            dashboardCanvas,
+            0, sourceY, dashboardCanvas.width, sliceHeight,
+            0, 0, dashboardCanvas.width, sliceHeight
+          );
+          const imageData = pageCanvas.toDataURL("image/jpeg", 0.9);
+          const renderedHeight = sliceHeight * printableWidth / dashboardCanvas.width;
+          pdf.addImage(imageData, "JPEG", margin, margin, printableWidth, renderedHeight);
+        }
+      }
+
+      // =========================================================
+      // CASE 6: FALLBACK FOR OTHER DIV ELEMENTS
+      // =========================================================
+      else {
         if (typeof html2canvas === "function") {
           const canvas = await html2canvas(targetElement, {
             backgroundColor: "#ffffff",
@@ -762,9 +790,9 @@ $(document).ready(function () {
   }
 
 $(document).ready(function () {
-    const reportParams = new URLSearchParams(window.location.search);
-
-    let selectedFilter = reportParams.get("filter") || "all";
+    const reportParams = new URLSearchParams(window.location.search);
+
+    let selectedFilter = reportParams.get("filter") || "week";
     let selectedVisitType = reportParams.get("visit_type") || "";
     let startDate = reportParams.get("start_date") || "";
     let endDate = reportParams.get("end_date") || "";
@@ -1091,6 +1119,7 @@ $(".calendar-icon")
         $dateLabel.text({
             today: "Data shown: Today",
             week: "Data shown: This week",
+            "30days": "Data shown: Last 30 days",
             month: "Data shown: This month",
             all: "Data shown: All dates"
         }[type] || "Data shown: --");
@@ -1117,7 +1146,13 @@ $(".calendar-icon")
         if (reportRequest) reportRequest.abort();
         reportRequest = $.ajax({
             url: "/reports/hospital-report-data/", type: "GET",
-            data: { filter: selectedFilter, visit_type: selectedVisitType, start_date: startDate, end_date: endDate },
+            data: {
+                filter: selectedFilter,
+                visit_type: selectedVisitType,
+                service_type: $("#serviceTypeFilter").val() || "",
+                start_date: startDate,
+                end_date: endDate
+            },
             success: function (response) {
                 window.lastHospitalReportData = response;
                 const departmentMenu = document.querySelector("#departmentRevenueSection .dropdown-menu");
@@ -1164,6 +1199,7 @@ $(".calendar-icon")
     $dateLabel.text({
         today: "Data shown: Today",
         week: "Data shown: This week",
+        "30days": "Data shown: Last 30 days",
         month: "Data shown: This month",
         all: "Data shown: All dates",
         custom: startDate && endDate
@@ -1186,6 +1222,7 @@ function loadDashboardData(filterType) {
         data: {
             filter: filterType,
             visit_type: $("#visitTypeFilter").val(),
+            service_type: $("#serviceTypeFilter").val() || "",
             start_date: window.hospitalReportStartDate || "",
             end_date: window.hospitalReportEndDate || ""
         },
@@ -1346,6 +1383,495 @@ $(document).ready(function () {
                     : formatChartDate(todayString));
         }
     });
+
+    $(document).ready(function () {
+        const trendCanvas = document.getElementById("bookingsTrendChart");
+        const statusCanvas = document.getElementById("bookingStatusChart");
+        const offersCanvas = document.getElementById("offersPerformanceChart");
+        const bidsConversionCanvas = document.getElementById("bidsConversionChart");
+        const bidsTurnaroundCanvas = document.getElementById("bidsTurnaroundChart");
+        const revenueCanvas = document.getElementById("hospitalRevenueChart");
+        let bookingsTrendChart = null;
+        let bookingStatusChart = null;
+        let bidsConversionChart = null;
+        let bidsTurnaroundChart = null;
+        let hospitalRevenueChart = null;
+
+        if (trendCanvas) {
+            bookingsTrendChart = new Chart(trendCanvas, {
+                type: "line",
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: "Total Bookings",
+                            data: [],
+                            borderColor: "#1d70e8",
+                            backgroundColor: "rgba(29, 112, 232, 0.1)",
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 3
+                        },
+                        {
+                            label: "Completed",
+                            data: [],
+                            borderColor: "#35c7a1",
+                            backgroundColor: "rgba(53, 199, 161, 0.08)",
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#edf1f6" } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        if (statusCanvas) {
+            bookingStatusChart = new Chart(statusCanvas, {
+                type: "doughnut",
+                data: {
+                    labels: ["Completed", "Upcoming", "In Progress", "Cancelled / No-show"],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ["#35c7a1", "#ffb84d", "#6c8cf5", "#f27878"],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "68%",
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        if (offersCanvas) {
+            new Chart(offersCanvas, {
+                type: "bar",
+                data: {
+                    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+                    datasets: [
+                        { label: "Offers", data: [24, 31, 28, 45], backgroundColor: "#dce9ff", borderRadius: 5 },
+                        { label: "Accepted", data: [16, 21, 19, 30], backgroundColor: "#3983ed", borderRadius: 5 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#edf1f6" } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        const bidChartOptions = function (maxValue, tickSuffix) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                interaction: { intersect: false, mode: "index" },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: maxValue,
+                        ticks: {
+                            stepSize: maxValue === 75 ? 25 : 10,
+                            color: "#98a1b1",
+                            font: { size: 9 },
+                            callback: function (value) { return value + tickSuffix; }
+                        },
+                        grid: { color: "#edf1f6" }
+                    },
+                    x: {
+                        ticks: { color: "#667085", font: { size: 9 } },
+                        grid: { display: false }
+                    }
+                }
+            };
+        };
+        if (bidsConversionCanvas) {
+            bidsConversionChart = new Chart(bidsConversionCanvas, {
+                type: "line",
+                data: {
+                    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+                    datasets: [
+                        {
+                            label: "Current Period",
+                            data: [39, 43, 47, 50],
+                            borderColor: "#1683ff",
+                            backgroundColor: "#1683ff",
+                            borderWidth: 1.5,
+                            pointRadius: 2,
+                            tension: 0.25
+                        },
+                        {
+                            label: "Previous Period",
+                            data: [32, 36, 40, 44],
+                            borderColor: "#22c995",
+                            backgroundColor: "#22c995",
+                            borderWidth: 1.5,
+                            pointRadius: 2,
+                            tension: 0.25
+                        }
+                    ]
+                },
+                options: bidChartOptions(75, "%")
+            });
+        }
+        if (bidsTurnaroundCanvas) {
+            bidsTurnaroundChart = new Chart(bidsTurnaroundCanvas, {
+                type: "line",
+                data: {
+                    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+                    datasets: [
+                        {
+                            label: "Current Period",
+                            data: [24, 27, 22, 30],
+                            borderColor: "#1683ff",
+                            backgroundColor: "#1683ff",
+                            borderWidth: 1.5,
+                            pointRadius: 2,
+                            tension: 0.45
+                        },
+                        {
+                            label: "Previous Period",
+                            data: [15, 18, 14, 20],
+                            borderColor: "#64748b",
+                            backgroundColor: "#64748b",
+                            borderWidth: 1.2,
+                            borderDash: [3, 3],
+                            pointRadius: 0,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: bidChartOptions(40, "")
+            });
+        }
+        if (revenueCanvas) {
+            hospitalRevenueChart = new Chart(revenueCanvas, {
+                type: "bar",
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "Revenue",
+                        data: [],
+                        backgroundColor: "#3983ed",
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: "#edf1f6" } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function setBookingText(id, value) {
+            const element = document.getElementById(id);
+            if (element) element.textContent = String(value ?? 0);
+        }
+
+        function setHospitalReportView(view) {
+            const isBooking = view === "booking";
+            const isBids = view === "bids";
+            const isRevenue = view === "revenue";
+            $("#bookingViewContent").toggleClass("hidden", !isBooking);
+            $("#bidsViewContent").toggleClass("hidden", !isBids).toggleClass("grid", isBids);
+            $("#revenueViewContent").toggleClass("hidden", !isRevenue).toggleClass("flex", isRevenue);
+            const labels = { booking: "Booking View", bids: "Bids View", revenue: "Revenue View" };
+            setBookingText("selectedHospitalReportView", labels[view] || labels.booking);
+            requestAnimationFrame(function () {
+                if (isBids) {
+                    if (bidsConversionChart) bidsConversionChart.resize();
+                    if (bidsTurnaroundChart) bidsTurnaroundChart.resize();
+                }
+                if (isRevenue && hospitalRevenueChart) hospitalRevenueChart.resize();
+            });
+        }
+
+        function updateBookingServices(rows) {
+            const container = document.getElementById("bookingsByService");
+            if (!container) return;
+            container.replaceChildren();
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+                const empty = document.createElement("p");
+                empty.className = "text-sm text-gray-400";
+                empty.textContent = "No service bookings for this period.";
+                container.appendChild(empty);
+                return;
+            }
+
+            const maxBookings = Math.max.apply(null, rows.map(function (row) {
+                return Number(row.bookings) || 0;
+            })) || 1;
+            rows.slice(0, 5).forEach(function (row) {
+                const item = document.createElement("div");
+                item.className = "space-y-2";
+                const heading = document.createElement("div");
+                heading.className = "flex items-center justify-between gap-3 text-sm";
+                const name = document.createElement("span");
+                name.className = "truncate text-[#344054]";
+                name.textContent = row.package || "Other service";
+                const count = document.createElement("strong");
+                count.className = "shrink-0 font-medium text-[#172b4d]";
+                count.textContent = String(row.bookings || 0);
+                heading.append(name, count);
+                const track = document.createElement("div");
+                track.className = "h-2 overflow-hidden rounded-full bg-[#edf1f6]";
+                const bar = document.createElement("div");
+                bar.className = "h-full rounded-full bg-[#3983ed]";
+                bar.style.width = Math.max((Number(row.bookings) || 0) / maxBookings * 100, 2) + "%";
+                track.appendChild(bar);
+                item.append(heading, track);
+                container.appendChild(item);
+            });
+        }
+
+        function updateBookingDashboard(response) {
+            if (!response || !response.stats) return;
+            const status = response.booking_status || {};
+            setBookingText("totalBookings", response.stats.total_appointments);
+            setBookingText("completedBookings", status.completed ?? response.stats.completed_bookings);
+            setBookingText("upcomingBookings", status.upcoming ?? response.stats.upcoming_bookings);
+            setBookingText("cancelledBookings", status.cancelled ?? response.stats.cancelled_bookings);
+            setBookingText("statusCompleted", status.completed);
+            setBookingText("statusUpcoming", status.upcoming);
+            setBookingText("statusInProgress", status.in_progress);
+            setBookingText("statusCancelled", status.cancelled);
+            setBookingText("revenueViewTotal", response.stats.revenue || "₹0");
+            setBookingText("revenueViewAverage", response.stats.avg_revenue || "₹0");
+            setBookingText("revenueViewDepartment", response.stats.highest_revenue || "—");
+            setBookingText("revenueViewGrowth", response.stats.growth || "—");
+
+            if (bookingsTrendChart && Array.isArray(response.booking_trend)) {
+                bookingsTrendChart.data.labels = response.booking_trend.map(function (row) {
+                    return new Date(row.date + "T00:00:00").toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short"
+                    });
+                });
+                bookingsTrendChart.data.datasets[0].data = response.booking_trend.map(function (row) { return row.total; });
+                bookingsTrendChart.data.datasets[1].data = response.booking_trend.map(function (row) { return row.completed; });
+                bookingsTrendChart.update();
+            }
+
+            if (bookingStatusChart) {
+                bookingStatusChart.data.datasets[0].data = [
+                    Number(status.completed) || 0,
+                    Number(status.upcoming) || 0,
+                    Number(status.in_progress) || 0,
+                    Number(status.cancelled) || 0
+                ];
+                bookingStatusChart.update();
+            }
+            if (hospitalRevenueChart && response.most_requested_test) {
+                hospitalRevenueChart.data.labels = response.most_requested_test.labels || [];
+                hospitalRevenueChart.data.datasets[0].data = response.most_requested_test.data || [];
+                hospitalRevenueChart.update();
+            }
+
+            const serviceSelect = document.getElementById("serviceTypeFilter");
+            if (serviceSelect && Array.isArray(response.service_options)) {
+                const selectedService = serviceSelect.value;
+                const options = document.createDocumentFragment();
+                const serviceMenu = document.getElementById("serviceTypeMenu");
+                if (serviceMenu) serviceMenu.replaceChildren();
+                const allServices = document.createElement("option");
+                allServices.value = "";
+                allServices.textContent = "All Services";
+                options.appendChild(allServices);
+                if (serviceMenu) {
+                    const allServicesOption = document.createElement("button");
+                    allServicesOption.type = "button";
+                    allServicesOption.className = "hospital-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]";
+                    allServicesOption.dataset.select = "serviceTypeFilter";
+                    allServicesOption.dataset.value = "";
+                    allServicesOption.textContent = "All Services";
+                    serviceMenu.appendChild(allServicesOption);
+                }
+                response.service_options.forEach(function (service) {
+                    const option = document.createElement("option");
+                    option.value = String(service.id);
+                    option.textContent = service.name;
+                    options.appendChild(option);
+                    if (serviceMenu) {
+                        const menuOption = document.createElement("button");
+                        menuOption.type = "button";
+                        menuOption.className = "hospital-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]";
+                        menuOption.dataset.select = "serviceTypeFilter";
+                        menuOption.dataset.value = String(service.id);
+                        menuOption.textContent = service.name;
+                        serviceMenu.appendChild(menuOption);
+                    }
+                });
+                serviceSelect.replaceChildren(options);
+                if (Array.from(serviceSelect.options).some(function (option) { return option.value === selectedService; })) {
+                    serviceSelect.value = selectedService;
+                }
+                const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+                setBookingText("selectedServiceType", selectedOption ? selectedOption.textContent : "All Services");
+            }
+            updateBookingServices(response.package_table);
+        }
+
+        const reportParams = new URLSearchParams(window.location.search);
+        const initialVisitType = reportParams.get("visit_type") || "";
+        $("#visitTypeFilter").val(initialVisitType);
+        const initialVisitOption = document.getElementById("visitTypeFilter").selectedOptions[0];
+        setBookingText("selectedVisitType", initialVisitOption ? initialVisitOption.textContent : "All Visit Types");
+
+        let activeDatePreset = reportParams.get("filter") || "week";
+        function setDateHeader(preset, customRange) {
+            const presetLabels = {
+                today: "Today",
+                week: "Last 7 days",
+                "30days": "Last 30 days",
+                month: "This Month",
+                custom: "Custom range",
+                all: "All dates"
+            };
+            const presetElement = document.getElementById("reportDatePreset");
+            const rangeElement = document.getElementById("reportRangeShort");
+            if (!presetElement || !rangeElement) return;
+            presetElement.textContent = presetLabels[preset] || presetLabels.all;
+
+            if (preset === "custom") {
+                rangeElement.textContent = customRange ? "· " + customRange : "· Select dates";
+                return;
+            }
+            if (preset === "all") {
+                rangeElement.textContent = "";
+                return;
+            }
+
+            const end = new Date();
+            end.setHours(0, 0, 0, 0);
+            const start = new Date(end);
+            if (preset === "week") start.setDate(start.getDate() - 6);
+            else if (preset === "30days") start.setDate(start.getDate() - 29);
+            else if (preset === "month") start.setDate(1);
+
+            const monthYear = new Intl.DateTimeFormat("en-IN", { month: "short", year: "numeric" });
+            let range;
+            if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+                range = start.getDate() + "–" + end.getDate() + " " + monthYear.format(end);
+            } else {
+                const fullDate = new Intl.DateTimeFormat("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric"
+                });
+                range = fullDate.format(start) + " – " + fullDate.format(end);
+            }
+            rangeElement.textContent = "· " + range;
+        }
+
+        setDateHeader(activeDatePreset);
+        $(document).on("click", ".report-filter", function () {
+            activeDatePreset = $(this).data("type");
+            setDateHeader(activeDatePreset);
+        });
+
+        $(document).on("click", ".report-select-toggle", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const menu = $(this).parent().find(".report-select-menu").first();
+            const shouldOpen = menu.hasClass("hidden");
+            $(".report-select-menu").addClass("hidden");
+            if (shouldOpen) menu.removeClass("hidden");
+        });
+        $(document).on("click", ".hospital-select-option", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const select = document.getElementById(this.dataset.select);
+            if (!select) return;
+            select.value = this.dataset.value;
+            setBookingText(
+                select.id === "serviceTypeFilter" ? "selectedServiceType" : "selectedVisitType",
+                select.options[select.selectedIndex]?.textContent || ""
+            );
+            $(select).trigger("change");
+            $(this).closest(".report-select-menu").addClass("hidden");
+        });
+        $(document).on("click", "#bookingViewMenu button[data-view]", function (event) {
+            event.preventDefault();
+            setHospitalReportView(this.dataset.view);
+            $("#bookingViewMenu").addClass("hidden");
+        });
+        $(document).on("click", function (event) {
+            if (!$(event.target).closest(".report-select-toggle, .report-select-menu").length) {
+                $(".report-select-menu").addClass("hidden");
+            }
+        });
+        setHospitalReportView("booking");
+
+        const exportModal = document.getElementById("hospitalExportModal");
+        function closeHospitalExport() {
+            if (!exportModal) return;
+            exportModal.classList.add("hidden");
+            exportModal.classList.remove("flex");
+            document.body.classList.remove("overflow-hidden");
+        }
+        $("#openHospitalExport").on("click", function () {
+            if (!exportModal) return;
+            exportModal.classList.remove("hidden");
+            exportModal.classList.add("flex");
+            document.body.classList.add("overflow-hidden");
+            $("#closeHospitalExport").trigger("focus");
+        });
+        $("#closeHospitalExport, #cancelHospitalExport").on("click", closeHospitalExport);
+        $("#hospitalExportModal").on("click", function (event) {
+            if (event.target === this) closeHospitalExport();
+        });
+        $(document).on("keydown.hospitalExport", function (event) {
+            if (event.key === "Escape" && exportModal && !exportModal.classList.contains("hidden")) {
+                closeHospitalExport();
+            }
+        });
+        $(".hospital-export-type").on("click", function () {
+            $(".hospital-export-type")
+                .removeClass("ring-1 ring-[#0789f5]")
+                .attr("aria-pressed", "false");
+            $(this).addClass("ring-1 ring-[#0789f5]").attr("aria-pressed", "true");
+        });
+        $("#generateHospitalExport").on("click", closeHospitalExport);
+
+        $("#serviceTypeFilter").on("change", function () {
+            $("#visitTypeFilter").trigger("change");
+        });
+        $(document).on("ajaxComplete", function (event, xhr, settings) {
+            if (!settings.url || settings.url.indexOf("/reports/hospital-report-data/") === -1) return;
+            if (activeDatePreset === "custom") {
+                const hiddenLabel = $("#hospitalReportDateRange").text().replace(/^Data shown:\s*/, "").trim();
+                if (hiddenLabel && hiddenLabel.indexOf("Select") === -1 && hiddenLabel.indexOf("Start date:") !== 0) {
+                    setDateHeader("custom", hiddenLabel);
+                }
+            }
+            if (xhr.responseJSON) updateBookingDashboard(xhr.responseJSON);
+        });
+        if (window.lastHospitalReportData) updateBookingDashboard(window.lastHospitalReportData);
+    });
 
     // Support the currently selected chart's existing URL parameters
     const chartId = params.get("chart");
