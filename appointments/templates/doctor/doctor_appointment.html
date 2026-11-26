@@ -206,19 +206,26 @@
       until the patient accepts.
     </div>
 
-    <div id="aptDaily">
-      <div class="flex items-center gap-4 mt-5">
-        <span class="text-[15px] font-semibold">Daily schedule</span>
-        <input
-          id="aptDate"
-          type="date"
-          value="2026-10-12"
-          class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100 !w-[170px] !py-2 !text-[14px]"
-        />
-      </div>
+    <!-- View toggle row -->
+<div class="flex flex-wrap items-center justify-between gap-3 mt-5">
+  <div id="aptDateWrap" class="flex items-center gap-4">
+    <span class="text-[15px] font-semibold">Daily schedule</span>
+    <input
+      id="aptDate"
+      type="date"
+      value="2026-10-12"
+      class="w-full border border-report-e2e8f0e5 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100 !w-[170px] !py-2 !text-[14px]"
+    />
+  </div>
+  <div class="ml-auto inline-flex border border-report-e2e8f0e5 rounded-lg overflow-hidden text-[13px]">
+    <button id="aptViewCal" type="button" data-view="calendar" class="apt-view px-4 py-2">Calendar View</button>
+    <button id="aptViewTable" type="button" data-view="table" class="apt-view px-4 py-2">Table View</button>
+  </div>
+</div>
 
-      <div id="aptSlots" class="flex gap-3 overflow-x-auto pb-2 mt-4"></div>
-    </div>
+<div id="aptDaily">
+  <div id="aptSlots" class="flex gap-3 overflow-x-auto pb-2 mt-4"></div>
+</div>
 
     <div class="flex flex-wrap items-center gap-3 mt-5">
       <div class="relative flex-1 min-w-[220px]">
@@ -274,6 +281,50 @@
         Reset Filters
       </button>
     </div>
+
+
+    <!-- Calendar view -->
+<div id="aptCalView" class="hidden mt-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="inline-flex border border-report-e2e8f0e5 rounded-lg overflow-hidden text-[13px]" id="calMode">
+      <button type="button" data-cm="month" class="cal-mode px-4 py-2">Month</button>
+      <button type="button" data-cm="week" class="cal-mode px-4 py-2">Week</button>
+      <button type="button" data-cm="day" class="cal-mode px-4 py-2">Day</button>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="calPrev" type="button" class="w-8 h-8 border border-report-e2e8f0e5 rounded-lg text-slate-700">&lsaquo;</button>
+      <div id="calTitle" class="border border-report-e2e8f0e5 rounded-lg px-4 py-1.5 text-[14px] font-medium min-w-[170px] text-center"></div>
+      <button id="calNext" type="button" class="w-8 h-8 border border-report-e2e8f0e5 rounded-lg text-slate-700">&rsaquo;</button>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="calToday" type="button" class="text-[13px] font-semibold px-4 py-1.5 rounded-lg border border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50">Today</button>
+      <button id="calFilterBtn" type="button" class="text-[13px] font-semibold px-4 py-1.5 rounded-lg border border-report-e2e8f0e5 text-slate-700 bg-white hover:bg-gray-100">Filter</button>
+    </div>
+  </div>
+
+  <div class="mt-4 border-t border-l border-report-e2e8f0e5 rounded-xl overflow-hidden">
+    <div id="calHead" class="grid grid-cols-7 bg-slate-50 text-[13px] font-semibold text-center">
+      <div class="py-3 border-r border-b border-report-e2e8f0e5">Sun</div>
+      <div class="py-3 border-r border-b border-report-e2e8f0e5">Mon</div>
+      <div class="py-3 border-r border-b border-report-e2e8f0e5">Tue</div>
+      <div class="py-3 border-r border-b border-report-e2e8f0e5">Wed</div>
+      <div class="py-3 border-r border-b border-report-e2e8f0e5">Thu</div>
+      <div class="py-3 border-r border-b border-report-e2e8f0e5">Fri</div>
+      <div class="py-3 border-r border-b border-report-e2e8f0e5">Sat</div>
+    </div>
+    <div id="calGrid" class="grid grid-cols-7"></div>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-6 mt-4 border border-report-e2e8f0e5 rounded-xl px-5 py-3 text-[13px]">
+    <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-blue-500"></i>Clinic / Hospital Visit</span>
+    <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-purple-500"></i>Video / Voice Call</span>
+    <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-green-500"></i>Home Visit</span>
+    <span class="flex items-center gap-2"><i class="w-2 h-2 rounded-full bg-orange-500"></i>Follow-up</span>
+  </div>
+</div>
+
+<!-- Event popover -->
+<div id="calPop" class="hidden fixed z-[900] w-[260px] bg-white rounded-xl shadow-[0_10px_30px_rgba(15,23,42,.2)] p-4"></div>
 
     <!-- Table -->
     <div class="overflow-x-auto mt-4 rounded-lg">

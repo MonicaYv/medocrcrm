@@ -1054,7 +1054,8 @@
     }
     function match(a) {
       var t = S.tab;
-      if (t === "today" && (a.date !== S.date || isReq(a.status))) return false;
+      // if (t === "today" && (a.date !== S.date || isReq(a.status))) return false;
+      if (t === "today" && ((S.view !== "calendar" && a.date !== S.date) || isReq(a.status))) return false;
       if (t === "upcoming" && !(a.status === "confirmed" && a.date > TODAY))
         return false;
       if (t === "pending" && PENDING.indexOf(a.status) < 0) return false;
@@ -1272,7 +1273,9 @@
             })
             .join("")
         : '<p class="text-[14px] text-slate-500">No appointments scheduled for this date.</p>';
-      $("#aptDaily").classList.toggle("hidden", S.tab !== "today");
+    $("#aptDaily").classList.toggle("hidden", S.tab !== "today" || S.view === "calendar");
+$("#aptDateWrap").classList.toggle("hidden",S.cd = S.date);
+applyView();
       $("#aptPendingNote").classList.toggle("hidden", S.tab !== "pending");
       updateCounts();
       saveRows();
@@ -1412,6 +1415,166 @@
       toast("Sample data reset");
     });
 
+    /* ================= CALENDAR VIEW ================= */
+S.view = "table";
+S.cm = "month"; /* month | week | day */
+S.cd = TODAY; /* anchor date */
+var MFULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var VON = "bg-shazam-blue text-white font-semibold";
+var VOFF = "bg-white text-slate-700";
+var CK = {
+  clinic: ["bg-blue-50 text-blue-600", "bg-blue-500"],
+  call: ["bg-purple-50 text-purple-600", "bg-purple-500"],
+  home: ["bg-green-50 text-green-600", "bg-green-500"],
+  follow: ["bg-orange-50 text-orange-600", "bg-orange-500"],
+};
+function iso(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function toD(s) {
+  var p = s.split("-");
+  return new Date(+p[0], +p[1] - 1, +p[2]);
+}
+function addDays(d, n) {
+  var x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+}
+function kind(a) {
+  if (/follow/i.test(a.issue)) return "follow";
+  if (a.mode === "Video Call" || a.mode === "Voice Call") return "call";
+  if (a.mode === "Home Visit") return "home";
+  return "clinic";
+}
+function chip(a) {
+  var c = CK[kind(a)];
+  return (
+    '<button type="button" data-cid="' + a.id + '" class="flex items-center gap-1.5 w-full text-left text-[11px] px-2 py-1 rounded-full ' + c[0] + '">' +
+    '<i class="w-1.5 h-1.5 rounded-full shrink-0 ' + c[1] + '"></i>' +
+    '<span class="truncate">' + fmtTime(a.time) + " – " + a.mode + "</span></button>"
+  );
+}
+function applyView() {
+  var cal = S.view === "calendar";
+  $("#aptCalView").classList.toggle("hidden", !cal);
+  ["aptSearchRow", "aptTableBox", "aptPager"].forEach(function (id) {
+    $("#" + id).classList.toggle("hidden", cal);
+  });
+  $$(".apt-view").forEach(function (b) {
+    setCls(b, b.dataset.view === S.view, VON, VOFF);
+  });
+  if (cal) renderCal();
+}
+function renderCal() {
+  var anchor = toD(S.cd), days = [], i, title;
+  if (S.cm === "month") {
+    var first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+    var start = addDays(first, -first.getDay());
+    for (i = 0; i < 42; i++) days.push(addDays(start, i));
+    title = MFULL[anchor.getMonth()] + " " + anchor.getFullYear();
+  } else if (S.cm === "week") {
+    var ws = addDays(anchor, -anchor.getDay());
+    for (i = 0; i < 7; i++) days.push(addDays(ws, i));
+    title = fmtDate(iso(days[0])) + " – " + fmtDate(iso(days[6]));
+  } else {
+    days = [anchor];
+    title = fmtDate(S.cd);
+  }
+  $("#calTitle").textContent = title;
+  $$(".cal-mode").forEach(function (b) {
+    setCls(b, b.dataset.cm === S.cm, VON, VOFF);
+  });
+  $("#calHead").classList.toggle("hidden", S.cm === "day");
+  $("#calGrid").className = "grid " + (S.cm === "day" ? "grid-cols-1" : "grid-cols-7");
+
+  var map = {};
+  S.rows.filter(match).forEach(function (a) {
+    (map[a.date] = map[a.date] || []).push(a);
+  });
+  var max = S.cm === "month" ? 2 : 99;
+  var minH = S.cm === "month" ? "min-h-[96px]" : "min-h-[260px]";
+
+  $("#calGrid").innerHTML = days
+    .map(function (d) {
+      var k = iso(d);
+      var list = (map[k] || []).sort(function (x, y) { return x.time < y.time ? -1 : 1; });
+      var out = S.cm === "month" && d.getMonth() !== anchor.getMonth();
+      var more = list.length > max
+        ? '<button type="button" data-more="' + k + '" class="text-[11px] text-shazam-blue font-medium mt-1">+' + (list.length - max) + " more</button>"
+        : "";
+      return (
+        '<div class="' + minH + " border-r border-b border-report-e2e8f0e5 p-2 " + (out ? "bg-slate-50 text-slate-400" : "") + '">' +
+        '<span class="inline-flex items-center justify-center w-6 h-6 text-[13px] rounded-full ' +
+        (k === TODAY ? "bg-shazam-blue text-white font-semibold" : "") + '">' + d.getDate() + "</span>" +
+        '<div class="space-y-1 mt-1">' + list.slice(0, max).map(chip).join("") + more + "</div></div>"
+      );
+    })
+    .join("");
+}
+function calNav(n) {
+  var d = toD(S.cd);
+  if (S.cm === "month") d.setMonth(d.getMonth() + n, 1);
+  else d = addDays(d, n * (S.cm === "week" ? 7 : 1));
+  S.cd = iso(d);
+  renderCal();
+}
+function showPop(a, anchorEl) {
+  var c = CK[kind(a)], r = anchorEl.getBoundingClientRect(), p = $("#calPop");
+  p.innerHTML =
+    '<div class="flex items-start gap-3"><span class="' + AV + ' w-10 h-10 text-sm">' + initials(a.name) + "</span>" +
+    '<div class="flex-1"><div class="font-semibold text-[15px]">' + esc(a.name) + '</div><div class="text-[12px] text-slate-400">' + a.id + "</div></div>" +
+    '<button type="button" data-popx class="text-slate-400 text-[16px] leading-none">✕</button></div>' +
+    '<span class="inline-block text-[12px] px-2 py-0.5 rounded-md mt-3 ' + c[0] + '">' + a.mode + "</span>" +
+    '<div class="text-[13px] text-slate-600 mt-2">' + fmtDate(a.date) + " · " + fmtTime(a.time) + "</div>" +
+    '<div class="text-[13px] text-slate-600 mt-1">' + esc(a.loc) + "</div>" +
+    '<button type="button" data-vd="' + a.id + '" class="' + B.primary + ' w-full mt-3">View Details</button>';
+  p.style.top = Math.max(8, Math.min(r.bottom + 8, window.innerHeight - 250)) + "px";
+  p.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 280)) + "px";
+  p.classList.remove("hidden");
+}
+$$(".apt-view").forEach(function (b) {
+  b.addEventListener("click", function () {
+    S.view = b.dataset.view;
+    S.page = 1;
+    render();
+  });
+});
+$$(".cal-mode").forEach(function (b) {
+  b.addEventListener("click", function () {
+    S.cm = b.dataset.cm;
+    renderCal();
+  });
+});
+$("#calPrev").addEventListener("click", function () { calNav(-1); });
+$("#calNext").addEventListener("click", function () { calNav(1); });
+$("#calToday").addEventListener("click", function () {
+  S.cd = TODAY;
+  renderCal();
+});
+$("#calFilterBtn").addEventListener("click", function () {
+  $("#aptFilterBtn").click();
+});
+document.addEventListener("click", function (e) {
+  var pop = $("#calPop");
+  var c = e.target.closest("[data-cid]");
+  if (c && c.closest("#calGrid")) {
+    showPop(byId(c.dataset.cid), c);
+    return;
+  }
+  var vd = e.target.closest("[data-vd]");
+  if (vd) {
+    pop.classList.add("hidden");
+    openDetails(byId(vd.dataset.vd));
+    return;
+  }
+  var m = e.target.closest("[data-more]");
+  if (m) {
+    S.cd = m.dataset.more;
+    S.cm = "day";
+    renderCal();
+  }
+  if (e.target.closest("[data-popx]") || !e.target.closest("#calPop")) pop.classList.add("hidden");
+});
     function buildDD() {
       $$("[data-dd]").forEach(function (w) {
         var k = w.dataset.dd;
