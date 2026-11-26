@@ -1,1652 +1,516 @@
-
 {% extends "dashboard/layout.html" %}
 {% load static %}
-{% block title %}Offers & Bids{% endblock %}
+{% block title %}Coupons{% endblock %}
 {% block content %}
 
-<div class="p-4">
-  <div class="offers-bids bg-white relative text-dark-gray main-content h-full flex-1 flex flex-col gap-4 overflow-y-auto scroll p-2">
 
-    <!-- Sidebar show toggle -->
-    <div class="show-sidebar-toggle hidden fixed top-24 left-0 z-50 h-10 w-10 bg-transparent-living-coral items-center justify-center rounded-r-md cursor-pointer">
-      <span class="material-symbols-outlined bold-weight text-living-coral">arrow_forward_ios</span>
-    </div>
-
-    <!-- Page header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div class="space-y-2">
-        <p class="flex items-center gap-2 text-2xl font-bold text-dark-black">
-          <span class="material-symbols-outlined">confirmation_number</span>
-          Offers &amp; Bids
-        </p>
-        <p class="text-sm text-ashy-blue font-medium">Review service requests, submit bids, and manage your hospital offers.</p>
-        <p class="text-sm text-ashy-blue font-medium">Tuesday 29 September 2026</p>
-        <p class="text-sm font-bold text-black">Lifecare Multispeciality Hospital</p>
-      </div>
-      <button type="button" class="flex items-center justify-center gap-2 rounded-lg border border-shazam-blue shadow-blue-box py-2 text-sm text-shazam-blue cursor-pointer whitespace-nowrap w-full max-w-72.25">
-        <span class="material-symbols-outlined">upload</span>
-        Export
-      </button>
-    </div>
-
-    <!-- Win rate banner -->
-    <div class="rounded-xl bg-shazam-blue border border-kyc-medium-gray text-white p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-      <div class="space-y-1">
-        <p class="text-xs font-semibold">This Week</p>
-        <p class="text-2xl font-bold">66.7%</p>
-        <p class="text-[10px] opacity-70">Historical performance · 12 wins / 10 answered</p>
-      </div>
-      <div class="flex flex-col items-end gap-1 text-right">
-        <span class="material-symbols-outlined">trophy</span>
-        <p class="text-[10px] font-semibold">18 answered · 12 Won · 6 Lost</p>
-      </div>
-    </div>
-
-    <!-- Stat cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <!-- New Requests -->
-      <div class="rounded-xl border border-report-e2e8f0e5 p-4 space-y-1.5">
-        <div class="flex items-center justify-between">
-          <div class="h-10 w-10 flex items-center justify-center rounded-lg border border-shazam-blue">
-            <span class="material-symbols-outlined text-shazam-blue">docs</span>
-          </div>
-          <span class="text-xs rounded-full border border-shazam-blue text-shazam-blue px-2 py-0.5">New Requests</span>
-        </div>
-        <p class="text-[32px] font-bold text-dark-black">8</p>
-        <p class="text-xs text-grayish-blue-slate">5 unattended · 3 awaiting response</p>
-      </div>
-
-      <!-- My Bids -->
-      <div class="rounded-xl border border-report-e2e8f0e5 p-4 space-y-1.5">
-        <div class="flex items-center justify-between">
-          <div class="h-10 w-10 flex items-center justify-center rounded-lg border border-instant-orange">
-           <span class="material-symbols-outlined text-instant-orange">send</span>
-          </div>
-          <span class="text-xs rounded-full border border-instant-orange text-instant-orange px-2 py-0.5">My Bids</span>
-        </div>
-        <p class="text-[32px] font-bold text-dark-black">4</p>
-        <p class="text-xs text-grayish-blue-slate">Today</p>
-      </div>
-
-      <!-- Accepted -->
-      <div class="rounded-xl border border-report-e2e8f0e5 p-4 space-y-1.5">
-        <div class="flex items-center justify-between">
-          <div class="h-10 w-10 flex items-center justify-center rounded-lg border border-kyc-green">
-            <span class="material-symbols-outlined text-kyc-green">check</span>
-          </div>
-          <span class="text-xs rounded-full border border-kyc-green text-kyc-green px-2 py-0.5">Accepted</span>
-        </div>
-        <p class="text-[32px] font-bold text-dark-black">3</p>
-        <p class="text-xs text-grayish-blue-slate">Customer accepted</p>
-      </div>
-
-      <!-- Awaiting Response -->
-      <div class="rounded-xl border border-report-e2e8f0e5 p-4 space-y-1.5">
-        <div class="flex items-center justify-between">
-          <div class="h-10 w-10 flex items-center justify-center rounded-lg border border-golden-yellow">
-           <span class="material-symbols-outlined text-golden-yellow">schedule</span>
-          </div>
-          <span class="text-xs rounded-full border border-golden-yellow text-golden-yellow px-2 py-0.5">Awaiting Response</span>
-        </div>
-        <p class="text-[32px] font-bold text-dark-black">3</p>
-        <p class="text-xs text-grayish-blue-slate">1 lost · 1 expired · 1 withdrawn</p>
-      </div>
-    </div>
-
-    <!-- Main panel -->
-    <div class="space-y-0 overflow-hidden">
-
-      <!-- Tabs -->
-      <div class="flex gap-0 whitespace-nowrap overflow-x-auto no-scrollbar px-4 pt-2">
-        <button type="button" data-tab="new-requests" data-active="text-shazam-blue border-shazam-blue font-medium" class="ob-tab flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 border-transparent text-gray-500 cursor-pointer">
-          New Request <span class="rounded-full bg-shazam-blue px-1.5 text-[10px] text-white min-w-4.5 text-center">5</span>
-        </button>
-        <button type="button" data-tab="my-bids" data-active="text-shazam-blue border-shazam-blue font-medium" class="ob-tab flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 border-transparent text-gray-500 cursor-pointer">
-          My Bids <span class="rounded-full bg-gray-200 px-1.5 text-[10px] text-gray-700 min-w-4.5 text-center">3</span>
-        </button>
-        <button type="button" data-tab="accepted" data-active="text-shazam-blue border-shazam-blue font-medium" class="ob-tab flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 border-transparent text-gray-500 cursor-pointer">
-          Accepted <span class="rounded-full bg-gray-200 px-1.5 text-[10px] text-gray-700 min-w-4.5 text-center">5</span>
-        </button>
-        <button type="button" data-tab="completed" data-active="text-shazam-blue border-shazam-blue font-medium" class="ob-tab flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 border-transparent text-gray-500 cursor-pointer">
-          Completed <span class="rounded-full bg-gray-200 px-1.5 text-[10px] text-gray-700 min-w-4.5 text-center">5</span>
-        </button>
-        <button type="button" data-tab="auto-bid" data-active="text-shazam-blue border-shazam-blue font-medium" class="ob-tab flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 border-transparent text-gray-500 cursor-pointer">
-          Auto Bid Settings
-        </button>
-      </div>
-
-      <!-- Search + Filter (hidden on Auto Bid tab) -->
-      <div id="list-controls" class="p-4 space-y-3">
-        <div id="list-toolbar" class="flex flex-wrap items-center justify-between gap-3">
-          <div class="relative flex-1 max-w-162.75">
-            <span class="material-symbols-outlined absolute left-2 top-2">search</span>
-            <input id="ob-search" type="text" placeholder="Search request ID, customer or service..." class="w-full rounded-lg border border-kyc-medium-gray bg-white py-2.5 pl-10 pr-3.5 text-[13px] text-dark-black focus:outline-none placeholder:text-grayish-blue-slate" />
-          </div>
-          <button id="filter-toggle" type="button" class="flex items-center gap-2 rounded-lg border border-kyc-medium-gray bg-white px-4.5 py-2.25 text-sm font-medium text-popup-label cursor-pointer transition-colors">
-            Filter
-            <span class="material-symbols-outlined">filter_alt</span>
-          </button>
-        </div>
-
-        <!-- Filter controls -->
-        <div id="filter-bar" class="hidden flex-col gap-4">
-          <div class="flex flex-wrap items-center gap-3">
-            <div class="relative" data-dd>
-              <button type="button" data-dd-trigger class="flex min-w-40 items-center justify-between gap-4 rounded-lg border border-kyc-medium-gray bg-white px-4 py-2.5 text-sm text-dark-gray cursor-pointer"><span data-dd-label>All Services</span><span class="material-symbols-outlined text-lg">keyboard_arrow_down</span></button>
-              <div data-dd-menu data-sel="bg-shazam-blue text-white" class="hidden absolute left-0 top-[calc(100%+6px)] z-30 min-w-52 rounded-xl border border-kyc-medium-gray bg-white p-2 shadow-lg">
-                <button type="button" data-filter="service" data-v="All Services" class="ob-opt block w-full rounded-lg bg-shazam-blue px-3 py-2.5 text-left text-sm text-white cursor-pointer">All Services</button>
-                <button type="button" data-filter="service" data-v="General Medicine OPD" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">General Medicine OPD</button>
-                <button type="button" data-filter="service" data-v="Wound Dressing" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Wound Dressing</button>
-                <button type="button" data-filter="service" data-v="Orthopaedic OPD" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Orthopaedic OPD</button>
-                <button type="button" data-filter="service" data-v="Day-care Service" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Day-care Service</button>
-                <button type="button" data-filter="service" data-v="Planned Admission" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Planned Admission</button>
-              </div>
-            </div>
-            <div class="relative" data-dd>
-              <button type="button" data-dd-trigger class="flex min-w-36 items-center justify-between gap-4 rounded-lg border border-kyc-medium-gray bg-white px-4 py-2.5 text-sm text-dark-gray cursor-pointer"><span data-dd-label>All Visit type</span><span class="material-symbols-outlined text-lg">keyboard_arrow_down</span></button>
-              <div data-dd-menu data-sel="bg-shazam-blue text-white" class="hidden absolute left-0 top-[calc(100%+6px)] z-30 min-w-48 rounded-xl border border-kyc-medium-gray bg-white p-2 shadow-lg">
-                <button type="button" data-filter="mode" data-v="All Visit type" class="ob-opt block w-full rounded-lg bg-shazam-blue px-3 py-2.5 text-left text-sm text-white cursor-pointer">All Visit type</button>
-                <button type="button" data-filter="mode" data-v="Hospital Visit" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Hospital visit</button>
-                <button type="button" data-filter="mode" data-v="Planned admission" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Planned admission</button>
-              </div>
-            </div>
-            <div class="relative" data-dd data-only="new-requests">
-              <button type="button" data-dd-trigger class="flex min-w-36 items-center justify-between gap-4 rounded-lg border border-kyc-medium-gray bg-white px-4 py-2.5 text-sm text-dark-gray cursor-pointer"><span data-dd-label>All Priorities</span><span class="material-symbols-outlined text-lg">keyboard_arrow_down</span></button>
-              <div data-dd-menu data-sel="bg-shazam-blue text-white" class="hidden absolute left-0 top-[calc(100%+6px)] z-30 min-w-40 rounded-xl border border-kyc-medium-gray bg-white p-2 shadow-lg">
-                <button type="button" data-filter="urgency" data-v="All Priorities" class="ob-opt block w-full rounded-lg bg-shazam-blue px-3 py-2.5 text-left text-sm text-white cursor-pointer">All Priorities</button>
-                <button type="button" data-filter="urgency" data-v="Standard" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Standard</button>
-                <button type="button" data-filter="urgency" data-v="Urgent" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Priority</button>
-              </div>
-            </div>
-            <div class="relative" data-dd>
-              <button type="button" data-dd-trigger class="flex min-w-36 items-center justify-between gap-4 rounded-lg border border-kyc-medium-gray bg-white px-4 py-2.5 text-sm text-dark-gray cursor-pointer"><span data-dd-label>All Status</span><span class="material-symbols-outlined text-lg">keyboard_arrow_down</span></button>
-              <div data-dd-menu data-sel="bg-shazam-blue text-white" class="hidden absolute left-0 top-[calc(100%+6px)] z-30 min-w-40 rounded-xl border border-kyc-medium-gray bg-white p-2 shadow-lg">
-                <button type="button" data-filter="status" data-v="All Status" class="ob-opt block w-full rounded-lg bg-shazam-blue px-3 py-2.5 text-left text-sm text-white cursor-pointer">All Status</button>
-                <button type="button" data-filter="status" data-v="New" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">New</button>
-                <button type="button" data-filter="status" data-v="Submitted" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Submitted</button>
-                <button type="button" data-filter="status" data-v="Completed" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Completed</button>
-                <button type="button" data-filter="status" data-v="Accepted" class="ob-opt block w-full rounded-lg px-3 py-2.5 text-left text-sm text-dark-gray hover:bg-transparent-living-coral cursor-pointer">Accepted</button>
-              </div>
-            </div>
-            <button id="filter-reset" type="button" class="px-2 text-sm text-ashy-blue cursor-pointer hover:text-shazam-blue">Reset Filters</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ NEW REQUESTS ============ -->
-      <div id="tab-new-requests" class="ob-panel">
-
-        <!-- Expiry warning -->
-        <div class="mx-4 mb-6 flex items-center justify-between rounded-xl bg-soft-ivory border border-instant-orange px-4 py-2.5 text-sm">
-          <span class="flex items-center gap-2 text-instant-orange">
-            <span class="material-symbols-outlined">info</span>
-            2 requests expire within 15 minutes.
-          </span>
-          <button type="button" class="text-instant-orange font-medium text-sm cursor-pointer hover:underline">Review Now →</button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-225 text-xs">
-            <thead>
-              <tr class="bg-shazam-blue text-white text-sm">
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Request /<br>Customer</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Service</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Date / Time</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Visit Type</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Priority</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Budget</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Time Left</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Status</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr data-row data-mode="Hospital Visit" data-urgency="Standard" data-price="700" data-date="2026-09-29" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">DP</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5501</p>
-                      <p class="font-semibold text-dark-black text-sm">Dolly Paris</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">34 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">General Medicine OPD</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>11:00 AM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹700</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="flex items-center gap-1 text-popup-label text-sm">
-                    <span class="material-symbols-outlined mini-icon">schedule</span>
-                      18m
-                    </span>
-                  </div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#EFF6FF] border border-[#DBEAFE99] px-2.5 py-0.5 text-xs text-shazam-blue">New</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="request-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" class="text-golden-yellow cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">share_windows</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-row data-mode="Hospital Visit" data-urgency="Standard" data-price="1200" data-date="2026-09-29" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">DP</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5501</p>
-                      <p class="font-semibold text-dark-black text-sm">Dolly Paris</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">34 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">General Medicine OPD</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>11:00 AM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹700</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="flex items-center gap-1 text-popup-label text-sm">
-                    <span class="material-symbols-outlined mini-icon">schedule</span>
-                      18m
-                    </span>
-                  </div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#EFF6FF] border border-[#DBEAFE99] px-2.5 py-0.5 text-xs text-shazam-blue">New</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="request-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" class="text-golden-yellow cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">share_windows</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-row data-mode="Hospital Visit" data-urgency="Urgent" data-price="900" data-date="2026-09-29" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">DP</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5501</p>
-                      <p class="font-semibold text-dark-black text-sm">Dolly Paris</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">34 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">General Medicine OPD</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>11:00 AM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#FEF2F2] px-2.5 py-0.5 text-xs text-[#FF383C]">Urgent</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹700</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="flex items-center gap-1 text-[#FF383C] text-sm">
-                      <span class="material-symbols-outlined mini-icon">schedule</span>
-                      18m
-                    </span>
-                  </div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#EFF6FF] border border-[#DBEAFE99] px-2.5 py-0.5 text-xs text-shazam-blue">New</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="request-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" class="text-golden-yellow cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">share_windows</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-row data-mode="Hospital Visit" data-urgency="Standard" data-price="3500" data-date="2026-09-29" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">DP</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5501</p>
-                      <p class="font-semibold text-dark-black text-sm">Dolly Paris</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">34 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">General Medicine OPD</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>11:00 AM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹700</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="flex items-center gap-1 text-popup-label text-sm">
-                    <span class="material-symbols-outlined mini-icon">schedule</span>
-                      18m
-                    </span>
-                  </div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#EFF6FF] border border-[#DBEAFE99] px-2.5 py-0.5 text-xs text-shazam-blue">New</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="request-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" class="text-golden-yellow cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">share_windows</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-row data-mode="Hospital Visit" data-urgency="Standard" data-price="1200" data-date="2026-09-29" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">DP</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5501</p>
-                      <p class="font-semibold text-dark-black text-sm">Dolly Paris</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">34 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">General Medicine OPD</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>11:00 AM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹700</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="flex items-center gap-1 text-popup-label text-sm">
-                    <span class="material-symbols-outlined mini-icon">schedule</span>
-                      18m
-                    </span>
-                  </div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#EFF6FF] border border-[#DBEAFE99] px-2.5 py-0.5 text-xs text-shazam-blue">New</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="request-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" class="text-golden-yellow cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">share_windows</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-empty class="hidden"><td colspan="9" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="flex items-center justify-between p-4 text-xs text-gray-500 border-t border-gray-100">
-          <span class="ob-showing" data-default="Showing 1-5 of 8">Showing 1-5 of 8</span>
-          <div class="flex items-center gap-2">
-            <select class="rounded-md border border-gray-200 px-2 py-1 text-xs"><option>8</option><option>16</option></select>
-            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-gray-400 cursor-pointer">Previous</button>
-            <span>1/2</span>
-            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-black cursor-pointer">Next</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ MY BIDS ============ -->
-      <div id="tab-my-bids" class="ob-panel hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-225 text-xs">
-            <thead>
-              <tr class="bg-shazam-blue text-white text-sm">
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Request /<br>Customer</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Service</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Date / Time</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Visit Type</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Priority</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Budget</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Time Left</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Status</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr data-row data-mode="Hospital Visit" data-price="500" data-date="2026-09-29" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">KN</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5508</p>
-                      <p class="font-semibold text-dark-black text-sm">Kavita Nair</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">38 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">Wound Dressing</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>05:00 PM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="flex items-center gap-1 text-popup-label text-sm">
-                    <span class="material-symbols-outlined mini-icon">schedule</span>
-                      1hr 30m
-                    </span>
-                  </div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#FAF5FF] border border-[#E9D5FFCC] px-2.5 py-0.5 text-xs text-[#7E22CE]">Awaiting</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="my-bid-awaiting-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" class="text-[#FF383C] cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">block</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-row data-mode="Home Visit" data-price="700" data-date="2026-09-29" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">KN</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5508</p>
-                      <p class="font-semibold text-dark-black text-sm">Kavita Nair</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">38 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">Wound Dressing</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>05:00 PM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="flex items-center gap-1 text-popup-label text-sm">
-                    <span class="material-symbols-outlined mini-icon">schedule</span>
-                      1hr 30m
-                    </span>
-                  </div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#F6FFF5] border border-[#D5FFDDCC] px-2.5 py-0.5 text-xs text-[#22CE50]">Accepted</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="my-bid-accepted-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" class="text-[#FF383C] cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">block</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-row data-mode="Video Call" data-price="280" data-date="2026-09-29" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">KN</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5508</p>
-                      <p class="font-semibold text-dark-black text-sm">Kavita Nair</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">38 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">Wound Dressing</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>05:00 PM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="flex items-center gap-1 text-popup-label text-sm">
-                    <span class="material-symbols-outlined mini-icon">schedule</span>
-                      1hr 30m
-                    </span>
-                  </div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-report-fff5f6 border border-[#FFD5DBCC] px-2.5 py-0.5 text-xs text-[#CE222B]">Rejected</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="submit-bid" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" class="text-[#FF383C] cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">block</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-empty class="hidden"><td colspan="9" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="flex items-center justify-between p-4 text-xs text-gray-500 border-t border-gray-100">
-          <span class="ob-showing" data-default="Showing 1-3 of 3">Showing 1-3 of 3</span>
-          <div class="flex items-center gap-2">
-            <select class="rounded-md border border-gray-200 px-2 py-1 text-xs"><option>8</option><option>16</option></select>
-            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-gray-400 cursor-pointer">Previous</button>
-            <span>1/1</span>
-            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-black cursor-pointer">Next</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ ACCEPTED ============ -->
-      <div id="tab-accepted" class="ob-panel hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-200 text-xs">
-            <thead>
-              <tr class="bg-shazam-blue text-white text-sm">
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Request /<br>Customer</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Service</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Date / Time</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Visit Type</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Priority</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Accepted Bid</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Appointment</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Status</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr data-row data-mode="Home Visit" data-price="8000" data-date="2025-03-27" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">KN</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5508</p>
-                      <p class="font-semibold text-dark-black text-sm">Kavita Nair</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">38 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">Wound Dressing</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>05:00 PM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">
-                  Today<br>05:00 PM
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#F6FFF5] border border-[#D5FFDDCC] px-2.5 py-0.5 text-xs text-[#22CE50]">Accepted</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="submit-bid" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                    <button type="button" data-open="appointment-details" class="text-kyc-green cursor-pointer" title="Appointment details">
-                      <span class="material-symbols-outlined">calendar_today</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-row data-mode="Home Visit" data-price="7000" data-date="2025-03-25" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">KN</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5508</p>
-                      <p class="font-semibold text-dark-black text-sm">Kavita Nair</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">38 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">Wound Dressing</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>05:00 PM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-white2 px-2.5 py-0.5 text-xs text-gray-600">Standard</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">
-                  30 Sep<br>05:00 PM
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#F6FFF5] border border-[#D5FFDDCC] px-2.5 py-0.5 text-xs text-[#22CE50]">Accepted</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="submit-bid" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                     <button type="button" data-open="appointment-details" class="text-kyc-green cursor-pointer" title="Appointment details">
-                      <span class="material-symbols-outlined">calendar_today</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-empty class="hidden"><td colspan="7" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="flex items-center justify-between p-4 text-xs text-gray-500 border-t border-gray-100">
-          <span class="ob-showing" data-default="Showing 1-2 of 5">Showing 1-2 of 5</span>
-          <div class="flex items-center gap-2">
-            <select class="rounded-md border border-gray-200 px-2 py-1 text-xs"><option>8</option></select>
-            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-gray-400 cursor-pointer">Previous</button>
-            <span>1/1</span>
-            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-black cursor-pointer">Next</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ COMPLETED ============ -->
-      <div id="tab-completed" class="ob-panel hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-200 text-xs">
-            <thead>
-              <tr class="bg-shazam-blue text-white text-sm">
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Request /<br>Customer</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Service</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Date / Time</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Visit Type</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Bid Amount</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Final Amount</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Completed On</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Status</th>
-                <th class="py-3 px-4 text-center font-medium uppercase tracking-wide">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr data-row data-mode="Home Visit" data-price="280" data-date="2025-03-27" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">KN</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5508</p>
-                      <p class="font-semibold text-dark-black text-sm">Kavita Nair</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">38 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">Wound Dressing</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>05:00 PM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Hospital Visit</td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">
-                  30 Sep 2026<br>05:00 PM
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#F6FFF5] border border-[#D5FFDDCC] px-2.5 py-0.5 text-xs text-[#22CE50]">Completed</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="completed-request-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                     <button type="button" data-open="completion-record" class="text-shazam-blue cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">description</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-row data-mode="Home Visit" data-price="500" data-date="2025-03-27" class="hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm font-semibold text-white">KN</span>
-                    <div>
-                      <p class="font-semibold text-shazam-blue text-xs">REQ-H5508</p>
-                      <p class="font-semibold text-dark-black text-sm">Kavita Nair</p>
-                      <p class="text-xs font-medium text-grayish-blue-slate">38 yrs · F</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-dark-black text-sm text-center">Wound Dressing</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">29 Sep 2026<br>05:00 PM</td>
-                <td class="py-3 px-4 text-ashy-blue font-normal text-sm text-center">Home Visit</td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4 font-semibold text-dark-black text-sm text-center">₹1200</td>
-                <td class="py-3 px-4 text-popup-label text-center text-sm">
-                  30 Sep 2026<br>05:00 PM
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center justify-center">
-                    <span class="rounded-full bg-[#F6FFF5] border border-[#D5FFDDCC] px-2.5 py-0.5 text-xs text-[#22CE50]">Completed</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <button type="button" data-open="completed-request-details" class="text-shazam-blue cursor-pointer" title="View">
-                      <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                     <button type="button" data-open="completion-record" class="text-shazam-blue cursor-pointer" title="Open">
-                      <span class="material-symbols-outlined">description</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr data-empty class="hidden"><td colspan="9" class="py-10 text-center text-sm text-slate-500">No results match. Change the search or filters.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="flex items-center justify-between p-4 text-xs text-gray-500 border-t border-gray-100">
-          <span class="ob-showing" data-default="Showing 1-2 of 5">Showing 1-2 of 5</span>
-          <div class="flex items-center gap-2">
-            <select class="rounded-md border border-gray-200 px-2 py-1 text-xs"><option>8</option></select>
-            <button type="button" class="rounded-md border border-gray-200 px-3 py-1 text-gray-400 cursor-pointer">Previous</button>
-            <span>1/1</span>
-            <button type="button" class="rounded-md border border-gray-300 px-3 py-1 text-black cursor-pointer">Next</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ AUTO BID SETTINGS ============ -->
-      <div id="tab-auto-bid" class="ob-panel hidden">
-
-        <!-- Auto Bid Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 border-b border-gray-100">
-          <div>
-            <p class="text-xl font-bold text-black">Auto Bid Settings</p>
-            <p class="text-sm text-gray-500 mt-0.5">Automatically respond to eligible medicine requests.</p>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <span class="flex items-center gap-1.5 rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-600">
-              <span class="h-1.5 w-1.5 rounded-full bg-gray-400 inline-block"></span>
-              Auto Bid is paused
+      <div class="p-4">
+        <div class="coupon bg-white relative transition-all duration-300 text-dark-gray shadow-(--box-shadow-5) rounded-[10px] main-content h-full flex-1 flex flex-col gap-8 overflow-y-auto scroll p-6">
+          <div class="show-sidebar-toggle hidden fixed top-24 left-0 z-50 h-10 w-10 bg-transparent-living-coral items-center justify-center rounded-r-md cursor-pointer">
+            <span class="material-symbols-outlined bold-weight text-living-coral">
+                arrow_forward_ios
             </span>
-            <label class="relative inline-flex cursor-pointer">
-              <input type="checkbox" id="auto-bid-toggle" class="peer sr-only" />
-              <span class="h-6 w-11 rounded-full bg-gray-300 transition peer-checked:bg-shazam-blue after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></span>
-            </label>
           </div>
-        </div>
+          <div class="flex items-center justify-between">
+              <div class="space-y-2">
+                <p class="flex items-center gap-2">
+                  <span class="tab-icon material-symbols-outlined"> upload </span>
+                  <span class="tab-title font-medium text-xl">Coupons</span>
+                </p>
+                <p class="tab-description text-18-nr">
+                  Boost Your Sales—Post New Coupons for Users!
+                </p>
+              </div>
+          </div>
 
-        <!-- Cards Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-5">
+            <!-- Tabs -->
+          <div>
+            <div class="flex gap-4 sm:gap-4 whitespace-nowrap overflow-x-auto no-scrollbar">
+              <button
+                class="{{ tab_class }} {% if active_tab == 'new-coupon' %}{{ active_tab_class }}{% endif %} px-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                data-tab="new-coupon">
+                Add New Coupon
+              </button>
+              <button class="{{ tab_class }} {% if active_tab == 'coupon-history' %}{{ active_tab_class }}{% endif %} px-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                data-tab="coupon-history">
+                Coupon History
+              </button>
+              <button class="{{ tab_class }} {% if active_tab == 'saved-coupon-history' %}{{ active_tab_class }}{% endif %} px-4 text-18-fs cursor-pointer border-{{ border }} text-{{ text }}"
+                data-tab="saved-coupon-history">
+                Saved Coupon
+              </button>
+            </div>
+          </div>  
 
-          <!-- Request Eligibility -->
-          <div class="rounded-xl border border-gray-200 bg-white p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <p class="text-base font-bold text-black">Request Eligibility</p>
-              <span class="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-medium text-shazam-blue">Rules</span>
-            </div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-3">
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Visit Hospital
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Home Visit
-              </label>
-            </div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-3 pt-1">
-              <div class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                <div class="relative">
-                  <select class="appearance-none rounded-md border border-gray-200 bg-white pl-2 pr-6 py-1 text-sm text-gray-700 cursor-pointer focus:outline-none focus:border-shazam-blue">
-                    <option>Radius: 15 km</option>
-                    <option>Radius: 10 km</option>
-                    <option>Radius: 20 km</option>
-                    <option>Radius: 25 km</option>
-                  </select>
-                  <svg class="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            <!-- New Coupon content -->
+            <form id="main-coupon-form" action="{% url 'coupons' %}" method="POST" enctype="multipart/form-data" class="new-coupon tab-content pb-3 space-y-2">
+              {% csrf_token %}
+              <div id="step-1" class="step">
+                <div class="space-y-5">
+                  <!-- Coupon title -->
+                  <div class="space-y-2">
+                    <h1 class=" text-18-fs font-semibold">Coupon Details</h1>
+                    <h1 class="text-dark-gray text-14-fs mt-4">Coupon Title</h1>
+                    <input type="text" placeholder="Eg.Summer Mega Offer" maxlength="20" name="title"
+                      class="required-field w-full h-10 p-3 rounded-[6px] border border-dark-gray focus:outline-none focus:ring-0 placeholder:text-dark-gray placeholder:text-14-nr" />
+                    <p class="field-error text-xs font-normal text-dark-gray text-end">*Title exists limit of 20 character's</p>
+                  </div>
+
+                  <!-- Description -->
+                  <div class="space-y-2">
+                    <h1 class="text-dark-gray text-14-fs">Description</h1>
+                    <textarea rows="2"  maxlength="120" name="description"
+                      class="required-field block p-3 w-full h-24 rounded-[6px] scroll border border-dark-gray focus:outline-none focus:ring-0 placeholder:text-dark-gray placeholder:text-14-nr"
+                      placeholder="Brief description of the rewards...."></textarea>
+                    <p class="field-error text-xs font-normal text-dark-gray text-end">*Description exists limit of 120 character's</p>
+                  </div>
+
+                  <!-- Coupon Code -->
+                  <div class="space-y-2">
+                    <h1 class="text-dark-gray text-14-fs">Coupon Code</h1>
+                    <input type="text" placeholder="E.g. SUMMER2025" name="code"
+                      class="required-field w-full h-10 p-3 rounded-[6px] border border-dark-gray focus:outline-none focus:ring-0 placeholder:text-dark-gray placeholder:text-14-nr" />
+                  </div>
+
+                  <div class="flex items-center justify-between gap-5">
+
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Category </h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-dark-gray text-14-nr text-left" />
+                          <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                          <input type="hidden" name="category" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white h-[162px] overflow-y-auto scroll">
+                          {% for option in category_options %}
+                            <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                          {% endfor %}
+                          <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Brand Name </h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-dark-gray text-14-nr text-left" />
+                          <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                          <input type="hidden" name="brand_name" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white h-[162px] overflow-y-auto scroll">
+                          {% for option in brand_options %}
+                            <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                          {% endfor %}
+                          <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <!-- Dropdowns -->
+                <div class="mt-4 space-y-3">
+                  <h2 class="text-18-fs text-black">Target Audience</h2>
+                  <div class="space-y-2">
+                    <h1 class="text-dark-gray text-14-fs">Country</h1>
+                    <div class="relative dropdown-wrapper">
+                      <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                        <input type="text" readonly value="Select" 
+                          class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                        <span class="material-symbols-outlined">
+                          keyboard_arrow_down
+                        </span>
+                        <input type="hidden" name="country" class="dropdown-input-hidden" />
+                      </div>
+                      <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white h-[162px] overflow-y-auto scroll">
+                          {% for option in country_options %}
+                            <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                          {% endfor %}
+                          <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-5">
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">State</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                          </span>
+                          <input type="hidden" name="state" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                            class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white h-[162px] overflow-y-auto scroll">
+                            {% for option in state_options %}
+                              <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                            {% endfor %}
+                            <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">City</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                          </span>
+                          <input type="hidden" name="city" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                            class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white h-[162px] overflow-y-auto scroll">
+                            {% for option in city_options %}
+                              <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                            {% endfor %}
+                            <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Pincode</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                          </span>
+                          <input type="hidden" name="pincode" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white h-[162px] overflow-y-auto scroll">
+                          {% for option in pincode_options %}
+                            <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id }}">{{ option.code }}</div>
+                          {% endfor %}
+                          <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-5">
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Age</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                          </span>
+                          <input type="hidden" name="age_group" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                            class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                            {% for option in age_options %}
+                              <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                            {% endfor %}
+                            <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                          </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Gender</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                          </span>
+                          <input type="hidden" name="gender" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                            class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                            {% for option in gender_options %}
+                              <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                            {% endfor %}
+                            <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-5">
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Spending power</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                          </span>
+                          <input type="hidden" name="spending_power" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                            class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white">
+                              {% for option in spending_power_options %}
+                                <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                              {% endfor %}
+                              <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                            </div>
+                      </div>
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Offer Type</h1>
+                      <div class="relative dropdown-wrapper">
+                        <div class="w-full border border-dark-gray rounded-[6px] p-1 cursor-pointer flex items-center">
+                          <input type="text" readonly value="Select" 
+                            class="required-field dropdown-input w-full h-8 border-none p-2 focus:outline-none focus:ring-0 text-left text-dark-gray text-14-nr" />
+                          <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                          </span>
+                          <input type="hidden" name="offer_type" class="dropdown-input-hidden" />
+                        </div>
+                        <div
+                          class="dropdown-list absolute z-10 w-full border border-dark-gray rounded mt-1 hidden shadow-md bg-white  h-[162px] overflow-y-auto scroll">
+                          {% for option in offer_type_options %}
+                            <div class="px-4 py-2 hover:bg-transparent-living-coral cursor-pointer" data-value="{{ option.id|slugify }}">{{ option.name }}</div>
+                          {% endfor %}
+                          <div class="px-4 py-2 font-semibold text-blue-600 cursor-pointer" data-value="custom">+ Custom</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-5">
+                    <div class="space-y-2 w-full">
+                      <h1 class="text-dark-gray text-14-fs">Maximum Redemptions *</h1>
+                      <input type="text" placeholder="Minimum 5" name="max_redemptions"
+                      class="required-field w-full h-10 p-3 rounded-[6px] border border-dark-gray focus:outline-none focus:ring-0 placeholder:text-dark-gray placeholder:text-14-nr">                  
+                    </div>
+                    <div class="space-y-2 w-full">
+                      <label class="block text-sm font-semibold mb-1">Validity *</label>
+                      <div class="relative calendar-wrapper w-full">
+                        <div
+                          class="w-full h-10 border border-dark-gray rounded-[6px] py-2.5 px-4 cursor-pointer flex items-center justify-between custom-date-trigger">
+                          <span class="selected-date text-16-nr text-dark-gray">DD/MM/YY</span>
+                          <span class="material-symbols-outlined text-dark-gray">calendar_month</span>
+                        </div>
+                        <input type="text" class="required-field start-date-range custom-date-range" name="validity"
+                          style="position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none;" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Upload Section -->
+                <div class="mt-4 space-y-3">
+                  <p class="text-16-nr">Upload coupon image (1 rupee per coupon)<span class="text-dark-red">*</span></p>
+                  <div
+                    class="upload-area relative border-2 border-dashed border-living-coral rounded-md h-[312px] flex items-center justify-center px-6">
+                    <input type="file" class="required-field upload-input hidden" name="coupon_image" accept=".jpg,.jpeg,.png,.mp4,image/jpeg,image/png,video/mp4"/>
+                    <div class="upload-placeholder flex flex-col items-center space-y-2 cursor-pointer">
+                      <img src="/static/images/cloud-upload-living.svg" alt="Cloud" loading="lazy" />
+                      <p class="text-xs sm:text-base text-center">Click or Upload</p>
+                    </div>
+                    <div class="upload-preview hidden relative w-full h-60">
+                      <button type="button" class="cancel-upload absolute -top-8 sm:-top-2 right-2">
+                        <span class="material-symbols-outlined cursor-pointer">
+                          close
+                        </span>
+                      </button>
+                      <img src="" alt="Preview" class="uploaded-img mx-auto max-h-52 object-contain" />
+                      <video class="uploaded-video hidden mx-auto max-h-52 w-full object-contain" controls></video>
+                      <p class="uploaded-file-name mt-2 text-center text-xs sm:text-sm text-dark-gray truncate"></p>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <p class="text-[9px] sm:text-xs py-2 text-dark-gray">
+                      Upload a JPG, PNG, or MP4 up to 10 MB
+                    </p>
+                    <div class="flex items-center gap-1">
+                      <p class="text-xs sm:text-16-nr text-dark-red">Virus Scan</p>
+                      <img src="/static/images/virus-scan.svg" alt="Scan" loading="lazy">
+                    </div>
+                  </div>
+                  <div class="flex justify-end sm:gap-8">
+
+                    <button id="next-step" class="pay-btn w-full max-w-[120px] py-2 rounded-[10px] bg-living-coral text-white cursor-pointer">
+                      Pay
+                    </button>
+                  </div>
                 </div>
               </div>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Patient matches specialty
-              </label>
-            </div>
-          </div>
-
-          <!-- Service Preferences -->
-          <div class="rounded-xl border border-gray-200 bg-white p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <p class="text-base font-bold text-black">Service Preferences</p>
-              <span class="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-medium text-shazam-blue">Preferences</span>
-            </div>
-            <div class="space-y-3">
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Regular service
-                <span class="text-xs text-gray-400">( within 24-48 hours )</span>
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Quick Service
-                <span class="text-xs text-gray-400">( within 2-4 hours )</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Availability -->
-          <div class="rounded-xl border border-gray-200 bg-white p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <p class="text-base font-bold text-black">Availability</p>
-              <span class="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-medium text-shazam-blue">Schedule</span>
-            </div>
-            <!-- Available hours -->
-            <div class="flex flex-wrap items-center gap-3">
-              <div class="flex items-center gap-2 text-sm text-gray-600 min-w-[120px]">
-                <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                Available hours
-              </div>
-              <div class="flex items-center gap-2 ml-auto">
-                <div class="relative">
-                  <select class="appearance-none rounded-lg border border-gray-200 bg-white pl-3 pr-8 py-1.5 text-sm text-gray-700 cursor-pointer focus:outline-none focus:border-shazam-blue">
-                    <option>09:00 AM</option>
-                    <option>08:00 AM</option>
-                    <option>10:00 AM</option>
-                  </select>
-                  <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              <div id="step-2" class="step hidden">
+                <div class="flex items-center justify-between">
+                  <div class="space-y-2">
+                    <p class="flex items-center gap-3">
+                      <span class="tab-icon material-symbols-outlined"> upload </span>
+                      <span class="tab-title font-medium text-xl">Coupons</span>
+                    </p>
+                    <p class="tab-description text-18-nr">
+                      Boost Your Sales—Post New Coupons for Users!
+                    </p>
+                  </div>
                 </div>
-                <span class="text-gray-400">—</span>
-                <div class="relative">
-                  <select class="appearance-none rounded-lg border border-gray-200 bg-white pl-3 pr-8 py-1.5 text-sm text-gray-700 cursor-pointer focus:outline-none focus:border-shazam-blue">
-                    <option>09:00 PM</option>
-                    <option>08:00 PM</option>
-                    <option>10:00 PM</option>
-                  </select>
-                  <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                <!-- Image Section -->
+                <div class="rounded-md overflow-hidden shadow mt-5">
+                  <img id="pay-preview-img" src="/static/images/tablets.svg" alt="Coupon" class="w-full h-48 object-cover">
+                  <video id="pay-preview-video" class="hidden w-full h-48 object-contain bg-black" controls></video>
+                  <div class="bg-white p-4">
+                    <p class="text-sm uppercase text-living-coral font-semibold">Coupon</p>
+                    <div class="flex justify-between items-center">
+                      <h2 id="pay-title" class="text-lg font-semibold">Coupon Title</h2>
+                      <span id="pay-category" class="text-sm font-semibold">Category: </span>
+                    </div>
+                    <p id="pay-description" class="text-sm text-light-gray1 mt-1">Coupon Description</p>
+                    <div class="flex flex-wrap gap-4 mt-2">
+                      <span id="pay-code" class="text-xs bg-gray-100 px-2 py-1 rounded">Code: </span>
+                      <span id="pay-brand" class="text-xs bg-gray-100 px-2 py-1 rounded">Brand: </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Coupon Entry -->
+                <div class="text-center my-6 text-dark-gray">
+                  <h3 class="text-xl font-bold">Maximum Redemptions *</h3>
+                  <input 
+                      type="number" 
+                      id="couponInput"
+                      name="number_of_coupons" 
+                      min="5" 
+                      value="10" 
+                      class="text-5xl font-bold mt-2 border border-gray-300 rounded px-4 py-2 text-center w-60 focus:outline-none focus:border-living-coral"
+                  />
+                  <p class="mt-2">Minimum: 5</p>
+                </div>
+
+                <!-- Summary -->
+                <div class="text-light-gray1 mt-6 space-y-4">
+                    <p>No. of Coupons Purchased: <span class="float-right font-semibold text-dark-gray" id="coupons-count">10</span></p>
+                    <p>No. of Displays per Coupon: <span class="float-right font-semibold text-dark-gray" id="displays-per-coupon">10</span></p>
+                    <p>Rate per Display: <span class="float-right font-semibold text-dark-gray" id="rate-per-display">₹100.00</span></p>
+                    <p class="font-semibold text-jet-black">Total Value Before GST: <span class="float-right font-semibold text-dark-gray" id="total-before-gst">₹10,000.00</span></p>
+                    <p>Add: GST @ 18% <span class="float-right font-semibold text-dark-gray" id="gst-amount">₹1,800.00</span></p>
+                    <p class="font-semibold text-jet-black">Gross Invoice Amount <span class="float-right font-semibold text-dark-gray" id="gross-amount">₹11,800.00</span></p>
+                    <p>Less: Advance Received (Adjusted) <span class="float-right font-semibold text-dark-gray" id="advance-received">₹100.00</span></p>
+                    <p class="font-semibold text-xl">Net Payable Now <span class="float-right font-semibold text-living-coral" id="net-payable">₹11,700.00</span></p>
+                </div>
+
+                <!-- Hidden inputs (dynamically filled via JS) -->
+              <input type="hidden" name="purchased_count" id="purchased_count_field">
+              <input type="hidden" name="displays_per_coupon" id="displays_per_coupon_field">
+              <input type="hidden" name="rate_per_display" id="rate_per_display_field">
+              <input type="hidden" name="advance_received" id="advance_received_field">
+              <input type="hidden" name="gst_amount" id="gst_amount_field">
+              <input type="hidden" name="final_paid_amount" id="final_paid_amount_field">
+              <input type="hidden" name="payment-method" value="UPI">
+
+                <!-- Pay Section -->
+                <div class="flex justify-end sm:gap-8 mt-6">
+                  <button id="prev-step" class="w-full max-w-[120px] py-2 rounded-[10px] border border-living-coral text-living-coral cancel-pay-btn hover:bg-living-coral hover:text-white transition-colors cursor-pointer">
+                      Cancel
+                  </button>
+
+                  <button type="submit" class="w-full max-w-[120px] py-2 rounded-[10px] bg-living-coral text-white hover:bg-red-600 transition-colors cursor-pointer">
+                      Pay
+                  </button>
                 </div>
               </div>
-            </div>
-            <!-- Available days -->
-            <div class="flex flex-wrap items-center gap-2">
-              <div class="flex items-center gap-2 text-sm text-gray-600 min-w-[120px]">
-                <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                Available days
-              </div>
-              <div class="flex flex-wrap gap-1.5 ml-auto">
-                <button type="button" class="day-btn h-8 w-8 rounded-full bg-shazam-blue text-white text-xs font-semibold cursor-pointer">Mon</button>
-                <button type="button" class="day-btn h-8 w-8 rounded-full bg-shazam-blue text-white text-xs font-semibold cursor-pointer">Tue</button>
-                <button type="button" class="day-btn h-8 w-8 rounded-full bg-shazam-blue text-white text-xs font-semibold cursor-pointer">Wed</button>
-                <button type="button" class="day-btn h-8 w-8 rounded-full bg-shazam-blue text-white text-xs font-semibold cursor-pointer">Thu</button>
-                <button type="button" class="day-btn h-8 w-8 rounded-full bg-shazam-blue text-white text-xs font-semibold cursor-pointer">Fri</button>
-                <button type="button" class="day-btn h-8 w-8 rounded-full border border-gray-300 bg-white text-gray-400 text-xs font-semibold cursor-pointer hover:border-shazam-blue hover:text-shazam-blue">Sat</button>
-                <button type="button" class="day-btn h-8 w-8 rounded-full border border-gray-300 bg-white text-gray-400 text-xs font-semibold cursor-pointer hover:border-shazam-blue hover:text-shazam-blue">Sun</button>
-              </div>
-            </div>
-          </div>
+            </form>
 
-          <!-- Smart Matching -->
-          <div class="rounded-xl border border-gray-200 bg-white p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <p class="text-base font-bold text-black">Smart Matching</p>
-              <span class="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-medium text-shazam-blue">Matching</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Consultation mode supported
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Within service radius (physical)
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Matches requested slot
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Only verified patients
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Budget in acceptable range
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Exclude blacklisted users
-              </label>
-            </div>
-          </div>
 
-          <!-- Bid Limits -->
-          <div class="rounded-xl border border-gray-200 bg-white p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <p class="text-base font-bold text-black">Bid Limits</p>
-              <span class="rounded-full bg-red-50 px-3 py-0.5 text-xs font-medium text-red-500">Risk Control</span>
-            </div>
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center gap-2 text-sm text-gray-700">
-                <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-                Maximum auto bids per day
-              </div>
-              <div class="flex items-center gap-0 rounded-lg border border-gray-200 overflow-hidden">
-                <button type="button" id="bid-limit-dec" class="px-3 py-2 text-gray-500 hover:bg-gray-100 cursor-pointer text-lg leading-none font-light">−</button>
-                <span id="bid-limit-val" class="px-4 py-2 text-sm font-semibold text-black border-x border-gray-200 min-w-[48px] text-center">10</span>
-                <button type="button" id="bid-limit-inc" class="px-3 py-2 text-gray-500 hover:bg-gray-100 cursor-pointer text-lg leading-none font-light">+</button>
-              </div>
-            </div>
-            <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </span>
-              Only bid when all selected rules match
-            </label>
-          </div>
+            <!-- Coupon History Content -->
+            {% include 'coupon-history.html' %}
 
-          <!-- Notifications -->
-          <div class="rounded-xl border border-gray-200 bg-white p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <p class="text-base font-bold text-black">Notifications</p>
-              <span class="rounded-full bg-amber-50 px-3 py-0.5 text-xs font-medium text-amber-600">Alerts</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Bid submitted
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Bid accepted
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Request skipped
-              </label>
-              <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-shazam-blue bg-shazam-blue">
-                  <svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                Auto Bid paused
-              </label>
-            </div>
-          </div>
-
+            <!-- Saved Coupon Content -->
+            {% include 'saved-coupon.html' %}
         </div>
-
-        <!-- Footer bar -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mx-5 mb-5 rounded-xl border border-gray-200 bg-white px-5 py-3">
-          <div class="flex items-center gap-3 text-sm text-gray-500">
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-shazam-blue">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            </span>
-            No auto-bid activity yet. Enable Auto Bid to get started.
-          </div>
-          <button type="button" class="shrink-0 rounded-lg bg-shazam-blue px-5 py-2.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 transition-opacity">Save Changes</button>
-        </div>
-
       </div>
 
-    </div>
-  </div>
-</div>
+        <!-- Preview Popup -->
+        {% include "coupon-preview-popup.html" %}
 
-<!-- ======================= POPUPS ======================= -->
+        <!-- Download popup -->
+        {% include "coupon-download-popup.html" %}
 
-<!-- Submit Your Bid -->
-<div id="submit-bid" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-4">
-  <div class="max-h-195.25 w-full max-w-135 overflow-y-auto rounded-xl border border-kyc-medium-gray bg-white p-5 shadow-lg sm:p-5.5">
-    <header class="mb-5 flex items-center justify-between">
-      <h2 class="text-xl font-semibold text-dark-black">Submit a Bid</h2>
-      <button type="button" data-close aria-label="Close" class="flex h-7 w-7 items-center justify-center rounded-full text-dark-black cursor-pointer">
-        <span class="material-symbols-outlined">cancel</span>
-      </button>
-    </header>
-    <div class="mb-4 rounded-xl border border-blue-100 bg-sky-50 px-3 py-3">
-      <p class="text-base font-semibold text-shazam-blue">REQ-H5501</p>
-      <p class="mt-1 text-sm text-dark-gray">General Medicine OPD · 29 Sep · 11:00 AM</p>
-      <p class="mt-1 text-xs text-grayish-blue-slate">Customer budget ₹700</p>
-    </div>
-    <form class="space-y-3" onsubmit="return false">
-      <label class="block text-sm font-medium text-dark-gray" for="bid-price">
-        Bid price (₹)
-        <span class="text-living-coral">*</span>
-        <input id="bid-price" type="number" min="1" placeholder="₹700" class="mt-1.5 block h-11 w-full rounded-xl border border-kyc-medium-gray px-3 text-sm outline-none focus:border-shazam-blue" />
-      </label>
-      <label class="block text-sm font-medium text-dark-gray" for="bid-date">
-        Available date
-        <input id="bid-date" type="date" value="2026-09-29" class="mt-1.5 block h-11 w-full rounded-xl border border-kyc-medium-gray px-3 text-sm" />
-      </label>
-      <div class="relative" data-custom-dropdown>
-        <label class="block text-sm text-dark-gray" id="bid-time-label">Available time</label>
-        <button type="button" data-custom-trigger aria-haspopup="listbox" aria-expanded="false" class="mt-1.5 flex h-11 w-full items-center justify-between rounded-xl border border-kyc-medium-gray bg-white px-3 text-sm text-dark-gray cursor-pointer">
-          <span data-custom-value>9:00 AM</span>
-          <span class="material-symbols-outlined text-base">keyboard_arrow_down</span>
-        </button>
-        <input type="hidden" name="available_time" value="9:00 AM" />
-        <div data-custom-menu role="listbox" aria-labelledby="bid-time-label" class="hidden absolute left-0 top-full z-40 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-kyc-medium-gray bg-white p-1 shadow-lg">
-          <button type="button" role="option" aria-selected="true" data-value="9:00 AM" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            9:00 AM
+        <!-- Platform bill Popup -->
+        {% include "platform-bill.html" %}
+
+        <!-- View All coupon history Popup -->
+        {% include "view-coupon-history.html" %}
+
+        <!-- View All saved coupon history Popup -->
+        {% include "view-saved-history.html" %}
+
+        <!-- Share popup  -->
+        {% include 'partials/share-popup.html' %}
+
+        <div class="fixed bottom-6 right-8 z-50">
+          <button class="chatTrigger cursor-pointer w-16 h-16 bg-living-coral text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
+            <img src="/static/images/avatar.svg" alt="avatar" class="w-full h-full object-contain" />
           </button>
-          <button type="button" role="option" aria-selected="false" data-value="10:00 AM" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            10:00 AM
-          </button>
-          <button type="button" role="option" aria-selected="false" data-value="11:00 AM" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            11:00 AM
-          </button>
-          <button type="button" role="option" aria-selected="false" data-value="12:00 PM" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            12:00 PM
-          </button>
-          <button type="button" role="option" aria-selected="false" data-value="1:00 PM" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            1:00 PM
-          </button>
-          <button type="button" role="option" aria-selected="false" data-value="2:00 PM" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            2:00 PM
-          </button>
-          <button type="button" role="option" aria-selected="false" data-value="3:00 PM" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            3:00 PM
-          </button>
-        </div>
-      </div>
-      <div class="relative" data-custom-dropdown>
-        <label class="block text-sm text-dark-gray" id="bid-department-label">
-          Department
-        </label>
-        <button type="button" data-custom-trigger aria-haspopup="listbox" aria-expanded="false" class="mt-1.5 flex h-11 w-full items-center justify-between rounded-xl border border-kyc-medium-gray bg-white px-3 text-sm text-dark-gray cursor-pointer">
-          <span data-custom-value>Outpatient Block</span>
-          <span class="material-symbols-outlined text-base">keyboard_arrow_down</span>
-        </button>
-        <input type="hidden" name="department" value="Outpatient Block" />
-        <div data-custom-menu role="listbox" aria-labelledby="bid-department-label" class="hidden absolute left-0 top-full z-40 mt-1 w-full rounded-xl border border-kyc-medium-gray bg-white p-1 shadow-lg">
-          <button type="button" role="option" aria-selected="true" data-value="Outpatient Block" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            Outpatient Block
-          </button>
-          <button type="button" role="option" aria-selected="false" data-value="Emergency Department" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            Emergency Department
-          </button>
-          <button type="button" role="option" aria-selected="false" data-value="Inpatient Department" class="custom-option w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-sky-50">
-            Inpatient Department
-          </button>
-        </div>
-      </div>
-      <label class="block text-sm text-dark-gray" for="bid-message">
-        Message for customer
-        <textarea id="bid-message" rows="3" class="mt-1.5 block min-h-18.5 w-full resize-y rounded-xl border border-kyc-medium-gray px-3 py-2.5 text-sm placeholder:text-grayish-blue-slate" placeholder="Any relevant details for the patient, no clinical info">
 
-        </textarea>
-      </label>
-      <p class="flex items-center gap-1.5 text-sm text-golden-yellow">
-        <span class="material-symbols-outlined text-sm">schedule</span>
-        Time remaining: 18m
-      </p>
-      <div class="grid grid-cols-2 gap-2">
-        <button type="button" data-close class="h-9 rounded-lg border border-shazam-blue text-xs text-shazam-blue cursor-pointer">
-          Save as Draft
-        </button>
-        <button type="button" data-open="bid-saved" data-bid="BID - 8805" class="h-9 rounded-lg bg-shazam-blue text-xs font-semibold text-white cursor-pointer">
-          Submit Bid
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div id="request-details" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-2 sm:p-4">
-  <section class="flex max-h-252 w-full max-w-125 flex-col overflow-hidden rounded-xl border border-kyc-medium-gray bg-white shadow-xl">
-    <header class="flex items-start justify-between border-b border-gray-100 px-4 py-3.5 sm:px-5">
-      <div>
-        <p class="text-lg font-semibold text-shazam-blue">REQ-H5501</p>
-        <div class="mt-1.5 flex gap-1.5">
-          <span class="rounded-full bg-sky-50 px-2 py-0.5 text-xs text-shazam-blue">New</span>
-          <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">Standard</span>
         </div>
-      </div>
-      <button type="button" data-close aria-label="Close request details" class="flex h-7 w-7 items-center justify-center rounded-full text-dark-black hover:bg-gray-100 cursor-pointer">
-        <span class="material-symbols-outlined text-lg">cancel</span>
-      </button>
-    </header>
-    <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5 text-[11px] sm:px-5">
-      <div class="flex items-center gap-2.5">
-        <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-lg text-white">
-          DP
-        </span>
-        <div class="min-w-0 flex-1">
-          <p class="text-xl font-semibold text-dark-black">Dolly Paris</p>
-          <p class="text-sm text-grayish-blue-slate">34 yrs · F · xxxx-xx-7845</p>
-        </div>
-        <button type="button" aria-label="Call customer" class="flex h-11 w-11 items-center justify-center rounded-lg border border-kyc-medium-gray text-shazam-blue">
-          <span class="material-symbols-outlined">call</span>
-        </button>
-      </div>
-      <div class="grid grid-cols-2 gap-x-3 gap-y-4">
-        <div>
-          <p class="text-xs text-ashy-blue">Service Type</p>
-          <p class="text-sm font-semibold text-dark-black">Wound Dressing</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Category</p>
-          <p class="text-sm font-semibold text-dark-black">OPD / Daycare</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Preferred Dates</p>
-          <p class="text-sm font-semibold text-dark-black">29 Sep 2026 – 15 Oct 2026</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Schedule Date</p>
-          <p class="text-sm font-semibold text-dark-black">29 Sep 2026 · 08:45 AM</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Beds &amp; Rooms</p>
-          <p class="text-sm font-semibold text-dark-black">General Ward</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Preferred Mode</p>
-          <p class="text-sm font-semibold text-dark-black">Visit Hospital</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Selected Address</p>
-          <p class="text-sm font-semibold text-dark-black">Saket Enclave
-            <span class="font-normal text-gray-500">(Chhatarpur)</span>
-          </p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Budget</p>
-          <p class="text-sm font-semibold text-dark-black">₹300 – ₹1,000</p>
-        </div>
-      </div>
-      <div>
-        <p class="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-dark-black">
-          <span class="material-symbols-outlined text-shazam-blue">description</span>
-          Prescription
-        </p>
-        <div class="flex items-center gap-2 rounded-lg border border-kyc-medium-gray px-2 py-3">
-          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-500 text-[10px] font-bold text-white">
-            PDF
-          </span>
-          <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-semibold text-dark-black">Prescription.pdf</p>
-            <p class="text-xs text-grayish-blue-slate">Uploaded · 1.2 MB</p>
+        <div class="relative ">
+          <div class="avatar fixed bottom-6 right-8 hidden  z-100">
+            <img src="/static/images/avatar.svg" alt="avatar">
+            <img src="/static/images/avatar-chatbox.svg" alt="chatbox" class="absolute bottom-0 right-50">
+              <button class="absolute cursor-pointer bottom-65 right-0 close-avatar-btn rounded-full bg-white shadow-[3.93px_5.24px_5.24px_0px_#00000040]">
+              <span class="material-symbols-outlined flex items-center justify-center p-[0.35rem] text-dark-gray">close</span>
+            </button>
+            <button class="absolute cursor-pointer bottom-6 right-18 bg-living-coral text-white p-2 rounded-md">
+              Talk
+            </button>
           </div>
-          <button type="button" data-open="prescription-preview" class="rounded-md border border-shazam-blue px-2.5 py-1 text-xs text-shazam-blue cursor-pointer">
-            View
-          </button>
         </div>
-      </div>
-      <div class="rounded-2xl border border-gray-100 bg-gray-50 p-3">
-        <p class="mb-1 text-sm font-semibold text-dark-black">Your Requirement</p>
-        <p class="text-xs leading-4 text-gray-600">Patients require consultation with a qualified general physician for diagnosis and treatment of common illnesses, infections, fever, and general health concerns.</p>
-      </div>
-      <div class="flex items-start gap-2 rounded-2xl border border-green-200 bg-green-50 p-2.5">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-sm text-white">
-          ★
-        </span>
-        <p class="pt-0.5 text-xs leading-4 text-emerald-700">
-          <strong>Earn 2.8 Credit points</strong>
-          on this request completion.
-        </p>
-      </div>
-      <div class="border-b border-gray-100">
-        <button type="button" class="border-b-2 border-shazam-blue px-3 py-1.5 text-sm font-medium text-shazam-blue">
-          Activity
-        </button>
-      </div>
-      <ol class="space-y-2.5 py-0.5 text-sm">
-        <li class="flex gap-2">
-          <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-shazam-blue"></span>
-          <div>
-            <p class="font-semibold text-dark-black">Request created</p>
-            <p class="mt-0.5 text-grayish-blue-slate text-xs">29 Sep 2026 · 10:42 AM</p>
-          </div>
-        </li>
-        <li class="flex gap-2">
-          <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-slate-300"></span>
-          <div>
-            <p class="font-semibold text-dark-black">Viewed by hospital</p>
-            <p class="mt-0.5 text-grayish-blue-slate text-xs">Just now</p>
-          </div>
-        </li>
-      </ol>
-    </div>
-    <footer class="grid grid-cols-2 gap-2 border-t border-gray-100 bg-white px-3.5 py-3">
-      <button type="button" data-close class="h-8 rounded-lg border border-shazam-blue text-xs font-medium text-shazam-blue cursor-pointer">Save as Draft</button>
-      <button type="button" data-open="submit-bid" class="h-8 rounded-lg bg-shazam-blue text-xs font-semibold text-white cursor-pointer">Bid</button>
-    </footer>
-  </section>
-</div>
 
-<div id="my-bid-awaiting-details" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-2 sm:p-4">
-  <section class="flex max-h-252 w-full max-w-125 flex-col overflow-hidden rounded-xl border border-kyc-medium-gray bg-white shadow-xl">
-    <header class="flex items-start justify-between border-b border-gray-100 px-4 py-3.5 sm:px-5">
-      <div>
-        <p class="text-lg font-semibold text-shazam-blue">REQ-H5508</p>
-        <div class="mt-1.5 flex gap-1.5"><span class="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-700">Awaiting</span><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">Standard</span>
-        </div>
-      </div>
-      <button type="button" data-close aria-label="Close request details" class="flex h-7 w-7 items-center justify-center rounded-full text-dark-black cursor-pointer">
-        <span class="material-symbols-outlined">cancel</span>
-      </button>
-    </header>
-    <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5 text-xs sm:px-5">
-      <div class="flex items-center gap-2.5">
-        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm text-white">KN</span>
-        <div class="min-w-0 flex-1">
-          <p class="text-sm font-semibold text-dark-black">Kavita Nair</p>
-          <p class="text-xs text-grayish-blue-slate">38 yrs · F · xxxx-xx-7845</p>
-        </div>
-        <button type="button" aria-label="Call customer" class="flex h-8 w-8 items-center justify-center rounded-lg border border-kyc-medium-gray text-shazam-blue">
-          <span class="material-symbols-outlined text-base">call</span>
-        </button>
-      </div>
-      <div class="grid grid-cols-2 gap-x-3 gap-y-2.5">
-        <div>
-          <p class="text-xs text-ashy-blue">Service Type</p>
-          <p class="text-sm font-semibold text-dark-black">Wound Dressing</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Category</p>
-          <p class="text-sm font-semibold text-dark-black">Inpatient Admission</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Preferred Dates</p>
-          <p class="text-sm font-semibold text-dark-black">29 Sep 2026 – 15 Oct 2026</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Schedule Date</p>
-          <p class="text-sm font-semibold text-dark-black">29 Sep 2026 · 08:45 AM</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Beds &amp; Rooms</p>
-          <p class="text-sm font-semibold text-dark-black">General Ward</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Preferred Mode</p>
-          <p class="text-sm font-semibold text-dark-black">Visit Hospital</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Selected Address</p>
-          <p class="text-sm font-semibold text-dark-black">Saket Enclave
-            <span class="font-normal text-gray-500">(Chhatarpur)</span>
-          </p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Budget</p>
-          <p class="text-sm font-semibold text-dark-black">₹300 – ₹1,000</p>
-        </div>
-      </div>
-      <div>
-        <p class="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-dark-black">
-          <span class="material-symbols-outlined text-shazam-blue">description</span>
-          Prescription
-        </p>
-        <div class="flex items-center gap-2 rounded-lg border border-kyc-medium-gray px-2 py-3">
-          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-500 text-[10px] font-bold text-white">
-            PDF
-          </span>
-          <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-semibold text-dark-black">Prescription.pdf</p>
-            <p class="text-xs text-grayish-blue-slate">Uploaded · 1.2 MB</p>
-          </div>
-          <button type="button" data-open="prescription-preview" class="rounded-md border border-shazam-blue px-2.5 py-1 text-xs text-shazam-blue cursor-pointer">
-            View
-          </button>
-        </div>
-      </div>
-      <div class="rounded-2xl border border-gray-100 bg-gray-50 p-3">
-        <p class="mb-1 text-sm font-semibold text-dark-black">Your Requirement</p>
-        <p class="text-xs leading-4 text-gray-600">Patients require consultation with a qualified general physician for diagnosis and treatment of common illnesses, infections, fever, and general health concerns.</p>
-      </div>
-      <div class="flex items-start gap-2 rounded-2xl border border-green-200 bg-green-50 p-2.5">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-sm text-white">
-          ★
-        </span>
-        <p class="pt-0.5 text-xs leading-4 text-emerald-700">
-          <strong>Earn 2.8 Credit points</strong>
-          on this request completion.
-        </p>
-      </div>
-      <div class="border-b border-gray-100">
-        <button type="button" class="border-b-2 border-shazam-blue px-3 py-1.5 text-sm font-medium text-shazam-blue">
-          Activity
-        </button>
-      </div>
-      <ol class="space-y-2.5 py-0.5 text-sm">
-        <li class="flex gap-2">
-          <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-shazam-blue"></span>
-          <div>
-            <p class="font-semibold text-dark-black">Request created</p>
-            <p class="mt-0.5 text-grayish-blue-slate text-xs">29 Sep 2026 · 10:42 AM</p>
-          </div>
-        </li>
-        <li class="flex gap-2">
-          <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-slate-300"></span>
-          <div>
-            <p class="font-semibold text-dark-black">Viewed by hospital</p>
-            <p class="mt-0.5 text-grayish-blue-slate text-xs">Just now</p>
-          </div>
-        </li>
-      </ol>
-    </div>
-    <footer class="border-t border-gray-100 bg-white px-4 py-3.5"><button type="button" data-open="withdraw-bid-confirmation" class="h-9 w-full rounded-lg bg-red-500 text-xs font-semibold text-white cursor-pointer">Withdraw</button></footer>
-  </section>
-</div>
+{% endblock%}
 
-<div id="my-bid-accepted-details" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-2 sm:p-4">
-  <section class="flex max-h-[94vh] w-full max-w-107.5 flex-col overflow-hidden rounded-xl border border-kyc-medium-gray bg-white shadow-xl">
-    <header class="flex items-center justify-between border-b border-gray-100 px-4 py-3.5 sm:px-5">
-      <div class="flex items-center gap-2">
-        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 text-shazam-blue">
-          <span class="material-symbols-outlined text-base">description</span>
-        </span>
-        <div>
-          <h2 class="text-sm font-semibold text-dark-black">View Accepted Request</h2>
-          <p class="text-[10px] text-shazam-blue">Here are the complete details of the accepted request.</p>
-        </div>
-      </div>
-      <button type="button" data-close aria-label="Close accepted request" class="flex h-7 w-7 items-center justify-center rounded-full text-dark-black cursor-pointer"><span class="material-symbols-outlined text-lg">cancel</span></button></header>
-    <div class="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-3.5 text-xs sm:px-5">
-      <div class="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 p-2.5"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm text-white">RS</span><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-dark-black">Rohan Sharma</p><p class="text-[10px] text-shazam-blue">42 yrs · M · REQ-H7421</p></div><span class="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-[10px] text-emerald-600">Accepted</span></div>
-      <div class="grid grid-cols-1 gap-2 sm:grid-cols-3"><div class="flex items-center gap-2 rounded-xl border border-gray-200 p-2"><span class="material-symbols-outlined rounded-md bg-sky-50 p-1 text-sm text-shazam-blue">layers</span><div><p class="text-[9px] uppercase text-ashy-blue">Service</p><p class="text-xs font-semibold text-dark-black">Wound Dressing</p></div></div><div class="flex items-center gap-2 rounded-xl border border-gray-200 p-2"><span class="material-symbols-outlined rounded-md bg-sky-50 p-1 text-sm text-shazam-blue">medical_services</span><div><p class="text-[9px] uppercase text-ashy-blue">Visit Type</p><p class="text-xs font-semibold text-dark-black">Hospital visit</p></div></div><div class="flex items-center gap-2 rounded-xl border border-gray-200 p-2"><span class="material-symbols-outlined rounded-md bg-sky-50 p-1 text-sm text-shazam-blue">bolt</span><div><p class="text-[9px] uppercase text-ashy-blue">Service Type</p><p class="text-xs font-semibold text-dark-black">Regular Service</p></div></div></div>
-      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2"><div class="flex items-center gap-2 rounded-xl border border-gray-200 p-2.5"><span class="material-symbols-outlined rounded-full bg-sky-50 p-1.5 text-sm text-shazam-blue">currency_rupee</span><div><p class="text-[9px] uppercase text-ashy-blue">Accepted Bid</p><p class="text-sm font-bold text-dark-black">₹1,000</p></div></div><div class="flex items-center gap-2 rounded-xl border border-gray-200 p-2.5"><span class="material-symbols-outlined rounded-full bg-sky-50 p-1.5 text-sm text-shazam-blue">calendar_month</span><div><p class="text-[9px] uppercase text-ashy-blue">Appointment</p><p class="text-xs font-semibold text-dark-black">Today, 5:00 PM</p></div></div></div>
-      <div><p class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-dark-black"><span class="material-symbols-outlined text-sm text-shazam-blue">description</span>Prescription</p><div class="flex items-center gap-2 rounded-lg border border-kyc-medium-gray p-2"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-red-500 text-[9px] font-bold text-white">PDF</span><div class="min-w-0 flex-1"><p class="truncate text-xs font-semibold text-dark-black">Prescription.pdf</p><p class="text-[10px] text-grayish-blue-slate">Uploaded · 1.2 MB</p></div><button type="button" data-open="prescription-preview" class="rounded-md border border-shazam-blue px-2.5 py-1 text-xs text-shazam-blue cursor-pointer">View</button></div></div>
-      <section class="rounded-xl border border-gray-200 p-2.5"><h3 class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-dark-black"><span class="material-symbols-outlined text-sm text-shazam-blue">person</span>Patient Details</h3><div class="grid grid-cols-3 gap-2 border-t border-gray-100 pt-2 text-[10px]"><div><p class="text-ashy-blue">Name</p><p class="mt-0.5 text-xs font-medium text-dark-black">Rohan Sharma</p></div><div><p class="text-ashy-blue">Age / Gender</p><p class="mt-0.5 text-xs font-medium text-dark-black">42 yrs · M</p></div><div><p class="text-ashy-blue">Phone</p><p class="mt-0.5 text-xs font-medium text-dark-black">+91 98765 43210</p></div></div></section>
-      <section class="rounded-xl border border-gray-200 p-2.5"><h3 class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-dark-black"><span class="material-symbols-outlined text-sm text-shazam-blue">description</span>Request Information</h3><div class="grid grid-cols-2 gap-2 border-t border-gray-100 pt-2 text-[10px] sm:grid-cols-4"><div><p class="text-ashy-blue">Request ID</p><p class="mt-0.5 font-medium text-dark-black">REQ-H7421</p></div><div><p class="text-ashy-blue">Service</p><p class="mt-0.5 font-medium text-dark-black">Wound Dressing</p></div><div><p class="text-ashy-blue">Visit Type</p><p class="mt-0.5 font-medium text-dark-black">Hospital visit</p></div><div><p class="text-ashy-blue">Service Type</p><p class="mt-0.5 font-medium text-dark-black">Regular Service</p></div></div></section>
-      <section class="rounded-xl border border-gray-200 p-2.5"><h3 class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-dark-black"><span class="material-symbols-outlined text-sm text-shazam-blue">calendar_month</span>Appointment Details</h3><div class="grid grid-cols-2 gap-2 border-t border-gray-100 pt-2 text-[10px] sm:grid-cols-3"><div><p class="text-ashy-blue">Date &amp; Time</p><p class="mt-0.5 font-medium text-dark-black">29 Sep 2026, 04:30 PM</p></div><div><p class="text-ashy-blue">Appointment</p><p class="mt-0.5 font-medium text-dark-black">Today, 5:00 PM</p></div><div><p class="text-ashy-blue">Status</p><span class="mt-0.5 inline-block rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] text-emerald-600">Accepted</span></div></div></section>
-      <div class="rounded-xl border border-shazam-blue bg-sky-50 p-2.5"><p class="flex items-center gap-1.5 text-xs font-semibold text-dark-black"><span class="material-symbols-outlined rounded-md bg-sky-100 p-1 text-sm text-shazam-blue">location_on</span>Lifecare Multispeciality Hospital</p><p class="mt-1 pl-7 text-[10px] text-shazam-blue">12, Green Park, Sector 15, Ranchi, Jharkhand – 834001</p></div>
-    </div>
-    <footer class="grid grid-cols-1 gap-2 border-t border-gray-100 bg-white px-4 py-3 sm:grid-cols-2"><button type="button" data-close class="h-9 rounded-lg border border-gray-400 text-xs text-gray-600 cursor-pointer">Close</button><button type="button" data-close class="h-9 rounded-lg bg-shazam-blue text-xs font-semibold text-white cursor-pointer">View Booking</button></footer>
-  </section>
-</div>
-
-<div id="completed-request-details" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-2 sm:p-4">
-  <section class="flex max-h-[94vh] w-full max-w-[430px] flex-col overflow-hidden rounded-xl border border-kyc-medium-gray bg-white shadow-xl">
-    <header class="flex items-center justify-between border-b border-gray-100 px-4 py-3.5 sm:px-5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 text-shazam-blue"><span class="material-symbols-outlined text-base">description</span></span><div><h2 class="text-base font-semibold text-dark-black">View Request Details</h2><p class="text-[11px] text-grayish-blue-slate">Here are the complete details of the healthcare request.</p></div></div><button type="button" data-close aria-label="Close completed request" class="flex h-7 w-7 items-center justify-center rounded-full text-dark-black cursor-pointer"><span class="material-symbols-outlined text-lg">cancel</span></button></header>
-    <div class="no-scrollbar min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-3.5 text-sm sm:px-5">
-      <div class="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 p-2.5"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-base text-white">RS</span><div class="min-w-0 flex-1"><p class="text-base font-semibold text-dark-black">Rohit Sharma</p><p class="text-[11px] text-grayish-blue-slate">45 yrs · Male</p><p class="text-[10px] text-grayish-blue-slate">REQ-H842</p></div><div class="text-right text-[11px] text-grayish-blue-slate"><span class="mb-1 inline-block rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-emerald-600">Completed</span><p><span class="material-symbols-outlined align-middle text-sm">call</span> +91 98765 43210</p><p class="mt-0.5 max-w-44 truncate"><span class="material-symbols-outlined align-middle text-sm">location_on</span> 12, Green Park, Sector 15, Ranchi...</p></div></div>
-      <h3 class="flex items-center gap-1.5 pt-0.5 text-sm font-semibold text-dark-black"><span class="material-symbols-outlined text-base text-shazam-blue">description</span>Service Information</h3>
-      <section class="space-y-1.5 rounded-xl border border-gray-200 p-2.5 text-xs">
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Service</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">General Physician Consultation</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Visit Type</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">Home Visit</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Service Type</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">Regular Service</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Beds &amp; Room</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">Bed no: 22 · General Ward</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Appointment Date &amp; Time</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">26 Sep 2026, 10:30 PM</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Completed On</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">26 Sep 2026, 02:15 PM</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Final Amount</span><span class="text-shazam-blue">:</span><span class="font-semibold text-dark-black">₹1,200</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Bid Amount</span><span class="text-shazam-blue">:</span><span class="font-semibold text-dark-black">₹1,200</span></div>
-      </section>
-      <h3 class="flex items-center gap-1.5 pt-0.5 text-sm font-semibold text-dark-black"><span class="material-symbols-outlined text-base text-shazam-blue">chat_bubble_outline</span>Patient Notes / Additional Information</h3>
-      <div class="rounded-xl border border-blue-100 bg-sky-50 p-2.5 text-[11px] leading-4 text-shazam-blue">Patient is experiencing mild fever and cold since 2 days. No major allergies reported. Please bring basic medicines for fever and cold.</div>
-      <h3 class="flex items-center gap-1.5 pt-0.5 text-sm font-semibold text-dark-black"><span class="material-symbols-outlined text-base text-shazam-blue">location_on</span>Location</h3>
-      <div class="flex flex-col gap-2 rounded-xl border border-gray-200 p-2 sm:flex-row sm:items-center"><div class="relative flex h-20 w-full items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-slate-100 sm:w-32"><svg viewBox="0 0 160 80" class="absolute inset-0 h-full w-full" aria-hidden="true"><path d="M-5 18 C35 8 58 28 82 20 S130 12 170 18 M40 -5 C52 22 53 49 75 86 M108 -5 C98 20 124 49 116 85" fill="none" stroke="#cbd5e1" stroke-width="2"/><circle cx="78" cy="39" r="12" fill="#dbeafe" stroke="#1688f8" stroke-width="2"/></svg><span class="material-symbols-outlined relative text-lg text-shazam-blue">location_on</span></div><div class="min-w-0 flex-1 text-[11px] leading-4 text-gray-600"><p>12, Green Park, Sector 15</p><p>Ranchi, Jharkhand – 834001</p><button type="button" class="mt-1 rounded-md border border-shazam-blue px-2.5 py-1 text-[11px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined align-middle text-sm">location_on</span> Open in Maps</button></div></div>
-    </div>
-    <footer class="border-t border-gray-100 bg-white px-4 py-3"><button type="button" data-close class="h-8 w-full rounded-lg border border-gray-400 text-sm text-gray-600 cursor-pointer">Close</button></footer>
-  </section>
-</div>
-
-<div id="completion-record" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-2 sm:p-4">
-  <section class="flex max-h-[94vh] w-full max-w-[430px] flex-col overflow-hidden rounded-xl border border-kyc-medium-gray bg-white shadow-xl">
-    <header class="flex items-center justify-between border-b border-gray-100 px-4 py-3.5 sm:px-5"><div class="flex items-center gap-2"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 text-shazam-blue"><span class="material-symbols-outlined text-base">description</span></span><div><h2 class="text-base font-semibold text-dark-black">Completion Record</h2><p class="text-[11px] text-grayish-blue-slate">Here is the service completion record and related documents.</p></div></div><button type="button" data-close aria-label="Close completion record" class="flex h-7 w-7 items-center justify-center rounded-full text-dark-black cursor-pointer"><span class="material-symbols-outlined text-lg">cancel</span></button></header>
-    <div class="no-scrollbar min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-3.5 text-sm sm:px-5">
-      <div class="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 p-2.5"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-base text-white">RS</span><div class="min-w-0 flex-1"><p class="text-base font-semibold text-dark-black">Rohit Sharma</p><p class="text-[11px] text-grayish-blue-slate">45 yrs · Male</p><p class="text-[10px] text-grayish-blue-slate">REQ-H842</p></div><div class="text-right text-[11px] text-grayish-blue-slate"><span class="mb-1 inline-block rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-emerald-600">Completed</span><p>☎ +91 98765 43210</p><p class="mt-0.5 max-w-44 truncate">⌖ 12, Green Park, Sector 15, Ranchi...</p></div></div>
-      <section class="rounded-xl border border-shazam-blue p-2.5"><h3 class="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-dark-black"><span class="material-symbols-outlined text-base text-emerald-500">check_circle</span>Service Completed Successfully</h3><p class="mb-2 text-[11px] text-grayish-blue-slate">The requested healthcare service has been completed as per the schedule.</p><div class="space-y-1 rounded-lg border border-gray-100 p-2.5 text-xs">
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Completed On</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">26 Sep 2026, 02:15 PM</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Service Provider</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">Dr. S. Verma <span class="text-[10px] font-normal text-gray-500">(General Physician)</span></span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Visit Type</span><span class="text-shazam-blue">:</span><span class="font-medium text-dark-black">Home Visit</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Final Amount</span><span class="text-shazam-blue">:</span><span class="font-semibold text-dark-black">₹1,200</span></div>
-        <div class="grid grid-cols-[minmax(95px,0.8fr)_10px_1fr] gap-1"><span class="text-ashy-blue">Payment Status</span><span class="text-shazam-blue">:</span><span><span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] text-emerald-700">Paid</span></span></div>
-      </div></section>
-      <div class="flex items-center justify-between pt-0.5"><h3 class="flex items-center gap-1.5 text-sm font-semibold text-dark-black"><span class="material-symbols-outlined text-base text-shazam-blue">science</span>Service Summary</h3><button type="button" class="text-[11px] text-shazam-blue cursor-pointer">View Full Report <span class="material-symbols-outlined align-middle text-sm">download</span></button></div>
-      <div class="overflow-x-auto rounded-xl border border-shazam-blue"><table class="w-full min-w-[330px] text-left text-[11px]"><thead class="bg-sky-50 text-dark-gray"><tr><th class="px-2.5 py-2 font-medium">Service</th><th class="px-2.5 py-2 font-medium">Duration</th><th class="px-2.5 py-2 font-medium">Notes</th></tr></thead><tbody><tr class="border-t border-gray-100"><td class="px-2.5 py-2.5 text-dark-black">General Physician Consultation</td><td class="px-2.5 py-2.5 text-gray-600">45 mins</td><td class="px-2.5 py-2.5 text-gray-600">Fever and cold (mild)</td></tr></tbody></table></div>
-      <section class="rounded-xl border border-gray-200 p-2.5"><div class="flex items-center justify-between"><h3 class="flex items-center gap-1.5 text-sm font-semibold text-dark-black"><span class="text-amber-400">★</span>Customer Feedback</h3><span class="rounded-full bg-amber-100 px-2 py-1 text-[10px] text-amber-600">★ 5.0</span></div><div class="mt-2 flex items-center justify-between"><div class="flex items-center gap-2"><span class="flex h-7 w-7 items-center justify-center rounded-full bg-shazam-blue text-sm text-white">R</span><p class="text-xs font-semibold text-dark-black">Rohit Sharma <span class="text-[10px] font-normal text-grayish-blue-slate">29 Sep 2026</span></p></div><span class="text-amber-400">★★★★★</span></div><blockquote class="mt-2 rounded-lg border-l-2 border-shazam-blue bg-gray-50 p-2.5 text-[11px] italic leading-4 text-gray-600">“Great service and very professional. The staff was supportive and everything was handled smoothly. Highly recommended!”</blockquote></section>
-      <div><h3 class="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-dark-black"><span class="material-symbols-outlined text-base text-shazam-blue">description</span>Documents</h3><div class="flex items-center gap-2 rounded-xl border border-gray-200 p-2.5"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-red-500 text-[8px] font-bold text-white">PDF</span><div class="min-w-0 flex-1"><p class="truncate text-xs font-semibold text-dark-black">Medical Report</p><p class="text-[10px] text-grayish-blue-slate">Completed on 26 Sep 2026 · 1.2 MB</p></div><button type="button" class="rounded-md border border-shazam-blue px-2.5 py-1 text-[11px] text-shazam-blue cursor-pointer"><span class="material-symbols-outlined align-middle text-sm">download</span> Download</button></div></div>
-    </div>
-    <footer class="border-t border-gray-100 bg-white px-4 py-3"><button type="button" data-close class="h-8 w-full rounded-lg border border-gray-400 text-sm text-gray-600 cursor-pointer">Close</button></footer>
-  </section>
-</div>
-
-<div id="appointment-details" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-3 sm:p-5">
-<section class="w-full max-w-[560px] rounded-xl border border-kyc-medium-gray bg-white p-4 shadow-xl sm:p-5">
-<h2 class="flex items-center gap-2 text-sm font-semibold text-dark-black"><span class="material-symbols-outlined text-base text-shazam-blue">calendar_month</span>Appointment Details</h2>
-<div class="mt-3 grid grid-cols-1 gap-3 text-xs sm:grid-cols-3"><div><p class="text-[11px] text-ashy-blue">Date &amp; Time</p><p id="appointment-date-time" class="mt-1 font-medium text-dark-black">29 Sep 2026, 04:30 PM</p></div><div><p class="text-[11px] text-ashy-blue">Appointment</p><p id="appointment-summary-time" class="mt-1 font-medium text-dark-black">Today, 5:00 PM</p></div><div><p class="text-[11px] text-ashy-blue">Status</p><span class="mt-1 inline-flex rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs text-emerald-600">Accepted</span></div></div>
-<div class="mt-4 grid grid-cols-1 gap-3.5 md:grid-cols-[1.25fr_0.9fr]">
-<section class="rounded-xl border border-gray-200 p-3"><div class="flex items-center justify-between"><button type="button" data-calendar-prev aria-label="Previous month" class="flex h-7 w-7 items-center justify-center rounded-md text-ashy-blue hover:bg-gray-50"><span class="material-symbols-outlined text-lg">chevron_left</span></button><h3 id="appointment-calendar-month" class="text-sm font-semibold text-dark-black">September 2026</h3><button type="button" data-calendar-next aria-label="Next month" class="flex h-7 w-7 items-center justify-center rounded-md text-ashy-blue hover:bg-gray-50"><span class="material-symbols-outlined text-lg">chevron_right</span></button></div>
-<div class="mt-1 grid grid-cols-7 text-center text-[10px] text-ashy-blue"><span class="py-1">Sun</span><span class="py-1">Mon</span><span class="py-1">Tue</span><span class="py-1">Wed</span><span class="py-1">Thu</span><span class="py-1">Fri</span><span class="py-1">Sat</span></div><div id="appointment-calendar-grid" class="grid grid-cols-7 text-center" aria-label="Appointment calendar"></div></section>
-<section class="rounded-xl border border-shazam-blue bg-sky-50 p-3.5"><h3 class="flex items-center gap-1.5 text-xs font-semibold text-shazam-blue"><span class="material-symbols-outlined text-sm">calendar_month</span>Appointment</h3><p id="appointment-selected-label" class="mt-2 text-lg font-bold text-dark-black">Today · 5:00 PM</p><div class="mt-2 space-y-2 text-xs text-dark-gray"><p class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-shazam-blue">medical_services</span>Wound Dressing</p><p class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-shazam-blue">location_city</span>Hospital visit</p><p class="flex items-start gap-2"><span class="material-symbols-outlined text-base text-shazam-blue">location_on</span><span>Lifecare Multispeciality Hospital</span></p></div></section></div>
-<div class="mt-4 flex justify-end"><button type="button" data-close class="rounded-lg border border-gray-300 px-5 py-2 text-xs text-gray-600 cursor-pointer">Close</button></div>
-</section></div>
-
-<!-- Withdraw bid confirmation -->
-<div id="withdraw-bid-confirmation" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-3 sm:p-4">
-  <section class="w-full max-w-xl rounded-3xl bg-white p-5 shadow-xl sm:p-7">
-    <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-4">
-      <span class="flex h-14 w-14 shrink-0 items-center justify-center self-start rounded-full bg-rose-50 text-red-500 ring-8 ring-rose-50/70 sm:self-center"><span class="material-symbols-outlined">error</span></span>
-      <div class="min-w-0"><h2 class="text-lg font-bold text-dark-black sm:text-xl">Withdraw this bid?</h2><p class="mt-1.5 text-sm text-ashy-blue">The customer will no longer see your bid for this service.</p></div>
-    </div>
-    <div class="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-2.5">
-      <button type="button" data-close data-return="my-bid-awaiting-details" class="h-9 rounded-lg border border-shazam-blue bg-white text-xs font-medium text-shazam-blue cursor-pointer">Keep It</button>
-      <button type="button" data-close class="h-9 rounded-lg bg-red-500 text-xs font-semibold text-white cursor-pointer">Withdraw</button>
-    </div>
-  </section>
-</div>
-
-<!-- Prescription preview -->
-<div id="prescription-preview" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-3 sm:p-4">
-  <section class="flex max-h-[94vh] w-full max-w-95 flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
-    <header class="flex items-center justify-between border-b border-gray-100 px-5 py-3.5">
-      <div>
-        <h2 class="text-base font-semibold text-dark-black">Prescription</h2>
-        <p class="mt-0.5 text-xs text-ashy-blue">Preview</p>
-      </div>
-      <button type="button" data-close data-return="request-details" aria-label="Close prescription preview" class="flex h-7 w-7 items-center justify-center rounded-full text-dark-black cursor-pointer">
-        <span class="material-symbols-outlined text-lg">cancel</span>
-      </button>
-    </header>
-    <div class="flex min-h-62.5 flex-1 items-center justify-center p-5 sm:min-h-82.5">
-      <div class="flex h-full min-h-62.5 w-full flex-col items-center justify-center rounded-xl bg-gray-50 text-center sm:min-h-77.5">
-        <span class="material-symbols-outlined text-4xl text-gray-400">description</span>
-        <p class="mt-1 text-xs text-ashy-blue">Prescription preview</p>
-        <p class="mt-1 text-[11px] text-grayish-blue-slate">Uploaded 29 Sep 2025</p>
-      </div>
-    </div>
-    <footer class="px-5 pb-4"><button type="button" data-close data-return="request-details" class="h-8 w-full rounded-lg border border-gray-400 text-[10px] text-gray-600 cursor-pointer">Close</button></footer>
-  </section>
-</div>
-
-<div id="my-bid-rejected" class="ob-modal hidden fixed inset-0 z-50 items-center justify-center bg-black/40 p-2 sm:p-4">
-  <section class="flex max-h-252 w-full max-w-125 flex-col overflow-hidden rounded-xl border border-kyc-medium-gray bg-white shadow-xl">
-    <header class="flex items-start justify-between border-b border-gray-100 px-4 py-3.5 sm:px-5">
-      <div>
-        <p class="text-lg font-semibold text-shazam-blue">REQ-H5508</p>
-        <div class="mt-1.5 flex gap-1.5">
-          <span class="rounded-full bg-report-fff5f6 border border-[#FFD5DBCC] px-2.5 py-0.5 text-xs text-[#CE222B]">Rejected</span>
-          <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">Standard</span>
-        </div>
-      </div>
-      <button type="button" data-close aria-label="Close request details" class="flex h-7 w-7 items-center justify-center rounded-full text-dark-black cursor-pointer">
-        <span class="material-symbols-outlined">cancel</span>
-      </button>
-    </header>
-    <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3.5 text-xs sm:px-5">
-      <div class="flex items-center gap-2.5">
-        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-shazam-blue text-sm text-white">KN</span>
-        <div class="min-w-0 flex-1">
-          <p class="text-sm font-semibold text-dark-black">Kavita Nair</p>
-          <p class="text-xs text-grayish-blue-slate">38 yrs · F · xxxx-xx-7845</p>
-        </div>
-        <button type="button" aria-label="Call customer" class="flex h-8 w-8 items-center justify-center rounded-lg border border-kyc-medium-gray text-shazam-blue">
-          <span class="material-symbols-outlined text-base">call</span>
-        </button>
-      </div>
-      <div class="grid grid-cols-2 gap-x-3 gap-y-5 my-4">
-        <div>
-          <p class="text-xs text-ashy-blue">Service</p>
-          <p class="text-sm font-semibold text-dark-black">Wound Dressing</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Visit type</p>
-          <p class="text-sm font-semibold text-dark-black">Hospital Visit</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Preferred Dates</p>
-          <p class="text-sm font-semibold text-dark-black">29 Sep</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Budget</p>
-          <p class="text-sm font-semibold text-dark-black">₹1200</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Time remaining</p>
-          <p class="text-sm font-semibold text-dark-black">1hr 30m</p>
-        </div>
-        <div>
-          <p class="text-xs text-ashy-blue">Source</p>
-          <p class="text-sm font-semibold text-dark-black">Patien App</p>
-        </div>
-      </div>
-      <div class="border-b border-gray-100">
-        <button type="button" class="border-b-2 border-shazam-blue px-3 py-1.5 text-sm font-medium text-shazam-blue">
-          Activity
-        </button>
-      </div>
-      <ol class="space-y-2.5 py-0.5 text-sm">
-        <li class="flex gap-2">
-          <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-shazam-blue"></span>
-          <div>
-            <p class="font-semibold text-dark-black">Request created</p>
-            <p class="mt-0.5 text-grayish-blue-slate text-xs">29 Sep 2026 · 10:42 AM</p>
-          </div>
-        </li>
-        <li class="flex gap-2">
-          <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-slate-300"></span>
-          <div>
-            <p class="font-semibold text-dark-black">Viewed by hospital</p>
-            <p class="mt-0.5 text-grayish-blue-slate text-xs">Just now</p>
-          </div>
-        </li>
-      </ol>
-    </div>
-    <footer class="border-t border-gray-100 bg-white px-4 py-3.5">
-      <button type="button" class="h-9 w-full rounded-lg border border-[#8E8E93] text-xs font-semibold text-[#8E8E93] cursor-pointer">Close</button>
-    </footer>
-  </section>
-</div>
-
-
-{% endblock %}
+{% if missing_fields %}
+  <script>
+    // Simple toaster example
+    setTimeout(function() {
+      let toaster = document.createElement('div');
+      toaster.innerText = "Please fill all required fields.";
+      toaster.style.position = "fixed";
+      toaster.style.top = "20px";
+      toaster.style.right = "20px";
+      toaster.style.background = "#ff4d4f";
+      toaster.style.color = "#fff";
+      toaster.style.padding = "10px 20px";
+      toaster.style.borderRadius = "5px";
+      toaster.style.zIndex = 9999;
+      document.body.appendChild(toaster);
+      setTimeout(() => { toaster.remove(); }, 2000);
+    }, 300);
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Check for ?tab=history in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tab') === 'history') {
+            // Remove 'active-tab-adv' from all tab buttons
+            document.querySelectorAll('.tab-btn-adv').forEach(btn => btn.classList.remove('active-tab-adv'));
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+            // Activate the Coupon History tab
+            document.querySelector('.tab-btn-adv[data-tab="coupon-history"]').classList.add('active-tab-adv');
+            document.querySelector('.coupon-history').style.display = '';
+        }
+    });
+    </script>
+{% endif %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="{% static 'js/Register-Advertiser/ad-coupon.js' %}"></script>
+<script src="{% static 'js/tabs.js' %}"></script>
 <script src="{% static 'js/sidebar.js' %}"></script>
-<script src="{% static 'js/offers-bids.js' %}"></script>
-<script>
-  // Day toggle buttons
-  document.querySelectorAll('.day-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const active = btn.classList.contains('bg-shazam-blue');
-      btn.classList.toggle('bg-shazam-blue', !active);
-      btn.classList.toggle('text-white', !active);
-      btn.classList.toggle('border-transparent', !active);
-      btn.classList.toggle('border', active);
-      btn.classList.toggle('border-gray-300', active);
-      btn.classList.toggle('bg-white', active);
-      btn.classList.toggle('text-gray-400', active);
-    });
-  });
-
-  // Bid limit counter
-  const bidVal = document.getElementById('bid-limit-val');
-  document.getElementById('bid-limit-dec')?.addEventListener('click', () => {
-    const v = parseInt(bidVal.textContent);
-    if (v > 1) bidVal.textContent = v - 1;
-  });
-  document.getElementById('bid-limit-inc')?.addEventListener('click', () => {
-    bidVal.textContent = parseInt(bidVal.textContent) + 1;
-  });
-</script>
+<script src="{% static 'js/table-pagination.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/Register-Advertiser/adv-tabs.js' %}"></script>
+<script src="{% static 'js/Register-Advertiser/cards-pagination.js' %}"></script>
 {% endblock %}
