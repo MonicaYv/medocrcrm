@@ -1,515 +1,419 @@
 {% extends "dashboard/layout.html" %}
-{% block title %}Earning{% endblock %}
-
+{% load static %}
+{% block title %}Earnings{% endblock %}
 
 {% block content %}
-<div id="earningsPage" class="px-4 py-5 md:px-6 text-slate-800">
+<style>
+  #pharmacyEarnings { color: #111c2e; font-family: Inter, Arial, sans-serif; }
+  .pe-card { background: #fff; border: 1px solid #e8edf3; border-radius: 12px; }
+  .pe-h { font-size: 15px; font-weight: 600; color: #111c2e; }
+  .pe-mute { color: #6b7a90; }
+  .pe-btn { height: 38px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; background: #fff; border: 1px solid #dfe5ec; border-radius: 8px; font-size: 13px; color: #344054; cursor: pointer; }
+  .pe-btn:hover { background: #f6f8fb; }
+  .pe-btn-primary { background: #1683ff; border-color: #1683ff; color: #fff; font-weight: 600; justify-content: center; }
+  .pe-btn-primary:hover { background: #0f74e8; }
+  .pe-btn-ghost { background: #fff; border-color: #cfd6df; color: #6b7a90; font-weight: 600; justify-content: center; }
+  .pe-btn-danger { background: #fff; border-color: #ef4444; color: #ef4444; justify-content: center; }
+  .pe-btn-danger:hover { background: #fff1f1; }
+  .pe-menu { display: none; position: absolute; right: 0; top: 44px; z-index: 40; background: #fff; border: 1px solid #e8edf3; border-radius: 10px; box-shadow: 0 10px 28px rgba(15, 23, 42, .14); }
+  .pe-menu.open { display: block; }
+  .pe-menu button.pe-opt { display: block; width: 100%; text-align: left; padding: 9px 12px; font-size: 13px; border-radius: 6px; color: #344054; }
+  .pe-menu button.pe-opt:hover, .pe-menu button.pe-opt.active { background: #eef5ff; color: #1683ff; }
+  .pe-input { width: 100%; height: 38px; border: 1px solid #dfe5ec; border-radius: 8px; padding: 0 12px; font-size: 14px; outline: none; background: #fff; }
+  .pe-input:focus { border-color: #1683ff; box-shadow: 0 0 0 3px #dbeafe; }
 
-  <!-- ============ HEADER ============ -->
-  <div class="flex flex-wrap items-start justify-between gap-4">
+  .pe-tab { padding: 12px 4px; font-size: 14px; color: #6b7a90; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .pe-tab.active { color: #1683ff; border-color: #1683ff; font-weight: 500; }
+
+  table.pe-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+  .pe-table thead th { background: #f6f8fb; color: #6b7a90; font-weight: 500; font-size: 12px; padding: 11px 16px; }
+  .pe-table tbody td { padding: 13px 16px; border-bottom: 1px solid #eef1f5; color: #1f2a3d; }
+  .pe-table tbody tr:last-child td { border-bottom: 0; }
+
+  .pe-pill { display: inline-block; font-size: 11px; line-height: 1; padding: 6px 13px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+  .pe-pill.delivered, .pe-pill.settled, .pe-pill.credited, .pe-pill.paid, .pe-pill.verified { background: #e9faf0; color: #16a34a; border-color: #7ddba3; }
+  .pe-pill.pending { background: #fff4d6; color: #b7791f; border-color: #f3d68a; }
+  .pe-pill.processing { background: #e8f3ff; color: #1683ff; border-color: #7db8ff; }
+  .pe-pill.cancelled, .pe-pill.deducted, .pe-pill.refunded { background: #ffe9e9; color: #e03131; border-color: #f5b5b5; }
+  .pe-pill.refund { background: #fffdf0; color: #d9a400; border-color: #f6e08a; }
+  .pe-pill.voided { background: #f1f4f8; color: #6b7a90; border-color: #d8dfe8; }
+  .pe-pill.credited, .pe-pill.deducted, .pe-pill.refunded, .pe-pill.voided { border-color: transparent; padding: 6px 14px; font-weight: 500; }
+
+  .pe-field { height: 42px; border-color: #cfd9e6; border-radius: 10px; font-size: 14px; }
+  .pe-modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
+  .pe-modal.open { display: flex; }
+  .pe-sheet { background: #fff; border-radius: 16px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(15, 23, 42, .28); }
+  .pe-note { display: flex; align-items: flex-start; gap: 12px; border: 1px solid #e3e9f0; background: #f8fafc; border-radius: 10px; padding: 14px 16px; font-size: 14px; color: #5b6b80; }
+
+  .pe-tl { list-style: none; margin: 0; padding: 0; }
+  .pe-tl li { position: relative; display: flex; gap: 12px; padding-bottom: 14px; }
+  .pe-tl li:last-child { padding-bottom: 0; }
+  .pe-tl li:not(:last-child)::before { content: ""; position: absolute; left: 13px; top: 30px; bottom: 2px; width: 2px; background: #dbe5f2; }
+  .pe-tl .ic { width: 26px; height: 26px; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pe-tick { width: 24px; height: 24px; border: 2px solid #1683ff; color: #1683ff; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .pe-spin { animation: peSpin .7s linear 1; }
+  @keyframes peSpin { to { transform: rotate(360deg); } }
+</style>
+
+<div id="pharmacyEarnings" class="px-4 py-5 md:px-6">
+
+  <!-- ============ BREADCRUMB + HEADER ============ -->
+  <nav class="flex items-center gap-1.5 text-[12px] pe-mute">Home <span>›</span> Earnings</nav>
+
+  <div class="mt-3 flex flex-wrap items-start justify-between gap-4">
     <div>
-      <h1 class="flex items-center gap-2 text-[24px] font-bold text-dark-inky-blue">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M16 12h5M5 6l11-3v3" /></svg>
-        Earning &amp; Payouts
+      <h1 class="flex items-center gap-2.5 text-[24px] font-semibold leading-none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1683ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5" /><path d="M16 13.5h2" /></svg>
+        Earnings
       </h1>
-      <p class="text-base text-ashy-blue mt-1">Track your performance, earnings, and patient analytics</p>
+      <p class="mt-2.5 text-[14px] pe-mute">Review your pharmacy earnings customer payments refunds and payment-provider settlements.</p>
+      <p class="mt-1.5 text-[11px] text-[#8a97ab]">MedPlus Pharmacy · Andheri East, Mumbai</p>
     </div>
 
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2.5">
+      <!-- date filter -->
       <div class="relative">
-        <button id="erDateBtn" type="button" class="flex items-center gap-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 10h18" /></svg>
-          <span id="erDateLabel">Jul 1 - Jul 22, 2025</span>
+        <button type="button" id="peDateBtn" class="pe-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 10h18" /></svg>
+          <span id="peDateLabel">This Month · 1–29 Sep 2026</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg>
         </button>
-        <div id="erDatePop" class="hidden absolute top-[calc(100%+6px)] right-0 z-30 bg-white border border-slate-200 shadow-[0_10px_30px_rgba(15,23,42,.12)] w-[300px] rounded-2xl p-4">
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="block text-[14px] text-slate-700 mb-1.5">From</label><input id="erFrom" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
-            <div><label class="block text-[14px] text-slate-700 mb-1.5">To</label><input id="erTo" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
-          </div>
-          <div class="grid grid-cols-2 gap-3 mt-3">
-            <button id="erDateCancel" type="button" class="text-[14px] font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
-            <button id="erDateApply" type="button" class="text-[14px] font-semibold px-[18px] py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Apply</button>
+        <div id="peDateMenu" class="pe-menu w-[290px] p-2">
+          <button type="button" class="pe-opt active" data-range="month">This Month</button>
+          <button type="button" class="pe-opt" data-range="week">Last 7 Days</button>
+          <button type="button" class="pe-opt" data-range="days30">Last 30 Days</button>
+          <button type="button" class="pe-opt" data-range="custom">Custom Range</button>
+          <div id="peCustomBox" class="hidden mt-2 border-t border-[#eef1f5] p-2">
+            <div class="grid grid-cols-2 gap-2">
+              <label class="text-[12px] pe-mute">From<input id="peFrom" type="date" class="pe-input mt-1" /></label>
+              <label class="text-[12px] pe-mute">To<input id="peTo" type="date" class="pe-input mt-1" /></label>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <button type="button" id="peCustomCancel" class="pe-btn pe-btn-ghost">Cancel</button>
+              <button type="button" id="peCustomApply" class="pe-btn pe-btn-primary">Apply</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div id="erPresets" class="flex items-center gap-1.5 text-[13px]">
-        <button type="button" data-preset="today" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">Today</button>
-        <button type="button" data-preset="7d" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">7D</button>
-        <button type="button" data-preset="30d" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">30 D</button>
-        <button type="button" data-preset="3m" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">3M</button>
-        <button type="button" data-preset="custom" class="er-preset px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">Custom</button>
+      <!-- export statement -->
+      <div class="relative">
+        <button type="button" id="peExportBtn" class="pe-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>
+          Export Statement
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg>
+        </button>
+        <div id="peExportMenu" class="pe-menu w-[200px] p-1.5">
+          <button type="button" class="pe-opt" id="peExportCsv">Download CSV</button>
+          <button type="button" class="pe-opt" id="peExportPdf">Print / Save as PDF</button>
+        </div>
       </div>
 
-      <button id="erStatementBtn" type="button" class="text-[14px] font-semibold px-4 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50 flex items-center gap-2">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Download Statement
-      </button>
-      <button id="erExportBtn" type="button" class="text-[14px] font-semibold px-4 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Export CSV
+      <button type="button" id="peRefresh" class="pe-btn !px-0 w-[38px] justify-center" title="Refresh">
+        <svg id="peRefreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" /><path d="M3 12A9 9 0 0 1 18.5 5.7L21 8" /><path d="M21 3v5h-5M3 21v-5h5" /></svg>
       </button>
     </div>
+  </div>
+
+  <!-- ============ INFO BANNER ============ -->
+  <div class="mt-4 flex items-center gap-2.5 rounded-lg bg-[#eaf3ff] px-4 py-3 text-[13px] text-[#344054]">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1683ff" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
+    <span>Gross service revenue and available payout balance are different figures. <a href="#" id="peViewReports" class="font-medium text-[#1683ff] hover:underline">View Reports</a></span>
   </div>
 
   <!-- ============ STAT CARDS ============ -->
-  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mt-5">
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-      <div class="flex justify-between items-start gap-2">
-        <span class="text-[14px] text-grayish-blue-slate">Gross Eligible Sales</span>
-        <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
+  <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+    <div class="pe-card px-5 py-4">
+      <div class="flex items-start justify-between">
+        <span class="text-[22px] font-medium leading-none text-[#1683ff]">₹</span>
+        <span class="text-[12px] font-semibold text-[#1683ff]">Gross Eligible Sale</span>
       </div>
-      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">₹1,35,000</p>
-      <div class="flex items-end justify-between mt-2">
-        <span class="text-[13px] text-grayish-blue-slate">Before platform commission</span>
-        <span class="w-7 h-7 rounded-lg border border-facebook-blue text-facebook-blue flex items-center justify-center text-[15px] font-bold">₹</span>
-      </div>
+      <p class="mt-2 text-[30px] font-bold leading-tight">₹1,35,000</p>
+      <p class="mt-1 text-[12px] pe-mute">Before Platform Commission</p>
     </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-      <div class="flex justify-between items-start gap-2">
-        <span class="text-[14px] text-grayish-blue-slate">Platform Commission</span>
-        <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
+    <div class="pe-card px-5 py-4">
+      <div class="flex items-start justify-between">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round"><path d="M19 5L5 19" /><circle cx="7" cy="7" r="2.2" /><circle cx="17" cy="17" r="2.2" /></svg>
+        <span class="text-[12px] font-semibold text-[#f97316]">Platform Commission</span>
       </div>
-      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">-₹10,800</p>
-      <div class="flex items-end justify-between mt-2">
-        <span class="text-[13px] text-grayish-blue-slate">8% illustrative demo rate</span>
-        <span class="w-7 h-7 rounded-lg border border-fuchsia-pink text-fuchsia-pink flex items-center justify-center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 5L5 19" /><circle cx="7" cy="7" r="2" /><circle cx="17" cy="17" r="2" /></svg></span>
-      </div>
+      <p class="mt-2 text-[30px] font-bold leading-tight">₹10,800</p>
+      <p class="mt-1 text-[12px] pe-mute">8% illustrative demo rate</p>
     </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-      <div class="flex justify-between items-start gap-2">
-        <span class="text-[14px] text-grayish-blue-slate">Net Earnings</span>
-        <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
+    <div class="pe-card px-5 py-4">
+      <div class="flex items-start justify-between">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="2.5" y="6" width="19" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6 9.5v.01M18 14.5v.01" /></svg>
+        <span class="text-[12px] font-semibold text-[#16a34a]">Net Earnings</span>
       </div>
-      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">₹1,24,200</p>
-      <div class="flex items-end justify-between mt-2">
-        <span class="text-[13px] text-grayish-blue-slate">After commission and adjustments</span>
-        <span class="w-7 h-7 shrink-0 rounded-lg border border-kyc-green text-kyc-green flex items-center justify-center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8M15 7h6v6" /></svg></span>
-      </div>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-      <div class="flex justify-between items-start gap-2">
-        <span class="text-[14px] text-grayish-blue-slate">Paid Out</span>
-        <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
-      </div>
-      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">₹30,000</p>
-      <div class="flex items-end justify-between mt-2">
-        <span class="text-[13px] text-grayish-blue-slate">1-22 Jul 2025</span>
-        <span class="w-7 h-7 rounded-lg border border-shazam-blue text-shazam-blue flex items-center justify-center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M8 12l3 3 5-6" /></svg></span>
-      </div>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm col-span-2 lg:col-span-1">
-      <div class="flex justify-between items-start gap-2">
-        <span class="text-[14px] text-grayish-blue-slate">Available Balance</span>
-        <svg class="text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
-      </div>
-      <p class="text-[26px] font-bold mt-2 text-dark-inky-blue">₹5,560</p>
-      <div class="flex items-end justify-between mt-2">
-        <span class="text-[13px] text-grayish-blue-slate">Eligible for payout</span>
-        <button id="erBankBtn" type="button" title="Banking destinations" class="w-7 h-7 rounded-lg border border-instant-orange text-instant-orange flex items-center justify-center hover:bg-orange-50"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M16 12h5M5 6l11-3v3" /></svg></button>
-      </div>
+      <p class="mt-2 text-[30px] font-bold leading-tight">₹1,24,200</p>
+      <p class="mt-1 text-[12px] pe-mute">After commission and adjustment</p>
     </div>
   </div>
 
-  <!-- ============ MAIN TABS ============ -->
-  <div id="erTabs" class="flex gap-6 overflow-x-auto border-b border-slate-100 mt-6">
-    <button type="button" data-tab="overview" class="er-tab text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">Overview</button>
-    <button type="button" data-tab="transactions" class="er-tab text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Transactions</button>
-    <button type="button" data-tab="payouts" class="er-tab text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Payout History</button>
-    <button type="button" data-tab="invoices" class="er-tab text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Invoice &amp; Statements</button>
+  <!-- ============ REVENUE TREND ============ -->
+  <div class="pe-card mt-4 px-5 py-4">
+    <h2 class="pe-h">Revenue trend</h2>
+    <p id="peTrendSub" class="mt-1 text-[11px] text-[#8a97ab]"></p>
+    <div class="mt-3 overflow-x-auto"><div id="peTrend" class="min-w-[560px]"></div></div>
+  </div>
+
+  <!-- ============ TABS ============ -->
+  <div id="peTabs" class="mt-5 flex gap-6 overflow-x-auto">
+    <button type="button" data-tab="overview" class="pe-tab active">Overview</button>
+    <button type="button" data-tab="transactions" class="pe-tab">Transactions</button>
+    <button type="button" data-tab="methods" class="pe-tab">Payment Methods</button>
   </div>
 
   <!-- ============ OVERVIEW ============ -->
-  <section id="er-overview" data-pane class="mt-5">
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
-      <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 class="text-[17px] font-semibold text-dark-inky-blue">Earnings Trends</h3>
-            <p class="text-[13px] text-grayish-blue-slate mt-1">Gross eligible sales, commission and net earnings by date</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <div id="erRange" class="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-[13px]">
-              <button type="button" data-range="daily" class="er-range px-3 py-1 rounded-md bg-white text-shazam-blue shadow-sm font-medium">Daily</button>
-              <button type="button" data-range="weekly" class="er-range px-3 py-1 rounded-md text-slate-600">Weekly</button>
-              <button type="button" data-range="monthly" class="er-range px-3 py-1 rounded-md text-slate-600">Monthly</button>
-            </div>
-            <button type="button" id="erChartDoc" title="Download statement" class="text-slate-400 hover:text-shazam-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" /><path d="M14 3v5h5" /></svg></button>
-            <button type="button" id="erChartDl" title="Export CSV" class="text-slate-400 hover:text-shazam-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg></button>
-          </div>
-        </div>
-        <div id="erChart" class="mt-4"></div>
-        <div class="flex flex-wrap items-center gap-4 text-[13px] text-slate-600 mt-2">
-          <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-facebook-blue"></i>Gross Eligible Sale</span>
-          <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-fuchsia-pink"></i>Platform Commission</span>
-          <span class="flex items-center gap-1.5"><i class="w-2 h-2 rounded-full bg-kyc-green"></i>Net Earnings</span>
-        </div>
-        <div class="flex flex-wrap items-center justify-between gap-2 text-[13px] mt-3">
-          <span id="erHigh" class="text-kyc-green font-medium"></span>
-          <span id="erLow" class="text-slate-400"></span>
-          <span id="erAvg" class="text-facebook-blue font-medium"></span>
-        </div>
+  <section id="pe-overview" data-pe-pane class="mt-3 space-y-4">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div class="pe-card p-5">
+        <h3 class="pe-h">Top Selling Categories</h3>
+        <div id="peCat" class="mt-3 flex min-h-[190px] flex-wrap items-center justify-center gap-8"></div>
       </div>
-
-      <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="text-[17px] font-semibold text-dark-inky-blue">Earnings by Fulfilment</h3>
-        <ul class="mt-5 space-y-5 text-[14px]">
-          <li class="flex items-center gap-3">
-            <span class="w-24 text-slate-600">Home Delivery</span>
-            <span class="flex-1 h-2 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-shazam-blue w-[77.8%]"></span></span>
-            <b class="w-16 text-right text-dark-inky-blue">₹96,600</b>
-            <span class="w-16 text-slate-400 text-[13px]">210 orders</span>
-          </li>
-          <li class="flex items-center gap-3">
-            <span class="w-24 text-slate-600">Stock Pick Up</span>
-            <span class="flex-1 h-2 rounded-full bg-slate-100"><span class="block h-full rounded-full bg-kyc-green w-[22.2%]"></span></span>
-            <b class="w-16 text-right text-dark-inky-blue">₹27,600</b>
-            <span class="w-16 text-slate-400 text-[13px]">60 orders</span>
-          </li>
-        </ul>
-        <div class="border-t border-slate-100 mt-6 pt-4 text-right">
-          <span class="text-[15px] text-slate-600 mr-3">Total</span><b class="text-[18px] text-dark-inky-blue">₹1,24,200</b>
-        </div>
+      <div class="pe-card p-5">
+        <h3 class="pe-h">Top Performing Medicines</h3>
+        <ul id="peMeds" class="mt-6 space-y-5"></ul>
       </div>
     </div>
 
-    <!-- Commission breakdown table -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-4 p-5">
-      <h3 class="text-[19px] font-semibold text-dark-inky-blue">Commission Breakdown</h3>
-      <p class="text-[13px] text-grayish-blue-slate mt-0.5">8% illustrative demo rate</p>
-      <div class="overflow-x-auto mt-4 rounded-lg">
-        <table class="w-full min-w-[640px] text-center">
-          <thead>
-            <tr class="text-white text-[13px] uppercase tracking-wide bg-shazam-blue">
-              <th class="px-5 py-3.5 font-medium">Fulfilment</th>
-              <th class="px-3 py-3.5 font-medium">Order</th>
-              <th class="px-3 py-3.5 font-medium">Gross Sale</th>
-              <th class="px-3 py-3.5 font-medium">Commission</th>
-              <th class="px-3 py-3.5 font-medium">Net</th>
-            </tr>
-          </thead>
-          <tbody class="text-[14px]">
-            <tr class="border-b border-slate-100"><td class="px-5 py-3.5">Home Delivery</td><td>210</td><td>₹1,05,000</td><td class="text-red-500">₹8,400</td><td class="text-kyc-green font-medium">₹96,600</td></tr>
-            <tr class="border-b border-slate-100"><td class="px-5 py-3.5">Stock Pickup</td><td>60</td><td>₹30,000</td><td class="text-red-500">₹2,400</td><td class="text-kyc-green font-medium">₹27,600</td></tr>
-            <tr class="bg-blue-100 font-bold"><td class="px-5 py-3.5 text-dark-inky-blue">Total</td><td>270</td><td>₹1,35,000</td><td class="text-red-500">₹10,800</td><td class="text-kyc-green">₹1,24,200</td></tr>
-          </tbody>
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div class="pe-card p-5">
+        <h3 class="pe-h">Order Status</h3>
+        <div id="peOrderStatus" class="mt-3 flex min-h-[170px] flex-wrap items-center justify-center gap-8"></div>
+      </div>
+      <div class="pe-card p-5">
+        <h3 class="pe-h">Payment Status Overview</h3>
+        <div id="pePayStatus" class="mt-3 flex min-h-[170px] flex-wrap items-center justify-center gap-8"></div>
+      </div>
+    </div>
+
+    <div class="pe-card p-5">
+      <div class="flex items-center justify-between">
+        <h3 class="pe-h">Payment History</h3>
+        <button type="button" class="peGoTxn text-[12px] font-medium text-[#1683ff] hover:underline">View All History →</button>
+      </div>
+      <div class="mt-3 overflow-x-auto"><div id="peHistory" class="min-w-[520px]"></div></div>
+    </div>
+
+    <div class="pe-card overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4">
+        <h3 class="pe-h">Recent Transactions</h3>
+        <button type="button" class="peGoTxn text-[14px] font-medium text-[#1683ff] hover:underline">View all transactions →</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="pe-table min-w-[720px]">
+          <thead><tr><th>Order ID</th><th>Customer Name</th><th>Product</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="peRecentBody"></tbody>
         </table>
       </div>
-    </div>
-
-    <!-- Recent ledger entries -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-4 p-5">
-      <div class="flex items-center justify-between">
-        <h3 class="text-[17px] font-semibold text-dark-inky-blue">Commission Breakdown</h3>
-        <button id="erViewAll" type="button" class="text-[14px] font-semibold text-shazam-blue">View all →</button>
-      </div>
-      <ul id="erRecent" class="mt-3 divide-y divide-slate-100"></ul>
     </div>
   </section>
 
   <!-- ============ TRANSACTIONS ============ -->
-  <section id="er-transactions" data-pane class="hidden mt-5">
-    <div id="erTxnTypes" class="flex gap-6 overflow-x-auto border-b border-slate-100">
-      <button type="button" data-txtype="all" class="er-txtype text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">All Transactions</button>
-      <button type="button" data-txtype="earnings" class="er-txtype text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Earnings</button>
-      <button type="button" data-txtype="commissions" class="er-txtype text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Commissions</button>
-      <button type="button" data-txtype="refunds" class="er-txtype text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Refunds &amp; Adjustments</button>
-    </div>
-
-    <p class="text-[14px] text-slate-600 mt-4">
-      Credits : <b class="text-dark-inky-blue">₹1,35,000</b> &nbsp; Debits : <b class="text-dark-inky-blue">₹1,26,760</b> &nbsp; Net Movement : <b class="text-kyc-green">+₹8,240</b>
-    </p>
-
-    <div class="flex flex-wrap items-center gap-3 mt-4">
-      <div class="relative flex-1 min-w-[240px]">
-        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-        <input id="erTxnSearch" type="text" placeholder="Search patient, appointment or issue..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
+  <section id="pe-transactions" data-pe-pane class="mt-3 hidden">
+    <div class="pe-card overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4">
+        <h3 class="pe-h">Recent Transactions</h3>
+        <button type="button" id="peToggleAll" class="text-[14px] font-medium text-[#1683ff] hover:underline">View all transactions →</button>
       </div>
-      <select id="erTxnStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
-        <option value="">Filter: All Status</option>
-        <option>Settled</option>
-        <option>Processing</option>
-        <option>Failed</option>
-        <option>Reversed</option>
-      </select>
-    </div>
-
-    <div class="overflow-x-auto mt-4 rounded-lg bg-white border border-slate-200 shadow-sm">
-      <table class="w-full min-w-[1040px] text-center">
-        <thead>
-          <tr class="text-white text-[13px] uppercase tracking-wide bg-shazam-blue">
-            <th class="px-4 py-3.5 font-medium">Date and Time</th>
-            <th class="px-3 py-3.5 font-medium">Transaction ID</th>
-            <th class="px-3 py-3.5 font-medium">Order Payout Ref</th>
-            <th class="px-3 py-3.5 font-medium">Type</th>
-            <th class="px-3 py-3.5 font-medium">Description</th>
-            <th class="px-3 py-3.5 font-medium">Credit</th>
-            <th class="px-3 py-3.5 font-medium">Debit</th>
-            <th class="px-3 py-3.5 font-medium">Running Balance</th>
-            <th class="px-3 py-3.5 font-medium">Status</th>
-            <th class="px-3 py-3.5 font-medium">Action</th>
-          </tr>
-        </thead>
-        <tbody id="erTxnRows" class="text-[14px]"></tbody>
-      </table>
-    </div>
-    <p id="erTxnCount" class="text-[14px] text-slate-600 mt-4"></p>
-  </section>
-
-  <!-- ============ PAYOUT HISTORY ============ -->
-  <section id="er-payouts" data-pane class="hidden mt-5">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="relative flex-1 min-w-[240px]">
-          <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-          <input id="erPayoutSearch" type="text" placeholder="Search payout ID..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
-        </div>
-        <select id="erPayoutStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
-          <option value="">All Status</option>
-          <option>Paid</option>
-          <option>Processing</option>
-          <option>Failed</option>
-        </select>
-        <button id="erPayoutReset" type="button" class="text-[15px] text-slate-600 px-2 py-2 hover:text-shazam-blue">Reset Filters</button>
-      </div>
-      <div class="overflow-x-auto mt-4 rounded-lg">
-        <table class="w-full min-w-[720px] text-center">
-          <thead>
-            <tr class="text-white text-[13px] uppercase tracking-wide bg-shazam-blue">
-              <th class="px-5 py-3.5 font-medium text-left">Payout ID</th><th class="px-3 py-3.5 font-medium">Date</th><th class="px-3 py-3.5 font-medium">Bank</th><th class="px-3 py-3.5 font-medium">Orders</th><th class="px-3 py-3.5 font-medium">Net Amount</th><th class="px-3 py-3.5 font-medium">Status</th><th class="px-3 py-3.5 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody id="erPayoutRows" class="text-[14px]"></tbody>
-        </table>
-      </div>
-      <p id="erPayoutCount" class="text-[14px] text-slate-600 mt-4"></p>
-    </div>
-  </section>
-
-  <!-- ============ INVOICE & STATEMENTS ============ -->
-  <section id="er-invoices" data-pane class="hidden mt-5">
-    <div id="erInvTabs" class="flex gap-6 overflow-x-auto border-b border-slate-100">
-      <button type="button" data-sub="commission" class="er-sub text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-shazam-blue border-shazam-blue font-medium">Commission Invoices</button>
-      <button type="button" data-sub="settlement" class="er-sub text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Settlement Statements</button>
-      <button type="button" data-sub="tax" class="er-sub text-[15px] py-3 px-1 border-b-2 whitespace-nowrap text-slate-600 border-transparent font-normal">Tax &amp; Summary</button>
-    </div>
-
-    <!-- Commission invoices -->
-    <div id="er-sub-commission" data-subpane class="mt-5">
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[13px] text-grayish-blue-slate">Total Requested</p><p class="text-[24px] font-bold text-dark-inky-blue mt-1">₹38,200</p></div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[13px] text-grayish-blue-slate">Processing</p><p class="text-[24px] font-bold text-dark-inky-blue mt-1">₹0</p></div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[13px] text-grayish-blue-slate">Paid</p><p class="text-[24px] font-bold text-kyc-green mt-1">₹30,000</p></div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4"><p class="text-[13px] text-grayish-blue-slate">Failed/Reversed</p><p class="text-[24px] font-bold text-red-500 mt-1">₹8,200</p></div>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-3 mt-5">
-        <button id="erInvDateBtn" type="button" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] text-slate-700 bg-white hover:bg-slate-50">Date range</button>
-        <select id="erInvStatus" class="border border-slate-200 rounded-lg px-3.5 py-2.5 text-[15px] text-slate-700 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100">
-          <option value="">Status</option>
-          <option>Available</option>
-          <option>Paid</option>
-          <option>Failed</option>
-        </select>
-        <div class="relative flex-1 min-w-[240px]">
-          <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-          <input id="erInvSearch" type="text" placeholder="Search patient, appointment or issue..." class="w-full border border-slate-200 rounded-lg pl-10 pr-3.5 py-2.5 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" />
-        </div>
-      </div>
-
-      <div class="overflow-x-auto mt-4 rounded-lg bg-white border border-slate-200 shadow-sm">
-        <table class="w-full min-w-[900px] text-center">
-          <thead>
-            <tr class="text-white text-[13px] uppercase tracking-wide bg-shazam-blue">
-              <th class="px-4 py-3.5 font-medium">Invoice Number</th><th class="px-3 py-3.5 font-medium">Period</th><th class="px-3 py-3.5 font-medium">Issued Date</th><th class="px-3 py-3.5 font-medium">Gross Eligible Sale</th><th class="px-3 py-3.5 font-medium">Rate</th><th class="px-3 py-3.5 font-medium">Commission</th><th class="px-3 py-3.5 font-medium">Status</th><th class="px-3 py-3.5 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody id="erInvoiceRows" class="text-[14px]"></tbody>
+      <div class="overflow-x-auto">
+        <table class="pe-table min-w-[720px]">
+          <thead><tr><th>Order ID</th><th>Customer Name</th><th>Product</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="peTxnBody"></tbody>
         </table>
       </div>
     </div>
+  </section>
 
-    <!-- Settlement statements -->
-    <div id="er-sub-settlement" data-subpane class="hidden mt-5">
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 class="text-[19px] font-semibold text-dark-inky-blue">Settlements Statements</h3>
-            <p class="text-[13px] text-grayish-blue-slate mt-1">1-22 Jul 2025 generated statement preview</p>
-          </div>
-          <button id="erGenStatement" type="button" class="text-[14px] font-semibold px-[18px] py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">+ Generate Statement</button>
-        </div>
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mt-5">
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[13px] text-grayish-blue-slate">Gross</p><p class="text-[22px] font-bold text-dark-inky-blue mt-1">₹1,35,000</p></div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[13px] text-grayish-blue-slate">Commission</p><p class="text-[22px] font-bold text-red-500 mt-1">-₹10,800</p></div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[13px] text-grayish-blue-slate">Adjustment</p><p class="text-[22px] font-bold text-red-500 mt-1">-₹420</p></div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[13px] text-grayish-blue-slate">Paid out</p><p class="text-[22px] font-bold text-dark-inky-blue mt-1">-₹1,15,960</p></div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 col-span-2 lg:col-span-1"><p class="text-[13px] text-grayish-blue-slate">Remaining</p><p class="text-[22px] font-bold text-red-500 mt-1">-₹7,820</p></div>
-        </div>
-        <p class="flex items-center gap-2 text-[13px] text-grayish-blue-slate mt-5">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
-          Small discrepancy from refund timing, reconcile note shown
-        </p>
-      </div>
-    </div>
-
-    <!-- Tax & summary -->
-    <div id="er-sub-tax" data-subpane class="hidden mt-5">
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="text-[19px] font-semibold text-dark-inky-blue">Illustrative period summary</h3>
-        <p class="text-[14px] text-slate-600 mt-3">
-          Gross eligible sale : <b class="text-dark-inky-blue">₹1,35,000</b> &nbsp; Commission : <b class="text-dark-inky-blue">₹10,800</b> &nbsp; Net earnings : <b class="text-dark-inky-blue">₹1,24,200</b>
-        </p>
-        <div class="flex items-center gap-2 mt-4 rounded-lg border border-instant-orange bg-orange-50 text-instant-orange text-[14px] px-4 py-3">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2z" /><path d="M12 10v5M12 18h.01" /></svg>
-          <span><b>Tax withholding not included in this demo view</b> <span class="text-slate-600">Consult a tax professional</span></span>
-        </div>
-      </div>
-    </div>
+  <!-- ============ PAYMENT METHODS ============ -->
+  <section id="pe-methods" data-pe-pane class="mt-3 hidden">
+    <div id="peMethodList" class="space-y-3"></div>
+    <button type="button" id="peAddMethod" class="pe-btn mt-4 !h-[40px]">+ Add payment method</button>
   </section>
 </div>
 
-<div id="erToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-dark-inky-blue text-white text-[15px] px-[18px] py-2.5 rounded-[10px] z-[1100] hidden"></div>
+<div id="peToast" class="fixed bottom-6 left-1/2 z-[1200] hidden -translate-x-1/2 rounded-[10px] bg-[#111c2e] px-[18px] py-2.5 text-[14px] text-white"></div>
 
 <!-- ============ TRANSACTION POPUP ============ -->
-<div id="m-txn" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
-  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[620px]">
-    <div class="flex justify-between items-start px-6 pt-5 pb-4 border-b border-slate-100">
+<div id="peTxnModal" class="pe-modal" role="dialog" aria-modal="true">
+  <div class="pe-sheet max-w-[780px]">
+    <div class="flex items-start justify-between border-b border-[#e8edf3] px-7 pb-4 pt-5">
       <div>
-        <p id="tx-type" class="text-[16px] text-slate-600"></p>
-        <p id="tx-id" class="text-[16px] text-slate-600 mt-2"></p>
+        <p id="pxType" class="text-[16px] text-[#5b6b80]">Order Settlement</p>
+        <p id="pxId" class="mt-2 text-[16px] text-[#5b6b80]"></p>
       </div>
       <div class="flex items-center gap-3">
-        <span id="tx-status"></span>
-        <button type="button" data-close="m-txn" class="w-[26px] h-[26px] rounded-full border-2 border-dark-inky-blue flex items-center justify-center bg-white cursor-pointer shrink-0" title="Close">
+        <span id="pxStatus"></span>
+        <button type="button" data-pe-close class="flex h-[26px] w-[26px] items-center justify-center rounded-full border-2 border-[#111c2e]" title="Close">
           <svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg>
         </button>
       </div>
     </div>
-    <div class="px-6 py-5">
-      <div class="rounded-2xl border border-slate-200 p-4">
-        <div id="txTabs" class="flex gap-5 border-b border-slate-100">
-          <button type="button" data-txtab="summary" class="tx-tab text-[14px] py-2 border-b-2 text-shazam-blue border-shazam-blue font-medium">Summary</button>
-          <button type="button" data-txtab="ledger" class="tx-tab text-[14px] py-2 border-b-2 text-slate-600 border-transparent font-normal">Ledger Details</button>
-          <button type="button" data-txtab="activity" class="tx-tab text-[14px] py-2 border-b-2 text-slate-600 border-transparent font-normal">Activity</button>
+
+    <div class="bg-[#f7f9fb] px-7 py-5">
+      <div class="rounded-2xl border border-[#e3e9f0] bg-white p-5">
+        <div id="pxTabs" class="flex gap-5">
+          <button type="button" data-ptab="summary" class="pe-tab active">Summary</button>
+          <button type="button" data-ptab="ledger" class="pe-tab">Ledger Details</button>
+          <button type="button" data-ptab="activity" class="pe-tab">Activity</button>
         </div>
 
-        <div id="tx-pane-summary" data-txpane class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 mt-3 text-[15px]">
-          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[14px]">Date &amp; Time</p><p id="tx-date" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
-          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[14px]">Reference</p><p id="tx-ref" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
-          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[14px]">Credit</p><p id="tx-credit" class="text-[18px] font-bold text-kyc-green mt-1"></p></div>
-          <div class="py-3 border-b border-slate-100"><p class="text-grayish-blue-slate text-[14px]">Debit</p><p id="tx-debit" class="text-[18px] font-bold text-red-500 mt-1"></p></div>
-          <div class="py-3"><p class="text-grayish-blue-slate text-[14px]">Closing balance</p><p id="tx-bal" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
-          <div class="py-3"><p class="text-grayish-blue-slate text-[14px]">Fulfilment</p><p id="tx-ful" class="text-[18px] font-bold text-dark-inky-blue mt-1"></p></div>
+        <!-- summary -->
+        <div id="px-summary" data-ppane class="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+          <div class="border-b border-[#eef1f5] py-3"><p class="text-[14px] pe-mute">Date &amp; Time</p><p id="pxDate" class="mt-1 text-[19px] font-bold"></p></div>
+          <div class="border-b border-[#eef1f5] py-3"><p class="text-[14px] pe-mute">Reference</p><p id="pxRef" class="mt-1 text-[19px] font-bold"></p></div>
+          <div class="border-b border-[#eef1f5] py-3"><p class="text-[14px] pe-mute">Credit</p><p id="pxCredit" class="mt-1 text-[19px] font-bold text-[#16a34a]"></p></div>
+          <div class="border-b border-[#eef1f5] py-3"><p class="text-[14px] pe-mute">Debit</p><p id="pxDebit" class="mt-1 text-[19px] font-bold text-[#ef4444]"></p></div>
+          <div class="border-b border-[#eef1f5] py-3"><p class="text-[14px] pe-mute">Closing balance</p><p id="pxBal" class="mt-1 text-[19px] font-bold"></p></div>
+          <div class="border-b border-[#eef1f5] py-3"><p class="text-[14px] pe-mute">Fulfilment</p><p id="pxFul" class="mt-1 text-[19px] font-bold"></p></div>
         </div>
 
-        <dl id="tx-pane-ledger" data-txpane class="hidden mt-3 text-[15px]">
-          <div class="flex justify-between py-2.5 border-b border-slate-100"><dt class="text-grayish-blue-slate">Transaction type</dt><dd id="tx-l-type" class="font-medium text-dark-inky-blue"></dd></div>
-          <div class="flex justify-between py-2.5 border-b border-slate-100"><dt class="text-grayish-blue-slate">Order payout ref</dt><dd id="tx-l-ref" class="font-medium text-dark-inky-blue"></dd></div>
-          <div class="flex justify-between py-2.5 border-b border-slate-100"><dt class="text-grayish-blue-slate">Description</dt><dd id="tx-l-desc" class="font-medium text-dark-inky-blue"></dd></div>
-          <div class="flex justify-between py-2.5"><dt class="text-grayish-blue-slate">Running balance</dt><dd id="tx-l-bal" class="font-medium text-dark-inky-blue"></dd></div>
-        </dl>
+        <!-- ledger -->
+        <div id="px-ledger" data-ppane class="mt-3 hidden overflow-x-auto">
+          <table class="pe-table min-w-[480px]">
+            <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody id="pxLedger"></tbody>
+          </table>
+        </div>
 
-        <ul id="tx-pane-activity" data-txpane class="hidden mt-4 space-y-3 text-[15px]"></ul>
+        <!-- activity -->
+        <div id="px-activity" data-ppane class="mt-4 hidden"><ul id="pxTimeline" class="pe-tl"></ul></div>
       </div>
 
-      <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-[14px] px-4 py-3 mt-4">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
-        <span id="tx-note"></span>
+      <div id="pxBelowSummary" class="mt-4">
+        <div class="pe-note">
+          <svg class="mt-0.5 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
+          <span id="pxSumNote"></span>
+        </div>
+        <p class="mt-5 text-[15px] text-[#5b6b80]">Activity</p>
+        <ul id="pxMiniTimeline" class="pe-tl mt-3"></ul>
       </div>
 
-      <p class="text-[15px] text-slate-600 mt-5">Activity</p>
-      <ul id="txTimeline" class="mt-3 space-y-3 text-[15px]"></ul>
+      <div id="pxBelowNote" class="mt-4 hidden">
+        <div class="pe-note">
+          <svg class="mt-0.5 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
+          <div><p class="text-[15px] text-[#1683ff]">Note</p><p class="mt-1.5">This ledger includes all applicable charges and deductions for this settlement</p></div>
+        </div>
+      </div>
     </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-      <button type="button" data-close="m-txn" class="text-[14px] font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Close</button>
-      <button id="txReceiptBtn" type="button" class="text-[14px] font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90 flex items-center gap-2">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Download Receipt
+
+    <div class="flex justify-end gap-3 border-t border-[#e8edf3] px-7 py-4">
+      <button type="button" data-pe-close class="pe-btn !h-[40px] !px-6 font-semibold">Close</button>
+      <button type="button" id="pxReceiptBtn" class="pe-btn pe-btn-primary !h-[40px] !px-5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>Download Receipt
       </button>
     </div>
   </div>
 </div>
 
-<!-- ============ DOWNLOAD STATEMENT POPUP ============ -->
-<div id="m-statement" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
-  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[560px]">
-    <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-      <p class="text-[14px] text-grayish-blue-slate">Wallet settings</p>
-      <h3 class="text-[22px] font-bold text-dark-inky-blue mt-1">Download Statement</h3>
+<!-- ============ DOWNLOAD RECEIPT POPUP ============ -->
+<div id="peReceiptModal" class="pe-modal" style="z-index:1100" role="dialog" aria-modal="true">
+  <div class="pe-sheet max-w-[640px] p-5">
+    <div class="flex items-start justify-between">
+      <div class="flex items-center gap-3">
+        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#e1f0ff] text-[#1683ff]">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg>
+        </span>
+        <div><h3 class="text-[16px] font-semibold">Download Receipt</h3><p class="text-[13px] pe-mute">Your settlement receipt is ready to download</p></div>
+      </div>
+      <button type="button" data-pe-close class="text-[#8a97ab] hover:text-[#111c2e]" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg>
+      </button>
     </div>
-    <dl class="px-6 py-3 text-[15px] bg-slate-50/60">
-      <div class="flex justify-between items-center py-3.5 border-b border-slate-200"><dt class="text-grayish-blue-slate">Period</dt><dd id="stPeriod" class="text-[18px] font-semibold text-dark-inky-blue">1-22 Jul 2025</dd></div>
-      <div class="flex justify-between items-center py-3.5 border-b border-slate-200"><dt class="text-grayish-blue-slate">Format</dt><dd class="text-[18px] font-semibold text-dark-inky-blue">PDF / Print-ready</dd></div>
-      <div class="flex justify-between items-center py-3.5"><dt class="text-grayish-blue-slate">Sections included</dt><dd class="text-grayish-blue-slate">Summary, Transactions, Payout, Commission</dd></div>
-    </dl>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-      <button type="button" data-close="m-statement" class="text-[14px] font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
-      <button id="stDownload" type="button" class="text-[14px] font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Download Statement</button>
+
+    <div class="mt-5 rounded-xl bg-[#e8f1ff] px-4 py-3.5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-[13px] pe-mute">Beneficiary Partner (<span id="prTxn">TXN</span>)</p>
+          <p class="mt-1.5 text-[16px] font-semibold">MedPlus Pharmacy</p>
+        </div>
+        <span id="prStatus" class="mt-1"></span>
+      </div>
+      <p class="mt-1.5 text-[13px] pe-mute">GSTIN: 27AABCM8492K1Z5 • DL No: 20B/21B-MH-409281</p>
+    </div>
+
+    <div class="mt-4 flex items-center justify-between px-1 text-[13px] pe-mute"><span>Settlement Particulars</span><span>Amount</span></div>
+    <div class="mt-3 space-y-4 px-1">
+      <div class="flex items-start justify-between gap-3">
+        <div><p class="text-[15px] font-semibold">Gross Order Settlement Value</p><p id="prPeriod" class="mt-1 text-[12px] pe-mute"></p></div>
+        <p id="prGross" class="text-[16px] font-bold"></p>
+      </div>
+      <div class="flex items-start justify-between gap-3">
+        <div><p class="text-[15px] font-semibold">Platform &amp; Facilitation Charges</p><p id="prGst" class="mt-1 text-[12px] pe-mute"></p></div>
+        <p id="prFee" class="text-[16px] font-bold"></p>
+      </div>
+    </div>
+    <div class="mt-4 flex items-start justify-between gap-3 rounded-xl bg-[#e8f1ff] px-4 py-3.5">
+      <div><p class="text-[15px] font-semibold">Net Settled Payout</p><p class="mt-1 text-[12px] pe-mute">HDFC Bank Ltd. •••• 4821</p></div>
+      <p id="prNet" class="text-[17px] font-bold text-[#1683ff]"></p>
+    </div>
+    <button type="button" id="prDownload" class="pe-btn pe-btn-primary mt-4 !h-[44px] w-full text-[14px]">Download Receipt</button>
+  </div>
+</div>
+
+<!-- ============ ADD / EDIT PAYOUT METHOD POPUP ============ -->
+<div id="peMethodModal" class="pe-modal" role="dialog" aria-modal="true">
+  <div class="pe-sheet max-w-[500px]">
+    <div class="flex items-center justify-between border-b border-[#e8edf3] px-6 py-5">
+      <h3 id="pmTitle" class="text-[20px] font-bold">Edit payout method</h3>
+      <button type="button" data-pe-close class="flex h-[26px] w-[26px] items-center justify-center rounded-full border-2 border-[#111c2e]" title="Close">
+        <svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 5l14 14M19 5L5 19" /></svg>
+      </button>
+    </div>
+
+    <div class="space-y-4 px-6 py-5">
+      <label class="block text-[14px] text-[#5b6b80]">Account holder name
+        <input id="pmHolder" type="text" class="pe-input pe-field mt-1.5" placeholder="Account holder name" autocomplete="off" /></label>
+      <label class="block text-[14px] text-[#5b6b80]">Bank name
+        <input id="pmBank" type="text" class="pe-input pe-field mt-1.5" placeholder="e.g. HDFC Bank" autocomplete="off" /></label>
+      <label class="block text-[14px] text-[#5b6b80]">Account number
+        <input id="pmAcc" type="password" inputmode="numeric" maxlength="18" class="pe-input pe-field mt-1.5" placeholder="Enter account number" autocomplete="off" /></label>
+      <label class="block text-[14px] text-[#5b6b80]">Confirm account number
+        <input id="pmAcc2" type="password" inputmode="numeric" maxlength="18" class="pe-input pe-field mt-1.5" placeholder="Re-enter account number" autocomplete="off" /></label>
+      <label class="block text-[14px] text-[#5b6b80]">IFSC code
+        <input id="pmIfsc" type="text" maxlength="11" class="pe-input pe-field mt-1.5 uppercase" placeholder="e.g. HDFC0001234" autocomplete="off" /></label>
+
+      <div class="text-[14px] text-[#5b6b80]">Account type
+        <div class="relative mt-1.5">
+          <button type="button" id="pmTypeBtn" class="pe-input pe-field flex items-center justify-between text-left">
+            <span id="pmTypeLabel">Savings</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7a90" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg>
+          </button>
+          <div id="pmTypeMenu" class="pe-menu p-2" style="left:0;right:0;top:auto;bottom:48px">
+            <button type="button" class="pe-opt pm-type !py-3 !text-[15px]" data-type="Savings">Savings</button>
+            <button type="button" class="pe-opt pm-type !py-3 !text-[15px]" data-type="Current">Current</button>
+            <button type="button" class="pe-opt pm-type !py-3 !text-[15px]" data-type="NRI">NRI</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg bg-[#f6f8fb] px-4 py-3.5 text-[13px] leading-relaxed text-[#5b6b80]">
+        Account details are encrypted and stored securely. Verification may take 1–2 business days.
+      </div>
+      <p id="pmError" class="hidden text-[13px] text-[#ef4444]"></p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 border-t border-[#e8edf3] px-6 py-4">
+      <button type="button" data-pe-close class="pe-btn pe-btn-ghost !h-[42px] !border-[#9aa5b6]">Cancel</button>
+      <button type="button" id="pmSave" class="pe-btn pe-btn-primary !h-[42px]">Save &amp; Verify</button>
     </div>
   </div>
 </div>
 
-<!-- ============ EXPORT REPORT POPUP ============ -->
-<div id="m-export" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
-  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[560px]">
-    <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-      <p class="text-[14px] text-grayish-blue-slate">Data Export</p>
-      <h3 class="text-[22px] font-bold text-dark-inky-blue mt-1">Export report</h3>
-    </div>
-    <div class="px-6 py-5 bg-slate-50/60">
-      <p class="text-[15px] text-grayish-blue-slate">Select the datasets and format for your demo export</p>
-      <ul id="exList" class="mt-4 space-y-3">
-        <li><label class="flex items-center gap-4 cursor-pointer text-[15px] text-slate-700"><input type="checkbox" value="Transactions" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Transactions</label></li>
-        <li><label class="flex items-center gap-4 cursor-pointer text-[15px] text-slate-700"><input type="checkbox" value="Payout History" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Payout History</label></li>
-        <li><label class="flex items-center gap-4 cursor-pointer text-[15px] text-slate-700"><input type="checkbox" value="Commission Invoices" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Commission Invoices</label></li>
-        <li><label class="flex items-center gap-4 cursor-pointer text-[15px] text-slate-700"><input type="checkbox" value="Settlement Statement" class="w-[22px] h-[22px] rounded-md border border-slate-300 accent-shazam-blue" />Settlement Statement</label></li>
-      </ul>
-      <p id="exError" class="hidden text-[14px] text-red-500 mt-3">Select at least one dataset to export.</p>
-      <div class="flex items-center gap-3 rounded-lg border border-slate-200 bg-white text-grayish-blue-slate text-[14px] px-4 py-3 mt-4">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v5h1" /></svg>
-        Payout destinations are included by default
-      </div>
-    </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-      <button type="button" data-close="m-export" class="text-[14px] font-semibold px-6 py-[10px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
-      <button id="exGenerate" type="button" class="text-[14px] font-semibold px-5 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Generate Export</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ BANKING DESTINATIONS POPUP ============ -->
-<div id="m-bank" data-modal class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[1000]">
-  <div class="bg-white rounded-2xl w-full max-h-[92vh] overflow-y-auto shadow-[0_20px_50px_rgba(15,23,42,.25)] max-w-[720px]">
-    <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-      <p class="text-[14px] text-grayish-blue-slate">Wallet settings</p>
-      <h3 class="text-[22px] font-bold text-dark-inky-blue mt-1">Banking destinations</h3>
-    </div>
-    <div class="px-6 py-5 bg-slate-50/60">
-      <ul id="bkList" class="space-y-4"></ul>
-      <p class="text-[14px] text-grayish-blue-slate mt-4">Primary destination cannot be removed until another destination is set primary.</p>
-      <p class="text-[14px] text-grayish-blue-slate mt-3">Sections included: Summary, Transaction, Payout, Commission</p>
-
-      <div id="bkForm" class="hidden mt-4 rounded-xl border border-slate-200 bg-white p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><label class="block text-[14px] text-slate-700 mb-1.5">Bank name</label><input id="bkName" type="text" placeholder="e.g. ICICI Bank" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
-          <div><label class="block text-[14px] text-slate-700 mb-1.5">Last 4 digits</label><input id="bkLast4" type="text" inputmode="numeric" maxlength="4" placeholder="1234" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-[15px] text-slate-800 bg-white outline-none focus:border-shazam-blue focus:ring-[3px] focus:ring-blue-100" /></div>
-        </div>
-        <p id="bkError" class="hidden text-[14px] text-red-500 mt-2">Enter a bank name and 4 digits.</p>
-        <div class="flex justify-end gap-3 mt-3">
-          <button id="bkCancelAdd" type="button" class="text-[14px] font-semibold px-5 py-[9px] rounded-lg border cursor-pointer transition-colors border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Cancel</button>
-          <button id="bkSaveAdd" type="button" class="text-[14px] font-semibold px-5 py-[9px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Save</button>
-        </div>
-      </div>
-
-      <button id="bkAdd" type="button" class="mt-4 text-[15px] font-medium px-4 py-2.5 rounded-lg border border-slate-400 text-slate-600 bg-white hover:bg-slate-50">+ Add Destination</button>
-    </div>
-    <div class="flex justify-end px-6 py-4 border-t border-slate-100">
-      <button type="button" data-close="m-bank" class="text-[14px] font-semibold px-10 py-[10px] rounded-lg border cursor-pointer transition-colors border-shazam-blue bg-shazam-blue text-white hover:opacity-90">Close</button>
+<!-- ============ REMOVE PAYMENT METHOD POPUP ============ -->
+<div id="peRemoveModal" class="pe-modal" role="dialog" aria-modal="true">
+  <div class="pe-sheet max-w-[420px] p-6">
+    <h3 class="text-[18px] font-semibold">Remove payment method?</h3>
+    <p id="rmText" class="mt-2 text-[14px] pe-mute"></p>
+    <div class="mt-5 flex justify-end gap-3">
+      <button type="button" data-pe-close class="pe-btn pe-btn-ghost !px-6">Cancel</button>
+      <button type="button" id="rmConfirm" class="pe-btn pe-btn-danger !px-6">Remove</button>
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/js/seller-earning.js"></script>
-<script src="/static/js/pharmacy-earning.js"></script>
-
+<script src="{% static 'js/pharmacy-earning.js' %}"></script>
 {% endblock %}

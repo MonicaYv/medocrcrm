@@ -497,7 +497,7 @@ def settings_page(request):
 
         "pharmacy": "settings/pharmacy_seller_settings.html",
 
-        "lab": "settings/seller_settings.html",
+        "lab": "settings/lab_seller_settings.html",
 
         "hospital": "settings/seller_settings.html",
 

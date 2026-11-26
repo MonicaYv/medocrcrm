@@ -183,7 +183,13 @@
             <div class="report-card p-4">
                 <h2 class="text-[14px] font-semibold">Orders by Category</h2>
                 <div class="flex items-center justify-center gap-4 h-[190px]">
-                    <div class="h-[125px] w-[125px] shrink-0"><canvas id="orderCategoryChart"></canvas></div>
+                  <div class="relative h-[125px] w-[125px] shrink-0">
+    <canvas id="orderCategoryChart"></canvas>
+    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <b class="text-[18px] leading-none">1,248</b>
+        <span class="text-[10px] text-[#697386]">Total</span>
+    </div>
+</div>
                     <div class="space-y-3 text-[9px] w-[55%]">
                         <div class="flex items-center gap-2"><span class="w-24 shrink-0">OTC Medicines</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[75%] rounded bg-[#1683ff]"></i></span><b>38.4%</b></div>
                         <div class="flex items-center gap-2"><span class="w-24 shrink-0">Health Supplements</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[63%] rounded bg-[#1683ff]"></i></span><b>32.1%</b></div>
@@ -203,7 +209,13 @@
             <div class="report-card p-4">
                 <h2 class="text-[14px] font-semibold">Order Status Breakdown</h2>
                 <div class="flex items-center justify-center gap-4 h-[190px]">
-                    <div class="h-[125px] w-[125px] shrink-0"><canvas id="orderStatusChart"></canvas></div>
+                   <div class="relative h-[125px] w-[125px] shrink-0">
+    <canvas id="orderStatusChart"></canvas>
+    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <b class="text-[18px] leading-none">1,248</b>
+        <span class="text-[10px] text-[#697386]">Total</span>
+    </div>
+</div>
                     <div class="space-y-3 text-[9px] w-[55%]">
                         <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#2868ed] mr-1"></i>Delivered</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[88%] rounded bg-[#1683ff]"></i></span><b>88.3%</b></div>
                         <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Processing</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[36%] rounded bg-[#1683ff]"></i></span><b>6.2%</b></div>
@@ -260,7 +272,13 @@
             <div class="report-card p-4">
                 <h2 class="text-[16px] font-semibold">Bid Status Overview</h2>
                 <div class="flex items-center justify-center gap-4 h-[190px]">
-                    <div class="h-[125px] w-[125px] shrink-0"><canvas id="bidStatusViewChart"></canvas></div>
+                  <div class="relative h-[125px] w-[125px] shrink-0">
+    <canvas id="bidStatusViewChart"></canvas>
+    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <b class="text-[18px] leading-none">72</b>
+        <span class="text-[10px] text-[#ef4444]">Total Bids</span>
+    </div>
+</div>
                     <div class="space-y-3 text-[12px] w-[56%]">
                         <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#1683ff] mr-1"></i>Accepted</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[67%] rounded bg-[#1683ff]"></i></span><b>66.7%</b></div>
                         <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#ef4444] mr-1"></i>Rejected</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[34%] rounded bg-[#1683ff]"></i></span><b>33.3%</b></div>
@@ -364,7 +382,6 @@
                     <div class="flex items-center justify-between gap-5"><span><i class="inline-block h-2 w-2 rounded-full bg-[#635bff] mr-2"></i>Card</span><strong>34.0%</strong></div>
                     <div class="flex items-center justify-between gap-5"><span><i class="inline-block h-2 w-2 rounded-full bg-[#2bc35a] mr-2"></i>Net Banking</span><strong>14.0%</strong></div>
                 </div>
-            </div>
             </div>
         </div>
     </div>
