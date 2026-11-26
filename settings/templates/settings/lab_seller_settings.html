@@ -1,0 +1,2678 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+
+{% block title %}Settings - Sunrise Diagnostics{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<div class="settings-scope relative transition-all duration-300 main-content min-h-full flex-1 flex flex-col gap-4 sm:gap-5 p-3 sm:p-5 lg:p-7" data-settings-user="{{ user.id }}">
+
+    <!-- PAGE HEADER -->
+    <div class="px-1 flex items-start justify-between gap-3">
+        <div class="min-w-0">
+            <h1 class="flex items-center gap-2 text-[26px] sm:text-[32px] leading-[1.25] font-bold text-dark-inky-blue">
+                <span class="material-symbols-outlined text-[28px] sm:text-[32px]">settings</span>
+                <span>Settings</span>
+            </h1>
+            <p class="text-[16px] text-ashy-blue font-medium mt-1">Manage your lab profile, operations, team, and account preferences.</p>
+        </div>
+    </div>
+
+    <!-- IDENTITY STRIP -->
+    <div id="identity-strip" class="rounded-2xl border border-shazam-blue bg-info-blue px-5 py-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5 min-w-0">
+            <div id="identity-avatar-badge" class="w-12 h-12 rounded-full bg-[#007bff] text-white font-bold text-[18px] flex items-center justify-center shrink-0">
+                SD
+            </div>
+            <div class="min-w-0">
+                <h2 id="identity-name" class="text-[20px] leading-7 font-bold text-[#0F172A] truncate">Sunrise Diagnostics</h2>
+                <p class="text-[15px] font-medium text-slate-500 truncate">Lab Seller</p>
+            </div>
+        </div>
+        <span class="st-pill green">Verified</span>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="relative w-full">
+        <span class="material-symbols-outlined absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400 text-[22px]">search</span>
+        <input type="text" id="settings-search-input" placeholder="Search settings..." class="st-input" style="padding-left:46px;height:46px;border-radius:10px;" />
+    </div>
+
+    <!-- TABS (7) -->
+    <div class="st-tabs px-1" role="tablist">
+        <button type="button" role="tab" class="settings-tab-btn is-active" data-tab="lb_profile">
+            <span class="material-symbols-outlined">description</span><span>Lab Profile</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="lb_branches">
+            <span class="material-symbols-outlined">location_on</span><span>Branches &amp; Hours</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="lb_team">
+            <span class="material-symbols-outlined">group</span><span>Team &amp; Permission</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="lb_notifications">
+            <span class="material-symbols-outlined">notifications</span><span>Notifications</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="lb_reports">
+            <span class="material-symbols-outlined">assignment</span><span>Report Preferences</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="lb_security">
+            <span class="material-symbols-outlined">verified_user</span><span>Security</span>
+        </button>
+        <button type="button" role="tab" class="settings-tab-btn" data-tab="lb_workspace">
+            <span class="material-symbols-outlined">app_settings_alt</span><span>WorkSpace Preferences</span>
+        </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: LAB PROFILE                                                -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel" data-tab-panel="lb_profile">
+
+        <div class="sub-view-screen" data-view-name="main">
+
+            <!-- Logo & Public Identity -->
+            <div class="st-card" data-edit-card="logo_identity">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Logo &amp; Public Identity</h3>
+                        <p class="st-sub">Your lab's identity as it appears to patients and partners.</p>
+                    </div>
+                    <button type="button" data-edit-toggle="logo_identity" class="st-btn">Edit Details</button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4 mb-5">
+                    <div id="lab-logo-preview" class="w-12 h-12 rounded-full bg-[#007bff] text-white font-bold text-[18px] flex items-center justify-center shrink-0">
+                        SD
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-3">
+                            <button type="button" data-open-modal="modal-upload-logo" class="st-btn" style="height:34px;padding:0 14px;font-size:13px;">Upload Logo</button>
+                            <button type="button" data-open-modal="modal-remove-logo" class="text-[13px] font-semibold text-red-500 hover:text-red-600">Remove Logo</button>
+                        </div>
+                        <span class="text-[12px] text-slate-400">PNG or JPG, max 2 MB</span>
+                    </div>
+                </div>
+
+                <div class="st-stack">
+                    <div>
+                        <label class="st-label" for="lb_display_name">Business display name</label>
+                        <input type="text" id="lb_display_name" name="lb_display_name" value="Sunrise Diagnostics"
+                               data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                               disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_short_desc">Short description</label>
+                        <textarea id="lb_short_desc" name="lb_short_desc" rows="3" maxlength="240" data-counter="lb-desc-count"
+                                  disabled class="st-textarea settings-field">Diagnostic testing and preventive health packages with on-time and home sample collection.</textarea>
+                        <div class="text-right text-[12px] text-slate-400 mt-1"><span id="lb-desc-count">92</span>/240</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Information -->
+            <div class="st-card" data-edit-card="business_info">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Business Information</h3>
+                        <p class="st-sub">Registered details and contact information for your laboratory.</p>
+                    </div>
+                    <button type="button" data-edit-toggle="business_info" class="st-btn">Edit Details</button>
+                </div>
+
+                <div class="st-grid-2">
+                    <div>
+                        <label class="st-label" for="lb_legal_name">Legal business name</label>
+                        <input type="text" id="lb_legal_name" name="lb_legal_name" value="Sunrise Diagnostics &amp; Pathology"
+                               data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                               disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_seller_category">Seller category</label>
+                        <select id="lb_seller_category" name="lb_seller_category" disabled class="st-select settings-field">
+                            <option value="Diagnostic Laboratory" selected>Diagnostic Laboratory</option>
+                            <option value="Pathology &amp; Imaging">Pathology &amp; Imaging</option>
+                            <option value="Reference Lab">Reference Lab</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_business_email">Business email</label>
+                        <input type="email" id="lb_business_email" name="lb_business_email" value="contact@sunrisediagnostics.example" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_public_phone">Public phone</label>
+                        <input type="text" id="lb_public_phone" name="lb_public_phone" value="+91 90000 04821"
+                               data-validate="phone" oninput="this.value = this.value.replace(/[^0-9+\-\s]/g, '')"
+                               disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_website">Website (optional)</label>
+                        <input type="url" id="lb_website" name="lb_website" value="https://www.sunrise.com" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_year_est">Year established</label>
+                        <input type="text" id="lb_year_est" name="lb_year_est" value="2014" inputmode="numeric" maxlength="4"
+                               data-validate="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_reg_id">Business registration ID</label>
+                        <input type="text" id="lb_reg_id" name="lb_reg_id" value="REG-MH-2014-8821" disabled class="st-input settings-field" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="st-card" data-edit-card="address">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Address</h3>
+                        <p class="st-sub">Your primary laboratory location.</p>
+                    </div>
+                    <button type="button" data-edit-toggle="address" class="st-btn inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">edit_location_alt</span>
+                        <span>Edit Location</span>
+                    </button>
+                </div>
+
+                <div class="st-stack mb-4">
+                    <div>
+                        <label class="st-label" for="lb_addr1">Address line 1</label>
+                        <input type="text" id="lb_addr1" name="lb_addr1" value="Unit 204, Sunrise Business Centre" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_addr2">Address line 2</label>
+                        <input type="text" id="lb_addr2" name="lb_addr2" value="Andheri East, Mumbai 400069" disabled class="st-input settings-field" />
+                    </div>
+                </div>
+
+                <div class="st-grid-2 mb-4">
+                    <div>
+                        <label class="st-label" for="lb_area">Area</label>
+                        <input type="text" id="lb_area" name="lb_area" value="Andheri East" disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_city">City</label>
+                        <input type="text" id="lb_city" name="lb_city" value="Mumbai"
+                               data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                               disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_state">State</label>
+                        <input type="text" id="lb_state" name="lb_state" value="Maharashtra"
+                               data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                               disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_pin">PIN</label>
+                        <input type="text" id="lb_pin" name="lb_pin" value="400069" inputmode="numeric" maxlength="6"
+                               data-validate="pin" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               disabled class="st-input settings-field" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_country">Country</label>
+                        <input type="text" id="lb_country" name="lb_country" value="India" disabled class="st-input settings-field" />
+                    </div>
+                </div>
+
+                <!-- MAP SECTION -->
+                <div class="st-map mt-4 relative w-full overflow-hidden rounded-xl border border-slate-200" style="height: 190px;">
+                    <svg viewBox="0 0 600 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true" class="absolute inset-0 w-full h-full">
+                        <rect width="600" height="200" fill="#e8edf7" />
+                        <path d="M0 150 Q150 110 300 130 T600 90" fill="none" stroke="#fff" stroke-width="8" />
+                        <path d="M120 0 Q160 100 140 200" fill="none" stroke="#fff" stroke-width="6" />
+                        <path d="M380 0 Q360 90 430 200" fill="none" stroke="#fff" stroke-width="6" />
+                        <rect x="40" y="30" width="90" height="60" rx="8" fill="#dcfce7" opacity="0.8" />
+                        <rect x="450" y="20" width="110" height="70" rx="10" fill="#c7d2fe" opacity="0.9" />
+                        <circle cx="210" cy="110" r="10" fill="#007bff" opacity="0.9" />
+                        <line x1="210" y1="100" x2="210" y2="80" stroke="#007bff" stroke-width="2" />
+                    </svg>
+                    <div class="st-map-center">
+                        <span class="material-symbols-outlined text-[#007bff] text-[34px]">location_on</span>
+                        <span class="text-[15px] font-semibold text-slate-700 mt-1">Sunrise Diagnostics · Map location preview</span>
+                    </div>
+                    <button type="button" data-open-modal="modal-pin-location" class="st-btn absolute top-3 right-3 shadow-sm bg-white" style="padding:7px 12px;font-size:14px;">
+                        <span class="material-symbols-outlined text-[18px]">open_in_full</span>
+                        <span>Pin Location</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Verification Documents -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Verification Documents</h3>
+                        <p class="st-sub">Keep your lab verification current.</p>
+                    </div>
+                </div>
+
+                <div class="st-table-wrap">
+                    <table class="st-table">
+                        <thead>
+                            <tr>
+                                <th>DOCUMENT</th>
+                                <th>UPLOADED</th>
+                                <th>STATUS</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-doc-row="Business Registration">
+                                <td class="font-semibold text-slate-800">Business Registration</td>
+                                <td data-doc-date>15 Mar 2024</td>
+                                <td><span class="st-pill green" data-doc-status>Verified</span></td>
+                                <td>
+                                    <div class="inline-flex items-center gap-2">
+                                        <button type="button" data-view-doc="Business Registration" data-doc-file="business_registration_2024.pdf"
+                                                class="text-[#007bff] hover:text-blue-700" title="View Document">
+                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                        </button>
+                                        <button type="button" data-replace-doc="Business Registration"
+                                                class="text-amber-500 hover:text-amber-600" title="Replace Document">
+                                            <span class="material-symbols-outlined text-[20px]">edit_square</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-doc-row="Laboratory Registration">
+                                <td class="font-semibold text-slate-800">Laboratory Registration</td>
+                                <td data-doc-date>20 Jan 2024</td>
+                                <td><span class="st-pill green" data-doc-status>Verified</span></td>
+                                <td>
+                                    <div class="inline-flex items-center gap-2">
+                                        <button type="button" data-view-doc="Laboratory Registration" data-doc-file="lab_registration_2024.pdf"
+                                                class="text-[#007bff] hover:text-blue-700" title="View Document">
+                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                        </button>
+                                        <button type="button" data-replace-doc="Laboratory Registration"
+                                                class="text-amber-500 hover:text-amber-600" title="Replace Document">
+                                            <span class="material-symbols-outlined text-[20px]">edit_square</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-doc-row="Accreditation Certificate">
+                                <td class="font-semibold text-slate-800">Accreditation Certificate</td>
+                                <td data-doc-date>—</td>
+                                <td><span class="st-pill gray" data-doc-status>Pending</span></td>
+                                <td>
+                                    <button type="button" data-add-doc="Accreditation Certificate"
+                                            class="text-[14px] font-semibold text-[#007bff] hover:underline">+ Add Document</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Public Profile Preview Card -->
+            <div class="st-card">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="st-card-title">Public Profile Preview</h3>
+                        <p class="st-sub">See how customers discover your lab.</p>
+                    </div>
+                    <button type="button" data-open-modal="modal-public-profile-preview" class="st-btn inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                        <span>Preview Public Profile</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Request Account Deletion (Proper Spacing & Full Width) -->
+            <div class="mt-4 w-full">
+                <button type="button" data-open-modal="modal-delete-account" class="st-link-card w-full flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3.5">
+                        <span class="st-icon-tile rose">
+                            <span class="material-symbols-outlined text-[22px]">delete</span>
+                        </span>
+                        <div>
+                            <p class="text-[15px] font-semibold text-rose-500">Request account deletion</p>
+                            <p class="text-[13px] text-slate-400">Permanently delete your lab account.</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+                </button>
+            </div>
+
+            <div class="st-footer">
+                <button type="button" class="st-btn action-discard-settings">Discard Changes</button>
+                <button type="button" class="st-btn st-btn-primary action-save-settings">Save Changes</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: BRANCHES & HOURS                                           -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="lb_branches">
+        <div class="sub-view-screen" data-view-name="main">
+
+            <!-- Branches List Card -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Branches &amp; Hours</h3>
+                        <p class="st-sub">Manage laboratory branches, collection centres, and schedules.</p>
+                    </div>
+                    <button type="button" data-open-modal="modal-add-branch" class="st-btn st-btn-primary inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        <span>Add Branch</span>
+                    </button>
+                </div>
+
+                <div class="st-stack" id="lab-branches-list">
+                    <!-- Branch 1 -->
+                    <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-3" data-branch-card data-branch-id="Andheri East">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-full bg-blue-50 text-[#007bff] flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-[15px] font-bold text-slate-800" data-branch-name-val>Andheri East</h4>
+                                        <span class="st-pill blue" data-branch-type-val>Main</span>
+                                    </div>
+                                    <p class="text-[13px] text-slate-500 mt-0.5" data-branch-addr-val>Unit 204, Sunrise Business Centre, Andheri East, Mumbai 400069</p>
+                                </div>
+                            </div>
+                            <button type="button" data-edit-branch="Andheri East" class="text-slate-400 hover:text-[#007bff]" title="Edit Branch">
+                                <span class="material-symbols-outlined text-[20px]">edit_square</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-[13px]">
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Mon–Sat</span>
+                                <span class="font-semibold text-slate-700" data-branch-hours-val>7:00 AM – 8:00 PM</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Sunday</span>
+                                <span class="font-semibold text-slate-700">8:00 AM – 1:00 PM</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Collection</span>
+                                <span class="font-semibold text-emerald-600">On-time &amp; Home</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branch 2 -->
+                    <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-3" data-branch-card data-branch-id="Bandra West">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-full bg-blue-50 text-[#007bff] flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-[15px] font-bold text-slate-800" data-branch-name-val>Bandra West</h4>
+                                        <span class="st-pill gray" data-branch-type-val>Sub</span>
+                                    </div>
+                                    <p class="text-[13px] text-slate-500 mt-0.5" data-branch-addr-val>Shop 12, Hill Road, Bandra West, Mumbai 400050</p>
+                                </div>
+                            </div>
+                            <button type="button" data-edit-branch="Bandra West" class="text-slate-400 hover:text-[#007bff]" title="Edit Branch">
+                                <span class="material-symbols-outlined text-[20px]">edit_square</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-[13px]">
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Mon–Sat</span>
+                                <span class="font-semibold text-slate-700" data-branch-hours-val>7:30 AM – 7:30 PM</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Sunday</span>
+                                <span class="font-semibold text-slate-700">8:00 AM – 12:30 PM</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Collection</span>
+                                <span class="font-semibold text-emerald-600">On-time &amp; Home</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branch 3 -->
+                    <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-3" data-branch-card data-branch-id="Powai">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-full bg-blue-50 text-[#007bff] flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-[15px] font-bold text-slate-800" data-branch-name-val>Powai</h4>
+                                        <span class="st-pill gray" data-branch-type-val>Sub</span>
+                                    </div>
+                                    <p class="text-[13px] text-slate-500 mt-0.5" data-branch-addr-val>Ground Floor, Hiranandani Gardens, Powai, Mumbai 400076</p>
+                                </div>
+                            </div>
+                            <button type="button" data-edit-branch="Powai" class="text-slate-400 hover:text-[#007bff]" title="Edit Branch">
+                                <span class="material-symbols-outlined text-[20px]">edit_square</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-[13px]">
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Mon–Sat</span>
+                                <span class="font-semibold text-slate-700" data-branch-hours-val>7:00 AM – 8:00 PM</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Sunday</span>
+                                <span class="font-semibold text-slate-400">Closed</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Collection</span>
+                                <span class="font-semibold text-emerald-600">On-time &amp; Home</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branch 4 -->
+                    <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-3" data-branch-card data-branch-id="Goregaon East">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-full bg-blue-50 text-[#007bff] flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-[20px]">location_on</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-[15px] font-bold text-slate-800" data-branch-name-val>Goregaon East</h4>
+                                        <span class="st-pill gray" data-branch-type-val>Sub</span>
+                                    </div>
+                                    <p class="text-[13px] text-slate-500 mt-0.5" data-branch-addr-val>21, Gokuldham Market, Goregaon East, Mumbai 400063</p>
+                                </div>
+                            </div>
+                            <button type="button" data-edit-branch="Goregaon East" class="text-slate-400 hover:text-[#007bff]" title="Edit Branch">
+                                <span class="material-symbols-outlined text-[20px]">edit_square</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-[13px]">
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Mon–Sat</span>
+                                <span class="font-semibold text-slate-700" data-branch-hours-val>8:00 AM – 8:00 PM</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Sunday</span>
+                                <span class="font-semibold text-slate-700">8:00 AM – 1:00 PM</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px] uppercase font-semibold">Collection</span>
+                                <span class="font-semibold text-emerald-600">On-time &amp; Home</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operating Hours Editor with Working Toggles -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Operating Hours Editor</h3>
+                        <p class="st-sub">Update weekly hours for your primary branch.</p>
+                    </div>
+                </div>
+
+                <div class="st-stack" id="operating-hours-editor">
+                    <!-- Monday -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-3 py-2.5 border-b border-slate-100" data-hours-row="Monday">
+                        <div class="sm:col-span-3 flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="hr_mon_active" checked class="sr-only peer" data-day-toggle="Monday" />
+                                <div class="st-switch"></div>
+                            </label>
+                            <span class="text-[15px] font-semibold text-slate-800">Monday</span>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_mon_open" value="07:00 AM" class="st-input" data-day-input="Monday" />
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_mon_close" value="08:00 PM" class="st-input" data-day-input="Monday" />
+                        </div>
+                        <div class="sm:col-span-3 text-right">
+                            <button type="button" class="text-[13px] font-semibold text-[#007bff] hover:underline action-add-break" data-day="Monday">+ Add Break</button>
+                        </div>
+                    </div>
+
+                    <!-- Tuesday -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-3 py-2.5 border-b border-slate-100" data-hours-row="Tuesday">
+                        <div class="sm:col-span-3 flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="hr_tue_active" checked class="sr-only peer" data-day-toggle="Tuesday" />
+                                <div class="st-switch"></div>
+                            </label>
+                            <span class="text-[15px] font-semibold text-slate-800">Tuesday</span>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_tue_open" value="07:00 AM" class="st-input" data-day-input="Tuesday" />
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_tue_close" value="08:00 PM" class="st-input" data-day-input="Tuesday" />
+                        </div>
+                        <div class="sm:col-span-3 text-right">
+                            <button type="button" class="text-[13px] font-semibold text-[#007bff] hover:underline action-add-break" data-day="Tuesday">+ Add Break</button>
+                        </div>
+                    </div>
+
+                    <!-- Wednesday -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-3 py-2.5 border-b border-slate-100" data-hours-row="Wednesday">
+                        <div class="sm:col-span-3 flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="hr_wed_active" checked class="sr-only peer" data-day-toggle="Wednesday" />
+                                <div class="st-switch"></div>
+                            </label>
+                            <span class="text-[15px] font-semibold text-slate-800">Wednesday</span>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_wed_open" value="07:00 AM" class="st-input" data-day-input="Wednesday" />
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_wed_close" value="08:00 PM" class="st-input" data-day-input="Wednesday" />
+                        </div>
+                        <div class="sm:col-span-3 text-right">
+                            <button type="button" class="text-[13px] font-semibold text-[#007bff] hover:underline action-add-break" data-day="Wednesday">+ Add Break</button>
+                        </div>
+                    </div>
+
+                    <!-- Thursday -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-3 py-2.5 border-b border-slate-100" data-hours-row="Thursday">
+                        <div class="sm:col-span-3 flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="hr_thu_active" checked class="sr-only peer" data-day-toggle="Thursday" />
+                                <div class="st-switch"></div>
+                            </label>
+                            <span class="text-[15px] font-semibold text-slate-800">Thursday</span>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_thu_open" value="07:00 AM" class="st-input" data-day-input="Thursday" />
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_thu_close" value="08:00 PM" class="st-input" data-day-input="Thursday" />
+                        </div>
+                        <div class="sm:col-span-3 text-right">
+                            <button type="button" class="text-[13px] font-semibold text-[#007bff] hover:underline action-add-break" data-day="Thursday">+ Add Break</button>
+                        </div>
+                    </div>
+
+                    <!-- Friday -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-3 py-2.5 border-b border-slate-100" data-hours-row="Friday">
+                        <div class="sm:col-span-3 flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="hr_fri_active" checked class="sr-only peer" data-day-toggle="Friday" />
+                                <div class="st-switch"></div>
+                            </label>
+                            <span class="text-[15px] font-semibold text-slate-800">Friday</span>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_fri_open" value="07:00 AM" class="st-input" data-day-input="Friday" />
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_fri_close" value="08:00 PM" class="st-input" data-day-input="Friday" />
+                        </div>
+                        <div class="sm:col-span-3 text-right">
+                            <button type="button" class="text-[13px] font-semibold text-[#007bff] hover:underline action-add-break" data-day="Friday">+ Add Break</button>
+                        </div>
+                    </div>
+
+                    <!-- Saturday -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-3 py-2.5 border-b border-slate-100" data-hours-row="Saturday">
+                        <div class="sm:col-span-3 flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="hr_sat_active" checked class="sr-only peer" data-day-toggle="Saturday" />
+                                <div class="st-switch"></div>
+                            </label>
+                            <span class="text-[15px] font-semibold text-slate-800">Saturday</span>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_sat_open" value="07:00 AM" class="st-input" data-day-input="Saturday" />
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" name="hr_sat_close" value="08:00 PM" class="st-input" data-day-input="Saturday" />
+                        </div>
+                        <div class="sm:col-span-3 text-right">
+                            <button type="button" class="text-[13px] font-semibold text-[#007bff] hover:underline action-add-break" data-day="Saturday">+ Add Break</button>
+                        </div>
+                    </div>
+
+                    <!-- Sunday -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 items-center gap-3 py-2.5" data-hours-row="Sunday">
+                        <div class="sm:col-span-3 flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="hr_sun_active" class="sr-only peer" data-day-toggle="Sunday" />
+                                <div class="st-switch"></div>
+                            </label>
+                            <span class="text-[15px] font-semibold text-slate-800">Sunday</span>
+                        </div>
+                        <div class="sm:col-span-9 flex items-center gap-3" data-day-status-wrap="Sunday">
+                            <span class="text-[14px] text-slate-400 font-medium" data-day-status="Sunday">Closed</span>
+                            <div class="hidden items-center gap-3 w-full" data-day-inputs-sun>
+                                <input type="text" name="hr_sun_open" value="08:00 AM" class="st-input w-1/3" />
+                                <input type="text" name="hr_sun_close" value="01:00 PM" class="st-input w-1/3" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="st-footer">
+                <button type="button" class="st-btn action-discard-settings">Discard Changes</button>
+                <button type="button" class="st-btn st-btn-primary action-save-settings">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: TEAM & PERMISSION                                          -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="lb_team">
+
+        <!-- 3a: main -->
+        <div class="sub-view-screen" data-view-name="main">
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Team &amp; Permissions</h3>
+                        <p class="st-sub">Control who can access your lab workspace.</p>
+                    </div>
+                    <button type="button" data-open-modal="modal-invite-member" data-team-action="team"
+                            class="st-btn st-btn-primary inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        <span>Invite Member</span>
+                    </button>
+                    <button type="button" data-open-modal="modal-add-role" data-team-action="roles"
+                            class="st-btn st-btn-primary hidden items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        <span>Add Role</span>
+                    </button>
+                </div>
+
+                <!-- Inner Tabs: Team | Roles -->
+                <div class="st-inner-tabs" role="tablist">
+                    <button type="button" class="st-inner-tab is-active" data-team-tab="lb_team_members">
+                        <span class="material-symbols-outlined">group</span>
+                        <span>Team</span>
+                    </button>
+                    <button type="button" class="st-inner-tab" data-team-tab="lb_team_roles">
+                        <span class="material-symbols-outlined">badge</span>
+                        <span>Roles</span>
+                    </button>
+                </div>
+
+                <!-- Search & Filter Toolbar with Proper Spacing -->
+                <div class="st-toolbar my-4 flex items-center gap-3">
+                    <div class="st-search flex-1">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" data-team-search placeholder="Search by name or mail" class="st-input" />
+                    </div>
+                    <button type="button" data-filter-toggle class="st-filter-btn">
+                        <span>Filter</span>
+                        <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+                    </button>
+                </div>
+
+                <!-- Expandable Filter Panel -->
+                <div data-filter-panel class="st-filter-panel hidden mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-wrap items-center gap-3">
+                    <select data-filter-role class="st-select-sm">
+                        <option value="all">All Roles</option>
+                        <option value="Owner">Owner</option>
+                        <option value="Lab Manager">Lab Manager</option>
+                        <option value="Lab Technician">Lab Technician</option>
+                        <option value="Report Reviewer">Report Reviewer</option>
+                        <option value="Finance Viewer">Finance Viewer</option>
+                    </select>
+                    <select data-filter-status class="st-select-sm">
+                        <option value="all">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Invited">Invited</option>
+                    </select>
+                    <button type="button" data-reset-filters class="text-[13px] font-semibold text-[#007bff] hover:underline">Reset Filters</button>
+                    <span data-filter-count class="ml-auto text-[12px] text-slate-400"></span>
+                </div>
+
+                <!-- INNER PANEL 1: TEAM -->
+                <div data-team-panel="lb_team_members" class="mt-2">
+                    <div class="st-table-wrap">
+                        <table class="st-table">
+                            <thead class="st-mini-head">
+                                <tr>
+                                    <th>Member Name</th>
+                                    <th>Email</th>
+                                    <th>Assign Role</th>
+                                    <th>Branch Access</th>
+                                    <th>Status</th>
+                                    <th>Last Active</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="team-members-tbody">
+                                <tr data-member-row data-role="Owner" data-status="Active">
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar a">RM</span>
+                                            <span class="font-semibold text-slate-800" data-member-name>Rohan Mehta</span>
+                                        </div>
+                                    </td>
+                                    <td data-member-email>rohan@sunrisediagnostics.example</td>
+                                    <td data-member-role-cell><span class="st-pill blue">Owner</span></td>
+                                    <td>All branches</td>
+                                    <td data-member-status-cell><span class="st-pill green">Active</span></td>
+                                    <td>Active now</td>
+                                    <td data-member-actions><span class="text-slate-400 text-[13px] font-medium">Owner</span></td>
+                                </tr>
+                                <tr data-member-row data-role="Lab Manager" data-status="Active">
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar b">NS</span>
+                                            <span class="font-semibold text-slate-800" data-member-name>Neha Shah</span>
+                                        </div>
+                                    </td>
+                                    <td data-member-email>neha@sunrisediagnostics.example</td>
+                                    <td data-member-role-cell>
+                                        <div class="flex flex-col items-center gap-1">
+                                            <span class="st-pill blue">Lab Manager</span>
+                                            <button type="button" class="st-pill lime action-open-assign-role"
+                                                    data-member="Neha Shah" data-email="neha@sunrisediagnostics.example" data-role="Lab Manager">
+                                                Assign Role <span class="material-symbols-outlined text-[13px]">add</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>Andheri East</td>
+                                    <td data-member-status-cell><span class="st-pill green">Active</span></td>
+                                    <td>Today, 09:30 AM</td>
+                                    <td data-member-actions>
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button" class="st-act-danger action-open-deactivate" data-member="Neha Shah" title="Deactivate Access">
+                                                <span class="material-symbols-outlined text-[19px]">block</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr data-member-row data-role="Lab Technician" data-status="Active">
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar c">RK</span>
+                                            <span class="font-semibold text-slate-800" data-member-name>Rahul Kumar</span>
+                                        </div>
+                                    </td>
+                                    <td data-member-email>rahul@sunrisediagnostics.example</td>
+                                    <td data-member-role-cell><span class="st-pill blue">Lab Technician</span></td>
+                                    <td>Andheri East</td>
+                                    <td data-member-status-cell><span class="st-pill green">Active</span></td>
+                                    <td>Today, 08:45 AM</td>
+                                    <td data-member-actions>
+                                        <button type="button" class="st-act-danger action-open-deactivate" data-member="Rahul Kumar" title="Deactivate Access">
+                                            <span class="material-symbols-outlined text-[19px]">block</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr data-member-row data-role="Report Reviewer" data-status="Active">
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar e">PS</span>
+                                            <span class="font-semibold text-slate-800" data-member-name>Dr. Priya Shah</span>
+                                        </div>
+                                    </td>
+                                    <td data-member-email>priya@sunrisediagnostics.example</td>
+                                    <td data-member-role-cell><span class="st-pill blue">Report Reviewer</span></td>
+                                    <td>Andheri East</td>
+                                    <td data-member-status-cell><span class="st-pill green">Active</span></td>
+                                    <td>Yesterday</td>
+                                    <td data-member-actions>
+                                        <button type="button" class="st-act-danger action-open-deactivate" data-member="Dr. Priya Shah" title="Deactivate Access">
+                                            <span class="material-symbols-outlined text-[19px]">block</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr data-member-row data-role="Finance Viewer" data-status="Invited">
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar f">AR</span>
+                                            <span class="font-semibold text-slate-800" data-member-name>Ananya Rao</span>
+                                        </div>
+                                    </td>
+                                    <td data-member-email>ananya@sunrisediagnostics.example</td>
+                                    <td data-member-role-cell><span class="st-pill blue">Finance Viewer</span></td>
+                                    <td>All branches</td>
+                                    <td data-member-status-cell><span class="st-pill amber">Invited</span></td>
+                                    <td>Invited</td>
+                                    <td data-member-actions>
+                                        <button type="button" class="st-act-danger action-open-deactivate" data-member="Ananya Rao" title="Revoke Invitation">
+                                            <span class="material-symbols-outlined text-[19px]">block</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- INNER PANEL 2: ROLES -->
+                <div data-team-panel="lb_team_roles" class="hidden mt-2">
+                    <div class="st-table-wrap">
+                        <table class="st-table">
+                            <thead class="st-mini-head">
+                                <tr>
+                                    <th>Role</th>
+                                    <th>Assign Member</th>
+                                    <th>Email</th>
+                                    <th>Branch Access</th>
+                                    <th>Status</th>
+                                    <th>Last Active</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="team-roles-tbody">
+                                <tr data-role-row data-role="Owner" data-status="Active">
+                                    <td class="font-semibold text-slate-800">Owner</td>
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar a">RM</span>
+                                            <span class="font-semibold text-slate-800">Rohan Mehta</span>
+                                        </div>
+                                    </td>
+                                    <td>rohan@sunrisediagnostics.example</td>
+                                    <td>All branches</td>
+                                    <td><span class="st-pill green">Active</span></td>
+                                    <td>Active now</td>
+                                    <td><span class="text-slate-400 text-[13px] font-medium">Owner</span></td>
+                                </tr>
+                                <tr data-role-row data-role="Lab Manager" data-status="Active">
+                                    <td class="font-semibold text-slate-800">Lab Manager</td>
+                                    <td>
+                                        <div class="flex flex-col items-center gap-1">
+                                            <span class="text-[13px] font-semibold text-slate-700">Assign Member</span>
+                                            <button type="button" class="st-pill lime action-open-assign-role" data-role="Lab Manager" data-member="Neha Shah">
+                                                Assign Team <span class="material-symbols-outlined text-[13px]">add</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>——</td>
+                                    <td>Andheri East</td>
+                                    <td><span class="st-pill green">Active</span></td>
+                                    <td>Today, 09:30 AM</td>
+                                    <td>
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button" class="st-act-edit" data-nav-tab="lb_team" data-nav-subview="edit_role" data-edit-role-name="Lab Manager" title="Edit Role &amp; Access">
+                                                <span class="material-symbols-outlined text-[19px]">edit_square</span>
+                                            </button>
+                                            <button type="button" class="st-act-danger action-open-deactivate" data-member="Lab Manager" title="Deactivate Role">
+                                                <span class="material-symbols-outlined text-[19px]">block</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr data-role-row data-role="Lab Technician" data-status="Active">
+                                    <td class="font-semibold text-slate-800">Lab Technician</td>
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar c">RK</span>
+                                            <span class="font-semibold text-slate-800">Rahul Kumar</span>
+                                        </div>
+                                    </td>
+                                    <td>rahul@sunrisediagnostics.example</td>
+                                    <td>Andheri East</td>
+                                    <td><span class="st-pill green">Active</span></td>
+                                    <td>Today, 08:45 AM</td>
+                                    <td>
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button" class="st-act-edit" data-nav-tab="lb_team" data-nav-subview="edit_role" data-edit-role-name="Lab Technician" title="Edit Role &amp; Access">
+                                                <span class="material-symbols-outlined text-[19px]">edit_square</span>
+                                            </button>
+                                            <button type="button" class="st-act-danger action-open-deactivate" data-member="Rahul Kumar" title="Deactivate">
+                                                <span class="material-symbols-outlined text-[19px]">block</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr data-role-row data-role="Report Reviewer" data-status="Active">
+                                    <td class="font-semibold text-slate-800">Report Reviewer</td>
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar e">PS</span>
+                                            <span class="font-semibold text-slate-800">Dr. Priya Shah</span>
+                                        </div>
+                                    </td>
+                                    <td>priya@sunrisediagnostics.example</td>
+                                    <td>Andheri East</td>
+                                    <td><span class="st-pill green">Active</span></td>
+                                    <td>Yesterday</td>
+                                    <td>
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button" class="st-act-edit" data-nav-tab="lb_team" data-nav-subview="edit_role" data-edit-role-name="Report Reviewer" title="Edit Role &amp; Access">
+                                                <span class="material-symbols-outlined text-[19px]">edit_square</span>
+                                            </button>
+                                            <button type="button" class="st-act-danger action-open-deactivate" data-member="Dr. Priya Shah" title="Deactivate">
+                                                <span class="material-symbols-outlined text-[19px]">block</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr data-role-row data-role="Finance Viewer" data-status="Invited">
+                                    <td class="font-semibold text-slate-800">Finance Viewer</td>
+                                    <td>
+                                        <div class="st-member">
+                                            <span class="st-avatar f">AR</span>
+                                            <span class="font-semibold text-slate-800">Ananya Rao</span>
+                                        </div>
+                                    </td>
+                                    <td>ananya@sunrisediagnostics.example</td>
+                                    <td>All branches</td>
+                                    <td><span class="st-pill amber">Invited</span></td>
+                                    <td>Invited</td>
+                                    <td>
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button" class="st-act-edit" data-nav-tab="lb_team" data-nav-subview="edit_role" data-edit-role-name="Finance Viewer" title="Edit Role &amp; Access">
+                                                <span class="material-symbols-outlined text-[19px]">edit_square</span>
+                                            </button>
+                                            <button type="button" class="st-act-danger action-open-deactivate" data-member="Ananya Rao" title="Deactivate">
+                                                <span class="material-symbols-outlined text-[19px]">block</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /3a main -->
+
+        <!-- 3b: edit_role (Clean Header & Aligned Table) -->
+        <div class="sub-view-screen hidden" data-view-name="edit_role">
+            <div class="st-page-head mb-4 flex items-center gap-3">
+                <button type="button" class="st-head-icon" data-back-tab="lb_team" data-back-subview="main" title="Go back">
+                    <span class="material-symbols-outlined text-[24px] text-slate-600">arrow_back</span>
+                </button>
+                <div>
+                    <h2 class="st-page-title">Edit Role &amp; Access</h2>
+                    <p class="st-page-sub">Modify permissions and settings for this role. Changes affect all assigned Team immediately.</p>
+                </div>
+            </div>
+
+            <div class="st-card">
+                <div class="st-stack mb-5">
+                    <div>
+                        <label class="st-label" for="edit-role-select">Role</label>
+                        <select id="edit-role-select" name="edit_role_name" class="st-select">
+                            <option value="Lab Manager">Lab Manager</option>
+                            <option value="Lab Technician">Lab Technician</option>
+                            <option value="Report Reviewer">Report Reviewer</option>
+                            <option value="Finance Viewer">Finance Viewer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label">Branch Access</label>
+                        <div class="flex flex-col gap-2 mt-1">
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="edit_role_branch" value="Andheri East" checked class="accent-[#007bff]" />
+                                <span>Andheri East</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="edit_role_branch" value="All branches" class="accent-[#007bff]" />
+                                <span>All branches</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aligned Permissions Matrix -->
+                <div class="st-table-wrap border border-slate-200 rounded-xl overflow-hidden mt-6">
+                    <table class="w-full text-left border-collapse" style="min-width: 650px;">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="py-3.5 px-6 text-[14px] font-bold text-slate-700 text-left uppercase tracking-wider">Module</th>
+                                <th class="py-3.5 px-4 text-[14px] font-bold text-slate-700 text-center uppercase tracking-wider">Edit</th>
+                                <th class="py-3.5 px-4 text-[14px] font-bold text-slate-700 text-center uppercase tracking-wider">View</th>
+                                <th class="py-3.5 px-4 text-[14px] font-bold text-slate-700 text-center uppercase tracking-wider">Approve</th>
+                                <th class="py-3.5 px-4 text-[14px] font-bold text-slate-700 text-center uppercase tracking-wider">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white text-[15px]">
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-6 font-semibold text-slate-800 text-left">Orders</td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_orders_edit" checked class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_orders_view" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_orders_approve" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_orders_delete" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-6 font-semibold text-slate-800 text-left">Offers &amp; Bids</td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_bids_edit" checked class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_bids_view" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_bids_approve" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_bids_delete" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-6 font-semibold text-slate-800 text-left">Tests &amp; Packages</td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_tests_edit" checked class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_tests_view" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_tests_approve" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_tests_delete" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-6 font-semibold text-slate-800 text-left">Lab Reports</td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_reports_edit" checked class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_reports_view" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_reports_approve" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_reports_delete" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-6 font-semibold text-slate-800 text-left">Analytics</td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_analytics_edit" checked class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_analytics_view" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_analytics_approve" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_analytics_delete" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-6 font-semibold text-slate-800 text-left">Earnings &amp; Payments</td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_earnings_edit" checked class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_earnings_view" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_earnings_approve" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_earnings_delete" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-6 font-semibold text-slate-800 text-left">Settings</td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_settings_edit" checked class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_settings_view" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_settings_approve" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_settings_delete" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-4 px-6 font-semibold text-slate-800 text-left">Team Management</td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_team_edit" checked class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_team_view" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_team_approve" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                                <td class="py-4 px-4 text-center"><input type="checkbox" name="perm_team_delete" class="w-4 h-4 accent-[#007bff] cursor-pointer" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="st-footer mt-6">
+                    <button type="button" class="st-btn" data-back-tab="lb_team" data-back-subview="main">Close</button>
+                    <button type="button" class="st-btn st-btn-primary action-save-settings" data-back-tab="lb_team" data-back-subview="main">Save Changes</button>
+                </div>
+            </div>
+        </div><!-- /3b edit_role -->
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 4: NOTIFICATIONS                                              -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="lb_notifications">
+        <div class="sub-view-screen" data-view-name="main">
+
+            <div class="px-1 mb-1">
+                <h2 class="text-[20px] font-bold text-[#0F172A]">Notifications</h2>
+                <p class="text-[14px] text-slate-500">Choose how your team receives operational updates.</p>
+            </div>
+
+            <!-- Functional Notification Preferences Matrix -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Notification preferences</h3>
+                        <p class="st-sub">Configure the channels used for each workspace event.</p>
+                    </div>
+                </div>
+
+                <div class="st-table-wrap border border-slate-200 rounded-xl overflow-hidden">
+                    <table class="w-full text-left border-collapse" style="min-width: 600px;">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="py-3.5 px-6 text-[14px] font-bold text-slate-700 text-left uppercase tracking-wider">Event</th>
+                                <th class="py-3.5 px-4 text-[14px] font-bold text-slate-700 text-center uppercase tracking-wider">In-app</th>
+                                <th class="py-3.5 px-4 text-[14px] font-bold text-slate-700 text-center uppercase tracking-wider">Email</th>
+                                <th class="py-3.5 px-4 text-[14px] font-bold text-slate-700 text-center uppercase tracking-wider">SMS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white text-[15px]">
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Booking updates</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_booking_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_booking_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_booking_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Sample collection</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_sample_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_sample_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_sample_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Home collection approaching</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_home_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_home_email" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_home_sms" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Offers &amp; bids</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_bids_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_bids_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_bids_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Bid expiring soon</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_bidexp_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_bidexp_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_bidexp_sms" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Report ready for review</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptrvw_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptrvw_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptrvw_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Report updates</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptupd_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptupd_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptupd_sms" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Report released</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptrel_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptrel_email" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_rptrel_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Payment received</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_pay_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_pay_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_pay_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Promotions &amp; offers</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_promo_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_promo_email" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_promo_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Provider settlement status</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_settle_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_settle_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_settle_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Support ticket response</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_support_inapp" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_support_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_support_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-3.5 px-6 font-medium text-slate-800">Product announcements</td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_prod_inapp" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_prod_email" checked class="sr-only peer" /><div class="st-switch"></div></label></td>
+                                <td class="py-3.5 px-4 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="ntf_prod_sms" class="sr-only peer" /><div class="st-switch"></div></label></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Shared lab notification email -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Shared lab notification email</h3>
+                        <p class="st-sub">Keep important updates visible to the whole lab team.</p>
+                    </div>
+                    <button type="button" data-open-modal="modal-manage-recipients" class="st-btn" style="color:#007bff;border-color:#BFDBFE;">Manage Recipients</button>
+                </div>
+                <div class="relative">
+                    <input type="email" id="shared-lab-email-input" name="lb_shared_email" value="contact@sunrisediagnostics.example" class="st-input" style="padding-right:40px;" />
+                    <button type="button" id="clear-shared-email-btn" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" title="Clear">
+                        <span class="material-symbols-outlined text-[18px]">cancel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Security alerts info box -->
+            <div class="rounded-2xl border border-[#7DD3FC] bg-[#F0F9FF] px-5 py-4 flex items-start gap-3">
+                <span class="material-symbols-outlined text-[#007bff] text-[22px] mt-0.5">info</span>
+                <div>
+                    <h4 class="text-[14px] font-bold text-slate-800">Security alerts</h4>
+                    <p class="text-[13px] text-slate-600">Essential account-security alerts remain enabled and cannot be disabled.</p>
+                </div>
+            </div>
+
+            <!-- Quiet hours with Working Toggle -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Quiet hours</h3>
+                        <p class="st-sub">Non-critical notifications will be deferred during quiet hours.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="lb_quiet_hours" checked class="sr-only peer" id="quiet-hours-toggle" />
+                        <div class="st-switch"></div>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="quiet-hours-inputs">
+                    <div>
+                        <label class="st-label" for="lb_quiet_start">Start</label>
+                        <div class="st-time">
+                            <input type="text" id="lb_quiet_start" name="lb_quiet_start" value="9:00 PM" class="st-input" />
+                            <span class="material-symbols-outlined">schedule</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_quiet_end">End</label>
+                        <div class="st-time">
+                            <input type="text" id="lb_quiet_end" name="lb_quiet_end" value="7:00 AM" class="st-input" />
+                            <span class="material-symbols-outlined">schedule</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="st-label" for="lb_quiet_tz">Timezone</label>
+                        <input type="text" id="lb_quiet_tz" name="lb_quiet_tz" value="Asia/Kolkata (IST)" class="st-input" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 5: REPORT PREFERENCES                                         -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="lb_reports">
+        <div class="sub-view-screen" data-view-name="main">
+
+            <!-- Report Branding with Working Toggle -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Report Branding</h3>
+                        <p class="st-sub">Set how your laboratory appears on every report.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
+                    <div>
+                        <p class="text-[14px] font-semibold text-slate-800">Use lab logo on reports</p>
+                        <p class="text-[13px] text-slate-500">Display your verified brand mark in the header.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="rpt_use_logo" name="rpt_use_logo" checked class="sr-only peer" />
+                        <div class="st-switch"></div>
+                    </label>
+                </div>
+
+                <div class="st-stack">
+                    <div>
+                        <label class="st-label" for="rpt_display_name">Lab display name on report</label>
+                        <input type="text" id="rpt_display_name" name="rpt_display_name" value="Sunrise Diagnostics &amp; Pathology"
+                               data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                               class="st-input" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="rpt_header_addr">Header address</label>
+                        <input type="text" id="rpt_header_addr" name="rpt_header_addr" value="Unit 204, Sunrise Business Centre, Andheri East, Mumbai 400069" class="st-input" />
+                    </div>
+                    <div>
+                        <label class="st-label" for="rpt_public_contact">Public contact</label>
+                        <input type="text" id="rpt_public_contact" name="rpt_public_contact" value="+91 90000 04821"
+                               data-validate="phone" oninput="this.value = this.value.replace(/[^0-9+\-\s]/g, '')"
+                               class="st-input" />
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <label class="st-label" for="rpt_footer_note">Footer note</label>
+                            <span class="text-[12px] text-slate-400"><span id="rpt-footer-count">89</span>/470</span>
+                        </div>
+                        <textarea id="rpt_footer_note" name="rpt_footer_note" rows="3" maxlength="470" data-counter="rpt-footer-count" class="st-textarea">This report is for informational purposes only. Please consult your physician for medical advice.</textarea>
+                    </div>
+                    <div>
+                        <button type="button" data-open-modal="modal-report-preview" class="st-btn inline-flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                            <span>Preview Report Layout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Identifiers -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Report Identifiers</h3>
+                        <p class="st-sub">Identifiers are created automatically for every released report.</p>
+                    </div>
+                </div>
+
+                <div class="max-w-xs mb-3">
+                    <label class="st-label" for="rpt_prefix">Report prefix</label>
+                    <input type="text" id="rpt_prefix" name="rpt_prefix" value="RPT-L" class="st-input" />
+                </div>
+                <p class="text-[13px] text-slate-500 mb-2">
+                    Example: <span id="rpt-prefix-example" class="font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">RPT-L-20260930-0184</span>
+                </p>
+                <p class="text-[12px] text-slate-400 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px]">info</span>
+                    <span>Report IDs are generated automatically and remain unique.</span>
+                </p>
+            </div>
+
+            <!-- Review Workflow with Working Toggle -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Review Workflow</h3>
+                        <p class="st-sub">Keep quality checks consistent before reports reach customers.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
+                    <div>
+                        <p class="text-[14px] font-semibold text-slate-800">Require reviewer approval before release</p>
+                        <p class="text-[13px] text-slate-500">A designated reviewer must approve each report.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="rpt_require_approval" name="rpt_require_approval" checked class="sr-only peer" />
+                        <div class="st-switch"></div>
+                    </label>
+                </div>
+
+                <div class="st-stack" id="review-workflow-fields">
+                    <div>
+                        <label class="st-label">Allowed reviewer roles</label>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            <span class="st-pill blue">Report Reviewer</span>
+                            <span class="st-pill blue">Lab Manager</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="st-label" for="rpt_default_reviewer">Default reviewer</label>
+                        <select id="rpt_default_reviewer" name="rpt_default_reviewer" class="st-select">
+                            <option value="Dr. Priya Shah" selected>Dr. Priya Shah</option>
+                            <option value="Neha Shah">Neha Shah</option>
+                            <option value="Rohan Mehta">Rohan Mehta</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label" for="rpt_escalation">Escalation recipient</label>
+                        <select id="rpt_escalation" name="rpt_escalation" class="st-select">
+                            <option value="Neha Shah" selected>Neha Shah</option>
+                            <option value="Rohan Mehta">Rohan Mehta</option>
+                        </select>
+                    </div>
+                    <p class="text-[12px] text-slate-400 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">info</span>
+                        <span>Only designated roles can release reports.</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Turnaround Defaults -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Turnaround Defaults</h3>
+                        <p class="st-sub">Establish timing expectations across your test catalog.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-3">
+                    <div>
+                        <label class="st-label" for="rpt_tat_default">Default turnaround</label>
+                        <select id="rpt_tat_default" name="rpt_tat_default" class="st-select">
+                            <option value="12 hours">12 hours</option>
+                            <option value="24 hours" selected>24 hours</option>
+                            <option value="48 hours">48 hours</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label" for="rpt_tat_reminder">Reminder before due</label>
+                        <select id="rpt_tat_reminder" name="rpt_tat_reminder" class="st-select">
+                            <option value="30 minutes">30 minutes</option>
+                            <option value="1 hour" selected>1 hour</option>
+                            <option value="2 hours">2 hours</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label" for="rpt_tat_overdue">Overdue alert delay</label>
+                        <select id="rpt_tat_overdue" name="rpt_tat_overdue" class="st-select">
+                            <option value="15 minutes">15 minutes</option>
+                            <option value="30 minutes" selected>30 minutes</option>
+                            <option value="1 hour">1 hour</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="text-[12px] text-slate-400">Test-package-specific turnaround overrides this default.</p>
+            </div>
+
+            <!-- Delivery Preferences with Working Toggles -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Delivery Preferences</h3>
+                        <p class="st-sub">Choose how customers receive released reports.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-4 pb-3">
+                    <div>
+                        <p class="text-[14px] font-semibold text-slate-800">Notify customer after report release</p>
+                        <p class="text-[13px] text-slate-500">Send an alert as soon as the report is ready.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="rpt_notify_release" checked class="sr-only peer" />
+                        <div class="st-switch"></div>
+                    </label>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mb-4 pb-4 border-b border-slate-100">
+                    <span class="st-pill green">In-app</span>
+                    <span class="st-pill green">Email</span>
+                    <span class="st-pill gray">SMS unavailable</span>
+                </div>
+
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <p class="text-[14px] font-semibold text-slate-800">Include secure report-view link</p>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="rpt_secure_link" checked class="sr-only peer" />
+                        <div class="st-switch"></div>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="st-label" for="rpt_language">Language</label>
+                    <select id="rpt_language" name="rpt_language" class="st-select">
+                        <option value="English" selected>English</option>
+                        <option value="Hindi">Hindi</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="st-footer">
+                <button type="button" class="st-btn action-discard-settings">Discard Changes</button>
+                <button type="button" class="st-btn st-btn-primary action-save-settings">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 6: SECURITY                                                   -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="lb_security">
+        <div class="sub-view-screen" data-view-name="main">
+
+            <div class="px-1 mb-1">
+                <h2 class="text-[20px] font-bold text-[#0F172A]">Security</h2>
+                <p class="text-[14px] text-slate-500">Manage login credentials and active sessions.</p>
+            </div>
+
+            <!-- Account Identity -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Account Identity</h3>
+                        <p class="st-sub">Your primary login credentials for this workspace.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <span class="text-[12px] text-slate-400 block">Primary owner</span>
+                        <span class="text-[14px] font-semibold text-slate-800">Rohan Mehta</span>
+                    </div>
+                    <div>
+                        <span class="text-[12px] text-slate-400 block">Email</span>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span id="security-email-display" class="text-[14px] font-semibold text-slate-800">contact@sunrisediagnostics.example</span>
+                            <span class="st-pill green">Verified</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[12px] text-slate-400 block">Phone</span>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span id="security-phone-display" class="text-[14px] font-semibold text-slate-800">+91 90000 04821</span>
+                            <span class="st-pill green">Verified</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" data-open-modal="modal-change-email" class="st-btn" style="color:#007bff;border-color:#BFDBFE;">Change Email</button>
+                    <button type="button" data-open-modal="modal-change-phone" class="st-btn" style="color:#007bff;border-color:#BFDBFE;">Change Phone</button>
+                    <button type="button" data-open-modal="modal-change-password" class="st-btn">Change Password</button>
+                    <button type="button" data-open-modal="modal-2step-verification" class="st-btn">2-Step Verification</button>
+                    <button type="button" data-open-modal="modal-recovery-code" class="st-btn">Recovery Codes</button>
+                </div>
+            </div>
+
+            <!-- Active Sessions -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Active Sessions</h3>
+                        <p class="st-sub">Devices currently logged in to your account.</p>
+                    </div>
+                </div>
+
+                <div class="st-table-wrap mb-3">
+                    <table class="st-table">
+                        <thead>
+                            <tr>
+                                <th>DEVICE</th>
+                                <th>BROWSER</th>
+                                <th>LOCATION</th>
+                                <th>LAST ACTIVE</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-sessions-tbody">
+                            <tr>
+                                <td>
+                                    <div class="flex items-center gap-2.5 font-semibold text-slate-800">
+                                        <span class="material-symbols-outlined text-[20px] text-slate-500">laptop_mac</span>
+                                        <span>MacBook Pro</span>
+                                    </div>
+                                </td>
+                                <td>Chrome 128</td>
+                                <td>Mumbai, MH</td>
+                                <td><span class="text-emerald-600 font-semibold">Active now</span></td>
+                                <td><span class="st-pill blue">This device</span></td>
+                            </tr>
+                            <tr data-session-row="Android">
+                                <td>
+                                    <div class="flex items-center gap-2.5 font-semibold text-slate-800">
+                                        <span class="material-symbols-outlined text-[20px] text-slate-500">smartphone</span>
+                                        <span>Android</span>
+                                    </div>
+                                </td>
+                                <td>Chrome Mobile</td>
+                                <td>Mumbai, MH</td>
+                                <td>Yesterday, 4:32 PM</td>
+                                <td>
+                                    <button type="button" data-signout-device="Android in Mumbai"
+                                            class="px-3 py-1 rounded-lg border border-red-300 text-red-500 text-[13px] font-semibold hover:bg-red-50">
+                                        Sign out
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <button type="button" data-open-modal="modal-signout-all-devices" class="text-[13px] font-semibold text-red-500 hover:underline">
+                    Sign Out All Other Devices
+                </button>
+            </div>
+
+            <!-- Recent Security Activity -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Recent Security Activity</h3>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-slate-100 text-[14px]">
+                    <div class="py-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 text-slate-700">
+                            <span class="material-symbols-outlined text-[18px] text-[#007bff]">login</span>
+                            <span>Sign-in · MacBook, Mumbai</span>
+                        </div>
+                        <span class="text-[13px] text-slate-400">30 Sep 2026, 09:41 AM</span>
+                    </div>
+                    <div class="py-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 text-slate-700">
+                            <span class="material-symbols-outlined text-[18px] text-[#007bff]">key</span>
+                            <span>Password updated</span>
+                        </div>
+                        <span class="text-[13px] text-slate-400">14 Sep 2026</span>
+                    </div>
+                    <div class="py-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 text-slate-700">
+                            <span class="material-symbols-outlined text-[18px] text-[#007bff]">verified_user</span>
+                            <span>Two-step verification enabled</span>
+                        </div>
+                        <span class="text-[13px] text-slate-400">01 Aug 2026</span>
+                    </div>
+                    <div class="py-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 text-slate-700">
+                            <span class="material-symbols-outlined text-[18px] text-[#007bff]">person_add</span>
+                            <span>Team member invited · Ananya Rao (Invited)</span>
+                        </div>
+                        <span class="text-[13px] text-slate-400">29 Sep 2026</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 7: WORKSPACE PREFERENCES                                      -->
+    <!-- ================================================================= -->
+    <div class="settings-tab-panel hidden" data-tab-panel="lb_workspace">
+        <div class="sub-view-screen" data-view-name="main">
+
+            <div class="px-1 mb-1">
+                <h2 class="text-[20px] font-bold text-[#0F172A]">Workspace Preferences</h2>
+                <p class="text-[14px] text-slate-500">Adjust how this workspace appears and formats information.</p>
+            </div>
+
+            <!-- Regional -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Regional</h3>
+                        <p class="st-sub">Set the language and formats used throughout your workspace.</p>
+                    </div>
+                </div>
+
+                <div class="st-grid-2 mb-4">
+                    <div>
+                        <label class="st-label" for="ws_language">Language</label>
+                        <select id="ws_language" name="ws_language" class="st-select">
+                            <option value="English" selected>English</option>
+                            <option value="Hindi">Hindi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label" for="ws_timezone">Timezone</label>
+                        <select id="ws_timezone" name="ws_timezone" class="st-select">
+                            <option value="Asia/Kolkata — IST" selected>Asia/Kolkata — IST</option>
+                            <option value="UTC">UTC</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label" for="ws_date_format">Date format</label>
+                        <select id="ws_date_format" name="ws_date_format" class="st-select">
+                            <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="st-label">Time format</label>
+                        <div class="flex items-center gap-5 mt-2">
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_time_format" value="12-hour" checked class="accent-[#007bff]" />
+                                <span>12-hour</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_time_format" value="24-hour" class="accent-[#007bff]" />
+                                <span>24-hour</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-[#7DD3FC] bg-[#F0F9FF] px-4 py-3 flex items-center justify-between text-[13px]">
+                    <span class="text-slate-600">Currency &nbsp;<strong class="text-slate-800">INR — ₹</strong></span>
+                    <span id="ws-regional-preview" class="font-semibold text-[#007bff]">30 Sep 2026 · 10:00 AM · ₹1,499</span>
+                </div>
+            </div>
+
+            <!-- Interface -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">Interface</h3>
+                        <p class="st-sub">Adjust how information is displayed in your workspace.</p>
+                    </div>
+                </div>
+
+                <div class="st-grid-2 mb-4">
+                    <div>
+                        <label class="st-label">Table density</label>
+                        <div class="flex items-center gap-5 mt-1.5">
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_table_density" value="Comfortable" checked class="accent-[#007bff]" />
+                                <span>Comfortable</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_table_density" value="Compact" class="accent-[#007bff]" />
+                                <span>Compact</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="st-label">Default rows per page</label>
+                        <div class="flex items-center gap-5 mt-1.5">
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_rows_per_page" value="10" checked class="accent-[#007bff]" />
+                                <span>10</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_rows_per_page" value="25" class="accent-[#007bff]" />
+                                <span>25</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_rows_per_page" value="50" class="accent-[#007bff]" />
+                                <span>50</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="st-label" for="ws_landing_page">Default landing page</label>
+                        <input type="text" id="ws_landing_page" name="ws_landing_page" value="Home" class="st-input" />
+                    </div>
+                    <div>
+                        <label class="st-label">Sidebar</label>
+                        <div class="flex items-center gap-5 mt-2">
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_sidebar" value="Expanded" checked class="accent-[#007bff]" />
+                                <span>Expanded</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                                <input type="radio" name="ws_sidebar" value="Collapsed" class="accent-[#007bff]" />
+                                <span>Collapsed</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                    <span class="text-[14px] font-semibold text-slate-800">Reduce motion</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="ws_reduce_motion" class="sr-only peer" />
+                        <div class="st-switch"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- File Preferences -->
+            <div class="st-card">
+                <div class="st-card-head">
+                    <div>
+                        <h3 class="st-card-title">File Preferences</h3>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="st-label">Default export format</label>
+                    <div class="flex items-center gap-5 mt-1.5">
+                        <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                            <input type="radio" name="ws_export_format" value="pdf" checked class="accent-[#007bff]" />
+                            <span>PDF</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                            <input type="radio" name="ws_export_format" value="csv" class="accent-[#007bff]" />
+                            <span>CSV</span>
+                        </label>
+                    </div>
+                </div>
+
+                <label class="inline-flex items-center gap-2.5 text-[14px] text-slate-700 cursor-pointer mb-4">
+                    <input type="checkbox" id="ws_include_date" name="ws_include_date" checked class="accent-[#007bff]" />
+                    <span>Include date in exported filenames</span>
+                </label>
+
+                <div class="rounded-xl border border-[#7DD3FC] bg-[#F0F9FF] px-4 py-3 text-[13px] text-slate-600">
+                    Filename preview: <span id="ws-filename-preview" class="font-semibold text-[#007bff]">earnings-report-2026-09-30.pdf</span>
+                </div>
+            </div>
+
+            <!-- Restore Defaults -->
+            <div class="st-card">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="st-card-title">Restore Defaults</h3>
+                        <p class="st-sub">Resets interface and format preferences only. Business details, permissions, and history are not affected.</p>
+                    </div>
+                    <button type="button" id="restore-workspace-defaults-btn"
+                            class="px-4 py-2 rounded-lg border border-red-300 text-red-500 text-[13px] font-semibold hover:bg-red-50">
+                        Restore Workspace Defaults
+                    </button>
+                </div>
+            </div>
+
+            <div class="st-footer">
+                <button type="button" class="st-btn action-discard-settings">Discard Changes</button>
+                <button type="button" class="st-btn st-btn-primary action-save-settings">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /.settings-scope -->
+
+
+<!-- ===================================================================== -->
+<!-- MODALS & POPUPS (Content-Based Proportional Widths)                    -->
+<!-- ===================================================================== -->
+
+<!-- 1. Upload Logo -->
+<div id="modal-upload-logo" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 480px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Upload Logo</h3>
+            <button type="button" data-close-modal="modal-upload-logo" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <label class="st-dropzone block cursor-pointer mb-4">
+                <input type="file" id="upload-logo-input" accept="image/png,image/jpeg" class="hidden" />
+                <span class="material-symbols-outlined text-[28px] text-[#007bff] mb-1">upload</span>
+                <p class="st-dz-title">Drag and drop a file or click to upload</p>
+                <p class="text-[12px] text-slate-400">PNG or JPG, max 2 MB</p>
+            </label>
+            <div class="flex items-center gap-3">
+                <div id="modal-logo-preview-circle" class="w-11 h-11 rounded-full bg-[#007bff] text-white font-bold flex items-center justify-center">SD</div>
+                <div>
+                    <p class="text-[14px] font-semibold text-slate-800">Logo preview</p>
+                    <p id="modal-logo-file-name" class="text-[12px] text-slate-400">No file selected</p>
+                </div>
+            </div>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-upload-logo" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-upload-logo" class="st-btn st-btn-primary">Save Logo</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Remove Logo -->
+<div id="modal-remove-logo" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 420px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Remove Logo?</h3>
+            <button type="button" data-close-modal="modal-remove-logo" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <p class="text-[14px] text-slate-500">This will remove your current logo from your public profile.</p>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-remove-logo" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-remove-logo" class="st-btn st-btn-danger">Remove Logo</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Pin Location -->
+<div id="modal-pin-location" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 640px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Pin Location</h3>
+            <button type="button" data-close-modal="modal-pin-location" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <div class="st-map relative w-full rounded-xl overflow-hidden" style="height: 260px;">
+                <svg viewBox="0 0 600 200" preserveAspectRatio="xMidYMid slice" class="absolute inset-0 w-full h-full">
+                    <rect width="600" height="200" fill="#EFF6FF"></rect>
+                    <path d="M0 60 L600 120 M0 180 L600 130 M200 0 L260 200 M480 0 L430 200" stroke="#CBD5E1" stroke-width="5" fill="none"></path>
+                    <path d="M0 135 L600 75" stroke="#FFFFFF" stroke-width="10" fill="none"></path>
+                </svg>
+                <div class="st-map-center">
+                    <span class="material-symbols-outlined text-[#007bff] text-[34px]">location_on</span>
+                    <span class="text-[14px] font-semibold text-slate-700 mt-1">Sunrise Diagnostics · Andheri East, Mumbai</span>
+                </div>
+            </div>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-pin-location" class="st-btn">Close</button>
+            <button type="button" id="confirm-pin-location" class="st-btn st-btn-primary">Confirm Location</button>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Add Document -->
+<div id="modal-add-document" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 480px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title" id="add-doc-title">Add Document</h3>
+            <button type="button" data-close-modal="modal-add-document" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <label class="st-dropzone block cursor-pointer">
+                <input type="file" id="add-doc-file-input" accept=".pdf,.png,.jpg,.jpeg" class="hidden" />
+                <span class="material-symbols-outlined text-[28px] text-[#007bff] mb-1">upload</span>
+                <p class="st-dz-title">Drag and drop a file or click to upload</p>
+                <p id="add-doc-file-label" class="text-[12px] text-slate-400">PDF, PNG or JPG, max 5 MB</p>
+            </label>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-add-document" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-add-doc" class="st-btn st-btn-primary">Upload Document</button>
+        </div>
+    </div>
+</div>
+
+<!-- 5. Replace Document -->
+<div id="modal-replace-document" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 440px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Replace Document?</h3>
+            <button type="button" data-close-modal="modal-replace-document" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <p class="text-[14px] text-slate-500">Uploading a new file will set the status to Pending Review while we verify the replacement.</p>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-replace-document" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-replace-doc" class="st-btn st-btn-primary">Upload Replacement</button>
+        </div>
+    </div>
+</div>
+
+<!-- 6. Document Preview -->
+<div id="modal-document-preview" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 480px;">
+        <div class="st-modal-head">
+            <div>
+                <h3 class="st-card-title" id="doc-preview-title">Business Registration</h3>
+                <p class="text-[12px] text-emerald-600 font-semibold">Verified Document</p>
+            </div>
+            <button type="button" data-close-modal="modal-document-preview" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <div class="rounded-xl bg-slate-100 border border-slate-200 h-44 flex flex-col items-center justify-center gap-2 text-slate-500">
+                <span class="material-symbols-outlined text-[36px] text-slate-400">description</span>
+                <p class="text-[13px] font-semibold">Document preview</p>
+                <p id="doc-preview-filename" class="text-[12px] text-slate-400">business_registration_2024.pdf</p>
+            </div>
+        </div>
+        <div class="st-modal-foot st-block">
+            <button type="button" data-close-modal="modal-document-preview" class="st-btn st-btn-block">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- 7. Public Profile Preview -->
+<div id="modal-public-profile-preview" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 460px; max-height: 90vh; overflow-y: auto;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Public Profile Preview</h3>
+            <button type="button" data-close-modal="modal-public-profile-preview" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-11 h-11 rounded-full bg-[#007bff] text-white font-bold flex items-center justify-center">SD</div>
+                <div>
+                    <h4 class="text-[16px] font-bold text-slate-900" id="preview-lab-name">Sunrise Diagnostics</h4>
+                    <p class="text-[12px] text-slate-400">Andheri East, Mumbai</p>
+                </div>
+            </div>
+            <p class="text-[13px] text-slate-600 mb-4" id="preview-lab-desc">Diagnostic testing and preventive health packages with on-time and home sample collection.</p>
+            <div class="mb-3">
+                <p class="text-[12px] font-bold text-slate-700 mb-1">Operating Hours</p>
+                <p class="text-[13px] text-slate-500">Mon–Sat: 7:00 AM–8:00 PM</p>
+                <p class="text-[13px] text-slate-500">Sun: 8:00 AM–1:00 PM</p>
+            </div>
+            <div class="mb-3">
+                <p class="text-[12px] font-bold text-slate-700 mb-1">Collection Methods</p>
+                <div class="flex gap-2">
+                    <span class="st-pill blue">Lab Visit</span>
+                    <span class="st-pill blue">Home Collection</span>
+                </div>
+            </div>
+            <div>
+                <p class="text-[12px] font-bold text-slate-700 mb-1">Verified</p>
+                <p class="text-[13px] text-emerald-600 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Business Registration</p>
+                <p class="text-[13px] text-emerald-600 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Laboratory Registration</p>
+            </div>
+        </div>
+        <div class="st-modal-foot st-block">
+            <button type="button" data-close-modal="modal-public-profile-preview" class="st-btn st-btn-block">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- 8. Request Account Deletion -->
+<div id="modal-delete-account" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 420px;">
+        <div class="st-modal-body text-center pt-6">
+            <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center mx-auto mb-3">
+                <span class="material-symbols-outlined text-[26px]">warning</span>
+            </div>
+            <h3 class="text-[18px] font-bold text-slate-900 mb-1">Request Account Deletion</h3>
+            <p class="text-[13px] text-slate-500 mb-4">This action permanently deletes your lab account and active listings.</p>
+            <input type="text" id="delete-account-confirm-input" placeholder="Type DELETE to confirm" class="st-input text-center" />
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-delete-account" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-delete-account" class="st-btn st-btn-danger">Submit Request</button>
+        </div>
+    </div>
+</div>
+
+<!-- 9. Add / Edit Branch (PROPERLY SIZED POPUP MATCHING FIGMA SCREENSHOT) -->
+<div id="modal-add-branch" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 760px; max-height: 90vh; overflow-y: auto;">
+        <div class="st-modal-head border-b border-slate-100 pb-3">
+            <div>
+                <h3 class="st-card-title" id="branch-modal-title">Add Branch</h3>
+                <p class="st-sub">Set up your lab branch, location, hours, and verification.</p>
+            </div>
+            <button type="button" data-close-modal="modal-add-branch" class="st-close">
+                <span class="material-symbols-outlined text-[24px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body py-4">
+            <form id="add-branch-form" class="st-stack">
+                <!-- Section 1: Logo & Public Identity -->
+                <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                    <h4 class="text-[16px] font-bold text-slate-800 mb-1">Logo &amp; Public Identity</h4>
+                    <p class="text-[13px] text-slate-500 mb-3">How this branch appears to patients and partners.</p>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-[#007bff] text-white font-bold flex items-center justify-center text-[15px]">SD</div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[12px] text-slate-500">Branch Logo (Inherits main logo or custom)</span>
+                        </div>
+                    </div>
+                    <div class="st-grid-2">
+                        <div>
+                            <label class="st-label" for="br_name">Branch name</label>
+                            <input type="text" id="br_name" required placeholder="e.g. Dadar West"
+                                   data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                                   class="st-input" />
+                        </div>
+                        <div>
+                            <label class="st-label" for="br_type">Branch type</label>
+                            <select id="br_type" class="st-select">
+                                <option value="Sub" selected>Sub Branch</option>
+                                <option value="Main">Main Branch</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Business Information -->
+                <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                    <h4 class="text-[16px] font-bold text-slate-800 mb-1">Business Information</h4>
+                    <p class="text-[13px] text-slate-500 mb-3">Branch contact &amp; manager details.</p>
+                    <div class="st-grid-2">
+                        <div>
+                            <label class="st-label" for="br_phone">Public Phone</label>
+                            <input type="text" id="br_phone" placeholder="+91 XXXXX XXXXX"
+                                   data-validate="phone" oninput="this.value = this.value.replace(/[^0-9+\-\s]/g, '')"
+                                   class="st-input" />
+                        </div>
+                        <div>
+                            <label class="st-label" for="br_collection">Collection Methods</label>
+                            <select id="br_collection" class="st-select">
+                                <option value="On-time &amp; Home" selected>On-time &amp; Home</option>
+                                <option value="Lab Visit Only">Lab Visit Only</option>
+                                <option value="Home Collection Only">Home Collection Only</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Address & Map -->
+                <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                    <h4 class="text-[16px] font-bold text-slate-800 mb-1">Address</h4>
+                    <p class="text-[13px] text-slate-500 mb-3">Location details for sample drop-off and visit.</p>
+                    <div class="st-stack mb-3">
+                        <div>
+                            <label class="st-label" for="br_address">Address line 1</label>
+                            <input type="text" id="br_address" required placeholder="Building, Street, Area" class="st-input" />
+                        </div>
+                        <div class="st-grid-2">
+                            <div>
+                                <label class="st-label" for="br_city">City</label>
+                                <input type="text" id="br_city" value="Mumbai"
+                                       data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                                       class="st-input" />
+                            </div>
+                            <div>
+                                <label class="st-label" for="br_pin">PIN Code</label>
+                                <input type="text" id="br_pin" placeholder="400001" inputmode="numeric" maxlength="6"
+                                       data-validate="pin" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                       class="st-input" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Operating Hours -->
+                <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                    <h4 class="text-[16px] font-bold text-slate-800 mb-1">Operating Hours</h4>
+                    <div class="st-grid-2 mt-2">
+                        <div>
+                            <label class="st-label" for="br_hours_weekday">Mon–Sat Hours</label>
+                            <input type="text" id="br_hours_weekday" value="7:00 AM – 8:00 PM" class="st-input" />
+                        </div>
+                        <div>
+                            <label class="st-label" for="br_hours_sunday">Sunday Hours</label>
+                            <input type="text" id="br_hours_sunday" value="8:00 AM – 1:00 PM" class="st-input" />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="st-modal-foot border-t border-slate-100 pt-3">
+            <button type="button" data-close-modal="modal-add-branch" class="st-btn">Cancel</button>
+            <button type="submit" form="add-branch-form" class="st-btn st-btn-primary">Save Branch</button>
+        </div>
+    </div>
+</div>
+
+<!-- 10. Invite Member -->
+<div id="modal-invite-member" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 520px;">
+        <div class="st-modal-head">
+            <div>
+                <h3 class="st-card-title">Invite Member</h3>
+                <p class="st-sub">Add a teammate to your lab workspace.</p>
+            </div>
+            <button type="button" data-close-modal="modal-invite-member" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <form id="invite-member-form" class="st-stack">
+                <div>
+                    <label class="st-label" for="inv_name">Full name</label>
+                    <input type="text" id="inv_name" required placeholder="Enter full name"
+                           data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                           class="st-input" />
+                </div>
+                <div>
+                    <label class="st-label" for="inv_email">Email</label>
+                    <input type="email" id="inv_email" required placeholder="name@company.com" class="st-input" />
+                </div>
+                <div>
+                    <label class="st-label" for="inv_role">Role</label>
+                    <select id="inv_role" class="st-select">
+                        <option value="Finance Viewer">Finance Viewer</option>
+                        <option value="Lab Manager">Lab Manager</option>
+                        <option value="Lab Technician">Lab Technician</option>
+                        <option value="Report Reviewer">Report Reviewer</option>
+                        <option value="Owner">Owner</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="st-label">Branch Access</label>
+                    <div class="flex items-center gap-5 mt-1">
+                        <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                            <input type="radio" name="inv_branch" value="All branches" checked class="accent-[#007bff]" />
+                            <span>All branches</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                            <input type="radio" name="inv_branch" value="Andheri East" class="accent-[#007bff]" />
+                            <span>Specific branch</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="st-summary">
+                    <p class="text-[13px] font-bold text-slate-700 mb-1">Permission Summary</p>
+                    <ul class="text-[12px] text-slate-500 list-disc pl-4 space-y-0.5">
+                        <li>View earnings and payment reports</li>
+                        <li>View analytics and workspace activity</li>
+                        <li>Cannot manage team access</li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-invite-member" class="st-btn">Cancel</button>
+            <button type="submit" form="invite-member-form" class="st-btn st-btn-primary">Send Invitation</button>
+        </div>
+    </div>
+</div>
+
+<!-- 11. Assign Role -->
+<div id="modal-assign-role" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 520px;">
+        <div class="st-modal-head">
+            <div>
+                <h3 class="st-card-title">Assign Role</h3>
+                <p class="st-sub">Add a teammate to your lab workspace.</p>
+            </div>
+            <button type="button" data-close-modal="modal-assign-role" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <form id="assign-role-form" class="st-stack">
+                <div>
+                    <label class="st-label" for="asg_name">Full name</label>
+                    <input type="text" id="asg_name" value="Neha Shah"
+                           data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')"
+                           class="st-input" />
+                </div>
+                <div>
+                    <label class="st-label" for="asg_email">Email</label>
+                    <input type="email" id="asg_email" value="neha@sunrisediagnostics.example" class="st-input" />
+                </div>
+                <div>
+                    <label class="st-label" for="asg_role">Role</label>
+                    <select id="asg_role" class="st-select">
+                        <option value="Finance Viewer">Finance Viewer</option>
+                        <option value="Lab Manager">Lab Manager</option>
+                        <option value="Lab Technician">Lab Technician</option>
+                        <option value="Report Reviewer">Report Reviewer</option>
+                        <option value="Owner">Owner</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="st-label">Branch Access</label>
+                    <div class="flex items-center gap-5 mt-1">
+                        <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                            <input type="radio" name="asg_branch" value="All branches" checked class="accent-[#007bff]" />
+                            <span>All branches</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                            <input type="radio" name="asg_branch" value="Andheri East" class="accent-[#007bff]" />
+                            <span>Specific branch</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="st-summary">
+                    <p class="text-[13px] font-bold text-slate-700 mb-1">Permission Summary</p>
+                    <ul class="text-[12px] text-slate-500 list-disc pl-4 space-y-0.5">
+                        <li>View earnings and payment reports</li>
+                        <li>View analytics and workspace activity</li>
+                        <li>Cannot manage team access</li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-assign-role" class="st-btn">Cancel</button>
+            <button type="submit" form="assign-role-form" class="st-btn st-btn-primary">Send Invitation</button>
+        </div>
+    </div>
+</div>
+
+<!-- 12. Add Role -->
+<div id="modal-add-role" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 460px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Add Role</h3>
+            <button type="button" data-close-modal="modal-add-role" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <form id="add-role-form" class="st-stack">
+                <div>
+                    <label class="st-label" for="new_role_name">Role</label>
+                    <select id="new_role_name" class="st-select">
+                        <option value="Lab Manager">Lab Manager</option>
+                        <option value="Lab Technician">Lab Technician</option>
+                        <option value="Report Reviewer">Report Reviewer</option>
+                        <option value="Finance Viewer">Finance Viewer</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="st-label">Branch Access</label>
+                    <div class="flex flex-col gap-2 mt-1">
+                        <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                            <input type="radio" name="new_role_branch" value="Andheri East" checked class="accent-[#007bff]" />
+                            <span>Andheri East</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 text-[14px] text-slate-700 cursor-pointer">
+                            <input type="radio" name="new_role_branch" value="All branches" class="accent-[#007bff]" />
+                            <span>All branches</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="button" data-close-modal="modal-add-role" data-nav-tab="lb_team" data-nav-subview="edit_role"
+                        class="st-btn w-full justify-center" style="color:#007bff;border-color:#BFDBFE;">
+                    <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    <span>Permission Matrix</span>
+                </button>
+            </form>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-add-role" class="st-btn">Cancel</button>
+            <button type="submit" form="add-role-form" class="st-btn st-btn-primary">Add Role</button>
+        </div>
+    </div>
+</div>
+
+<!-- 13. Deactivate Access -->
+<div id="modal-deactivate" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 420px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Deactivate Access?</h3>
+            <button type="button" data-close-modal="modal-deactivate" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <p class="text-[14px] text-slate-500">
+                <strong id="deactivate-member-name" class="text-slate-800">Rahul Kumar</strong> will lose access to this workspace. Their activity history is preserved.
+            </p>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-deactivate" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-deactivate" class="st-btn st-btn-danger">Deactivate</button>
+        </div>
+    </div>
+</div>
+
+<!-- 14. Manage Recipients -->
+<div id="modal-manage-recipients" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 480px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Manage Recipients</h3>
+            <button type="button" data-close-modal="modal-manage-recipients" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <div id="recipients-list" class="st-stack mb-4">
+                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50" data-recipient-row>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="material-symbols-outlined text-[18px] text-slate-400">mail</span>
+                        <span class="text-[13px] font-medium text-slate-700 truncate">contact@sunrisediagnostics.example</span>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="st-pill green">Verified</span>
+                        <button type="button" class="text-red-400 hover:text-red-600 action-remove-recipient">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <input type="email" id="new-recipient-email" placeholder="Add email address" class="st-input flex-1" />
+                <button type="button" id="add-recipient-btn" class="st-btn" style="color:#007bff;border-color:#BFDBFE;">+ Add Recipient</button>
+            </div>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-manage-recipients" class="st-btn st-btn-primary">Done</button>
+        </div>
+    </div>
+</div>
+
+<!-- 15. Report Preview -->
+<div id="modal-report-preview" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Report Preview — Demo</h3>
+            <button type="button" data-close-modal="modal-report-preview" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body relative overflow-hidden">
+            <div class="pointer-events-none select-none absolute inset-0 flex items-center justify-center -rotate-12 opacity-10">
+                <span class="text-[48px] font-extrabold text-[#007bff] tracking-widest">DEMO PREVIEW</span>
+            </div>
+            <div class="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div id="rpt-prev-logo" class="w-10 h-10 rounded-full border-2 border-[#007bff] text-[#007bff] font-bold flex items-center justify-center text-[14px]">SD</div>
+                    <div>
+                        <h4 id="rpt-prev-name" class="text-[15px] font-bold text-slate-900">Sunrise Diagnostics &amp; Pathology</h4>
+                        <p id="rpt-prev-addr" class="text-[12px] text-slate-500">Unit 204, Sunrise Business Centre, Andheri East, Mumbai 400069</p>
+                        <p id="rpt-prev-contact" class="text-[12px] text-slate-500">+91 90000 04821</p>
+                    </div>
+                </div>
+                <span id="rpt-prev-id" class="text-[12px] font-semibold text-slate-500">RPT-L-20260930-0184</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-[12px] mb-4 bg-slate-50 p-3 rounded-lg">
+                <div><span class="text-slate-400">Order:</span> <strong class="text-slate-700">LAB-2190</strong></div>
+                <div><span class="text-slate-400">Patient:</span> <strong class="text-slate-700">Demo Patient, 35M</strong></div>
+                <div><span class="text-slate-400">Ordered by:</span> <strong class="text-slate-700">Dr. Sample</strong></div>
+                <div><span class="text-slate-400">Test:</span> <strong class="text-slate-700">CBC — Complete Blood Count</strong></div>
+            </div>
+
+            <div class="st-table-wrap mb-4">
+                <table class="st-table">
+                    <thead>
+                        <tr>
+                            <th>TEST</th>
+                            <th>RESULT</th>
+                            <th>REFERENCE RANGE</th>
+                            <th>FLAG</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-medium">Haemoglobin</td>
+                            <td>13.8 g/dL</td>
+                            <td>12.0–16.0</td>
+                            <td><span class="text-emerald-600 font-semibold">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium">WBC Count</td>
+                            <td>7,200 /µL</td>
+                            <td>4,000–11,000</td>
+                            <td><span class="text-emerald-600 font-semibold">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium">Platelet Count</td>
+                            <td>2.42 Lakh/µL</td>
+                            <td>1.5–4.5</td>
+                            <td><span class="text-emerald-600 font-semibold">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium">Fasting Glucose</td>
+                            <td>108 mg/dL</td>
+                            <td>70–100</td>
+                            <td><span class="text-red-500 font-semibold">High</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p id="rpt-prev-footer" class="text-[11px] text-slate-400 pt-2 border-t border-slate-100">
+                This report is for informational purposes only. Please consult your physician for medical advice.
+            </p>
+        </div>
+        <div class="st-modal-foot st-block">
+            <button type="button" data-close-modal="modal-report-preview" class="st-btn st-btn-block">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- 16. Change Email -->
+<div id="modal-change-email" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 440px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Change Email</h3>
+            <button type="button" data-close-modal="modal-change-email" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <form id="change-email-form" class="st-stack">
+                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-[13px] text-slate-600">
+                    Current email: <strong id="modal-current-email">contact@sunrisediagnostics.example</strong>
+                </div>
+                <div>
+                    <label class="st-label" for="sec_new_email">New email</label>
+                    <input type="email" id="sec_new_email" required placeholder="Enter new email" class="st-input" />
+                </div>
+                <div>
+                    <label class="st-label" for="sec_email_pwd">Password confirmation</label>
+                    <input type="password" id="sec_email_pwd" required placeholder="Enter current password" class="st-input" />
+                </div>
+            </form>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-change-email" class="st-btn">Cancel</button>
+            <button type="submit" form="change-email-form" class="st-btn st-btn-primary">Send Verification Code</button>
+        </div>
+    </div>
+</div>
+
+<!-- 17. Change Phone -->
+<div id="modal-change-phone" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 440px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Change Phone</h3>
+            <button type="button" data-close-modal="modal-change-phone" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <form id="change-phone-form" class="st-stack">
+                <div class="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-[13px] text-slate-600">
+                    Current phone: <strong id="modal-current-phone">+91 90000 04821</strong>
+                </div>
+                <div>
+                    <label class="st-label" for="sec_new_phone">New Phone</label>
+                    <input type="text" id="sec_new_phone" required placeholder="+91 XXXXX XXXXX"
+                           data-validate="phone" oninput="this.value = this.value.replace(/[^0-9+\-\s]/g, '')"
+                           class="st-input" />
+                </div>
+                <div>
+                    <label class="st-label" for="sec_phone_pwd">Password confirmation</label>
+                    <input type="password" id="sec_phone_pwd" required placeholder="Enter current password" class="st-input" />
+                </div>
+            </form>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-change-phone" class="st-btn">Cancel</button>
+            <button type="submit" form="change-phone-form" class="st-btn st-btn-primary">Send Verification Code</button>
+        </div>
+    </div>
+</div>
+
+<!-- 18. Change Password -->
+<div id="modal-change-password" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 440px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Change Password?</h3>
+            <button type="button" data-close-modal="modal-change-password" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <form id="change-password-form" class="st-stack">
+                <div>
+                    <label class="st-label" for="sec_curr_pwd">Current password</label>
+                    <input type="password" id="sec_curr_pwd" required class="st-input" />
+                </div>
+                <div>
+                    <label class="st-label" for="sec_new_pwd">New password</label>
+                    <input type="password" id="sec_new_pwd" required minlength="8" class="st-input" />
+                    <div class="h-1 w-full bg-slate-100 rounded mt-1.5 overflow-hidden">
+                        <div id="pwd-strength-bar" class="h-full w-1/4 bg-red-400 transition-all"></div>
+                    </div>
+                </div>
+                <div>
+                    <label class="st-label" for="sec_confirm_pwd">Confirm password</label>
+                    <input type="password" id="sec_confirm_pwd" required minlength="8" class="st-input" />
+                    <p class="text-[11px] text-slate-400 mt-1">Minimum 8 characters with letters and numbers.</p>
+                </div>
+            </form>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-change-password" class="st-btn">Cancel</button>
+            <button type="submit" form="change-password-form" class="st-btn st-btn-primary">Update Password</button>
+        </div>
+    </div>
+</div>
+
+<!-- 19. 2-Step Verification -->
+<div id="modal-2step-verification" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 480px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Two-Step Verification</h3>
+            <button type="button" data-close-modal="modal-2step-verification" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <div class="rounded-xl border border-blue-200 bg-blue-50/70 p-3.5 mb-3">
+                <p class="text-[13px] font-semibold text-slate-800 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#007bff] text-[18px]">verified_user</span>
+                    <span>Two-step verification adds a second layer of security.</span>
+                </p>
+            </div>
+            <p class="text-[13px] text-slate-600">Current status: <strong id="twofa-status-text" class="text-slate-800">Enabled via Authenticator App</strong></p>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" id="toggle-twofa-btn" class="st-btn" style="color:#EF4444;border-color:#FCA5A5;">Disable</button>
+            <button type="button" data-close-modal="modal-2step-verification" class="st-btn st-btn-primary">Change Method</button>
+        </div>
+    </div>
+</div>
+
+<!-- 20. Recovery Codes -->
+<div id="modal-recovery-code" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 500px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Recovery Codes</h3>
+            <button type="button" data-close-modal="modal-recovery-code" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-700 mb-3">
+                Store these in a safe place. Each code can be used once.
+            </div>
+            <div id="recovery-codes-grid" class="grid grid-cols-2 gap-2 text-[13px] font-mono text-slate-700">
+                <div class="bg-slate-100 rounded px-3 py-2 text-center">SD89-0238-3842</div>
+                <div class="bg-slate-100 rounded px-3 py-2 text-center">SD89-0238-8871</div>
+                <div class="bg-slate-100 rounded px-3 py-2 text-center">SD89-0238-9104</div>
+                <div class="bg-slate-100 rounded px-3 py-2 text-center">SD89-0238-4566</div>
+                <div class="bg-slate-100 rounded px-3 py-2 text-center">SD89-0238-7310</div>
+                <div class="bg-slate-100 rounded px-3 py-2 text-center">SD89-0238-6081</div>
+                <div class="bg-slate-100 rounded px-3 py-2 text-center">SD89-0238-1934</div>
+                <div class="bg-slate-100 rounded px-3 py-2 text-center">SD89-0238-5247</div>
+            </div>
+        </div>
+        <div class="st-modal-foot st-split">
+            <div class="flex gap-2">
+                <button type="button" id="copy-recovery-codes" class="st-btn">Copy All</button>
+                <button type="button" id="download-recovery-codes" class="st-btn">Download</button>
+            </div>
+            <button type="button" data-close-modal="modal-recovery-code" class="st-btn st-btn-primary">Done</button>
+        </div>
+    </div>
+</div>
+
+<!-- 21. Sign Out Device -->
+<div id="modal-signout-device" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 420px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Sign Out Device?</h3>
+            <button type="button" data-close-modal="modal-signout-device" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <p class="text-[14px] text-slate-500">The <strong id="signout-device-name" class="text-slate-800">Android device in Mumbai</strong> will be signed out.</p>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-signout-device" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-signout-device" class="st-btn st-btn-danger">Sign Out Device</button>
+        </div>
+    </div>
+</div>
+
+<!-- 22. Sign Out All Other Devices -->
+<div id="modal-signout-all-devices" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full" style="max-width: 420px;">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Sign Out All Other Devices?</h3>
+            <button type="button" data-close-modal="modal-signout-all-devices" class="st-close">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+        <div class="st-modal-body">
+            <p class="text-[14px] text-slate-500">You will remain signed in on this device only.</p>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-close-modal="modal-signout-all-devices" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-signout-all-devices" class="st-btn st-btn-danger">Sign Out All</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/lab_settings.js' %}"></script>
+{% endblock %}
