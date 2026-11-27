@@ -147,39 +147,112 @@
         '<span class="bg-white relative z-[1]">' + ICON[e[2]] + '</span><div><p class="font-bold text-dark-inky-blue">' + e[0] + '</p><p class="text-[13px] text-grayish-blue-slate">' + e[1] + '</p></div></li>';
     }).join('');
   }
-  function openDetail(b) {
+   function openDetail(b) {
     cur = b;
     $('dt-id').textContent = b.bid.replace(/-/g, '–');
-    $('dt-status').innerHTML = badge(UP.indexOf(b.status) > -1 ? 'Upcoming' : b.status);
+    $('dt-status').innerHTML = badge(b.status);
+    
+    // Set Avatar and Name
     $('dt-avatar').innerHTML = initials(b.name);
     $('dt-avatar').style.background = color(b.name);
     $('dt-name').textContent = b.name;
+    
+    // Set meta info
     $('dt-meta').textContent = b.age + ' years · ' + b.sex;
-    var h = field('Service', b.svc) + field('Department / Unit', b.dept);
-    if (b.bed) h += field('Bed Assigned', b.bed);
-    h += '<div class="py-3 border-b border-slate-100"><p class="text-[14px] text-grayish-blue-slate">Visit type</p><span class="inline-block mt-1.5 text-[13px] font-medium px-3 py-1 rounded-md bg-shazam-blue text-white">' + b.visit + '</span></div>';
-    h += field('Scheduled date', 'Tuesday, 29 Sep 2026') + field('Scheduled time', b.time);
-    if (b.status === 'Missed') {
-      h += field('Booking Status', 'Missed') + field('Reason', b.reason) + field('Follow-Up', 'Contact Patient to Reschedule') +
-        '<p class="rounded-lg border border-yellow-400 text-yellow-600 text-[14px] px-4 py-3 mt-3">No arrival or check-in was recorded by the schedule time.</p>';
-    } else {
-      if (b.adm) h += field('Admitted', b.adm) + field('Discharged', b.dis); else if (b.status !== 'Cancelled') h += field('Assigned room / unit', b.dept);
-      if (b.status === 'Cancelled') h += field('Cancellation Reason', b.reason);
-      h += field('Booking source', 'Patient app') + field('Payment status', b.pay);
-      if (b.status === 'Completed') h += '<div class="py-3"><p class="text-[14px] text-grayish-blue-slate">Invoice</p><button type="button" id="dtInvoice" class="flex items-center gap-2 mt-1 text-[16px] font-bold text-dark-inky-blue"><svg class="text-red-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg>Download</button></div>';
-    }
-    $('dt-pane-details').innerHTML = h;
+
+    // Build the 2-column grid content
+    var isAdmission = b.visit === 'Planned admission';
+    var cat = isAdmission ? 'Inpatient Admission' : 'OPD / Daycare';
+    var mode = b.visit === 'Home visit' ? 'Home Service' : 'Visit Hospital';
+    
+    var html = `
+      <div class="grid grid-cols-2 gap-y-4 gap-x-2">
+        <div>
+          <p class="text-[13px] text-grayish-blue-slate">Service Type</p>
+          <p class="text-[15px] font-bold text-dark-inky-blue mt-0.5">${b.svc}</p>
+        </div>
+        <div>
+          <p class="text-[13px] text-grayish-blue-slate">Category</p>
+          <p class="text-[15px] font-bold text-dark-inky-blue mt-0.5">${cat}</p>
+        </div>
+        
+        <div>
+          <p class="text-[13px] text-grayish-blue-slate">Preferred Dates</p>
+          <p class="text-[15px] font-bold text-dark-inky-blue mt-0.5">29 Sep 2026 – 15 Oct 2026</p>
+        </div>
+        <div>
+          <p class="text-[13px] text-grayish-blue-slate">Schedule Date</p>
+          <p class="text-[15px] font-bold text-dark-inky-blue mt-0.5">29 Sep 2026 • ${b.time}</p>
+        </div>
+        
+        <div>
+          <p class="text-[13px] text-grayish-blue-slate">Beds &amp; Rooms</p>
+          <p class="text-[15px] font-bold text-dark-inky-blue mt-0.5">${b.bed || 'General Ward'}</p>
+        </div>
+        <div>
+          <p class="text-[13px] text-grayish-blue-slate">Preferred Mode</p>
+          <p class="text-[15px] font-bold text-dark-inky-blue mt-0.5">${mode}</p>
+        </div>
+        
+        <div class="col-span-2">
+          <p class="text-[13px] text-grayish-blue-slate">Selected Address</p>
+          <p class="text-[15px] font-bold text-dark-inky-blue mt-0.5">Saket Enclave <span class="text-[13px] font-normal text-grayish-blue-slate">(Chhatarpur)</span></p>
+        </div>
+        <div class="col-span-2">
+          <p class="text-[13px] text-grayish-blue-slate">Budget</p>
+          <p class="text-[15px] font-bold text-dark-inky-blue mt-0.5">₹300 – ₹1,000</p>
+        </div>
+      </div>
+
+      <p class="flex items-center gap-2 text-[15px] font-medium text-slate-700 mt-6">
+        <svg class="text-shazam-blue" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg>
+        Prescription
+      </p>
+      <div class="flex items-center gap-3 rounded-xl border border-slate-200 p-3 mt-2">
+        <span class="w-10 h-10 rounded-lg bg-[#FF4D4F] text-white text-[11px] font-bold flex items-center justify-center shrink-0">PDF</span>
+        <div class="flex-1">
+          <p class="text-[15px] font-bold text-dark-inky-blue leading-tight">Prescription.pdf</p>
+          <p class="text-[12px] text-grayish-blue-slate mt-0.5">Uploaded · 1.2 MB</p>
+        </div>
+        <button id="dtViewPdf" type="button" class="text-[13px] font-semibold px-4 py-1.5 rounded-lg border border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50 transition-colors">View</button>
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 mt-4">
+        <p class="text-[15px] font-bold text-dark-inky-blue">Your Requirement</p>
+        <p class="text-[13px] text-slate-600 mt-1.5 leading-relaxed">Patients require consultation with a qualified general physician for diagnosis and treatment of common illnesses, infections, fever, and general health concerns.</p>
+      </div>
+
+      <div class="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3.5 mt-4">
+        <span class="w-8 h-8 rounded-full bg-[#FFC107] text-white flex items-center justify-center shrink-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9z"/></svg>
+        </span>
+        <p class="text-[14px] text-slate-700"><b class="text-kyc-green">2.8 Credit points Earned</b></p>
+      </div>
+    `;
+    
+    $('dt-pane-details').innerHTML = html;
     $('dt-pane-activity').innerHTML = timeline(b);
+
+    // Footer Buttons
     var cls = 'text-[15px] font-semibold py-[10px] rounded-lg border cursor-pointer transition-colors ';
     var close = '<button type="button" data-close="m-detail" class="flex-1 ' + cls + 'border-gray-400 text-gray-500 bg-white hover:bg-gray-100">Close</button>';
     var primary = function (id, t) { return '<button id="' + id + '" type="button" class="flex-1 ' + cls + 'border-shazam-blue bg-shazam-blue text-white hover:opacity-90">' + t + '</button>'; };
     var outline = function (id, t) { return '<button id="' + id + '" type="button" class="flex-1 ' + cls + 'border-shazam-blue text-shazam-blue bg-white hover:bg-blue-50">' + t + '</button>'; };
+    
     var foot = close;
-    if (b.status === 'In progress') foot = primary('dtComplete', 'Complete Service');
-    else if (b.status === 'Missed') foot = close + primary('dtResched', 'Reschedule');
-    else if (b.status === 'Checked in') foot = close + primary('dtStart', 'Start Service');
-    else if (UP.indexOf(b.status) > -1) foot = outline('dtResched', 'Reschedule') + primary('dtCheckin', 'Check-In');
+    if (b.status === 'Completed') {
+      foot = close + primary('dtDownload', 'Download Invoice');
+    } else if (b.status === 'In progress') {
+      foot = close + primary('dtComplete', 'Complete Service');
+    } else if (b.status === 'Missed') {
+      foot = close + primary('dtResched', 'Reschedule');
+    } else if (b.status === 'Checked in') {
+      foot = close + primary('dtStart', 'Start Service');
+    } else if (UP.indexOf(b.status) > -1) {
+      foot = outline('dtResched', 'Reschedule') + primary('dtCheckin', 'Check-In');
+    }
     $('dt-foot').innerHTML = foot;
+
     setDTab('details');
     openM('m-detail');
   }
