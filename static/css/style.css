@@ -31,6 +31,7 @@
   --color-charcoal-black: #1c1b1f;
   --color-dark-gray: #484848;
   --color-golden-yellow: #dac568;
+  --color-green-dark:#059669;
   --color-transparent-light-sea-green: #3aafa926;
   --color-light-gray: #d4d4d4;
   --color-light-gray1: #626262;
@@ -200,6 +201,7 @@
   --color-warm-tangerine: #e17100;
   --color-deep-amber: #bb4d004d;
   --color-pastel-seafoam: #b9f8cf1a;
+  --color-darkk-gray:#6B7280;
   --color-seafoam: #b9f8cf;
   --color-leaf-green: #009966;
   --color-crimson-red: #fb2c36;
@@ -4598,3 +4600,72 @@ body {
 
   .hr-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #111c2e; color: #fff; font-size: 14px; padding: 10px 18px; border-radius: 10px; z-index: 1200; display: none; }
   .hr-toast.show { display: block; }
+
+
+  /* pharmacy-report */
+   .pharmacy-report-page {
+        background: #f7f9fb;
+        min-height: 100%;
+        color: dark-black;
+        font-family: Inter, Arial, sans-serif;
+    }
+
+    .pharmacy-report-page .report-card {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(33, 43, 54, .04);
+    }
+
+    .pharmacy-report-page .inventory-attention {
+        background: #fffdf2;
+        border-color: #ffe3a3;
+        box-shadow: none;
+    }
+
+    .pharmacy-report-page .report-btn {
+        height: 34px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .pharmacy-report-page .metric-card {
+        min-height: 80px;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        padding: 16px 14px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(33, 43, 54, .025);
+    }
+
+    .pharmacy-report-page .metric-icon {
+        width: 12px;
+        height: 12px;
+        color: #9aa3b2;
+    }
+
+    .pharmacy-report-page .chart-card {
+        height: 264px;
+    }
+
+    .pharmacy-report-page canvas {
+        max-height: 100%;
+    }
+
+    @media (min-width:1024px) {
+        .pharmacy-report-page {
+            margin: -8px -16px 0;
+            padding: 18px 16px 28px;
+        }
+    }
+
+    @media (max-width:767px) {
+        .pharmacy-report-page .chart-card {
+            height: 320px;
+        }
+    }

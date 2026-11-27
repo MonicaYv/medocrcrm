@@ -3,122 +3,54 @@
 {% block title %}Reports{% endblock %}
 
 {% block content %}
-<style>
-    .pharmacy-report-page {
-        background: #f7f9fb;
-        min-height: 100%;
-        color: #202b3c;
-        font-family: Inter, Arial, sans-serif;
-    }
-
-    .pharmacy-report-page .report-card {
-        background: #fff;
-        border: 1px solid #edf0f4;
-        border-radius: 10px;
-        box-shadow: 0 2px 12px rgba(33, 43, 54, .04);
-    }
-
-    .pharmacy-report-page .inventory-attention {
-        background: #fffdf2;
-        border-color: #ffe3a3;
-        box-shadow: none;
-    }
-
-    .pharmacy-report-page .report-btn {
-        height: 34px;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .pharmacy-report-page .metric-card {
-        min-height: 80px;
-        border: 1px solid #edf0f4;
-        border-radius: 8px;
-        padding: 16px 14px;
-        background: #fff;
-        box-shadow: 0 2px 8px rgba(33, 43, 54, .025);
-    }
-
-    .pharmacy-report-page .metric-icon {
-        width: 12px;
-        height: 12px;
-        color: #9aa3b2;
-    }
-
-    .pharmacy-report-page .chart-card {
-        height: 264px;
-    }
-
-    .pharmacy-report-page canvas {
-        max-height: 100%;
-    }
-
-    @media (min-width:1024px) {
-        .pharmacy-report-page {
-            margin: -8px -16px 0;
-            padding: 18px 16px 28px;
-        }
-    }
-
-    @media (max-width:767px) {
-        .pharmacy-report-page .chart-card {
-            height: 320px;
-        }
-    }
-</style>
 
 <div class="pharmacy-report-page" id="pharmacy-report-root" data-report-url="{% url 'pharmacy_report_data' %}">
-    <div class="text-[11px] text-[#697386] mb-4">Home / Reports &amp; Analytics</div>
+    <div class="text-[11px] text-darkk-gray mb-4">Home / Reports &amp; Analytics</div>
     <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
             <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px] text-[#1683ff]">bar_chart</span>
+                <span class="material-symbols-outlined text-[20px] text-shazam-blue">bar_chart</span>
                 <h1 class="text-[24px] font-semibold leading-none">Reports &amp; Analytics</h1>
             </div>
-            <p class="mt-2 text-[12px] text-[#697386]">Track lab performance, revenue, bids, popular tests, and turnaround time.</p>
-            <p class="mt-1 text-[12px] text-[#697386]">MedPlus Pharmacy · Andheri East, Mumbai</p>
-            <p class="mt-1 text-[11px] text-[#98a1b1]">Tuesday, 23 July 2026 · 10:00 AM IST</p>
+            <p class="mt-2 text-[12px] text-darkk-gray">Track lab performance, revenue, bids, popular tests, and turnaround time.</p>
+            <p class="mt-1 text-[12px] text-darkk-gray">MedPlus Pharmacy · Andheri East, Mumbai</p>
+            <p class="mt-1 text-[11px] text-grayish-blue-slate">Tuesday, 23 July 2026 · 10:00 AM IST</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <div class="relative">
                 <button type="button" id="reportDateToggle"
-                    class="h-9 px-3 rounded-md border border-[#dfe5ec] bg-white text-[14px] text-[#344054] flex items-center gap-2 shadow-sm">
+                    class="h-9 px-3 rounded-md border border-[#dfe5ec] bg-white text-[14px] text-dark-black flex items-center gap-2 shadow-sm">
                     <span class="material-symbols-outlined text-[14px]">calendar_month</span>
                     <span id="reportDatePreset">Last 30 days</span> <span id="reportRangeShort">1 Jul - 22 Jul 2026</span>
                     <span class="material-symbols-outlined text-[14px]">keyboard_arrow_down</span>
                 </button>
                 <div id="reportDatePopover"
                     class="hidden absolute right-0 top-[42px] z-40 w-[300px] rounded-[12px] bg-[#eef1f6] p-3 shadow-[0_8px_24px_rgba(30,41,59,.18)]">
-                    <p class="text-[14px] font-semibold text-[#202b3c] mb-2">Date Filter</p>
+                    <p class="text-[14px] font-semibold text-[dark-black] mb-2">Date Filter</p>
                     <div class="rounded-[12px] bg-white p-3 mb-3">
-                        <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[14px] hover:bg-[#f3f7fb]" data-period="today">Today</button>
-                        <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[14px] hover:bg-[#f3f7fb]" data-period="week">Last 7 Days</button>
-                        <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[14px] hover:bg-[#f3f7fb]" data-period="month">Last 30 Days</button>
-                        <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[14px] hover:bg-[#f3f7fb]" data-period="custom">Custom Range</button>
+                        <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[14px] hover:bg-kyc-medium-gray" data-period="today">Today</button>
+                        <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[14px] hover:bg-kyc-medium-gray" data-period="week">Last 7 Days</button>
+                        <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[14px] hover:bg-kyc-medium-gray" data-period="month">Last 30 Days</button>
+                        <button type="button" class="reportDateOption block w-full text-left rounded-md px-2 py-1.5 text-[14px] hover:bg-kyc-medium-gray" data-period="custom">Custom Range</button>
                     </div>
-                    <p class="text-[14px] font-semibold text-[#202b3c] mb-2">Date Range</p>
+                    <p class="text-[14px] font-semibold text-[dark-black] mb-2">Date Range</p>
                     <div class="rounded-[12px] bg-white p-3">
                         <div class="grid grid-cols-2 gap-2">
-                            <label class="text-[14px] text-[#697386]">From<input id="reportStartDate" type="date" class="mt-1 h-9 w-full rounded-md border border-[#edf0f4] px-2 text-[14px] outline-none"></label>
-                            <label class="text-[14px] text-[#697386]">To<input id="reportEndDate" type="date" class="mt-1 h-9 w-full rounded-md border border-[#edf0f4] px-2 text-[14px] outline-none"></label>
+                            <label class="text-[14px] text-darkk-gray">From<input id="reportStartDate" type="date" class="mt-1 h-9 w-full rounded-md border border-kyc-medium-gray px-2 text-[14px] outline-none"></label>
+                            <label class="text-[14px] text-darkk-gray">To<input id="reportEndDate" type="date" class="mt-1 h-9 w-full rounded-md border border-kyc-medium-gray px-2 text-[14px] outline-none"></label>
                         </div>
                         <div class="grid grid-cols-2 gap-2 mt-3">
-                            <button type="button" id="reportDateCancel" class="h-9 rounded-md border border-[#dfe5ec] bg-white text-[14px] text-[#697386]">Cancel</button>
-                            <button type="button" id="reportDateApply" class="h-9 rounded-md bg-[#1683ff] text-[14px] font-semibold text-white">Apply</button>
+                            <button type="button" id="reportDateCancel" class="h-9 rounded-md border border-[#dfe5ec] bg-white text-[14px] text-darkk-gray">Cancel</button>
+                            <button type="button" id="reportDateApply" class="h-9 rounded-md bg-shazam-blue text-[14px] font-semibold text-white">Apply</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <label class="flex items-center gap-1.5 text-[14px] text-[#697386] whitespace-nowrap">
-                <input id="comparePreviousPeriod" type="checkbox" checked class="accent-[#1683ff]">
+            <label class="flex items-center gap-1.5 text-[14px] text-darkk-gray whitespace-nowrap">
+                <input id="comparePreviousPeriod" type="checkbox" checked class="accent-shazam-blue">
                 Compare with previous period
             </label>
-            <button type="button" id="openReportExport" class="report-btn border border-[#1683ff] px-3 text-[#1683ff] bg-white">
+            <button type="button" id="openReportExport" class="report-btn border border-shazam-blue px-3 text-shazam-blue bg-white">
                 <span class="material-symbols-outlined text-[14px]">download</span> Export
                 <span class="material-symbols-outlined text-[15px]">keyboard_arrow_down</span>
             </button>
@@ -127,22 +59,22 @@
 
     <div class="mt-4 flex flex-wrap items-center gap-3">
         <div class="relative">
-            <button type="button" class="report-select-toggle h-9 px-3 rounded-md border border-[#dfe5ec] bg-white text-[14px] text-[#344054] flex items-center gap-2">
+            <button type="button" class="report-select-toggle h-9 px-3 rounded-md border border-[#dfe5ec] bg-white text-[14px] text-dark-black flex items-center gap-2">
                 Branch: <span id="selectedBranch">All branches</span><span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
-            <div class="report-select-menu hidden absolute left-0 top-[42px] z-30 min-w-full rounded-md border border-[#edf0f4] bg-white p-1 shadow-lg">
-                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] hover:bg-[#f3f7fb]" data-target="selectedBranch">All branches</button>
-                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] hover:bg-[#f3f7fb]" data-target="selectedBranch">Andheri East</button>
+            <div class="report-select-menu hidden absolute left-0 top-[42px] z-30 min-w-full rounded-md border border-kyc-medium-gray bg-white p-1 shadow-lg">
+                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] hover:bg-kyc-medium-gray" data-target="selectedBranch">All branches</button>
+                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] hover:bg-kyc-medium-gray" data-target="selectedBranch">Andheri East</button>
             </div>
         </div>
         <div class="relative">
-            <button type="button" class="report-select-toggle h-9 px-3 rounded-md bg-[#1683ff] text-white text-[14px] flex items-center gap-2">
+            <button type="button" class="report-select-toggle h-9 px-3 rounded-md bg-shazam-blue text-white text-[14px] flex items-center gap-2">
                 <span id="selectedReportView">Revenue View</span><span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
-            <div class="report-select-menu hidden absolute left-0 top-[42px] z-30 min-w-full rounded-md border border-[#edf0f4] bg-white p-1 shadow-lg">
-                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-target="selectedReportView">Revenue View</button>
-                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-target="selectedReportView">Bids View</button>
-                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-[#344054] hover:bg-[#f3f7fb]" data-target="selectedReportView">Order View</button>
+            <div class="report-select-menu hidden absolute left-0 top-[42px] z-30 min-w-full rounded-md border border-kyc-medium-gray bg-white p-1 shadow-lg">
+                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-dark-black hover:bg-kyc-medium-gray" data-target="selectedReportView">Revenue View</button>
+                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-dark-black hover:bg-kyc-medium-gray" data-target="selectedReportView">Bids View</button>
+                <button type="button" class="report-select-option block w-full rounded px-3 py-2 text-left text-[14px] text-dark-black hover:bg-kyc-medium-gray" data-target="selectedReportView">Order View</button>
             </div>
         </div>
     </div>
@@ -150,20 +82,20 @@
     <div id="orderViewContent" class="hidden mt-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
             <div class="metric-card">
-                <div class="flex items-center justify-between"><p class="text-[11px] text-[#697386]">Total Orders</p><span class="material-symbols-outlined text-[15px] text-[#1683ff]">event_note</span></div>
-                <p class="mt-2 text-[18px] font-semibold leading-none">1,248</p><p class="mt-1 text-[10px] text-[#22b45d]">↗ 12% <span class="text-[#98a1b1]">vs last period</span></p>
+                <div class="flex items-center justify-between"><p class="text-[11px] text-darkk-gray">Total Orders</p><span class="material-symbols-outlined text-[15px] text-shazam-blue">event_note</span></div>
+                <p class="mt-2 text-[18px] font-semibold leading-none">1,248</p><p class="mt-1 text-[10px] text-[#22b45d]">↗ 12% <span class="text-grayish-blue-slate">vs last period</span></p>
             </div>
             <div class="metric-card">
-                <div class="flex items-center justify-between"><p class="text-[11px] text-[#697386]">Completed Orders</p><span class="material-symbols-outlined text-[15px] text-[#22b45d]">check_circle</span></div>
-                <p class="mt-2 text-[18px] font-semibold leading-none">1,102</p><p class="mt-1 text-[10px] text-[#22b45d]">↗ 10% <span class="text-[#98a1b1]">vs last period</span></p>
+                <div class="flex items-center justify-between"><p class="text-[11px] text-darkk-gray">Completed Orders</p><span class="material-symbols-outlined text-[15px] text-[#22b45d]">check_circle</span></div>
+                <p class="mt-2 text-[18px] font-semibold leading-none">1,102</p><p class="mt-1 text-[10px] text-[#22b45d]">↗ 10% <span class="text-grayish-blue-slate">vs last period</span></p>
             </div>
             <div class="metric-card">
-                <div class="flex items-center justify-between"><p class="text-[11px] text-[#697386]">Pending Orders</p><span class="material-symbols-outlined text-[15px] text-[#f6b900]">schedule</span></div>
-                <p class="mt-2 text-[18px] font-semibold leading-none">146</p><p class="mt-1 text-[10px] text-[#ef4444]">↙ 8% <span class="text-[#98a1b1]">vs last period</span></p>
+                <div class="flex items-center justify-between"><p class="text-[11px] text-darkk-gray">Pending Orders</p><span class="material-symbols-outlined text-[15px] text-[#f6b900]">schedule</span></div>
+                <p class="mt-2 text-[18px] font-semibold leading-none">146</p><p class="mt-1 text-[10px] text-[#ef4444]">↙ 8% <span class="text-grayish-blue-slate">vs last period</span></p>
             </div>
             <div class="metric-card">
-                <div class="flex items-center justify-between"><p class="text-[11px] text-[#697386]">Cancelled Orders</p><span class="material-symbols-outlined text-[15px] text-[#ef4444]">block</span></div>
-                <p class="mt-2 text-[18px] font-semibold leading-none">87</p><p class="mt-1 text-[10px] text-[#ef4444]">↙ 5% <span class="text-[#98a1b1]">vs last period</span></p>
+                <div class="flex items-center justify-between"><p class="text-[11px] text-darkk-gray">Cancelled Orders</p><span class="material-symbols-outlined text-[15px] text-[#ef4444]">block</span></div>
+                <p class="mt-2 text-[18px] font-semibold leading-none">87</p><p class="mt-1 text-[10px] text-[#ef4444]">↙ 5% <span class="text-grayish-blue-slate">vs last period</span></p>
             </div>
         </div>
 
@@ -178,64 +110,64 @@
                     </div>
                 </div>
                 <div class="h-[150px] mt-2"><canvas id="orderTrendChart"></canvas></div>
-                <div class="flex justify-center gap-4 text-[9px] text-[#64748b]"><span><i class="inline-block h-2 w-2 rounded-full bg-[#1683ff] mr-1"></i>Total Orders</span><span><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Successful Orders</span></div>
+                <div class="flex justify-center gap-4 text-[9px] text-darkk-gray"><span><i class="inline-block h-2 w-2 rounded-full bg-shazam-blue mr-1"></i>Total Orders</span><span><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Successful Orders</span></div>
             </div>
-            <div class="report-card p-4">
-                <h2 class="text-[14px] font-semibold">Orders by Category</h2>
-                <div class="flex items-center justify-center gap-4 h-[190px]">
-                  <div class="relative h-[125px] w-[125px] shrink-0">
-    <canvas id="orderCategoryChart"></canvas>
-    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <b class="text-[18px] leading-none">1,248</b>
-        <span class="text-[10px] text-[#697386]">Total</span>
+          <div class="report-card p-4">
+    <h2 class="text-[16px] font-semibold">Orders by Category</h2>
+    <div class="flex items-center justify-center gap-6 h-[200px]">
+        <div class="relative h-[150px] w-[150px] shrink-0">
+            <canvas id="orderCategoryChart" class="block"></canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <b class="text-[16px] leading-none text-dark-black">1,248</b>
+                <span class="mt-1 text-[12px] leading-none text-grayish-blue-slate">Total</span>
+            </div>
+        </div>
+        <div class="flex-1 min-w-0 space-y-3 text-[12px]">
+            <div class="flex items-center gap-2"><span class="w-36 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-shazam-blue mr-1.5"></i>OTC Medicines</span><span class="h-2 flex-1 min-w-0 rounded bg-[#eef2f7]"><i class="block h-full w-[75%] rounded bg-shazam-blue"></i></span><b class="w-12 shrink-0 text-right">38.4%</b></div>
+            <div class="flex items-center gap-2"><span class="w-36 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1.5"></i>Health Supplements</span><span class="h-2 flex-1 min-w-0 rounded bg-[#eef2f7]"><i class="block h-full w-[63%] rounded bg-shazam-blue"></i></span><b class="w-12 shrink-0 text-right">32.1%</b></div>
+            <div class="flex items-center gap-2"><span class="w-36 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#f59e0b] mr-1.5"></i>Personal Care</span><span class="h-2 flex-1 min-w-0 rounded bg-[#eef2f7]"><i class="block h-full w-[38%] rounded bg-shazam-blue"></i></span><b class="w-12 shrink-0 text-right">18.7%</b></div>
+            <div class="flex items-center gap-2"><span class="w-36 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#a855f7] mr-1.5"></i>Wellness Products</span><span class="h-2 flex-1 min-w-0 rounded bg-[#eef2f7]"><i class="block h-full w-[22%] rounded bg-shazam-blue"></i></span><b class="w-12 shrink-0 text-right">10.8%</b></div>
+        </div>
     </div>
 </div>
-                    <div class="space-y-3 text-[9px] w-[55%]">
-                        <div class="flex items-center gap-2"><span class="w-24 shrink-0">OTC Medicines</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[75%] rounded bg-[#1683ff]"></i></span><b>38.4%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-24 shrink-0">Health Supplements</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[63%] rounded bg-[#1683ff]"></i></span><b>32.1%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-24 shrink-0">Personal Care</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[38%] rounded bg-[#1683ff]"></i></span><b>18.7%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-24 shrink-0">Wellness Products</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[22%] rounded bg-[#1683ff]"></i></span><b>10.8%</b></div>
-                    </div>
-                </div>
-            </div>
             <div class="report-card p-4">
                 <h2 class="text-[14px] font-semibold mb-4">Orders by Channel</h2>
                 <div class="space-y-4 pt-2 text-[10px]">
-                    <div class="flex items-center gap-3"><span class="w-8">Online</span><span class="h-2.5 flex-1 rounded-full bg-[#eef2f7]"><i class="block h-full w-[58%] rounded-full bg-[#2868ed]"></i></span><span class="w-16 text-right">684 <small class="text-[#98a1b1]">(54.8%)</small></span></div>
-                    <div class="flex items-center gap-3"><span class="w-8">In-Store</span><span class="h-2.5 flex-1 rounded-full bg-[#eef2f7]"><i class="block h-full w-[36%] rounded-full bg-[#2868ed]"></i></span><span class="w-16 text-right">421 <small class="text-[#98a1b1]">(33.7%)</small></span></div>
-                    <div class="flex items-center gap-3"><span class="w-8">Partner</span><span class="h-2.5 flex-1 rounded-full bg-[#eef2f7]"><i class="block h-full w-[12%] rounded-full bg-[#2868ed]"></i></span><span class="w-16 text-right">143 <small class="text-[#98a1b1]">(11.5%)</small></span></div>
+                    <div class="flex items-center gap-3"><span class="w-8">Online</span><span class="h-2.5 flex-1 rounded-full bg-[#eef2f7]"><i class="block h-full w-[58%] rounded-full bg-shazam-blue"></i></span><span class="w-16 text-right">684 <small class="text-grayish-blue-slate">(54.8%)</small></span></div>
+                    <div class="flex items-center gap-3"><span class="w-8">In-Store</span><span class="h-2.5 flex-1 rounded-full bg-[#eef2f7]"><i class="block h-full w-[36%] rounded-full bg-shazam-blue"></i></span><span class="w-16 text-right">421 <small class="text-grayish-blue-slate">(33.7%)</small></span></div>
+                    <div class="flex items-center gap-3"><span class="w-8">Partner</span><span class="h-2.5 flex-1 rounded-full bg-[#eef2f7]"><i class="block h-full w-[12%] rounded-full bg-shazam-blue"></i></span><span class="w-16 text-right">143 <small class="text-grayish-blue-slate">(11.5%)</small></span></div>
                 </div>
             </div>
             <div class="report-card p-4">
-                <h2 class="text-[14px] font-semibold">Order Status Breakdown</h2>
-                <div class="flex items-center justify-center gap-4 h-[190px]">
-                   <div class="relative h-[125px] w-[125px] shrink-0">
-    <canvas id="orderStatusChart"></canvas>
-    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <b class="text-[18px] leading-none">1,248</b>
-        <span class="text-[10px] text-[#697386]">Total</span>
+    <h2 class="text-[16px] font-semibold">Order Status Breakdown</h2>
+    <div class="flex items-center justify-center gap-6 h-[200px]">
+        <div class="relative h-[150px] w-[150px] shrink-0">
+            <canvas id="orderStatusChart" class="block"></canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <b class="text-[16px] leading-none text-dark-black">1,248</b>
+                <span class="mt-1 text-[12px] leading-none text-grayish-blue-slate">Total</span>
+            </div>
+        </div>
+        <div class="flex-1 min-w-0 space-y-3 text-[12px]">
+            <div class="flex items-center gap-2"><span class="w-24 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-shazam-blue mr-1.5"></i>Delivered</span><span class="h-2 flex-1 min-w-0 rounded bg-[#eef2f7]"><i class="block h-full w-[88%] rounded bg-shazam-blue"></i></span><b class="w-12 shrink-0 text-right">88.3%</b></div>
+            <div class="flex items-center gap-2"><span class="w-24 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1.5"></i>Processing</span><span class="h-2 flex-1 min-w-0 rounded bg-[#eef2f7]"><i class="block h-full w-[36%] rounded bg-shazam-blue"></i></span><b class="w-12 shrink-0 text-right">6.2%</b></div>
+            <div class="flex items-center gap-2"><span class="w-24 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#f59e0b] mr-1.5"></i>Shipped</span><span class="h-2 flex-1 min-w-0 rounded bg-[#eef2f7]"><i class="block h-full w-[23%] rounded bg-shazam-blue"></i></span><b class="w-12 shrink-0 text-right">3.8%</b></div>
+            <div class="flex items-center gap-2"><span class="w-24 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#a855f7] mr-1.5"></i>Returned</span><span class="h-2 flex-1 min-w-0 rounded bg-[#eef2f7]"><i class="block h-full w-[10%] rounded bg-shazam-blue"></i></span><b class="w-12 shrink-0 text-right">1.7%</b></div>
+        </div>
     </div>
 </div>
-                    <div class="space-y-3 text-[9px] w-[55%]">
-                        <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#2868ed] mr-1"></i>Delivered</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[88%] rounded bg-[#1683ff]"></i></span><b>88.3%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Processing</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[36%] rounded bg-[#1683ff]"></i></span><b>6.2%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#f59e0b] mr-1"></i>Shipped</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[23%] rounded bg-[#1683ff]"></i></span><b>3.8%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#a855f7] mr-1"></i>Returned</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[10%] rounded bg-[#1683ff]"></i></span><b>1.7%</b></div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="report-card mt-3 overflow-hidden">
             <h2 class="px-4 pt-4 text-[14px] font-semibold">Recent Orders</h2>
             <div class="overflow-x-auto px-4 pb-3">
                 <table class="mt-3 w-full min-w-[650px] text-[14px]">
-                    <thead class="text-[#98a1b1]"><tr class="border-b border-[#edf0f4]"><th class="px-3 py-2 font-normal">Order ID</th><th class="px-3 py-2 font-normal">Customer</th><th class="px-3 py-2 font-normal">Products</th><th class="px-3 py-2 font-normal">Order Value</th><th class="px-3 py-2 font-normal">Status</th><th class="px-3 py-2 font-normal">Order Date</th></tr></thead>
-                    <tbody class="text-[#344054]">
-                        <tr class="border-b border-[#f1f4f7]"><td class="px-3 py-2.5 font-semibold">#ORD-2026-10478</td><td class="px-3 py-2.5">Riya Sharma</td><td class="px-3 py-2.5">Paracetamol 500mg</td><td class="px-3 py-2.5 font-semibold">₹248</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#e8faf1] px-2 py-1 text-[#0b9b62]">Delivered</span></td><td class="px-3 py-2.5">29 Sep 2026</td></tr>
-                        <tr class="border-b border-[#f1f4f7]"><td class="px-3 py-2.5 font-semibold">#ORD-2026-10477</td><td class="px-3 py-2.5">Amit Verma</td><td class="px-3 py-2.5">Vitamin D 1000IU</td><td class="px-3 py-2.5 font-semibold">₹499</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#fff7df] px-2 py-1 text-[#c77c00]">Processing</span></td><td class="px-3 py-2.5">29 Sep 2026</td></tr>
-                        <tr class="border-b border-[#f1f4f7]"><td class="px-3 py-2.5 font-semibold">#ORD-2026-10476</td><td class="px-3 py-2.5">Neha Kapoor</td><td class="px-3 py-2.5">Multivitamin</td><td class="px-3 py-2.5 font-semibold">₹699</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#eaf2ff] px-2 py-1 text-[#2868ed]">Shipped</span></td><td class="px-3 py-2.5">28 Sep 2026</td></tr>
-                        <tr class="border-b border-[#f1f4f7]"><td class="px-3 py-2.5 font-semibold">#ORD-2026-10475</td><td class="px-3 py-2.5">Suresh Patel</td><td class="px-3 py-2.5">Cough Syrup</td><td class="px-3 py-2.5 font-semibold">₹320</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#e8faf1] px-2 py-1 text-[#0b9b62]">Delivered</span></td><td class="px-3 py-2.5">28 Sep 2026</td></tr>
+                    <thead class="text-grayish-blue-slate"><tr class="border-b border-kyc-medium-gray"><th class="px-3 py-2 font-normal">Order ID</th><th class="px-3 py-2 font-normal">Customer</th><th class="px-3 py-2 font-normal">Products</th><th class="px-3 py-2 font-normal">Order Value</th><th class="px-3 py-2 font-normal">Status</th><th class="px-3 py-2 font-normal">Order Date</th></tr></thead>
+                    <tbody class="text-dark-black">
+                        <tr class="border-b border-kyc-medium-gray"><td class="px-3 py-2.5 font-semibold">#ORD-2026-10478</td><td class="px-3 py-2.5">Riya Sharma</td><td class="px-3 py-2.5">Paracetamol 500mg</td><td class="px-3 py-2.5 font-semibold">₹248</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#e8faf1] px-2 py-1 text-green-dark">Delivered</span></td><td class="px-3 py-2.5">29 Sep 2026</td></tr>
+                        <tr class="border-b border-kyc-medium-gray"><td class="px-3 py-2.5 font-semibold">#ORD-2026-10477</td><td class="px-3 py-2.5">Amit Verma</td><td class="px-3 py-2.5">Vitamin D 1000IU</td><td class="px-3 py-2.5 font-semibold">₹499</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#fff7df] px-2 py-1 text-[#c77c00]">Processing</span></td><td class="px-3 py-2.5">29 Sep 2026</td></tr>
+                        <tr class="border-b border-kyc-medium-gray"><td class="px-3 py-2.5 font-semibold">#ORD-2026-10476</td><td class="px-3 py-2.5">Neha Kapoor</td><td class="px-3 py-2.5">Multivitamin</td><td class="px-3 py-2.5 font-semibold">₹699</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#eaf2ff] px-2 py-1 text-shazam-blue">Shipped</span></td><td class="px-3 py-2.5">28 Sep 2026</td></tr>
+                        <tr class="border-b border-kyc-medium-gray"><td class="px-3 py-2.5 font-semibold">#ORD-2026-10475</td><td class="px-3 py-2.5">Suresh Patel</td><td class="px-3 py-2.5">Cough Syrup</td><td class="px-3 py-2.5 font-semibold">₹320</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#e8faf1] px-2 py-1 text-green-dark">Delivered</span></td><td class="px-3 py-2.5">28 Sep 2026</td></tr>
                         <tr><td class="px-3 py-2.5 font-semibold">#ORD-2026-10474</td><td class="px-3 py-2.5">Priya Nair</td><td class="px-3 py-2.5">ORS Pack</td><td class="px-3 py-2.5 font-semibold">₹180</td><td class="px-3 py-2.5"><span class="rounded-full bg-[#fff0f0] px-2 py-1 text-[#e23b3b]">Cancelled</span></td><td class="px-3 py-2.5">27 Sep 2026</td></tr>
                     </tbody>
                 </table>
@@ -246,27 +178,27 @@
     <div id="bidsViewContent" class="hidden mt-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
             <div class="metric-card">
-                <div class="flex items-center justify-between"><p class="text-[12px] text-[#697386]">Total Bids</p><span class="material-symbols-outlined text-[15px] text-[#1683ff]">event_note</span></div>
-                <p class="mt-2 text-[16px] font-semibold leading-none">324</p><p class="mt-1 text-[12px] text-[#22b45d]">↗ 12% <span class="text-[#98a1b1]">vs last period</span></p>
+                <div class="flex items-center justify-between"><p class="text-[12px] text-darkk-gray">Total Bids</p><span class="material-symbols-outlined text-[15px] text-shazam-blue">event_note</span></div>
+                <p class="mt-2 text-[16px] font-semibold leading-none">324</p><p class="mt-1 text-[12px] text-[#22b45d]">↗ 12% <span class="text-grayish-blue-slate">vs last period</span></p>
             </div>
             <div class="metric-card">
-                <div class="flex items-center justify-between"><p class="text-[12px] text-[#697386]">Accepted Bids</p><span class="material-symbols-outlined text-[15px] text-[#22b45d]">check_circle</span></div>
-                <p class="mt-2 text-[16px] font-semibold leading-none">182</p><p class="mt-1 text-[12px] text-[#22b45d]">↗ 8% <span class="text-[#98a1b1]">vs last period</span></p>
+                <div class="flex items-center justify-between"><p class="text-[12px] text-darkk-gray">Accepted Bids</p><span class="material-symbols-outlined text-[15px] text-[#22b45d]">check_circle</span></div>
+                <p class="mt-2 text-[16px] font-semibold leading-none">182</p><p class="mt-1 text-[12px] text-[#22b45d]">↗ 8% <span class="text-grayish-blue-slate">vs last period</span></p>
             </div>
             <div class="metric-card">
-                <div class="flex items-center justify-between"><p class="text-[12px] text-[#697386]">Pending Bids</p><span class="material-symbols-outlined text-[15px] text-[#f6b900]">schedule</span></div>
-                <p class="mt-2 text-[16px] font-semibold leading-none">98</p><p class="mt-1 text-[12px] text-[#ef4444]">↙ 6% <span class="text-[#98a1b1]">vs last period</span></p>
+                <div class="flex items-center justify-between"><p class="text-[12px] text-darkk-gray">Pending Bids</p><span class="material-symbols-outlined text-[15px] text-[#f6b900]">schedule</span></div>
+                <p class="mt-2 text-[16px] font-semibold leading-none">98</p><p class="mt-1 text-[12px] text-[#ef4444]">↙ 6% <span class="text-grayish-blue-slate">vs last period</span></p>
             </div>
             <div class="metric-card">
-                <div class="flex items-center justify-between"><p class="text-[12px] text-[#697386]">Rejected Bids</p><span class="material-symbols-outlined text-[15px] text-[#ef4444]">block</span></div>
-                <p class="mt-2 text-[16px] font-semibold leading-none">44</p><p class="mt-1 text-[12px] text-[#ef4444]">↙ 5% <span class="text-[#98a1b1]">vs last period</span></p>
+                <div class="flex items-center justify-between"><p class="text-[12px] text-darkk-gray">Rejected Bids</p><span class="material-symbols-outlined text-[15px] text-[#ef4444]">block</span></div>
+                <p class="mt-2 text-[16px] font-semibold leading-none">44</p><p class="mt-1 text-[12px] text-[#ef4444]">↙ 5% <span class="text-grayish-blue-slate">vs last period</span></p>
             </div>
         </div>
 
         <div class="mt-3 grid grid-cols-1 xl:grid-cols-2 gap-3">
             <div class="report-card p-4">
                 <h2 class="text-[16px] font-semibold">Bid Trend</h2>
-                <p class="mt-1 text-[12px] text-[#98a1b1]">Total bids over the selected period</p>
+                <p class="mt-1 text-[12px] text-grayish-blue-slate">Total bids over the selected period</p>
                 <div class="h-[150px] mt-2"><canvas id="bidTrendViewChart"></canvas></div>
             </div>
             <div class="report-card chart-card flex flex-col p-4">
@@ -280,10 +212,10 @@
     </div>
 </div>
                     <div class="w-full max-w-[320px] space-y-3 text-[12px] sm:w-[56%]">
-                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#1683ff] mr-1"></i>Accepted</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[67%] rounded bg-[#1683ff]"></i></span><b class="w-10 shrink-0 text-right">66.7%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#ef4444] mr-1"></i>Rejected</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[34%] rounded bg-[#1683ff]"></i></span><b class="w-10 shrink-0 text-right">33.3%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#f59e0b] mr-1"></i>Expired</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[12%] rounded bg-[#1683ff]"></i></span><b class="w-10 shrink-0 text-right">11.1%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Withdrawn</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[7%] rounded bg-[#1683ff]"></i></span><b class="w-10 shrink-0 text-right">5.6%</b></div>
+                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-shazam-blue mr-1"></i>Accepted</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[67%] rounded bg-shazam-blue"></i></span><b class="w-10 shrink-0 text-right">66.7%</b></div>
+                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#ef4444] mr-1"></i>Rejected</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[34%] rounded bg-shazam-blue"></i></span><b class="w-10 shrink-0 text-right">33.3%</b></div>
+                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#f59e0b] mr-1"></i>Expired</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[12%] rounded bg-shazam-blue"></i></span><b class="w-10 shrink-0 text-right">11.1%</b></div>
+                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Withdrawn</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[7%] rounded bg-shazam-blue"></i></span><b class="w-10 shrink-0 text-right">5.6%</b></div>
                     </div>
                 </div>
             </div>
@@ -291,32 +223,32 @@
             <div class="report-card p-4">
                 <h2 class="text-[16px] font-semibold">Bids by Medicine Category</h2>
                 <div class="mt-5 space-y-3 text-[12px]">
-                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">Prescription Medicines</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[88%] rounded bg-[#2868ed]"></i></span><b>148</b></div>
-                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">OTC Medicines</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[65%] rounded bg-[#2868ed]"></i></span><b>112</b></div>
-                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">Surgical Supplies</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[50%] rounded bg-[#2868ed]"></i></span><b>86</b></div>
-                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">Vitamins &amp; Supplements</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[42%] rounded bg-[#2868ed]"></i></span><b>78</b></div>
-                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">Medical Devices</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[32%] rounded bg-[#2868ed]"></i></span><b>62</b></div>
+                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">Prescription Medicines</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[88%] rounded bg-shazam-blue"></i></span><b>148</b></div>
+                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">OTC Medicines</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[65%] rounded bg-shazam-blue"></i></span><b>112</b></div>
+                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">Surgical Supplies</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[50%] rounded bg-shazam-blue"></i></span><b>86</b></div>
+                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">Vitamins &amp; Supplements</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[42%] rounded bg-shazam-blue"></i></span><b>78</b></div>
+                    <div class="flex items-center gap-3"><span class="w-28 shrink-0">Medical Devices</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[32%] rounded bg-shazam-blue"></i></span><b>62</b></div>
                 </div>
             </div>
             <div class="report-card chart-card flex flex-col p-4">
                 <h2 class="min-h-6 text-[16px] font-semibold">Offers &amp; Bids Performance</h2>
                 <div class="mt-2 grid grid-cols-4 items-start gap-2 text-center">
-                    <div class="min-w-0"><strong class="block text-[16px] leading-5">32</strong><p class="text-[12px] text-[#98a1b1]">Answered</p></div>
-                    <div class="min-w-0"><strong class="block text-[16px] leading-5 text-[#10b981]">21</strong><p class="text-[12px] text-[#98a1b1]">Won</p></div>
-                    <div class="min-w-0"><strong class="block text-[16px] leading-5 text-[#ef4444]">11</strong><p class="text-[12px] text-[#98a1b1]">Lost</p></div>
-                    <div class="min-w-0"><strong class="block text-[16px] leading-5">65.6%</strong><p class="text-[12px] text-[#98a1b1]">Win rate</p></div>
+                    <div class="min-w-0"><strong class="block text-[16px] leading-5">32</strong><p class="text-[12px] text-grayish-blue-slate">Answered</p></div>
+                    <div class="min-w-0"><strong class="block text-[16px] leading-5 text-[#10b981]">21</strong><p class="text-[12px] text-grayish-blue-slate">Won</p></div>
+                    <div class="min-w-0"><strong class="block text-[16px] leading-5 text-[#ef4444]">11</strong><p class="text-[12px] text-grayish-blue-slate">Lost</p></div>
+                    <div class="min-w-0"><strong class="block text-[16px] leading-5">65.6%</strong><p class="text-[12px] text-grayish-blue-slate">Win rate</p></div>
                 </div>
                 <div class="mt-2 min-h-0 flex-1"><canvas id="bidOffersViewChart"></canvas></div>
-                <p class="mt-1 text-center text-[12px] leading-4 text-[#98a1b1]">Active bids awaiting customer response are excluded from answered totals.</p>
+                <p class="mt-1 text-center text-[12px] leading-4 text-grayish-blue-slate">Active bids awaiting customer response are excluded from answered totals.</p>
             </div>
 
             <div class="report-card p-4">
-                <div class="flex items-center justify-between"><h2 class="text-[16px] font-semibold">Bid Conversion Rate</h2><span class="text-[12px] text-[#64748b]"><i class="inline-block h-2 w-2 rounded-full bg-[#1683ff] mr-1"></i>Current Period &nbsp; <i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Previous Period</span></div>
+                <div class="flex items-center justify-between"><h2 class="text-[16px] font-semibold">Bid Conversion Rate</h2><span class="text-[12px] text-darkk-gray"><i class="inline-block h-2 w-2 rounded-full bg-shazam-blue mr-1"></i>Current Period &nbsp; <i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Previous Period</span></div>
                 <div class="h-[145px] mt-2"><canvas id="bidConversionViewChart"></canvas></div>
             </div>
             <div class="report-card p-4">
-                <div class="flex items-center justify-between"><h2 class="text-[16px] font-semibold">Fulfilment Turnaround Time</h2><span class="text-[12px] text-[#64748b]"><i class="inline-block h-2 w-2 rounded-full bg-[#1683ff] mr-1"></i>Current Period &nbsp; <i class="inline-block h-2 w-2 rounded-full bg-[#98a1b1] mr-1"></i>Previous Period</span></div>
-                <p class="mt-1 text-[12px] text-[#98a1b1]">Average hours to respond to pharmacy bids, current vs previous period, by week</p>
+                <div class="flex items-center justify-between"><h2 class="text-[16px] font-semibold">Fulfilment Turnaround Time</h2><span class="text-[12px] text-darkk-gray"><i class="inline-block h-2 w-2 rounded-full bg-shazam-blue mr-1"></i>Current Period &nbsp; <i class="inline-block h-2 w-2 rounded-full bg-grayish-blue-slate mr-1"></i>Previous Period</span></div>
+                <p class="mt-1 text-[12px] text-grayish-blue-slate">Average hours to respond to pharmacy bids, current vs previous period, by week</p>
                 <div class="h-[125px] mt-1"><canvas id="bidTurnaroundViewChart"></canvas></div>
             </div>
         </div>
@@ -326,90 +258,104 @@
     <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div class="metric-card">
             <div class="flex items-center justify-between">
-                <p class="text-[11px] text-[#697386]">Total Revenue</p><span class="material-symbols-outlined text-[15px] text-[#1683ff]">info</span>
+                <p class="text-[11px] text-darkk-gray">Total Revenue</p><span class="material-symbols-outlined text-[15px] text-shazam-blue">info</span>
             </div>
             <p class="mt-2 text-[18px] font-semibold leading-none">₹4,52,500</p>
-            <p class="mt-1 text-[10px] text-[#22b45d]">↗ 12% <span class="text-[#98a1b1]">vs last period</span></p>
+            <p class="mt-1 text-[10px] text-[#22b45d]">↗ 12% <span class="text-grayish-blue-slate">vs last period</span></p>
         </div>
         <div class="metric-card">
             <div class="flex items-center justify-between">
-                <p class="text-[11px] text-[#697386]">Avg Revenue per Order</p><span class="material-symbols-outlined text-[15px] text-[#1683ff]">info</span>
+                <p class="text-[11px] text-darkk-gray">Avg Revenue per Order</p><span class="material-symbols-outlined text-[15px] text-shazam-blue">info</span>
             </div>
             <p class="mt-2 text-[18px] font-semibold leading-none">₹3,075</p>
-            <p class="mt-1 text-[10px] text-[#22b45d]">↗ 8% <span class="text-[#98a1b1]">vs last period</span></p>
+            <p class="mt-1 text-[10px] text-[#22b45d]">↗ 8% <span class="text-grayish-blue-slate">vs last period</span></p>
         </div>
         <div class="metric-card">
             <div class="flex items-center justify-between">
-                <p class="text-[11px] text-[#697386]">Revenue Growth</p><span class="material-symbols-outlined text-[15px] text-[#1683ff]">info</span>
+                <p class="text-[11px] text-darkk-gray">Revenue Growth</p><span class="material-symbols-outlined text-[15px] text-shazam-blue">info</span>
             </div>
             <p class="mt-2 text-[18px] font-semibold leading-none">18.5%</p>
-            <p class="mt-1 text-[10px] text-[#22b45d]">↗ 2.1% <span class="text-[#98a1b1]">vs last period</span></p>
+            <p class="mt-1 text-[10px] text-[#22b45d]">↗ 2.1% <span class="text-grayish-blue-slate">vs last period</span></p>
         </div>
         <div class="metric-card">
             <div class="flex items-center justify-between">
-                <p class="text-[11px] text-[#697386]">Cancelled Revenue</p><span class="material-symbols-outlined text-[15px] text-[#ef4444]">block</span>
+                <p class="text-[11px] text-darkk-gray">Cancelled Revenue</p><span class="material-symbols-outlined text-[15px] text-[#ef4444]">block</span>
             </div>
             <p class="mt-2 text-[18px] font-semibold leading-none">₹28,750</p>
-            <p class="mt-1 text-[10px] text-[#ef4444]">↙ 6% <span class="text-[#98a1b1]">vs last period</span></p>
+            <p class="mt-1 text-[10px] text-[#ef4444]">↙ 6% <span class="text-grayish-blue-slate">vs last period</span></p>
         </div>
     </div>
 
     <div class="mt-4 grid grid-cols-1 xl:grid-cols-[1.08fr_.92fr] gap-3">
-        <div class="report-card chart-card p-4">
-            <div class="flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-[#1683ff]">bar_chart</span><h2 class="text-[14px] font-semibold">Revenue Trend</h2></div>
-                    <p class="text-[10px] text-[#9aa3b2] mt-1">Your revenue over the selected period</p>
-                </div>
-                <div class="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[9px]">
-                    <span class="flex items-center gap-1"><i class="h-2 w-2 rounded-full bg-[#1683ff]"></i>Revenue</span>
-                    <span class="flex items-center gap-1 text-[#697386]"><i class="h-2 w-2 rounded-full bg-[#635bff]"></i>Previous Period (Last 7 days)</span>
-                </div>
+    <div class="report-card chart-card p-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-shazam-blue">bar_chart</span><h2 class="text-[14px] font-semibold">Revenue Trend</h2></div>
+                <p class="text-[10px] text-darkk-gray mt-1">Your revenue over the selected period</p>
             </div>
-            <div class="h-[190px] mt-3"><canvas id="lineChart"></canvas></div>
+            <div class="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[9px]">
+                <span class="flex items-center gap-1"><i class="h-2 w-2 rounded-full bg-shazam-blue"></i>Revenue</span>
+                <span class="flex items-center gap-1 text-darkk-gray"><i class="h-2 w-2 rounded-full bg-[#635bff]"></i>Previous Period (Last 7 days)</span>
+            </div>
         </div>
-        <div class="report-card chart-card p-4">
-            <div class="flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-[#1683ff]">currency_rupee</span><h2 class="text-[14px] font-semibold">Payment Method Breakdown</h2></div>
-                    <p class="text-[10px] text-[#9aa3b2] mt-1">Share of payments received</p>
-                </div>
+        <div class="h-[190px] mt-3"><canvas id="lineChart"></canvas></div>
+    </div>
+
+    <div class="report-card chart-card p-4 sm:p-5">
+        <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined mt-0.5 text-[16px] text-shazam-blue">currency_rupee</span>
+            <div>
+                <h2 class="m-0 text-[14px] font-semibold leading-snug text-dark-black">Payment Method Breakdown</h2>
+                <p class="m-0 mt-0.5 text-[10px] text-darkk-gray">Share of payments received</p>
             </div>
-            <div class="flex items-center justify-center gap-3 sm:gap-5 h-[205px]">
-                <div class="h-[135px] w-[135px] sm:h-[150px] sm:w-[150px] shrink-0"><canvas id="pieChart"></canvas></div>
-                <div class="space-y-3 text-[10px] text-[#344054] min-w-[110px] sm:min-w-[120px]">
-                    <div class="flex items-center justify-between gap-5"><span><i class="inline-block h-2 w-2 rounded-full bg-[#1683ff] mr-2"></i>UPI</span><strong>52.0%</strong></div>
-                    <div class="flex items-center justify-between gap-5"><span><i class="inline-block h-2 w-2 rounded-full bg-[#635bff] mr-2"></i>Card</span><strong>34.0%</strong></div>
-                    <div class="flex items-center justify-between gap-5"><span><i class="inline-block h-2 w-2 rounded-full bg-[#2bc35a] mr-2"></i>Net Banking</span><strong>14.0%</strong></div>
+        </div>
+        <div class="mt-2 flex h-[205px] flex-col items-center justify-center gap-4 sm:flex-row sm:items-center sm:justify-around sm:gap-6">
+            <div class="relative flex h-[135px] w-[135px] shrink-0 items-center justify-center sm:h-[150px] sm:w-[150px]">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="min-w-[145px] sm:min-w-[165px] space-y-3 text-[14px] leading-5 text-dark-black">
+                <div class="flex items-center justify-between gap-6">
+                    <span class="flex items-center gap-2"><i class="inline-block h-2.5 w-2.5 rounded-full bg-shazam-blue"></i>UPI</span>
+                    <strong class="font-semibold text-dark-black tabular-nums">52.0%</strong>
+                </div>
+                <div class="flex items-center justify-between gap-6">
+                    <span class="flex items-center gap-2"><i class="inline-block h-2.5 w-2.5 rounded-full bg-[#635bff]"></i>Card</span>
+                    <strong class="font-semibold text-dark-black tabular-nums">34.0%</strong>
+                </div>
+                <div class="flex items-center justify-between gap-6">
+                    <span class="flex items-center gap-2"><i class="inline-block h-2.5 w-2.5 rounded-full bg-[#2bc35a]"></i>Net Banking</span>
+                    <strong class="font-semibold text-dark-black tabular-nums">14.0%</strong>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
 
     <div class="report-card inventory-attention mt-4 p-0 overflow-hidden">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-3">
-            <div class="flex flex-wrap items-center gap-4 text-[12px] text-[#697386]">
-                <span class="flex items-center gap-2 text-[#202b3c] font-semibold">
+            <div class="flex flex-wrap items-center gap-4 text-[12px] text-darkk-gray">
+                <span class="flex items-center gap-2 text-[dark-black] font-semibold">
                     <span class="material-symbols-outlined text-[#ef9d32] text-[15px]">error</span>
                     Inventory attention
                 </span>
-                <span>Low/Critical: <strong class="text-[#202b3c]">2 products</strong></span>
-                <span>Out of Stock: <strong class="text-[#202b3c]">1</strong></span>
-                <span>Expiring: <strong class="text-[#202b3c]">30d 2 batches</strong></span>
+                <span>Low/Critical: <strong class="text-[dark-black]">2 products</strong></span>
+                <span>Out of Stock: <strong class="text-[dark-black]">1</strong></span>
+                <span>Expiring: <strong class="text-[dark-black]">30d 2 batches</strong></span>
             </div>
-            <button type="button" class="text-[14px] text-[#347fe7] font-bold whitespace-nowrap cursor-pointer">Open Inventory ↗</button>
+            <button type="button" class="text-[14px] text-shazam-blue font-bold whitespace-nowrap cursor-pointer">Open Inventory ↗</button>
         </div>
     </div>
 
     <div class="report-card mt-4 px-4 pt-4 pb-3 overflow-hidden">
         <div class="flex items-center justify-between mb-3">
             <h2 class="text-[14px] font-semibold">Top Medicines</h2>
-            <button type="button" id="openAllMedicines" class="text-[12px] text-[#347fe7]">View All →</button>
+            <button type="button" id="openAllMedicines" class="text-[12px] text-shazam-blue">View All →</button>
         </div>
         <div class="overflow-x-auto">
             <table id="topMedicinesTable" class="w-full border-collapse text-[14px]">
                 <thead>
-                    <tr class="bg-[#3799f5] text-white">
+                    <tr class="bg-shazam-blue text-white">
                         <th class="text-left font-semibold px-12 py-2.5">PRODUCT</th>
                         <th class="text-left font-semibold px-3 py-2.5">QTY SOLD · UNIT</th>
                         <th class="text-left font-semibold px-3 py-2.5">COMPLETED ORDERS</th>
@@ -418,95 +364,95 @@
                         <th class="text-right font-semibold px-12 py-2.5">ACTION</th>
                     </tr>
                 </thead>
-                <tbody class="text-[#202b3c]">
-                    <tr class="border-b border-[#edf0f4]">
+                <tbody class="text-dark-black">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Crocin 500mg Tablet</td>
                         <td class="px-3 py-3">48 strips</td>
                         <td class="px-3 py-3">32</td>
                         <td class="px-3 py-3">₹4,800</td>
                         <td class="px-3 py-3">12</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
-                    <tr class="border-b border-[#edf0f4]">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Vitamin C 500mg</td>
                         <td class="px-3 py-3">40 strips</td>
                         <td class="px-3 py-3">28</td>
                         <td class="px-3 py-3">₹2,400</td>
                         <td class="px-3 py-3">100</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
-                    <tr class="border-b border-[#edf0f4]">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Pantop 40mg</td>
                         <td class="px-3 py-3">35 strips</td>
                         <td class="px-3 py-3">22</td>
                         <td class="px-3 py-3">₹3,800</td>
                         <td class="px-3 py-3">70</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
-                    <tr class="border-b border-[#edf0f4]">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Amoxicillin 500mg</td>
                         <td class="px-3 py-3">30 strips</td>
                         <td class="px-3 py-3">18</td>
                         <td class="px-3 py-3">₹4,500</td>
                         <td class="px-3 py-3">50</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
-                    <tr class="border-b border-[#edf0f4]">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Atorva 10mg</td>
                         <td class="px-3 py-3">28 strips</td>
                         <td class="px-3 py-3">20</td>
                         <td class="px-3 py-3">₹2,520</td>
                         <td class="px-3 py-3">50</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
-                    <tr class="border-b border-[#edf0f4]">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Paracetamol 650mg</td>
                         <td class="px-3 py-3">26 strips</td>
                         <td class="px-3 py-3">19</td>
                         <td class="px-3 py-3">₹1,820</td>
                         <td class="px-3 py-3">85</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
-                    <tr class="border-b border-[#edf0f4]">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Azithromycin 500mg</td>
                         <td class="px-3 py-3">24 strips</td>
                         <td class="px-3 py-3">16</td>
                         <td class="px-3 py-3">₹3,600</td>
                         <td class="px-3 py-3">40</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
-                    <tr class="border-b border-[#edf0f4]">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Metformin 500mg</td>
                         <td class="px-3 py-3">22 strips</td>
                         <td class="px-3 py-3">15</td>
                         <td class="px-3 py-3">₹1,540</td>
                         <td class="px-3 py-3">110</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
-                    <tr class="border-b border-[#edf0f4]">
+                    <tr class="border-b border-kyc-medium-gray">
                         <td class="px-12 py-3">Cetirizine 10mg</td>
                         <td class="px-3 py-3">20 strips</td>
                         <td class="px-3 py-3">14</td>
                         <td class="px-3 py-3">₹1,200</td>
                         <td class="px-3 py-3">95</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
                     <tr>
@@ -516,7 +462,7 @@
                         <td class="px-3 py-3">₹2,160</td>
                         <td class="px-3 py-3">60</td>
                         <td class="px-12 py-3 text-right"><span
-                                class="material-symbols-outlined text-[#3799f5] text-[16px] cursor-pointer">visibility</span>
+                                class="material-symbols-outlined text-shazam-blue text-[16px] cursor-pointer">visibility</span>
                         </td>
                     </tr>
                 </tbody>
@@ -527,25 +473,25 @@
     <div class="report-card mt-4 px-4 py-4">
         <h2 class="text-[14px] font-semibold mb-3">Recent Report Activity</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 text-[12px]">
-            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
-                        class="material-symbols-outlined text-[12px] text-[#347fe7] align-middle mr-2">trophy</span>ORD:
-                    3320 completed · ₹420</span><span class="text-[#98a1b1] whitespace-nowrap">22 Jul 12:40 PM</span>
+            <div class="flex justify-between gap-3"><span class="text-darkk-gray"><span
+                        class="material-symbols-outlined text-[12px] text-shazam-blue align-middle mr-2">trophy</span>ORD:
+                    3320 completed · ₹420</span><span class="text-grayish-blue-slate whitespace-nowrap">22 Jul 12:40 PM</span>
             </div>
-            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
-                        class="material-symbols-outlined text-[12px] text-[#347fe7] align-middle mr-2">trophy</span>New
-                    5-star review · from Monica Singh</span><span class="text-[#98a1b1] whitespace-nowrap">22 Jul 12:00
+            <div class="flex justify-between gap-3"><span class="text-darkk-gray"><span
+                        class="material-symbols-outlined text-[12px] text-shazam-blue align-middle mr-2">trophy</span>New
+                    5-star review · from Monica Singh</span><span class="text-grayish-blue-slate whitespace-nowrap">22 Jul 12:00
                     PM</span></div>
-            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
+            <div class="flex justify-between gap-3"><span class="text-darkk-gray"><span
                         class="material-symbols-outlined text-[12px] text-[#f0a43a] align-middle mr-2">trophy</span>Low
                     stock alert · Crocin 500mg, 12 strips remaining</span><span
-                    class="text-[#98a1b1] whitespace-nowrap">22 Jul 9:00 AM</span></div>
-            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
-                        class="material-symbols-outlined text-[12px] text-[#347fe7] align-middle mr-2">trophy</span>3
-                    transactions collected today · ₹1,340</span><span class="text-[#98a1b1] whitespace-nowrap">22 Jul
+                    class="text-grayish-blue-slate whitespace-nowrap">22 Jul 9:00 AM</span></div>
+            <div class="flex justify-between gap-3"><span class="text-darkk-gray"><span
+                        class="material-symbols-outlined text-[12px] text-shazam-blue align-middle mr-2">trophy</span>3
+                    transactions collected today · ₹1,340</span><span class="text-grayish-blue-slate whitespace-nowrap">22 Jul
                     9:00 AM</span></div>
-            <div class="flex justify-between gap-3"><span class="text-[#697386]"><span
-                        class="material-symbols-outlined text-[12px] text-[#347fe7] align-middle mr-2">trophy</span>2
-                    batches expire within 30 days</span><span class="text-[#98a1b1] whitespace-nowrap">22 Jul 8:00
+            <div class="flex justify-between gap-3"><span class="text-darkk-gray"><span
+                        class="material-symbols-outlined text-[12px] text-shazam-blue align-middle mr-2">trophy</span>2
+                    batches expire within 30 days</span><span class="text-grayish-blue-slate whitespace-nowrap">22 Jul 8:00
                     AM</span></div>
         </div>
     </div>
@@ -554,31 +500,31 @@
 
 <div id="allMedicinesModal" class="hidden fixed inset-0 z-[100] bg-black/40 p-4 items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="allMedicinesTitle">
     <div class="w-full max-w-[600px] overflow-hidden rounded-[12px] bg-white shadow-2xl">
-        <div class="flex items-center justify-between border-b border-[#edf0f4] px-4 py-3">
+        <div class="flex items-center justify-between border-b border-kyc-medium-gray px-4 py-3">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f3ff] text-[#1683ff]">medication</span>
-                <div><h2 id="allMedicinesTitle" class="text-[16px] font-semibold">Top Medicines</h2><p class="text-[12px] text-[#98a1b1]">Your best performing medicines based on sales and demand</p></div>
+                <span class="material-symbols-outlined flex h-8 w-8 items-center justify-center rounded-lg bg-grayish-blue-slate text-shazam-blue">medication</span>
+                <div><h2 id="allMedicinesTitle" class="text-[16px] font-semibold">Top Medicines</h2><p class="text-[12px] text-grayish-blue-slate">Your best performing medicines based on sales and demand</p></div>
             </div>
-            <button type="button" class="closeAllMedicines material-symbols-outlined text-[18px] text-[#344054]" aria-label="Close top medicines">cancel</button>
+            <button type="button" class="closeAllMedicines material-symbols-outlined text-[18px] text-dark-black" aria-label="Close top medicines">cancel</button>
         </div>
         <div class="flex items-center justify-between gap-3 px-4 py-3">
-            <button type="button" class="flex h-8 items-center gap-2 rounded-md border border-[#e5eaf0] px-2 text-[12px] text-[#344054]"><span class="material-symbols-outlined text-[14px]">calendar_month</span>Last 30 Days<span class="material-symbols-outlined text-[14px]">keyboard_arrow_down</span></button>
-            <button type="button" id="allMedicinesExport" class="flex h-8 items-center gap-2 rounded-md border border-[#1683ff] px-3 text-[12px] text-[#1683ff]"><span class="material-symbols-outlined text-[14px]">download</span>Export Report</button>
+            <button type="button" class="flex h-8 items-center gap-2 rounded-md border border-kyc-medium-gray px-2 text-[12px] text-dark-black"><span class="material-symbols-outlined text-[14px]">calendar_month</span>Last 30 Days<span class="material-symbols-outlined text-[14px]">keyboard_arrow_down</span></button>
+            <button type="button" id="allMedicinesExport" class="flex h-8 items-center gap-2 rounded-md border border-shazam-blue px-3 text-[12px] text-shazam-blue"><span class="material-symbols-outlined text-[14px]">download</span>Export Report</button>
         </div>
         <div class="overflow-x-auto px-4">
             <table class="w-full min-w-[560px] border-collapse text-[12px]">
-                <thead><tr class="bg-[#1683ff] text-white"><th class="px-2 py-2 text-center">#</th><th class="px-2 py-2 text-left">Product</th><th class="px-2 py-2 text-left">Qty Sold · Unit</th><th class="px-2 py-2 text-left">Completed Orders</th><th class="px-2 py-2 text-left">Net Sales</th><th class="px-2 py-2 text-left">Available Stock</th><th class="px-2 py-2 text-center">Action</th></tr></thead>
-                <tbody id="allMedicinesTableBody" class="text-[#344054]"></tbody>
+                <thead><tr class="bg-shazam-blue text-white"><th class="px-2 py-2 text-center">#</th><th class="px-2 py-2 text-left">Product</th><th class="px-2 py-2 text-left">Qty Sold · Unit</th><th class="px-2 py-2 text-left">Completed Orders</th><th class="px-2 py-2 text-left">Net Sales</th><th class="px-2 py-2 text-left">Available Stock</th><th class="px-2 py-2 text-center">Action</th></tr></thead>
+                <tbody id="allMedicinesTableBody" class="text-dark-black"></tbody>
             </table>
         </div>
-        <div class="flex items-center justify-between border-t border-[#edf0f4] px-4 py-3 text-[12px] text-[#98a1b1]">
-            <span>Showing <strong class="text-[#344054]">1 - 10</strong> of 10 medicines</span>
+        <div class="flex items-center justify-between border-t border-kyc-medium-gray px-4 py-3 text-[12px] text-grayish-blue-slate">
+            <span>Showing <strong class="text-dark-black">1 - 10</strong> of 10 medicines</span>
             <div class="flex items-center gap-1">
-                <button type="button" class="h-7 w-7 rounded border border-[#e5eaf0] text-[#98a1b1]" aria-label="Previous page">‹</button>
-                <button type="button" class="h-7 w-7 rounded bg-[#1683ff] text-white">1</button>
-                <button type="button" class="h-7 w-7 rounded border border-[#e5eaf0] text-[#344054]">2</button>
-                <button type="button" class="h-7 w-7 rounded border border-[#e5eaf0] text-[#344054]" aria-label="Next page">›</button>
-                <button type="button" class="closeAllMedicines ml-2 h-7 rounded-md border border-[#1683ff] px-3 text-[#1683ff]">Close</button>
+                <button type="button" class="h-7 w-7 rounded border border-kyc-medium-gray text-grayish-blue-slate" aria-label="Previous page">‹</button>
+                <button type="button" class="h-7 w-7 rounded bg-shazam-blue text-white">1</button>
+                <button type="button" class="h-7 w-7 rounded border border-kyc-medium-gray text-dark-black">2</button>
+                <button type="button" class="h-7 w-7 rounded border border-kyc-medium-gray text-dark-black" aria-label="Next page">›</button>
+                <button type="button" class="closeAllMedicines ml-2 h-7 rounded-md border border-shazam-blue px-3 text-shazam-blue">Close</button>
             </div>
         </div>
     </div>
@@ -586,91 +532,91 @@
 
 <div id="medicineDetailsModal" class="hidden fixed inset-0 z-[110] bg-black/40 p-4 items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="medicineDetailsTitle">
     <div class="w-full max-w-[530px] overflow-hidden rounded-[12px] bg-white shadow-2xl">
-        <div class="flex items-center justify-between border-b border-[#edf0f4] px-4 py-3">
+        <div class="flex items-center justify-between border-b border-kyc-medium-gray px-4 py-3">
             <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined flex h-8 w-8 items-center justify-center rounded-lg bg-[#e8f3ff] text-[#1683ff]">medication</span>
-                <div><h2 id="medicineDetailsTitle" class="text-[16px] font-semibold">Medicine Details</h2><p id="medicineDetailsCategory" class="text-[12px] text-[#98a1b1]">Medicine summary</p></div>
+                <span class="material-symbols-outlined flex h-8 w-8 items-center justify-center rounded-lg bg-grayish-blue-slate text-shazam-blue">medication</span>
+                <div><h2 id="medicineDetailsTitle" class="text-[16px] font-semibold">Medicine Details</h2><p id="medicineDetailsCategory" class="text-[12px] text-grayish-blue-slate">Medicine summary</p></div>
             </div>
-            <button type="button" class="closeMedicineDetails material-symbols-outlined text-[18px] text-[#344054]" aria-label="Close medicine details">cancel</button>
+            <button type="button" class="closeMedicineDetails material-symbols-outlined text-[18px] text-dark-black" aria-label="Close medicine details">cancel</button>
         </div>
         <div class="p-4">
             <div class="flex items-center gap-3 mb-3">
-                <span class="material-symbols-outlined flex h-9 w-9 items-center justify-center rounded-lg bg-[#e8f3ff] text-[#1683ff]">medication_liquid</span>
-                <div><h3 id="medicineDetailsName" class="text-[14px] font-semibold">Medicine</h3><p class="text-[12px] text-[#98a1b1]">Pain Relief · Paracetamol</p></div>
+                <span class="material-symbols-outlined flex h-9 w-9 items-center justify-center rounded-lg bg-grayish-blue-slate text-shazam-blue">medication_liquid</span>
+                <div><h3 id="medicineDetailsName" class="text-[14px] font-semibold">Medicine</h3><p class="text-[12px] text-grayish-blue-slate">Pain Relief · Paracetamol</p></div>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div class="rounded-lg border border-[#edf0f4] p-2"><p class="text-[12px] text-[#697386]">Qty Sold</p><strong id="medicineQtySold" class="text-[14px]">48 strips</strong></div>
-                <div class="rounded-lg border border-[#edf0f4] p-2"><p class="text-[12px] text-[#697386]">Completed Orders</p><strong id="medicineCompletedOrders" class="text-[14px]">32</strong></div>
-                <div class="rounded-lg border border-[#edf0f4] p-2"><p class="text-[12px] text-[#697386]">Net Sales</p><strong id="medicineNetSales" class="text-[14px]">₹4,800</strong></div>
-                <div class="rounded-lg border border-[#edf0f4] p-2"><p class="text-[12px] text-[#697386]">Available Stock</p><strong id="medicineAvailableStock" class="text-[14px]">12</strong></div>
+                <div class="rounded-lg border border-kyc-medium-gray p-2"><p class="text-[12px] text-darkk-gray">Qty Sold</p><strong id="medicineQtySold" class="text-[14px]">48 strips</strong></div>
+                <div class="rounded-lg border border-kyc-medium-gray p-2"><p class="text-[12px] text-darkk-gray">Completed Orders</p><strong id="medicineCompletedOrders" class="text-[14px]">32</strong></div>
+                <div class="rounded-lg border border-kyc-medium-gray p-2"><p class="text-[12px] text-darkk-gray">Net Sales</p><strong id="medicineNetSales" class="text-[14px]">₹4,800</strong></div>
+                <div class="rounded-lg border border-kyc-medium-gray p-2"><p class="text-[12px] text-darkk-gray">Available Stock</p><strong id="medicineAvailableStock" class="text-[14px]">12</strong></div>
             </div>
             <div class="mt-3 grid grid-cols-1 sm:grid-cols-[1.8fr_1fr] gap-3">
-                <div class="rounded-lg border border-[#edf0f4] p-3">
-                    <div class="flex items-center justify-between"><h3 class="text-[14px] font-semibold">Sales Trend</h3><span class="text-[12px] text-[#697386]">Qty Sold</span></div>
+                <div class="rounded-lg border border-kyc-medium-gray p-3">
+                    <div class="flex items-center justify-between"><h3 class="text-[14px] font-semibold">Sales Trend</h3><span class="text-[12px] text-darkk-gray">Qty Sold</span></div>
                     <div class="h-[135px] mt-2"><canvas id="medicineSalesChart"></canvas></div>
                 </div>
-                <div class="rounded-lg border border-[#edf0f4] bg-[#f8fbff] p-3">
+                <div class="rounded-lg border border-kyc-medium-gray bg-[#f8fbff] p-3">
                     <h3 class="text-[14px] font-semibold">Product Summary</h3>
-                    <p class="mt-2 text-[12px] text-[#22b45d]">↗ 15% <span class="text-[#697386]">vs previous period</span></p>
-                    <p class="mt-2 text-[12px] text-[#697386]"><span id="medicineSummaryName">This medicine</span> continues to show strong demand with consistent sales throughout the selected period.</p>
-                    <div class="mt-3 border-t border-[#e7edf4] pt-2"><p class="text-[12px] font-semibold">☀ Key Insight</p><p class="text-[12px] text-[#697386]">Sales increased by 15% compared to the previous period.</p></div>
+                    <p class="mt-2 text-[12px] text-[#22b45d]">↗ 15% <span class="text-darkk-gray">vs previous period</span></p>
+                    <p class="mt-2 text-[12px] text-darkk-gray"><span id="medicineSummaryName">This medicine</span> continues to show strong demand with consistent sales throughout the selected period.</p>
+                    <div class="mt-3 border-t border-[#e7edf4] pt-2"><p class="text-[12px] font-semibold">☀ Key Insight</p><p class="text-[12px] text-darkk-gray">Sales increased by 15% compared to the previous period.</p></div>
                 </div>
             </div>
-            <div class="mt-3 overflow-hidden rounded-lg border border-[#edf0f4]">
+            <div class="mt-3 overflow-hidden rounded-lg border border-kyc-medium-gray">
                 <h3 class="px-3 py-2 text-[14px] font-semibold">Recent Activity</h3>
-                <table class="w-full text-[12px]"><thead class="bg-[#f5f8fb] text-[#697386]"><tr><th class="px-2 py-2 text-left font-medium">Date &amp; Time</th><th class="px-2 py-2 text-left font-medium">Action</th><th class="px-2 py-2 text-left font-medium">Details</th></tr></thead><tbody class="text-[#344054]"><tr class="border-t border-[#edf0f4]"><td class="px-2 py-2">22 Jul 2025, 10:45 AM</td><td class="px-2 py-2"><span class="rounded-full bg-[#e8faf1] px-2 py-1 text-[#0b9b62]">Order Completed</span></td><td class="px-2 py-2">Order #ORD-7865 completed with 1 strip</td></tr><tr class="border-t border-[#edf0f4]"><td class="px-2 py-2">21 Jul 2025, 03:20 PM</td><td class="px-2 py-2"><span class="rounded-full bg-[#eaf2ff] px-2 py-1 text-[#2868ed]">Stock Updated</span></td><td class="px-2 py-2">Stock updated to 12 strips</td></tr><tr class="border-t border-[#edf0f4]"><td class="px-2 py-2">20 Jul 2025, 01:10 PM</td><td class="px-2 py-2"><span class="rounded-full bg-[#f5eaff] px-2 py-1 text-[#8b42c7]">Price Adjusted</span></td><td class="px-2 py-2">Unit price verified at ₹100 per strip</td></tr></tbody></table>
+                <table class="w-full text-[12px]"><thead class="bg-[#f5f8fb] text-darkk-gray"><tr><th class="px-2 py-2 text-left font-medium">Date &amp; Time</th><th class="px-2 py-2 text-left font-medium">Action</th><th class="px-2 py-2 text-left font-medium">Details</th></tr></thead><tbody class="text-dark-black"><tr class="border-t border-kyc-medium-gray"><td class="px-2 py-2">22 Jul 2025, 10:45 AM</td><td class="px-2 py-2"><span class="rounded-full bg-[#e8faf1] px-2 py-1 text-green-dark">Order Completed</span></td><td class="px-2 py-2">Order #ORD-7865 completed with 1 strip</td></tr><tr class="border-t border-kyc-medium-gray"><td class="px-2 py-2">21 Jul 2025, 03:20 PM</td><td class="px-2 py-2"><span class="rounded-full bg-[#eaf2ff] px-2 py-1 text-shazam-blue">Stock Updated</span></td><td class="px-2 py-2">Stock updated to 12 strips</td></tr><tr class="border-t border-kyc-medium-gray"><td class="px-2 py-2">20 Jul 2025, 01:10 PM</td><td class="px-2 py-2"><span class="rounded-full bg-[#f5eaff] px-2 py-1 text-[#8b42c7]">Price Adjusted</span></td><td class="px-2 py-2">Unit price verified at ₹100 per strip</td></tr></tbody></table>
             </div>
         </div>
-        <div class="flex justify-end border-t border-[#edf0f4] px-4 py-3"><button type="button" class="closeMedicineDetails h-8 min-w-[80px] rounded-md border border-[#1683ff] text-[12px] text-[#1683ff]">Close</button></div>
+        <div class="flex justify-end border-t border-kyc-medium-gray px-4 py-3"><button type="button" class="closeMedicineDetails h-8 min-w-[80px] rounded-md border border-shazam-blue text-[12px] text-shazam-blue">Close</button></div>
     </div>
 </div>
 
 <div id="reportExportModal" class="hidden fixed inset-0 z-[100] bg-black/40 p-4 items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="reportExportTitle">
     <div class="w-full max-w-[440px] overflow-visible rounded-[9px] bg-white shadow-2xl">
-        <div class="flex items-center justify-between border-b border-[#edf0f4] px-4 py-3">
+        <div class="flex items-center justify-between border-b border-kyc-medium-gray px-4 py-3">
             <h2 id="reportExportTitle" class="text-[18px] font-semibold text-[#182230]">Download Export Report</h2>
-            <button type="button" id="closeReportExport" class="material-symbols-outlined text-[17px] text-[#344054]" aria-label="Close export dialog">cancel</button>
+            <button type="button" id="closeReportExport" class="material-symbols-outlined text-[17px] text-dark-black" aria-label="Close export dialog">cancel</button>
         </div>
         <div class="space-y-3 px-4 py-3">
             <div class="relative">
-                <label class="mb-1 block text-[12px] font-medium text-[#344054]" for="reportExportScope">Report scope</label>
+                <label class="mb-1 block text-[12px] font-medium text-dark-black" for="reportExportScope">Report scope</label>
                 <button type="button" id="reportExportScope"
-                    class="flex h-9 w-full items-center justify-between rounded-md border border-[#e5eaf0] px-2 text-left text-[14px] text-[#344054]">
+                    class="flex h-9 w-full items-center justify-between rounded-md border border-kyc-medium-gray px-2 text-left text-[14px] text-dark-black">
                     <span id="reportExportScopeLabel">Current Tab</span>
                     <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
                 </button>
-                <div id="reportExportScopeMenu" class="hidden absolute left-0 right-0 top-[62px] z-10 rounded-md border border-[#e5eaf0] bg-white p-1 shadow-lg">
-                    <button type="button" class="reportExportScopeOption block w-full rounded px-2 py-2 text-left text-[14px] hover:bg-[#f3f7fb]">Current Tab</button>
-                    <button type="button" class="reportExportScopeOption block w-full rounded px-2 py-2 text-left text-[14px] hover:bg-[#f3f7fb]">Full Report</button>
-                    <button type="button" class="reportExportScopeOption block w-full rounded px-2 py-2 text-left text-[14px] hover:bg-[#f3f7fb]">Selected Sections</button>
+                <div id="reportExportScopeMenu" class="hidden absolute left-0 right-0 top-[62px] z-10 rounded-md border border-kyc-medium-gray bg-white p-1 shadow-lg">
+                    <button type="button" class="reportExportScopeOption block w-full rounded px-2 py-2 text-left text-[14px] hover:bg-kyc-medium-gray">Current Tab</button>
+                    <button type="button" class="reportExportScopeOption block w-full rounded px-2 py-2 text-left text-[14px] hover:bg-kyc-medium-gray">Full Report</button>
+                    <button type="button" class="reportExportScopeOption block w-full rounded px-2 py-2 text-left text-[14px] hover:bg-kyc-medium-gray">Selected Sections</button>
                 </div>
             </div>
             <div>
-                <label class="mb-1 block text-[12px] font-medium text-[#344054]" for="exportDateRange">Date range</label>
+                <label class="mb-1 block text-[12px] font-medium text-dark-black" for="exportDateRange">Date range</label>
                 <input id="exportDateRange" type="text" readonly value="1 Jul 2025 - 22 Jul 2025"
-                    class="h-9 w-full rounded-md border border-[#e5eaf0] px-2 text-[14px] text-[#344054]">
+                    class="h-9 w-full rounded-md border border-kyc-medium-gray px-2 text-[14px] text-dark-black">
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <label class="flex min-h-9 items-center gap-2 rounded-md border border-[#e5eaf0] px-2 text-[12px] text-[#344054]">
-                    <input id="exportIncludeComparison" type="checkbox" checked class="accent-[#1683ff]">Include comparison
+                <label class="flex min-h-9 items-center gap-2 rounded-md border border-kyc-medium-gray px-2 text-[12px] text-dark-black">
+                    <input id="exportIncludeComparison" type="checkbox" checked class="accent-shazam-blue">Include comparison
                 </label>
-                <label class="flex min-h-9 items-center gap-2 rounded-md border border-[#e5eaf0] px-2 text-[12px] text-[#344054]">
-                    <input id="exportIncludeCharts" type="checkbox" class="accent-[#1683ff]">Include charts for PDF
+                <label class="flex min-h-9 items-center gap-2 rounded-md border border-kyc-medium-gray px-2 text-[12px] text-dark-black">
+                    <input id="exportIncludeCharts" type="checkbox" class="accent-shazam-blue">Include charts for PDF
                 </label>
-                <label class="flex min-h-9 items-center gap-2 rounded-md border border-[#e5eaf0] px-2 text-[12px] text-[#344054]">
-                    <input id="exportMaskContacts" type="checkbox" checked class="accent-[#1683ff]">Mask customer contact details
+                <label class="flex min-h-9 items-center gap-2 rounded-md border border-kyc-medium-gray px-2 text-[12px] text-dark-black">
+                    <input id="exportMaskContacts" type="checkbox" checked class="accent-shazam-blue">Mask customer contact details
                 </label>
-                <label class="flex min-h-9 items-center gap-2 rounded-md border border-[#e5eaf0] px-2 text-[12px] text-[#344054]">
-                    <input id="exportAsiaTimezone" type="checkbox" class="accent-[#1683ff]">Asia/Kolkata timezone
+                <label class="flex min-h-9 items-center gap-2 rounded-md border border-kyc-medium-gray px-2 text-[12px] text-dark-black">
+                    <input id="exportAsiaTimezone" type="checkbox" class="accent-shazam-blue">Asia/Kolkata timezone
                 </label>
             </div>
             <div class="rounded-md border border-[#ffe3a3] bg-[#fff9e9] px-2.5 py-2 text-[11px] text-[#9b4c00]">
                 Demo data and schedules are for preview only. No emails will be sent.
             </div>
         </div>
-        <div class="flex justify-end gap-2 border-t border-[#edf0f4] px-4 py-3">
-            <button type="button" id="cancelReportExport" class="h-9 min-w-[92px] rounded-md border border-[#cfd5dc] bg-white text-[12px] text-[#697386]">Cancel</button>
-            <button type="button" id="generateReportExport" class="h-9 min-w-[112px] rounded-md bg-[#1683ff] px-3 text-[12px] font-medium text-white">Generate Export</button>
+        <div class="flex justify-end gap-2 border-t border-kyc-medium-gray px-4 py-3">
+            <button type="button" id="cancelReportExport" class="h-9 min-w-[92px] rounded-md border border-[#cfd5dc] bg-white text-[12px] text-darkk-gray">Cancel</button>
+            <button type="button" id="generateReportExport" class="h-9 min-w-[112px] rounded-md bg-shazam-blue px-3 text-[12px] font-medium text-white">Generate Export</button>
         </div>
     </div>
 </div>

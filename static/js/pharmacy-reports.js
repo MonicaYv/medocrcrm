@@ -423,7 +423,7 @@ $(document).ready(function () {
           datasets: [{ data: [38.4, 32.1, 18.7, 10.8], backgroundColor: ["#1683ff", "#10b981", "#f59e0b", "#a855f7"], borderWidth: 0 }],
         },
         options: doughnutOptions,
-        plugins: [orderCenterLabelPlugin("1,248")],
+     
       });
     }
     if (!orderCharts.status) {
@@ -434,7 +434,7 @@ $(document).ready(function () {
           datasets: [{ data: [88.3, 6.2, 3.8, 1.7], backgroundColor: ["#2868ed", "#10b981", "#f59e0b", "#a855f7"], borderWidth: 0 }],
         },
         options: doughnutOptions,
-        plugins: [orderCenterLabelPlugin("1,248")],
+     
       });
     }
   }
