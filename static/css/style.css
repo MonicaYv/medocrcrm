@@ -462,6 +462,10 @@ body {
   font-size: 30px;
 }
 
+.material-symbols-outlined.normal-icon {
+  font-size: 14px;
+}
+
 .material-symbols-outlined.mini-icon {
   font-size: 12px;
 }
