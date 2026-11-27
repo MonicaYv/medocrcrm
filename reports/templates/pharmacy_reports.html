@@ -269,9 +269,9 @@
                 <p class="mt-1 text-[12px] text-[#98a1b1]">Total bids over the selected period</p>
                 <div class="h-[150px] mt-2"><canvas id="bidTrendViewChart"></canvas></div>
             </div>
-            <div class="report-card p-4">
-                <h2 class="text-[16px] font-semibold">Bid Status Overview</h2>
-                <div class="flex items-center justify-center gap-4 h-[190px]">
+            <div class="report-card chart-card flex flex-col p-4">
+                <h2 class="min-h-6 text-[16px] font-semibold">Bid Status Overview</h2>
+                <div class="flex flex-1 flex-col items-center justify-center gap-4 sm:flex-row">
                   <div class="relative h-[125px] w-[125px] shrink-0">
     <canvas id="bidStatusViewChart"></canvas>
     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -279,11 +279,11 @@
         <span class="text-[10px] text-[#ef4444]">Total Bids</span>
     </div>
 </div>
-                    <div class="space-y-3 text-[12px] w-[56%]">
-                        <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#1683ff] mr-1"></i>Accepted</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[67%] rounded bg-[#1683ff]"></i></span><b>66.7%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#ef4444] mr-1"></i>Rejected</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[34%] rounded bg-[#1683ff]"></i></span><b>33.3%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#f59e0b] mr-1"></i>Expired</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[12%] rounded bg-[#1683ff]"></i></span><b>11.1%</b></div>
-                        <div class="flex items-center gap-2"><span class="w-16 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Withdrawn</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[7%] rounded bg-[#1683ff]"></i></span><b>5.6%</b></div>
+                    <div class="w-full max-w-[320px] space-y-3 text-[12px] sm:w-[56%]">
+                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#1683ff] mr-1"></i>Accepted</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[67%] rounded bg-[#1683ff]"></i></span><b class="w-10 shrink-0 text-right">66.7%</b></div>
+                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#ef4444] mr-1"></i>Rejected</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[34%] rounded bg-[#1683ff]"></i></span><b class="w-10 shrink-0 text-right">33.3%</b></div>
+                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#f59e0b] mr-1"></i>Expired</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[12%] rounded bg-[#1683ff]"></i></span><b class="w-10 shrink-0 text-right">11.1%</b></div>
+                        <div class="flex items-center gap-2"><span class="w-20 shrink-0"><i class="inline-block h-2 w-2 rounded-full bg-[#10b981] mr-1"></i>Withdrawn</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[7%] rounded bg-[#1683ff]"></i></span><b class="w-10 shrink-0 text-right">5.6%</b></div>
                     </div>
                 </div>
             </div>
@@ -298,16 +298,16 @@
                     <div class="flex items-center gap-3"><span class="w-28 shrink-0">Medical Devices</span><span class="h-2 flex-1 rounded bg-[#eef2f7]"><i class="block h-full w-[32%] rounded bg-[#2868ed]"></i></span><b>62</b></div>
                 </div>
             </div>
-            <div class="report-card p-4">
-                <h2 class="text-[16px] font-semibold">Offers &amp; Bids Performance</h2>
-                <div class="grid grid-cols-4 gap-2 text-center mt-2">
-                    <div><strong class="text-[16px]">32</strong><p class="text-[12px] text-[#98a1b1]">Answered</p></div>
-                    <div><strong class="text-[16px] text-[#10b981]">21</strong><p class="text-[12px] text-[#98a1b1]">Won</p></div>
-                    <div><strong class="text-[16px] text-[#ef4444]">11</strong><p class="text-[12px] text-[#98a1b1]">Lost</p></div>
-                    <div><strong class="text-[16px]">65.6%</strong><p class="text-[12px] text-[#98a1b1]">Win rate</p></div>
+            <div class="report-card chart-card flex flex-col p-4">
+                <h2 class="min-h-6 text-[16px] font-semibold">Offers &amp; Bids Performance</h2>
+                <div class="mt-2 grid grid-cols-4 items-start gap-2 text-center">
+                    <div class="min-w-0"><strong class="block text-[16px] leading-5">32</strong><p class="text-[12px] text-[#98a1b1]">Answered</p></div>
+                    <div class="min-w-0"><strong class="block text-[16px] leading-5 text-[#10b981]">21</strong><p class="text-[12px] text-[#98a1b1]">Won</p></div>
+                    <div class="min-w-0"><strong class="block text-[16px] leading-5 text-[#ef4444]">11</strong><p class="text-[12px] text-[#98a1b1]">Lost</p></div>
+                    <div class="min-w-0"><strong class="block text-[16px] leading-5">65.6%</strong><p class="text-[12px] text-[#98a1b1]">Win rate</p></div>
                 </div>
-                <div class="h-[100px] mt-2"><canvas id="bidOffersViewChart"></canvas></div>
-                <p class="text-center text-[12px] text-[#98a1b1]">Active bids awaiting customer response are excluded from answered totals.</p>
+                <div class="mt-2 min-h-0 flex-1"><canvas id="bidOffersViewChart"></canvas></div>
+                <p class="mt-1 text-center text-[12px] leading-4 text-[#98a1b1]">Active bids awaiting customer response are excluded from answered totals.</p>
             </div>
 
             <div class="report-card p-4">
