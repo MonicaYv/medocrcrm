@@ -517,8 +517,8 @@
       },
       medicinesSummary: "Amoxicillin 500mg + Prescribed Item",
       medicinesCount: 2,
-      prescriptionStatus: "Verified",
-      prescriptionBadgeClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
+      prescriptionStatus: "Pending Review",
+      prescriptionBadgeClass: "bg-amber-100 text-amber-800 border-amber-200",
       fulfilment: "Home Delivery",
       dueSlot: "Today 2:00 PM",
       dueSlotSub: "",
@@ -530,19 +530,22 @@
       hasAlert: true,
       tab: "pending",
       needsAttention: true,
-      attentionType: "stock",
-      attentionLabel: "1 stock shortage",
+      attentionType: "prescription",
+      attentionLabel: "1 prescription to review",
       items: [
         { name: "Amoxicillin 500mg Capsules", qty: "2 strips (20 caps)", unitPrice: 140, total: 280, isShortage: true, stockAvailable: 0 },
         { name: "Prescribed Item (Vitamin C 500mg)", qty: "1 strip (15 tabs)", unitPrice: 140, total: 140, isShortage: false, stockAvailable: 48 }
       ],
-      stockShortageDetails: {
-        itemName: "Amoxicillin 500mg Capsules",
-        orderedQty: "2 strips (20 caps)",
-        availableStock: "0 units in store",
-        suggestedAlternatives: [
-          { name: "Moxikind-CV 500mg (Generic Alternative - In Stock: 24 strips)", price: 145 },
-          { name: "Novamox 500mg (Cipla - In Stock: 18 strips)", price: 140 }
+      rxDetails: {
+        fileName: "Prescription for Priya Sharma - MPT-1001.pdf",
+        doctor: "Dr. Sunita Deshmukh - MD (Internal Medicine)",
+        hospital: "Apollo Clinics, Goregaon East",
+        regNo: "MCI-71822",
+        date: "22 Jul 2025",
+        status: "Pending Review",
+        itemsList: [
+          "Cap Amoxicillin 500mg - 1 capsule three times daily after meals (5 days)",
+          "Tab Vitamin C 500mg - 1 tablet daily after meals (15 days)"
         ]
       },
       paymentDetails: {
@@ -556,7 +559,7 @@
       },
       activity: [
         { title: "Stock shortage flagged by automated inventory check", time: "22 Jul 2025 • 01:20 PM", status: "warning" },
-        { title: "Prescription verified successfully", time: "22 Jul 2025 • 01:15 PM", status: "completed" },
+        { title: "Prescription uploaded & waiting for review", time: "22 Jul 2025 • 01:15 PM", status: "pending" },
         { title: "Order received", time: "22 Jul 2025 • 01:10 PM", status: "completed" }
       ]
     },
@@ -873,61 +876,59 @@
       // Prescription sub-tag styling
       let rxTagHtml = '';
       if (order.prescriptionStatus === 'Clarification Needed') {
-        rxTagHtml = `<span class="inline-block mt-0.5 text-[11px] font-medium text-amber-600">Clarification Needed</span>`;
+        rxTagHtml = `<span class="inline-block mt-0.5 text-[14px] font-medium text-amber-600">Clarification Needed</span>`;
       } else if (order.prescriptionStatus === 'Pending Review') {
-        rxTagHtml = `<span class="inline-block mt-0.5 text-[11px] font-medium text-amber-600">Pending Review</span>`;
+        rxTagHtml = `<span class="inline-block mt-0.5 text-[14px] font-medium text-amber-600">Pending Review</span>`;
       } else if (order.prescriptionStatus === 'Verified') {
-        rxTagHtml = `<span class="inline-block mt-0.5 text-[11px] font-medium text-emerald-600">Verified</span>`;
+        rxTagHtml = `<span class="inline-block mt-0.5 text-[14px] font-medium text-emerald-600">Verified</span>`;
       } else {
-        rxTagHtml = `<span class="inline-block mt-0.5 text-[11px] font-medium text-gray-400">Not Required</span>`;
+        rxTagHtml = `<span class="inline-block mt-0.5 text-[14px] font-medium text-gray-400">Not Required</span>`;
       }
 
       // Status badge styling
       let statusBadge = '';
       if (order.status === 'Cancelled') {
-        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFD7D7] text-[#FF383C] border border-[#FFD7D7]">${order.status}</span>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-sm font-medium bg-[#FFD7D7] text-[#FF383C] border border-[#FFD7D7]">${order.status}</span>`;
       } else if (order.status === 'Collected' || order.status === 'Delivered') {
-        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">${order.status}</span>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">${order.status}</span>`;
       } else if (order.status === 'Out for Delivery') {
-        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">${order.status}</span>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-sm font-medium bg-purple-50 text-purple-700 border border-purple-200">${order.status}</span>`;
       } else if (order.status === 'Ready') {
-        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-50 text-cyan-700 border border-cyan-200">${order.status}</span>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-sm font-medium bg-cyan-50 text-cyan-700 border border-cyan-200">${order.status}</span>`;
       } else if (order.status === 'Packing') {
-        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">${order.status}</span>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">${order.status}</span>`;
       } else {
         // Pending
-        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">${order.status}</span>`;
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-sm font-medium bg-amber-50 text-amber-700 border border-amber-200">${order.status}</span>`;
       }
 
       // Actions column button
       let actionBtnHtml = '';
       if (order.status === 'Cancelled') {
-        actionBtnHtml = `<button type="button" class="action-view-cancellation px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition cursor-pointer" data-id="${order.id}">View Cancellation</button>`;
+        actionBtnHtml = `<button type="button" class="action-view-cancellation px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition cursor-pointer" data-id="${order.id}">View Cancellation</button>`;
       } else if (order.status === 'Collected' || order.status === 'Delivered') {
-        actionBtnHtml = `<button type="button" class="action-view-invoice px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition cursor-pointer" data-id="${order.id}">View Invoice</button>`;
+        actionBtnHtml = `<button type="button" class="action-view-invoice px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition cursor-pointer" data-id="${order.id}">View Invoice</button>`;
       } else if (order.status === 'Out for Delivery') {
-        actionBtnHtml = `<button type="button" class="action-track-delivery px-3 py-1.5 text-xs font-medium text-purple-700 bg-white border border-purple-300 rounded-md hover:bg-purple-50 transition cursor-pointer" data-id="${order.id}">Track Delivery</button>`;
+        actionBtnHtml = `<button type="button" class="action-track-delivery px-3 py-1.5 text-sm font-medium text-purple-700 bg-white border border-purple-300 rounded-md hover:bg-purple-50 transition cursor-pointer" data-id="${order.id}">Track Delivery</button>`;
       } else if (order.status === 'Ready') {
         if (order.fulfilment === 'Store Pickup') {
-          actionBtnHtml = `<button type="button" class="action-confirm-pickup px-3 py-1.5 text-xs font-medium text-cyan-700 bg-white border border-cyan-300 rounded-md hover:bg-cyan-50 transition cursor-pointer" data-id="${order.id}">Confirm Pickup</button>`;
+          actionBtnHtml = `<button type="button" class="action-confirm-pickup px-3 py-1.5 text-sm font-medium text-cyan-700 bg-white border border-cyan-300 rounded-md hover:bg-cyan-50 transition cursor-pointer" data-id="${order.id}">Confirm Pickup</button>`;
         } else {
-          actionBtnHtml = `<button type="button" class="action-dispatch-order px-3 py-1.5 text-xs font-medium text-dodger-blue bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition cursor-pointer" data-id="${order.id}">Dispatch Order</button>`;
+          actionBtnHtml = `<button type="button" class="action-dispatch-order px-3 py-1.5 text-sm font-medium text-dodger-blue bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition cursor-pointer" data-id="${order.id}">Dispatch Order</button>`;
         }
       } else if (order.status === 'Packing') {
-        actionBtnHtml = `<button type="button" class="action-mark-ready px-3 py-1.5 text-xs font-medium text-dodger-blue bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition cursor-pointer" data-id="${order.id}">Mark Ready</button>`;
+        actionBtnHtml = `<button type="button" class="action-mark-ready px-3 py-1.5 text-sm font-medium text-dodger-blue bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition cursor-pointer" data-id="${order.id}">Mark Ready</button>`;
       } else {
         // Pending actions
-        if (order.attentionType === 'stock') {
-          actionBtnHtml = `<button type="button" class="action-resolve-stock px-3 py-1.5 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-300 rounded-md hover:bg-rose-100 transition cursor-pointer" data-id="${order.id}">Resolve Stock Issue</button>`;
-        } else if (order.attentionType === 'prescription') {
-          actionBtnHtml = `<button type="button" class="action-review-rx px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-300 rounded-md hover:bg-amber-100 transition cursor-pointer" data-id="${order.id}">Review Prescription</button>`;
+        if (order.attentionType === 'prescription') {
+          actionBtnHtml = `<button type="button" class="action-review-rx px-3 py-1.5 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-300 rounded-md hover:bg-amber-100 transition cursor-pointer" data-id="${order.id}">Review Prescription</button>`;
         } else {
-          actionBtnHtml = `<button type="button" class="action-start-packing px-3 py-1.5 text-xs font-medium text-dodger-blue bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition cursor-pointer" data-id="${order.id}">Start Packing</button>`;
+          actionBtnHtml = `<button type="button" class="action-start-packing px-3 py-1.5 text-sm font-medium text-dodger-blue bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition cursor-pointer" data-id="${order.id}">Start Packing</button>`;
         }
       }
 
       return `
-        <tr class="hover:bg-slate-50/70 border-b border-gray-100 transition text-[13px]">
+        <tr class="hover:bg-slate-50/70 border-b border-gray-100 transition text-[15px]">
           <!-- ORDER ID -->
           <td class="py-3.5 px-4 font-semibold text-dodger-blue">
             <button type="button" class="hover:underline font-semibold text-dodger-blue cursor-pointer action-open-details" data-id="${order.id}">
@@ -938,12 +939,12 @@
           <!-- CUSTOMER -->
           <td class="py-3.5 px-4">
             <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-full ${order.customer.avatarBg} ${order.customer.avatarColor} flex items-center justify-center font-bold text-xs shrink-0">
+              <div class="w-8 h-8 rounded-full ${order.customer.avatarBg} ${order.customer.avatarColor} flex items-center justify-center font-bold text-sm shrink-0">
                 ${order.customer.avatar}
               </div>
               <div class="min-w-0">
                 <p class="font-medium text-gray-900 leading-tight truncate">${order.customer.name}</p>
-                <p class="text-[11px] text-gray-500 leading-tight">${order.customer.area}</p>
+                <p class="text-[14px] text-gray-500 leading-tight">${order.customer.area}</p>
               </div>
             </div>
           </td>
@@ -953,7 +954,7 @@
             <div>
               <p class="font-medium text-gray-800 leading-tight">${order.medicinesSummary}</p>
               <div class="flex items-center gap-1.5">
-                <span class="text-[11px] text-gray-500">${order.medicinesCount} product${order.medicinesCount > 1 ? 's' : ''}</span>
+                <span class="text-[14px] text-gray-500">${order.medicinesCount} product${order.medicinesCount > 1 ? 's' : ''}</span>
                 <span class="text-gray-300">•</span>
                 ${rxTagHtml}
               </div>
@@ -962,7 +963,7 @@
 
           <!-- FULFILMENT -->
           <td class="py-3.5 px-4">
-            <span class="text-xs font-medium ${order.fulfilment === 'Home Delivery' ? 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded' : 'text-blue-700 bg-blue-50 px-2 py-0.5 rounded'}">
+            <span class="text-sm font-medium ${order.fulfilment === 'Home Delivery' ? 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded' : 'text-blue-700 bg-blue-50 px-2 py-0.5 rounded'}">
               ${order.fulfilment}
             </span>
           </td>
@@ -970,8 +971,8 @@
           <!-- DUE/SLOT -->
           <td class="py-3.5 px-4">
             <div>
-              <p class="text-xs text-gray-800">${order.dueSlot}</p>
-              ${order.dueSlotSub ? `<p class="text-[11px] ${order.dueSlotSubClass || 'text-gray-500'}">${order.dueSlotSub}</p>` : ''}
+              <p class="text-sm text-gray-800">${order.dueSlot}</p>
+              ${order.dueSlotSub ? `<p class="text-[14px] ${order.dueSlotSubClass || 'text-gray-500'}">${order.dueSlotSub}</p>` : ''}
             </div>
           </td>
 
@@ -983,8 +984,8 @@
           <!-- PAYMENT -->
           <td class="py-3.5 px-4">
             <div>
-              <p class="text-xs font-medium text-gray-800">${order.paymentStatus}</p>
-              <p class="text-[11px] text-gray-500">${order.paymentMethod}</p>
+              <p class="text-sm font-medium text-gray-800">${order.paymentStatus}</p>
+              <p class="text-[14px] text-gray-500">${order.paymentMethod}</p>
             </div>
           </td>
 
@@ -1004,7 +1005,7 @@
                 <button type="button" class="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 cursor-pointer action-more-menu-btn" data-id="${order.id}">
                   <span class="material-symbols-outlined text-[18px]">more_vert</span>
                 </button>
-                <div class="hidden group-hover:block absolute right-0 top-full mt-1 w-44 bg-white rounded-lg shadow-lg border border-gray-100 py-1.5 z-30 text-xs">
+                <div class="hidden group-hover:block absolute right-0 top-full mt-1 w-44 bg-white rounded-lg shadow-lg border border-gray-100 py-1.5 z-30 text-sm">
                   <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-gray-50 text-gray-700 flex items-center gap-2 action-open-details" data-id="${order.id}">
                     <span class="material-symbols-outlined text-[16px]">info</span> View Details
                   </button>
@@ -1034,14 +1035,14 @@
     // Status badge
     const badgeEl = document.getElementById('modal-order-status-badge');
     if (badgeEl) {
-      badgeEl.className = `px-2.5 py-0.5 rounded-full text-xs font-medium border ${order.statusBadgeClass}`;
+      badgeEl.className=`px-2.5 py-0.5 rounded-full text-sm font-medium border ${order.statusBadgeClass}`;
       badgeEl.textContent = order.status;
     }
 
     // Tab 1: Overview
     const avatarEl = document.getElementById('details-customer-avatar');
     if (avatarEl) {
-      avatarEl.className = `w-12 h-12 rounded-full ${order.customer.avatarBg} ${order.customer.avatarColor} flex items-center justify-center font-bold text-base shrink-0`;
+      avatarEl.className=`w-12 h-12 rounded-full ${order.customer.avatarBg} ${order.customer.avatarColor} flex items-center justify-center font-bold text-base shrink-0`;
       avatarEl.textContent = order.customer.avatar;
     }
     setTxt('details-customer-name', order.customer.name);
@@ -1055,7 +1056,7 @@
     const itemsTableBody = document.getElementById('details-items-tbody');
     if (itemsTableBody) {
       itemsTableBody.innerHTML = order.items.map(item => `
-        <tr class="border-b border-gray-100 text-xs">
+        <tr class="border-b border-gray-100 text-sm">
           <td class="py-2.5 px-3 font-medium text-gray-900">${item.name}</td>
           <td class="py-2.5 px-3 text-gray-600">${item.qty}</td>
           <td class="py-2.5 px-3 text-gray-600">₹${item.unitPrice}</td>
@@ -1071,44 +1072,44 @@
     if (contextualBox) {
       if (order.status === 'Cancelled') {
         contextualBox.innerHTML = `
-          <button type="button" class="w-full sm:w-auto px-4 py-2 text-xs font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 action-view-cancellation" data-id="${order.id}">
+          <button type="button" class="w-full sm:w-auto px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 action-view-cancellation" data-id="${order.id}">
             View Cancellation Details
           </button>
         `;
       } else if (order.status === 'Completed' || order.status === 'Delivered' || order.status === 'Collected') {
         contextualBox.innerHTML = `
           <div class="flex items-center gap-2">
-            <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-dodger-blue bg-blue-50 border border-blue-200 hover:bg-blue-100 action-view-invoice" data-id="${order.id}">
+            <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg text-dodger-blue bg-blue-50 border border-blue-200 hover:bg-blue-100 action-view-invoice" data-id="${order.id}">
               View Invoice
             </button>
-            <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 action-view-inventory" data-id="${order.id}">
+            <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 action-view-inventory" data-id="${order.id}">
               View Inventory Deductions
             </button>
           </div>
         `;
       } else if (order.status === 'Out for Delivery') {
         contextualBox.innerHTML = `
-          <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 action-track-delivery" data-id="${order.id}">
+          <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 action-track-delivery" data-id="${order.id}">
             Track Live Delivery
           </button>
         `;
       } else if (order.status === 'Ready') {
         if (order.fulfilment === 'Store Pickup') {
           contextualBox.innerHTML = `
-            <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-white bg-cyan-600 hover:bg-cyan-700 action-confirm-pickup" data-id="${order.id}">
+            <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg text-white bg-cyan-600 hover:bg-cyan-700 action-confirm-pickup" data-id="${order.id}">
               Confirm Store Pickup
             </button>
           `;
         } else {
           contextualBox.innerHTML = `
-            <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-white bg-dodger-blue hover:bg-blue-600 action-dispatch-order" data-id="${order.id}">
+            <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg text-white bg-dodger-blue hover:bg-blue-600 action-dispatch-order" data-id="${order.id}">
               Dispatch Order
             </button>
           `;
         }
       } else if (order.status === 'Packing') {
         contextualBox.innerHTML = `
-          <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-white bg-dodger-blue hover:bg-blue-600 action-mark-ready" data-id="${order.id}">
+          <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg text-white bg-dodger-blue hover:bg-blue-600 action-mark-ready" data-id="${order.id}">
             Prepare Order & Mark Ready
           </button>
         `;
@@ -1117,20 +1118,13 @@
         let pendingBtns = '';
         if (order.attentionType === 'prescription') {
           pendingBtns += `
-            <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 action-review-rx mr-2" data-id="${order.id}">
+            <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 action-review-rx mr-2" data-id="${order.id}">
               Review Prescription
             </button>
           `;
         }
-        if (order.attentionType === 'stock') {
-          pendingBtns += `
-            <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-rose-800 bg-rose-100 hover:bg-rose-200 border border-rose-300 action-resolve-stock mr-2" data-id="${order.id}">
-              Review Stock Issue
-            </button>
-          `;
-        }
         pendingBtns += `
-          <button type="button" class="px-4 py-2 text-xs font-medium rounded-lg text-white bg-dodger-blue hover:bg-blue-600 action-start-packing" data-id="${order.id}">
+          <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg text-white bg-dodger-blue hover:bg-blue-600 action-start-packing" data-id="${order.id}">
             Start Packing
           </button>
         `;
@@ -1148,21 +1142,21 @@
               <div class="flex items-start gap-3">
                 <span class="material-symbols-outlined text-[32px] text-dodger-blue">description</span>
                 <div>
-                  <p class="font-semibold text-sm text-gray-900">${order.rxDetails.fileName}</p>
-                  <p class="text-xs text-gray-500 mt-0.5">${order.rxDetails.doctor} • Reg: ${order.rxDetails.regNo}</p>
-                  <p class="text-xs text-gray-400 mt-0.5">Uploaded on ${order.rxDetails.date}</p>
+                  <p class="font-semibold text-[15px] text-gray-900">${order.rxDetails.fileName}</p>
+                  <p class="text-sm text-gray-500 mt-0.5">${order.rxDetails.doctor} • Reg: ${order.rxDetails.regNo}</p>
+                  <p class="text-sm text-gray-400 mt-0.5">Uploaded on ${order.rxDetails.date}</p>
                 </div>
               </div>
-              <span class="px-2 py-0.5 rounded-full text-xs font-medium ${order.prescriptionBadgeClass}">
+              <span class="px-2 py-0.5 rounded-full text-sm font-medium ${order.prescriptionBadgeClass}">
                 ${order.prescriptionStatus}
               </span>
             </div>
-            ${order.rxDetails.notes ? `<p class="text-xs text-amber-700 bg-amber-50 p-2.5 rounded mt-3 border border-amber-100"><span class="font-semibold">Note:</span> ${order.rxDetails.notes}</p>` : ''}
+            ${order.rxDetails.notes ? `<p class="text-sm text-amber-700 bg-amber-50 p-2.5 rounded mt-3 border border-amber-100"><span class="font-semibold">Note:</span> ${order.rxDetails.notes}</p>` : ''}
             <div class="flex items-center gap-2 mt-4">
-              <button type="button" class="px-3.5 py-1.5 text-xs font-medium text-white bg-dodger-blue rounded hover:bg-blue-600 action-review-rx" data-id="${order.id}">
+              <button type="button" class="px-3.5 py-1.5 text-sm font-medium text-white bg-dodger-blue rounded hover:bg-blue-600 action-review-rx" data-id="${order.id}">
                 Review Prescription
               </button>
-              <button type="button" class="px-3.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 action-view-full-rx" data-id="${order.id}">
+              <button type="button" class="px-3.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 action-view-full-rx" data-id="${order.id}">
                 View Full Rx
               </button>
             </div>
@@ -1172,7 +1166,7 @@
         rxCard.innerHTML = `
           <div class="border border-dashed border-gray-200 rounded-lg p-6 text-center text-gray-400">
             <span class="material-symbols-outlined text-[36px] text-gray-300">healing</span>
-            <p class="text-xs mt-1">Prescription is not required for over-the-counter items in this order.</p>
+            <p class="text-sm mt-1">Prescription is not required for over-the-counter items in this order.</p>
           </div>
         `;
       }
@@ -1201,13 +1195,13 @@
             <div class="relative pl-6 pb-5 last:pb-0">
               ${idx < order.activity.length - 1 ? '<div class="absolute left-2.5 top-3 -bottom-1 w-0.5 bg-gray-200"></div>' : ''}
               <div class="absolute left-1 top-1.5 w-3.5 h-3.5 rounded-full ${dotColor} ring-4 ring-white"></div>
-              <p class="text-xs font-semibold text-gray-900">${act.title}</p>
-              <p class="text-[11px] text-gray-500 mt-0.5">${act.time}</p>
+              <p class="text-sm font-semibold text-gray-900">${act.title}</p>
+              <p class="text-[14px] text-gray-500 mt-0.5">${act.time}</p>
             </div>
           `;
         }).join('');
       } else {
-        activityList.innerHTML = `<p class="text-xs text-gray-400">No activity recorded yet.</p>`;
+        activityList.innerHTML = `<p class="text-sm text-gray-400">No activity recorded yet.</p>`;
       }
     }
 
@@ -1224,9 +1218,9 @@
       const content = document.getElementById(`tab-content-${t}`);
       if (btn) {
         if (t === tabName) {
-          btn.className = "py-3 px-4 border-b-2 border-dodger-blue font-semibold text-dodger-blue text-xs sm:text-sm cursor-pointer";
+          btn.className="py-3 px-4 border-b-2 border-dodger-blue font-semibold text-dodger-blue text-sm sm:text-base cursor-pointer";
         } else {
-          btn.className = "py-3 px-4 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 text-xs sm:text-sm cursor-pointer";
+          btn.className="py-3 px-4 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 text-sm sm:text-base cursor-pointer";
         }
       }
       if (content) {
@@ -1248,6 +1242,28 @@
     setTxt('rx-popup-reg', order.rxDetails?.regNo || "MCI-49201");
     setTxt('rx-popup-date', order.rxDetails?.date || "22 Jul 2025");
     setTxt('rx-popup-patient', order.customer.name);
+    const status = order.prescriptionStatus || order.rxDetails?.status || "Pending Review";
+    const statusBadge = document.getElementById('rx-popup-status');
+    if (statusBadge) {
+      statusBadge.textContent = status;
+      statusBadge.className = `px-2 py-0.5 rounded text-[13px] font-semibold ${
+        status === 'Verified'
+          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+          : 'bg-amber-50 text-amber-700 border border-amber-200'
+      }`;
+    }
+
+    const prescriptionItems = document.getElementById('rx-popup-items');
+    if (prescriptionItems) {
+      prescriptionItems.replaceChildren();
+      const items = order.rxDetails?.itemsList || order.items?.map(item => `${item.name} - ${item.qty}`) || [];
+      const displayedItems = items.length > 0 ? items : ["Prescription details unavailable."];
+      displayedItems.forEach((item, index) => {
+        const itemElement = document.createElement('p');
+        itemElement.textContent = `${index + 1}. ${item}`;
+        prescriptionItems.appendChild(itemElement);
+      });
+    }
 
     // Reset checkboxes
     const c1 = document.getElementById('rx-check-1');
@@ -1265,26 +1281,6 @@
     openModal('modal-review-prescription');
   }
 
-  // Resolve Stock Issue Popup
-  function openResolveStockPopup(orderId) {
-    const order = ordersList.find(o => o.id === orderId) || state.activeOrder;
-    if (!order) return;
-    state.activeOrder = order;
-
-    setTxt('stock-popup-subtitle', `${order.id} - ${order.customer.name}`);
-    const details = order.stockShortageDetails || {
-      itemName: "Amoxicillin 500mg Capsules",
-      orderedQty: "2 strips (20 caps)",
-      availableStock: "0 units in store"
-    };
-
-    setTxt('stock-shortage-item', details.itemName);
-    setTxt('stock-shortage-ordered', details.orderedQty);
-    setTxt('stock-shortage-available', details.availableStock);
-
-    openModal('modal-resolve-stock');
-  }
-
   // Prepare Order (Packing) Popup
   function openPrepareOrderPopup(orderId) {
     const order = ordersList.find(o => o.id === orderId) || state.activeOrder;
@@ -1296,7 +1292,7 @@
     const tbody = document.getElementById('prepare-items-tbody');
     if (tbody) {
       tbody.innerHTML = order.items.map((item, idx) => `
-        <tr class="border-b border-gray-100 text-xs">
+        <tr class="border-b border-gray-100 text-sm">
           <td class="py-2.5 px-3 font-medium text-gray-900">${item.name}</td>
           <td class="py-2.5 px-3 text-gray-600">${item.qty}</td>
           <td class="py-2.5 px-3 text-gray-600">${item.shelf || 'Shelf A-12'} • ${item.batch || 'Batch #B-902'}</td>
@@ -1404,7 +1400,7 @@
     const tbody = document.getElementById('invoice-items-tbody');
     if (tbody) {
       tbody.innerHTML = order.items.map(item => `
-        <tr class="border-b border-gray-100 text-xs">
+        <tr class="border-b border-gray-100 text-sm">
           <td class="py-2 px-3 font-medium text-gray-900">${item.name}</td>
           <td class="py-2 px-3 text-gray-500">3004</td>
           <td class="py-2 px-3 text-gray-700">${item.qty}</td>
@@ -1433,7 +1429,7 @@
     const tbody = document.getElementById('inventory-items-tbody');
     if (tbody) {
       tbody.innerHTML = order.items.map(item => `
-        <tr class="border-b border-gray-100 text-xs">
+        <tr class="border-b border-gray-100 text-sm">
           <td class="py-2.5 px-3 font-medium text-gray-900">${item.name}</td>
           <td class="py-2.5 px-3 text-gray-600">${item.batch || 'B-4921'}</td>
           <td class="py-2.5 px-3 text-gray-600">${item.expiry || '12/2026'}</td>
@@ -1621,10 +1617,11 @@
 
         state.dateRange = range;
         document.querySelectorAll('.date-filter-pill').forEach(p => {
-          p.classList.remove('bg-dodger-blue', 'text-white', 'border-transparent');
+          p.classList.remove('bg-dodger-blue', 'text-white', 'border-transparent', 'hover:bg-dodger-blue');
           p.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+          p.classList.add('hover:bg-gray-50');
         });
-        this.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+        this.classList.remove('bg-white', 'text-gray-700', 'border-gray-300', 'hover:bg-gray-50');
         this.classList.add('bg-dodger-blue', 'text-white', 'border-transparent');
 
         if (range === 'today') setTxt('selected-date-display', 'Selected date : 22 Jul 2025');
@@ -1644,13 +1641,14 @@
 
         state.dateRange = 'custom';
         document.querySelectorAll('.date-filter-pill').forEach(p => {
-          p.classList.remove('bg-dodger-blue', 'text-white', 'border-transparent');
+          p.classList.remove('bg-dodger-blue', 'text-white', 'border-transparent', 'hover:bg-dodger-blue');
           p.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+          p.classList.add('hover:bg-gray-50');
         });
 
         const customPill = document.querySelector('.date-filter-pill[data-range="custom"]');
         if (customPill) {
-          customPill.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+          customPill.classList.remove('bg-white', 'text-gray-700', 'border-gray-300', 'hover:bg-gray-50');
           customPill.classList.add('bg-dodger-blue', 'text-white', 'border-transparent');
         }
 
@@ -1720,14 +1718,6 @@
       if (reviewRxBtn) {
         const orderId = reviewRxBtn.getAttribute('data-id');
         openReviewPrescriptionPopup(orderId);
-        return;
-      }
-
-      // Resolve Stock Issue click
-      const resolveStockBtn = target.closest('.action-resolve-stock');
-      if (resolveStockBtn) {
-        const orderId = resolveStockBtn.getAttribute('data-id');
-        openResolveStockPopup(orderId);
         return;
       }
 
@@ -1872,36 +1862,7 @@
       });
     }
 
-    // 3. Confirm Stock Resolution
-    const btnConfirmStock = document.getElementById('btn-confirm-stock-resolution');
-    if (btnConfirmStock) {
-      btnConfirmStock.addEventListener('click', function () {
-        if (!state.activeOrder) return;
-        state.activeOrder.needsAttention = false;
-        state.activeOrder.hasAlert = false;
-        // Apply substitution
-        if (state.activeOrder.items && state.activeOrder.items[0]) {
-          state.activeOrder.items[0].name = "Moxikind-CV 500mg (Generic Alternative)";
-          state.activeOrder.items[0].isShortage = false;
-        }
-        state.activeOrder.activity.unshift({
-          title: "Stock shortage resolved: Substituted with generic Moxikind-CV 500mg",
-          time: "Just now",
-          status: "completed"
-        });
-
-        closeModal('modal-resolve-stock');
-        updateCounts();
-        renderOrdersTable();
-        notify(`Stock issue resolved for ${state.activeOrder.id}. Substitution applied.`, 'success');
-
-        if (!document.getElementById('modal-order-details').classList.contains('hidden')) {
-          populateOrderDetails(state.activeOrder);
-        }
-      });
-    }
-
-    // 4. Complete Packing & Mark Ready
+    // 3. Complete Packing & Mark Ready
     const btnCompletePacking = document.getElementById('btn-complete-packing');
     if (btnCompletePacking) {
       btnCompletePacking.addEventListener('click', function () {
