@@ -9,16 +9,16 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-xs">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-light-dodger-blue flex items-center justify-center text-dodger-blue shrink-0">
-                <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+                <span class="material-symbols-outlined text-[28px] sm:text-[32px]">receipt_long</span>
             </div>
             <div>
-                <h1 class="text-lg sm:text-xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+                <h1 class="text-[26px] sm:text-[32px] font-bold text-gray-900 tracking-tight flex items-center gap-2">
                     Orders
                 </h1>
-                <p class="text-xs text-gray-500 font-normal">
+                <p class="text-[16px] text-gray-500 font-normal">
                     Manage confirmed medicine orders, prescriptions, packing and delivery
                 </p>
-                <p class="text-[11px] text-gray-400 mt-0.5">
+                <p class="text-[14px] text-gray-400 mt-0.5">
                     Tuesday, 22 July 2025
                 </p>
             </div>
@@ -26,14 +26,14 @@
 
         <div class="flex flex-wrap items-center gap-3 self-end md:self-center">
             <!-- Location pill -->
-            <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600 font-medium">
+            <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 font-medium">
                 <span class="material-symbols-outlined text-[16px] text-gray-500">location_on</span>
                 <span>Andheri East, Mumbai</span>
             </div>
 
             <!-- Auto refresh toggle -->
-            <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600">
-                <span class="text-xs">Auto Refresh</span>
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
+                <span class="text-sm">Auto Refresh</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="auto-refresh-toggle" class="sr-only peer" checked>
                     <div class="w-8 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-dodger-blue"></div>
@@ -46,7 +46,7 @@
             </button>
 
             <!-- Export Button (Always visible on all tabs) -->
-            <button type="button" class="btn-open-export inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-lg transition shadow-xs cursor-pointer">
+            <button type="button" class="btn-open-export inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-lg transition shadow-xs cursor-pointer">
                 <span class="material-symbols-outlined text-[16px]">file_download</span>
                 <span>Export</span>
             </button>
@@ -56,23 +56,23 @@
     <!-- DATE RANGE SELECTION PILLS (Always visible on all tabs) -->
     <div class="flex flex-wrap items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border border-gray-100 shadow-xs">
         <div class="flex flex-wrap items-center gap-2">
-            <button type="button" class="date-filter-pill px-3.5 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer bg-dodger-blue text-white border-transparent" data-range="today">
+            <button type="button" class="date-filter-pill px-3.5 py-1.5 text-sm font-medium rounded-lg transition cursor-pointer bg-dodger-blue text-white border-transparent" data-range="today">
                 Today
             </button>
-            <button type="button" class="date-filter-pill px-3.5 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer bg-white text-gray-700 border border-gray-300 hover:bg-gray-50" data-range="yesterday">
+            <button type="button" class="date-filter-pill px-3.5 py-1.5 text-sm font-medium rounded-lg transition cursor-pointer bg-white text-gray-700 border border-gray-300 hover:bg-gray-50" data-range="yesterday">
                 Yesterday
             </button>
-            <button type="button" class="date-filter-pill px-3.5 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer bg-white text-gray-700 border border-gray-300 hover:bg-gray-50" data-range="last7">
+            <button type="button" class="date-filter-pill px-3.5 py-1.5 text-sm font-medium rounded-lg transition cursor-pointer bg-white text-gray-700 border border-gray-300 hover:bg-gray-50" data-range="last7">
                 Last 7 Days
             </button>
             <!-- Custom Date pill (Opens custom date popup) -->
-            <button type="button" class="date-filter-pill inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer bg-white text-gray-700 border border-gray-300 hover:bg-gray-50" data-range="custom">
+            <button type="button" class="date-filter-pill inline-flex items-center gap-1 px-3.5 py-1.5 text-sm font-medium rounded-lg transition cursor-pointer bg-white text-gray-700 border border-gray-300 hover:bg-gray-50" data-range="custom">
                 <span class="material-symbols-outlined text-[15px]">calendar_today</span>
                 <span>Custom Date</span>
             </button>
         </div>
 
-        <div class="text-xs text-gray-500 font-medium" id="selected-date-display">
+        <div class="text-sm text-gray-500 font-medium" id="selected-date-display">
             Selected date : 22 Jul 2025
         </div>
     </div>
@@ -82,93 +82,93 @@
         <!-- Card 1: Total Orders -->
         <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Total Orders</span>
+                <span class="text-sm font-semibold text-gray-500">Total Orders</span>
                 <span class="material-symbols-outlined text-gray-400 text-[18px]">list_alt</span>
             </div>
             <div class="mt-3">
                 <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight" id="metric-total-orders">12</p>
-                <p class="text-[11px] text-gray-400 mt-1">Selected date : 22 Jul 2025</p>
+                <p class="text-[14px] text-gray-400 mt-1">Selected date : 22 Jul 2025</p>
             </div>
         </div>
 
         <!-- Card 2: To Prepare -->
         <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">To Prepare</span>
+                <span class="text-sm font-semibold text-gray-500">To Prepare</span>
                 <div class="w-6 h-6 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
                     <span class="material-symbols-outlined text-[14px]">inventory_2</span>
                 </div>
             </div>
             <div class="mt-3">
                 <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight" id="metric-to-prepare">5</p>
-                <p class="text-[11px] text-gray-500 mt-1 font-medium" id="metric-to-prepare-sub">3 Pending • 2 Packing</p>
+                <p class="text-[14px] text-gray-500 mt-1 font-medium" id="metric-to-prepare-sub">3 Pending • 2 Packing</p>
             </div>
         </div>
 
         <!-- Card 3: Ready for Handover -->
         <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Ready for Handover</span>
+                <span class="text-sm font-semibold text-gray-500">Ready for Handover</span>
                 <div class="w-6 h-6 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center">
                     <span class="material-symbols-outlined text-[14px]">task_alt</span>
                 </div>
             </div>
             <div class="mt-3">
                 <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight" id="metric-ready-handover">2</p>
-                <p class="text-[11px] text-gray-500 mt-1 font-medium" id="metric-ready-handover-sub">1 Courier Pickup • 1 Store Pickup</p>
+                <p class="text-[14px] text-gray-500 mt-1 font-medium" id="metric-ready-handover-sub">1 Courier Pickup • 1 Store Pickup</p>
             </div>
         </div>
 
         <!-- Card 4: Out for Delivery -->
         <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Out for Delivery</span>
+                <span class="text-sm font-semibold text-gray-500">Out for Delivery</span>
                 <div class="w-6 h-6 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
                     <span class="material-symbols-outlined text-[14px]">local_shipping</span>
                 </div>
             </div>
             <div class="mt-3">
                 <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight" id="metric-ofd">2</p>
-                <p class="text-[11px] text-red-500 font-medium mt-1" id="metric-ofd-sub">1 delivery running late</p>
+                <p class="text-[14px] text-red-500 font-medium mt-1" id="metric-ofd-sub">1 delivery running late</p>
             </div>
         </div>
 
         <!-- Card 5: Completed -->
         <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex flex-col justify-between col-span-2 sm:col-span-1">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Completed</span>
+                <span class="text-sm font-semibold text-gray-500">Completed</span>
                 <div class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
                     <span class="material-symbols-outlined text-[14px]">verified</span>
                 </div>
             </div>
             <div class="mt-3">
                 <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight" id="metric-completed">2</p>
-                <p class="text-[11px] text-gray-500 mt-1 font-medium" id="metric-completed-sub">1 Delivered • 1 Collected</p>
+                <p class="text-[14px] text-gray-500 mt-1 font-medium" id="metric-completed-sub">1 Delivered • 1 Collected</p>
             </div>
         </div>
     </div>
 
     <!-- Small Note below cards -->
-    <div class="text-[11px] text-gray-400 pl-1 -mt-2">
+    <div class="text-[14px] text-gray-400 pl-1 -mt-2">
         1 cancelled order in this period.
     </div>
 
     <!-- ATTENTION WARNING BANNER -->
     <div id="attention-banner" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-50/90 border border-amber-200/90 rounded-xl px-4 py-3 text-amber-900 shadow-xs">
         <div class="flex flex-wrap items-center gap-2">
-            <span class="font-bold text-xs sm:text-sm" id="attention-banner-text">3 orders need attention</span>
+            <span class="font-bold text-sm sm:text-base" id="attention-banner-text">3 orders need attention</span>
             
-            <span id="pill-rx-attention" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white border border-amber-300 text-amber-800">
+            <span id="pill-rx-attention" class="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-white border border-amber-300 text-amber-800">
                 1 prescription to review
             </span>
-            <span id="pill-stock-attention" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white border border-amber-300 text-amber-800">
+            <span id="pill-stock-attention" class="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-white border border-amber-300 text-amber-800">
                 1 stock shortage
             </span>
-            <span id="pill-delay-attention" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white border border-amber-300 text-amber-800">
+            <span id="pill-delay-attention" class="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-white border border-amber-300 text-amber-800">
                 1 delayed delivery
             </span>
         </div>
-        <button type="button" id="btn-review-orders" class="inline-flex items-center gap-1 text-xs font-bold text-amber-900 hover:text-amber-950 hover:underline cursor-pointer shrink-0">
+        <button type="button" id="btn-review-orders" class="inline-flex items-center gap-1 text-sm font-bold text-amber-900 hover:text-amber-950 hover:underline cursor-pointer shrink-0">
             <span>Review Orders</span>
             <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
         </button>
@@ -179,40 +179,40 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 px-4 gap-2">
             <!-- Order Status Tabs -->
             <div class="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-1">
-                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-dodger-blue text-dodger-blue font-semibold text-xs sm:text-sm whitespace-nowrap cursor-pointer transition" data-tab="all">
+                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-dodger-blue text-dodger-blue font-semibold text-sm sm:text-base whitespace-nowrap cursor-pointer transition" data-tab="all">
                     <span>All Orders</span>
-                    <span id="tab-count-all" class="px-1.5 py-0.5 rounded-full text-[10px] bg-blue-50 text-dodger-blue font-bold">12</span>
+                    <span id="tab-count-all" class="px-1.5 py-0.5 rounded-full text-[13px] bg-blue-50 text-dodger-blue font-bold">12</span>
                 </button>
-                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-xs sm:text-sm whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="pending">
+                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-sm sm:text-base whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="pending">
                     <span>Pending</span>
-                    <span id="tab-count-pending" class="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-100 text-gray-600 font-bold">3</span>
+                    <span id="tab-count-pending" class="px-1.5 py-0.5 rounded-full text-[13px] bg-gray-100 text-gray-600 font-bold">3</span>
                 </button>
-                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-xs sm:text-sm whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="packing">
+                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-sm sm:text-base whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="packing">
                     <span>Packing</span>
-                    <span id="tab-count-packing" class="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-100 text-gray-600 font-bold">2</span>
+                    <span id="tab-count-packing" class="px-1.5 py-0.5 rounded-full text-[13px] bg-gray-100 text-gray-600 font-bold">2</span>
                 </button>
-                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-xs sm:text-sm whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="ready">
+                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-sm sm:text-base whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="ready">
                     <span>Ready</span>
-                    <span id="tab-count-ready" class="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-100 text-gray-600 font-bold">2</span>
+                    <span id="tab-count-ready" class="px-1.5 py-0.5 rounded-full text-[13px] bg-gray-100 text-gray-600 font-bold">2</span>
                 </button>
-                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-xs sm:text-sm whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="out_for_delivery">
+                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-sm sm:text-base whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="out_for_delivery">
                     <span>Out for Delivery</span>
-                    <span id="tab-count-out-for-delivery" class="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-100 text-gray-600 font-bold">2</span>
+                    <span id="tab-count-out-for-delivery" class="px-1.5 py-0.5 rounded-full text-[13px] bg-gray-100 text-gray-600 font-bold">2</span>
                 </button>
-                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-xs sm:text-sm whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="completed">
+                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-sm sm:text-base whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="completed">
                     <span>Completed</span>
-                    <span id="tab-count-completed" class="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-100 text-gray-600 font-bold">2</span>
+                    <span id="tab-count-completed" class="px-1.5 py-0.5 rounded-full text-[13px] bg-gray-100 text-gray-600 font-bold">2</span>
                 </button>
-                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-xs sm:text-sm whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="cancelled">
+                <button type="button" class="order-tab-btn flex h-12 w-32 shrink-0 items-center justify-center gap-1.5 border-b-2 border-transparent text-gray-500 font-medium text-sm sm:text-base whitespace-nowrap hover:text-gray-700 cursor-pointer transition" data-tab="cancelled">
                     <span>Cancelled</span>
-                    <span id="tab-count-cancelled" class="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-100 text-gray-600 font-bold">1</span>
+                    <span id="tab-count-cancelled" class="px-1.5 py-0.5 rounded-full text-[13px] bg-gray-100 text-gray-600 font-bold">1</span>
                 </button>
             </div>
 
             <!-- Needs Attention Only Toggle -->
             <div class="flex items-center gap-2.5 py-2 sm:py-0 self-end sm:self-center">
-                <span class="text-xs font-medium text-gray-700">Needs Attention Only</span>
-                <span id="attention-count-badge" class="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-bold">3</span>
+                <span class="text-sm font-medium text-gray-700">Needs Attention Only</span>
+                <span id="attention-count-badge" class="px-1.5 py-0.5 rounded-full text-[13px] bg-amber-100 text-amber-800 font-bold">3</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="needs-attention-toggle" class="sr-only peer">
                     <div class="w-8 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-500"></div>
@@ -226,14 +226,14 @@
             <div class="relative flex-1 min-w-[260px]">
                 <span class="material-symbols-outlined absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 text-[18px]">search</span>
                 <input type="text" id="orders-search-input" placeholder="Search order ID, customer, area or medicine"
-                       class="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-gray-200 bg-white placeholder:text-gray-400 focus:outline-none focus:border-dodger-blue focus:ring-1 focus:ring-dodger-blue" />
+                       class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-gray-200 bg-white placeholder:text-gray-400 focus:outline-none focus:border-dodger-blue focus:ring-1 focus:ring-dodger-blue" />
             </div>
 
             <!-- Filter Dropdowns -->
             <div class="flex flex-wrap items-center gap-2">
                 <!-- Fulfilment Filter -->
                 <div class="relative">
-                    <select id="filter-fulfilment" class="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-xs text-gray-700 focus:outline-none focus:border-dodger-blue cursor-pointer">
+                    <select id="filter-fulfilment" class="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm text-gray-700 focus:outline-none focus:border-dodger-blue cursor-pointer">
                         <option value="all">Fulfilment: All</option>
                         <option value="home">Home Delivery</option>
                         <option value="store">Store Pickup</option>
@@ -243,7 +243,7 @@
 
                 <!-- Payment Filter -->
                 <div class="relative">
-                    <select id="filter-payment" class="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-xs text-gray-700 focus:outline-none focus:border-dodger-blue cursor-pointer">
+                    <select id="filter-payment" class="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm text-gray-700 focus:outline-none focus:border-dodger-blue cursor-pointer">
                         <option value="all">Payment: All</option>
                         <option value="paid">Paid</option>
                         <option value="cod">COD</option>
@@ -255,7 +255,7 @@
 
                 <!-- Prescription Filter -->
                 <div class="relative">
-                    <select id="filter-prescription" class="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-xs text-gray-700 focus:outline-none focus:border-dodger-blue cursor-pointer">
+                    <select id="filter-prescription" class="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm text-gray-700 focus:outline-none focus:border-dodger-blue cursor-pointer">
                         <option value="all">Prescription: All</option>
                         <option value="verified">Verified</option>
                         <option value="pending">Pending Review</option>
@@ -267,7 +267,7 @@
 
                 <!-- Sort Filter -->
                 <div class="relative">
-                    <select id="filter-sort" class="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-xs text-gray-700 focus:outline-none focus:border-dodger-blue cursor-pointer">
+                    <select id="filter-sort" class="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm text-gray-700 focus:outline-none focus:border-dodger-blue cursor-pointer">
                         <option value="newest">Newest First</option>
                         <option value="oldest">Oldest First</option>
                         <option value="amount_high">Amount: High to Low</option>
@@ -277,7 +277,7 @@
                 </div>
 
                 <!-- Reset Filters -->
-                <button type="button" id="btn-reset-filters" class="px-3 py-2 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                <button type="button" id="btn-reset-filters" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition cursor-pointer">
                     Reset Filters
                 </button>
             </div>
@@ -287,7 +287,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[1000px]">
                 <thead>
-                    <tr class="border-y border-gray-200/80 bg-gray-50/70 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                    <tr class="border-y border-gray-200/80 bg-gray-50/70 text-[14px] font-semibold text-gray-500 uppercase tracking-wider">
                         <th class="py-3 px-4">Order ID</th>
                         <th class="py-3 px-4">Customer</th>
                         <th class="py-3 px-4">Medicines</th>
@@ -308,19 +308,19 @@
         <!-- Empty State -->
         <div id="orders-empty-state" class="hidden py-12 text-center">
             <span class="material-symbols-outlined text-[44px] text-gray-300">search_off</span>
-            <p class="text-sm font-semibold text-gray-700 mt-2">No matching orders found</p>
-            <p class="text-xs text-gray-400 mt-0.5">Try clearing filters or search query to view all orders.</p>
+            <p class="text-[15px] font-semibold text-gray-700 mt-2">No matching orders found</p>
+            <p class="text-sm text-gray-400 mt-0.5">Try clearing filters or search query to view all orders.</p>
         </div>
 
         <!-- TABLE PAGINATION FOOTER -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-t border-gray-100 text-xs text-gray-500">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-t border-gray-100 text-sm text-gray-500">
             <div id="showing-orders-count">
                 Showing 1-12 of 12 orders
             </div>
             <div class="flex items-center gap-4 self-end sm:self-center">
                 <div class="flex items-center gap-1.5">
                     <span>Rows per page:</span>
-                    <select class="border border-gray-200 rounded px-2 py-1 text-xs text-gray-700 focus:outline-none">
+                    <select class="border border-gray-200 rounded px-2 py-1 text-sm text-gray-700 focus:outline-none">
                         <option>20</option>
                         <option>50</option>
                         <option>100</option>
@@ -348,40 +348,40 @@
 <div id="modal-custom-date" class="orders-modal-overlay hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
     <div class="bg-white rounded-xl w-full max-w-[340px] p-5 shadow-xl relative border border-gray-100">
         <!-- Title -->
-        <h3 class="text-sm font-bold text-gray-900 mb-3.5">Custom</h3>
+        <h3 class="text-[15px] font-bold text-gray-900 mb-3.5">Custom</h3>
 
         <!-- From and To Side by Side -->
         <div class="grid grid-cols-2 gap-3">
             <div>
-                <label class="block text-[11px] font-medium text-gray-500 mb-1">From</label>
+                <label class="block text-[14px] font-medium text-gray-500 mb-1">From</label>
                 <div class="relative">
                     <input type="text" id="custom-from-date" value="12/05/2024"
-                           class="w-full pl-2.5 pr-7 py-1.5 text-xs text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:border-teal-600 bg-white" />
+                           class="w-full pl-2.5 pr-7 py-1.5 text-sm text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:border-teal-600 bg-white" />
                     <span class="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 text-[16px] pointer-events-none">calendar_today</span>
                 </div>
             </div>
             <div>
-                <label class="block text-[11px] font-medium text-gray-500 mb-1">To</label>
+                <label class="block text-[14px] font-medium text-gray-500 mb-1">To</label>
                 <div class="relative">
                     <input type="text" id="custom-to-date" value="18/05/2024"
-                           class="w-full pl-2.5 pr-7 py-1.5 text-xs text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:border-teal-600 bg-white" />
+                           class="w-full pl-2.5 pr-7 py-1.5 text-sm text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:border-teal-600 bg-white" />
                     <span class="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 text-[16px] pointer-events-none">calendar_today</span>
                 </div>
             </div>
         </div>
 
         <!-- Note with radio/circle -->
-        <div class="flex items-start gap-1.5 mt-3 text-[10px] text-gray-500 leading-tight">
+        <div class="flex items-start gap-1.5 mt-3 text-[13px] text-gray-500 leading-tight">
             <span class="material-symbols-outlined text-[13px] text-gray-400 shrink-0 mt-0.5">radio_button_unchecked</span>
             <span>Filters lab test records, patient admissions, and orders.</span>
         </div>
 
         <!-- Action Buttons -->
         <div class="flex items-center justify-end gap-2 mt-4 pt-2">
-            <button type="button" data-close-modal="modal-custom-date" class="px-4 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition cursor-pointer">
+            <button type="button" data-close-modal="modal-custom-date" class="px-4 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition cursor-pointer">
                 Cancel
             </button>
-            <button type="button" id="btn-apply-custom-date" class="px-5 py-1.5 text-xs font-medium text-white bg-dodger-blue  rounded-md transition shadow-xs cursor-pointer">
+            <button type="button" id="btn-apply-custom-date" class="px-5 py-1.5 text-sm font-medium text-white bg-dodger-blue rounded-md transition shadow-xs cursor-pointer">
                 Apply
             </button>
         </div>
@@ -393,25 +393,25 @@
     <div class="bg-white rounded-xl w-full max-w-[360px] p-5 shadow-xl relative border border-gray-100">
         <!-- Header with round close icon -->
         <div class="flex items-center justify-between pb-3 border-b border-gray-100">
-            <h3 class="text-sm font-bold text-gray-900">Export Orders</h3>
+            <h3 class="text-[15px] font-bold text-gray-900">Export Orders</h3>
             <button type="button" data-close-modal="modal-export" class="w-6 h-6 rounded-full border border-gray-200 hover:border-gray-300 flex items-center justify-center text-gray-400 hover:text-gray-700 cursor-pointer">
                 <span class="material-symbols-outlined text-[14px]">close</span>
             </button>
         </div>
 
-        <div class="space-y-4 pt-3 text-xs">
+        <div class="space-y-4 pt-3 text-sm">
             <!-- EXPORT FORMAT -->
             <div>
-                <p class="text-[10px] font-bold tracking-wider text-gray-400 uppercase mb-1.5">Export Format</p>
+                <p class="text-[13px] font-bold tracking-wider text-gray-400 uppercase mb-1.5">Export Format</p>
                 <div class="flex items-center justify-between p-2.5 border border-gray-200 rounded-lg bg-white">
                     <label class="flex items-center gap-2.5 cursor-pointer flex-1">
                         <input type="radio" name="export_format" value="csv" checked class="h-3.5 w-3.5 text-[#3aafa9] focus:ring-[#3aafa9]">
                         <div>
-                            <p class="text-xs font-bold text-gray-900">Format CSV</p>
-                            <p class="text-[10px] text-gray-400">Standard spreadsheet format</p>
+                            <p class="text-sm font-bold text-gray-900">Format CSV</p>
+                            <p class="text-[13px] text-gray-400">Standard spreadsheet format</p>
                         </div>
                     </label>
-                    <span class="inline-flex items-center gap-1 border border-gray-200 px-1.5 py-0.5 rounded text-[10px] font-medium text-gray-600 bg-gray-50">
+                    <span class="inline-flex items-center gap-1 border border-gray-200 px-1.5 py-0.5 rounded text-[13px] font-medium text-gray-600 bg-gray-50">
                         <span class="material-symbols-outlined text-[12px] text-gray-400">description</span>
                         <span>.CSV</span>
                     </span>
@@ -421,48 +421,48 @@
             <!-- ORDER SCOPE -->
             <div>
                 <div class="flex items-center justify-between mb-1.5">
-                    <p class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Order Scope</p>
-                    <span class="text-[9px] text-gray-500 font-medium border border-gray-200 bg-gray-50 px-1.5 py-0.2 rounded-full">Filter applied</span>
+                    <p class="text-[13px] font-bold tracking-wider text-gray-400 uppercase">Order Scope</p>
+                    <span class="text-[12px] text-gray-500 font-medium border border-gray-200 bg-gray-50 px-1.5 py-0.2 rounded-full">Filter applied</span>
                 </div>
                 <div class="space-y-2">
                     <label class="flex items-center justify-between p-2.5 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer bg-white">
                         <div class="flex items-center gap-2.5">
                             <input type="radio" name="export_scope" value="filtered" checked class="h-3.5 w-3.5 text-[#3aafa9] focus:ring-[#3aafa9]">
                             <div>
-                                <p class="text-xs font-bold text-gray-900">Current filtered results</p>
-                                <p class="text-[10px] text-gray-400">Active criteria & dates</p>
+                                <p class="text-sm font-bold text-gray-900">Current filtered results</p>
+                                <p class="text-[13px] text-gray-400">Active criteria & dates</p>
                             </div>
                         </div>
-                        <span id="export-filtered-count-badge" class="border border-gray-200 rounded-full px-2 py-0.5 text-[10px] text-gray-600 font-medium bg-gray-50">3 orders</span>
+                        <span id="export-filtered-count-badge" class="border border-gray-200 rounded-full px-2 py-0.5 text-[13px] text-gray-600 font-medium bg-gray-50">3 orders</span>
                     </label>
 
                     <label class="flex items-center justify-between p-2.5 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer bg-white">
                         <div class="flex items-center gap-2.5">
                             <input type="radio" name="export_scope" value="all" class="h-3.5 w-3.5 text-[#3aafa9] focus:ring-[#3aafa9]">
                             <div>
-                                <p class="text-xs font-medium text-gray-800">All 12 orders</p>
-                                <p class="text-[10px] text-gray-400">Full hospital database scope</p>
+                                <p class="text-sm font-medium text-gray-800">All 12 orders</p>
+                                <p class="text-[13px] text-gray-400">Full hospital database scope</p>
                             </div>
                         </div>
-                        <span class="border border-gray-200 rounded-full px-2 py-0.5 text-[10px] text-gray-500 font-medium bg-gray-50">12 total</span>
+                        <span class="border border-gray-200 rounded-full px-2 py-0.5 text-[13px] text-gray-500 font-medium bg-gray-50">12 total</span>
                     </label>
                 </div>
             </div>
 
             <!-- CONTENT DETAILS -->
             <div>
-                <p class="text-[10px] font-bold tracking-wider text-gray-400 uppercase mb-1.5">Content Details</p>
+                <p class="text-[13px] font-bold tracking-wider text-gray-400 uppercase mb-1.5">Content Details</p>
                 <label class="flex items-start gap-2.5 p-2.5 border border-gray-200 rounded-lg cursor-pointer bg-white">
                     <input type="checkbox" id="export-include-items" checked class="mt-0.5 h-3.5 w-3.5 text-[#3aafa9] rounded border-gray-300 focus:ring-[#3aafa9]">
                     <div>
-                        <p class="text-xs font-bold text-gray-900">Include item details</p>
-                        <p class="text-[10px] text-gray-400 leading-tight mt-0.5">Includes itemized medicines, dosage, unit pricing and batch numbers</p>
+                        <p class="text-sm font-bold text-gray-900">Include item details</p>
+                        <p class="text-[13px] text-gray-400 leading-tight mt-0.5">Includes itemized medicines, dosage, unit pricing and batch numbers</p>
                     </div>
                 </label>
             </div>
 
             <!-- SUMMARY PILL -->
-            <div class="flex items-center justify-between border border-gray-200 rounded-lg p-2 bg-gray-50 text-[10px] text-gray-600">
+            <div class="flex items-center justify-between border border-gray-200 rounded-lg p-2 bg-gray-50 text-[13px] text-gray-600">
                 <span id="export-summary-count" class="font-semibold text-gray-800 flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
                     3 orders selected
@@ -473,10 +473,10 @@
 
         <!-- ACTIONS -->
         <div class="flex items-center justify-end gap-2 pt-4 mt-3 border-t border-gray-100">
-            <button type="button" data-close-modal="modal-export" class="px-4 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+            <button type="button" data-close-modal="modal-export" class="px-4 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                 Cancel
             </button>
-            <button type="button" id="btn-confirm-export" class="px-5 py-1.5 text-xs font-medium text-white bg-dodger-blue rounded-md transition shadow-xs cursor-pointer">
+            <button type="button" id="btn-confirm-export" class="px-5 py-1.5 text-sm font-medium text-white bg-dodger-blue rounded-md transition shadow-xs cursor-pointer">
                 Export
             </button>
         </div>
@@ -490,10 +490,10 @@
         <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
             <div>
                 <div class="flex items-center gap-2">
-                    <h2 class="text-sm font-bold text-gray-900" id="modal-order-title">Order Details</h2>
-                    <span id="modal-order-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-semibold">Status</span>
+                    <h2 class="text-[15px] font-bold text-gray-900" id="modal-order-title">Order Details</h2>
+                    <span id="modal-order-status-badge" class="px-2 py-0.5 rounded-full text-[13px] font-semibold">Status</span>
                 </div>
-                <p class="text-[11px] text-gray-400 mt-0.5" id="modal-order-subtitle">ORD-3302 (Created 22 Jul 2025 • 12:45 PM)</p>
+                <p class="text-[14px] text-gray-400 mt-0.5" id="modal-order-subtitle">ORD-3302 (Created 22 Jul 2025 • 12:45 PM)</p>
             </div>
             <div class="flex items-center gap-2">
                 <button type="button" class="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer action-quick-print" title="Share / Print">
@@ -507,50 +507,50 @@
 
         <!-- 4 Sub-Tabs -->
         <div class="flex border-b border-gray-100 px-5 bg-white shrink-0">
-            <button type="button" id="tab-btn-overview" class="py-2.5 px-3 border-b-2 border-dodger-blue font-semibold text-dodger-blue text-xs cursor-pointer">
+            <button type="button" id="tab-btn-overview" class="py-2.5 px-3 border-b-2 border-dodger-blue font-semibold text-dodger-blue text-sm cursor-pointer">
                 Overview
             </button>
-            <button type="button" id="tab-btn-prescription" class="py-2.5 px-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 text-xs cursor-pointer">
+            <button type="button" id="tab-btn-prescription" class="py-2.5 px-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 text-sm cursor-pointer">
                 Prescription
             </button>
-            <button type="button" id="tab-btn-payment" class="py-2.5 px-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 text-xs cursor-pointer">
+            <button type="button" id="tab-btn-payment" class="py-2.5 px-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 text-sm cursor-pointer">
                 Payment
             </button>
-            <button type="button" id="tab-btn-activity" class="py-2.5 px-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 text-xs cursor-pointer">
+            <button type="button" id="tab-btn-activity" class="py-2.5 px-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700 text-sm cursor-pointer">
                 Activity
             </button>
         </div>
 
         <!-- Sub-Tabs Body -->
-        <div class="p-5 overflow-y-auto flex-1 space-y-4 text-xs">
+        <div class="p-5 overflow-y-auto flex-1 space-y-4 text-sm">
             <!-- TAB 1: OVERVIEW -->
             <div id="tab-content-overview" class="space-y-4">
                 <!-- Customer Details Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-gray-100">
                     <div class="flex items-center gap-3">
-                        <div id="details-customer-avatar" class="w-10 h-10 rounded-full bg-dodger-blue text-white flex items-center justify-center font-bold text-xs shrink-0">
+                        <div id="details-customer-avatar" class="w-10 h-10 rounded-full bg-dodger-blue text-white flex items-center justify-center font-bold text-sm shrink-0">
                             MP
                         </div>
                         <div>
-                            <h4 class="font-bold text-xs text-gray-900" id="details-customer-name">Meera Pillai</h4>
-                            <p class="text-[11px] text-gray-500" id="details-customer-meta">28 • Female</p>
-                            <p class="text-[11px] text-gray-500" id="details-customer-phone">+91 98765 43210</p>
+                            <h4 class="font-bold text-sm text-gray-900" id="details-customer-name">Meera Pillai</h4>
+                            <p class="text-[14px] text-gray-500" id="details-customer-meta">28 • Female</p>
+                            <p class="text-[14px] text-gray-500" id="details-customer-phone">+91 98765 43210</p>
                         </div>
                     </div>
                     <div class="text-left sm:text-right space-y-0.5">
-                        <span id="details-fulfilment-badge" class="px-2 py-0.5 text-[10px] font-semibold rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span id="details-fulfilment-badge" class="px-2 py-0.5 text-[13px] font-semibold rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
                             Home Delivery
                         </span>
-                        <p class="text-[11px] text-gray-500 mt-1" id="details-customer-address">Building, Sambare, Vikhroli E 23 604</p>
-                        <p class="text-[10px] text-gray-400" id="details-order-slot">22 Jul 2025 • 01:45 PM</p>
+                        <p class="text-[14px] text-gray-500 mt-1" id="details-customer-address">Building, Sambare, Vikhroli E 23 604</p>
+                        <p class="text-[13px] text-gray-400" id="details-order-slot">22 Jul 2025 • 01:45 PM</p>
                     </div>
                 </div>
 
                 <!-- Order Items Table -->
                 <div>
-                    <table class="w-full text-left text-xs">
+                    <table class="w-full text-left text-sm">
                         <thead>
-                            <tr class="text-[11px] font-semibold text-gray-400 border-b border-gray-100 pb-2">
+                            <tr class="text-[14px] font-semibold text-gray-400 border-b border-gray-100 pb-2">
                                 <th class="pb-2 font-medium">Product</th>
                                 <th class="pb-2 font-medium">Quantity</th>
                                 <th class="pb-2 font-medium">Unit Price</th>
@@ -569,9 +569,9 @@
                 </div>
 
                 <!-- Bottom Total -->
-                <div class="flex justify-between items-center pt-3 border-t border-gray-100 text-xs">
+                <div class="flex justify-between items-center pt-3 border-t border-gray-100 text-sm">
                     <span class="text-gray-500">Invoice total:</span>
-                    <span class="text-sm font-bold text-gray-900" id="details-items-total">₹260</span>
+                    <span class="text-[15px] font-bold text-gray-900" id="details-items-total">₹260</span>
                 </div>
             </div>
 
@@ -585,21 +585,21 @@
             <!-- TAB 3: PAYMENT -->
             <div id="tab-content-payment" class="hidden space-y-3">
                 <div class="space-y-2 py-2">
-                    <div class="flex justify-between text-xs text-gray-600">
+                    <div class="flex justify-between text-sm text-gray-600">
                         <span>Items subtotal</span>
                         <span class="font-medium text-gray-900" id="details-pay-subtotal">₹240</span>
                     </div>
-                    <div class="flex justify-between text-xs text-gray-600">
+                    <div class="flex justify-between text-sm text-gray-600">
                         <span>Delivery</span>
                         <span class="font-medium text-gray-900" id="details-pay-delivery">₹20</span>
                     </div>
-                    <div class="flex justify-between text-sm font-bold text-gray-900 pt-1 border-t border-gray-100">
+                    <div class="flex justify-between text-[15px] font-bold text-gray-900 pt-1 border-t border-gray-100">
                         <span>Order total</span>
                         <span class="text-gray-900" id="details-pay-total">₹260</span>
                     </div>
                 </div>
 
-                <div class="p-3 bg-blue-50/60 border border-blue-100 rounded-lg text-xs text-gray-700 space-y-1">
+                <div class="p-3 bg-blue-50/60 border border-blue-100 rounded-lg text-sm text-gray-700 space-y-1">
                     <p><span class="text-gray-500">Payment status:</span> <strong id="details-pay-status" class="text-emerald-700">Paid</strong></p>
                     <p><span class="text-gray-500">Method:</span> <strong id="details-pay-method">UPI</strong></p>
                     <p><span class="text-gray-500">Transaction ID:</span> <span class="font-mono" id="details-pay-txnid">UPI-ref-91823791</span></p>
@@ -616,7 +616,7 @@
 
         <!-- Footer -->
         <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-end gap-2 bg-white shrink-0">
-            <button type="button" data-close-modal="modal-order-details" class="px-4 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+            <button type="button" data-close-modal="modal-order-details" class="px-4 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                 Close
             </button>
         </div>
@@ -629,11 +629,11 @@
         <!-- Header -->
         <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between shrink-0">
             <div>
-                <h3 class="text-sm font-bold text-gray-900">Review Prescription</h3>
-                <p class="text-[11px] text-gray-400" id="rx-popup-subtitle">ORD-3302 • Gaurav Sharma</p>
+                <h3 class="text-[15px] font-bold text-gray-900">Review Prescription</h3>
+                <p class="text-[14px] text-gray-400" id="rx-popup-subtitle">ORD-3302 • Gaurav Sharma</p>
             </div>
             <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                <span id="rx-popup-status" class="px-2 py-0.5 rounded text-[13px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                     Clarification Needed
                 </span>
                 <button type="button" data-close-modal="modal-review-prescription" class="text-gray-400 hover:text-gray-600 cursor-pointer">
@@ -643,31 +643,31 @@
         </div>
 
         <!-- 2 Columns Content -->
-        <div class="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <!-- Left: Document Preview -->
             <div class="border border-gray-200 rounded-lg p-3.5 bg-gray-50/50 flex flex-col justify-between">
                 <div class="space-y-3">
                     <div class="border-b border-gray-200 pb-2">
                         <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-xs text-gray-900" id="rx-popup-doctor">Dr. A. K. Gupta - MBBS, MD</h4>
-                            <span class="text-[10px] font-bold text-dodger-blue bg-blue-50 px-1.5 py-0.2 rounded">Rx</span>
+                            <h4 class="font-bold text-sm text-gray-900" id="rx-popup-doctor">Dr. A. K. Gupta - MBBS, MD</h4>
+                            <span class="text-[13px] font-bold text-dodger-blue bg-blue-50 px-1.5 py-0.2 rounded">Rx</span>
                         </div>
-                        <p class="text-[10px] text-gray-500" id="rx-popup-hospital">Apollo Clinics, Borivali West</p>
-                        <p class="text-[9px] text-gray-400" id="rx-popup-reg">MCI-49201</p>
+                        <p class="text-[13px] text-gray-500" id="rx-popup-hospital">Apollo Clinics, Borivali West</p>
+                        <p class="text-[12px] text-gray-400" id="rx-popup-reg">MCI-49201</p>
                     </div>
 
-                    <div class="text-[11px] space-y-1">
+                    <div class="text-[14px] space-y-1">
                         <p><span class="text-gray-500">Patient:</span> <strong id="rx-popup-patient">Gaurav Sharma</strong></p>
                         <p><span class="text-gray-500">Date:</span> <span id="rx-popup-date">22 Jul 2025</span></p>
                     </div>
 
-                    <div class="bg-white border border-gray-200 rounded p-2 text-[10px] font-mono space-y-1 text-gray-800">
+                    <div id="rx-popup-items" class="bg-white border border-gray-200 rounded p-2 text-[13px] font-mono space-y-1 text-gray-800">
                         <p>1. Tab Metformin 500mg - 1 tab BD (30 days)</p>
                         <p>2. Cap Pantop 40mg - 1 cap OD before meals</p>
                     </div>
                 </div>
 
-                <div class="border-t border-gray-200 pt-2 mt-3 flex items-center justify-between text-[10px] text-gray-500">
+                <div class="border-t border-gray-200 pt-2 mt-3 flex items-center justify-between text-[13px] text-gray-500">
                     <span class="flex items-center gap-1 text-emerald-700">
                         <span class="material-symbols-outlined text-[14px]">verified</span>
                         <span>Digitally Signed</span>
@@ -682,39 +682,39 @@
             <!-- Right: Checklist -->
             <div class="flex flex-col justify-between space-y-3">
                 <div class="space-y-2">
-                    <p class="font-bold text-xs text-gray-800">Review checklist</p>
+                    <p class="font-bold text-sm text-gray-800">Review checklist</p>
                     <label class="flex items-center gap-2 p-1.5 bg-gray-50 rounded border border-gray-200 cursor-pointer">
                         <input type="checkbox" id="rx-check-1" checked class="h-3.5 w-3.5 text-dodger-blue rounded border-gray-300">
-                        <span class="text-[11px] text-gray-700">Doctor details valid</span>
+                        <span class="text-[14px] text-gray-700">Doctor details valid</span>
                     </label>
                     <label class="flex items-center gap-2 p-1.5 bg-gray-50 rounded border border-gray-200 cursor-pointer">
                         <input type="checkbox" id="rx-check-2" checked class="h-3.5 w-3.5 text-dodger-blue rounded border-gray-300">
-                        <span class="text-[11px] text-gray-700">Patient name matches order</span>
+                        <span class="text-[14px] text-gray-700">Patient name matches order</span>
                     </label>
                     <label class="flex items-center gap-2 p-1.5 bg-gray-50 rounded border border-gray-200 cursor-pointer">
                         <input type="checkbox" id="rx-check-3" checked class="h-3.5 w-3.5 text-dodger-blue rounded border-gray-300">
-                        <span class="text-[11px] text-gray-700">Prescription within validity period</span>
+                        <span class="text-[14px] text-gray-700">Prescription within validity period</span>
                     </label>
                     <label class="flex items-center gap-2 p-1.5 bg-gray-50 rounded border border-gray-200 cursor-pointer">
                         <input type="checkbox" id="rx-check-4" checked class="h-3.5 w-3.5 text-dodger-blue rounded border-gray-300">
-                        <span class="text-[11px] text-gray-700">Dosage instructions clear</span>
+                        <span class="text-[14px] text-gray-700">Dosage instructions clear</span>
                     </label>
 
                     <div class="pt-1">
-                        <label class="block text-[10px] font-semibold text-gray-500 mb-0.5">Prescription notes</label>
+                        <label class="block text-[13px] font-semibold text-gray-500 mb-0.5">Prescription notes</label>
                         <textarea id="rx-notes-input" rows="2" placeholder="Add prescription notes / queries..."
-                                  class="w-full p-2 text-xs border border-gray-200 rounded-md focus:outline-none focus:border-dodger-blue"></textarea>
+                                  class="w-full p-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-dodger-blue"></textarea>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-                    <button type="button" id="btn-reject-rx" class="px-3 py-1.5 text-xs font-medium text-rose-600 bg-white border border-rose-200 rounded-md hover:bg-rose-50 cursor-pointer">
+                    <button type="button" id="btn-reject-rx" class="px-3 py-1.5 text-sm font-medium text-rose-600 bg-white border border-rose-200 rounded-md hover:bg-rose-50 cursor-pointer">
                         Reject Rx
                     </button>
-                    <button type="button" data-close-modal="modal-review-prescription" class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <button type="button" data-close-modal="modal-review-prescription" class="px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                         Ask Clarification
                     </button>
-                    <button type="button" id="btn-approve-rx" class="px-4 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
+                    <button type="button" id="btn-approve-rx" class="px-4 py-1.5 text-sm font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
                         Accept Prescription
                     </button>
                 </div>
@@ -723,84 +723,23 @@
     </div>
 </div>
 
-<!-- 5. RESOLVE STOCK ISSUE POPUP -->
-<div id="modal-resolve-stock" class="orders-modal-overlay hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-xl w-full max-w-[420px] p-5 shadow-xl relative border border-gray-100">
-        <div class="flex items-center justify-between pb-2.5 border-b border-gray-100">
-            <div>
-                <h3 class="text-sm font-bold text-gray-900">Resolve Stock Issue</h3>
-                <p class="text-[10px] text-gray-400" id="stock-popup-subtitle">ORD-3303 • Priya Sharma</p>
-            </div>
-            <button type="button" data-close-modal="modal-resolve-stock" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                <span class="material-symbols-outlined text-[18px]">close</span>
-            </button>
-        </div>
-
-        <div class="space-y-3 pt-3 text-xs">
-            <!-- Warning -->
-            <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[11px] leading-tight">
-                <span class="font-bold">1 item out of stock or low in inventory</span>
-                <p class="mt-0.5 text-amber-900 font-semibold" id="stock-shortage-item">Amoxicillin 500mg Capsules</p>
-                <p class="text-[10px] text-amber-700">Ordered: <span id="stock-shortage-ordered">2 strips</span> • Available: <span id="stock-shortage-available">0 in stock</span></p>
-            </div>
-
-            <!-- Options -->
-            <div class="space-y-2">
-                <label class="flex items-start gap-2 p-2 border border-dodger-blue bg-blue-50/50 rounded-lg cursor-pointer">
-                    <input type="radio" name="stock_resolution" value="substitute" checked class="mt-0.5 text-dodger-blue focus:ring-dodger-blue">
-                    <div>
-                        <p class="font-semibold text-gray-900">Substitute with generic alternative</p>
-                        <select class="mt-1 text-[11px] border border-gray-300 rounded p-1 bg-white">
-                            <option>Moxikind-CV 500mg (24 strips in stock • ₹140)</option>
-                            <option>Novamox 500mg (18 strips in stock • ₹140)</option>
-                        </select>
-                    </div>
-                </label>
-
-                <label class="flex items-start gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer">
-                    <input type="radio" name="stock_resolution" value="partial" class="mt-0.5 text-dodger-blue focus:ring-dodger-blue">
-                    <div>
-                        <p class="font-semibold text-gray-800">Fulfill partial order (refund missing items)</p>
-                    </div>
-                </label>
-
-                <label class="flex items-start gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer">
-                    <input type="radio" name="stock_resolution" value="contact" class="mt-0.5 text-dodger-blue focus:ring-dodger-blue">
-                    <div>
-                        <p class="font-semibold text-gray-800">Contact customer for confirmation</p>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-gray-100">
-            <button type="button" data-close-modal="modal-resolve-stock" class="px-3.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                Cancel
-            </button>
-            <button type="button" id="btn-confirm-stock-resolution" class="px-4 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
-                Save Resolution
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- 6. PREPARE ORDER (PACKING) POPUP -->
+<!-- 5. PREPARE ORDER (PACKING) POPUP -->
 <div id="modal-prepare-order" class="orders-modal-overlay hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-xl w-full max-w-[460px] p-5 shadow-xl relative border border-gray-100">
         <div class="flex items-center justify-between pb-2.5 border-b border-gray-100">
             <div>
-                <h3 class="text-sm font-bold text-gray-900">Prepare Order</h3>
-                <p class="text-[10px] text-gray-400" id="prepare-popup-subtitle">ORD-3305 • Amit Kumar</p>
+                <h3 class="text-[15px] font-bold text-gray-900">Prepare Order</h3>
+                <p class="text-[13px] text-gray-400" id="prepare-popup-subtitle">ORD-3305 • Amit Kumar</p>
             </div>
             <button type="button" data-close-modal="modal-prepare-order" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div class="space-y-3 pt-3 text-xs">
-            <table class="w-full text-left text-xs border border-gray-200 rounded-lg overflow-hidden">
+        <div class="space-y-3 pt-3 text-sm">
+            <table class="w-full text-left text-sm border border-gray-200 rounded-lg overflow-hidden">
                 <thead>
-                    <tr class="bg-gray-50 text-[10px] font-semibold text-gray-500 uppercase border-b border-gray-200">
+                    <tr class="bg-gray-50 text-[13px] font-semibold text-gray-500 uppercase border-b border-gray-200">
                         <th class="py-2 px-2.5">Product</th>
                         <th class="py-2 px-2.5">Ordered</th>
                         <th class="py-2 px-2.5">Stock Shelf</th>
@@ -812,16 +751,16 @@
                 </tbody>
             </table>
 
-            <div class="p-2.5 bg-blue-50/50 border border-blue-100 rounded text-[11px] text-gray-600">
+            <div class="p-2.5 bg-blue-50/50 border border-blue-100 rounded text-[14px] text-gray-600">
                 <span class="font-semibold text-dodger-blue">Packaging:</span> Standard sealed pouch with invoice label attached.
             </div>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-gray-100">
-            <button type="button" data-close-modal="modal-prepare-order" class="px-3.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+            <button type="button" data-close-modal="modal-prepare-order" class="px-3.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                 Cancel
             </button>
-            <button type="button" id="btn-complete-packing" class="px-4 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
+            <button type="button" id="btn-complete-packing" class="px-4 py-1.5 text-sm font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
                 Complete Packing & Mark Ready
             </button>
         </div>
@@ -833,24 +772,24 @@
     <div class="bg-white rounded-xl w-full max-w-[420px] p-5 shadow-xl relative border border-gray-100">
         <div class="flex items-center justify-between pb-2.5 border-b border-gray-100">
             <div>
-                <h3 class="text-sm font-bold text-gray-900">Dispatch Order</h3>
-                <p class="text-[10px] text-gray-400" id="dispatch-popup-subtitle">ORD-3306 - Home Delivery</p>
+                <h3 class="text-[15px] font-bold text-gray-900">Dispatch Order</h3>
+                <p class="text-[13px] text-gray-400" id="dispatch-popup-subtitle">ORD-3306 - Home Delivery</p>
             </div>
             <button type="button" data-close-modal="modal-dispatch-order" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div class="space-y-3 pt-3 text-xs">
+        <div class="space-y-3 pt-3 text-sm">
             <div class="p-2.5 bg-gray-50 border border-gray-200 rounded-lg space-y-1">
-                <p class="text-[11px] text-gray-500">Address: 12 Shanti Sadan, Nehru Road, Vile Parle East</p>
+                <p class="text-[14px] text-gray-500">Address: 12 Shanti Sadan, Nehru Road, Vile Parle East</p>
                 <div class="flex items-center justify-between pt-1">
                     <span class="font-bold text-gray-900" id="dispatch-courier-name">Dunzo Express</span>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-dodger-blue">Ready for Handover</span>
+                    <span class="px-2 py-0.5 rounded text-[13px] font-bold bg-blue-50 text-dodger-blue">Ready for Handover</span>
                 </div>
             </div>
 
-            <div class="space-y-1.5 pt-1 text-[11px]">
+            <div class="space-y-1.5 pt-1 text-[14px]">
                 <div class="flex justify-between text-gray-600">
                     <span>Staff Name:</span>
                     <strong class="text-gray-800">Amit R.</strong>
@@ -868,20 +807,20 @@
             <div class="space-y-1.5 pt-1">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="dispatch-check-1" checked class="h-3.5 w-3.5 text-dodger-blue rounded border-gray-300">
-                    <span class="text-[11px] text-gray-700">Package handed to delivery person</span>
+                    <span class="text-[14px] text-gray-700">Package handed to delivery person</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="dispatch-check-2" checked class="h-3.5 w-3.5 text-dodger-blue rounded border-gray-300">
-                    <span class="text-[11px] text-gray-700">Package status verified</span>
+                    <span class="text-[14px] text-gray-700">Package status verified</span>
                 </label>
             </div>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-gray-100">
-            <button type="button" data-close-modal="modal-dispatch-order" class="px-3.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+            <button type="button" data-close-modal="modal-dispatch-order" class="px-3.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                 Cancel
             </button>
-            <button type="button" id="btn-confirm-dispatch" class="px-4 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
+            <button type="button" id="btn-confirm-dispatch" class="px-4 py-1.5 text-sm font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
                 Confirm Dispatch
             </button>
         </div>
@@ -893,17 +832,17 @@
     <div class="bg-white rounded-xl w-full max-w-[440px] p-5 shadow-xl relative border border-gray-100">
         <div class="flex items-center justify-between pb-2.5 border-b border-gray-100">
             <div>
-                <h3 class="text-sm font-bold text-gray-900">Confirm Store Pickup</h3>
-                <p class="text-[10px] text-gray-400" id="pickup-popup-subtitle">ORD-3307 - Store Pickup</p>
+                <h3 class="text-[15px] font-bold text-gray-900">Confirm Store Pickup</h3>
+                <p class="text-[13px] text-gray-400" id="pickup-popup-subtitle">ORD-3307 - Store Pickup</p>
             </div>
             <button type="button" data-close-modal="modal-confirm-pickup" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div class="space-y-3 pt-3 text-xs">
+        <div class="space-y-3 pt-3 text-sm">
             <!-- Top details -->
-            <div class="grid grid-cols-2 gap-2 p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-[11px]">
+            <div class="grid grid-cols-2 gap-2 p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-[14px]">
                 <div>
                     <p class="text-gray-500">Status: <strong class="text-cyan-700 font-semibold">Ready for Pickup</strong></p>
                     <p class="text-gray-500 mt-0.5">Time of Pickup: <strong class="text-gray-800" id="pickup-popup-slot">Today 1:15 PM</strong></p>
@@ -920,24 +859,24 @@
                     <img src="{% static 'images/sample-qr.png' %}" alt="Pickup QR" class="w-full h-full object-contain" />
                 </div>
                 <div class="space-y-1.5 flex-1">
-                    <label class="block text-[11px] font-semibold text-gray-700">Enter Pickup OTP</label>
+                    <label class="block text-[14px] font-semibold text-gray-700">Enter Pickup OTP</label>
                     <input type="text" id="pickup-otp-input" value="8419" maxlength="4"
-                           class="w-full px-2 py-1.5 text-center tracking-widest font-mono text-sm font-bold border border-gray-300 rounded bg-white focus:outline-none focus:border-dodger-blue" />
-                    <p class="text-[10px] text-gray-400">Customer verification</p>
+                           class="w-full px-2 py-1.5 text-center tracking-widest font-mono text-[15px] font-bold border border-gray-300 rounded bg-white focus:outline-none focus:border-dodger-blue" />
+                    <p class="text-[13px] text-gray-400">Customer verification</p>
                 </div>
             </div>
 
             <label class="flex items-center gap-2 cursor-pointer pt-1">
                 <input type="checkbox" id="pickup-verify-check" checked class="h-3.5 w-3.5 text-dodger-blue rounded border-gray-300">
-                <span class="text-[11px] text-gray-700">Customer signature / ID verified</span>
+                <span class="text-[14px] text-gray-700">Customer signature / ID verified</span>
             </label>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-gray-100">
-            <button type="button" data-close-modal="modal-confirm-pickup" class="px-3.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+            <button type="button" data-close-modal="modal-confirm-pickup" class="px-3.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                 Cancel
             </button>
-            <button type="button" id="btn-handover-pickup" class="px-4 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
+            <button type="button" id="btn-handover-pickup" class="px-4 py-1.5 text-sm font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
                 Confirm and Handover Order
             </button>
         </div>
@@ -949,32 +888,32 @@
     <div class="bg-white rounded-xl w-full max-w-[480px] p-5 shadow-xl relative border border-gray-100">
         <div class="flex items-center justify-between pb-2.5 border-b border-gray-100">
             <div>
-                <h3 class="text-sm font-bold text-gray-900">Track Delivery</h3>
-                <p class="text-[10px] text-gray-400" id="track-popup-subtitle">ORD-3309 - Sneha Patil</p>
+                <h3 class="text-[15px] font-bold text-gray-900">Track Delivery</h3>
+                <p class="text-[13px] text-gray-400" id="track-popup-subtitle">ORD-3309 - Sneha Patil</p>
             </div>
             <button type="button" data-close-modal="modal-track-delivery" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div class="space-y-3 pt-3 text-xs">
+        <div class="space-y-3 pt-3 text-sm">
             <!-- Grid info -->
-            <div class="grid grid-cols-2 gap-2 text-[10px] text-gray-500">
+            <div class="grid grid-cols-2 gap-2 text-[13px] text-gray-500">
                 <div>
                     <span>DELIVERY STATUS:</span>
-                    <strong class="block text-xs font-bold text-purple-700 mt-0.5">Out for Delivery</strong>
+                    <strong class="block text-sm font-bold text-purple-700 mt-0.5">Out for Delivery</strong>
                 </div>
                 <div class="text-right">
                     <span>ESTIMATED DELIVERY:</span>
-                    <strong class="block text-xs font-bold text-gray-800 mt-0.5">12:50 PM</strong>
+                    <strong class="block text-sm font-bold text-gray-800 mt-0.5">12:50 PM</strong>
                 </div>
                 <div>
                     <span>RIDER:</span>
-                    <strong class="block text-xs text-gray-800 mt-0.5" id="track-rider">Ramesh Patel</strong>
+                    <strong class="block text-sm text-gray-800 mt-0.5" id="track-rider">Ramesh Patel</strong>
                 </div>
                 <div class="text-right">
                     <span>DELIVERY ADDRESS:</span>
-                    <strong class="block text-[11px] text-gray-800 mt-0.5 truncate" id="track-destination">Pipeline Road, Kurla West</strong>
+                    <strong class="block text-[14px] text-gray-800 mt-0.5 truncate" id="track-destination">Pipeline Road, Kurla West</strong>
                 </div>
             </div>
 
@@ -989,10 +928,10 @@
                         <div class="w-6 h-6 rounded-full bg-dodger-blue text-white flex items-center justify-center">
                             <span class="material-symbols-outlined text-[12px]">local_pharmacy</span>
                         </div>
-                        <span class="text-[9px] font-bold text-gray-600 mt-0.5">Store</span>
+                        <span class="text-[12px] font-bold text-gray-600 mt-0.5">Store</span>
                     </div>
 
-                    <div class="px-2.5 py-1 bg-white border border-purple-200 rounded-full shadow-sm text-[10px] font-bold text-purple-700 flex items-center gap-1">
+                    <div class="px-2.5 py-1 bg-white border border-purple-200 rounded-full shadow-sm text-[13px] font-bold text-purple-700 flex items-center gap-1">
                         <span>🚚</span>
                         <span>In Transit • 15 min away</span>
                     </div>
@@ -1001,13 +940,13 @@
                         <div class="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center">
                             <span class="material-symbols-outlined text-[12px]">home</span>
                         </div>
-                        <span class="text-[9px] font-bold text-gray-600 mt-0.5">Customer</span>
+                        <span class="text-[12px] font-bold text-gray-600 mt-0.5">Customer</span>
                     </div>
                 </div>
             </div>
 
             <!-- Timeline -->
-            <div class="space-y-1.5 text-[11px] border-t border-gray-100 pt-2 text-gray-600">
+            <div class="space-y-1.5 text-[14px] border-t border-gray-100 pt-2 text-gray-600">
                 <div class="flex items-center gap-1.5 text-emerald-700">
                     <span class="material-symbols-outlined text-[14px]">check_circle</span>
                     <span>Prescription status: Verified</span>
@@ -1024,10 +963,10 @@
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-gray-100">
-            <button type="button" id="btn-call-rider" class="px-3.5 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 cursor-pointer">
+            <button type="button" id="btn-call-rider" class="px-3.5 py-1.5 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 cursor-pointer">
                 Call Rider
             </button>
-            <button type="button" data-close-modal="modal-track-delivery" class="px-4 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
+            <button type="button" data-close-modal="modal-track-delivery" class="px-4 py-1.5 text-sm font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
                 Close
             </button>
         </div>
@@ -1038,34 +977,34 @@
 <div id="modal-invoice-preview" class="orders-modal-overlay hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-xl w-full max-w-[560px] max-h-[90vh] flex flex-col shadow-2xl overflow-hidden relative border border-gray-100">
         <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between shrink-0">
-            <h3 class="text-sm font-bold text-gray-900">Invoice Preview</h3>
+            <h3 class="text-[15px] font-bold text-gray-900">Invoice Preview</h3>
             <button type="button" data-close-modal="modal-invoice-preview" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div class="p-5 overflow-y-auto flex-1 space-y-3 text-xs">
+        <div class="p-5 overflow-y-auto flex-1 space-y-3 text-sm">
             <div class="flex justify-between items-start border-b border-gray-200 pb-3">
                 <div>
-                    <h2 class="text-sm font-bold text-gray-900">Medoc Pharmacy</h2>
-                    <p class="text-[10px] text-gray-500">GSTIN: 27AABCU9603R1ZM</p>
+                    <h2 class="text-[15px] font-bold text-gray-900">Medoc Pharmacy</h2>
+                    <p class="text-[13px] text-gray-500">GSTIN: 27AABCU9603R1ZM</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] font-bold text-dodger-blue uppercase">Tax Invoice</p>
+                    <p class="text-[13px] font-bold text-dodger-blue uppercase">Tax Invoice</p>
                     <p class="font-bold text-gray-900" id="invoice-no">INV-2025-0722</p>
-                    <p class="text-[10px] text-gray-400" id="invoice-date">22 Jul 2025</p>
+                    <p class="text-[13px] text-gray-400" id="invoice-date">22 Jul 2025</p>
                 </div>
             </div>
 
-            <div class="bg-gray-50 p-2.5 rounded text-[11px]">
-                <p class="text-[10px] font-semibold text-gray-400 uppercase">Bill To:</p>
+            <div class="bg-gray-50 p-2.5 rounded text-[14px]">
+                <p class="text-[13px] font-semibold text-gray-400 uppercase">Bill To:</p>
                 <p class="font-bold text-gray-800" id="invoice-customer-name">Anjali Rao</p>
-                <p class="text-gray-500 text-[10px]" id="invoice-customer-address">Andheri East, Mumbai</p>
+                <p class="text-gray-500 text-[13px]" id="invoice-customer-address">Andheri East, Mumbai</p>
             </div>
 
-            <table class="w-full text-left border border-gray-200 rounded overflow-hidden text-xs">
+            <table class="w-full text-left border border-gray-200 rounded overflow-hidden text-sm">
                 <thead>
-                    <tr class="bg-gray-50 text-[10px] font-semibold text-gray-500 border-b border-gray-200">
+                    <tr class="bg-gray-50 text-[13px] font-semibold text-gray-500 border-b border-gray-200">
                         <th class="py-1.5 px-2">Item</th>
                         <th class="py-1.5 px-2">HSN</th>
                         <th class="py-1.5 px-2">Qty</th>
@@ -1079,21 +1018,21 @@
             </table>
 
             <div class="flex justify-end pt-1">
-                <div class="w-48 space-y-1 text-xs">
+                <div class="w-48 space-y-1 text-sm">
                     <div class="flex justify-between text-gray-600">
                         <span>Subtotal:</span>
                         <span id="invoice-subtotal">₹380.00</span>
                     </div>
-                    <div class="flex justify-between text-gray-500 text-[10px]">
+                    <div class="flex justify-between text-gray-500 text-[13px]">
                         <span>CGST (2.5%):</span>
                         <span id="invoice-cgst">₹9.50</span>
                     </div>
-                    <div class="flex justify-between text-gray-500 text-[10px]">
+                    <div class="flex justify-between text-gray-500 text-[13px]">
                         <span>SGST (2.5%):</span>
                         <span id="invoice-sgst">₹9.50</span>
                     </div>
                     <hr class="border-gray-200 my-0.5">
-                    <div class="flex justify-between font-bold text-xs text-gray-900">
+                    <div class="flex justify-between font-bold text-sm text-gray-900">
                         <span>Grand Total:</span>
                         <span class="text-dodger-blue" id="invoice-grand-total">₹380.00</span>
                     </div>
@@ -1102,10 +1041,10 @@
         </div>
 
         <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-end gap-2 bg-gray-50 shrink-0">
-            <button type="button" id="btn-print-invoice" class="px-3.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+            <button type="button" id="btn-print-invoice" class="px-3.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                 Print
             </button>
-            <button type="button" id="btn-download-invoice-pdf" class="px-4 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
+            <button type="button" id="btn-download-invoice-pdf" class="px-4 py-1.5 text-sm font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
                 Download PDF
             </button>
         </div>
@@ -1117,18 +1056,18 @@
     <div class="bg-white rounded-xl w-full max-w-[480px] p-5 shadow-xl relative border border-gray-100">
         <div class="flex items-center justify-between pb-2.5 border-b border-gray-100">
             <div>
-                <h3 class="text-sm font-bold text-gray-900">Order Inventory</h3>
-                <p class="text-[10px] text-gray-400" id="inventory-popup-subtitle">ORD-3310 - Crocin 650mg + Augmentin 625mg</p>
+                <h3 class="text-[15px] font-bold text-gray-900">Order Inventory</h3>
+                <p class="text-[13px] text-gray-400" id="inventory-popup-subtitle">ORD-3310 - Crocin 650mg + Augmentin 625mg</p>
             </div>
             <button type="button" data-close-modal="modal-order-inventory" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div class="space-y-3 pt-3 text-xs">
-            <table class="w-full text-left text-xs border border-gray-200 rounded overflow-hidden">
+        <div class="space-y-3 pt-3 text-sm">
+            <table class="w-full text-left text-sm border border-gray-200 rounded overflow-hidden">
                 <thead>
-                    <tr class="bg-gray-50 text-[10px] font-semibold text-gray-500 uppercase border-b border-gray-200">
+                    <tr class="bg-gray-50 text-[13px] font-semibold text-gray-500 uppercase border-b border-gray-200">
                         <th class="py-2 px-2.5">Medicine</th>
                         <th class="py-2 px-2.5">Batch</th>
                         <th class="py-2 px-2.5">Expiry</th>
@@ -1143,7 +1082,7 @@
         </div>
 
         <div class="flex items-center justify-end pt-3 mt-3 border-t border-gray-100">
-            <button type="button" data-close-modal="modal-order-inventory" class="px-4 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md cursor-pointer">
+            <button type="button" data-close-modal="modal-order-inventory" class="px-4 py-1.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md cursor-pointer">
                 Close
             </button>
         </div>
@@ -1155,32 +1094,32 @@
     <div class="bg-white rounded-xl w-full max-w-[420px] p-5 shadow-xl relative border border-gray-100">
         <div class="flex items-center justify-between pb-2.5 border-b border-gray-100">
             <div>
-                <h3 class="text-sm font-bold text-gray-900">Cancellation Details</h3>
-                <p class="text-[10px] text-gray-400" id="cancel-popup-subtitle">ORD-3312 - Meera Pillai</p>
+                <h3 class="text-[15px] font-bold text-gray-900">Cancellation Details</h3>
+                <p class="text-[13px] text-gray-400" id="cancel-popup-subtitle">ORD-3312 - Meera Pillai</p>
             </div>
             <button type="button" data-close-modal="modal-cancellation-details" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div class="space-y-2.5 pt-3 text-xs">
+        <div class="space-y-2.5 pt-3 text-sm">
             <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
-                <p id="cancel-popup-reason" class="text-xs leading-normal">
+                <p id="cancel-popup-reason" class="text-sm leading-normal">
                     Order was cancelled because prescription required clarification and was not verified before cut-off time.
                 </p>
             </div>
 
-            <div class="text-[11px] text-gray-500 space-y-0.5">
+            <div class="text-[14px] text-gray-500 space-y-0.5">
                 <p>Cancelled At: <strong class="text-gray-800" id="cancel-popup-time">22 Jul 2025 • 10:20 AM</strong></p>
                 <p id="cancel-popup-refund" class="text-amber-800 font-medium">Refund Pending: ₹260.00 via UPI</p>
             </div>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-gray-100">
-            <button type="button" data-close-modal="modal-cancellation-details" class="px-3.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+            <button type="button" data-close-modal="modal-cancellation-details" class="px-3.5 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                 Close
             </button>
-            <button type="button" id="btn-process-refund" class="px-4 py-1.5 text-xs font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
+            <button type="button" id="btn-process-refund" class="px-4 py-1.5 text-sm font-semibold text-white bg-dodger-blue hover:bg-blue-600 rounded-md cursor-pointer">
                 Process Refund
             </button>
         </div>

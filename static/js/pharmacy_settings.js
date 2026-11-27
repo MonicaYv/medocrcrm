@@ -7,6 +7,50 @@
 (function () {
   'use strict';
 
+  /* ─── Field validation ─────────────────────────────────────────────── */
+  function applyFieldValidation(el) {
+    if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return;
+
+    if (el.dataset.validate === 'name') {
+      el.value = el.value.replace(/[0-9]/g, '');
+    } else if (el.dataset.validate === 'phone') {
+      el.value = el.value.replace(/[^0-9+\-\s]/g, '').replace(/(?!^)\+/g, '');
+      const digits = el.value.replace(/\D/g, '').length;
+      el.setCustomValidity(el.value && (digits < 7 || digits > 15 || !/^\+?[0-9][0-9\s-]*$/.test(el.value))
+        ? 'Enter a valid phone number with 7 to 15 digits.' : '');
+    } else if (el.dataset.validate === 'pin') {
+      el.value = el.value.replace(/[^0-9]/g, '').slice(0, 6);
+      el.setCustomValidity(el.value && el.value.length !== 6 ? 'Enter a 6-digit PIN.' : '');
+    } else if (el.dataset.validate === 'numeric') {
+      const maxLength = Number(el.maxLength);
+      const digits = el.value.replace(/[^0-9]/g, '');
+      el.value = maxLength > 0 ? digits.slice(0, maxLength) : digits;
+    } else if (el.dataset.validate === 'decimal') {
+      const value = el.value.replace(/[^0-9.]/g, '');
+      const dotIndex = value.indexOf('.');
+      el.value = dotIndex < 0
+        ? value
+        : value.slice(0, dotIndex + 1) + value.slice(dotIndex + 1).replace(/\./g, '').slice(0, 2);
+    }
+  }
+
+  function setupGlobalFieldValidation() {
+    document.addEventListener('input', e => applyFieldValidation(e.target));
+    document.addEventListener('change', e => applyFieldValidation(e.target));
+    document.addEventListener('paste', e => {
+      setTimeout(() => applyFieldValidation(e.target), 0);
+    });
+  }
+
+  function validateContainer(container) {
+    if (!container) return true;
+    const invalid = [...container.querySelectorAll('input, select, textarea')]
+      .find(el => !el.disabled && !el.checkValidity());
+    if (!invalid) return true;
+    invalid.reportValidity();
+    return false;
+  }
+
   /* ─── Persistence ─────────────────────────────────────────────────── */
   const persistenceKey =
     'pharmacy-settings:' +
@@ -211,6 +255,7 @@
       let editing   = false;
 
       toggle.addEventListener('click', () => {
+        if (editing && !validateContainer(card)) return;
         editing = !editing;
         fields.forEach(f => { f.disabled = !editing; });
         const lbl = toggle.querySelector('[data-edit-label]') || toggle;
@@ -228,6 +273,7 @@
     document.querySelectorAll('.action-save-settings').forEach(btn => {
       btn.addEventListener('click', () => {
         const panel = btn.closest('.settings-tab-panel');
+        if (!validateContainer(panel)) return;
         if (panel) persistPanel(panel);
         toast('Settings saved successfully.', 'success');
       });
@@ -309,6 +355,7 @@
       const emailEl = document.getElementById('invite_email');
       const name    = nameEl?.value.trim() || '';
       const email   = emailEl?.value.trim() || '';
+      if (!validateContainer(document.getElementById('modal-invite-member'))) return;
       if (!name)  { toast('Please enter a full name.', 'error'); return; }
       if (!email || !/\S+@\S+\.\S+/.test(email)) { toast('Please enter a valid email.', 'error'); return; }
       closeModal('modal-invite-member');
@@ -333,6 +380,7 @@
     const btn = document.getElementById('btn-save-branch');
     if (!btn) return;
     btn.addEventListener('click', () => {
+      if (!validateContainer(document.getElementById('modal-add-branch'))) return;
       closeModal('modal-add-branch');
       toast('Branch saved successfully.', 'success');
     });
@@ -353,9 +401,15 @@
       docInput.addEventListener('change', () => {
         const file = docInput.files[0];
         if (!file) return;
-        if (file.size > 2 * 1024 * 1024) {
-          if (docError) { docError.textContent = 'File exceeds 2 MB limit.'; docError.classList.remove('hidden'); }
+        if (!['image/png', 'image/jpeg'].includes(file.type) || file.size > 2 * 1024 * 1024) {
+          if (docError) {
+            docError.textContent = file.size > 2 * 1024 * 1024
+              ? 'File exceeds 2 MB limit.'
+              : 'Choose a PNG or JPG image.';
+            docError.classList.remove('hidden');
+          }
           if (docName)  docName.classList.add('hidden');
+          docInput.value = '';
           return;
         }
         if (docError) docError.classList.add('hidden');
@@ -363,9 +417,103 @@
       });
     }
 
+    /* ─── Pharmacy logo upload / removal ──────────────────────────────── */
+    function setupLogoActions() {
+      const input = document.getElementById('pharmacy-logo-input');
+      const name = document.getElementById('pharmacy-logo-file-name');
+      const error = document.getElementById('pharmacy-logo-error');
+      const modalPreview = document.getElementById('pharmacy-logo-modal-preview');
+      const mainPreview = document.getElementById('pharmacy-logo-preview');
+      const identityAvatar = document.getElementById('pharmacy-identity-avatar');
+      const publicLogo = document.getElementById('pharmacy-public-logo');
+      let pendingLogoUrl = null;
+
+      const updatePreview = (element, src, alt) => {
+        if (!element) return;
+        const image = document.createElement('img');
+        image.src = src;
+        image.alt = alt;
+        image.className = 'w-full h-full object-cover rounded-full';
+        element.replaceChildren(image);
+      };
+
+      input?.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        if (!['image/png', 'image/jpeg'].includes(file.type) || file.size > 2 * 1024 * 1024) {
+          pendingLogoUrl = null;
+          input.value = '';
+          if (error) {
+            error.textContent = file.size > 2 * 1024 * 1024
+              ? 'The selected image must be 2 MB or smaller.'
+              : 'Choose a PNG or JPG image.';
+            error.classList.remove('hidden');
+          }
+          if (name) name.textContent = 'No file selected';
+          return;
+        }
+
+        if (error) error.classList.add('hidden');
+        if (name) name.textContent = file.name;
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+          if (typeof reader.result !== 'string') {
+            pendingLogoUrl = null;
+            if (error) {
+              error.textContent = 'The selected image could not be read. Please choose another file.';
+              error.classList.remove('hidden');
+            }
+            return;
+          }
+          pendingLogoUrl = reader.result;
+          updatePreview(modalPreview, pendingLogoUrl, 'Selected pharmacy logo');
+        });
+        reader.addEventListener('error', () => {
+          pendingLogoUrl = null;
+          if (error) {
+            error.textContent = 'The selected image could not be read. Please choose another file.';
+            error.classList.remove('hidden');
+          }
+        });
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById('confirm-pharmacy-logo')?.addEventListener('click', () => {
+        if (!pendingLogoUrl) {
+          toast('Please select a PNG or JPG file first.', 'warning');
+          return;
+        }
+        updatePreview(mainPreview, pendingLogoUrl, 'Pharmacy logo');
+        updatePreview(identityAvatar, pendingLogoUrl, 'Pharmacy logo');
+        updatePreview(publicLogo, pendingLogoUrl, 'Pharmacy logo');
+        closeModal('modal-upload-logo');
+        toast('Pharmacy logo updated.', 'success');
+      });
+
+      document.getElementById('confirm-remove-pharmacy-logo')?.addEventListener('click', () => {
+        pendingLogoUrl = null;
+        if (input) input.value = '';
+        if (name) name.textContent = 'No file selected';
+        if (error) error.classList.add('hidden');
+        [mainPreview, identityAvatar, publicLogo, modalPreview].forEach(element => {
+          if (element) element.textContent = 'MP';
+        });
+        closeModal('modal-remove-logo');
+        toast('Pharmacy logo removed.', 'info');
+      });
+    }
+
     const sendBtn = document.getElementById('btn-send-document');
     if (sendBtn) {
       sendBtn.addEventListener('click', () => {
+        if (!docInput?.files?.[0]) {
+          if (docError) {
+            docError.textContent = 'Please select a PNG or JPG file before uploading.';
+            docError.classList.remove('hidden');
+          }
+          toast('Please select a PNG or JPG file before uploading.', 'warning');
+          return;
+        }
         closeModal('modal-add-document');
         toast('Document uploaded for review.', 'success');
       });
@@ -378,6 +526,7 @@
         toast('Replacement uploaded. Status set to Pending.', 'warning');
       });
     }
+    setupLogoActions();
   }
 
   /* ─── Active sessions sign-out / confirm buttons ─────────────────────── */
@@ -529,7 +678,9 @@
     setupSettingsSearch();
     setup24x7Toggle();
     setupIdentitySync();
+    setupGlobalFieldValidation();
     restoreAll();
+    document.querySelectorAll('[data-validate]').forEach(applyFieldValidation);
   }
 
   if (document.readyState === 'loading') {

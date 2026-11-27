@@ -25,8 +25,8 @@
     <!-- IDENTITY STRIP -->
     <div id="identity-strip" class="rounded-2xl border border-shazam-blue bg-info-blue px-5 py-4 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3.5 min-w-0">
-            <div class="w-12 h-12 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center text-[#007bff] shrink-0">
-                <span class="material-symbols-outlined text-[26px]">local_pharmacy</span>
+            <div id="pharmacy-identity-avatar" class="w-12 h-12 rounded-full bg-[#007bff] text-white font-bold text-[18px] flex items-center justify-center shrink-0">
+                MP
             </div>
             <div class="min-w-0">
                 <h2 id="identity-name" class="text-[20px] leading-7 font-bold text-[#0F172A] truncate">Med Pluse Pharmancy</h2>
@@ -39,7 +39,7 @@
     <!-- SEARCH -->
     <div class="relative w-full">
         <span class="material-symbols-outlined absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400 text-[22px]">search</span>
-        <input type="text" id="settings-search-input" placeholder="Search settings..." class="st-input" style="padding-left:46px;height:46px;border-radius:10px;" />
+        <input type="text" id="settings-search-input" placeholder="Search settings..." class="st-input !pl-12 h-[46px] rounded-[10px]" />
     </div>
 
     <!-- TABS (6) -->
@@ -82,17 +82,28 @@
                     <button type="button" data-edit-toggle="identity" class="st-btn">Add Details</button>
                 </div>
 
+                <div class="flex flex-wrap items-center gap-4 mb-5">
+                    <div id="pharmacy-logo-preview" class="w-12 h-12 rounded-full bg-[#007bff] text-white font-bold text-[18px] flex items-center justify-center shrink-0">MP</div>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-3">
+                            <button type="button" data-open-modal="modal-upload-logo" class="st-btn h-[34px] px-[14px] text-[13px]">Upload Logo</button>
+                            <button type="button" data-open-modal="modal-remove-logo" class="text-[13px] font-semibold text-red-500 hover:text-red-600">Remove Logo</button>
+                        </div>
+                        <span class="text-[12px] text-slate-400">PNG or JPG, max 2 MB</span>
+                    </div>
+                </div>
+
                 <div class="st-grid-2">
                     <div>
                         <label class="st-label" for="ph_store_name">Registered Store Name</label>
                         <input type="text" id="ph_store_name" name="ph_store_name" value="Med Care Pluse Pharmacy"
-                               oninput="this.value = this.value.replace(/[0-9]/g, '')" disabled class="st-input settings-field" />
+                               data-validate="name" disabled class="st-input settings-field" />
                     </div>
                     <div>
                         <label class="st-label" for="ph_proprietor">Proprietor / Chief Pharmacist</label>
                         <div class="relative">
                             <input type="text" id="ph_proprietor" name="ph_proprietor" value="Dr. Aaron Sharma"
-                                   oninput="this.value = this.value.replace(/[0-9]/g, '')" disabled class="st-input settings-field" style="padding-right:44px;" />
+                                   data-validate="name" disabled class="st-input settings-field pr-[44px]" />
                             <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[22px] text-slate-400">verified_user</span>
                         </div>
                     </div>
@@ -106,13 +117,13 @@
                     </div>
                     <div>
                         <label class="st-label" for="ph_contact_phone">Official Contact Phone</label>
-                        <input type="text" id="ph_contact_phone" name="ph_contact_phone" value="+91 93647665112" disabled class="st-input settings-field" />
+                        <input type="tel" id="ph_contact_phone" name="ph_contact_phone" value="+91 93647665112" data-validate="phone" required disabled class="st-input settings-field" />
                     </div>
                     <div>
                         <label class="st-label" for="ph_ops_email">Operations Email</label>
                         <input type="email" id="ph_ops_email" name="ph_ops_email" value="ops@medplus.co.in" disabled class="st-input settings-field" />
                     </div>
-                    <div style="grid-column: 1 / -1;">
+                    <div class="col-span-full">
                         <label class="st-label" for="ph_reg_address">Registered Premise Address</label>
                         <input type="text" id="ph_reg_address" name="ph_reg_address"
                                value="Shop 4 Health Plaza MG Road Pune Maharashtra 411001" disabled class="st-input settings-field" />
@@ -131,7 +142,7 @@
                 </div>
 
                 <!-- Open 24x7 Toggle -->
-                <div class="st-row" style="border-bottom: 1px solid #EDF1F5; padding-bottom: 14px; margin-bottom: 14px;">
+                <div class="st-row border-b border-[#EDF1F5] pb-[14px] mb-[14px]">
                     <div>
                         <h5 class="text-[17px] font-semibold text-[#0F172A]">Open 24 * 7 Emergency Service</h5>
                         <p class="st-sub">Always open round the clock orders.</p>
@@ -143,7 +154,7 @@
                 </div>
 
                 <!-- Opening / Closing Time -->
-                <div class="st-grid-2" style="margin-top: 10px;">
+                <div class="st-grid-2 mt-[10px]">
                     <div>
                         <label class="st-label" for="ph_open_time">Opening Time</label>
                         <div class="st-time">
@@ -161,7 +172,7 @@
                 </div>
 
                 <!-- Cold Chain Toggle -->
-                <div class="st-row" style="margin-top: 14px; border-bottom: 0; padding-bottom: 0;">
+                <div class="st-row mt-[14px] border-b-0 pb-0">
                     <div>
                         <h5 class="text-[17px] font-semibold text-[#0F172A]">Cold Chain Insulin &amp; Vaccine Storage</h5>
                         <p class="st-sub">2°C – 8°C cold-chain storage logger</p>
@@ -208,8 +219,7 @@
                         </div>
                         <div>
                             <label class="st-label" for="ph_pin">PIN</label>
-                            <input type="text" id="ph_pin" inputmode="numeric" maxlength="6" value="400091" disabled
-                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="st-input settings-field" />
+                            <input type="text" id="ph_pin" inputmode="numeric" maxlength="6" value="400091" data-validate="pin" required disabled class="st-input settings-field" />
                         </div>
                     </div>
                     <div class="sm:w-[36%]">
@@ -234,26 +244,26 @@
                         <span class="material-symbols-outlined text-rose-500 text-[34px]">location_on</span>
                         <span class="text-[15px] font-medium text-slate-500 mt-0.5">Map location preview</span>
                     </div>
-                    <button type="button" data-open-modal="modal-pin-location" class="st-btn absolute top-2.5 right-2.5" style="padding:7px 12px;font-size:15px;"><span class="material-symbols-outlined">open_in_full</span><span>Pin location</span></button>
+                    <button type="button" data-open-modal="modal-pin-location" class="st-btn absolute top-2.5 right-2.5 px-3 py-[7px] text-[15px]"><span class="material-symbols-outlined">open_in_full</span><span>Pin location</span></button>
                 </div>
             </div>
 
             <!-- Verification Documents -->
             <div class="st-card">
-                <div class="st-card-head" style="margin-bottom:12px;">
+                <div class="st-card-head mb-3">
                     <div>
                         <h3 class="st-card-title">Verification Documents</h3>
                         <p class="st-sub">Keep your seller verification current.</p>
                     </div>
                 </div>
-                <div class="st-table-wrap" style="border:0;">
-                    <table class="st-table" style="min-width:620px;">
+                <div class="st-table-wrap border-0">
+                    <table class="st-table !min-w-[620px]">
                         <tbody>
                             <tr class="st-mini-head">
                                 <td>Document</td><td>Uploaded</td><td>Status</td><td>Actions</td>
                             </tr>
                             <tr data-doc-row="drug_license">
-                                <td style="font-weight:700;color:#0F172A;" data-doc-name>Drug Licence (From 29/93)</td>
+                                <td class="font-bold text-[#0F172A]" data-doc-name>Drug Licence (From 29/93)</td>
                                 <td data-doc-date>15 Mar 2024</td>
                                 <td data-doc-status><span class="st-pill green">Verified</span></td>
                                 <td data-doc-actions>
@@ -264,7 +274,7 @@
                                 </td>
                             </tr>
                             <tr data-doc-row="gst_cert">
-                                <td style="font-weight:700;color:#0F172A;" data-doc-name>GST Certificate</td>
+                                <td class="font-bold text-[#0F172A]" data-doc-name>GST Certificate</td>
                                 <td data-doc-date>20 Jan 2024</td>
                                 <td data-doc-status><span class="st-pill green">Verified</span></td>
                                 <td data-doc-actions>
@@ -275,8 +285,8 @@
                                 </td>
                             </tr>
                             <tr data-doc-row="pharmacist_reg">
-                                <td style="font-weight:700;color:#0F172A;" data-doc-name>Pharmacist Registration</td>
-                                <td data-doc-date style="color:#94a3b8;">—</td>
+                                <td class="font-bold text-[#0F172A]" data-doc-name>Pharmacist Registration</td>
+                                <td data-doc-date class="text-slate-400">—</td>
                                 <td data-doc-status><span class="st-pill amber">Pending</span></td>
                                 <td data-doc-actions>
                                     <button type="button" data-open-modal="modal-add-document" data-doc-target="pharmacist_reg" class="st-btn st-btn-ghost">+ Add Document</button>
@@ -288,18 +298,18 @@
             </div>
 
             <!-- Public Profile Preview -->
-            <div class="st-card flex items-center justify-between gap-3 flex-wrap" style="padding:18px 24px;">
+            <div class="st-card flex items-center justify-between gap-3 flex-wrap px-6 py-[18px]">
                 <div>
                     <h3 class="text-[20px] font-bold">Public Profile Preview</h3>
                     <p class="st-sub">See how customers discover your store.</p>
                 </div>
-                <button type="button" data-nav-tab="ph_profile" data-nav-subview="public_preview" class="st-btn">
+                <button type="button" data-open-modal="modal-public-profile-preview" class="st-btn">
                     <span class="material-symbols-outlined">visibility</span><span>Preview Public Profile</span>
                 </button>
             </div>
 
             <!-- Account Deletion -->
-            <div class="st-card settings-card-item st-link-card" style="margin-top:16px;" data-open-modal="modal-delete-account">
+            <div class="st-card settings-card-item st-link-card mt-4" data-open-modal="modal-delete-account">
                 <div class="flex items-center gap-3">
                     <div class="st-icon-tile rose"><span class="material-symbols-outlined text-[24px]">delete</span></div>
                     <div>
@@ -316,68 +326,6 @@
             </div>
         </div>
 
-        <!-- 1b: public preview -->
-        <div class="sub-view-screen hidden" data-view-name="public_preview">
-            <div class="st-card flex items-center gap-4">
-                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-icon-btn" aria-label="Back"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button>
-                <div>
-                    <h2 class="text-[24px] font-bold">Preview Public Profile</h2>
-                    <p class="st-sub">This is how customers see your pharmacy profile.</p>
-                </div>
-            </div>
-            <div class="st-card space-y-6" style="max-width:580px; margin:0 auto;">
-                <!-- Profile header -->
-                <div class="flex items-center gap-4 p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
-                    <div class="w-16 h-16 rounded-2xl bg-blue-100 border border-blue-200 flex items-center justify-center text-[#007bff] shrink-0">
-                        <span class="material-symbols-outlined text-[36px]">local_pharmacy</span>
-                    </div>
-                    <div class="min-w-0">
-                        <h3 class="text-[22px] font-bold">HealthPluse Pharmacy</h3>
-                        <p class="text-[15px] text-slate-500 font-medium">Your Health Our Priority</p>
-                    </div>
-                </div>
-                <p class="text-[16px] text-slate-600">Quality medicines, trusted care and fast delivery for a healthier tomorrow.</p>
-
-                <!-- Operating Hours -->
-                <div>
-                    <p class="text-[16px] font-bold text-slate-800 mb-2">Operating Hours</p>
-                    <p class="text-[15px] text-slate-600">Mon–Sat: 7:00 AM–9:00 PM</p>
-                    <p class="text-[15px] text-slate-600">Sun: 8:00 AM–1:00 PM</p>
-                </div>
-
-                <!-- Collection Methods -->
-                <div>
-                    <p class="text-[16px] font-bold text-slate-800 mb-2">Collection Methods</p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="st-pill blue" style="padding:5px 14px;">In-Store Pickup</span>
-                        <span class="st-pill blue" style="padding:5px 14px;">Home Delivery</span>
-                    </div>
-                </div>
-
-                <!-- Verified -->
-                <div>
-                    <p class="text-[16px] font-bold text-slate-800 mb-2">Verified</p>
-                    <div class="flex flex-col gap-1">
-                        <div class="flex items-center gap-2 text-[15px] text-green-600 font-medium">
-                            <span class="material-symbols-outlined text-[18px]">check_circle</span>
-                            Business Registration
-                        </div>
-                        <div class="flex items-center gap-2 text-[15px] text-green-600 font-medium">
-                            <span class="material-symbols-outlined text-[18px]">check_circle</span>
-                            Pharmacist Registration
-                        </div>
-                    </div>
-                </div>
-
-                <div class="st-strip">This is how customers see your pharmacy profile.</div>
-                <div class="st-strip">This is a demo customers see your profile.</div>
-
-                <div class="st-footer" style="border-top:1px solid #EDF1F5;padding-top:20px;">
-                    <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn">Edit Profile</button>
-                    <button type="button" data-action="share-profile" class="st-btn st-btn-primary">Share Profile</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- ================================================================= -->
@@ -388,15 +336,15 @@
 
             <!-- Branch Section -->
             <div class="st-card">
-                <div class="st-card-head" style="margin-bottom:16px;">
+                <div class="st-card-head mb-4">
                     <div>
                         <h3 class="st-card-title">Branch</h3>
                         <p class="st-sub">Manage store location and service areas.</p>
                     </div>
                 </div>
 
-                <div class="st-table-wrap" style="border:0;">
-                    <table class="st-table" style="min-width:600px;">
+                <div class="st-table-wrap border-0">
+                    <table class="st-table !min-w-[600px]">
                         <thead>
                             <tr>
                                 <th>Branch</th>
@@ -408,32 +356,32 @@
                         </thead>
                         <tbody>
                             <tr data-branch-row>
-                                <td style="font-weight:700;color:#0F172A;">Vijay Nagar (Main)</td>
+                                <td class="font-bold text-[#0F172A]">Vijay Nagar (Main)</td>
                                 <td>Indore</td>
                                 <td>8 Am - 11 PM</td>
                                 <td><span class="st-pill green">Verified</span></td>
-                                <td style="color:#94a3b8;font-size:13px;">5km</td>
+                                <td class="text-slate-400 text-[13px]">5km</td>
                             </tr>
                             <tr data-branch-row>
-                                <td style="font-weight:700;color:#0F172A;">Palasia</td>
+                                <td class="font-bold text-[#0F172A]">Palasia</td>
                                 <td>Indore</td>
                                 <td>24 hours</td>
                                 <td><span class="st-pill green">Verified</span></td>
-                                <td style="color:#94a3b8;font-size:13px;">4km</td>
+                                <td class="text-slate-400 text-[13px]">4km</td>
                             </tr>
                             <tr data-branch-row>
-                                <td style="font-weight:700;color:#0F172A;">Area Colony</td>
+                                <td class="font-bold text-[#0F172A]">Area Colony</td>
                                 <td>Bhopal</td>
                                 <td>9 Am - 10 PM</td>
                                 <td><span class="st-pill amber">Pending</span></td>
-                                <td style="color:#94a3b8;font-size:13px;">3km</td>
+                                <td class="text-slate-400 text-[13px]">3km</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div style="margin-top:16px; display:flex; justify-content:flex-end;">
-                    <button type="button" data-open-modal="modal-add-branch" class="st-btn st-btn-primary" style="padding:10px 24px;">
+                <div class="mt-4 flex justify-end">
+                    <button type="button" data-open-modal="modal-add-branch" class="st-btn st-btn-primary px-6 py-[10px]">
                         <span class="material-symbols-outlined">add</span><span>Add Branch</span>
                     </button>
                 </div>
@@ -441,7 +389,7 @@
 
             <!-- Awareness & Health Programs -->
             <div class="st-card">
-                <div style="margin-bottom:16px;">
+                <div class="mb-4">
                     <h3 class="st-card-title">Awareness &amp; Health Programs</h3>
                     <p class="st-sub">Opt-in to campaigns shown on your pharmacy page.</p>
                 </div>
@@ -467,7 +415,7 @@
                             <div class="st-switch"></div>
                         </label>
                     </div>
-                    <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+                    <div class="st-row border-b-0 pb-0">
                         <div>
                             <h5 class="text-[17px] font-semibold text-[#0F172A]">Vaccination reminders</h5>
                             <p class="st-sub">Send seasonal reminders to past customers</p>
@@ -562,7 +510,7 @@
                                 <td>All branches</td>
                                 <td data-member-status-cell><span class="st-pill green">Active</span></td>
                                 <td>Active now</td>
-                                <td style="color:#94a3b8;">Owner</td>
+                                <td class="text-slate-400">Owner</td>
                             </tr>
                             <tr data-member-row data-role="Stock Manager" data-status="Active">
                                 <td><div class="st-member"><span class="st-avatar f">NS</span><span data-member-name>Neha Shah</span></div></td>
@@ -570,7 +518,7 @@
                                 <td data-member-role-cell>
                                     <div class="flex flex-col items-center gap-1">
                                         <span class="st-pill blue">Pharmacy Manager</span>
-                                        <button type="button" class="st-pill lime" data-open-modal="modal-assign-role" data-member="Neha Shah" data-email="neha@medplus.example">Assign Role <span class="material-symbols-outlined" style="font-size:16px;">add</span></button>
+                                        <button type="button" class="st-pill lime" data-open-modal="modal-assign-role" data-member="Neha Shah" data-email="neha@medplus.example">Assign Role <span class="material-symbols-outlined text-[16px]">add</span></button>
                                     </div>
                                 </td>
                                 <td>Andheri East</td>
@@ -608,7 +556,7 @@
                         </tbody>
                     </table>
                 </div>
-                <p data-team-empty class="hidden st-note text-center" style="padding:18px;">No team members match these filters.</p>
+                <p data-team-empty class="hidden st-note text-center p-[18px]">No team members match these filters.</p>
             </div>
 
             <!-- ROLES panel -->
@@ -660,7 +608,7 @@
                                 <td data-role-branch>All branches</td>
                                 <td data-role-status-cell><span class="st-pill green">Active</span></td>
                                 <td data-role-active>Active now</td>
-                                <td data-role-actions style="color:#94a3b8;">Owner</td>
+                                <td data-role-actions class="text-slate-400">Owner</td>
                             </tr>
                             <tr data-role-row data-role="Stock Manager" data-status="Active">
                                 <td class="st-role-name">Stock Manager</td>
@@ -721,7 +669,7 @@
                         </tbody>
                     </table>
                 </div>
-                <p data-team-empty class="hidden st-note text-center" style="padding:18px;">No roles match these filters.</p>
+                <p data-team-empty class="hidden st-note text-center p-[18px]">No roles match these filters.</p>
             </div>
         </div>
 
@@ -756,8 +704,8 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto" style="margin-top:20px;">
-                    <table class="st-matrix" style="min-width:560px;">
+                <div class="overflow-x-auto mt-5">
+                    <table class="st-matrix min-w-[560px]">
                         <thead><tr><th>Module</th><th>Edit</th><th>View</th><th>Approve</th><th>Delete</th></tr></thead>
                         <tbody>
                             <tr><td>Orders</td><td><input type="checkbox" checked aria-label="Orders edit"></td><td><input type="checkbox" aria-label="Orders view"></td><td><input type="checkbox" aria-label="Orders approve"></td><td><input type="checkbox" aria-label="Orders delete"></td></tr>
@@ -786,7 +734,7 @@
     <div class="settings-tab-panel hidden" data-tab-panel="ph_notifications">
         <div class="sub-view-screen" data-view-name="main">
             <div class="st-card">
-                <div class="st-card-head" style="margin-bottom:22px;">
+                <div class="st-card-head mb-[22px]">
                     <div>
                         <h3 class="st-card-title">Multi Channel Alert Routing Matrix</h3>
                         <p class="st-sub">Configure real time alerts for online orders expiry alert &amp; Schedule</p>
@@ -794,19 +742,19 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="st-table" style="min-width:620px;">
+                    <table class="st-table !min-w-[620px]">
                         <thead>
                             <tr>
-                                <th style="width:40%;">Alert Event</th>
-                                <th class="text-center" style="text-transform:uppercase;font-size:12px;letter-spacing:0.06em;color:#94a3b8;">Manager Inventory</th>
-                                <th class="text-center" style="text-transform:uppercase;font-size:12px;letter-spacing:0.06em;color:#94a3b8;">Approve RX</th>
-                                <th class="text-center" style="text-transform:uppercase;font-size:12px;letter-spacing:0.06em;color:#94a3b8;">Process Refunds</th>
+                                <th class="w-[40%] ! !text-white">Alert Event</th>
+                                <th class="text-center uppercase text-[12px] tracking-[0.06em]  !text-white">Manager Inventory</th>
+                                <th class="text-center uppercase text-[12px] tracking-[0.06em]  !text-white">Approve RX</th>
+                                <th class="text-center uppercase text-[12px] tracking-[0.06em]  !text-white">Process Refunds</th>
                             </tr>
                         </thead>
                         <tbody>
                             <!-- New Online Order -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">New Online Order</div>
                                     <div class="text-[14px] text-slate-500">Instant alert when a nearby customer places a medicine order.</div>
                                 </td>
@@ -816,7 +764,7 @@
                             </tr>
                             <!-- Low Stock & Expiry Alert -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">Low Stock &amp; Expiry Alert</div>
                                     <div class="text-[14px] text-slate-500">Warn when SKU stock or batch expiry hits threshold.</div>
                                 </td>
@@ -826,7 +774,7 @@
                             </tr>
                             <!-- Schedule H/H1 Rx Upload -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">Schedule H/H1 Rx Upload</div>
                                     <div class="text-[14px] text-slate-500">Notify duty pharmacist to verify uploaded prescription.</div>
                                 </td>
@@ -836,7 +784,7 @@
                             </tr>
                             <!-- Daily GST & Settlement Payout -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">Daily GST &amp; Settlement Payout</div>
                                     <div class="text-[14px] text-slate-500">Bank NEFT/IMPS payout confirmation and tax ledger.</div>
                                 </td>
@@ -846,7 +794,7 @@
                             </tr>
                             <!-- Prescription Rejection -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">Prescription Rejection</div>
                                     <div class="text-[14px] text-slate-500">Alert when a Prescription is rejected.</div>
                                 </td>
@@ -856,7 +804,7 @@
                             </tr>
                             <!-- Expired Medicine Alert -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">Expired Medicine Alert</div>
                                     <div class="text-[14px] text-slate-500">Alert when a medicine batch expires.</div>
                                 </td>
@@ -866,7 +814,7 @@
                             </tr>
                             <!-- Stock Reorder Reminder -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">Stock Reorder Reminder</div>
                                     <div class="text-[14px] text-slate-500">Notify when medicine needs restocking.</div>
                                 </td>
@@ -876,7 +824,7 @@
                             </tr>
                             <!-- Refund Processed -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">Refund Processed</div>
                                     <div class="text-[14px] text-slate-500">Notify when a customer refund is completed.</div>
                                 </td>
@@ -886,7 +834,7 @@
                             </tr>
                             <!-- Payment Failed Alert -->
                             <tr>
-                                <td>
+                                <td class="!text-left">
                                     <div class="font-bold text-[16px] text-[#0F172A]">Payment Failed Alert</div>
                                     <div class="text-[14px] text-slate-500">Alert when an order payment fails.</div>
                                 </td>
@@ -900,8 +848,8 @@
             </div>
 
             <div class="st-footer">
-                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn" style="min-width:150px;">Back</button>
-                <button type="button" class="action-save-settings st-btn st-btn-primary" style="min-width:150px;">Save Changes</button>
+                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn min-w-[150px]">Back</button>
+                <button type="button" class="action-save-settings st-btn st-btn-primary min-w-[150px]">Save Changes</button>
             </div>
         </div>
     </div>
@@ -912,7 +860,7 @@
     <div class="settings-tab-panel hidden" data-tab-panel="ph_security">
         <div class="sub-view-screen" data-view-name="main">
             <div class="st-card">
-                <div class="st-card-head" style="margin-bottom:18px;">
+                <div class="st-card-head mb-[18px]">
                     <div>
                         <h3 class="st-card-title">Security &amp; Access</h3>
                         <p class="st-sub">Protect access to your hospital workspace</p>
@@ -924,17 +872,17 @@
                         <div><h5>Biometric app lock</h5><p>Available in the native mobile app on supported devices.</p></div>
                         <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Biometric app lock"><div class="st-switch"></div></label>
                     </div>
-                    <div class="st-field" style="padding:6px 0 10px;">
+                    <div class="st-field pt-[6px] pb-[10px]">
                         <label class="st-label" for="sec_autolock">Auto-lock after inactivity</label>
                         <select id="sec_autolock" class="st-select"><option>1 min</option><option selected>5 min</option><option>15 min</option><option>30 min</option></select>
                     </div>
-                    <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+                    <div class="st-row border-b-0 pb-0">
                         <div><h5>Show sensitive notification previews</h5><p>Allow patient-related details in notification previews.</p></div>
                         <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Show sensitive notification previews"><div class="st-switch"></div></label>
                     </div>
                 </div>
 
-                <div class="st-group" style="margin-top:16px;padding-top:0;padding-bottom:0;">
+                <div class="st-group mt-4 py-0">
                     <button type="button" class="st-nav-row settings-card-item" data-open-modal="modal-active-sessions">
                         <span class="st-nav-main">
                             <span class="st-icon-tile sm"><span class="material-symbols-outlined text-[22px]">devices</span></span>
@@ -952,10 +900,10 @@
                 </div>
             </div>
 
-            <div class="st-strip" style="margin-top:16px;">Security controls in this preview are preferences only. Live authentication and device controls require backend integration.</div>
+            <div class="st-strip mt-4">Security controls in this preview are preferences only. Live authentication and device controls require backend integration.</div>
             <div class="st-footer">
-                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn" style="min-width:150px;">Back</button>
-                <button type="button" class="action-save-settings st-btn st-btn-primary" style="min-width:150px;">Save Changes</button>
+                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn min-w-[150px]">Back</button>
+                <button type="button" class="action-save-settings st-btn st-btn-primary min-w-[150px]">Save Changes</button>
             </div>
         </div>
     </div>
@@ -966,16 +914,16 @@
     <div class="settings-tab-panel hidden" data-tab-panel="ph_workspace">
         <div class="sub-view-screen" data-view-name="main">
             <div class="st-card">
-                <div class="st-card-head" style="margin-bottom:18px;">
+                <div class="st-card-head mb-[18px]">
                     <div>
                         <h3 class="st-card-title">Workspace Preferences</h3>
                         <p class="st-sub">Customize how your dashboard looks and behaves.</p>
                     </div>
                 </div>
 
-                <p class="text-[16px] font-medium text-slate-600" style="margin-bottom:16px;">Protect access to your hospital workspace</p>
+                <p class="text-[16px] font-medium text-slate-600 mb-4">Protect access to your hospital workspace</p>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:12px;">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-3">
                     <div>
                         <label class="st-label" for="pref_lang">Language</label>
                         <input type="text" id="pref_lang" value="English" class="st-input" />
@@ -990,12 +938,12 @@
                     </div>
                 </div>
 
-                <div style="margin-bottom:14px;">
+                <div class="mb-[14px]">
                     <label class="st-label" for="pref_currency">Currency</label>
-                    <input type="text" id="pref_currency" value="INR" class="st-input" style="max-width:100%;" />
+                    <input type="text" id="pref_currency" value="INR" class="st-input max-w-full" />
                 </div>
 
-                <div class="st-list" style="margin-top:8px;">
+                <div class="st-list mt-2">
                     <div class="st-row">
                         <div>
                             <h5 class="text-[17px] font-semibold text-[#0F172A]">Dark mode</h5>
@@ -1010,7 +958,7 @@
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="pref_auto_print" class="sr-only peer" checked aria-label="Auto-print invoice"><div class="st-switch"></div></label>
                     </div>
-                    <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+                    <div class="st-row border-b-0 pb-0">
                         <div>
                             <h5 class="text-[17px] font-semibold text-[#0F172A]">Compact tables</h5>
                             <p class="st-sub">Show more rows per screen</p>
@@ -1021,8 +969,8 @@
             </div>
 
             <div class="st-footer">
-                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn" style="min-width:150px;">Back</button>
-                <button type="button" class="action-save-settings st-btn st-btn-primary" style="min-width:150px;">Save Changes</button>
+                <button type="button" data-back-tab="ph_profile" data-back-subview="main" class="st-btn min-w-[150px]">Back</button>
+                <button type="button" class="action-save-settings st-btn st-btn-primary min-w-[150px]">Save Changes</button>
             </div>
         </div>
     </div>
@@ -1033,9 +981,110 @@
 <!-- MODALS                                                             -->
 <!-- ================================================================= -->
 
+<!-- Upload Logo -->
+<div id="modal-upload-logo" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full !max-w-[480px]">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Upload Logo</h3>
+            <button type="button" data-close-modal="modal-upload-logo" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[20px]">close</span></button>
+        </div>
+        <div class="st-modal-body">
+            <label for="pharmacy-logo-input" class="st-dropzone block cursor-pointer mb-4">
+                <input type="file" id="pharmacy-logo-input" accept="image/png,image/jpeg" class="hidden" />
+                <span class="material-symbols-outlined text-[28px] text-[#007bff] mb-1">upload</span>
+                <p class="st-dz-title">Drag and drop a file or click to upload</p>
+                <p class="text-[12px] text-slate-400">PNG or JPG, max 2 MB</p>
+            </label>
+            <p id="pharmacy-logo-error" class="hidden text-[13px] text-rose-600 mb-3" role="alert"></p>
+            <div class="flex items-center gap-3">
+                <div id="pharmacy-logo-modal-preview" class="w-11 h-11 rounded-full bg-[#007bff] text-white font-bold flex items-center justify-center">MP</div>
+                <div>
+                    <p class="text-[14px] font-semibold text-slate-800">Logo preview</p>
+                    <p id="pharmacy-logo-file-name" class="text-[12px] text-slate-400">No file selected</p>
+                </div>
+            </div>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-upload-logo" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-pharmacy-logo" class="st-btn st-btn-primary">Save Logo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Remove Logo -->
+<div id="modal-remove-logo" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-[2px] items-center justify-center p-4">
+    <div class="st-modal mx-auto w-full !max-w-[420px]">
+        <div class="st-modal-head">
+            <h3 class="st-card-title">Remove Logo?</h3>
+            <button type="button" data-close-modal="modal-remove-logo" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[20px]">close</span></button>
+        </div>
+        <div class="st-modal-body">
+            <p class="text-[14px] text-slate-500">This will remove your current logo from your public profile.</p>
+        </div>
+        <div class="st-modal-foot">
+            <button type="button" data-close-modal="modal-remove-logo" class="st-btn">Cancel</button>
+            <button type="button" id="confirm-remove-pharmacy-logo" class="st-btn st-btn-danger">Remove Logo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Public Profile Preview -->
+<div id="modal-public-profile-preview" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
+    <div class="st-modal !max-w-[600px] max-h-[92vh] flex flex-col">
+        <div class="st-modal-head">
+            <div>
+                <h3>Preview Public Profile</h3>
+                <p>This is how customers see your pharmacy profile.</p>
+            </div>
+            <button type="button" data-close-modal="modal-public-profile-preview" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
+        </div>
+        <div class="st-modal-body space-y-6 min-h-0 flex-1 overflow-y-auto">
+            <div class="flex items-center gap-4 p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
+                <div id="pharmacy-public-logo" class="w-16 h-16 rounded-full bg-[#007bff] text-white font-bold text-[22px] flex items-center justify-center shrink-0">MP</div>
+                <div class="min-w-0">
+                    <h3 class="text-[22px] font-bold">HealthPluse Pharmacy</h3>
+                    <p class="text-[15px] text-slate-500 font-medium">Your Health Our Priority</p>
+                </div>
+            </div>
+            <p class="text-[16px] text-slate-600">Quality medicines, trusted care and fast delivery for a healthier tomorrow.</p>
+            <div>
+                <p class="text-[16px] font-bold text-slate-800 mb-2">Operating Hours</p>
+                <p class="text-[15px] text-slate-600">Mon–Sat: 7:00 AM–9:00 PM</p>
+                <p class="text-[15px] text-slate-600">Sun: 8:00 AM–1:00 PM</p>
+            </div>
+            <div>
+                <p class="text-[16px] font-bold text-slate-800 mb-2">Collection Methods</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="st-pill blue px-[14px] py-[5px]">In-Store Pickup</span>
+                    <span class="st-pill blue px-[14px] py-[5px]">Home Delivery</span>
+                </div>
+            </div>
+            <div>
+                <p class="text-[16px] font-bold text-slate-800 mb-2">Verified</p>
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-2 text-[15px] text-green-600 font-medium">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                        Business Registration
+                    </div>
+                    <div class="flex items-center gap-2 text-[15px] text-green-600 font-medium">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                        Pharmacist Registration
+                    </div>
+                </div>
+            </div>
+            <div class="st-strip">This is how customers see your pharmacy profile.</div>
+            <div class="st-strip">This is a demo customers see your profile.</div>
+        </div>
+        <div class="st-modal-foot st-split">
+            <button type="button" data-nav-tab="ph_profile" data-nav-subview="main" data-close-modal="modal-public-profile-preview" class="st-btn">Edit Profile</button>
+            <button type="button" data-action="share-profile" class="st-btn st-btn-primary">Share Profile</button>
+        </div>
+    </div>
+</div>
+
 <!-- Add Branch Modal -->
-<div id="modal-add-branch" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;max-height:94vh;overflow-y:auto;">
+<div id="modal-add-branch" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4 overflow-y-auto">
+    <div class="st-modal !max-w-[520px] max-h-[94vh] flex flex-col">
         <div class="st-modal-head">
             <div>
                 <h3>Add New Branch</h3>
@@ -1043,13 +1092,13 @@
             </div>
             <button type="button" data-close-modal="modal-add-branch" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
         </div>
-        <div class="st-modal-body st-stack">
+        <div class="st-modal-body st-stack min-h-0 flex-1 overflow-y-auto">
             <div class="st-grid-2">
-                <div><label class="st-label" for="br_name">Branch name</label><input type="text" id="br_name" class="st-input" placeholder="Branch name" /></div>
-                <div><label class="st-label" for="br_manager">Branch manager</label><input type="text" id="br_manager" class="st-input" placeholder="Pharmacist in charge" /></div>
+                <div><label class="st-label" for="br_name">Branch name</label><input type="text" id="br_name" class="st-input" placeholder="Branch name" data-validate="name" required /></div>
+                <div><label class="st-label" for="br_manager">Branch manager</label><input type="text" id="br_manager" class="st-input" placeholder="Pharmacist in charge" data-validate="name" required /></div>
             </div>
             <div class="st-grid-2">
-                <div><label class="st-label" for="br_phone">Branch Phone</label><input type="text" id="br_phone" class="st-input" placeholder="+91 XXXXXXXXXX" /></div>
+                <div><label class="st-label" for="br_phone">Branch Phone</label><input type="tel" id="br_phone" class="st-input" placeholder="+91 XXXXXXXXXX" data-validate="phone" required /></div>
                 <div><label class="st-label" for="br_drug_no">Drug licence no</label><input type="text" id="br_drug_no" class="st-input" placeholder="Licence for this branch" /></div>
             </div>
             <div>
@@ -1060,16 +1109,16 @@
                 <button type="button" class="st-btn flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">my_location</span><span>Use current location</span></button>
                 <button type="button" class="st-btn flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">push_pin</span><span>Pin on Map</span></button>
             </div>
-            <div><label class="st-label" for="br_addr1_m">Address line 1</label><input type="text" id="br_addr1_m" class="st-input" placeholder="Shop no." /></div>
+            <div><label class="st-label" for="br_addr1_m">Address line 1</label><input type="text" id="br_addr1_m" class="st-input" placeholder="Shop no." required /></div>
             <div><label class="st-label" for="br_addr2_m">Address line 2</label><input type="text" id="br_addr2_m" class="st-input" placeholder="Shop no." /></div>
             <div class="st-grid-2">
                 <div><label class="st-label" for="br_area_m">Area</label><input type="text" id="br_area_m" class="st-input" placeholder="Area" /></div>
-                <div><label class="st-label" for="br_city_m">City</label><input type="text" id="br_city_m" class="st-input" placeholder="City" /></div>
+                <div><label class="st-label" for="br_city_m">City</label><input type="text" id="br_city_m" class="st-input" placeholder="City" data-validate="name" required /></div>
                 <div><label class="st-label" for="br_state_m">State</label><input type="text" id="br_state_m" class="st-input" value="Madhya Pradesh" /></div>
-                <div><label class="st-label" for="br_pin_m">Pin</label><input type="text" id="br_pin_m" class="st-input" value="45200" /></div>
+                <div><label class="st-label" for="br_pin_m">Pin</label><input type="text" id="br_pin_m" class="st-input" value="452001" inputmode="numeric" maxlength="6" data-validate="pin" required /></div>
             </div>
             <!-- Map mini -->
-            <div class="st-map" style="height:120px;border-radius:12px;overflow:hidden;">
+            <div class="st-map h-[120px] rounded-xl overflow-hidden">
                 <svg viewBox="0 0 400 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                     <rect width="400" height="120" fill="#e8edf7" />
                     <path d="M0 80 Q100 60 200 70 T400 50" fill="none" stroke="#fff" stroke-width="5" />
@@ -1102,21 +1151,21 @@
                     <div class="st-time"><input type="time" id="br_close_time_m" class="st-input" value="08:00" /><span class="material-symbols-outlined">schedule</span></div>
                 </div>
             </div>
-            <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+            <div class="st-row border-b-0 pb-0">
                 <div><h5 class="text-[16px] font-semibold">Opne 24 Hours</h5><p class="st-sub">Branch runs the clock</p></div>
                 <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" aria-label="Open 24 hours"><div class="st-switch"></div></label>
             </div>
             <!-- Services -->
-            <p class="st-label" style="margin-top:4px;">Services</p>
+            <p class="st-label mt-1">Services</p>
             <div class="st-grid-2">
-                <div><label class="st-label" for="br_delivery_radius">Delivery radius</label><input type="text" id="br_delivery_radius" class="st-input" value="5km" /></div>
+                <div><label class="st-label" for="br_delivery_radius">Delivery radius (km)</label><input type="text" id="br_delivery_radius" class="st-input" value="5" inputmode="decimal" maxlength="6" pattern="^[0-9]+(\.[0-9]{1,2})?$" data-validate="decimal" required /></div>
                 <div><label class="st-label" for="br_status">Branch status</label><input type="text" id="br_status" class="st-input" value="Active" /></div>
             </div>
-            <div class="st-row" style="border-bottom:1px solid #EDF1F5;padding-bottom:14px;">
+            <div class="st-row border-b border-[#EDF1F5] pb-[14px]">
                 <div><h5 class="text-[16px] font-semibold">Home delivery</h5><p class="st-sub">Deliver medicines from this branch</p></div>
                 <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Home delivery"><div class="st-switch"></div></label>
             </div>
-            <div class="st-row" style="border-bottom:0;padding-bottom:0;">
+            <div class="st-row border-b-0 pb-0">
                 <div><h5 class="text-[16px] font-semibold">Accept prescription orders</h5><p class="st-sub">Patients can upload prescription</p></div>
                 <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" class="sr-only peer" checked aria-label="Accept prescription orders"><div class="st-switch"></div></label>
             </div>
@@ -1130,14 +1179,14 @@
 
 <!-- Invite Member -->
 <div id="modal-invite-member" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;max-height:94vh;overflow-y:auto;">
+    <div class="st-modal !max-w-[520px] max-h-[94vh] flex flex-col">
         <div class="st-modal-head">
             <div><h3>Invite Member</h3><p>Add a teammate to your Pharmacy workspace.</p></div>
             <button type="button" data-close-modal="modal-invite-member" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
         </div>
-        <div class="st-modal-body st-stack">
-            <div><label class="st-label" for="invite_name">Full name</label><input type="text" id="invite_name" class="st-input" placeholder="Enter full name" data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')" /></div>
-            <div><label class="st-label" for="invite_email">Email</label><input type="email" id="invite_email" class="st-input" placeholder="name@company.com" data-validate="email" /></div>
+        <div class="st-modal-body st-stack min-h-0 flex-1 overflow-y-auto">
+            <div><label class="st-label" for="invite_name">Full name</label><input type="text" id="invite_name" class="st-input" placeholder="Enter full name" data-validate="name" required /></div>
+            <div><label class="st-label" for="invite_email">Email</label><input type="email" id="invite_email" class="st-input" placeholder="name@company.com" data-validate="email" required /></div>
             <div>
                 <label class="st-label" for="invite_role">Role</label>
                 <select id="invite_role" class="st-select">
@@ -1163,12 +1212,12 @@
 
 <!-- Assign Role -->
 <div id="modal-assign-role" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;max-height:94vh;overflow-y:auto;">
+    <div class="st-modal !max-w-[520px] max-h-[94vh] flex flex-col">
         <div class="st-modal-head">
             <div><h3>Assign Role</h3><p>Add a teammate to your Pharmacy workspace.</p></div>
             <button type="button" data-close-modal="modal-assign-role" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
         </div>
-        <div class="st-modal-body st-stack">
+        <div class="st-modal-body st-stack min-h-0 flex-1 overflow-y-auto">
             <div><label class="st-label" for="assign_name">Full name</label><input type="text" id="assign_name" class="st-input" value="Neha Shah" readonly /></div>
             <div><label class="st-label" for="assign_email">Email</label><input type="email" id="assign_email" class="st-input" value="neha@medplus.example" readonly /></div>
             <div>
@@ -1196,14 +1245,14 @@
 
 <!-- Assign Team Member -->
 <div id="modal-assign-member" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;max-height:94vh;overflow-y:auto;">
+    <div class="st-modal !max-w-[520px] max-h-[94vh] flex flex-col">
         <div class="st-modal-head">
             <div><h3>Assign Team Member</h3><p>Add a teammate to your Pharmacy workspace.</p></div>
             <button type="button" data-close-modal="modal-assign-member" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
         </div>
-        <div class="st-modal-body st-stack">
-            <div><label class="st-label" for="am_name">Full name</label><input type="text" id="am_name" class="st-input" placeholder="Enter full name" data-validate="name" oninput="this.value = this.value.replace(/[0-9]/g, '')" /></div>
-            <div><label class="st-label" for="am_email">Email</label><input type="email" id="am_email" class="st-input" placeholder="name@company.com" data-validate="email" /></div>
+        <div class="st-modal-body st-stack min-h-0 flex-1 overflow-y-auto">
+            <div><label class="st-label" for="am_name">Full name</label><input type="text" id="am_name" class="st-input" placeholder="Enter full name" data-validate="name" required /></div>
+            <div><label class="st-label" for="am_email">Email</label><input type="email" id="am_email" class="st-input" placeholder="name@company.com" data-validate="email" required /></div>
             <div>
                 <label class="st-label" for="am_role">Role</label>
                 <select id="am_role" class="st-select">
@@ -1229,7 +1278,7 @@
 
 <!-- Deactivate Access -->
 <div id="modal-deactivate" class="settings-modal-overlay hidden fixed inset-0 z-[60] bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:420px;">
+    <div class="st-modal !max-w-[420px]">
         <div class="st-modal-head">
             <h3>Deactivate Access?</h3>
             <button type="button" data-close-modal="modal-deactivate" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
@@ -1241,7 +1290,7 @@
 
 <!-- Add Role -->
 <div id="modal-add-role" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;">
+    <div class="st-modal !max-w-[520px]">
         <div class="st-modal-head"><h3>Add Role</h3><button type="button" data-close-modal="modal-add-role" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
         <div class="st-modal-body st-stack">
             <div>
@@ -1262,7 +1311,7 @@
                     <label><input type="radio" name="add_role_branch" value="All branches" /> All branches</label>
                 </div>
             </div>
-            <button type="button" data-nav-tab="ph_team" data-nav-subview="edit_role" data-role-from="#add_role_name" data-close-modal="modal-add-role" class="st-btn st-btn-block" style="color:#007bff;border-color:#93c5fd;background:#f5faff;"><span class="material-symbols-outlined">tune</span>Permission Matrix</button>
+            <button type="button" data-nav-tab="ph_team" data-nav-subview="edit_role" data-role-from="#add_role_name" data-close-modal="modal-add-role" class="st-btn st-btn-block !text-[#007bff] !border-[#93c5fd] !bg-[#f5faff]"><span class="material-symbols-outlined">tune</span>Permission Matrix</button>
         </div>
         <div class="st-modal-foot st-split"><button type="button" data-close-modal="modal-add-role" class="st-btn">Cancel</button><button type="button" id="btn-add-role" class="st-btn st-btn-primary">Add Role</button></div>
     </div>
@@ -1270,9 +1319,9 @@
 
 <!-- Active Sessions -->
 <div id="modal-active-sessions" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;max-height:92vh;overflow-y:auto;">
-        <div class="st-modal-head" style="border-bottom:1px solid #EDF1F5;padding-bottom:14px;"><h3>Active sessions</h3><button type="button" data-close-modal="modal-active-sessions" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
-        <div class="st-modal-body" style="padding-top:6px;padding-bottom:10px;">
+    <div class="st-modal !max-w-[520px] max-h-[92vh] flex flex-col">
+        <div class="st-modal-head border-b border-[#EDF1F5] pb-[14px]"><h3>Active sessions</h3><button type="button" data-close-modal="modal-active-sessions" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body pt-[6px] pb-[10px] min-h-0 flex-1 overflow-y-auto">
             <div class="flex items-center justify-between gap-3 py-4 border-b border-slate-100">
                 <div class="flex items-center gap-3">
                     <span class="st-icon-tile sm"><span class="material-symbols-outlined text-[22px]">smartphone</span></span>
@@ -1281,7 +1330,7 @@
                         <p class="text-[14px] text-slate-500">Last used: Today</p>
                     </div>
                 </div>
-                <button type="button" class="st-btn" style="padding:6px 14px;font-size:14px;">Log Out</button>
+                <button type="button" class="st-btn px-[14px] py-[6px] text-[14px]">Log Out</button>
             </div>
             <div class="flex items-center justify-between gap-3 py-4">
                 <div class="flex items-center gap-3">
@@ -1291,11 +1340,11 @@
                         <p class="text-[14px] text-slate-500">Last Down 11 Days Ago</p>
                     </div>
                 </div>
-                <button type="button" class="st-btn" style="padding:6px 14px;font-size:14px;">Log Out</button>
+                <button type="button" class="st-btn px-[14px] py-[6px] text-[14px]">Log Out</button>
             </div>
-            <p class="st-note" style="margin-top:4px;">Illustrative devices for this preview.</p>
+            <p class="st-note mt-1">Illustrative devices for this preview.</p>
         </div>
-        <div class="st-modal-foot st-block" style="background:#f8fafc;border-top:1px solid #EDF1F5;padding-top:14px;">
+        <div class="st-modal-foot st-block bg-slate-50 border-t border-[#EDF1F5] pt-[14px]">
             <button type="button" data-close-modal="modal-active-sessions" class="st-btn">Close</button>
         </div>
     </div>
@@ -1303,14 +1352,14 @@
 
 <!-- Account Verification -->
 <div id="modal-account-verification" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;">
-        <div class="st-modal-head" style="border-bottom:1px solid #EDF1F5;padding-bottom:14px;"><h3>Account verification</h3><button type="button" data-close-modal="modal-account-verification" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
-        <div class="st-modal-body" style="padding-top:6px;">
+    <div class="st-modal !max-w-[520px]">
+        <div class="st-modal-head border-b border-[#EDF1F5] pb-[14px]"><h3>Account verification</h3><button type="button" data-close-modal="modal-account-verification" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body pt-[6px]">
             <div class="st-detail"><span>Mobile</span><strong>+91 ........04821 Verified</strong></div>
             <div class="st-detail"><span>Business email</span><strong>Pharmacy@1234gmail.com <span class="text-green-600">Verified</span></strong></div>
-            <div class="st-strip" style="margin-top:8px;">Contact changes require identity verification in the live application.</div>
+            <div class="st-strip mt-2">Contact changes require identity verification in the live application.</div>
         </div>
-        <div class="st-modal-foot st-block" style="background:#f8fafc;border-top:1px solid #EDF1F5;padding-top:14px;">
+        <div class="st-modal-foot st-block bg-slate-50 border-t border-[#EDF1F5] pt-[14px]">
             <button type="button" data-close-modal="modal-account-verification" class="st-btn">Back</button>
         </div>
     </div>
@@ -1318,12 +1367,12 @@
 
 <!-- Delete Account -->
 <div id="modal-delete-account" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal text-center" style="max-width:420px;padding:24px;">
-        <div class="st-modal-head" style="justify-content:space-between;border-bottom:0;padding-bottom:0;">
+    <div class="st-modal text-center !max-w-[420px] p-6">
+        <div class="st-modal-head justify-between border-b-0 pb-0">
             <h3>Delete Account?</h3>
             <button type="button" data-close-modal="modal-delete-account" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button>
         </div>
-        <div class="st-modal-body" style="padding-top:12px;">
+        <div class="st-modal-body pt-3">
             <p class="text-[17px] text-slate-500 font-medium">This request is for the permanent deletion of this account.</p>
         </div>
         <div class="mt-5 grid grid-cols-2 gap-3">
@@ -1335,7 +1384,7 @@
 
 <!-- Replace Document -->
 <div id="modal-replace-document" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;">
+    <div class="st-modal !max-w-[520px]">
         <div class="st-modal-head"><h3>Replace Document?</h3><button type="button" data-close-modal="modal-replace-document" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
         <div class="st-modal-body"><p class="text-[17px] text-slate-500 font-medium">Uploading a new file will set the status to Pending Review while we verify the replacement.</p></div>
         <div class="st-modal-foot">
@@ -1347,9 +1396,9 @@
 
 <!-- Add Document -->
 <div id="modal-add-document" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:520px;">
+    <div class="st-modal !max-w-[520px]">
         <div class="st-modal-head"><h3 id="add-document-title">Add Document</h3><button type="button" data-close-modal="modal-add-document" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
-        <div class="st-modal-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="st-modal-body flex flex-col gap-3">
             <label for="doc-file-input" class="st-dropzone">
                 <span class="material-symbols-outlined text-[#007bff] text-[26px]">upload</span>
                 <span class="st-dz-title">Drag and drop or click to upload</span>
@@ -1368,9 +1417,9 @@
 
 <!-- Document Preview -->
 <div id="modal-document-preview" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:600px;max-height:92vh;overflow-y:auto;">
+    <div class="st-modal !max-w-[600px] max-h-[92vh] flex flex-col">
         <div class="st-modal-head"><div><h3>Document Preview</h3><p>Drug Licence • DL-MH-2024-29993</p></div><button type="button" data-close-modal="modal-document-preview" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">close</span></button></div>
-        <div class="st-modal-body">
+        <div class="st-modal-body min-h-0 flex-1 overflow-y-auto">
             <div class="p-6 border-4 border-double border-slate-400 bg-amber-50/30 rounded-xl text-center font-serif space-y-3">
                 <div class="flex justify-center"><span class="material-symbols-outlined text-[48px] text-amber-700">stars</span></div>
                 <h4 class="text-[17px] font-bold tracking-widest uppercase text-slate-900">STATE OF MAHARASHTRA</h4>
@@ -1390,10 +1439,10 @@
 
 <!-- Pin Location -->
 <div id="modal-pin-location" class="settings-modal-overlay hidden fixed inset-0 z-50 bg-black/60 items-center justify-center p-4">
-    <div class="st-modal" style="max-width:600px;">
-        <div class="st-modal-head" style="border-bottom:1px solid #EDF1F5;padding-bottom:14px;"><h3>Pin Location</h3><button type="button" data-close-modal="modal-pin-location" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
-        <div class="st-modal-body" style="padding-top:16px;">
-            <div class="st-map" style="height:260px;">
+    <div class="st-modal !max-w-[600px]">
+        <div class="st-modal-head border-b border-[#EDF1F5] pb-[14px]"><h3>Pin Location</h3><button type="button" data-close-modal="modal-pin-location" aria-label="Close" class="st-close"><span class="material-symbols-outlined text-[26px]">highlight_off</span></button></div>
+        <div class="st-modal-body pt-4">
+            <div class="st-map h-[260px]">
                 <svg viewBox="0 0 520 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                     <rect width="520" height="240" fill="#eef1f6" />
                     <rect x="26" y="20" width="78" height="52" rx="8" fill="#d6f0d9" />
@@ -1409,7 +1458,7 @@
                 </div>
             </div>
         </div>
-        <div class="st-modal-foot" style="padding-top:0;">
+        <div class="st-modal-foot pt-0">
             <button type="button" data-close-modal="modal-pin-location" class="st-btn st-btn-block">Close</button>
         </div>
     </div>
@@ -1417,7 +1466,7 @@
 
 <!-- Sign Out -->
 <div id="modal-signout" class="settings-modal-overlay hidden fixed inset-0 z-[60] bg-black/60 items-center justify-center p-4">
-    <div class="st-modal text-center" style="max-width:400px;padding:24px;">
+    <div class="st-modal text-center !max-w-[400px] p-6">
         <div class="mx-auto w-24 h-24 rounded-full bg-amber-300 flex items-center justify-center mb-4">
             <div class="w-14 h-14 rounded-xl bg-white flex items-center justify-center"><span class="material-symbols-outlined text-amber-400 text-[32px]">logout</span></div>
         </div>

@@ -287,8 +287,8 @@ $(document).ready(function () {
     };
   }
 
-  function renderOrderCharts() {
-    if (!orderCharts.trend) {
+  function renderOrderCharts(bidsOnly = false) {
+    if (!bidsOnly && !orderCharts.trend) {
       orderCharts.trend = new Chart(document.getElementById("orderTrendChart").getContext("2d"), {
         type: "line",
         data: {
@@ -339,7 +339,6 @@ $(document).ready(function () {
             datasets: [{ data: [66.7, 33.3, 11.1, 5.6], backgroundColor: ["#1683ff", "#ef4444", "#f59e0b", "#10b981"], borderWidth: 0 }],
           },
           options: doughnutOptions,
-          plugins: [orderCenterLabelPlugin("72", "Total Bids")],
         });
       }
       if (!bidsCharts.offers) {
@@ -403,6 +402,11 @@ $(document).ready(function () {
           },
         });
       }
+    }
+
+    if (bidsOnly) {
+      renderBidsCharts();
+      return;
     }
 
     const doughnutOptions = {
@@ -551,7 +555,7 @@ $(document).ready(function () {
         renderOrderCharts();
         Object.values(orderCharts).forEach((chart) => chart.resize());
       } else if (isBidsView) {
-        renderBidsCharts();
+        renderOrderCharts(true);
         Object.values(bidsCharts).forEach((chart) => chart.resize());
       }
     }

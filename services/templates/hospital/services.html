@@ -36,11 +36,22 @@
       </div>
     </div>
 
-    <button type="button" class="mt-4 flex items-center gap-2 text-[16px] text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50">
-      <span class="material-symbols-outlined !text-[21px]">calendar_today</span>
-      Today · <span id="bfShortDate"></span>
-      <span class="material-symbols-outlined !text-[21px]">keyboard_arrow_down</span>
-    </button>
+    <div id="bfDatePickerWrap" class="relative mt-4 inline-block">
+      <button id="bfDateBtn" type="button" aria-haspopup="dialog" aria-expanded="false" class="flex items-center gap-2 text-[16px] text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-100">
+        <span class="material-symbols-outlined !text-[21px]">calendar_today</span>
+        <span id="bfDatePrefix">Today</span> · <span id="bfShortDate"></span>
+        <span class="material-symbols-outlined !text-[21px]">keyboard_arrow_down</span>
+      </button>
+      <div id="bfDatePicker" class="hidden absolute left-0 top-[calc(100%+8px)] z-50 w-[280px] max-w-[calc(100vw-32px)] rounded-xl border border-slate-200 bg-white p-3 shadow-lg" role="dialog" aria-label="Choose a date">
+        <div class="mb-3 flex items-center justify-between">
+          <button id="bfCalendarPrev" type="button" aria-label="Previous month" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"><span class="material-symbols-outlined">chevron_left</span></button>
+          <p id="bfCalendarMonth" class="text-sm font-semibold text-dark-inky-blue"></p>
+          <button id="bfCalendarNext" type="button" aria-label="Next month" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"><span class="material-symbols-outlined">chevron_right</span></button>
+        </div>
+        <div class="mb-1 grid grid-cols-7 text-center text-xs font-medium text-slate-500"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+        <div id="bfCalendarDays" class="grid grid-cols-7 gap-y-1 text-center"></div>
+      </div>
+    </div>
 
     <!-- ============ STAT CARDS ============ -->
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mt-5">
@@ -404,7 +415,7 @@
     Scheduled: 'border-purple-400 text-purple-600 bg-purple-50'
   };
   var TABS = [
-    { key: 'overview', label: 'Over view' },
+    { key: 'overview', label: 'Overview' },
     { key: 'inventory', label: 'Bed Inventory' },
     { key: 'activity', label: 'Recent Activity' }
   ];
@@ -434,13 +445,53 @@
   }
 
   /* ---------- DATES ---------- */
-  function renderDates() {
-    var d = new Date();
+  var selectedBedDate = new Date();
+  var calendarMonth = new Date(selectedBedDate.getFullYear(), selectedBedDate.getMonth(), 1);
+  function renderDates(selectedDate) {
+    var d = selectedDate || new Date();
+    selectedBedDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     var long = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/,/g, '');
     var wd = d.toLocaleDateString('en-GB', { weekday: 'short' });
     var rest = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     text('bfFullDate', long);
     text('bfShortDate', wd + ', ' + rest);
+    var today = new Date();
+    var isToday = d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+    text('bfDatePrefix', isToday ? 'Today' : 'Selected');
+  }
+
+  function renderDateCalendar() {
+    var year = calendarMonth.getFullYear();
+    var month = calendarMonth.getMonth();
+    text('bfCalendarMonth', calendarMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }));
+    var firstDay = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    var daysInPreviousMonth = new Date(year, month, 0).getDate();
+    var today = new Date();
+    var markup = '';
+    for (var index = 0; index < 42; index++) {
+      var date;
+      var outsideMonth = false;
+      if (index < firstDay) {
+        date = new Date(year, month - 1, daysInPreviousMonth - firstDay + index + 1);
+        outsideMonth = true;
+      } else if (index >= firstDay + daysInMonth) {
+        date = new Date(year, month + 1, index - firstDay - daysInMonth + 1);
+        outsideMonth = true;
+      } else {
+        date = new Date(year, month, index - firstDay + 1);
+      }
+      var isSelected = date.toDateString() === selectedBedDate.toDateString();
+      var isToday = date.toDateString() === today.toDateString();
+      var tone = isSelected
+        ? 'bg-shazam-blue text-white font-semibold'
+        : outsideMonth
+          ? 'text-slate-300 hover:bg-slate-50'
+          : 'text-slate-700 hover:bg-blue-50';
+      var todayRing = isToday && !isSelected ? ' ring-1 ring-shazam-blue' : '';
+      markup += '<button type="button" data-bf-date="' + date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0') + '" aria-pressed="' + isSelected + '" class="mx-auto flex h-8 w-8 items-center justify-center rounded-full text-sm transition-colors ' + tone + todayRing + '">' + date.getDate() + '</button>';
+    }
+    $('bfCalendarDays').innerHTML = markup;
   }
 
   /* ---------- STATS ---------- */
@@ -638,9 +689,45 @@
 
   /* ---------- EVENTS ---------- */
   function bind() {
+    $('bfDateBtn').addEventListener('click', function (event) {
+      event.stopPropagation();
+      var picker = $('bfDatePicker');
+      var isOpening = picker.classList.contains('hidden');
+      picker.classList.toggle('hidden', !isOpening);
+      $('bfDateBtn').setAttribute('aria-expanded', String(isOpening));
+      if (isOpening) {
+        calendarMonth = new Date(selectedBedDate.getFullYear(), selectedBedDate.getMonth(), 1);
+        renderDateCalendar();
+      }
+    });
+    $('bfCalendarPrev').addEventListener('click', function () {
+      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+      renderDateCalendar();
+    });
+    $('bfCalendarNext').addEventListener('click', function () {
+      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
+      renderDateCalendar();
+    });
+    $('bfCalendarDays').addEventListener('click', function (event) {
+      var dayButton = event.target.closest('[data-bf-date]');
+      if (!dayButton) return;
+      var parts = dayButton.getAttribute('data-bf-date').split('-').map(Number);
+      renderDates(new Date(parts[0], parts[1] - 1, parts[2]));
+      calendarMonth = new Date(selectedBedDate.getFullYear(), selectedBedDate.getMonth(), 1);
+      $('bfDatePicker').classList.add('hidden');
+      $('bfDateBtn').setAttribute('aria-expanded', 'false');
+      renderDateCalendar();
+    });
+
     document.addEventListener('click', function (e) {
       var t = e.target;
       var el;
+
+      if (t.closest('#bfDatePickerWrap')) {
+        return;
+      }
+      $('bfDatePicker').classList.add('hidden');
+      $('bfDateBtn').setAttribute('aria-expanded', 'false');
 
       if ((el = t.closest('[data-tab]'))) { setTab(el.getAttribute('data-tab')); return; }
       if (t.closest('#bfViewAll')) { setTab('activity'); return; }
@@ -675,7 +762,13 @@
       $('bfExportMenu').classList.add('hidden');
     });
 
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closeAll();
+        $('bfDatePicker').classList.add('hidden');
+        $('bfDateBtn').setAttribute('aria-expanded', 'false');
+      }
+    });
 
     // searches (kept in sync across tabs)
     all('[data-bfsearch], #bfInvSearch').forEach(function (inp) {
@@ -726,6 +819,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     renderDates();
+    renderDateCalendar();
     renderStats();
     renderTabs();
     renderCategories();
